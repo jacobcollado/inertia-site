@@ -541,6 +541,28 @@ h1:hover .redact > span.redact-inner,
   pointer-events: auto;
 }
 
+/* Bottom bar — fixed pill at the very bottom of the viewport */
+
+.sheet-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  display: flex;
+  justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 12px);
+  padding-top: 10px;
+  pointer-events: none;
+}
+
+.sheet-bar__handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
 /* Sheet is taller than the viewport so content extends below the fold.
    translateY is driven by JS — no internal overflow scroll at all. */
 

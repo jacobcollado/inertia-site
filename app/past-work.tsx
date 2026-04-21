@@ -235,7 +235,7 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     };
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault();
-      const delta = e.touches[0].clientY - touchLastY.current;
+      const delta = touchLastY.current - e.touches[0].clientY; // positive = dragging up
       touchLastY.current = e.touches[0].clientY;
       const next = Math.max(0, Math.min(getMaxY(), targetY.current - delta));
       targetY.current = next;
@@ -294,6 +294,11 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
       role="dialog"
       aria-label={item.client}
     >
+      {/* Bottom bar — fixed to viewport, shows scroll hint */}
+      <div className="sheet-bar" onClick={(e) => e.stopPropagation()}>
+        <div className="sheet-bar__handle" />
+      </div>
+
       <div
         ref={sheetRef}
         className="sheet"
