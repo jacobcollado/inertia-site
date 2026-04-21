@@ -1,0 +1,87 @@
+---
+title: A quiet forecast on AI capability
+subtitle: Notes from five years of watching the field, and where I think the next twenty-four months are going.
+date: 2026-04-14
+pinned: true
+summary: Where models are today, where they're headed over the next 24 months, and the signals I'm watching closely.
+---
+
+I've been keeping a private log for almost five years now on where AI is and where it seems to be going. Every few months I read it back and laugh at how often I was wrong about timelines but right about direction. This post is an attempt to organize the parts I feel most confident about, with room to be wrong in public.
+
+None of this is affiliated with any lab. It's a view from the outside, written by someone who builds with these tools every day.
+
+## The current plateau is misleading
+
+Every time a new model ships that feels only incrementally better than the last, people say progress is slowing. I don't think that's what's happening.
+
+What's slowing is the visible part — the benchmark numbers, the leaderboard positions, the demo videos. What isn't slowing is the interior work: tooling, reliability, long-horizon task completion, agentic scaffolding, multi-modal coherence. Those improvements are less photogenic but they're the ones that determine whether you can actually depend on a model to do a piece of work and walk away.
+
+My rough mental model is that we went through a period where the frontier was about raw capability — can the model do the thing at all — and we're now in a period where the frontier is about trust. A model that's 98% reliable at a task is unusable for anything unattended. A model that's 99.9% reliable at the same task reshapes entire workflows. The gap between those two numbers looks small from the outside and feels enormous from the inside.
+
+## What actually got better in the last year
+
+A short list, from where I sit:
+
+- **Long context became real.** Not just "supports 1M tokens" on paper, but actually using that context without pathological degradation mid-document. This changed what I can ask a model to do in a single turn.
+- **Tool use stopped being fragile.** Function calling used to fail often enough that you couldn't build a product on it. It now fails rarely enough that you can.
+- **Image and video understanding caught up to text.** A year ago I'd describe a screenshot to a model. Now I paste it and ask a question. This is a larger shift than it reads.
+- **Cost dropped by an order of magnitude.** The same quality of output is roughly 10× cheaper than it was 18 months ago. This is the quiet change that will reshape everything downstream.
+
+## Three trajectories I'd bet on
+
+These are the curves I'd bet are still compounding, and I'll happily eat these words in two years if I'm wrong.
+
+### 1. Agents will be the unit of work, not prompts
+
+Prompting as an interface is a transitional artifact. It exists because we had to invent a way to talk to these systems before we'd figured out how to embed them in normal software flows. Over the next 18 months I expect most valuable applications of AI to look like persistent agents with goals, memory, and permission boundaries — not chat windows.
+
+This doesn't mean chat disappears. It means chat becomes the debugger, not the product.
+
+The hard part isn't the agent loop itself. It's the trust model. Who can the agent contact, what can it spend, what does it do when it's uncertain. Solving that is mostly a design and policy problem, not a capability problem, and that's precisely why I think it's tractable.
+
+### 2. Specialized small models will eat the middle
+
+The narrative for a long time was that only the frontier labs matter. I think the next 24 months tell a different story. The economics of running a 7B- to 30B-parameter model fine-tuned on a specific domain are going to crush the economics of calling a frontier model for most production workloads that don't require general reasoning.
+
+The frontier still matters. It defines the ceiling. But most actual work in production — categorizing, summarizing, extracting, routing — doesn't need the ceiling. It needs a model that's good enough, fast enough, and cheap enough to run continuously. That's the middle, and the middle is where small models win.
+
+### 3. Evaluation is the bottleneck, not capability
+
+The single most under-invested piece of the stack right now is evaluation. How do you know a model is actually doing its job? How do you catch regressions? How do you measure whether the new version is better or just different?
+
+I think this becomes a first-class discipline in the next year. We're going to see the equivalent of observability platforms but for model behavior — tools that tell you "your customer-facing agent is hallucinating 2% of the time on returns questions, and that number went up last Tuesday." Whoever builds that well will be more important than a lot of the labs people currently pay attention to.
+
+## What I'm not sure about
+
+A list of things I've flip-flopped on in my private log:
+
+- Whether reasoning-style models will generalize or stay bounded to math and code domains.
+- Whether on-device inference ever catches up enough to matter for consumer apps, or whether latency is good enough over the network forever.
+- Whether open-weight models stay competitive, or whether the gap widens again once training costs shift.
+- Whether synthetic data hits a wall, or whether it's just getting started.
+
+I genuinely don't have strong takes on these. The people telling you they do are usually selling something.
+
+## The human question
+
+This is the part I find hardest to write about without sounding either naive or doom-y. I'll try.
+
+AI is not going to replace humans wholesale. It's also not going to leave work untouched. What's actually happening — what I see happening in my own work every week — is that the *definition* of a job is being slowly rewritten. A designer today spends meaningfully less time on execution and meaningfully more time on taste and direction. A developer spends less time typing and more time reviewing. A writer spends less time on first drafts and more time on structure and voice.
+
+The jobs that survive are the ones where judgment compounds. The jobs that struggle are the ones where execution was the whole thing.
+
+That's not a comforting take for everyone, and I don't want to pretend it is. But I think it's more accurate than either "nothing changes" or "everything collapses."
+
+## The thing I'm most convinced of
+
+Here's the one I'm most confident about and I'll stake this post on it.
+
+Over the next five years, problems that we today consider *out of reach* — specific, named, widely-known problems in science, medicine, materials, logistics — are going to start falling. Not all of them. Probably not even most. But enough of them that the cumulative effect will feel like a kind of dawn.
+
+This won't be because AI alone did it. It'll be because AI compressed the search space enough that small teams of humans, working with these tools, can now do what used to require institutions. That compression is the real story. Everything else is window dressing.
+
+## What I'm doing about it
+
+I'm spending less time reading takes and more time building. I'm taking notes privately, publishing sparingly, and trusting the craft more than the discourse.
+
+If you want to follow along, this blog is where I'll write it down.
