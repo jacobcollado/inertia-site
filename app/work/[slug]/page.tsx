@@ -79,11 +79,22 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
           </p>
         )}
 
+        {/* Preview */}
+        {piece.preview && (
+          <div
+            className="mt-10 overflow-hidden rounded-xl border border-[rgb(var(--line))] rise"
+            style={{ ["--rise-delay" as any]: "200ms" }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={piece.preview} alt={`${piece.client} site`} className="w-full h-auto" />
+          </div>
+        )}
+
         {/* Cover */}
         {piece.cover && (
           <div
             className="mt-10 overflow-hidden rounded-xl border border-[rgb(var(--line))] bg-[rgb(var(--line))]/20 aspect-[16/9] rise"
-            style={{ ["--rise-delay" as any]: "240ms" }}
+            style={{ ["--rise-delay" as any]: "280ms" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={piece.cover} alt="" className="w-full h-full object-cover" />

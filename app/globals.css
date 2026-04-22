@@ -535,32 +535,12 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   pointer-events: auto;
-}
-
-/* Bottom bar — fixed pill at the very bottom of the viewport */
-
-.sheet-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 90;
-  display: flex;
-  justify-content: center;
-  padding-bottom: env(safe-area-inset-bottom, 12px);
-  padding-top: 10px;
-  pointer-events: none;
-}
-
-.sheet-bar__handle {
-  width: 36px;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
 }
 
 /* Sheet is taller than the viewport so content extends below the fold.
@@ -613,6 +593,25 @@ h1:hover .redact > span.redact-inner,
   aspect-ratio: 5/1;
   display: block;
   object-fit: cover;
+}
+
+.sheet__preview {
+  width: 100%;
+  display: block;
+  height: auto;
+  margin-top: 24px;
+}
+
+.sheet__palette {
+  display: flex;
+  gap: 8px;
+  padding: 28px 32px 0;
+}
+
+.sheet__swatch {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
 }
 
 .sheet__process-para {

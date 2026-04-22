@@ -152,17 +152,6 @@ function highlightSummary(text: string): string {
   return out;
 }
 
-/* ── Demo content ─────────────────────────────────────────────── */
-
-const DEMO_IMAGES = [
-  "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=900&q=80",
-  "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=900&q=80",
-  "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=900&q=80",
-  "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=900&q=80",
-];
-
-const PROCESS_COPY = `Client needed a site that felt like the brand, not a <strong>template stretched to fit</strong>. The constraints were tight: a <strong>72-hour turnaround</strong>, mobile-first, and a checkout that didn't leak.\n\nExplored three directions, killed two. The one that stuck leaned into <strong>editorial tension</strong>: oversized type set against minimal product photography. Nothing made the cut unless it earned its place.\n\nBuilt on <strong>Next.js with a headless Shopify</strong> backend. Custom cart drawer, scroll-triggered reveals, a product grid that adapts to inventory count. The whole thing went out in a single deploy.\n\n<strong>Sold out within 4 hours of launch.</strong> Client reported their highest single-day revenue since opening. Zero support tickets in the first week.`;
-
 /* ── Work sheet ───────────────────────────────────────────────── */
 
 // PEEK_PX: how much of the sheet is visible when first opened.
@@ -182,7 +171,7 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     ...(item.cover ? [item.cover] : []),
     ...(item.images ?? []).filter((src) => src !== item.cover),
   ];
-  const displayImages = gallery.length > 0 ? gallery : DEMO_IMAGES;
+  const displayImages = gallery;
 
   const getSheetHeight = () => sheetRef.current?.offsetHeight ?? window.innerHeight;
   const getMaxY = () => getSheetHeight() - PEEK_PX;
@@ -294,11 +283,6 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
       role="dialog"
       aria-label={item.client}
     >
-      {/* Bottom bar — fixed to viewport, shows scroll hint */}
-      <div className="sheet-bar" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-bar__handle" />
-      </div>
-
       <div
         ref={sheetRef}
         className="sheet"
@@ -308,20 +292,33 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={displayImages[0]} alt={item.client} className="sheet__hero" />
 
-        {/* Body — summary then paragraphs interleaved with images */}
+        {/* Summary */}
         <div className="sheet__body">
           {item.summary && (
             <p className="sheet__summary" dangerouslySetInnerHTML={{ __html: highlightSummary(item.summary) }} />
           )}
+        </div>
 
-          {PROCESS_COPY.split("\n\n").map((para, i) => (
-            <>
-              <p key={`para-${i}`} className="sheet__process-para" dangerouslySetInnerHTML={{ __html: para }} />
-              {displayImages[i + 1] && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={`img-${i}`} src={displayImages[i + 1]} alt={`${item.client} — ${i + 2}`} className="sheet__img" />
-              )}
-            </>
+        {/* Preview — full bleed outside body padding */}
+        {item.preview && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={item.preview} alt={`${item.client} site`} className="sheet__preview" />
+        )}
+
+        {/* Colour palette */}
+        {item.palette && item.palette.length > 0 && (
+          <div className="sheet__palette">
+            {item.palette.map((color) => (
+              <div key={color} className="sheet__swatch" style={{ background: color }} />
+            ))}
+          </div>
+        )}
+
+        {/* Remaining images */}
+        <div className="sheet__body">
+          {displayImages.slice(1).map((src, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={`img-${i}`} src={src} alt={`${item.client} ${i + 2}`} className="sheet__img" />
           ))}
         </div>
 

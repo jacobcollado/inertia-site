@@ -15,6 +15,8 @@ export type WorkMeta = {
   summary?: string;
   order?: number;
   cover?: string;
+  preview?: string;
+  palette?: string[];
   url?: string;
   images?: string[];
 };
@@ -38,6 +40,8 @@ export function getAllWork(): WorkMeta[] {
       summary: data.summary,
       order: typeof data.order === "number" ? data.order : 999,
       cover: data.cover,
+      preview: data.preview,
+      palette: Array.isArray(data.palette) ? data.palette : undefined,
       url: data.url,
       images,
     } as WorkMeta;
@@ -69,6 +73,8 @@ export function getWork(slug: string): WorkPiece | null {
         summary: data.summary,
         order: typeof data.order === "number" ? data.order : 999,
         cover: data.cover,
+        preview: data.preview,
+        palette: Array.isArray(data.palette) ? data.palette : undefined,
         url: data.url,
         images: extractImages(content),
         content,
