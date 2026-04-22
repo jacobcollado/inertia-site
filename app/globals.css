@@ -535,8 +535,6 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
