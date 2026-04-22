@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useViewMode, type ViewMode } from "./view-mode-context";
 
 const NAV = [
@@ -109,7 +109,7 @@ export function VisualNotch() {
             {([
               { value: "text", label: "Text", Icon: TextIcon },
               { value: "visual", label: "Visual", Icon: GridIcon },
-            ] as { value: ViewMode; label: string; Icon: () => JSX.Element }[]).map(({ value, label, Icon }) => (
+            ] as { value: ViewMode; label: string; Icon: () => React.ReactElement }[]).map(({ value, label, Icon }) => (
               <button
                 key={value}
                 onClick={() => { setMode(value); if (value === "text") setOpen(false); }}
