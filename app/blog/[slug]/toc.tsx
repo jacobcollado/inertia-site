@@ -75,7 +75,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
   };
 
   const renderList = (stagger: boolean) => (
-    <ul className="space-y-2.5 text-sm tracking-tight">
+    <ul className={`tracking-tight ${stagger ? "space-y-2.5 text-sm" : "space-y-4 text-base"}`}>
       {headings.map((h, i) => {
         const active = activeId === h.id;
         const delay = 180 + i * 55;
@@ -193,13 +193,13 @@ export function TOC({ headings }: { headings: Heading[] }) {
       <button
         onClick={() => setMenuOpen(true)}
         aria-label="Open contents"
-        className="lg:hidden sticky top-3 z-30 ml-auto mb-4 -mt-8 inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-3.5 py-1.5 text-xs tracking-tight text-[rgb(var(--muted))] backdrop-blur hover:border-[rgb(var(--fg))] hover:text-[rgb(var(--fg))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] transition-colors duration-300 [-webkit-tap-highlight-color:transparent]"
+        className="lg:hidden sticky top-4 z-30 ml-auto mb-6 -mt-10 flex items-center gap-2.5 rounded-full bg-[rgb(var(--fg))] px-4 py-2 text-sm font-medium tracking-tight text-[rgb(var(--bg))] shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] active:scale-95 transition-transform duration-150 [-webkit-tap-highlight-color:transparent]"
       >
         <svg
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.8"
+          strokeWidth="2"
           strokeLinecap="round"
           className="h-3.5 w-3.5"
           aria-hidden="true"
@@ -208,7 +208,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
           <line x1="4" y1="12" x2="20" y2="12" />
           <line x1="4" y1="17" x2="14" y2="17" />
         </svg>
-        contents
+        Contents
       </button>
 
       {mounted && <MobileSheet open={menuOpen} onClose={() => setMenuOpen(false)}>{list}</MobileSheet>}
@@ -230,42 +230,50 @@ function MobileSheet({
       className={`lg:hidden fixed inset-0 z-[60] ${open ? "pointer-events-auto" : "pointer-events-none"}`}
       aria-hidden={!open}
     >
+      {/* Backdrop */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/40 transition-opacity duration-300"
-        style={{ opacity: open ? 1 : 0 }}
+        className="absolute inset-0 transition-opacity duration-300"
+        style={{
+          opacity: open ? 1 : 0,
+          background: "rgba(0,0,0,0.45)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+        }}
       />
+      {/* Sheet */}
       <div
-        className="absolute inset-x-0 bottom-0 max-h-[70vh] overflow-y-auto rounded-t-2xl border-t border-[rgb(var(--line))] bg-[rgb(var(--bg))] p-6"
+        className="absolute inset-x-0 bottom-0 rounded-t-3xl bg-[rgb(var(--bg))] overflow-hidden"
         style={{
           transform: open ? "translateY(0)" : "translateY(100%)",
-          transition: "transform 400ms cubic-bezier(0.22, 1, 0.36, 1)",
+          transition: "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)",
+          paddingBottom: "env(safe-area-inset-bottom, 24px)",
         }}
       >
-        <div className="flex items-center justify-between mb-5">
-          <p className="text-sm font-medium tracking-tighter text-[rgb(var(--muted))]">
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-[rgb(var(--line))]" />
+        </div>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-3 pb-4">
+          <p className="text-base font-semibold tracking-tight text-[rgb(var(--fg))]">
             On this page
           </p>
           <button
             onClick={onClose}
             aria-label="Close contents"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:border-[rgb(var(--fg))] hover:text-[rgb(var(--fg))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] transition-colors duration-300 [-webkit-tap-highlight-color:transparent]"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] focus:outline-none [-webkit-tap-highlight-color:transparent] transition-colors duration-200"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              className="h-3.5 w-3.5"
-              aria-hidden="true"
-            >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
               <line x1="6" y1="6" x2="18" y2="18" />
               <line x1="18" y1="6" x2="6" y2="18" />
             </svg>
           </button>
         </div>
-        {children}
+        {/* List */}
+        <div className="overflow-y-auto max-h-[55vh] px-6 pb-6">
+          {children}
+        </div>
       </div>
     </div>,
     document.body

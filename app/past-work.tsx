@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta } from "@/lib/work";
 import { useViewMode } from "./view-mode-context";
@@ -152,6 +152,41 @@ function highlightSummary(text: string): string {
   return out;
 }
 
+/* ── Swatch row ───────────────────────────────────────────────── */
+
+function SwatchRow({ colors }: { colors: string[] }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  const copy = useCallback((hex: string) => {
+    navigator.clipboard.writeText(hex).then(() => {
+      setCopied(hex);
+      setTimeout(() => setCopied(null), 1400);
+    });
+  }, []);
+
+  return (
+    <div className="sheet__palette">
+      {colors.map((color) => (
+        <button
+          key={color}
+          className="sheet__swatch"
+          style={{ background: color }}
+          onClick={() => copy(color)}
+          onMouseEnter={() => setHovered(color)}
+          onMouseLeave={() => setHovered(null)}
+          title={color}
+          aria-label={`Copy ${color}`}
+        >
+          <span className="sheet__swatch-label">
+            {copied === color ? "copied" : hovered === color ? color : ""}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /* ── Work sheet ───────────────────────────────────────────────── */
 
 // PEEK_PX: how much of the sheet is visible when first opened.
@@ -160,6 +195,7 @@ const CLOSE_THRESHOLD = 200;
 
 function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   // targetY is where we want to be; currentY is where we are (for spring)
   const targetY = useRef<number>(0);
@@ -186,7 +222,10 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     cancelAnimationFrame(rafRef.current);
     const tick = () => {
       const diff = targetY.current - currentY.current;
-      if (Math.abs(diff) < 0.1) { applyY(targetY.current); return; }
+      if (Math.abs(diff) < 0.1) {
+        applyY(targetY.current);
+        return;
+      }
       applyY(currentY.current + diff * 0.12);
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -206,6 +245,7 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     applyY(currentY.current);
     targetY.current = maxY;
     runSpring();
+    setTimeout(() => setRevealed(true), 400);
 
     // Lock Lenis so page doesn't scroll while sheet is open
     window.dispatchEvent(new Event("lenis:lock"));
@@ -292,52 +332,74 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={displayImages[0]} alt={item.client} className="sheet__hero" />
 
-        {/* Summary */}
-        <div className="sheet__body">
-          {item.summary && (
-            <p className="sheet__summary" dangerouslySetInnerHTML={{ __html: highlightSummary(item.summary) }} />
-          )}
-        </div>
-
-        {/* Preview — full bleed outside body padding */}
-        {item.preview && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.preview} alt={`${item.client} site`} className="sheet__preview" />
-        )}
-
-        {/* Colour palette */}
-        {item.palette && item.palette.length > 0 && (
-          <div className="sheet__palette">
-            {item.palette.map((color) => (
-              <div key={color} className="sheet__swatch" style={{ background: color }} />
-            ))}
-          </div>
-        )}
-
-        {/* Remaining images */}
-        <div className="sheet__body">
-          {displayImages.slice(1).map((src, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={`img-${i}`} src={src} alt={`${item.client} ${i + 2}`} className="sheet__img" />
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div className="sheet__footer">
-          <div className="sheet__footer-left">
-            <span className="sheet__footer-title">{item.service ?? item.client}</span>
-            {(item.year || item.role) && (
-              <span className="sheet__footer-sub">
-                {[item.year, item.role].filter(Boolean).join(", ")}
-              </span>
+        {/* Content — fades in once sheet settles */}
+        <div className={`sheet__content ${revealed ? "sheet__content--revealed" : ""}`}>
+          {/* Summary */}
+          <div className="sheet__body">
+            <div className="sheet__meta">
+              <span className="sheet__meta-client">{item.client}</span>
+              {item.service && <span className="sheet__meta-service">{item.service}</span>}
+            </div>
+            {item.summary && (
+              <p className="sheet__summary" dangerouslySetInnerHTML={{ __html: highlightSummary(item.summary) }} />
             )}
           </div>
-          {item.url && (
-            <a href={item.url} target="_blank" rel="noreferrer" className="sheet__url">
-              {item.url.replace(/^https?:\/\/(www\.)?/, "")}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
-            </a>
+
+          {/* Preview — full bleed outside body padding */}
+          {item.preview && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={item.preview} alt={`${item.client} site`} className="sheet__preview" />
           )}
+
+          {/* Colour palette */}
+          {item.palette && item.palette.length > 0 && (
+            <SwatchRow colors={item.palette} />
+          )}
+
+          {/* Remaining images */}
+          {displayImages.slice(1).length > 0 && (
+            <div className="sheet__body">
+              {displayImages.slice(1).map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={`img-${i}`} src={src} alt={`${item.client} ${i + 2}`} className="sheet__img" />
+              ))}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="sheet__footer">
+            <div className="sheet__footer-left">
+              <span className="sheet__footer-title">{item.service ?? item.client}</span>
+              {(item.year || item.role) && (
+                <span className="sheet__footer-sub">
+                  {[item.year, item.role].filter(Boolean).join(", ")}
+                </span>
+              )}
+            </div>
+            <div className="sheet__footer-actions">
+              {item.instagram && (
+                <a
+                  href={`https://instagram.com/${item.instagram}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="sheet__ig-btn"
+                  aria-label={`@${item.instagram} on Instagram`}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <circle cx="12" cy="12" r="4"/>
+                    <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                  </svg>
+                </a>
+              )}
+              {item.url && (
+                <a href={item.url} target="_blank" rel="noreferrer" className="sheet__url-btn">
+                  Visit site
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+                </a>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>,

@@ -17,6 +17,7 @@ export type WorkMeta = {
   cover?: string;
   preview?: string;
   palette?: string[];
+  instagram?: string;
   url?: string;
   images?: string[];
 };
@@ -42,6 +43,7 @@ export function getAllWork(): WorkMeta[] {
       cover: data.cover,
       preview: data.preview,
       palette: Array.isArray(data.palette) ? data.palette : undefined,
+      instagram: data.instagram,
       url: data.url,
       images,
     } as WorkMeta;
@@ -75,6 +77,7 @@ export function getWork(slug: string): WorkPiece | null {
         cover: data.cover,
         preview: data.preview,
         palette: Array.isArray(data.palette) ? data.palette : undefined,
+        instagram: data.instagram,
         url: data.url,
         images: extractImages(content),
         content,

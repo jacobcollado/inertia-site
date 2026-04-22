@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ThemeToggle } from "../../theme-toggle";
 import { TOC } from "./toc";
 import { ReadingProgress } from "./progress";
+import { Highlighter } from "./highlighter";
 import { getAllPosts, getPost, formatDate, renderMarkdown, extractHeadings, readingStats } from "@/lib/posts";
 
 export function generateStaticParams() {
@@ -40,7 +41,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   const stats = readingStats(post.content);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 pt-6 pb-16 sm:pt-8 sm:pb-20 text-lg">
+    <main className="relative mx-auto w-full max-w-2xl px-6 pt-6 pb-16 sm:pt-8 sm:pb-20 text-lg">
       <ReadingProgress />
       <header
         className="flex items-center justify-between mb-14 rise"
@@ -88,6 +89,19 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </article>
+
+      <Highlighter slug={slug} />
+
+      {/* Back to top */}
+      <div className="flex justify-end mt-12">
+        <a
+          href="#"
+          className="inline-flex items-center gap-2 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors duration-200"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></svg>
+          Back to top
+        </a>
+      </div>
     </main>
   );
 }
