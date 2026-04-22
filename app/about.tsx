@@ -109,35 +109,47 @@ export function AboutCard() {
     <div>
       <TimeTagline fallback="I design and build end to end, shaping brand, web, and product from concept to code." />
 
+      {/* First paragraph — always visible */}
+      <div
+        className="mt-5 text-base leading-relaxed tracking-tight text-[rgb(var(--muted))]"
+        style={{
+          opacity: 1,
+          transition: "opacity 400ms cubic-bezier(0.22, 1, 0.36, 1)",
+        }}
+      >
+        {paragraphs[0]}
+      </div>
+
+      {/* Expanded content */}
       <div
         aria-hidden={!open}
         style={{
           height: open ? height : 0,
           opacity: open ? 1 : 0,
-          filter: open ? "blur(0)" : "blur(5px)",
-          transform: open ? "translateY(0)" : "translateY(-6px)",
-          marginTop: open ? "1.5rem" : "0rem",
+          filter: open ? "blur(0)" : "blur(4px)",
+          transform: open ? "translateY(0)" : "translateY(-4px)",
+          marginTop: open ? "1.25rem" : "0rem",
           overflow: "hidden",
           transition:
             "height 700ms cubic-bezier(0.22, 1, 0.36, 1)," +
-            "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)," +
-            "filter 700ms cubic-bezier(0.22, 1, 0.36, 1)," +
-            "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)," +
+            "opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)," +
+            "filter 600ms cubic-bezier(0.22, 1, 0.36, 1)," +
+            "transform 600ms cubic-bezier(0.22, 1, 0.36, 1)," +
             "margin-top 700ms cubic-bezier(0.22, 1, 0.36, 1)",
           willChange: "height, opacity, transform, filter",
         }}
       >
         <div ref={innerRef}>
-          <div className="space-y-5 text-lg leading-relaxed tracking-tight text-[rgb(var(--fg))]">
-            {paragraphs.map((p, i) => {
-              const delay = 120 + i * 90;
+          <div className="space-y-4 text-base leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+            {paragraphs.slice(1).map((p, i) => {
+              const delay = 80 + i * 80;
               return (
                 <div
                   key={i}
                   style={{
                     opacity: open ? 1 : 0,
-                    transform: open ? "translateY(0)" : "translateY(6px)",
-                    transition: `opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? delay : 0}ms, transform 700ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? delay : 0}ms`,
+                    transform: open ? "translateY(0)" : "translateY(5px)",
+                    transition: `opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? delay : 0}ms, transform 600ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? delay : 0}ms`,
                     willChange: "opacity, transform",
                   }}
                 >
@@ -147,31 +159,35 @@ export function AboutCard() {
             })}
           </div>
 
-          <ul
-            className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm tracking-tight text-[rgb(var(--muted))]"
+          {/* Tech stack chips */}
+          <div
+            className="mt-6 flex flex-wrap gap-2"
             style={{
               opacity: open ? 1 : 0,
-              transform: open ? "translateY(0)" : "translateY(6px)",
-              transition: `opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? 420 : 0}ms, transform 700ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? 420 : 0}ms`,
+              transform: open ? "translateY(0)" : "translateY(5px)",
+              transition: `opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? 280 : 0}ms, transform 600ms cubic-bezier(0.22, 1, 0.36, 1) ${open ? 280 : 0}ms`,
             }}
           >
             {extras.map(({ name, icon }) => (
-              <li key={name} className="inline-flex items-center gap-2">
-                <span className="inline-flex items-center justify-center">{icon}</span>
-                <span>{name}</span>
-              </li>
+              <span
+                key={name}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-3 py-1 text-xs tracking-tight text-[rgb(var(--muted))]"
+              >
+                <span className="inline-flex">{icon}</span>
+                {name}
+              </span>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
 
       <button
         onClick={() => setOpen((v) => !v)}
-        className="mt-5 text-base tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors outline-none focus-visible:underline underline-offset-4"
+        className="mt-4 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors outline-none focus-visible:underline underline-offset-4"
         aria-expanded={open}
       >
         <span className="inline-flex items-center gap-1.5">
-          {open ? "view less" : "view more"}
+          {open ? "read less" : "read more"}
           <span
             aria-hidden="true"
             className="inline-block transition-transform duration-500 ease-fluid"

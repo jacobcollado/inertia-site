@@ -11,6 +11,23 @@ const NAV = [
   { label: "Contact", href: "/contact" },
 ];
 
+const TextIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="16" y2="12" />
+    <line x1="4" y1="17" x2="12" y2="17" />
+  </svg>
+);
+
+const GridIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" className="h-4 w-4" aria-hidden="true">
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+  </svg>
+);
+
 export function VisualNotch() {
   const { mode, setMode } = useViewMode();
   const [open, setOpen] = useState(false);
@@ -26,13 +43,18 @@ export function VisualNotch() {
   return (
     <>
       {/* Backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 z-40"
-          style={{ background: "rgb(var(--bg) / 0.6)", backdropFilter: "blur(2px)" }}
-          onClick={() => setOpen(false)}
-        />
-      )}
+      <div
+        className="fixed inset-0 z-40"
+        style={{
+          pointerEvents: open ? "auto" : "none",
+          background: "rgba(0,0,0,0.3)",
+          backdropFilter: open ? "blur(8px)" : "blur(0px)",
+          WebkitBackdropFilter: open ? "blur(8px)" : "blur(0px)",
+          opacity: open ? 1 : 0,
+          transition: "opacity 400ms cubic-bezier(0.22,1,0.36,1), backdrop-filter 400ms cubic-bezier(0.22,1,0.36,1)",
+        }}
+        onClick={() => setOpen(false)}
+      />
 
       {/* Notch pill */}
       <button
@@ -79,18 +101,24 @@ export function VisualNotch() {
             </Link>
           ))}
         </nav>
+
+        {/* View segmented control */}
         <div className="notch-panel__view-switch">
-          <span className="notch-panel__view-label">View</span>
-          <div className="view-tooltip__pills">
-            {(["text", "visual"] as ViewMode[]).map((v) => (
+          <p className="notch-panel__view-label">View</p>
+          <div className="notch-view-seg">
+            {([
+              { value: "text", label: "Text", Icon: TextIcon },
+              { value: "visual", label: "Visual", Icon: GridIcon },
+            ] as { value: ViewMode; label: string; Icon: () => JSX.Element }[]).map(({ value, label, Icon }) => (
               <button
-                key={v}
-                onClick={() => { setMode(v); setOpen(false); }}
-                className="view-tooltip__pill"
-                data-active={mode === v}
-                aria-pressed={mode === v}
+                key={value}
+                onClick={() => { setMode(value); if (value === "text") setOpen(false); }}
+                className="notch-view-seg__btn"
+                data-active={mode === value}
+                aria-pressed={mode === value}
               >
-                {v === "text" ? "Text" : "Visual"}
+                <span className="notch-view-seg__icon"><Icon /></span>
+                {label}
               </button>
             ))}
           </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta } from "@/lib/work";
 import { useViewMode } from "./view-mode-context";
@@ -101,7 +101,7 @@ function TextList({ work }: { work: WorkMeta[] }) {
 
 /* ── Masonry grid ─────────────────────────────────────────────── */
 
-const ASPECT_CYCLE = ["aspect-[4/5]", "aspect-[3/4]", "aspect-[1/1]", "aspect-[4/3]", "aspect-[3/4]"];
+const ASPECT_CYCLE = ["aspect-[3/4]", "aspect-[3/4]", "aspect-[4/5]", "aspect-[3/4]", "aspect-[4/5]"];
 
 function MasonryGrid({ work, onOpen }: { work: WorkMeta[]; onOpen: (w: WorkMeta) => void }) {
   return (
@@ -121,10 +121,10 @@ function MasonryGrid({ work, onOpen }: { work: WorkMeta[]; onOpen: (w: WorkMeta)
             ) : (
               <div className="masonry-card__placeholder" />
             )}
-          </div>
-          <div className="masonry-card__info">
-            <span className="masonry-card__client">{w.client}</span>
-            {w.role && <span className="masonry-card__role">{w.role}</span>}
+            <div className="masonry-card__info">
+              <span className="masonry-card__client">{w.client}</span>
+              {w.role && <span className="masonry-card__role">{w.role}</span>}
+            </div>
           </div>
         </div>
       ))}

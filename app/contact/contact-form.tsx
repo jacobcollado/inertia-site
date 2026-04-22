@@ -128,7 +128,7 @@ function Field({
 }) {
   const filled = value.length > 0;
   const base =
-    "peer w-full bg-transparent border border-[rgb(var(--line))] rounded-2xl px-4 pt-5 pb-2 text-base tracking-tight text-[rgb(var(--fg))] placeholder-transparent focus:outline-none focus:border-[rgb(var(--fg))] transition-colors duration-300";
+    "peer w-full bg-transparent border border-[rgb(var(--line))] rounded-xl px-4 pt-5 pb-2 text-base tracking-tight text-[rgb(var(--fg))] placeholder-transparent focus:outline-none focus:border-[rgb(var(--fg))] transition-colors duration-300";
   return (
     <label htmlFor={id} className="relative block">
       {textarea ? (
