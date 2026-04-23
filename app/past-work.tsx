@@ -307,26 +307,34 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
       runSpring();
     };
 
-    // Touch — only drive the sheet when:
-    //   a) sheet is at peek (not fully open), OR
-    //   b) touch started in the top 56px handle zone of the sheet
+    // Touch — attach directly on the sheet element so it doesn't interfere
+    // with native scroll inside sheet content. Only intercept when:
+    //   a) touch starts in the top 56px drag handle, OR
+    //   b) sheet is at peek and finger moves downward
+    const sheetEl = el;
+
     const onTouchStart = (e: TouchEvent) => {
       touchLastY.current = e.touches[0].clientY;
       touchLastTime.current = e.timeStamp;
       touchVelocity.current = 0;
-      const sheetTop = sheetRef.current?.getBoundingClientRect().top ?? 0;
-      const touchY = e.touches[0].clientY;
-      const atPeek = Math.abs(targetY.current - getMaxY()) < 4;
-      const inHandle = touchY - sheetTop < 56;
-      touchDrivingSheet.current = atPeek || inHandle;
+      const sheetTop = sheetEl.getBoundingClientRect().top;
+      const inHandle = e.touches[0].clientY - sheetTop < 56;
+      touchDrivingSheet.current = inHandle;
     };
+
     const onTouchMove = (e: TouchEvent) => {
       const now = e.timeStamp;
       const dt = now - touchLastTime.current || 1;
-      const dy = e.touches[0].clientY - touchLastY.current; // positive = finger moving down
+      const dy = e.touches[0].clientY - touchLastY.current;
       touchVelocity.current = dy / dt;
       touchLastY.current = e.touches[0].clientY;
       touchLastTime.current = now;
+
+      // Also start driving if at peek and dragging down
+      if (!touchDrivingSheet.current) {
+        const atPeek = Math.abs(targetY.current - getMaxY()) < 8;
+        if (atPeek && dy > 0) touchDrivingSheet.current = true;
+      }
 
       if (!touchDrivingSheet.current) return;
       e.preventDefault();
@@ -334,9 +342,10 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
       targetY.current = next;
       runSpring();
     };
+
     const onTouchEnd = () => {
       if (!touchDrivingSheet.current) return;
-      // Close on fast downward flick (>0.3 px/ms) or dragged near bottom
+      touchDrivingSheet.current = false;
       if (touchVelocity.current > 0.3 || targetY.current > getMaxY() - 60) {
         handleClose();
       } else {
@@ -346,17 +355,19 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd);
+    // Attach touch handlers on the sheet element, not window, so native
+    // scroll inside sheet content is never blocked
+    sheetEl.addEventListener("touchstart", onTouchStart, { passive: true });
+    sheetEl.addEventListener("touchmove", onTouchMove, { passive: false });
+    sheetEl.addEventListener("touchend", onTouchEnd);
 
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.dispatchEvent(new Event("lenis:unlock"));
       window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
+      sheetEl.removeEventListener("touchstart", onTouchStart);
+      sheetEl.removeEventListener("touchmove", onTouchMove);
+      sheetEl.removeEventListener("touchend", onTouchEnd);
     };
   }, [mounted]);
 
@@ -399,6 +410,10 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
         className="sheet"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Bars that extend outside the viewport to prevent bg bleed */}
+        <div className="sheet__overflow-bar sheet__overflow-bar--top" aria-hidden="true" />
+        <div className="sheet__overflow-bar sheet__overflow-bar--bottom" aria-hidden="true" />
+
         {/* Hero — full bleed poster */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={displayImages[0]} alt={item.client} className="sheet__hero" />

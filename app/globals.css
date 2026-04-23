@@ -694,6 +694,26 @@ h1:hover .redact > span.redact-inner,
   overflow: hidden;
 }
 
+/* Bars that sit outside the visible sheet, filling the gap between
+   the sheet edge and the true viewport edge so no backdrop bleeds through */
+.sheet__overflow-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: rgb(var(--bg));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sheet__overflow-bar--top {
+  bottom: 100%;
+}
+
+.sheet__overflow-bar--bottom {
+  top: 100%;
+}
+
 .sheet__meta {
   display: flex;
   flex-direction: column;
