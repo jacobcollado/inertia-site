@@ -20,6 +20,7 @@ export type WorkMeta = {
   instagram?: string;
   url?: string;
   images?: string[];
+  featured?: boolean;
 };
 
 export type WorkPiece = WorkMeta & { content: string };
@@ -46,6 +47,7 @@ export function getAllWork(): WorkMeta[] {
       instagram: data.instagram,
       url: data.url,
       images,
+      featured: data.featured === true,
     } as WorkMeta;
   });
   return pieces.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));

@@ -104,30 +104,75 @@ function TextList({ work }: { work: WorkMeta[] }) {
 const ASPECT_CYCLE = ["aspect-[3/4]", "aspect-[3/4]", "aspect-[4/5]", "aspect-[3/4]", "aspect-[4/5]"];
 
 function MasonryGrid({ work, onOpen }: { work: WorkMeta[]; onOpen: (w: WorkMeta) => void }) {
+  const featured = work.find((w) => w.featured);
+  const rest = work.filter((w) => !w.featured);
+
+  // Build 3 cols; inject featured as first item of center col (index 1)
+  const col0 = rest.filter((_, i) => i % 3 === 0);
+  const col1 = rest.filter((_, i) => i % 3 === 1);
+  const col2 = rest.filter((_, i) => i % 3 === 2);
+  const offsets = ["mt-0", "mt-10 sm:mt-16", "sm:mt-32"];
+
+  const renderCard = (w: WorkMeta, globalIndex: number) => (
+    <div
+      key={w.slug}
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(w)}
+      onKeyDown={(e) => e.key === "Enter" && onOpen(w)}
+      className="masonry-card"
+    >
+      <div className={`masonry-card__img-wrap ${ASPECT_CYCLE[globalIndex % ASPECT_CYCLE.length]}`}>
+        {w.cover ? (
+          <Image src={w.cover} alt={w.client} fill sizes="(min-width: 768px) 33vw, 50vw" className="masonry-card__img" />
+        ) : (
+          <div className="masonry-card__placeholder" />
+        )}
+      </div>
+      <div className="masonry-card__info">
+        <span className="masonry-card__client">{w.client}</span>
+        {w.role && <span className="masonry-card__role">{w.role}</span>}
+      </div>
+    </div>
+  );
+
   return (
     <div className="masonry-grid">
-      {work.map((w, i) => (
-        <div
-          key={w.slug}
-          role="button"
-          tabIndex={0}
-          onClick={() => onOpen(w)}
-          onKeyDown={(e) => e.key === "Enter" && onOpen(w)}
-          className="masonry-card"
-        >
-          <div className={`masonry-card__img-wrap ${ASPECT_CYCLE[i % ASPECT_CYCLE.length]}`}>
-            {w.cover ? (
-              <Image src={w.cover} alt={w.client} fill sizes="(min-width: 768px) 33vw, 50vw" className="masonry-card__img" />
-            ) : (
-              <div className="masonry-card__placeholder" />
-            )}
+      {/* Col 0 */}
+      <div className={`masonry-col ${offsets[0]}`}>
+        {col0.map((w, i) => renderCard(w, i * 3))}
+      </div>
+
+      {/* Col 1 — center, featured card sits here floating over neighbors */}
+      <div className={`masonry-col ${offsets[1]}`}>
+        {featured && (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen(featured)}
+            onKeyDown={(e) => e.key === "Enter" && onOpen(featured)}
+            className="masonry-card masonry-card--featured"
+          >
+            <div className={`masonry-card__img-wrap ${ASPECT_CYCLE[1]}`}>
+              {featured.cover ? (
+                <Image src={featured.cover} alt={featured.client} fill sizes="(min-width: 768px) 33vw, 50vw" className="masonry-card__img" priority />
+              ) : (
+                <div className="masonry-card__placeholder" />
+              )}
+            </div>
             <div className="masonry-card__info">
-              <span className="masonry-card__client">{w.client}</span>
-              {w.role && <span className="masonry-card__role">{w.role}</span>}
+              <span className="masonry-card__client">{featured.client}</span>
+              {featured.role && <span className="masonry-card__role">{featured.role}</span>}
             </div>
           </div>
-        </div>
-      ))}
+        )}
+        {col1.map((w, i) => renderCard(w, 1 + i * 3))}
+      </div>
+
+      {/* Col 2 */}
+      <div className={`masonry-col ${offsets[2]}`}>
+        {col2.map((w, i) => renderCard(w, 2 + i * 3))}
+      </div>
     </div>
   );
 }
@@ -202,6 +247,10 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
   const currentY = useRef<number>(0);
   const rafRef = useRef<number>(0);
   const touchLastY = useRef<number>(0);
+  const touchVelocity = useRef<number>(0);
+  const touchLastTime = useRef<number>(0);
+  // Whether the current touch gesture is driving the sheet (vs. scrolling content inside)
+  const touchDrivingSheet = useRef<boolean>(false);
 
   const gallery = [
     ...(item.cover ? [item.cover] : []),
@@ -258,20 +307,42 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
       runSpring();
     };
 
-    // Touch drives the sheet — drag up = sheet moves up
+    // Touch — only drive the sheet when:
+    //   a) sheet is at peek (not fully open), OR
+    //   b) touch started in the top 56px handle zone of the sheet
     const onTouchStart = (e: TouchEvent) => {
       touchLastY.current = e.touches[0].clientY;
+      touchLastTime.current = e.timeStamp;
+      touchVelocity.current = 0;
+      const sheetTop = sheetRef.current?.getBoundingClientRect().top ?? 0;
+      const touchY = e.touches[0].clientY;
+      const atPeek = Math.abs(targetY.current - getMaxY()) < 4;
+      const inHandle = touchY - sheetTop < 56;
+      touchDrivingSheet.current = atPeek || inHandle;
     };
     const onTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      const delta = touchLastY.current - e.touches[0].clientY; // positive = dragging up
+      const now = e.timeStamp;
+      const dt = now - touchLastTime.current || 1;
+      const dy = e.touches[0].clientY - touchLastY.current; // positive = finger moving down
+      touchVelocity.current = dy / dt;
       touchLastY.current = e.touches[0].clientY;
-      const next = Math.max(0, Math.min(getMaxY(), targetY.current - delta));
+      touchLastTime.current = now;
+
+      if (!touchDrivingSheet.current) return;
+      e.preventDefault();
+      const next = Math.max(0, Math.min(getMaxY(), targetY.current + dy));
       targetY.current = next;
       runSpring();
     };
     const onTouchEnd = () => {
-      if (currentY.current > getSheetHeight() - CLOSE_THRESHOLD) handleClose();
+      if (!touchDrivingSheet.current) return;
+      // Close on fast downward flick (>0.3 px/ms) or dragged near bottom
+      if (touchVelocity.current > 0.3 || targetY.current > getMaxY() - 60) {
+        handleClose();
+      } else {
+        targetY.current = getMaxY();
+        runSpring();
+      }
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });

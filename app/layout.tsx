@@ -4,6 +4,7 @@ import { ThemeProvider } from "./theme-provider";
 import { RouteFade } from "./route-fade";
 import { LenisProvider } from "./lenis-provider";
 import { ViewModeProvider } from "./view-mode-context";
+import { VisualNotch } from "./visual-notch";
 
 export const metadata: Metadata = {
   title: "Jacob Collado",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <ViewModeProvider>
             <LenisProvider />
+            <VisualNotch />
             <RouteFade>{children}</RouteFade>
           </ViewModeProvider>
         </ThemeProvider>

@@ -189,24 +189,25 @@ export function TOC({ headings }: { headings: Heading[] }) {
     <>
       {mounted && createPortal(desktopAside, document.body)}
 
-      {/* Mobile trigger — sticky near top */}
+      {/* Mobile trigger — fixed bottom right */}
       <button
         onClick={() => setMenuOpen(true)}
         aria-label="Open contents"
-        className="lg:hidden sticky top-4 z-30 ml-auto mb-6 -mt-10 flex items-center gap-2.5 rounded-full bg-[rgb(var(--fg))] px-4 py-2 text-sm font-medium tracking-tight text-[rgb(var(--bg))] shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] active:scale-95 transition-transform duration-150 [-webkit-tap-highlight-color:transparent]"
+        className="lg:hidden fixed bottom-6 right-5 z-30 inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-4 py-2.5 text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.18)] focus:outline-none active:scale-95 transition-transform duration-150 [-webkit-tap-highlight-color:transparent]"
+        style={{ animationFillMode: "both", bottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}
       >
         <svg
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.8"
           strokeLinecap="round"
-          className="h-3.5 w-3.5"
+          className="h-3.5 w-3.5 opacity-60"
           aria-hidden="true"
         >
           <line x1="4" y1="7" x2="20" y2="7" />
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="17" x2="14" y2="17" />
+          <line x1="4" y1="12" x2="16" y2="12" />
+          <line x1="4" y1="17" x2="12" y2="17" />
         </svg>
         Contents
       </button>

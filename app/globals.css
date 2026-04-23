@@ -41,6 +41,21 @@ html.dark body::before {
   opacity: 0;
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, transparent 30%, rgba(0,0,0,0.28) 100%);
+  transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.dark body::after {
+  opacity: 1;
+}
+
 html,
 body {
   user-select: none;
@@ -368,6 +383,18 @@ h1:hover .redact > span.redact-inner,
   }
 }
 
+@keyframes welcome-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
 @media (prefers-reduced-motion: reduce) {
   .fade-in,
   .rise {
@@ -486,178 +513,146 @@ h1:hover .redact > span.redact-inner,
   border-color: rgb(var(--fg));
 }
 
-/* ── Visual notch pill ──────────────────────────────────────────── */
+/* ── Notch ──────────────────────────────────────────────────────── */
 
-.notch-pill {
+.notch-bar {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 18px;
+  left: 0;
+  right: 0;
   z-index: 50;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  pointer-events: none;
+  animation: notch-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes notch-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* The single expanding container */
+.notch-island {
+  pointer-events: auto;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
   background: rgb(var(--fg));
   color: rgb(var(--bg));
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 4px 16px -4px rgba(0,0,0,0.16);
+  transition: box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+.notch-island[data-open="true"] {
+  border-radius: 16px;
+}
+
+.notch-island:hover {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.14), 0 8px 24px -4px rgba(0,0,0,0.2);
+}
+
+.dark .notch-island {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.6);
+}
+
+.dark .notch-island:hover {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 12px 40px rgba(0,0,0,0.7);
+}
+
+/* Name trigger button */
+.notch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   border: none;
-  border-radius: 999px;
-  padding: 7px 14px 8px 16px;
-  font-size: 14px;
+  background: transparent;
+  color: inherit;
+  padding: 8px 7px 8px 12px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.03em;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 2px 8px -2px rgba(0,0,0,0.18), 0 8px 24px -8px rgba(0,0,0,0.22);
-  transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    background 400ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 400ms cubic-bezier(0.22, 1, 0.36, 1);
-  animation: notch-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  flex-shrink: 0;
 }
 
-@keyframes notch-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-8px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
+/* "Jacob Col" always visible */
+.notch-pill__name-short {
+  display: inline-block;
 }
 
-.notch-pill:hover {
-  box-shadow: 0 4px 12px -2px rgba(0,0,0,0.22), 0 12px 32px -8px rgba(0,0,0,0.28);
-  transform: translateX(-50%) translateY(-1px);
+/* " Collado" slides in when open */
+.notch-pill__name-rest {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  vertical-align: bottom;
+  margin-left: 3px;
+  transition: max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.notch-pill:active {
-  transform: translateX(-50%) scale(0.97);
+.notch-island[data-open="true"] .notch-pill__name-rest {
+  max-width: 56px;
+  opacity: 1;
 }
 
-/* ── Notch nav panel ────────────────────────────────────────────── */
-
-.notch-panel {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100%);
-  z-index: 45;
-  background: rgb(var(--bg));
-  border: 1px solid rgb(var(--line));
-  border-top: none;
-  border-radius: 0 0 24px 24px;
-  padding: 84px 36px 32px;
-  min-width: 300px;
-  max-width: 440px;
-  width: calc(100vw - 48px);
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 16px 48px -8px rgba(0,0,0,0.18), 0 4px 12px -4px rgba(0,0,0,0.1);
+.notch-pill__icon {
+  display: flex;
+  align-items: center;
+  opacity: 0.4;
+  transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.notch-panel[data-open="true"] {
-  transform: translateX(-50%) translateY(0);
+.notch-island[data-open="true"] .notch-pill__icon {
+  opacity: 0.6;
 }
 
-.notch-panel__nav {
+/* Expandable nav — height + opacity driven by JS for fluid easing */
+.notch-nav {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  overflow: hidden;
 }
 
-.notch-panel__link {
+.notch-nav__link {
   display: block;
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: -0.05em;
-  color: rgb(var(--muted));
-  padding: 7px 0;
-  transition: color 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  font-size: 12.5px;
+  font-weight: 450;
+  letter-spacing: -0.025em;
+  color: rgb(var(--bg));
+  opacity: 0.45;
+  padding: 7px 12px;
   text-decoration: none;
-  will-change: transform;
+  white-space: nowrap;
+  border-top: 1px solid rgba(var(--bg), 0.08);
+  transition: opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.notch-panel__link:hover {
-  color: rgb(var(--fg));
-  transform: translateX(6px);
-}
-
-/* Staggered entry for each link */
-.notch-panel[data-open="true"] .notch-panel__link:nth-child(1) { animation: link-in 400ms cubic-bezier(0.22,1,0.36,1) 80ms both; }
-.notch-panel[data-open="true"] .notch-panel__link:nth-child(2) { animation: link-in 400ms cubic-bezier(0.22,1,0.36,1) 130ms both; }
-.notch-panel[data-open="true"] .notch-panel__link:nth-child(3) { animation: link-in 400ms cubic-bezier(0.22,1,0.36,1) 180ms both; }
-.notch-panel[data-open="true"] .notch-panel__link:nth-child(4) { animation: link-in 400ms cubic-bezier(0.22,1,0.36,1) 230ms both; }
-
-@keyframes link-in {
-  from { opacity: 0; transform: translateX(-8px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-.notch-panel__view-switch {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid rgb(var(--line));
-}
-
-.notch-panel__view-label {
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgb(var(--muted));
-  margin-bottom: 10px;
-}
-
-/* Segmented control */
-.notch-view-seg {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  background: rgb(var(--line));
-  border-radius: 12px;
-  padding: 3px;
-}
-
-.notch-view-seg__btn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 9px 0;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  color: rgb(var(--muted));
-  cursor: pointer;
-  transition: color 250ms cubic-bezier(0.22, 1, 0.36, 1);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.notch-view-seg__btn[data-active="true"] {
-  background: rgb(var(--bg));
-  color: rgb(var(--fg));
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 0 0 0.5px rgba(0,0,0,0.06);
-  border-radius: 9px;
-  transition: background 300ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 250ms cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.notch-view-seg__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.6;
-  transition: opacity 250ms ease;
-}
-
-.notch-view-seg__btn[data-active="true"] .notch-view-seg__icon {
+.notch-nav__link:hover {
   opacity: 1;
+}
+
+/* Theme toggle — fixed independently so it never shifts when notch expands */
+.notch-bar__toggle {
+  position: fixed;
+  top: 18px;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  pointer-events: auto;
+  z-index: 50;
+  animation: notch-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* ── Work sheet ─────────────────────────────────────────────────── */
@@ -691,7 +686,7 @@ h1:hover .redact > span.redact-inner,
   max-width: 740px;
   min-height: 120vh;
   background: rgb(var(--bg));
-  border-radius: 16px 16px 0 0;
+  border-radius: 10px 10px 0 0;
   display: flex;
   flex-direction: column;
   box-shadow: 0 -24px 72px -8px rgba(0, 0, 0, 0.32);
@@ -927,49 +922,77 @@ h1:hover .redact > span.redact-inner,
   opacity: 0.8;
 }
 
+/* ── Featured card (center col, floats over neighbors) ──────────── */
+
+.masonry-card--featured {
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 8px 32px -4px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.14);
+}
+
+
+
 /* ── Masonry grid ───────────────────────────────────────────────── */
 
 .masonry-grid {
-  columns: 2;
-  column-gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  align-items: start;
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 640px) {
   .masonry-grid {
-    columns: 3;
-    column-gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+}
+
+.masonry-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@media (min-width: 640px) {
+  .masonry-col {
+    gap: 5px;
+  }
+}
+
+/* Hide third column on mobile (only 2 cols) */
+.masonry-col:nth-child(3) {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .masonry-col:nth-child(3) {
+    display: flex;
   }
 }
 
 .masonry-card {
-  break-inside: avoid;
   display: block;
-  margin-bottom: 8px;
   text-decoration: none;
   cursor: pointer;
-}
-
-@media (min-width: 640px) {
-  .masonry-card {
-    margin-bottom: 10px;
-  }
 }
 
 .masonry-card__img-wrap {
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 10px;
   background: rgb(var(--line));
 }
 
 .masonry-card__img {
   object-fit: cover;
-  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .masonry-card:hover .masonry-card__img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
 .masonry-card__placeholder {
@@ -978,35 +1001,26 @@ h1:hover .redact > span.redact-inner,
   background: rgb(var(--line));
 }
 
-/* Scrim — always visible, slightly stronger on hover */
 .masonry-card__info {
-  position: absolute;
-  inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 12px 10px;
-  border-radius: 10px;
-  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.08) 55%, transparent 100%);
-  pointer-events: none;
-  transition: background 300ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.masonry-card:hover .masonry-card__info {
-  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.12) 55%, transparent 100%);
+  align-items: center;
+  text-align: center;
+  padding: 7px 4px 2px;
+  gap: 1px;
 }
 
 .masonry-card__client {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: -0.02em;
-  color: #fff;
+  letter-spacing: -0.01em;
+  color: rgb(var(--fg));
   line-height: 1.2;
 }
 
 .masonry-card__role {
   font-size: 10px;
-  letter-spacing: -0.01em;
-  color: rgba(255,255,255,0.55);
-  margin-top: 2px;
+  letter-spacing: 0;
+  color: rgb(var(--muted));
+  line-height: 1.3;
 }

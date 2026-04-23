@@ -10,17 +10,17 @@ function getChicagoHour(): number {
 
 function getTagline(hour: number): string {
   if (hour >= 0 && hour < 5)
-    return "Still up. Designing and building, end to end.";
+    return "Still up. Design and code.";
   if (hour >= 5 && hour < 12)
-    return "Morning. Designing and building, end to end.";
+    return "Morning. Design and code.";
   if (hour >= 17 && hour < 20)
-    return "Evening. Designing and building, end to end.";
+    return "Evening. Design and code.";
   if (hour >= 20)
-    return "Winding down. Still designing and building, end to end.";
-  return "I design and build end to end, shaping brand, web, and product from concept to code.";
+    return "Winding down. Still at it.";
+  return "Design and code, end to end.";
 }
 
-const DEFAULT_TAGLINE = "I design and build end to end, shaping brand, web, and product from concept to code.";
+const DEFAULT_TAGLINE = "Design and code, end to end.";
 
 export function TimeTagline({ fallback = DEFAULT_TAGLINE }: { fallback?: string }) {
   const [tagline, setTagline] = useState(fallback);
@@ -48,24 +48,28 @@ export function TimeTagline({ fallback = DEFAULT_TAGLINE }: { fallback?: string 
 
 export function WelcomeBack() {
   const [returning, setReturning] = useState(false);
+  const [visits, setVisits] = useState(0);
 
   useEffect(() => {
     const key = "jc_visited";
-    if (localStorage.getItem(key)) {
+    const count = parseInt(localStorage.getItem(key) ?? "0", 10);
+    if (count > 0) {
       setReturning(true);
-    } else {
-      localStorage.setItem(key, "1");
+      setVisits(count);
     }
+    localStorage.setItem(key, String(count + 1));
   }, []);
 
   if (!returning) return null;
 
+  const label = visits >= 5 ? "good to see you again" : "welcome back";
+
   return (
     <span
-      className="text-sm tracking-tight text-[rgb(var(--muted))]"
-      style={{ animation: "fade-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both" }}
+      className="text-[13px] tracking-tight text-[rgb(var(--muted))]"
+      style={{ animation: "welcome-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both", animationDelay: "500ms" }}
     >
-      welcome back
+      {label}
     </span>
   );
 }

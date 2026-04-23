@@ -10,19 +10,9 @@ const ViewModeContext = createContext<{
 }>({ mode: "text", setMode: () => {} });
 
 export function ViewModeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<ViewMode>("visual");
+  const [mode] = useState<ViewMode>("visual");
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("view-mode") as ViewMode | null;
-      if (saved === "visual" || saved === "text") setModeState(saved);
-    } catch {}
-  }, []);
-
-  const setMode = (m: ViewMode) => {
-    setModeState(m);
-    try { localStorage.setItem("view-mode", m); } catch {}
-  };
+  const setMode = (_m: ViewMode) => {};
 
   return (
     <ViewModeContext.Provider value={{ mode, setMode }}>
