@@ -175,69 +175,73 @@ export default async function BlogPost({
 
       <article>
         {/* Hero header — centered */}
-        <header className="px-8 pt-8 pb-14 text-center rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+        <header className="px-8 pt-12 pb-8 text-center rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+          {/* Author byline — directly under title */}
+          <div className="flex items-center justify-center gap-2 mb-7">
+            <div className="w-5 h-5 rounded-full bg-[rgb(var(--line))] flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-[rgb(var(--muted))]" aria-hidden="true">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+              </svg>
+            </div>
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Jacob Collado</span>
+            <span className="text-[rgb(var(--line))] text-[10px]">·</span>
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">Founder, Inertia</span>
+          </div>
+
           <h1 className="text-[clamp(2.25rem,5.5vw,4rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] max-w-3xl mx-auto">
             {post.title}
           </h1>
+
+          {post.subtitle && (
+            <p className="mt-5 text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mx-auto">
+              {post.subtitle}
+            </p>
+          )}
         </header>
 
-        {/* Author byline */}
-        <div className="flex items-center justify-center gap-2.5 pb-6 rise" style={{ ["--rise-delay" as any]: "100ms" }}>
-          <div className="w-6 h-6 rounded-full bg-[rgb(var(--line))] flex items-center justify-center shrink-0 overflow-hidden">
-            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[rgb(var(--muted))] opacity-60" aria-hidden="true">
-              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-            </svg>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] font-medium">Jacob Collado</span>
-            <span className="text-[rgb(var(--line))]">·</span>
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Founder, Inertia</span>
-          </div>
-        </div>
-
-        {/* Meta bar — constrained to article width */}
-        <div
-          className="mx-auto max-w-2xl px-8 rise"
-          style={{ ["--rise-delay" as any]: "120ms" }}
-        >
-        <div className="flex items-center justify-between gap-6 py-4 border-y border-[rgb(var(--line))]">
-          <div className="flex items-center gap-5">
-            <span className="flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))]">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 opacity-60" aria-hidden="true">
-                <circle cx="8" cy="8" r="6" />
-                <path d="M8 5v3.5l2 1" />
-              </svg>
-              {stats.minutes} min read
+        {/* Meta bar */}
+        <div className="mx-auto max-w-2xl px-8 rise" style={{ ["--rise-delay" as any]: "120ms" }}>
+          <div className="flex items-center justify-between gap-6 py-3.5 border-y border-[rgb(var(--line))]">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))]">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6" />
+                  <path d="M8 5v3.5l2 1" />
+                </svg>
+                {stats.minutes} min read
+              </span>
+              <CopyURL />
+            </div>
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-60">
+              {formatDate(post.date)}
             </span>
-            <CopyURL />
           </div>
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums">
-            {formatDate(post.date)}
-          </span>
-        </div>
         </div>
 
-        {/* Article sketch — inside the article column, above prose */}
-        <div className="mx-auto max-w-2xl px-8 pt-10 rise" style={{ ["--rise-delay" as any]: "160ms" }}>
+        {/* Article sketch */}
+        <div className="mx-auto max-w-2xl px-8 pt-12 pb-4 rise" style={{ ["--rise-delay" as any]: "160ms" }}>
           <PostSketch slug={post.slug} />
         </div>
 
-
         {/* Body */}
         <div
-          className="mx-auto max-w-2xl px-8 pt-8 pb-8 rise
-            text-[1.0625rem] leading-[1.8] tracking-tight text-[rgb(var(--fg))]
+          className="mx-auto max-w-2xl px-8 pt-10 pb-8 rise
+            text-[1.0625rem] leading-[1.85] tracking-tight text-[rgb(var(--fg))]
             space-y-6
+            [&_p:first-of-type]:text-[1.125rem] [&_p:first-of-type]:leading-[1.8] [&_p:first-of-type]:text-[rgb(var(--fg))]
             [&_a]:text-blue-500 [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-blue-500/40 [&_a]:transition-colors hover:[&_a]:text-blue-400 hover:[&_a]:decoration-blue-400
             [&_strong]:font-medium [&_strong]:text-[rgb(var(--fg))]
-            [&_code]:font-mono [&_code]:text-[0.875em] [&_code]:bg-[rgb(var(--line))/0.5] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded
-            [&_blockquote]:border-l-2 [&_blockquote]:border-[rgb(var(--line))] [&_blockquote]:pl-5 [&_blockquote]:text-[rgb(var(--muted))] [&_blockquote]:italic
+            [&_em]:text-[rgb(var(--muted))]
+            [&_code]:font-mono [&_code]:text-[0.875em] [&_code]:bg-[rgb(var(--line))/0.6] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded
+            [&_pre]:bg-[rgb(var(--line))/0.4] [&_pre]:rounded-lg [&_pre]:p-5 [&_pre]:overflow-x-auto [&_pre]:text-[0.875em]
+            [&_blockquote]:border-l-[3px] [&_blockquote]:border-[rgb(var(--fg))/0.15] [&_blockquote]:pl-6 [&_blockquote]:text-[rgb(var(--muted))] [&_blockquote]:italic [&_blockquote]:text-[1.0625rem]
             [&_ul]:list-none [&_ul]:space-y-2
-            [&_ul_li]:relative [&_ul_li]:pl-4 [&_ul_li]:before:absolute [&_ul_li]:before:left-0 [&_ul_li]:before:top-[0.7em] [&_ul_li]:before:h-px [&_ul_li]:before:w-2 [&_ul_li]:before:bg-[rgb(var(--muted))] [&_ul_li]:before:opacity-40 [&_ul_li]:before:content-['']
+            [&_ul_li]:relative [&_ul_li]:pl-4 [&_ul_li]:before:absolute [&_ul_li]:before:left-0 [&_ul_li]:before:top-[0.75em] [&_ul_li]:before:h-px [&_ul_li]:before:w-2.5 [&_ul_li]:before:bg-[rgb(var(--muted))] [&_ul_li]:before:opacity-30 [&_ul_li]:before:content-['']
             [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2
-            [&_h2]:text-[1.3125rem] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:mt-14 [&_h2]:mb-4 [&_h2]:scroll-mt-24
+            [&_h2]:text-[1.375rem] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:mt-16 [&_h2]:mb-4 [&_h2]:scroll-mt-24 [&_h2]:text-[rgb(var(--fg))]
             [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_h3]:tracking-tight [&_h3]:mt-10 [&_h3]:mb-3 [&_h3]:scroll-mt-24
-            [&_hr]:border-none [&_hr]:h-px [&_hr]:bg-[rgb(var(--line))] [&_hr]:my-12"
+            [&_hr]:border-none [&_hr]:h-px [&_hr]:bg-[rgb(var(--line))] [&_hr]:my-14
+            [&_table]:w-full [&_table]:text-[0.9375rem] [&_th]:text-left [&_th]:pb-2 [&_th]:border-b [&_th]:border-[rgb(var(--line))] [&_th]:font-medium [&_td]:py-2 [&_td]:border-b [&_td]:border-[rgb(var(--line))/0.5]"
           style={{ ["--rise-delay" as any]: "200ms" }}
           dangerouslySetInnerHTML={{ __html: html }}
         />
@@ -245,15 +249,9 @@ export default async function BlogPost({
 
       <Highlighter slug={slug} />
 
-      {/* Footer nav */}
-      <footer className="mx-auto max-w-2xl px-8 pt-8 mt-8 border-t border-[rgb(var(--line))]">
-        <div className="flex items-center justify-between gap-8">
-          <Link
-            href="/blog"
-            className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-          >
-            ← Perspectives
-          </Link>
+      {/* Footer — back to top only */}
+      <footer className="mx-auto max-w-2xl px-8 pt-10 mt-6 border-t border-[rgb(var(--line))/0.5]">
+        <div className="flex items-center justify-end">
           <a
             href="#"
             className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"

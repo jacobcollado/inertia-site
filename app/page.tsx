@@ -362,14 +362,16 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <GridRule />
 
           {/* ── Perspectives ── */}
-          <div className="relative flex items-center justify-center gap-3 py-6">
-            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">How we</span>
-            <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2">
-              <SiSubstack className="w-4 h-4 text-[rgb(var(--fg))]" />
-              <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">think</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">How we</span>
+              <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2">
+                <SiSubstack className="w-4 h-4 text-[rgb(var(--fg))]" />
+                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">think</span>
+              </div>
+              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">about the craft</span>
             </div>
-            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">about the craft</span>
-            <Link href="/blog" className="absolute right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">all posts →</Link>
+            <Link href="/blog" className="sm:absolute sm:right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center sm:text-left">all posts →</Link>
           </div>
 
           <GridRule />
