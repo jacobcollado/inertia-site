@@ -4,26 +4,34 @@ import { useEffect, useRef } from "react";
 
 // Dark: subtle blue-grey, nearly monochrome
 const DARK_COLORS: [number, number, number][] = [
-  [55,  65,  80],
-  [48,  60,  78],
-  [60,  58,  85],
-  [52,  70,  82],
-  [45,  62,  75],
-  [62,  62,  90],
-  [50,  68,  80],
-  [58,  60,  78],
+  [56, 108, 255],
+  [24, 214, 255],
+  [122, 88, 255],
+  [0, 164, 255],
+  [82, 132, 255],
+  [40, 196, 255],
+  [146, 96, 255],
+  [0, 142, 255],
+  [0, 196, 168],
+  [82, 90, 255],
+  [32, 232, 255],
+  [176, 96, 255],
 ];
 
 // Light: cool mid-greys on white — no colour cast
 const LIGHT_COLORS: [number, number, number][] = [
-  [155, 160, 165],
-  [145, 152, 160],
-  [160, 158, 165],
-  [150, 158, 162],
-  [148, 155, 165],
-  [158, 155, 162],
-  [152, 160, 158],
-  [155, 155, 162],
+  [0, 116, 255],
+  [0, 196, 255],
+  [94, 72, 255],
+  [0, 164, 232],
+  [255, 86, 166],
+  [0, 186, 140],
+  [126, 56, 255],
+  [0, 142, 255],
+  [255, 124, 64],
+  [0, 170, 204],
+  [196, 72, 255],
+  [32, 128, 255],
 ];
 
 const CELL_SIZE = 48;
@@ -177,7 +185,7 @@ export function SoundwaveHero() {
       const colCount = Math.ceil(W / CELL_SIZE) + 1;
 
       // Grid base
-      ctx.fillStyle = dark ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.04)";
+      ctx.fillStyle = dark ? "rgba(255,255,255,0.038)" : "rgba(15,23,42,0.048)";
       for (let c = 0; c < colCount; c++) {
         for (let r = 0; r < ROWS; r++) {
           ctx.fillRect(c * CELL_SIZE + GAP / 2, r * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
@@ -196,7 +204,7 @@ export function SoundwaveHero() {
         const fromBottom = ROWS - 1 - cell.row;
         const brightBoost = 0.45 + 0.55 * (fromBottom / (ROWS - 1));
         // Hover cells are brighter
-        const maxAlpha = cell.hover ? (dark ? 1.0 : 0.9) : (dark ? 0.9 : 0.75);
+        const maxAlpha = cell.hover ? (dark ? 1.0 : 0.98) : (dark ? 0.92 : 0.88);
         const alpha = fade * brightBoost * maxAlpha;
 
         const colorCol = cell.col + Math.floor(waveFront / 4);

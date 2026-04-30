@@ -128,6 +128,9 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
         </div>
 
         {/* Internal vertical divider — only visible on md+ */}
+        <div className="px-8 md:hidden">
+          <GridRule />
+        </div>
         <div className="inner-divider hidden md:block shrink-0" aria-hidden="true" />
 
         {/* Right: about */}
