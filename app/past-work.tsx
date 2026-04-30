@@ -290,12 +290,8 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
         const totalX = e.touches[0].clientX - gestureStartX;
         if (Math.abs(totalY) < 6 && Math.abs(totalX) < 6) return; // deadzone
         gestureDecided = true;
-        // Drive the sheet if: primarily vertical AND dragging down
-        const sheetTop = sheetEl.getBoundingClientRect().top;
-        const inHandle = gestureStartY - sheetTop < 56;
-        const draggingDown = totalY > 0;
         const vertical = Math.abs(totalY) > Math.abs(totalX);
-        touchDrivingSheet.current = vertical && (draggingDown || inHandle);
+        touchDrivingSheet.current = vertical;
       }
 
       if (!touchDrivingSheet.current) return;
@@ -309,10 +305,10 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
       if (!touchDrivingSheet.current) return;
       touchDrivingSheet.current = false;
       gestureDecided = false;
-      if (touchVelocity.current > 0.3 || targetY.current > getMaxY() - 60) {
+      if (touchVelocity.current > 0.3 || targetY.current > getMaxY() - CLOSE_THRESHOLD) {
         handleClose();
       } else {
-        targetY.current = getMaxY();
+        targetY.current = targetY.current < getMaxY() * 0.5 ? 0 : getMaxY();
         runSpring();
       }
     };
