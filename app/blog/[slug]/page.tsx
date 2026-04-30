@@ -1,3 +1,4 @@
+import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -112,7 +113,7 @@ function SketchWave() {
   );
 }
 
-const SLUG_SKETCHES: Record<string, () => JSX.Element> = {
+const SLUG_SKETCHES: Record<string, () => React.ReactElement> = {
   "ai-capability-forecast": SketchAI,
   "hello-world": SketchTerminal,
 };
