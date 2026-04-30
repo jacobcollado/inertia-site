@@ -418,14 +418,16 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
       <section className="rise flex flex-col" style={{ ["--rise-delay" as any]: "60ms" }}>
 
         {/* Label cell */}
-        <div className="relative flex items-center justify-center gap-3 py-6">
-          <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
-          <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2">
-            <SiDribbble className="w-4 h-4 text-[rgb(var(--fg))]" />
-            <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">shipped</span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">
+          <div className="flex items-center justify-center gap-3">
+            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
+            <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2">
+              <SiDribbble className="w-4 h-4 text-[rgb(var(--fg))]" />
+              <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">shipped</span>
+            </div>
+            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
           </div>
-          <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
-          <Link href="/work" className="absolute right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">all work →</Link>
+          <Link href="/work" className="sm:absolute sm:right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center sm:text-left">all work →</Link>
         </div>
 
         <GridRule />

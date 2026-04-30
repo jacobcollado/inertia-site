@@ -168,11 +168,11 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     cancelAnimationFrame(rafRef.current);
     const tick = () => {
       const diff = targetY.current - currentY.current;
-      if (Math.abs(diff) < 0.1) {
+      if (Math.abs(diff) < 0.15) {
         applyY(targetY.current);
         return;
       }
-      applyY(currentY.current + diff * 0.12);
+      applyY(currentY.current + diff * 0.2);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -194,7 +194,7 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     applyY(currentY.current);
     targetY.current = maxY;
     runSpring();
-    setTimeout(() => setRevealed(true), 400);
+    setTimeout(() => setRevealed(true), 220);
 
     // Lock Lenis so page doesn't scroll while sheet is open
     document.documentElement.style.overflow = "hidden";
