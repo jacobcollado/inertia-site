@@ -6,6 +6,7 @@ import { LenisProvider } from "./lenis-provider";
 import { ViewModeProvider } from "./view-mode-context";
 import { VisualNotch } from "./visual-notch";
 import { SiteFooter } from "./site-footer";
+import { WelcomePopup } from "./ambient";
 
 export const metadata: Metadata = {
   title: "Inertia",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </RouteFade>
             <SiteFooter />
+            <WelcomePopup />
           </ViewModeProvider>
         </ThemeProvider>
       </body>
