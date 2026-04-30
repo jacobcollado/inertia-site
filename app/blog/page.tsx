@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import type { PostMeta } from "@/lib/posts";
@@ -214,7 +215,7 @@ function SketchWave({ index }: { index: number }) {
   );
 }
 
-const SLUG_SKETCHES: Record<string, () => JSX.Element> = {
+const SLUG_SKETCHES: Record<string, () => React.ReactElement> = {
   "ai-capability-forecast": SketchAI,
   "hello-world": SketchTerminal,
 };
