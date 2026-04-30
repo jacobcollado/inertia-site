@@ -234,6 +234,9 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     if (!mounted) return;
     const el = sheetRef.current;
     if (!el) return;
+    const bodyOverflow = document.body.style.overflow;
+    const bodyTouchAction = document.body.style.touchAction;
+    const htmlOverflow = document.documentElement.style.overflow;
 
     const maxY = getMaxY();
     // Start below screen, spring up to peek position
@@ -244,6 +247,9 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     setTimeout(() => setRevealed(true), 400);
 
     // Lock Lenis so page doesn't scroll while sheet is open
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
     window.dispatchEvent(new Event("lenis:lock"));
 
     // Wheel drives the sheet — scroll down = sheet moves up (deltaY positive = move up)
@@ -318,6 +324,9 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
 
     return () => {
       cancelAnimationFrame(rafRef.current);
+      document.documentElement.style.overflow = htmlOverflow;
+      document.body.style.overflow = bodyOverflow;
+      document.body.style.touchAction = bodyTouchAction;
       window.dispatchEvent(new Event("lenis:unlock"));
       window.removeEventListener("wheel", onWheel);
       sheetEl.removeEventListener("touchstart", onTouchStart);

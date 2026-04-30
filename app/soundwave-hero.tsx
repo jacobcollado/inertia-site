@@ -57,6 +57,7 @@ export function SoundwaveHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
   const lastHoverColRef = useRef<number>(-999);
+  const touchActiveRef = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -80,14 +81,48 @@ export function SoundwaveHero() {
 
     const isDark = () => document.documentElement.classList.contains("dark");
 
+    const setPointFromEvent = (clientX: number, clientY: number) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top };
+    };
+
     // Mouse handlers
     const onMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      setPointFromEvent(e.clientX, e.clientY);
     };
-    const onMouseLeave = () => { mouseRef.current = null; };
+    const onMouseLeave = () => {
+      if (!touchActiveRef.current) mouseRef.current = null;
+    };
+
+    // Pointer handlers let touch users slide across the wave like hover.
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") return;
+      touchActiveRef.current = true;
+      setPointFromEvent(e.clientX, e.clientY);
+      canvas.setPointerCapture(e.pointerId);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse" && !touchActiveRef.current) return;
+      setPointFromEvent(e.clientX, e.clientY);
+    };
+
+    const clearPointer = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") {
+        touchActiveRef.current = false;
+        mouseRef.current = null;
+        if (canvas.hasPointerCapture(e.pointerId)) {
+          canvas.releasePointerCapture(e.pointerId);
+        }
+      }
+    };
+
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseleave", onMouseLeave);
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", clearPointer);
+    canvas.addEventListener("pointercancel", clearPointer);
 
     const frame = (now: number) => {
       if (!running) return;
@@ -182,13 +217,17 @@ export function SoundwaveHero() {
       ro.disconnect();
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseleave", onMouseLeave);
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", clearPointer);
+      canvas.removeEventListener("pointercancel", clearPointer);
     };
   }, []);
 
   return (
     <section
       className="relative overflow-hidden cursor-crosshair"
-      style={{ width: "100%", height: "380px", zIndex: 1 }}
+      style={{ width: "100%", height: "380px", zIndex: 1, touchAction: "none" }}
       aria-hidden="true"
     >
       <div
