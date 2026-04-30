@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AboutCard } from "./about";
 import { PastWork } from "./past-work";
 import { WelcomeBack } from "./ambient";
+import { SoundwaveHero } from "./soundwave-hero";
 import type { WorkMeta } from "@/lib/work";
 import type { PostMeta } from "@/lib/posts";
 
@@ -17,8 +18,8 @@ function formatDate(iso: string): string {
 
 const BUILDING = [
   {
-    name: "Aftertone",
-    description: "Creative agency. Design, brand, motion.",
+    name: "Inertia",
+    description: "We turn your vision into something real.",
     tag: "active",
     href: "https://www.instagram.com/kayz.xyz/",
   },
@@ -45,27 +46,33 @@ export default function Home() {
 }
 
 
+function GridRule() {
+  return <div className="grid-rule" aria-hidden="true" />;
+}
+
 function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) {
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 pb-16 sm:pb-20 min-h-screen flex flex-col">
-      {/* Past work — leads the visual layout */}
-      <section className="rise pt-16 sm:pt-20 md:pt-32" style={{ ["--rise-delay" as any]: "60ms" }}>
-        <h2 className="text-sm tracking-tight text-[rgb(var(--muted))] mb-6">Past work</h2>
+    <main className="page-container mx-auto w-full max-w-5xl pb-16 sm:pb-20 min-h-screen flex flex-col">
+
+      {/* Soundwave hero — touches both grid lines */}
+      <SoundwaveHero />
+
+      {/* Past work — label padded, work-list spans edge to edge */}
+      <section className="rise pt-8 pb-16" style={{ ["--rise-delay" as any]: "60ms" }}>
+        <h2 className="px-8 text-sm tracking-tight text-[rgb(var(--muted))] mb-6">Past work</h2>
         <PastWork work={work} />
       </section>
 
-      {/* Two-col: bio left, sidebar right */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-10 mt-16">
+      <GridRule />
 
-        <div className="md:col-span-7 md:order-2 rise" style={{ ["--rise-delay" as any]: "120ms" }}>
-          <AboutCard />
-        </div>
+      {/* Shipping + Thoughts | About */}
+      <div className="flex flex-col md:flex-row py-16 gap-y-12 md:gap-y-0 overflow-visible">
 
-        <div className="md:col-span-5 md:order-1 rise flex flex-col gap-10" style={{ ["--rise-delay" as any]: "180ms" }}>
+        {/* Left: shipping + thoughts */}
+        <div className="px-8 md:w-5/12 rise flex flex-col gap-10 md:pr-10" style={{ ["--rise-delay" as any]: "120ms" }}>
 
-          {/* Building */}
           <div>
-            <h2 className="text-sm tracking-tight text-[rgb(var(--muted))] mb-4">Building</h2>
+            <h2 className="text-sm tracking-tight text-[rgb(var(--muted))] mb-4">What we're shipping</h2>
             <ul className="space-y-4">
               {BUILDING.map((item) => {
                 const external = item.href.startsWith("http");
@@ -88,9 +95,11 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
             </ul>
           </div>
 
-          {/* Writing */}
           <div>
-            <h2 className="text-sm tracking-tight text-[rgb(var(--muted))] mb-4">Writing</h2>
+            <div className="flex items-baseline justify-between gap-6 mb-4">
+              <h2 className="text-sm tracking-tight text-[rgb(var(--muted))]">Thoughts</h2>
+              <Link href="/blog" className="text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">all posts →</Link>
+            </div>
             {posts.length === 0 ? (
               <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing yet.</p>
             ) : (
@@ -98,8 +107,8 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                 {posts.slice(0, 3).map((post, i) => (
                   <li key={post.slug}>
                     <Link href={`/blog/${post.slug}`} className="group flex items-start justify-between gap-4">
-                      <div>
-                        <div className="fluid-link text-[15px] tracking-tight text-[rgb(var(--fg))] mb-1.5">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="fluid-link text-[15px] tracking-tight text-[rgb(var(--fg))]">
                           <span className="fluid-link__text">{post.title}</span>
                         </div>
                         <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] tabular-nums">{formatDate(post.date)}</span>
@@ -117,19 +126,31 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           </div>
 
         </div>
+
+        {/* Internal vertical divider — only visible on md+ */}
+        <div className="inner-divider hidden md:block shrink-0" aria-hidden="true" />
+
+        {/* Right: about */}
+        <div className="px-8 md:w-7/12 rise md:pl-10" style={{ ["--rise-delay" as any]: "180ms" }}>
+          <AboutCard />
+        </div>
+
       </div>
 
-      <footer className="mt-14 flex items-center justify-between gap-6 text-sm tracking-tight text-[rgb(var(--muted))] rise" style={{ ["--rise-delay" as any]: "260ms" }}>
+      <GridRule />
+
+      <footer className="px-8 py-8 flex items-center justify-between gap-6 text-sm tracking-tight text-[rgb(var(--muted))] rise" style={{ ["--rise-delay" as any]: "260ms" }}>
         <WelcomeBack />
-        <a href="https://www.instagram.com/kayz.xyz/" target="_blank" rel="noreferrer" aria-label="Instagram — @kayz.xyz" className="inline-flex items-center gap-[3px] hover:text-[rgb(var(--fg))] transition-colors ml-auto">
+        <a href="https://www.instagram.com/inertia.dev/" target="_blank" rel="noreferrer" aria-label="Instagram — @inertia.dev" className="inline-flex items-center gap-[3px] hover:text-[rgb(var(--fg))] transition-colors ml-auto">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-[14px] w-[14px]" aria-hidden="true">
             <rect x="3" y="3" width="18" height="18" rx="5" />
             <circle cx="12" cy="12" r="4" />
             <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" stroke="none" />
           </svg>
-          kayz.xyz
+          inertia.dev
         </a>
       </footer>
+
     </main>
   );
 }

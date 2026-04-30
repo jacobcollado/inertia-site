@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ThemeToggle } from "../../theme-toggle";
 import { TOC } from "./toc";
 import { ReadingProgress } from "./progress";
 import { Highlighter } from "./highlighter";
@@ -41,10 +40,10 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   const stats = readingStats(post.content);
 
   return (
-    <main className="relative mx-auto w-full max-w-2xl px-6 pt-6 pb-16 sm:pt-8 sm:pb-20 text-lg">
+    <main className="relative mx-auto w-full max-w-5xl px-8 pt-6 pb-16 sm:pt-8 sm:pb-20 text-lg">
       <ReadingProgress />
       <header
-        className="flex items-center justify-between mb-14 rise"
+        className="flex items-center mb-14 rise"
         style={{ ["--rise-delay" as any]: "0ms" }}
       >
         <Link
@@ -53,7 +52,6 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         >
           ← back
         </Link>
-        <ThemeToggle />
       </header>
 
       <TOC headings={headings} />

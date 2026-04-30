@@ -1,101 +1,48 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta } from "@/lib/work";
-import { useViewMode } from "./view-mode-context";
-
-const PAGE_SIZE = 4;
 
 export function PastWork({ work }: { work: WorkMeta[] }) {
-  const { mode } = useViewMode();
-  const [active, setActive] = useState<WorkMeta | null>(null);
-
-  if (mode === "visual") {
-    return (
-      <>
-        <MasonryGrid work={work} onOpen={setActive} />
-        {active && <WorkSheet item={active} onClose={() => setActive(null)} />}
-      </>
-    );
-  }
   return <TextList work={work} />;
 }
 
 /* ── Text list ────────────────────────────────────────────────── */
 
 function TextList({ work }: { work: WorkMeta[] }) {
-  const [page, setPage] = useState(0);
-  const [entering, setEntering] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const pageCount = Math.max(1, Math.ceil(work.length / PAGE_SIZE));
-  const visible = work.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
-
-  const go = (next: number) => {
-    if (next === page || next < 0 || next >= pageCount) return;
-    setEntering(true);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      setPage(next);
-      requestAnimationFrame(() => setEntering(false));
-    }, 260);
-  };
+  const [active, setActive] = useState<WorkMeta | null>(null);
 
   return (
-    <div>
-      <div
-        aria-live="polite"
-        style={{
-          opacity: entering ? 0 : 1,
-          filter: entering ? "blur(4px)" : "blur(0)",
-          transform: entering ? "translateY(4px)" : "translateY(0)",
-          transition: "opacity 260ms cubic-bezier(0.22, 1, 0.36, 1), filter 260ms cubic-bezier(0.22, 1, 0.36, 1), transform 260ms cubic-bezier(0.22, 1, 0.36, 1)",
-          willChange: "opacity, filter, transform",
-        }}
-      >
-        <ul className="space-y-4">
-          {visible.map((w) => (
-            <li key={w.slug}>
-              <Link href={`/work/${w.slug}`} className="group flex items-baseline justify-between gap-6">
-                <span className="fluid-link tracking-tight text-[rgb(var(--fg))]">
-                  <span className="fluid-link__text">{w.client}</span>
-                </span>
-                <span className="text-base tracking-tight text-[rgb(var(--muted))] text-right">{w.role || ""}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {pageCount > 1 && (
-        <div className="mt-7 flex items-center justify-between border-t border-[rgb(var(--line))] pt-4">
-          <div className="flex items-baseline gap-1.5 text-[rgb(var(--muted))] tabular-nums">
-            <span key={page} className="text-base tracking-tight text-[rgb(var(--fg))] inline-block" style={{ animation: "counter-in 400ms cubic-bezier(0.22, 1, 0.36, 1)" }}>
-              {String(page + 1).padStart(2, "0")}
+    <>
+      <div className="work-list">
+        {work.map((w, i) => (
+          <button
+            key={w.slug}
+            onClick={() => setActive(w)}
+            className="work-row group w-full flex items-center justify-between gap-6 px-8 py-4 border-b border-[rgb(var(--line))] text-left"
+            style={{ ["--row-i" as any]: i }}
+          >
+            <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate transition-opacity duration-300 group-hover:opacity-50">
+              {w.client}
             </span>
-            <span className="text-sm tracking-tight">/</span>
-            <span className="text-sm tracking-tight">{String(pageCount).padStart(2, "0")}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => go(page - 1)} disabled={page === 0} aria-label="Previous page" className="pager-btn group inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] pl-3 pr-4 h-9 text-sm tracking-tight text-[rgb(var(--muted))] hover:border-[rgb(var(--fg))] hover:text-[rgb(var(--fg))] disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] transition-colors duration-300 [-webkit-tap-highlight-color:transparent]">
-              <span className="pager-btn__arrow pager-btn__arrow--left inline-flex">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-              </span>
-              prev
-            </button>
-            <button onClick={() => go(page + 1)} disabled={page === pageCount - 1} aria-label="Next page" className="pager-btn group inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] pl-4 pr-3 h-9 text-sm tracking-tight text-[rgb(var(--muted))] hover:border-[rgb(var(--fg))] hover:text-[rgb(var(--fg))] disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] transition-colors duration-300 [-webkit-tap-highlight-color:transparent]">
-              next
-              <span className="pager-btn__arrow pager-btn__arrow--right inline-flex">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+            <div className="flex items-center gap-6 shrink-0">
+              {w.role && (
+                <span className="hidden sm:block text-[13px] tracking-tight text-[rgb(var(--muted))]">{w.role}</span>
+              )}
+              {w.year && (
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] tabular-nums">{w.year}</span>
+              )}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-60 transition-opacity duration-300 -rotate-45" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
+            </div>
+          </button>
+        ))}
+      </div>
+      {active && <WorkSheet item={active} onClose={() => setActive(null)} />}
+    </>
   );
 }
 
@@ -307,33 +254,42 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
       runSpring();
     };
 
-    // Touch — attach directly on the sheet element so it doesn't interfere
-    // with native scroll inside sheet content. Only intercept when:
-    //   a) touch starts in the top 56px drag handle, OR
-    //   b) sheet is at peek and finger moves downward
     const sheetEl = el;
+    let gestureStartY = 0;
+    let gestureStartX = 0;
+    let gestureDecided = false;
 
     const onTouchStart = (e: TouchEvent) => {
-      touchLastY.current = e.touches[0].clientY;
+      gestureStartY = e.touches[0].clientY;
+      gestureStartX = e.touches[0].clientX;
+      touchLastY.current = gestureStartY;
       touchLastTime.current = e.timeStamp;
       touchVelocity.current = 0;
-      const sheetTop = sheetEl.getBoundingClientRect().top;
-      const inHandle = e.touches[0].clientY - sheetTop < 56;
-      touchDrivingSheet.current = inHandle;
+      touchDrivingSheet.current = false;
+      gestureDecided = false;
     };
 
     const onTouchMove = (e: TouchEvent) => {
       const now = e.timeStamp;
       const dt = now - touchLastTime.current || 1;
-      const dy = e.touches[0].clientY - touchLastY.current;
+      const clientY = e.touches[0].clientY;
+      const dy = clientY - touchLastY.current;
       touchVelocity.current = dy / dt;
-      touchLastY.current = e.touches[0].clientY;
+      touchLastY.current = clientY;
       touchLastTime.current = now;
 
-      // Also start driving if at peek and dragging down
-      if (!touchDrivingSheet.current) {
-        const atPeek = Math.abs(targetY.current - getMaxY()) < 8;
-        if (atPeek && dy > 0) touchDrivingSheet.current = true;
+      // Decide gesture intent once we have enough movement
+      if (!gestureDecided) {
+        const totalY = clientY - gestureStartY;
+        const totalX = e.touches[0].clientX - gestureStartX;
+        if (Math.abs(totalY) < 6 && Math.abs(totalX) < 6) return; // deadzone
+        gestureDecided = true;
+        // Drive the sheet if: primarily vertical AND dragging down
+        const sheetTop = sheetEl.getBoundingClientRect().top;
+        const inHandle = gestureStartY - sheetTop < 56;
+        const draggingDown = totalY > 0;
+        const vertical = Math.abs(totalY) > Math.abs(totalX);
+        touchDrivingSheet.current = vertical && (draggingDown || inHandle);
       }
 
       if (!touchDrivingSheet.current) return;
@@ -346,6 +302,7 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     const onTouchEnd = () => {
       if (!touchDrivingSheet.current) return;
       touchDrivingSheet.current = false;
+      gestureDecided = false;
       if (touchVelocity.current > 0.3 || targetY.current > getMaxY() - 60) {
         handleClose();
       } else {
@@ -355,8 +312,6 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
-    // Attach touch handlers on the sheet element, not window, so native
-    // scroll inside sheet content is never blocked
     sheetEl.addEventListener("touchstart", onTouchStart, { passive: true });
     sheetEl.addEventListener("touchmove", onTouchMove, { passive: false });
     sheetEl.addEventListener("touchend", onTouchEnd);

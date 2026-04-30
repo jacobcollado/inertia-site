@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ThemeToggle } from "./theme-toggle";
 
 export const metadata: Metadata = {
   title: "Not found — Jacob Collado",
@@ -9,9 +8,9 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 pt-6 pb-16 sm:pt-8 sm:pb-20 text-lg">
+    <main className="mx-auto w-full max-w-5xl flex min-h-screen flex-col px-8 pt-6 pb-16 sm:pt-8 sm:pb-20 text-lg">
       <header
-        className="flex items-center justify-between mb-14 rise"
+        className="flex items-center mb-14 rise"
         style={{ ["--rise-delay" as any]: "0ms" }}
       >
         <Link
@@ -20,7 +19,6 @@ export default function NotFound() {
         >
           ← back
         </Link>
-        <ThemeToggle />
       </header>
 
       <section

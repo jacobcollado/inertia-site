@@ -10,17 +10,21 @@ function getChicagoHour(): number {
 
 function getTagline(hour: number): string {
   if (hour >= 0 && hour < 5)
-    return "Still up. Design and code.";
-  if (hour >= 5 && hour < 12)
-    return "Morning. Design and code.";
+    return "Still building while you sleep.";
+  if (hour >= 5 && hour < 9)
+    return "Early start. Big ideas.";
+  if (hour >= 9 && hour < 12)
+    return "Deep in it. What are we building?";
+  if (hour >= 12 && hour < 17)
+    return "Midday momentum. Shipping things.";
   if (hour >= 17 && hour < 20)
-    return "Evening. Design and code.";
+    return "Golden hour. Still going.";
   if (hour >= 20)
-    return "Winding down. Still at it.";
-  return "Design and code, end to end.";
+    return "Late hours. Our best work lives here.";
+  return "Your vision. Built.";
 }
 
-const DEFAULT_TAGLINE = "Design and code, end to end.";
+const DEFAULT_TAGLINE = "Your vision. Built.";
 
 export function TimeTagline({ fallback = DEFAULT_TAGLINE }: { fallback?: string }) {
   const [tagline, setTagline] = useState(fallback);
@@ -38,7 +42,7 @@ export function TimeTagline({ fallback = DEFAULT_TAGLINE }: { fallback?: string 
   return (
     <p
       key={tagline}
-      className="text-2xl sm:text-3xl leading-[1.25] tracking-tight text-[rgb(var(--fg))]"
+      className="text-3xl sm:text-4xl leading-[1.15] tracking-tighter font-medium text-[rgb(var(--fg))]"
       style={swapped ? { animation: "fade-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both" } : undefined}
     >
       {tagline}

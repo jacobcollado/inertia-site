@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ThemeToggle } from "../../theme-toggle";
 import { getAllWork, getWork, renderWorkMarkdown } from "@/lib/work";
 
 export function generateStaticParams() {
@@ -37,10 +36,10 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   const next = idx >= 0 ? all[(idx + 1) % all.length] : null;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 pt-6 pb-16 sm:pt-8 sm:pb-24">
+    <main className="mx-auto w-full max-w-5xl px-8 pt-6 pb-16 sm:pt-8 sm:pb-24">
       {/* Nav */}
       <header
-        className="flex items-center justify-between mb-16 rise"
+        className="flex items-center mb-16 rise"
         style={{ ["--rise-delay" as any]: "0ms" }}
       >
         <Link
@@ -49,7 +48,6 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         >
           ← back
         </Link>
-        <ThemeToggle />
       </header>
 
       <article>

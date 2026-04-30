@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ThemeToggle } from "../theme-toggle";
 import { CopyEmail } from "./copy-email";
 import { ContactForm } from "./contact-form";
 
@@ -13,9 +12,9 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-6 pt-6 pb-16 sm:pt-8 sm:pb-20">
+    <main className="mx-auto w-full max-w-5xl flex min-h-screen flex-col px-8 pt-6 pb-16 sm:pt-8 sm:pb-20">
       <header
-        className="flex items-center justify-between mb-16 rise"
+        className="flex items-center mb-16 rise"
         style={{ ["--rise-delay" as any]: "0ms" }}
       >
         <Link
@@ -24,7 +23,6 @@ export default function ContactPage() {
         >
           ← back
         </Link>
-        <ThemeToggle />
       </header>
 
       {/* Heading */}

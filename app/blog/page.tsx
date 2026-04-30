@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ThemeToggle } from "../theme-toggle";
 import { getAllPosts, formatDate } from "@/lib/posts";
 
 export const metadata: Metadata = {
@@ -12,9 +11,9 @@ export default function BlogIndex() {
   const posts = getAllPosts();
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 pt-6 pb-16 sm:pt-8 sm:pb-20">
+    <main className="mx-auto w-full max-w-5xl px-8 pt-6 pb-16 sm:pt-8 sm:pb-20">
       <header
-        className="flex items-center justify-between mb-16 rise"
+        className="flex items-center mb-16 rise"
         style={{ ["--rise-delay" as any]: "0ms" }}
       >
         <Link
@@ -23,7 +22,6 @@ export default function BlogIndex() {
         >
           ← back
         </Link>
-        <ThemeToggle />
       </header>
 
       <div className="rise mb-12" style={{ ["--rise-delay" as any]: "80ms" }}>

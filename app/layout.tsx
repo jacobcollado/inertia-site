@@ -7,8 +7,8 @@ import { ViewModeProvider } from "./view-mode-context";
 import { VisualNotch } from "./visual-notch";
 
 export const metadata: Metadata = {
-  title: "Jacob Collado",
-  description: "Personal site of Jacob. Building things on the internet.",
+  title: "Inertia",
+  description: "Inertia — design and development studio.",
 };
 
 const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var t=s||'dark';if(t==='dark')document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;

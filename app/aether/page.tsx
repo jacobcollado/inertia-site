@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ThemeToggle } from "../theme-toggle";
 import { CopyPassword } from "./copy-password";
 import { FitQuiz } from "./fit-quiz";
 
@@ -63,9 +62,9 @@ const DEMO_URL = "https://aether-starter.myshopify.com";
 
 export default function AetherPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 pt-6 pb-16 sm:pt-8 sm:pb-20 min-h-screen flex flex-col">
+    <main className="mx-auto w-full max-w-5xl px-8 pt-6 pb-16 sm:pt-8 sm:pb-20 min-h-screen flex flex-col">
       <header
-        className="flex items-center justify-between mb-12 rise"
+        className="flex items-center mb-12 rise"
         style={{ ["--rise-delay" as any]: "0ms" }}
       >
         <Link
@@ -74,7 +73,6 @@ export default function AetherPage() {
         >
           ← back
         </Link>
-        <ThemeToggle />
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-14">
@@ -107,6 +105,12 @@ export default function AetherPage() {
               className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
             >
               Buy a license
+            </Link>
+            <Link
+              href="/aether/changelog"
+              className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+            >
+              Changelog
             </Link>
           </div>
         </section>

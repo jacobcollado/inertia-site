@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --bg: 237 228 212;
-  --fg: 28 22 14;
-  --muted: 140 122 98;
-  --line: 210 196 174;
-  --accent: 28 22 14;
+  --bg: 255 255 255;
+  --fg: 18 18 18;
+  --muted: 130 130 130;
+  --line: 220 220 220;
+  --accent: 18 18 18;
   color-scheme: light;
 }
 
@@ -26,20 +26,7 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.12;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-}
-
-html.dark body::before {
-  opacity: 0;
-}
+/* Noise texture removed */
 
 body::after {
   content: "";
@@ -542,8 +529,12 @@ h1:hover .redact > span.redact-inner,
   align-items: stretch;
   background: rgb(var(--fg));
   color: rgb(var(--bg));
-  border-radius: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 4px 16px -4px rgba(0,0,0,0.16);
+  border-radius: 100px;
+  /* outer shadows only — overflow:hidden clips inset shadows so we avoid them here */
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.2),
+    0 4px 14px -2px rgba(0,0,0,0.24),
+    0 20px 48px -8px rgba(0,0,0,0.2);
   transition: box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1),
     background 400ms cubic-bezier(0.22, 1, 0.36, 1),
     color 400ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -551,20 +542,53 @@ h1:hover .redact > span.redact-inner,
   overflow: hidden;
 }
 
+/* Inner bezel — renders on top of content via ::after, not clipped */
+.notch-island::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  /* top highlight + bottom shadow = physical depth */
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.28),
+    inset 0 -1.5px 0 rgba(0,0,0,0.35),
+    inset 1px 0 0 rgba(255,255,255,0.06),
+    inset -1px 0 0 rgba(0,0,0,0.12);
+  z-index: 10;
+}
+
 .notch-island[data-open="true"] {
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
 .notch-island:hover {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.14), 0 8px 24px -4px rgba(0,0,0,0.2);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.24),
+    0 8px 24px -4px rgba(0,0,0,0.3),
+    0 32px 64px -12px rgba(0,0,0,0.24);
 }
 
 .dark .notch-island {
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.6);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.07),
+    0 2px 6px rgba(0,0,0,0.5),
+    0 16px 40px -6px rgba(0,0,0,0.65);
+}
+
+.dark .notch-island::after {
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,0.14),
+    inset 0 -1.5px 0 rgba(0,0,0,0.6),
+    inset 1px 0 0 rgba(255,255,255,0.04),
+    inset -1px 0 0 rgba(0,0,0,0.3);
 }
 
 .dark .notch-island:hover {
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 12px 40px rgba(0,0,0,0.7);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.1),
+    0 4px 12px rgba(0,0,0,0.55),
+    0 24px 56px -8px rgba(0,0,0,0.75);
 }
 
 /* Name trigger button */
@@ -575,8 +599,8 @@ h1:hover .redact > span.redact-inner,
   border: none;
   background: transparent;
   color: inherit;
-  padding: 8px 7px 8px 12px;
-  font-size: 13px;
+  padding: 6px 6px 6px 10px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: -0.03em;
   cursor: pointer;
@@ -626,12 +650,12 @@ h1:hover .redact > span.redact-inner,
 
 .notch-nav__link {
   display: block;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 450;
   letter-spacing: -0.025em;
   color: rgb(var(--bg));
   opacity: 0.45;
-  padding: 7px 12px;
+  padding: 6px 10px;
   text-decoration: none;
   white-space: nowrap;
   border-top: 1px solid rgba(var(--bg), 0.08);
@@ -1043,4 +1067,76 @@ h1:hover .redact > span.redact-inner,
   letter-spacing: 0;
   color: rgb(var(--muted));
   line-height: 1.3;
+}
+
+/* ── Page container with vertical grid lines ────────────────────── */
+
+.page-container {
+  position: relative;
+}
+
+/* Vertical lines — absolute within the container, left/right edges */
+.page-container::before,
+.page-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgb(var(--line));
+  pointer-events: none;
+  z-index: 10;
+}
+
+.page-container::before {
+  left: 0;
+}
+
+.page-container::after {
+  right: 0;
+}
+
+/* ── Section divider — full width, touching both grid lines ─────── */
+
+.grid-rule {
+  height: 1px;
+  background: rgb(var(--line));
+  flex-shrink: 0;
+}
+
+/* ── Internal column divider ─────────────────────────────────────── */
+
+/* py-16 = 4rem on the parent flex row. Negative margins extend the line
+   to touch the GridRules above and below. */
+.inner-divider {
+  width: 1px;
+  background: rgb(var(--line));
+  align-self: stretch;
+  margin-top: -4rem;
+  margin-bottom: -4rem;
+}
+
+/* ── Work list ───────────────────────────────────────────────────── */
+
+.work-list {
+  border-top: 1px solid rgb(var(--line));
+}
+
+/* ── Work row ───────────────────────────────────────────────────── */
+
+.work-row {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  appearance: none;
+}
+
+@keyframes work-row-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.work-row {
+  animation: work-row-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(60ms + var(--row-i, 0) * 40ms);
 }

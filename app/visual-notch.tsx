@@ -53,7 +53,7 @@ export function VisualNotch() {
             aria-expanded={open}
             className="notch-pill"
           >
-            <span><span className="notch-pill__name-short">Jacob</span><span className="notch-pill__name-rest"> Collado</span></span>
+            <span>Inertia</span>
             <span className="notch-pill__icon" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
