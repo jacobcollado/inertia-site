@@ -6,59 +6,55 @@ import { ContactForm } from "./contact-form";
 const EMAIL = "jacob@aftertone.agency";
 
 export const metadata: Metadata = {
-  title: "Contact — Jacob Collado",
+  title: "Contact — Inertia",
   description: "Get in touch for work, collaborations, or a simple hello.",
 };
 
 export default function ContactPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl flex min-h-screen flex-col px-8 pt-6 pb-16 sm:pt-8 sm:pb-20">
-      <header
-        className="flex items-center mb-16 rise"
-        style={{ ["--rise-delay" as any]: "0ms" }}
-      >
+    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
+
+      {/* Nav */}
+      <div className="flex items-center px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
         <Link
           href="/"
-          className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
           ← back
         </Link>
-      </header>
+      </div>
 
-      {/* Heading */}
-      <div className="rise mb-10" style={{ ["--rise-delay" as any]: "80ms" }}>
-        <h1 className="text-4xl sm:text-5xl font-medium tracking-tighter leading-[1.0] mb-5">
+      <div className="grid-rule" aria-hidden="true" />
+
+      {/* Hero */}
+      <div className="px-8 pt-14 pb-12 text-center rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+        <div className="inline-flex items-center gap-2 mb-6">
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Start a</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-3 py-1 text-[13px] tracking-tight text-[rgb(var(--fg))]">
+            <span className="relative flex h-1.5 w-1.5 shrink-0">
+              <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-70" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            </span>
+            conversation
+          </span>
+        </div>
+        <h1 className="text-[clamp(2.25rem,5.5vw,4rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))]">
           Let&apos;s make something.
         </h1>
-        <p className="text-base leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-[36ch]">
+        <p className="mt-4 text-[15px] tracking-tight leading-relaxed text-[rgb(var(--muted))] max-w-xs mx-auto">
           Commissions, collaborations, or a hello. I read everything.
         </p>
       </div>
 
-      {/* Status row */}
-      <div
-        className="rise mb-10 inline-flex items-center gap-2 text-sm tracking-tight text-[rgb(var(--muted))]"
-        style={{ ["--rise-delay" as any]: "140ms" }}
-      >
-        <span className="relative inline-flex h-2 w-2 shrink-0">
-          <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-        </span>
-        Available for new work · Chicago · replies within 24h
-      </div>
+      <div className="grid-rule" aria-hidden="true" />
 
       {/* Contact links */}
-      <div
-        className="rise mb-12 border-t border-[rgb(var(--line))]"
-        style={{ ["--rise-delay" as any]: "200ms" }}
-      >
-        <div className="flex items-center justify-between gap-6 py-4 border-b border-[rgb(var(--line))]">
-          <span className="text-sm tracking-tight text-[rgb(var(--muted))] w-20 shrink-0">email</span>
+      <div className="rise" style={{ ["--rise-delay" as any]: "120ms" }}>
+        <div className="flex items-center justify-between gap-6 px-8 py-4 border-b border-[rgb(var(--line))]">
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60 w-20 shrink-0">email</span>
           <div className="flex items-center gap-3 min-w-0 flex-1 justify-end">
-            <a href={`mailto:${EMAIL}`} className="group inline-flex min-w-0">
-              <span className="fluid-link text-sm tracking-tight text-[rgb(var(--fg))] truncate">
-                <span className="fluid-link__text">{EMAIL}</span>
-              </span>
+            <a href={`mailto:${EMAIL}`} className="text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors truncate">
+              {EMAIL}
             </a>
             <CopyEmail email={EMAIL} />
           </div>
@@ -67,19 +63,25 @@ export default function ContactPage() {
           href="https://www.instagram.com/kayz.xyz/"
           target="_blank"
           rel="noreferrer"
-          className="group flex items-center justify-between gap-6 py-4 border-b border-[rgb(var(--line))]"
+          className="flex items-center justify-between gap-6 px-8 py-4 border-b border-[rgb(var(--line))] hover:bg-[rgb(var(--line))/0.1] transition-colors"
         >
-          <span className="text-sm tracking-tight text-[rgb(var(--muted))] w-20 shrink-0">instagram</span>
-          <span className="fluid-link text-sm tracking-tight text-[rgb(var(--fg))]">
-            <span className="fluid-link__text">@kayz.xyz</span>
-          </span>
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60 w-20 shrink-0">instagram</span>
+          <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]">@kayz.xyz</span>
         </a>
+        <div className="flex items-center justify-between gap-6 px-8 py-4 border-b border-[rgb(var(--line))]">
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60 w-20 shrink-0">location</span>
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Chicago · replies within 24h</span>
+        </div>
       </div>
 
+      <div className="grid-rule" aria-hidden="true" />
+
       {/* Form */}
-      <div className="rise" style={{ ["--rise-delay" as any]: "280ms" }}>
+      <div className="px-6 sm:px-8 py-10 rise" style={{ ["--rise-delay" as any]: "200ms" }}>
+        <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-6">Send a note</p>
         <ContactForm />
       </div>
+
     </main>
   );
 }
