@@ -24,11 +24,24 @@ export function VisualNotch() {
     if (!mounted) return;
     const el = navRef.current;
     if (!el) return;
-    const saved = el.style.cssText;
-    el.style.cssText = "position:absolute;visibility:hidden;height:auto;overflow:visible;";
-    const h = el.scrollHeight;
-    el.style.cssText = saved;
-    setNavHeight(h);
+    const measure = () => {
+      const saved = el.style.cssText;
+      el.style.cssText = "position:absolute;visibility:hidden;height:auto;overflow:visible;";
+      const h = el.scrollHeight;
+      el.style.cssText = saved;
+      setNavHeight(h);
+    };
+
+    measure();
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, [mounted]);
 
   useEffect(() => {
