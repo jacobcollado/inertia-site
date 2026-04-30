@@ -5,6 +5,7 @@ import { RouteFade } from "./route-fade";
 import { LenisProvider } from "./lenis-provider";
 import { ViewModeProvider } from "./view-mode-context";
 import { VisualNotch } from "./visual-notch";
+import { SiteFooter } from "./site-footer";
 
 export const metadata: Metadata = {
   title: "Inertia",
@@ -30,7 +31,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ViewModeProvider>
             <LenisProvider />
             <VisualNotch />
-            <RouteFade>{children}</RouteFade>
+            <RouteFade>
+              {children}
+            </RouteFade>
+            <SiteFooter />
           </ViewModeProvider>
         </ThemeProvider>
       </body>

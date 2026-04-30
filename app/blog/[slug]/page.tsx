@@ -181,6 +181,20 @@ export default async function BlogPost({
           </h1>
         </header>
 
+        {/* Author byline */}
+        <div className="flex items-center justify-center gap-2.5 pb-6 rise" style={{ ["--rise-delay" as any]: "100ms" }}>
+          <div className="w-6 h-6 rounded-full bg-[rgb(var(--line))] flex items-center justify-center shrink-0 overflow-hidden">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[rgb(var(--muted))] opacity-60" aria-hidden="true">
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] font-medium">Jacob Collado</span>
+            <span className="text-[rgb(var(--line))]">·</span>
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Founder, Inertia</span>
+          </div>
+        </div>
+
         {/* Meta bar — constrained to article width */}
         <div
           className="mx-auto max-w-2xl px-8 rise"
