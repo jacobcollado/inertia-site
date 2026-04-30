@@ -1,44 +1,25 @@
 "use client";
 
+import React from "react";
 import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta } from "@/lib/work";
 
 export function PastWork({ work }: { work: WorkMeta[] }) {
-  return <TextList work={work} />;
+  return <WorkGrid work={work} />;
 }
 
-/* ── Text list ────────────────────────────────────────────────── */
+/* ── Work grid ────────────────────────────────────────────────── */
 
-function TextList({ work }: { work: WorkMeta[] }) {
+function WorkGrid({ work }: { work: WorkMeta[] }) {
   const [active, setActive] = useState<WorkMeta | null>(null);
 
   return (
     <>
-      <div className="work-list">
+      <div className="grid grid-cols-2 md:grid-cols-3">
         {work.map((w, i) => (
-          <button
-            key={w.slug}
-            onClick={() => setActive(w)}
-            className="work-row group w-full flex items-center justify-between gap-6 px-8 py-4 border-b border-[rgb(var(--line))] text-left"
-            style={{ ["--row-i" as any]: i }}
-          >
-            <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate transition-opacity duration-300 group-hover:opacity-50">
-              {w.client}
-            </span>
-            <div className="flex items-center gap-6 shrink-0">
-              {w.role && (
-                <span className="hidden sm:block text-[13px] tracking-tight text-[rgb(var(--muted))]">{w.role}</span>
-              )}
-              {w.year && (
-                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] tabular-nums">{w.year}</span>
-              )}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-60 transition-opacity duration-300 -rotate-45" aria-hidden="true">
-                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-              </svg>
-            </div>
-          </button>
+          <WorkCard key={w.slug} item={w} index={i} total={work.length} onOpen={() => setActive(w)} />
         ))}
       </div>
       {active && <WorkSheet item={active} onClose={() => setActive(null)} />}
@@ -46,83 +27,52 @@ function TextList({ work }: { work: WorkMeta[] }) {
   );
 }
 
-/* ── Masonry grid ─────────────────────────────────────────────── */
-
-const ASPECT_CYCLE = ["aspect-[3/4]", "aspect-[3/4]", "aspect-[4/5]", "aspect-[3/4]", "aspect-[4/5]"];
-
-function MasonryGrid({ work, onOpen }: { work: WorkMeta[]; onOpen: (w: WorkMeta) => void }) {
-  const featured = work.find((w) => w.featured);
-  const rest = work.filter((w) => !w.featured);
-
-  // Build 3 cols; inject featured as first item of center col (index 1)
-  const col0 = rest.filter((_, i) => i % 3 === 0);
-  const col1 = rest.filter((_, i) => i % 3 === 1);
-  const col2 = rest.filter((_, i) => i % 3 === 2);
-  const offsets = ["mt-0", "mt-10 sm:mt-16", "sm:mt-32"];
-
-  const renderCard = (w: WorkMeta, globalIndex: number) => (
-    <div
-      key={w.slug}
-      role="button"
-      tabIndex={0}
-      onClick={() => onOpen(w)}
-      onKeyDown={(e) => e.key === "Enter" && onOpen(w)}
-      className="masonry-card"
-    >
-      <div className={`masonry-card__img-wrap ${ASPECT_CYCLE[globalIndex % ASPECT_CYCLE.length]}`}>
-        {w.cover ? (
-          <Image src={w.cover} alt={w.client} fill sizes="(min-width: 768px) 33vw, 50vw" className="masonry-card__img" />
-        ) : (
-          <div className="masonry-card__placeholder" />
-        )}
-      </div>
-      <div className="masonry-card__info">
-        <span className="masonry-card__client">{w.client}</span>
-        {w.role && <span className="masonry-card__role">{w.role}</span>}
-      </div>
-    </div>
-  );
-
+function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: number; total: number; onOpen: () => void }) {
   return (
-    <div className="masonry-grid">
-      {/* Col 0 */}
-      <div className={`masonry-col ${offsets[0]}`}>
-        {col0.map((w, i) => renderCard(w, i * 3))}
-      </div>
-
-      {/* Col 1 — center, featured card sits here floating over neighbors */}
-      <div className={`masonry-col ${offsets[1]}`}>
-        {featured && (
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => onOpen(featured)}
-            onKeyDown={(e) => e.key === "Enter" && onOpen(featured)}
-            className="masonry-card masonry-card--featured"
-          >
-            <div className={`masonry-card__img-wrap ${ASPECT_CYCLE[1]}`}>
-              {featured.cover ? (
-                <Image src={featured.cover} alt={featured.client} fill sizes="(min-width: 768px) 33vw, 50vw" className="masonry-card__img" priority />
-              ) : (
-                <div className="masonry-card__placeholder" />
-              )}
-            </div>
-            <div className="masonry-card__info">
-              <span className="masonry-card__client">{featured.client}</span>
-              {featured.role && <span className="masonry-card__role">{featured.role}</span>}
-            </div>
-          </div>
+    <button
+      onClick={onOpen}
+      className="work-grid-card group relative flex flex-col text-left bg-transparent transition-colors hover:bg-[rgb(var(--line))/0.08]"
+      data-index={index}
+      data-total={total}
+      style={{ ["--row-i" as any]: index }}
+    >
+      {/* Cover image */}
+      <div className="relative w-full aspect-[4/3] overflow-hidden bg-[rgb(var(--line))]">
+        {item.cover ? (
+          <Image
+            src={item.cover}
+            alt={item.client}
+            fill
+            sizes="(min-width: 768px) 33vw, 50vw"
+            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[rgb(var(--line))]" />
         )}
-        {col1.map((w, i) => renderCard(w, 1 + i * 3))}
       </div>
 
-      {/* Col 2 */}
-      <div className={`masonry-col ${offsets[2]}`}>
-        {col2.map((w, i) => renderCard(w, 2 + i * 3))}
+      {/* Info */}
+      <div className="flex flex-col gap-0.5 px-5 py-4">
+        <span className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{item.client}</span>
+        {item.role && (
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">{item.role}</span>
+        )}
+        {item.year && (
+          <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-60 mt-1">{item.year}</span>
+        )}
       </div>
-    </div>
+
+      {/* Hover arrow */}
+      <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 rounded-full bg-[rgb(var(--bg))] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3 h-3 text-[rgb(var(--fg))] -rotate-45" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+    </button>
   );
 }
+
+
 
 /* ── Highlight key phrases in plain text ─────────────────────── */
 

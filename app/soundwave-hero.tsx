@@ -37,10 +37,10 @@ const LIGHT_COLORS: [number, number, number][] = [
 const CELL_SIZE = 48;
 const GAP = 4;
 const ROWS = 10;
-const WAVE_SPEED = 55;
-const FADE_MS = 1200;
+const WAVE_SPEED = 90;
+const FADE_MS = 2000;
 // Hover ripple: how many cols wide and how long cells stay lit
-const HOVER_FADE_MS = 800;
+const HOVER_FADE_MS = 1100;
 const HOVER_RADIUS = 3; // columns each side of cursor
 
 function lerp(a: number, b: number, t: number) {
@@ -235,8 +235,7 @@ export function SoundwaveHero() {
   return (
     <section
       className="relative overflow-hidden cursor-crosshair"
-      style={{ width: "100%", height: "380px", zIndex: 1, touchAction: "none" }}
-      aria-hidden="true"
+      style={{ width: "100%", height: "520px", zIndex: 1, touchAction: "none" }}
     >
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0"
@@ -247,6 +246,18 @@ export function SoundwaveHero() {
         style={{ height: "20%", background: "linear-gradient(to top, transparent, rgb(var(--bg)))", zIndex: 2 }}
       />
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ display: "block" }} />
+
+      {/* Centered tagline */}
+      <div
+        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3"
+        style={{ zIndex: 3 }}
+        aria-hidden="true"
+      >
+        <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]">A body in motion stays in motion.</p>
+        <h1 className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] text-center">
+          We build the thing<br />that keeps you moving.
+        </h1>
+      </div>
     </section>
   );
 }

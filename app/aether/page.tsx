@@ -4,7 +4,7 @@ import { CopyPassword } from "./copy-password";
 import { FitQuiz } from "./fit-quiz";
 
 export const metadata: Metadata = {
-  title: "Aether Theme — Jacob Collado",
+  title: "Aether Theme — Inertia",
   description:
     "A high-end Shopify theme built for conversion, flow, and presence.",
 };
@@ -36,14 +36,14 @@ const TIERS: {
   {
     name: "Standard",
     price: "$85",
-    term: "1 year, single store",
+    term: "1 year · single store",
     description: "The full theme, licensed for a year. Good for testing the waters.",
     includes: ["Full Aether theme", "1 year of updates", "Single store license", "Email support"],
   },
   {
     name: "Lifetime",
     price: "$105",
-    term: "Forever, single store",
+    term: "Forever · single store",
     description: "Own it outright. One store, no renewals, updates for life.",
     includes: ["Full Aether theme", "Lifetime updates", "Single store license", "Priority email support"],
     featured: true,
@@ -54,58 +54,156 @@ const TIERS: {
     price: "On request",
     term: "Foundation + bespoke build",
     description: "Aether as the base, tailored end to end around your brand.",
-    includes: ["Bespoke design pass", "Custom sections", "Brand-tuned interactions", "Direct line to me"],
+    includes: ["Bespoke design pass", "Custom sections", "Brand-tuned interactions", "Direct line to us"],
   },
 ];
 
 const DEMO_URL = "https://aether-starter.myshopify.com";
 
+function GridRule() {
+  return <div className="grid-rule" aria-hidden="true" />;
+}
+
+// Storefront blueprint — hero section wireframe
+function SketchStorefront() {
+  return (
+    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+      <rect x="8" y="8" width="184" height="104" rx="2" strokeWidth="0.9" />
+      <line x1="8" y1="20" x2="192" y2="20" strokeWidth="0.7" />
+      <rect x="40" y="13" width="120" height="5" rx="1.5" strokeWidth="0.5" />
+      <line x1="16" y1="30" x2="44" y2="30" strokeWidth="0.8" />
+      <line x1="80" y1="30" x2="96" y2="30" strokeWidth="0.5" />
+      <line x1="102" y1="30" x2="118" y2="30" strokeWidth="0.5" />
+      <line x1="124" y1="30" x2="140" y2="30" strokeWidth="0.5" />
+      <rect x="158" y="27" width="26" height="6" rx="2" strokeWidth="0.6" />
+      <rect x="16" y="38" width="112" height="52" rx="1" strokeWidth="0.7" />
+      <line x1="16" y1="38" x2="128" y2="90" strokeWidth="0.35" />
+      <line x1="128" y1="38" x2="16" y2="90" strokeWidth="0.35" />
+      <line x1="138" y1="42" x2="184" y2="42" strokeWidth="1.1" />
+      <line x1="138" y1="49" x2="176" y2="49" strokeWidth="0.9" />
+      <line x1="138" y1="56" x2="164" y2="56" strokeWidth="0.6" />
+      <line x1="138" y1="62" x2="180" y2="62" strokeWidth="0.5" />
+      <line x1="138" y1="67" x2="170" y2="67" strokeWidth="0.5" />
+      <rect x="138" y="74" width="46" height="8" rx="2" strokeWidth="0.7" />
+      <circle cx="140" cy="86" r="2.5" strokeWidth="0.6" />
+      <circle cx="148" cy="86" r="2.5" strokeWidth="0.6" />
+      <circle cx="156" cy="86" r="2.5" strokeWidth="0.6" />
+      <circle cx="164" cy="86" r="2.5" strokeWidth="0.6" />
+      <line x1="8" y1="115" x2="192" y2="115" strokeWidth="0.35" />
+      <line x1="8" y1="113" x2="8" y2="117" strokeWidth="0.5" />
+      <line x1="192" y1="113" x2="192" y2="117" strokeWidth="0.5" />
+    </svg>
+  );
+}
+
+// Interaction timeline — transitions, polish
+function SketchTimeline() {
+  return (
+    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+      <line x1="16" y1="60" x2="184" y2="60" strokeWidth="0.7" />
+      <line x1="16" y1="56" x2="16" y2="64" strokeWidth="0.8" />
+      <polyline points="180,56 184,60 180,64" strokeWidth="0.7" />
+      <circle cx="42" cy="60" r="3" strokeWidth="0.8" />
+      <line x1="42" y1="57" x2="42" y2="38" strokeWidth="0.6" />
+      <line x1="32" y1="38" x2="72" y2="38" strokeWidth="0.8" />
+      <line x1="32" y1="34" x2="60" y2="34" strokeWidth="0.5" />
+      <line x1="32" y1="30" x2="52" y2="30" strokeWidth="0.4" />
+      <path d="M 32 48 Q 40 44 48 38" strokeWidth="0.5" strokeDasharray="1.5 2" />
+      <circle cx="90" cy="60" r="3" strokeWidth="0.8" />
+      <line x1="90" y1="63" x2="90" y2="84" strokeWidth="0.6" />
+      <line x1="78" y1="84" x2="118" y2="84" strokeWidth="0.8" />
+      <line x1="78" y1="88" x2="108" y2="88" strokeWidth="0.5" />
+      <line x1="78" y1="92" x2="96" y2="92" strokeWidth="0.4" />
+      <circle cx="142" cy="60" r="3" strokeWidth="0.8" />
+      <line x1="142" y1="57" x2="142" y2="42" strokeWidth="0.6" />
+      <line x1="130" y1="42" x2="168" y2="42" strokeWidth="0.8" />
+      <line x1="130" y1="38" x2="158" y2="38" strokeWidth="0.5" />
+      <line x1="130" y1="34" x2="148" y2="34" strokeWidth="0.4" />
+      <line x1="42" y1="108" x2="142" y2="108" strokeWidth="0.5" />
+      <line x1="42" y1="105" x2="42" y2="111" strokeWidth="0.6" />
+      <line x1="142" y1="105" x2="142" y2="111" strokeWidth="0.6" />
+    </svg>
+  );
+}
+
+// Conversion funnel — flow diagram
+function SketchFunnel() {
+  return (
+    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+      <rect x="20" y="10" width="160" height="14" rx="1" strokeWidth="0.8" />
+      <line x1="100" y1="24" x2="100" y2="33" strokeWidth="0.6" />
+      <polyline points="96,30 100,34 104,30" strokeWidth="0.6" />
+      <rect x="40" y="34" width="120" height="14" rx="1" strokeWidth="0.8" />
+      <line x1="100" y1="48" x2="100" y2="57" strokeWidth="0.6" />
+      <polyline points="96,54 100,58 104,54" strokeWidth="0.6" />
+      <rect x="60" y="58" width="80" height="14" rx="1" strokeWidth="0.8" />
+      <line x1="100" y1="72" x2="100" y2="81" strokeWidth="0.6" />
+      <polyline points="96,78 100,82 104,78" strokeWidth="0.6" />
+      <rect x="76" y="82" width="48" height="14" rx="1" strokeWidth="1.0" />
+      <line x1="12" y1="10" x2="12" y2="24" strokeWidth="0.5" />
+      <line x1="8" y1="10" x2="16" y2="10" strokeWidth="0.5" />
+      <line x1="8" y1="24" x2="16" y2="24" strokeWidth="0.5" />
+      <line x1="12" y1="82" x2="12" y2="96" strokeWidth="0.5" />
+      <line x1="8" y1="82" x2="16" y2="82" strokeWidth="0.5" />
+      <line x1="8" y1="96" x2="16" y2="96" strokeWidth="0.5" />
+      <line x1="140" y1="89" x2="180" y2="89" strokeWidth="0.5" strokeDasharray="2 2" />
+      <line x1="180" y1="82" x2="180" y2="96" strokeWidth="0.6" />
+      <line x1="176" y1="82" x2="184" y2="82" strokeWidth="0.5" />
+      <line x1="176" y1="96" x2="184" y2="96" strokeWidth="0.5" />
+    </svg>
+  );
+}
+
 export default function AetherPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-8 pt-6 pb-16 sm:pt-8 sm:pb-20 min-h-screen flex flex-col">
-      <header
-        className="flex items-center mb-12 rise"
-        style={{ ["--rise-delay" as any]: "0ms" }}
-      >
+    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
+
+      {/* Back nav */}
+      <div className="px-6 sm:px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
         <Link
           href="/"
-          className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
           ← back
         </Link>
-      </header>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-14">
+      <GridRule />
 
-        {/* Hero — full width */}
-        <section className="md:col-span-12 rise" style={{ ["--rise-delay" as any]: "100ms" }}>
-          <p className="inline-flex items-center gap-1.5 text-sm tracking-tight text-[rgb(var(--muted))] mb-4">
-            <ShopifyLogo />
-            <span>Shopify theme</span>
-          </p>
-          <h1 className="text-5xl sm:text-6xl font-medium tracking-tighter leading-none mb-6">
-            Aether
-          </h1>
-          <p className="text-xl sm:text-2xl leading-[1.35] tracking-tight text-[rgb(var(--muted))] mb-8 max-w-2xl">
-            A high-end Shopify theme built for flow, presence, and conversion. Designed for brands that treat the storefront as product.
-          </p>
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm tracking-tight">
-            <a
-              href={DEMO_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2.5 hover:opacity-90 transition-opacity"
-            >
-              View live demo
-              <span aria-hidden="true">↗</span>
-            </a>
-            <CopyPassword password="aether" />
+      {/* Hero */}
+      <section className="px-6 sm:px-8 pt-12 pb-14 flex flex-col items-center text-center rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+        <p className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] mb-6">
+          <ShopifyLogo />
+          <span>Shopify theme by Inertia</span>
+        </p>
+        <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4">
+          Aether
+        </h1>
+        <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-3">
+          High-conversion. Prestige design. Ships in days.
+        </p>
+        <p className="text-[1rem] leading-[1.75] tracking-tight text-[rgb(var(--muted))] mb-10 max-w-sm sm:max-w-lg">
+          Built for brands that treat the storefront as product — not just a place to list SKUs.
+        </p>
+        <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 text-[13px] tracking-tight w-full">
+          <a
+            href={DEMO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2.5 hover:opacity-90 transition-opacity"
+          >
+            View live demo
+            <span aria-hidden="true">↗</span>
+          </a>
+          <CopyPassword password="aether" />
+          <div className="flex items-center gap-4">
             <Link
               href="/aether/buy"
               className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
             >
               Buy a license
             </Link>
+            <span className="text-[rgb(var(--line))]">·</span>
             <Link
               href="/aether/changelog"
               className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
@@ -113,90 +211,153 @@ export default function AetherPage() {
               Changelog
             </Link>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features */}
-        <section className="md:col-span-7 rise" style={{ ["--rise-delay" as any]: "200ms" }}>
-          <h2 className="text-sm tracking-tight text-[rgb(var(--muted))] mb-6">What makes it different</h2>
-          <ul className="space-y-8">
-            {FEATURES.map((f) => (
-              <li key={f.title}>
-                <h3 className="text-xl font-medium tracking-tighter mb-2 text-[rgb(var(--fg))]">
-                  {f.title}
-                </h3>
-                <p className="text-base leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-                  {f.body}
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <GridRule />
 
-        {/* Fit quiz */}
-        <section className="md:col-span-5 rise" style={{ ["--rise-delay" as any]: "280ms" }}>
-          <h2 className="text-sm tracking-tight text-[rgb(var(--muted))] mb-6">Before you buy</h2>
-          <FitQuiz />
-        </section>
-
-        {/* Pricing — full width */}
-        <section id="pricing" className="md:col-span-12 rise scroll-mt-20" style={{ ["--rise-delay" as any]: "360ms" }}>
-          <div className="flex items-baseline justify-between gap-6 mb-6">
-            <h2 className="text-sm tracking-tight text-[rgb(var(--muted))]">Pricing</h2>
-            <span className="text-xs tracking-tight text-[rgb(var(--muted))]">One payment. No subscription.</span>
-          </div>
-          <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {TIERS.map((t) => (
-              <li key={t.name}>
-                <Link
-                  href={`/aether/buy?tier=${t.name.toLowerCase()}`}
-                  className={`group relative flex flex-col h-full rounded-2xl border p-6 transition-all duration-300 hover:border-[rgb(var(--fg))] ${
-                    t.featured
-                      ? "border-[rgb(var(--fg))] bg-[rgb(var(--line))]/20"
-                      : "border-[rgb(var(--line))]"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <p className="text-base font-medium tracking-tight text-[rgb(var(--fg))]">{t.name}</p>
-                    {t.badge && (
-                      <span className="inline-flex items-center rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-2 pt-[3px] pb-[4px] text-[10.5px] font-medium tracking-tight leading-none">
-                        {t.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-5">{t.description}</p>
-                  <ul className="space-y-2 mb-8">
-                    {t.includes.map((line) => (
-                      <li key={line} className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--fg))] w-full">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        {line}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-auto flex items-end justify-between gap-4">
-                    <div>
-                      <p className="text-2xl font-medium tracking-tighter text-[rgb(var(--fg))] tabular-nums leading-none">
-                        {t.price}
-                      </p>
-                      <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] mt-1.5">{t.term}</p>
-                    </div>
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-sm tracking-tight shrink-0 transition-all ${
-                      t.featured
-                        ? "bg-[rgb(var(--fg))] text-[rgb(var(--bg))] group-hover:opacity-90"
-                        : "border border-[rgb(var(--line))] text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg))]"
-                    }`}>
-                      {t.price === "On request" ? "Enquire" : "Choose"}
-                      <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
+      {/* Section label — what makes it different */}
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise" style={{ ["--rise-delay" as any]: "100ms" }}>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))]">Three things that make it</span>
+        <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[rgb(var(--fg))]" aria-hidden="true">
+            <polygon points="8,2 14,12 2,12" />
+          </svg>
+          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">worth it</span>
+        </div>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))]">over anything else</span>
       </div>
+
+      <GridRule />
+
+      {/* Features — 3 col on desktop, stacked on mobile */}
+      <div className="flex flex-col sm:flex-row rise" style={{ ["--rise-delay" as any]: "140ms" }}>
+        {FEATURES.map((f, i) => (
+          <div
+            key={f.title}
+            className="flex-1 flex flex-col gap-5 px-6 sm:px-8 pt-8 pb-8"
+            style={{
+              borderLeft: i > 0 ? "1px solid rgb(var(--line))" : undefined,
+              borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined,
+            }}
+          >
+            <div className="w-full">
+              {i === 0 && <SketchStorefront />}
+              {i === 1 && <SketchTimeline />}
+              {i === 2 && <SketchFunnel />}
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
+                {f.title}
+              </h3>
+              <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+                {f.body}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <GridRule />
+
+      {/* Section label — before you buy */}
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise" style={{ ["--rise-delay" as any]: "180ms" }}>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))]">Four questions.</span>
+        <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[rgb(var(--fg))]" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" />
+            <path d="M8 5.5c0-1 1.5-1 1.5 0S8 7 8 8M8 10.5v.5" />
+          </svg>
+          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Twenty seconds.</span>
+        </div>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))]">Find out if it fits.</span>
+      </div>
+
+      <GridRule />
+
+      {/* Fit quiz */}
+      <div className="px-6 sm:px-8 py-10 rise" style={{ ["--rise-delay" as any]: "220ms" }}>
+        <FitQuiz />
+      </div>
+
+      <GridRule />
+
+      {/* Section label — pricing */}
+      <div className="relative flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise" style={{ ["--rise-delay" as any]: "260ms" }}>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))]">One payment.</span>
+        <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3.5 sm:px-4 py-1.5 sm:py-2">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[rgb(var(--fg))]" aria-hidden="true">
+            <rect x="2" y="4" width="12" height="9" rx="1.5" />
+            <path d="M2 7h12" />
+            <path d="M5 10h2" />
+          </svg>
+          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Pick your license.</span>
+        </div>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))]">Own it forever.</span>
+      </div>
+
+      <GridRule />
+
+      {/* Pricing — 3 col desktop, stacked mobile */}
+      <div id="pricing" className="flex flex-col sm:flex-row scroll-mt-20 rise" style={{ ["--rise-delay" as any]: "300ms" }}>
+        {TIERS.map((t, i) => (
+          <Link
+            key={t.name}
+            href={`/aether/buy?tier=${t.name.toLowerCase()}`}
+            className="group flex-1 flex flex-col justify-between gap-6 px-6 sm:px-8 pt-8 pb-8 transition-colors hover:bg-[rgb(var(--line))/0.1]"
+            style={{
+              borderLeft: i > 0 ? "1px solid rgb(var(--line))" : undefined,
+              borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined,
+            }}
+          >
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2.5">
+                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{t.name}</span>
+                {t.badge && (
+                  <span className="inline-flex items-center rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-2 pt-[3px] pb-[4px] text-[10.5px] font-medium tracking-tight leading-none">
+                    {t.badge}
+                  </span>
+                )}
+              </div>
+              <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">{t.description}</p>
+              <ul className="space-y-2">
+                {t.includes.map((line) => (
+                  <li key={line} className="flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {line}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex items-end justify-between gap-4 mt-auto">
+              <div>
+                <p className="text-[2rem] font-medium tracking-[-0.04em] text-[rgb(var(--fg))] tabular-nums leading-none">
+                  {t.price}
+                </p>
+                <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] mt-1.5">{t.term}</p>
+              </div>
+              <span className="shrink-0 inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] transition-colors">
+                {t.price === "On request" ? "Enquire" : "Choose"}
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-200" aria-hidden="true">
+                  <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <GridRule />
+
+      {/* Footer */}
+      <footer className="px-6 sm:px-8 py-8 flex items-center justify-between gap-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">
+        <Link href="/" className="hover:text-[rgb(var(--fg))] transition-colors">← Inertia</Link>
+        <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch →</Link>
+      </footer>
+
     </main>
   );
 }
@@ -206,7 +367,7 @@ function ShopifyLogo() {
     <svg
       viewBox="0 0 256 292"
       aria-hidden="true"
-      className="h-[22px] w-auto shrink-0"
+      className="h-[18px] w-auto shrink-0"
       preserveAspectRatio="xMidYMid meet"
     >
       <path

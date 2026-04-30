@@ -81,37 +81,64 @@ export function TOC({ headings }: { headings: Heading[] }) {
     history.replaceState(null, "", `#${id}`);
   };
 
-  const renderList = (stagger: boolean) => (
-    <ul
-      className={`tracking-tight ${
-        stagger ? "space-y-2.5 text-sm" : "space-y-4 text-base"
-      }`}
-    >
+  const renderDesktopList = () => (
+    <ul className="space-y-px">
       {headings.map((h, i) => {
         const active = activeId === h.id;
-        const delay = 180 + i * 55;
+        const delay = 160 + i * 45;
+        const isH3 = h.level === 3;
         return (
           <li
             key={h.id}
             style={{
-              paddingLeft: `${(h.level - 1) * 12}px`,
-              ...(stagger
-                ? {
-                    opacity: entered ? 1 : 0,
-                    transform: entered ? "translateX(0)" : "translateX(-10px)",
-                    transition: `opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 700ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms`,
-                    willChange: "opacity, transform",
-                  }
-                : {}),
+              opacity: entered ? 1 : 0,
+              transform: entered ? "translateX(0)" : "translateX(-8px)",
+              transition: `opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 600ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms`,
             }}
           >
             <a
               href={`#${h.id}`}
               onClick={(e) => handleClick(e, h.id)}
-              className={`block leading-snug transition-colors duration-300 ${
-                active
-                  ? "text-[rgb(var(--fg))]"
-                  : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
+              className="group relative flex items-center gap-2.5 py-1 transition-colors duration-200"
+              style={{ paddingLeft: isH3 ? "12px" : "0" }}
+            >
+              {/* Active indicator bar */}
+              <span
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] rounded-full transition-all duration-300"
+                style={{
+                  height: active ? "14px" : "0px",
+                  background: "rgb(var(--fg))",
+                  opacity: active ? 1 : 0,
+                  left: isH3 ? "-1px" : "-9px",
+                }}
+              />
+              <span
+                className={`text-[12px] leading-snug tracking-tight transition-colors duration-200 ${
+                  active
+                    ? "text-[rgb(var(--fg))]"
+                    : "text-[rgb(var(--muted))] opacity-60 group-hover:opacity-100 group-hover:text-[rgb(var(--fg))]"
+                }`}
+              >
+                {h.text}
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+
+  const renderMobileList = () => (
+    <ul className="space-y-4">
+      {headings.map((h) => {
+        const active = activeId === h.id;
+        return (
+          <li key={h.id} style={{ paddingLeft: `${(h.level - 1) * 12}px` }}>
+            <a
+              href={`#${h.id}`}
+              onClick={(e) => handleClick(e, h.id)}
+              className={`block text-base leading-snug tracking-tight transition-colors duration-200 ${
+                active ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
               }`}
             >
               {h.text}
@@ -122,79 +149,64 @@ export function TOC({ headings }: { headings: Heading[] }) {
     </ul>
   );
 
-  const list = renderList(false);
-  const desktopList = renderList(true);
-
   const desktopAside = (
     <aside
-      className="fixed left-8 top-24 z-40 hidden max-h-[calc(100vh-8rem)] overflow-hidden lg:block"
+      className="fixed left-6 top-28 z-40 hidden lg:block"
       style={{
-        width: collapsed ? "2.25rem" : "14rem",
+        width: collapsed ? "2rem" : "13rem",
         opacity: entered ? 1 : 0,
-        transform: entered
-          ? "translateX(0) translateY(0)"
-          : "translateX(-14px) translateY(4px)",
-        filter: entered ? "blur(0)" : "blur(4px)",
+        transform: entered ? "translateX(0)" : "translateX(-12px)",
         transition:
-          "width 400ms cubic-bezier(0.22, 1, 0.36, 1)," +
-          "opacity 700ms cubic-bezier(0.22, 1, 0.36, 1)," +
-          "transform 800ms cubic-bezier(0.22, 1, 0.36, 1)," +
-          "filter 700ms cubic-bezier(0.22, 1, 0.36, 1)",
-        willChange: "opacity, transform, filter",
+          "width 380ms cubic-bezier(0.22, 1, 0.36, 1)," +
+          "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)," +
+          "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
       }}
     >
-      <div
-        className="mb-4 flex items-center gap-2"
-        style={{
-          opacity: entered ? 1 : 0,
-          transform: entered ? "translateX(0)" : "translateX(-8px)",
-          transition:
-            "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1) 80ms, transform 700ms cubic-bezier(0.22, 1, 0.36, 1) 80ms",
-        }}
-      >
+      {/* Header row */}
+      <div className="flex items-center gap-2 mb-5 pl-[9px]">
         <button
           onClick={() => setCollapsed((v) => !v)}
           aria-label={collapsed ? "Expand contents" : "Collapse contents"}
           aria-expanded={!collapsed}
-          className="order-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors duration-300 hover:border-[rgb(var(--fg))] hover:text-[rgb(var(--fg))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))]"
+          className="shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded-sm text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors focus:outline-none"
         >
           <svg
-            viewBox="0 0 24 24"
+            viewBox="0 0 16 16"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="1.6"
             strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-3.5 w-3.5 transition-transform duration-400 ease-fluid"
-            style={{ transform: collapsed ? "rotate(0deg)" : "rotate(180deg)" }}
+            className="w-3 h-3"
+            style={{ transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)" }}
             aria-hidden="true"
           >
-            <polyline points="15 18 9 12 15 6" />
+            <polyline points="4 6 8 10 12 6" />
           </svg>
         </button>
-        <p
-          className="order-2 whitespace-nowrap text-sm font-medium tracking-tighter text-[rgb(var(--muted))]"
+        <span
+          className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] uppercase whitespace-nowrap"
           style={{
-            opacity: collapsed ? 0 : 1,
-            transition: "opacity 250ms cubic-bezier(0.22, 1, 0.36, 1)",
-            pointerEvents: collapsed ? "none" : "auto",
+            opacity: collapsed ? 0 : 0.5,
+            transition: "opacity 200ms cubic-bezier(0.22, 1, 0.36, 1)",
+            pointerEvents: "none",
           }}
         >
           On this page
-        </p>
+        </span>
       </div>
+
+      {/* List */}
       <div
-        className="overflow-y-auto pr-2"
+        className="pl-[9px] border-l border-[rgb(var(--line))] overflow-y-auto"
         style={{
-          maxHeight: "calc(100vh - 10rem)",
+          maxHeight: "calc(100vh - 12rem)",
           opacity: collapsed ? 0 : 1,
-          transform: collapsed ? "translateX(-8px)" : "translateX(0)",
-          transition:
-            "opacity 250ms cubic-bezier(0.22, 1, 0.36, 1), transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
+          transform: collapsed ? "translateX(-4px)" : "translateX(0)",
+          transition: "opacity 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 250ms cubic-bezier(0.22, 1, 0.36, 1)",
           pointerEvents: collapsed ? "none" : "auto",
         }}
       >
-        {desktopList}
+        {renderDesktopList()}
       </div>
     </aside>
   );
@@ -232,7 +244,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
 
       {mounted && (
         <MobileSheet open={menuOpen} onClose={() => setMenuOpen(false)}>
-          {list}
+          {renderMobileList()}
         </MobileSheet>
       )}
     </>

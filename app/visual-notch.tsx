@@ -94,7 +94,12 @@ export function VisualNotch() {
             style={{
               height: open && navHeight !== null ? navHeight : 0,
               opacity: open && navHeight !== null ? 1 : 0,
-              transition: navHeight !== null ? "height 380ms cubic-bezier(0.4, 0, 0.2, 1), opacity 260ms cubic-bezier(0.4, 0, 0.2, 1)" : "none",
+              willChange: "height, opacity",
+              transition: navHeight !== null
+                ? open
+                  ? "height 420ms cubic-bezier(0.25, 1, 0.5, 1), opacity 260ms cubic-bezier(0.25, 1, 0.5, 1) 60ms"
+                  : "height 300ms cubic-bezier(0.4, 0, 1, 1), opacity 140ms cubic-bezier(0.4, 0, 1, 1)"
+                : "none",
             }}
           >
             {NAV.map((item) => (

@@ -494,7 +494,7 @@ h1:hover .redact > span.redact-inner,
   right: 0;
   z-index: 50;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   pointer-events: none;
   animation: notch-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -515,10 +515,9 @@ h1:hover .redact > span.redact-inner,
   background: rgb(var(--fg));
   color: rgb(var(--bg));
   border-radius: 100px;
-  /* outer shadows only — overflow:hidden clips inset shadows so we avoid them here */
   transition: background 400ms cubic-bezier(0.22, 1, 0.36, 1),
     color 400ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius 400ms cubic-bezier(0.22, 1, 0.36, 1);
+    border-radius 420ms cubic-bezier(0.25, 1, 0.5, 1);
   overflow: hidden;
 }
 
@@ -574,7 +573,7 @@ h1:hover .redact > span.redact-inner,
 }
 
 .notch-island[data-open="true"] .notch-pill {
-  border-radius: 999px 999px 10px 10px;
+  border-radius: 999px;
 }
 
 /* "Jacob Col" always visible */
@@ -1090,7 +1089,7 @@ h1:hover .redact > span.redact-inner,
 
 .grid-rule {
   height: 1px;
-  background: rgba(var(--line), 0.8);
+  background: rgb(var(--line));
   flex-shrink: 0;
 }
 
@@ -1100,10 +1099,29 @@ h1:hover .redact > span.redact-inner,
    to touch the GridRules above and below. */
 .inner-divider {
   width: 1px;
-  background: rgba(var(--line), 0.8);
+  background: rgb(var(--line));
   align-self: stretch;
-  margin-top: -4rem;
-  margin-bottom: -4rem;
+}
+
+/* ── Tech marquee ────────────────────────────────────────────────── */
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
 }
 
 /* ── Work list ───────────────────────────────────────────────────── */
@@ -1137,8 +1155,7 @@ h1:hover .redact > span.redact-inner,
 }
 
 .work-row:hover {
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.015);
+  background: rgb(var(--line) / 0.15);
 }
 
 .work-row:hover::before {
@@ -1153,4 +1170,62 @@ h1:hover .redact > span.redact-inner,
 .work-row {
   animation: work-row-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(60ms + var(--row-i, 0) * 40ms);
+}
+
+/* ── Work grid cards ──────────────────────────────────────────────── */
+
+.work-grid-card {
+  border: none;
+  appearance: none;
+  cursor: pointer;
+  border-bottom: 1px solid rgb(var(--line));
+  border-right: 1px solid rgb(var(--line));
+}
+
+/* 2-col: right column — no right border */
+.work-grid-card:nth-child(2n) {
+  border-right: none;
+}
+
+/* last item(s) in 2-col — no bottom border */
+.work-grid-card:last-child { border-bottom: none; }
+.work-grid-card:nth-last-child(2):nth-child(2n+1) { border-bottom: none; }
+
+@media (min-width: 768px) {
+  /* 3-col: reset right border, remove from every third */
+  .work-grid-card { border-right: 1px solid rgb(var(--line)); }
+  .work-grid-card:nth-child(3n) { border-right: none; }
+
+  /* last row in 3-col: no bottom border */
+  .work-grid-card:last-child { border-bottom: none; }
+  .work-grid-card:nth-last-child(2):nth-child(3n+1) { border-bottom: none; }
+  .work-grid-card:nth-last-child(2):nth-child(3n+2) { border-bottom: none; }
+  .work-grid-card:nth-last-child(3):nth-child(3n+1) { border-bottom: none; }
+
+  /* override 2-col last-row rule that doesn't apply at md+ */
+  .work-grid-card:nth-last-child(2):nth-child(2n+1) { border-bottom: 1px solid rgb(var(--line)); }
+}
+
+/* ── Blog card grid ───────────────────────────────────────────────── */
+
+.blog-card {
+  border-bottom: 1px solid rgb(var(--line));
+  border-right: none;
+}
+
+@media (min-width: 640px) {
+  .blog-card { border-right: 1px solid rgb(var(--line)); }
+  .blog-card:nth-child(2n) { border-right: none; }
+  .blog-card:last-child { border-bottom: none; }
+  .blog-card:nth-last-child(2):nth-child(2n+1) { border-bottom: none; }
+}
+
+@media (min-width: 1024px) {
+  .blog-card { border-right: 1px solid rgb(var(--line)); }
+  .blog-card:nth-child(3n) { border-right: none; }
+  .blog-card:last-child { border-bottom: none; }
+  .blog-card:nth-last-child(2):nth-child(3n+1) { border-bottom: none; }
+  .blog-card:nth-last-child(2):nth-child(3n+2) { border-bottom: none; }
+  .blog-card:nth-last-child(3):nth-child(3n+1) { border-bottom: none; }
+  .blog-card:nth-last-child(2):nth-child(2n+1) { border-bottom: 1px solid rgb(var(--line)); }
 }
