@@ -67,19 +67,19 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
   return (
     <form onSubmit={onSubmit} className="space-y-6" noValidate>
       <fieldset>
-        <legend className="text-sm tracking-tight text-[rgb(var(--muted))] mb-3">
+        <legend className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-4">
           Select a license
         </legend>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[rgb(var(--line))] border border-[rgb(var(--line))]">
           {TIERS.map((t) => {
             const active = tier === t.id;
             return (
               <label
                 key={t.id}
-                className={`cursor-pointer rounded-xl border p-4 transition-colors ${
+                className={`cursor-pointer p-5 transition-colors ${
                   active
-                    ? "border-[rgb(var(--fg))]"
-                    : "border-[rgb(var(--line))] hover:border-[rgb(var(--muted))]"
+                    ? "bg-[rgb(var(--fg))/0.04]"
+                    : "hover:bg-[rgb(var(--line))/0.15]"
                 }`}
               >
                 <input
@@ -90,17 +90,20 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
                   onChange={() => setTier(t.id)}
                   className="sr-only"
                 />
-                <div className="flex items-baseline justify-between gap-3 mb-1">
-                  <span className="text-base font-medium tracking-tight text-[rgb(var(--fg))]">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`w-2 h-2 rounded-full border transition-colors ${active ? "border-[rgb(var(--fg))] bg-[rgb(var(--fg))]" : "border-[rgb(var(--muted))]"}`} />
+                  <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">
                     {t.label}
                   </span>
-                  <span className="text-sm tracking-tight text-[rgb(var(--fg))] tabular-nums">
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">
+                    {t.term}
+                  </span>
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] tabular-nums shrink-0">
                     {t.price}
                   </span>
                 </div>
-                <span className="block text-xs tracking-tight text-[rgb(var(--muted))]">
-                  {t.term}
-                </span>
               </label>
             );
           })}

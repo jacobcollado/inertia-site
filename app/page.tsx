@@ -5,7 +5,6 @@ import Link from "next/link";
 import { SiNextdotjs, SiShopify, SiReact, SiTypescript, SiTailwindcss, SiFigma, SiSubstack, SiDribbble } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { PastWork } from "./past-work";
-import { WelcomeBack } from "./ambient";
 import { SoundwaveHero } from "./soundwave-hero";
 import type { WorkMeta } from "@/lib/work";
 import type { PostMeta } from "@/lib/posts";
@@ -19,7 +18,7 @@ function formatDate(iso: string): string {
 
 function SketchInertia() {
   return (
-    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
       {/* Ground plane — perspective grid */}
       <line x1="100" y1="60" x2="10"  y2="110" strokeWidth="0.8" />
       <line x1="100" y1="60" x2="190" y2="110" strokeWidth="0.8" />
@@ -60,7 +59,7 @@ function SketchInertia() {
 
 function SketchAether() {
   return (
-    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
       {/* Browser chrome */}
       <rect x="8" y="8" width="184" height="104" rx="3" strokeWidth="0.9" />
       {/* Nav bar */}
@@ -143,7 +142,7 @@ function GridRule() {
 // Blueprint sketches for the perspectives (think) cards
 const THINK_SKETCHES = [
   // Drafting compass — precision, craft
-  <svg key="compass" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+  <svg key="compass" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
     {/* Compass pivot point */}
     <circle cx="100" cy="28" r="3" strokeWidth="0.8" />
     {/* Left leg */}
@@ -177,7 +176,7 @@ const THINK_SKETCHES = [
   </svg>,
 
   // Type specimen grid — hierarchy, rhythm
-  <svg key="type" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+  <svg key="type" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
     {/* Baseline grid */}
     <line x1="12" y1="32"  x2="188" y2="32"  strokeWidth="0.4" strokeDasharray="2 3" />
     <line x1="12" y1="48"  x2="188" y2="48"  strokeWidth="0.4" strokeDasharray="2 3" />
@@ -215,7 +214,7 @@ const THINK_SKETCHES = [
   </svg>,
 
   // Light bulb cross-section — ideas, clarity
-  <svg key="bulb" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.18]" aria-hidden="true">
+  <svg key="bulb" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
     {/* Bulb outer profile */}
     <path d="M 100 10 C 130 10 148 30 148 55 C 148 75 136 88 128 95 L 72 95 C 64 88 52 75 52 55 C 52 30 70 10 100 10 Z" strokeWidth="0.9" />
     {/* Filament support wires */}
@@ -246,6 +245,27 @@ const THINK_SKETCHES = [
     <line x1="148" y1="113" x2="148" y2="117" strokeWidth="0.5" />
   </svg>,
 ];
+
+// Slug-specific sketch overrides for the think section
+const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
+  "hello-world": (
+    <svg key="hello-world" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
+      {/* Origin point */}
+      <circle cx="44" cy="60" r="3.5" fill="currentColor" stroke="none" opacity="0.7" />
+      {/* Concentric arcs expanding outward */}
+      <path d="M 55 43 A 20 20 0 0 1 55 77" strokeWidth="1.0" />
+      <path d="M 68 30 A 34 34 0 0 1 68 90" strokeWidth="0.7" />
+      <path d="M 84 19 A 48 48 0 0 1 84 101" strokeWidth="0.45" />
+      <path d="M 103 10 A 62 62 0 0 1 103 110" strokeWidth="0.28" />
+      {/* Dashed axis */}
+      <line x1="44" y1="60" x2="170" y2="60" strokeWidth="0.3" strokeDasharray="2 5" />
+      {/* Arrival tick + arrow */}
+      <line x1="170" y1="51" x2="170" y2="69" strokeWidth="0.75" />
+      <line x1="177" y1="60" x2="190" y2="60" strokeWidth="0.5" />
+      <polyline points="184,55 190,60 184,65" strokeWidth="0.65" />
+    </svg>
+  ),
+};
 
 const TECH = [
   { name: "Next.js",    icon: SiNextdotjs },
@@ -316,7 +336,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                   <Cmp href={item.href} {...extra} className="group flex-1 flex flex-col justify-between gap-6 px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[220px]">
                     <div className="flex-1 flex flex-col gap-5">
                       {/* Blueprint sketch */}
-                      <div className="w-full">
+                      <div className="w-full scale-[1.35] sm:scale-100 origin-center sm:origin-top-left">
                         {item.sketch}
                       </div>
                       <div className="flex flex-col gap-1">
@@ -363,8 +383,8 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                   {i > 0 && <div className="w-px bg-[rgb(var(--line))] shrink-0" />}
                   <Link href={`/blog/${post.slug}`} className="group flex-1 flex flex-col justify-between gap-6 px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[220px]">
                     <div className="flex-1 flex flex-col gap-5">
-                      <div className="w-full">
-                        {THINK_SKETCHES[i % THINK_SKETCHES.length]}
+                      <div className="w-full scale-[1.35] sm:scale-100 origin-center sm:origin-top-left">
+                        {THINK_SLUG_SKETCHES[post.slug] ?? THINK_SKETCHES[i % THINK_SKETCHES.length]}
                       </div>
                       <div className="flex flex-col gap-1">
                         <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
@@ -413,18 +433,6 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
       </section>
 
       <GridRule />
-
-      <footer className="px-8 py-8 flex items-center justify-between gap-6 text-sm tracking-tight text-[rgb(var(--muted))] rise" style={{ ["--rise-delay" as any]: "260ms" }}>
-        <WelcomeBack />
-        <a href="https://www.instagram.com/inertia.dev/" target="_blank" rel="noreferrer" aria-label="Instagram — @inertia.dev" className="inline-flex items-center gap-[3px] hover:text-[rgb(var(--fg))] transition-colors ml-auto">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-[14px] w-[14px]" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="5" />
-            <circle cx="12" cy="12" r="4" />
-            <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" stroke="none" />
-          </svg>
-          inertia.dev
-        </a>
-      </footer>
 
     </main>
   );
