@@ -10,261 +10,292 @@ const EFFECTIVE = "May 1, 2026";
 
 /* ── Sketches ─────────────────────────────────────────────────────── */
 
-// Before we start — two hands meeting, clean line art
+// Two hands clasping — side profile, fingers interlocked
 function SketchHandshake() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--blue))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Left forearm */}
-      <line x1="14" y1="100" x2="72" y2="68" stroke={m} strokeWidth="2.5" opacity="0.5" />
+      <path d="M 10 118 L 58 88 L 72 82" stroke={m} strokeWidth="3" opacity="0.45" />
       {/* Right forearm */}
-      <line x1="186" y1="100" x2="128" y2="68" stroke={m} strokeWidth="2.5" opacity="0.5" />
-      {/* Left hand knuckles */}
-      <path d="M 72 68 L 78 62 L 84 65 L 88 60 L 94 63 L 98 58 L 100 66" stroke={a} strokeWidth="1.8" opacity="0.75" />
-      {/* Right hand knuckles — mirrored */}
-      <path d="M 128 68 L 122 62 L 116 65 L 112 60 L 106 63 L 102 58 L 100 66" stroke={a} strokeWidth="1.8" opacity="0.75" />
-      {/* Grip join */}
-      <path d="M 72 68 Q 86 76 100 74 Q 114 76 128 68" stroke={a} strokeWidth="2" opacity="0.65" />
-      {/* Wrist cuffs */}
-      <line x1="66" y1="72" x2="78" y2="64" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      <line x1="134" y1="72" x2="122" y2="64" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      {/* Spark above */}
-      <line x1="100" y1="52" x2="100" y2="42" stroke={a} strokeWidth="1.5" opacity="0.7" />
-      <line x1="91" y1="55" x2="84" y2="47" stroke={a} strokeWidth="1.2" opacity="0.55" />
-      <line x1="109" y1="55" x2="116" y2="47" stroke={a} strokeWidth="1.2" opacity="0.55" />
-      <line x1="87" y1="46" x2="95" y2="44" stroke={a} strokeWidth="1" opacity="0.4" />
-      <line x1="113" y1="46" x2="105" y2="44" stroke={a} strokeWidth="1" opacity="0.4" />
+      <path d="M 210 118 L 162 88 L 148 82" stroke={m} strokeWidth="3" opacity="0.45" />
+      {/* Left palm */}
+      <path d="M 72 82 L 76 96 L 84 100 L 110 96" stroke={m} strokeWidth="2" opacity="0.4" />
+      {/* Right palm */}
+      <path d="M 148 82 L 144 96 L 136 100 L 110 96" stroke={m} strokeWidth="2" opacity="0.4" />
+      {/* Left fingers — 4 fingers extending right */}
+      <path d="M 84 80 L 96 68 L 100 72" stroke={a} strokeWidth="2" opacity="0.7" />
+      <path d="M 90 76 L 104 62 L 108 67" stroke={a} strokeWidth="2" opacity="0.7" />
+      <path d="M 96 74 L 112 60 L 115 65" stroke={a} strokeWidth="2" opacity="0.7" />
+      <path d="M 100 76 L 116 64 L 118 70" stroke={a} strokeWidth="2" opacity="0.65" />
+      {/* Right fingers — 4 fingers extending left, interlocking */}
+      <path d="M 136 80 L 124 68 L 120 72" stroke={a} strokeWidth="2" opacity="0.7" />
+      <path d="M 130 76 L 116 62 L 112 67" stroke={a} strokeWidth="2" opacity="0.7" />
+      <path d="M 124 74 L 108 60 L 105 65" stroke={a} strokeWidth="2" opacity="0.7" />
+      <path d="M 120 76 L 104 64 L 102 70" stroke={a} strokeWidth="2" opacity="0.65" />
+      {/* Grip band */}
+      <path d="M 72 88 Q 110 78 148 88" stroke={a} strokeWidth="2.5" opacity="0.6" />
+      {/* Agreement sparks */}
+      <line x1="110" y1="52" x2="110" y2="38" stroke={a} strokeWidth="1.8" opacity="0.75" />
+      <line x1="98" y1="56" x2="88" y2="44" stroke={a} strokeWidth="1.5" opacity="0.6" />
+      <line x1="122" y1="56" x2="132" y2="44" stroke={a} strokeWidth="1.5" opacity="0.6" />
+      <line x1="93" y1="42" x2="103" y2="40" stroke={a} strokeWidth="1.2" opacity="0.4" />
+      <line x1="127" y1="42" x2="117" y2="40" stroke={a} strokeWidth="1.2" opacity="0.4" />
+      {/* Ground */}
+      <line x1="20" y1="128" x2="200" y2="128" stroke={m} strokeWidth="0.8" opacity="0.2" />
     </svg>
   );
 }
 
-// Ownership — document with "YOURS" label, key transferring
+// Document with a wax seal transferring to a person icon
 function SketchOwnership() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--purple))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Document body */}
-      <rect x="30" y="10" width="80" height="100" rx="3" stroke={m} strokeWidth="1.5" opacity="0.5" />
-      {/* Dog-ear fold */}
-      <polyline points="90,10 110,10 110,30 90,10" stroke={m} strokeWidth="1.2" opacity="0.4" />
-      {/* Text lines */}
-      <line x1="44" y1="40" x2="96" y2="40" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      <line x1="44" y1="52" x2="96" y2="52" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      <line x1="44" y1="64" x2="80" y2="64" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      {/* Ownership stamp circle */}
-      <circle cx="65" cy="90" r="16" stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.07" />
-      {/* Tick inside stamp */}
-      <polyline points="56,90 62,97 76,82" stroke={a} strokeWidth="2.2" opacity="0.8" />
-      {/* Arrow transferring to owner */}
-      <line x1="118" y1="60" x2="158" y2="60" stroke={a} strokeWidth="1.5" opacity="0.65" strokeDasharray="4 3" />
-      <polyline points="152,53 160,60 152,67" stroke={a} strokeWidth="1.8" opacity="0.7" />
-      {/* Owner box */}
-      <rect x="162" y="46" width="28" height="28" rx="2" stroke={a} strokeWidth="1.4" opacity="0.55" fill={a} fillOpacity="0.06" />
-      <line x1="168" y1="57" x2="184" y2="57" stroke={a} strokeWidth="1.1" opacity="0.5" />
-      <line x1="168" y1="63" x2="178" y2="63" stroke={a} strokeWidth="1" opacity="0.4" />
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Document */}
+      <rect x="18" y="12" width="84" height="108" rx="3" stroke={m} strokeWidth="1.8" opacity="0.5" />
+      {/* Dog-ear */}
+      <polyline points="82,12 102,12 102,32 82,12" stroke={m} strokeWidth="1.4" opacity="0.4" />
+      {/* Title line */}
+      <line x1="30" y1="44" x2="90" y2="44" stroke={m} strokeWidth="1.8" opacity="0.4" />
+      {/* Body lines */}
+      <line x1="30" y1="56" x2="90" y2="56" stroke={m} strokeWidth="1.2" opacity="0.3" />
+      <line x1="30" y1="66" x2="90" y2="66" stroke={m} strokeWidth="1.2" opacity="0.3" />
+      <line x1="30" y1="76" x2="74" y2="76" stroke={m} strokeWidth="1.2" opacity="0.25" />
+      {/* Wax seal */}
+      <circle cx="58" cy="102" r="18" stroke={a} strokeWidth="2" opacity="0.7" fill={a} fillOpacity="0.08" />
+      <circle cx="58" cy="102" r="13" stroke={a} strokeWidth="1" opacity="0.4" />
+      {/* Check in seal */}
+      <polyline points="48,102 55,110 70,93" stroke={a} strokeWidth="2.5" opacity="0.85" />
+      {/* Transfer arrow */}
+      <line x1="112" y1="72" x2="156" y2="72" stroke={a} strokeWidth="1.8" opacity="0.6" strokeDasharray="5 3" />
+      <polyline points="149,64 158,72 149,80" stroke={a} strokeWidth="2" opacity="0.7" />
+      {/* Person / recipient */}
+      <circle cx="180" cy="48" r="14" stroke={a} strokeWidth="1.8" opacity="0.65" fill={a} fillOpacity="0.06" />
+      <path d="M 156 100 Q 156 78 180 78 Q 204 78 204 100" stroke={a} strokeWidth="1.8" opacity="0.6" />
+      {/* "YOURS" underlining the person */}
+      <line x1="158" y1="108" x2="202" y2="108" stroke={a} strokeWidth="1.4" opacity="0.45" />
     </svg>
   );
 }
 
-// Payment — invoice split cleanly 50/50 with a coin
+// Invoice card — two clear columns: deposit paid, balance pending
 function SketchPayment() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--green))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Invoice card */}
-      <rect x="20" y="16" width="160" height="88" rx="3" stroke={m} strokeWidth="1.4" opacity="0.4" />
-      {/* Header stripe */}
-      <rect x="20" y="16" width="160" height="20" rx="3" stroke="none" fill={a} fillOpacity="0.1" />
-      <line x1="20" y1="36" x2="180" y2="36" stroke={a} strokeWidth="1.2" opacity="0.45" />
-      {/* Header text line */}
-      <line x1="32" y1="27" x2="90" y2="27" stroke={a} strokeWidth="1.4" opacity="0.55" />
-      {/* 50% divider */}
-      <line x1="100" y1="36" x2="100" y2="104" stroke={m} strokeWidth="1" strokeDasharray="4 3" opacity="0.3" />
-      {/* Left half — paid */}
-      <rect x="20" y="36" width="80" height="68" rx="0" fill={a} fillOpacity="0.06" stroke="none" />
-      {/* Left label lines */}
-      <line x1="32" y1="54" x2="88" y2="54" stroke={a} strokeWidth="1.2" opacity="0.5" />
-      <line x1="32" y1="64" x2="76" y2="64" stroke={a} strokeWidth="1" opacity="0.4" />
-      {/* Checkmark left */}
-      <polyline points="36,82 42,89 56,74" stroke={a} strokeWidth="2" opacity="0.75" />
-      {/* Right label lines */}
-      <line x1="110" y1="54" x2="170" y2="54" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      <line x1="110" y1="64" x2="158" y2="64" stroke={m} strokeWidth="1" opacity="0.25" />
-      {/* Right half indicator — dashed */}
-      <line x1="110" y1="82" x2="170" y2="82" stroke={m} strokeWidth="1" strokeDasharray="3 3" opacity="0.3" />
-      {/* 50 / 50 labels */}
-      <line x1="32" y1="98" x2="60" y2="98" stroke={a} strokeWidth="1.2" opacity="0.45" />
-      <line x1="110" y1="98" x2="138" y2="98" stroke={m} strokeWidth="1.2" opacity="0.25" />
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Card */}
+      <rect x="14" y="16" width="192" height="108" rx="4" stroke={m} strokeWidth="1.6" opacity="0.4" />
+      {/* Header */}
+      <rect x="14" y="16" width="192" height="26" rx="4" fill={a} fillOpacity="0.08" stroke="none" />
+      <line x1="14" y1="42" x2="206" y2="42" stroke={a} strokeWidth="1.4" opacity="0.45" />
+      <line x1="28" y1="30" x2="100" y2="30" stroke={a} strokeWidth="1.6" opacity="0.55" />
+      {/* Vertical divider */}
+      <line x1="110" y1="42" x2="110" y2="124" stroke={m} strokeWidth="1" strokeDasharray="4 3" opacity="0.35" />
+      {/* Left col — deposit paid */}
+      <rect x="14" y="42" width="96" height="82" rx="0" fill={a} fillOpacity="0.05" stroke="none" />
+      <line x1="26" y1="60" x2="96" y2="60" stroke={a} strokeWidth="1.4" opacity="0.5" />
+      <line x1="26" y1="71" x2="82" y2="71" stroke={a} strokeWidth="1.1" opacity="0.4" />
+      {/* Big checkmark left */}
+      <polyline points="30,96 42,108 70,82" stroke={a} strokeWidth="2.8" opacity="0.8" />
+      {/* Left label */}
+      <line x1="26" y1="118" x2="66" y2="118" stroke={a} strokeWidth="1.2" opacity="0.45" />
+      {/* Right col — balance due */}
+      <line x1="122" y1="60" x2="196" y2="60" stroke={m} strokeWidth="1.4" opacity="0.3" />
+      <line x1="122" y1="71" x2="176" y2="71" stroke={m} strokeWidth="1.1" opacity="0.25" />
+      {/* Clock / pending icon */}
+      <circle cx="159" cy="97" r="14" stroke={m} strokeWidth="1.6" opacity="0.4" />
+      <line x1="159" y1="87" x2="159" y2="97" stroke={m} strokeWidth="1.8" opacity="0.45" />
+      <line x1="159" y1="97" x2="168" y2="102" stroke={m} strokeWidth="1.8" opacity="0.45" />
+      {/* Right label */}
+      <line x1="122" y1="118" x2="162" y2="118" stroke={m} strokeWidth="1.2" opacity="0.25" />
     </svg>
   );
 }
 
-// Revisions — document with numbered v1 / v2 marks and a pencil
+// Two document versions, pencil editing the top one, two circled counters
 function SketchRevisions() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--amber))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Background doc v1 */}
-      <rect x="22" y="22" width="80" height="90" rx="2" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      {/* Foreground doc v2 */}
-      <rect x="36" y="12" width="80" height="90" rx="2" stroke={a} strokeWidth="1.6" opacity="0.65" fill={a} fillOpacity="0.04" />
-      {/* Doc lines */}
-      <line x1="50" y1="34" x2="104" y2="34" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      <line x1="50" y1="46" x2="104" y2="46" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      <line x1="50" y1="58" x2="88" y2="58" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      {/* Pencil — rotated 45° */}
-      <rect x="118" y="30" width="10" height="52" rx="2" transform="rotate(-45 118 30)" stroke={a} strokeWidth="1.6" opacity="0.7" fill={a} fillOpacity="0.07" />
-      <polyline points="144,72 152,80 138,82" stroke={a} strokeWidth="1.4" opacity="0.6" />
-      {/* Edit line being drawn */}
-      <line x1="106" y1="68" x2="140" y2="68" stroke={a} strokeWidth="1.4" opacity="0.55" strokeDasharray="4 3" />
-      {/* Round counters */}
-      <circle cx="160" cy="30" r="10" stroke={a} strokeWidth="1.5" opacity="0.65" fill={a} fillOpacity="0.08" />
-      <circle cx="160" cy="56" r="10" stroke={a} strokeWidth="1.5" opacity="0.65" fill={a} fillOpacity="0.08" />
-      {/* 1 inside first circle */}
-      <line x1="160" y1="24" x2="160" y2="36" stroke={a} strokeWidth="1.8" opacity="0.7" />
-      {/* 2 inside second circle — simplified */}
-      <path d="M 154 51 Q 154 48 160 48 Q 166 48 166 53 Q 166 57 154 62 L 166 62" stroke={a} strokeWidth="1.6" opacity="0.7" />
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Doc v1 — behind */}
+      <rect x="14" y="26" width="86" height="104" rx="3" stroke={m} strokeWidth="1.4" opacity="0.3" />
+      {/* Doc v2 — front, accented */}
+      <rect x="30" y="12" width="86" height="104" rx="3" stroke={a} strokeWidth="1.8" opacity="0.65" fill={a} fillOpacity="0.04" />
+      {/* Lines on front doc */}
+      <line x1="44" y1="34" x2="104" y2="34" stroke={m} strokeWidth="1.3" opacity="0.35" />
+      <line x1="44" y1="46" x2="104" y2="46" stroke={m} strokeWidth="1.3" opacity="0.35" />
+      <line x1="44" y1="58" x2="88" y2="58" stroke={m} strokeWidth="1.3" opacity="0.3" />
+      {/* Pencil body — diagonal */}
+      <rect x="104" y="44" width="12" height="52" rx="3"
+        transform="rotate(-42 104 44)"
+        stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.07" />
+      {/* Pencil tip */}
+      <polyline points="138,88 148,100 132,104" stroke={a} strokeWidth="1.6" opacity="0.65" />
+      {/* Line being drawn */}
+      <line x1="80" y1="78" x2="130" y2="78" stroke={a} strokeWidth="1.5" opacity="0.5" strokeDasharray="4 3" />
+      {/* Round 1 badge */}
+      <circle cx="172" cy="36" r="14" stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.08" />
+      {/* "1" */}
+      <line x1="172" y1="27" x2="172" y2="45" stroke={a} strokeWidth="2.2" opacity="0.75" />
+      <line x1="167" y1="31" x2="172" y2="27" stroke={a} strokeWidth="1.6" opacity="0.6" />
+      {/* Round 2 badge */}
+      <circle cx="172" cy="76" r="14" stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.08" />
+      {/* "2" */}
+      <path d="M 164 70 Q 164 66 172 66 Q 180 66 180 72 Q 180 78 164 84 L 180 84"
+        stroke={a} strokeWidth="2" opacity="0.75" />
+      {/* Connector between rounds */}
+      <line x1="172" y1="50" x2="172" y2="62" stroke={a} strokeWidth="1.2" opacity="0.4" strokeDasharray="3 2" />
+      {/* Scope boundary line */}
+      <line x1="14" y1="124" x2="116" y2="124" stroke={a} strokeWidth="1.2" opacity="0.35" strokeDasharray="4 2" />
     </svg>
   );
 }
 
-// After launch — flag planted, 14-day window calendar
+// Planted flag (launched) + 14-cell calendar with bracket
 function SketchLaunch() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--blue))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Ground / horizon */}
-      <line x1="10" y1="96" x2="190" y2="96" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      {/* Flag pole */}
-      <line x1="72" y1="96" x2="72" y2="20" stroke={m} strokeWidth="1.8" opacity="0.55" />
-      {/* Flag */}
-      <path d="M 72 20 L 122 32 L 72 48 Z" stroke={a} strokeWidth="1.5" opacity="0.7" fill={a} fillOpacity="0.1" />
-      {/* Ground bump */}
-      <path d="M 52 96 Q 72 88 92 96" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      {/* Calendar — 14-day window */}
-      <rect x="116" y="30" width="68" height="58" rx="3" stroke={a} strokeWidth="1.5" opacity="0.6" />
-      <line x1="116" y1="46" x2="184" y2="46" stroke={a} strokeWidth="1.2" opacity="0.5" />
-      {/* Calendar header rings */}
-      <line x1="136" y1="26" x2="136" y2="34" stroke={a} strokeWidth="1.8" opacity="0.6" />
-      <line x1="164" y1="26" x2="164" y2="34" stroke={a} strokeWidth="1.8" opacity="0.6" />
-      {/* Calendar cells — 2 rows of 7 */}
-      {[0,1,2,3,4,5,6].map(d => (
-        <rect key={`r1-${d}`} x={120 + d * 9} y={50} width="7" height="7" rx="1"
-          stroke={d < 2 ? a : m} strokeWidth={d < 2 ? 1.2 : 0.8}
-          fill={d < 2 ? a : "none"} fillOpacity="0.2"
-          opacity={d < 2 ? 0.7 : 0.3} />
-      ))}
-      {[0,1,2,3,4,5,6].map(d => (
-        <rect key={`r2-${d}`} x={120 + d * 9} y={62} width="7" height="7" rx="1"
-          stroke={d < 7 ? a : m} strokeWidth={d < 7 ? 1.2 : 0.8}
-          fill={d < 7 ? a : "none"} fillOpacity="0.15"
-          opacity={d < 7 ? 0.65 : 0.3} />
-      ))}
-      {/* "14" label */}
-      <line x1="122" y1="80" x2="178" y2="80" stroke={a} strokeWidth="1" opacity="0.4" strokeDasharray="3 2" />
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Horizon */}
+      <line x1="10" y1="110" x2="210" y2="110" stroke={m} strokeWidth="1.2" opacity="0.3" />
+      {/* Pole */}
+      <line x1="68" y1="110" x2="68" y2="22" stroke={m} strokeWidth="2.2" opacity="0.55" />
+      {/* Flag waving */}
+      <path d="M 68 22 C 96 18 112 28 108 36 C 104 44 88 44 68 46 Z"
+        stroke={a} strokeWidth="1.8" opacity="0.75" fill={a} fillOpacity="0.12" />
+      {/* Ground mound */}
+      <path d="M 44 110 Q 68 100 92 110" stroke={m} strokeWidth="1.4" opacity="0.35" />
+      {/* Calendar frame */}
+      <rect x="108" y="26" width="96" height="76" rx="4" stroke={a} strokeWidth="1.8" opacity="0.65" />
+      {/* Header */}
+      <line x1="108" y1="44" x2="204" y2="44" stroke={a} strokeWidth="1.4" opacity="0.5" />
+      {/* Ring hooks */}
+      <line x1="134" y1="22" x2="134" y2="30" stroke={a} strokeWidth="2.2" opacity="0.65" />
+      <line x1="178" y1="22" x2="178" y2="30" stroke={a} strokeWidth="2.2" opacity="0.65" />
+      {/* Header label line */}
+      <line x1="120" y1="35" x2="160" y2="35" stroke={a} strokeWidth="1.2" opacity="0.4" />
+      {/* 14 cells — 2 rows of 7 */}
+      {Array.from({length: 14}, (_, i) => {
+        const col = i % 7;
+        const row = Math.floor(i / 7);
+        return (
+          <rect key={i}
+            x={113 + col * 13} y={49 + row * 14}
+            width="10" height="10" rx="1.5"
+            stroke={a} strokeWidth={i < 14 ? 1.2 : 0.8}
+            fill={a} fillOpacity={i < 14 ? 0.18 : 0}
+            opacity={0.75 - i * 0.02}
+          />
+        );
+      })}
+      {/* 14-day bracket */}
+      <path d="M 108 102 L 104 102 L 104 110 L 108 110" stroke={a} strokeWidth="1.4" opacity="0.55" />
+      <path d="M 204 102 L 208 102 L 208 110 L 204 110" stroke={a} strokeWidth="1.4" opacity="0.55" />
+      <line x1="104" y1="106" x2="208" y2="106" stroke={a} strokeWidth="1" opacity="0.35" strokeDasharray="3 2" />
     </svg>
   );
 }
 
-// Confidentiality — large padlock, clean and readable
+// Large padlock centered, document lines feeding in, blocked on both sides
 function SketchLock() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--green))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Lock body */}
-      <rect x="58" y="56" width="84" height="58" rx="6" stroke={a} strokeWidth="2" opacity="0.75" fill={a} fillOpacity="0.07" />
-      {/* Shackle — U shape */}
-      <path d="M 76 56 L 76 38 Q 76 18 100 18 Q 124 18 124 38 L 124 56" stroke={a} strokeWidth="2" opacity="0.7" />
+      <rect x="72" y="66" width="76" height="62" rx="8" stroke={a} strokeWidth="2.2" opacity="0.8" fill={a} fillOpacity="0.07" />
+      {/* Shackle — proper U, sitting on top of body */}
+      <path d="M 88 66 L 88 46 Q 88 22 110 22 Q 132 22 132 46 L 132 66"
+        stroke={a} strokeWidth="2.2" opacity="0.75" />
       {/* Keyhole circle */}
-      <circle cx="100" cy="80" r="9" stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.1" />
-      {/* Keyhole stem */}
-      <line x1="100" y1="89" x2="100" y2="101" stroke={a} strokeWidth="2.2" opacity="0.65" />
-      {/* Horizontal key crossbar */}
-      <line x1="95" y1="96" x2="105" y2="96" stroke={a} strokeWidth="2" opacity="0.6" />
-      {/* NDA label lines */}
-      <line x1="20" y1="50" x2="46" y2="50" stroke={m} strokeWidth="1.2" opacity="0.4" />
-      <line x1="20" y1="60" x2="46" y2="60" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      <line x1="20" y1="70" x2="40" y2="70" stroke={m} strokeWidth="1" opacity="0.25" />
-      {/* Lock icon on data */}
-      <line x1="48" y1="44" x2="56" y2="56" stroke={a} strokeWidth="1.4" opacity="0.55" />
-      <line x1="56" y1="44" x2="48" y2="56" stroke={a} strokeWidth="1.4" opacity="0.55" />
-      {/* Right side — same */}
-      <line x1="154" y1="50" x2="180" y2="50" stroke={m} strokeWidth="1.2" opacity="0.4" />
-      <line x1="154" y1="60" x2="180" y2="60" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      <line x1="160" y1="70" x2="180" y2="70" stroke={m} strokeWidth="1" opacity="0.25" />
-      <line x1="144" y1="44" x2="152" y2="56" stroke={a} strokeWidth="1.4" opacity="0.55" />
-      <line x1="152" y1="44" x2="144" y2="56" stroke={a} strokeWidth="1.4" opacity="0.55" />
+      <circle cx="110" cy="90" r="10" stroke={a} strokeWidth="2" opacity="0.75" fill={a} fillOpacity="0.1" />
+      {/* Keyhole teardrop stem */}
+      <path d="M 106 98 L 106 106 L 114 106 L 114 98" stroke={a} strokeWidth="2" opacity="0.65" />
+      {/* Left data lines */}
+      <line x1="12" y1="64" x2="56" y2="64" stroke={m} strokeWidth="1.4" opacity="0.45" />
+      <line x1="12" y1="76" x2="56" y2="76" stroke={m} strokeWidth="1.4" opacity="0.4" />
+      <line x1="12" y1="88" x2="46" y2="88" stroke={m} strokeWidth="1.4" opacity="0.3" />
+      {/* Left barrier */}
+      <line x1="60" y1="56" x2="60" y2="98" stroke={a} strokeWidth="2" opacity="0.6" />
+      <line x1="56" y1="60" x2="64" y2="68" stroke={a} strokeWidth="1.6" opacity="0.5" />
+      <line x1="56" y1="84" x2="64" y2="92" stroke={a} strokeWidth="1.6" opacity="0.5" />
+      {/* Right data lines */}
+      <line x1="164" y1="64" x2="208" y2="64" stroke={m} strokeWidth="1.4" opacity="0.45" />
+      <line x1="164" y1="76" x2="208" y2="76" stroke={m} strokeWidth="1.4" opacity="0.4" />
+      <line x1="174" y1="88" x2="208" y2="88" stroke={m} strokeWidth="1.4" opacity="0.3" />
+      {/* Right barrier */}
+      <line x1="160" y1="56" x2="160" y2="98" stroke={a} strokeWidth="2" opacity="0.6" />
+      <line x1="164" y1="60" x2="156" y2="68" stroke={a} strokeWidth="1.6" opacity="0.5" />
+      <line x1="164" y1="84" x2="156" y2="92" stroke={a} strokeWidth="1.6" opacity="0.5" />
     </svg>
   );
 }
 
-// Liability cap — two bar chart columns, one with a hard ceiling
+// Two bar chart columns — left tall/unbounded, right shorter with hard cap line
 function SketchCap() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--amber))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Baseline */}
-      <line x1="20" y1="100" x2="180" y2="100" stroke={m} strokeWidth="1.4" opacity="0.4" />
-      {/* Left bar — uncapped, tall, faded */}
-      <rect x="40" y="20" width="44" height="80" rx="2" stroke={m} strokeWidth="1.4" opacity="0.35" fill={m} fillOpacity="0.06" />
-      {/* Arrow continuing above — unbounded */}
-      <line x1="62" y1="20" x2="62" y2="10" stroke={m} strokeWidth="1.2" opacity="0.3" strokeDasharray="3 2" />
-      <polyline points="57,14 62,8 67,14" stroke={m} strokeWidth="1.2" opacity="0.3" />
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Axis */}
+      <line x1="28" y1="116" x2="196" y2="116" stroke={m} strokeWidth="1.6" opacity="0.4" />
+      <line x1="28" y1="20" x2="28" y2="116" stroke={m} strokeWidth="1.2" opacity="0.3" />
+      {/* Left bar — uncapped, tall */}
+      <rect x="48" y="22" width="52" height="94" rx="3" stroke={m} strokeWidth="1.6" opacity="0.4" fill={m} fillOpacity="0.07" />
+      {/* Unbounded arrow up */}
+      <line x1="74" y1="22" x2="74" y2="10" stroke={m} strokeWidth="1.4" opacity="0.35" strokeDasharray="3 2" />
+      <polyline points="68,16 74,8 80,16" stroke={m} strokeWidth="1.4" opacity="0.35" />
+      {/* Left label */}
+      <line x1="42" y1="124" x2="106" y2="124" stroke={m} strokeWidth="1.1" opacity="0.3" />
       {/* Right bar — capped */}
-      <rect x="116" y="50" width="44" height="50" rx="2" stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.08" />
-      {/* Cap line — horizontal ceiling */}
-      <line x1="108" y1="50" x2="168" y2="50" stroke={a} strokeWidth="2.5" opacity="0.8" />
-      {/* Cap tick marks */}
-      <line x1="108" y1="44" x2="108" y2="56" stroke={a} strokeWidth="1.8" opacity="0.7" />
-      <line x1="168" y1="44" x2="168" y2="56" stroke={a} strokeWidth="1.8" opacity="0.7" />
-      {/* Arrow stopped by cap */}
-      <line x1="138" y1="10" x2="138" y2="48" stroke={a} strokeWidth="1.4" opacity="0.55" strokeDasharray="4 3" />
-      <line x1="130" y1="20" x2="138" y2="10" stroke={a} strokeWidth="1.2" opacity="0.45" />
-      <line x1="146" y1="20" x2="138" y2="10" stroke={a} strokeWidth="1.2" opacity="0.45" />
-      {/* Column labels */}
-      <line x1="36" y1="108" x2="88" y2="108" stroke={m} strokeWidth="1" opacity="0.25" />
-      <line x1="112" y1="108" x2="164" y2="108" stroke={a} strokeWidth="1.2" opacity="0.45" />
+      <rect x="124" y="58" width="52" height="58" rx="3" stroke={a} strokeWidth="2" opacity="0.75" fill={a} fillOpacity="0.09" />
+      {/* Cap line — thick horizontal */}
+      <line x1="114" y1="58" x2="186" y2="58" stroke={a} strokeWidth="3" opacity="0.85" />
+      {/* Cap end ticks */}
+      <line x1="114" y1="50" x2="114" y2="66" stroke={a} strokeWidth="2" opacity="0.75" />
+      <line x1="186" y1="50" x2="186" y2="66" stroke={a} strokeWidth="2" opacity="0.75" />
+      {/* Arrow coming down, stopped by cap */}
+      <line x1="150" y1="8" x2="150" y2="54" stroke={a} strokeWidth="1.6" opacity="0.55" strokeDasharray="4 3" />
+      <polyline points="143,18 150,8 157,18" stroke={a} strokeWidth="1.6" opacity="0.55" />
+      {/* Stop symbol on cap */}
+      <line x1="144" y1="52" x2="156" y2="52" stroke={a} strokeWidth="2.5" opacity="0.7" />
+      {/* Right label */}
+      <line x1="118" y1="124" x2="182" y2="124" stroke={a} strokeWidth="1.2" opacity="0.45" />
     </svg>
   );
 }
 
-// Disputes — two speech bubbles + a bridge/handoff between them
+// Two speech bubbles pointing at each other, handshake resolution below
 function SketchMediation() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--blue))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Left speech bubble */}
-      <path d="M 10 14 Q 10 8 16 8 L 74 8 Q 80 8 80 14 L 80 44 Q 80 50 74 50 L 36 50 L 24 62 L 28 50 L 16 50 Q 10 50 10 44 Z"
-        stroke={m} strokeWidth="1.5" opacity="0.5" fill={m} fillOpacity="0.04" />
-      {/* Left bubble lines */}
-      <line x1="22" y1="22" x2="68" y2="22" stroke={m} strokeWidth="1.1" opacity="0.4" />
-      <line x1="22" y1="32" x2="68" y2="32" stroke={m} strokeWidth="1.1" opacity="0.4" />
-      <line x1="22" y1="42" x2="52" y2="42" stroke={m} strokeWidth="1.1" opacity="0.35" />
-      {/* Right speech bubble — accent */}
-      <path d="M 120 14 Q 120 8 126 8 L 184 8 Q 190 8 190 14 L 190 44 Q 190 50 184 50 L 172 50 L 176 62 L 164 50 L 126 50 Q 120 50 120 44 Z"
-        stroke={a} strokeWidth="1.6" opacity="0.65" fill={a} fillOpacity="0.06" />
-      {/* Right bubble lines */}
-      <line x1="132" y1="22" x2="178" y2="22" stroke={a} strokeWidth="1.1" opacity="0.5" />
-      <line x1="132" y1="32" x2="178" y2="32" stroke={a} strokeWidth="1.1" opacity="0.5" />
-      <line x1="132" y1="42" x2="162" y2="42" stroke={a} strokeWidth="1.1" opacity="0.45" />
-      {/* Bridge / resolution line */}
-      <line x1="80" y1="85" x2="120" y2="85" stroke={a} strokeWidth="2" opacity="0.6" />
-      <circle cx="100" cy="85" r="6" stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.12" />
-      {/* Connector from bubbles to bridge */}
-      <line x1="45" y1="62" x2="45" y2="80" stroke={m} strokeWidth="1.2" opacity="0.3" strokeDasharray="3 3" />
-      <line x1="45" y1="80" x2="80" y2="85" stroke={m} strokeWidth="1.2" opacity="0.3" strokeDasharray="3 3" />
-      <line x1="155" y1="62" x2="155" y2="80" stroke={m} strokeWidth="1.2" opacity="0.3" strokeDasharray="3 3" />
-      <line x1="155" y1="80" x2="120" y2="85" stroke={m} strokeWidth="1.2" opacity="0.3" strokeDasharray="3 3" />
-      {/* Resolution tick */}
-      <polyline points="94,85 98,90 108,79" stroke={a} strokeWidth="2" opacity="0.8" />
+    <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Left bubble */}
+      <path d="M 8 10 Q 8 4 14 4 L 84 4 Q 90 4 90 10 L 90 48 Q 90 54 84 54 L 42 54 L 28 68 L 32 54 L 14 54 Q 8 54 8 48 Z"
+        stroke={m} strokeWidth="1.6" opacity="0.5" fill={m} fillOpacity="0.04" />
+      <line x1="20" y1="20" x2="78" y2="20" stroke={m} strokeWidth="1.2" opacity="0.4" />
+      <line x1="20" y1="32" x2="78" y2="32" stroke={m} strokeWidth="1.2" opacity="0.4" />
+      <line x1="20" y1="44" x2="56" y2="44" stroke={m} strokeWidth="1.2" opacity="0.35" />
+      {/* Right bubble — accent, facing left (tail on left) */}
+      <path d="M 130 10 Q 130 4 136 4 L 206 4 Q 212 4 212 10 L 212 48 Q 212 54 206 54 L 188 54 L 192 68 L 178 54 L 136 54 Q 130 54 130 48 Z"
+        stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.06" />
+      <line x1="142" y1="20" x2="200" y2="20" stroke={a} strokeWidth="1.2" opacity="0.5" />
+      <line x1="142" y1="32" x2="200" y2="32" stroke={a} strokeWidth="1.2" opacity="0.5" />
+      <line x1="142" y1="44" x2="176" y2="44" stroke={a} strokeWidth="1.2" opacity="0.45" />
+      {/* Dashed lines converging to resolution */}
+      <line x1="48" y1="68" x2="90" y2="98" stroke={m} strokeWidth="1.2" opacity="0.3" strokeDasharray="4 3" />
+      <line x1="172" y1="68" x2="130" y2="98" stroke={m} strokeWidth="1.2" opacity="0.3" strokeDasharray="4 3" />
+      {/* Resolution handshake circle */}
+      <circle cx="110" cy="108" r="20" stroke={a} strokeWidth="2" opacity="0.65" fill={a} fillOpacity="0.07" />
+      {/* Checkmark inside */}
+      <polyline points="100,108 107,116 122,100" stroke={a} strokeWidth="2.5" opacity="0.85" />
     </svg>
   );
 }
@@ -289,6 +320,9 @@ const SECTIONS: Section[] = [
           This page covers how Inertia operates: what you own, what we retain, how payment works, and what happens when things go sideways. It&apos;s written to be read, not skimmed by lawyers.
         </p>
         <p>
+          Most projects run without ever needing to reference this. We&apos;re a small studio and we have a genuine interest in doing right by the people we work with. But clear terms protect both sides, and ambiguity tends to create problems that goodwill alone can&apos;t fix.
+        </p>
+        <p>
           By engaging Inertia for any paid work, you agree to the terms below. If something here doesn&apos;t work for your situation, raise it before we start. Not after.
         </p>
       </>
@@ -301,13 +335,13 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          When you pay in full, you own the final deliverable. That includes code, design files, and written content produced specifically for your project.
+          When you pay in full, you own the final deliverable. That includes code, design files, copy, and any other material produced specifically for your project. It&apos;s yours to use, modify, and build on however you like.
         </p>
         <p>
-          We retain ownership of anything we built before your project started: frameworks, base components, tooling, internal libraries, and unreleased work. If we use those as a starting point (which we often do, it&apos;s why we&apos;re fast), you get a perpetual licence to use them inside your project, but you don&apos;t own them outright.
+          We retain ownership of anything that existed before your project started: base themes, component libraries, tooling, build systems, and internal frameworks. If we use those as a foundation (which we often do, and it&apos;s a large part of why we&apos;re fast), you receive a perpetual, irrevocable licence to use them within your project. You can&apos;t sell them separately or claim ownership over the underlying code, but you&apos;ll never be restricted from using what we built for you.
         </p>
         <p>
-          We reserve the right to show the work in our portfolio unless you explicitly ask otherwise before signing. We will never publish anything marked confidential, share source code, or reveal your business details.
+          We reserve the right to include finished work in our portfolio unless you ask us not to before we sign. We will never show anything marked confidential, share access credentials, publish source code, or disclose details about your business.
         </p>
       </>
     ),
@@ -319,13 +353,13 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          All projects require a 50% deposit before work begins. The remaining 50% is due before final files are handed over or a site goes live, whichever comes first.
+          All projects are split 50/50. Half is due before we start. The other half is due before the site goes live or final files are delivered, whichever comes first. Work does not begin until the deposit clears.
         </p>
         <p>
-          Invoices are due within 7 days of issue. Late payments accrue a 1.5% monthly fee after 14 days. If payment is more than 30 days overdue, we reserve the right to pause or terminate the project without refund of work already completed.
+          Invoices are payable within 7 days. After 14 days, a 1.5% monthly late fee applies to the outstanding balance. If an invoice goes unpaid past 30 days, we reserve the right to pause work, pull deliverables from staging, or terminate the project entirely. Work completed to that point is still owed at our standard rate.
         </p>
         <p>
-          Deposits are non-refundable once work has begun. If you cancel after we&apos;ve started, you owe for all work completed to that point, billed at our standard rate.
+          Deposits are non-refundable once we&apos;ve started. If you cancel mid-project, you owe for all work completed to date. We won&apos;t charge for work that wasn&apos;t done, but we will charge for work that was.
         </p>
       </>
     ),
@@ -337,13 +371,13 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Every project includes two rounds of revisions. A revision is a change to something already built within the original brief. Not a new feature, a change of direction, or a design overhaul.
+          Every project includes two rounds of revisions against the original brief. A revision means changing something we built. It does not mean adding a new feature, changing the design concept, or rebuilding a section from scratch. If you&apos;re not sure whether something counts as a revision, ask before assuming it&apos;s included.
         </p>
         <p>
-          Additional revisions are billed at our current hourly rate. Scope changes (work outside the original agreement) require a new estimate and written sign-off before we proceed.
+          Additional revision rounds are billed at our hourly rate. Scope changes — anything outside what was agreed in the brief — require a new written estimate and your sign-off before we proceed. We won&apos;t silently absorb extra work and present a surprise invoice later.
         </p>
         <p>
-          If a project stalls on your end for more than 30 days without communication, we reserve the right to close it out and bill for completed work. Re-opening a stalled project is treated as a new engagement.
+          If a project goes quiet on your end for more than 30 consecutive days without a scheduled pause agreed in advance, we treat it as stalled. We&apos;ll invoice for completed work and close the project out. Re-engaging after that point is a new engagement, and our availability isn&apos;t guaranteed.
         </p>
       </>
     ),
@@ -355,10 +389,13 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Once a project is handed over, ongoing support is not included unless we&apos;ve agreed to a retainer. We offer a 14-day correction window for bugs that are clearly our fault: things that were supposed to work and don&apos;t. This does not cover new requests, platform updates, or changes made by your team after handover.
+          Handover means the project is complete. Ongoing support, updates, and changes are not included unless we&apos;ve agreed to a separate retainer. We don&apos;t disappear after launch, but continued work is continued work and it gets scoped and priced accordingly.
         </p>
         <p>
-          Theme purchases (Aether and any future releases) include updates for the version purchased. Major version upgrades may be offered at a reduced rate for existing customers.
+          We offer a 14-day correction window after handover. If something we built doesn&apos;t work the way it was supposed to, we&apos;ll fix it at no charge. This window covers genuine bugs: things that were specified and built incorrectly. It does not cover new feature requests, Shopify platform updates, browser changes, or modifications made by your team after you took ownership.
+        </p>
+        <p>
+          Theme purchases include updates for the version you purchased. We&apos;ll notify existing customers of major upgrades and offer a discounted upgrade path where we can.
         </p>
       </>
     ),
@@ -370,10 +407,13 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Anything you share with us (business plans, unreleased products, financials, customer data) stays between us. We don&apos;t discuss client work publicly, share access credentials with third parties, or use your information for anything outside the scope of your project.
+          Everything you share with us stays with us. Business plans, product roadmaps, financials, customer data, unreleased work — none of it gets discussed outside the project, shared with third parties, or used for anything other than the work you hired us to do.
         </p>
         <p>
-          If your project requires an NDA, send one over before we begin. We&apos;re generally fine signing reasonable NDAs.
+          We use professional tooling and don&apos;t store client credentials beyond what&apos;s needed to complete the work. Access is revoked on handover unless you instruct otherwise.
+        </p>
+        <p>
+          If your project requires a formal NDA, send it over before we begin. We sign reasonable NDAs without issue.
         </p>
       </>
     ),
@@ -385,10 +425,13 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          We build things carefully and stand behind our work. But we cannot be held liable for lost revenue, missed opportunities, or downstream business impacts resulting from a delay, bug, or change in direction.
+          We build carefully and stand behind our work. If we make a mistake, we want to know and we want to fix it. But there are limits to what we can reasonably be held responsible for.
         </p>
         <p>
-          Our total liability for any claim related to a project is capped at the amount you paid us for that project. We are not liable for issues caused by third-party platforms (Shopify, hosting providers, payment processors), your team&apos;s modifications, or circumstances outside our control.
+          Our total liability for any claim arising from a project is capped at the total amount you paid us for that project. We are not liable for lost revenue, lost customers, missed launches, reputational harm, or any other downstream business impact — even if a bug or delay was on our end.
+        </p>
+        <p>
+          We are also not liable for issues caused by third-party platforms (Shopify, payment processors, hosting providers, CDNs), changes to those platforms after handover, or modifications made by your team to code we delivered. Once you or someone you authorise touches the codebase, that portion is outside our warranty.
         </p>
       </>
     ),
@@ -400,10 +443,13 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          If something goes wrong, talk to us first. Most issues get resolved in a single conversation. We&apos;re a small studio and we have a genuine interest in making things right.
+          If something goes wrong, message us first. We&apos;re a small studio and most issues resolve in a single conversation. We don&apos;t have a legal team waiting to fire back — we have a genuine interest in making things right and keeping the relationship intact where possible.
         </p>
         <p>
-          If a dispute can&apos;t be resolved directly, it will be handled under the laws of Illinois, United States. Both parties agree to attempt mediation before pursuing legal action.
+          If a dispute can&apos;t be resolved between us directly, both parties agree to attempt mediation before pursuing any legal action. Formal proceedings, if it comes to that, will be governed by the laws of Illinois, United States.
+        </p>
+        <p>
+          We&apos;ve never had a dispute reach that stage and we intend to keep it that way.
         </p>
       </>
     ),
@@ -430,7 +476,7 @@ export default function LegalPage() {
 
       {/* Header */}
       <div className="px-8 pt-12 pb-10">
-        <p className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-50 mb-4">Legal</p>
+        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-4">Legal</p>
         <h1 className="text-[clamp(2rem,5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] mb-4">
           Terms of engagement.
         </h1>
@@ -447,7 +493,7 @@ export default function LegalPage() {
       {/* Body */}
       <div className="flex flex-col sm:flex-row">
 
-        {/* TOC — desktop sticky sidebar */}
+        {/* TOC sidebar */}
         <aside className="hidden sm:flex sm:w-56 shrink-0 flex-col gap-1 px-8 pt-10 sticky top-8 self-start">
           {SECTIONS.map((s) => (
             <a
@@ -467,17 +513,14 @@ export default function LegalPage() {
           {SECTIONS.map((s, i) => (
             <div key={s.id}>
               <section id={s.id} className="px-8 sm:px-12 py-10">
-                <h2 className="text-[11px] font-medium tracking-widest uppercase text-[rgb(var(--muted))] opacity-50 mb-7">
+                <h2 className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] mb-7">
                   {s.title}
                 </h2>
-                {/* Sketch + text side by side on desktop, stacked on mobile */}
-                <div className="flex flex-col sm:flex-row gap-8 sm:gap-10 items-start">
-                  {/* Sketch */}
-                  <div className="w-full sm:w-[180px] shrink-0 opacity-80">
+                <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 items-start">
+                  <div className="w-full sm:w-[200px] shrink-0">
                     {s.sketch}
                   </div>
-                  {/* Text */}
-                  <div className="flex-1 space-y-4 text-[15px] tracking-tight leading-[1.8] text-[rgb(var(--fg))] [&_p]:text-[rgb(var(--fg))]">
+                  <div className="flex-1 space-y-4 text-[15px] tracking-tight leading-[1.8] text-[rgb(var(--muted))] [&_p]:text-[rgb(var(--muted))]">
                     {s.body}
                   </div>
                 </div>
