@@ -379,27 +379,42 @@ const IconWhop = () => (
   </svg>
 );
 
-const TECH = [
+const TECH_ROW1 = [
   { name: "Shopify",    icon: SiShopify },
   { name: "React",      icon: SiReact },
   { name: "TypeScript", icon: SiTypescript },
   { name: "Tailwind",   icon: SiTailwindcss },
   { name: "Figma",      icon: SiFigma },
+];
+const TECH_ROW2 = [
   { name: "Photoshop",  icon: IconPhotoshop },
   { name: "Swift",      icon: SiSwift },
   { name: "Whop",       icon: IconWhop },
   { name: "Meta",       icon: SiMeta },
+  { name: "Substack",   icon: SiSubstack },
+  { name: "Dribbble",   icon: SiDribbble },
 ];
 
 function TechMarquee() {
-  const items = [...TECH, ...TECH];
+  const r1 = [...TECH_ROW1, ...TECH_ROW1, ...TECH_ROW1];
+  const r2 = [...TECH_ROW2, ...TECH_ROW2, ...TECH_ROW2];
   return (
-    <div className="overflow-hidden py-5" aria-hidden="true">
-      <div className="marquee-track">
-        {items.map((tech, i) => (
-          <div key={i} className="flex items-center gap-1.5 px-8 text-[rgb(var(--muted))] opacity-30 hover:opacity-70 transition-opacity duration-300">
-            <tech.icon className="w-5 h-5 shrink-0" />
-            <span className="text-[13px] tracking-tight font-medium whitespace-nowrap">{tech.name}</span>
+    <div className="overflow-hidden py-4 select-none" aria-hidden="true">
+      {/* Row 1 — scrolls left, closer / brighter */}
+      <div className="marquee-row marquee-row--fwd mb-3">
+        {r1.map((tech, i) => (
+          <div key={i} className="marquee-item">
+            <tech.icon />
+            <span>{tech.name}</span>
+          </div>
+        ))}
+      </div>
+      {/* Row 2 — scrolls right, farther / dimmer */}
+      <div className="marquee-row marquee-row--rev">
+        {r2.map((tech, i) => (
+          <div key={i} className="marquee-item marquee-item--far">
+            <tech.icon />
+            <span>{tech.name}</span>
           </div>
         ))}
       </div>
@@ -430,9 +445,9 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <div className="flex items-center justify-center gap-3 py-6">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">What we're actively</span>
             <TooltipPill tip="Products and themes we're currently developing under the Inertia name.">
-              <div className="flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3.5 py-2 cursor-default">
-                <SiShopify className="w-4 h-4 text-[rgb(var(--fg))]" />
-                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">building</span>
+              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--blue)/0.08)", border: "1px solid rgb(var(--blue)/0.25)" }}>
+                <SiShopify className="w-4 h-4" style={{ color: "rgb(var(--blue))" }} />
+                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--blue))" }}>building</span>
               </div>
             </TooltipPill>
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">right now</span>
@@ -486,9 +501,9 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
             <div className="flex items-center justify-center gap-3">
               <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">How we</span>
               <TooltipPill tip="Short posts on design, development, and the decisions behind what we build.">
-                <div className="flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3.5 py-2 cursor-default">
-                  <SiSubstack className="w-4 h-4 text-[rgb(var(--fg))]" />
-                  <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">think</span>
+                <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--amber)/0.08)", border: "1px solid rgb(var(--amber)/0.25)" }}>
+                  <SiSubstack className="w-4 h-4" style={{ color: "rgb(var(--amber))" }} />
+                  <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--amber))" }}>think</span>
                 </div>
               </TooltipPill>
               <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">about the craft</span>
@@ -502,19 +517,13 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
             <p className="px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing yet.</p>
           ) : (
             <div className="grid grid-cols-2">
-              {posts.slice(0, 4).map((post, i, arr) => {
-                const isLastOdd = i === arr.length - 1 && arr.length % 2 !== 0;
-                return (
+              {posts.slice(0, 4).map((post, i) => (
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
                   className={[
                     "group flex flex-col justify-between gap-4 px-5 sm:px-6 pt-6 pb-5 transition-colors hover:bg-[rgb(var(--line))/0.15]",
-                    // last odd item spans full width on desktop
-                    isLastOdd ? "sm:col-span-2" : "",
-                    // right border: only left-column cells that are not spanning full width
-                    !isLastOdd && i % 2 === 0 ? "border-r border-[rgb(var(--line))]" : "",
-                    // bottom border on top-row cells
+                    i % 2 === 0 ? "border-r border-[rgb(var(--line))]" : "",
                     i < 2 ? "border-b border-[rgb(var(--line))]" : "",
                   ].filter(Boolean).join(" ")}
                 >
@@ -537,8 +546,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                     </svg>
                   </div>
                 </Link>
-                );
-              })}
+              ))}
             </div>
           )}
 
@@ -556,9 +564,9 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <div className="flex items-center justify-center gap-3">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
             <TooltipPill tip="Selected client work spanning Shopify builds, brand identities, and custom web projects.">
-              <div className="flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3.5 py-2 cursor-default">
-                <SiDribbble className="w-4 h-4 text-[rgb(var(--fg))]" />
-                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">shipped</span>
+              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--green)/0.08)", border: "1px solid rgb(var(--green)/0.25)" }}>
+                <SiDribbble className="w-4 h-4" style={{ color: "rgb(var(--green))" }} />
+                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--green))" }}>shipped</span>
               </div>
             </TooltipPill>
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>

@@ -37,6 +37,32 @@ html {
   overscroll-behavior: none;
 }
 
+/* Theme crossfade via View Transitions API */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+  animation-timing-function: ease;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation-name: theme-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: theme-fade-in;
+}
+
+@keyframes theme-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes theme-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* Noise texture removed */
 
 html,
@@ -1384,23 +1410,70 @@ h1:hover .redact > span.redact-inner,
 
 /* ── Tech marquee ────────────────────────────────────────────────── */
 
-.marquee-track {
+.marquee-row {
   display: flex;
   width: max-content;
-  animation: marquee 28s linear infinite;
 }
 
-.marquee-track:hover {
+.marquee-row--fwd {
+  animation: marquee-fwd 32s linear infinite;
+}
+
+.marquee-row--rev {
+  animation: marquee-rev 42s linear infinite;
+}
+
+.marquee-row:hover {
   animation-play-state: paused;
 }
 
-@keyframes marquee {
+.marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 30px;
+  color: rgb(var(--muted));
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  opacity: 0.28;
+  transition: opacity 0.25s ease;
+}
+
+.marquee-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.marquee-item--far {
+  opacity: 0.16;
+  font-size: 12px;
+}
+
+.marquee-item--far svg {
+  width: 17px;
+  height: 17px;
+}
+
+.marquee-item:hover,
+.marquee-item--far:hover {
+  opacity: 0.65;
+}
+
+@keyframes marquee-fwd {
   from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  to   { transform: translateX(-33.333%); }
+}
+
+@keyframes marquee-rev {
+  from { transform: translateX(-33.333%); }
+  to   { transform: translateX(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; }
+  .marquee-row { animation: none; }
 }
 
 /* ── Work list ───────────────────────────────────────────────────── */

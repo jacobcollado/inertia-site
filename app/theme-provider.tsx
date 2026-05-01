@@ -20,14 +20,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!mounted) return;
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    root.style.removeProperty("background-color");
-    root.style.removeProperty("color-scheme");
     localStorage.setItem("theme", theme);
   }, [theme, mounted]);
 
-  const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+  const toggle = () => {
+    const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
+    const apply = () => {
+      document.documentElement.classList.toggle("dark", next === "dark");
+      setTheme(next);
+    };
+    if (!document.startViewTransition) {
+      apply();
+    } else {
+      document.startViewTransition(apply);
+    }
+  };
 
   return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
 }
