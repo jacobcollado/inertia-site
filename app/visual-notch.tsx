@@ -245,9 +245,9 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
           {NAV.map((item) => (
             <MobileAccordion key={item.label} item={item} onNavigate={onClose} />
           ))}
-          {/* Auth row */}
-          <div className="px-4 py-4 border-t border-[rgb(var(--line))] mt-1">
-            <HeaderAuth />
+          {/* Auth section */}
+          <div className="mobile-nav__section">
+            <HeaderAuth mobile />
           </div>
         </div>
       </div>
