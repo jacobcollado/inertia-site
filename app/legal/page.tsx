@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Legal — Inertia",
+  title: "Legal · Inertia",
   description: "Terms of engagement, IP ownership, and everything worth knowing before we work together.",
 };
 
@@ -286,10 +286,10 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          This page covers how Inertia operates — what you own, what we retain, how payment works, and what happens when things go sideways. It&apos;s written to be read, not skimmed by lawyers.
+          This page covers how Inertia operates: what you own, what we retain, how payment works, and what happens when things go sideways. It&apos;s written to be read, not skimmed by lawyers.
         </p>
         <p>
-          By engaging Inertia for any paid work, you agree to the terms below. If something here doesn&apos;t work for your situation, raise it before we start — not after.
+          By engaging Inertia for any paid work, you agree to the terms below. If something here doesn&apos;t work for your situation, raise it before we start. Not after.
         </p>
       </>
     ),
@@ -304,7 +304,7 @@ const SECTIONS: Section[] = [
           When you pay in full, you own the final deliverable. That includes code, design files, and written content produced specifically for your project.
         </p>
         <p>
-          We retain ownership of anything we built before your project started — frameworks, base components, tooling, internal libraries, and unreleased work. If we use those as a starting point (which we often do — it&apos;s why we&apos;re fast), you get a perpetual licence to use them inside your project, but you don&apos;t own them outright.
+          We retain ownership of anything we built before your project started: frameworks, base components, tooling, internal libraries, and unreleased work. If we use those as a starting point (which we often do, it&apos;s why we&apos;re fast), you get a perpetual licence to use them inside your project, but you don&apos;t own them outright.
         </p>
         <p>
           We reserve the right to show the work in our portfolio unless you explicitly ask otherwise before signing. We will never publish anything marked confidential, share source code, or reveal your business details.
@@ -319,7 +319,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          All projects require a 50% deposit before work begins. The remaining 50% is due before final files are handed over or a site goes live — whichever comes first.
+          All projects require a 50% deposit before work begins. The remaining 50% is due before final files are handed over or a site goes live, whichever comes first.
         </p>
         <p>
           Invoices are due within 7 days of issue. Late payments accrue a 1.5% monthly fee after 14 days. If payment is more than 30 days overdue, we reserve the right to pause or terminate the project without refund of work already completed.
@@ -337,10 +337,10 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Every project includes two rounds of revisions. A revision is a change to something already built within the original brief — not a new feature, a change of direction, or a design overhaul.
+          Every project includes two rounds of revisions. A revision is a change to something already built within the original brief. Not a new feature, a change of direction, or a design overhaul.
         </p>
         <p>
-          Additional revisions are billed at our current hourly rate. Scope changes — meaning work outside the original agreement — require a new estimate and written sign-off before we proceed.
+          Additional revisions are billed at our current hourly rate. Scope changes (work outside the original agreement) require a new estimate and written sign-off before we proceed.
         </p>
         <p>
           If a project stalls on your end for more than 30 days without communication, we reserve the right to close it out and bill for completed work. Re-opening a stalled project is treated as a new engagement.
@@ -355,7 +355,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Once a project is handed over, ongoing support is not included unless we&apos;ve agreed to a retainer. We offer a 14-day correction window for bugs that are clearly our fault — things that were supposed to work and don&apos;t. This does not cover new requests, platform updates, or changes made by your team after handover.
+          Once a project is handed over, ongoing support is not included unless we&apos;ve agreed to a retainer. We offer a 14-day correction window for bugs that are clearly our fault: things that were supposed to work and don&apos;t. This does not cover new requests, platform updates, or changes made by your team after handover.
         </p>
         <p>
           Theme purchases (Aether and any future releases) include updates for the version purchased. Major version upgrades may be offered at a reduced rate for existing customers.
@@ -370,7 +370,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Anything you share with us — business plans, unreleased products, financials, customer data — stays between us. We don&apos;t discuss client work publicly, share access credentials with third parties, or use your information for anything outside the scope of your project.
+          Anything you share with us (business plans, unreleased products, financials, customer data) stays between us. We don&apos;t discuss client work publicly, share access credentials with third parties, or use your information for anything outside the scope of your project.
         </p>
         <p>
           If your project requires an NDA, send one over before we begin. We&apos;re generally fine signing reasonable NDAs.
