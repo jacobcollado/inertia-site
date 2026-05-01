@@ -24,31 +24,31 @@ function SketchStore() {
   const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Storefront frame */}
-      <rect x="30" y="40" width="200" height="120" rx="2" stroke={muted} strokeWidth="0.8" opacity="0.3" />
-      {/* Awning */}
-      <path d="M30 40 L130 18 L230 40" stroke={blue} strokeWidth="1" opacity="0.6" />
-      <line x1="30" y1="40" x2="230" y2="40" stroke={blue} strokeWidth="0.8" opacity="0.5" />
+      {/* Storefront walls */}
+      <rect x="28" y="44" width="204" height="118" rx="2" stroke={muted} strokeWidth="1.2" opacity="0.45" />
+      {/* Awning triangle */}
+      <path d="M28 44 L130 18 L232 44" stroke={blue} strokeWidth="1.6" opacity="0.75" fill={blue} fillOpacity="0.06" />
+      <line x1="28" y1="44" x2="232" y2="44" stroke={blue} strokeWidth="1.2" opacity="0.65" />
       {/* Awning stripes */}
-      {[50,70,90,110,130,150,170,190,210].map(x => (
-        <line key={x} x1={x} y1="40" x2={x - 10} y2="28" stroke={blue} strokeWidth="0.5" opacity="0.25" />
+      {[52,72,92,112,132,152,172,192,212].map(x => (
+        <line key={x} x1={x} y1="44" x2={x - 11} y2="27" stroke={blue} strokeWidth="1" opacity="0.35" />
       ))}
-      {/* Door */}
-      <rect x="106" y="110" width="48" height="50" rx="1" stroke={muted} strokeWidth="0.7" opacity="0.3" />
-      <circle cx="148" cy="136" r="2" fill={muted} opacity="0.3" />
-      {/* Windows */}
-      <rect x="42" y="60" width="64" height="44" rx="1" stroke={blue} strokeWidth="0.7" opacity="0.45" fill={blue} fillOpacity="0.04" />
-      <rect x="154" y="60" width="64" height="44" rx="1" stroke={muted} strokeWidth="0.7" opacity="0.25" />
-      {/* Window cross */}
-      <line x1="74" y1="60" x2="74" y2="104" stroke={blue} strokeWidth="0.5" opacity="0.3" />
-      <line x1="42" y1="82" x2="106" y2="82" stroke={blue} strokeWidth="0.5" opacity="0.3" />
-      <line x1="186" y1="60" x2="186" y2="104" stroke={muted} strokeWidth="0.5" opacity="0.2" />
-      <line x1="154" y1="82" x2="218" y2="82" stroke={muted} strokeWidth="0.5" opacity="0.2" />
       {/* Sign */}
-      <rect x="90" y="50" width="80" height="14" rx="2" fill={blue} fillOpacity="0.1" stroke={blue} strokeWidth="0.6" opacity="0.5" />
-      <line x1="104" y1="57" x2="156" y2="57" stroke={blue} strokeWidth="1" opacity="0.4" />
+      <rect x="88" y="50" width="84" height="16" rx="2" fill={blue} fillOpacity="0.12" stroke={blue} strokeWidth="1.2" opacity="0.7" />
+      <line x1="102" y1="58" x2="158" y2="58" stroke={blue} strokeWidth="1.4" opacity="0.6" />
+      {/* Left window */}
+      <rect x="40" y="62" width="66" height="46" rx="2" stroke={blue} strokeWidth="1.2" opacity="0.65" fill={blue} fillOpacity="0.05" />
+      <line x1="73" y1="62" x2="73" y2="108" stroke={blue} strokeWidth="0.9" opacity="0.45" />
+      <line x1="40" y1="85" x2="106" y2="85" stroke={blue} strokeWidth="0.9" opacity="0.45" />
+      {/* Right window */}
+      <rect x="154" y="62" width="66" height="46" rx="2" stroke={muted} strokeWidth="1" opacity="0.45" />
+      <line x1="187" y1="62" x2="187" y2="108" stroke={muted} strokeWidth="0.8" opacity="0.35" />
+      <line x1="154" y1="85" x2="220" y2="85" stroke={muted} strokeWidth="0.8" opacity="0.35" />
+      {/* Door */}
+      <rect x="105" y="112" width="50" height="50" rx="2" stroke={muted} strokeWidth="1.1" opacity="0.45" />
+      <circle cx="149" cy="138" r="3" fill={muted} opacity="0.5" />
       {/* Ground */}
-      <line x1="20" y1="160" x2="240" y2="160" stroke={muted} strokeWidth="0.5" opacity="0.2" />
+      <line x1="18" y1="162" x2="242" y2="162" stroke={muted} strokeWidth="0.8" opacity="0.3" />
     </svg>
   );
 }
@@ -58,22 +58,21 @@ function SketchPerson() {
   const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Circle avatar */}
-      <circle cx="130" cy="72" r="38" stroke={green} strokeWidth="1" opacity="0.5" />
+      {/* Outer glow ring */}
+      <circle cx="130" cy="68" r="44" stroke={green} strokeWidth="1.2" opacity="0.3" strokeDasharray="4 4" />
       {/* Head */}
-      <circle cx="130" cy="60" r="18" stroke={green} strokeWidth="1" opacity="0.6" fill={green} fillOpacity="0.05" />
-      {/* Shoulders */}
-      <path d="M80 140 Q80 108 130 108 Q180 108 180 140" stroke={green} strokeWidth="1" opacity="0.5" />
+      <circle cx="130" cy="56" r="24" stroke={green} strokeWidth="1.6" opacity="0.75" fill={green} fillOpacity="0.07" />
+      {/* Shoulders / bust */}
+      <path d="M72 148 Q72 110 130 110 Q188 110 188 148" stroke={green} strokeWidth="1.6" opacity="0.65" />
+      {/* Neck */}
+      <line x1="130" y1="80" x2="130" y2="110" stroke={green} strokeWidth="1.2" opacity="0.35" />
       {/* Name tag */}
-      <rect x="96" y="118" width="68" height="28" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.28" />
-      <line x1="108" y1="128" x2="152" y2="128" stroke={green} strokeWidth="1.2" opacity="0.5" />
-      <line x1="108" y1="136" x2="140" y2="136" stroke={muted} strokeWidth="0.6" opacity="0.25" />
-      {/* Greeting arcs */}
-      <path d="M60 72 A 72 72 0 0 1 60 100" stroke={green} strokeWidth="0.6" strokeDasharray="3 3" opacity="0.3" />
-      <path d="M200 72 A 72 72 0 0 0 200 100" stroke={green} strokeWidth="0.6" strokeDasharray="3 3" opacity="0.3" />
-      {/* Tick marks */}
-      <line x1="55" y1="84" x2="48" y2="84" stroke={green} strokeWidth="0.7" opacity="0.35" />
-      <line x1="204" y1="84" x2="212" y2="84" stroke={green} strokeWidth="0.7" opacity="0.35" />
+      <rect x="94" y="120" width="72" height="30" rx="3" stroke={green} strokeWidth="1.2" opacity="0.55" fill={green} fillOpacity="0.05" />
+      <line x1="106" y1="131" x2="154" y2="131" stroke={green} strokeWidth="1.6" opacity="0.65" />
+      <line x1="106" y1="140" x2="142" y2="140" stroke={muted} strokeWidth="1" opacity="0.4" />
+      {/* Wave lines — greeting */}
+      <path d="M52 68 Q46 76 52 84 Q58 92 52 100" stroke={green} strokeWidth="1.2" opacity="0.5" fill="none" />
+      <path d="M208 68 Q214 76 208 84 Q202 92 208 100" stroke={green} strokeWidth="1.2" opacity="0.5" fill="none" />
     </svg>
   );
 }
@@ -83,25 +82,25 @@ function SketchEmail() {
   const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Envelope */}
-      <rect x="40" y="52" width="180" height="116" rx="3" stroke={green} strokeWidth="1" opacity="0.55" fill={green} fillOpacity="0.03" />
-      {/* Flap open */}
-      <path d="M40 52 L130 110 L220 52" stroke={green} strokeWidth="1" opacity="0.55" />
-      {/* Left fold */}
-      <line x1="40" y1="168" x2="100" y2="118" stroke={muted} strokeWidth="0.6" opacity="0.22" />
-      {/* Right fold */}
-      <line x1="220" y1="168" x2="160" y2="118" stroke={muted} strokeWidth="0.6" opacity="0.22" />
-      {/* Letter lines inside */}
-      <line x1="90" y1="128" x2="170" y2="128" stroke={muted} strokeWidth="0.7" opacity="0.25" />
-      <line x1="90" y1="138" x2="170" y2="138" stroke={muted} strokeWidth="0.7" opacity="0.25" />
-      <line x1="90" y1="148" x2="145" y2="148" stroke={muted} strokeWidth="0.7" opacity="0.25" />
-      {/* Send arrow */}
-      <line x1="188" y1="32" x2="222" y2="32" stroke={green} strokeWidth="1.2" opacity="0.6" />
-      <polyline points="213,24 222,32 213,40" stroke={green} strokeWidth="1.2" opacity="0.6" />
-      {/* Dots — signal */}
-      <circle cx="56" cy="32" r="3" fill={green} opacity="0.35" />
-      <circle cx="70" cy="32" r="3" fill={green} opacity="0.25" />
-      <circle cx="84" cy="32" r="3" fill={green} opacity="0.15" />
+      {/* Envelope body — fits within viewBox */}
+      <rect x="36" y="46" width="188" height="118" rx="4" stroke={green} strokeWidth="1.6" opacity="0.7" fill={green} fillOpacity="0.05" />
+      {/* Flap crease — V shape at top */}
+      <path d="M36 46 L130 106 L224 46" stroke={green} strokeWidth="1.4" opacity="0.7" />
+      {/* Bottom-left fold */}
+      <line x1="36" y1="164" x2="104" y2="116" stroke={muted} strokeWidth="1" opacity="0.35" />
+      {/* Bottom-right fold */}
+      <line x1="224" y1="164" x2="156" y2="116" stroke={muted} strokeWidth="1" opacity="0.35" />
+      {/* Letter lines visible below the flap point */}
+      <line x1="88" y1="122" x2="172" y2="122" stroke={muted} strokeWidth="1" opacity="0.4" />
+      <line x1="88" y1="134" x2="172" y2="134" stroke={muted} strokeWidth="1" opacity="0.4" />
+      <line x1="88" y1="146" x2="148" y2="146" stroke={muted} strokeWidth="1" opacity="0.35" />
+      {/* Send arrow — top left */}
+      <line x1="36" y1="26" x2="72" y2="26" stroke={green} strokeWidth="1.6" opacity="0.65" />
+      <polyline points="62,18 72,26 62,34" stroke={green} strokeWidth="1.6" opacity="0.65" />
+      {/* Signal dots — top right */}
+      <circle cx="178" cy="26" r="4" fill={green} opacity="0.55" />
+      <circle cx="196" cy="26" r="4" fill={green} opacity="0.38" />
+      <circle cx="214" cy="26" r="4" fill={green} opacity="0.2" />
     </svg>
   );
 }
@@ -111,27 +110,28 @@ function SketchBudget() {
   const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Coin stack 1 */}
-      {[0,6,12,18,24].map((y, i) => (
-        <ellipse key={i} cx="80" cy={140 - y} rx="28" ry="8" stroke={amber} strokeWidth="0.8" opacity={0.25 + i * 0.1} fill={amber} fillOpacity={0.03} />
+      {/* Baseline */}
+      <line x1="34" y1="148" x2="226" y2="148" stroke={muted} strokeWidth="1" opacity="0.35" />
+      {/* Coin stack 1 — small */}
+      {[0,7,14,16].map((y, i) => (
+        <ellipse key={i} cx="72" cy={148 - y} rx="30" ry="9" stroke={amber} strokeWidth={i === 3 ? 1.4 : 1.1} opacity={0.3 + i * 0.12} fill={amber} fillOpacity={0.04 + i * 0.01} />
       ))}
-      {/* Coin stack 2 — taller */}
-      {[0,6,12,18,24,30,36].map((y, i) => (
-        <ellipse key={i} cx="130" cy={140 - y} rx="28" ry="8" stroke={amber} strokeWidth="0.8" opacity={0.2 + i * 0.08} fill={amber} fillOpacity={0.03} />
+      {/* Coin stack 2 — tallest */}
+      {[0,7,14,21,28,35,42].map((y, i) => (
+        <ellipse key={i} cx="130" cy={148 - y} rx="30" ry="9" stroke={amber} strokeWidth={i === 6 ? 1.6 : 1.1} opacity={0.25 + i * 0.09} fill={amber} fillOpacity={0.03 + i * 0.01} />
       ))}
-      {/* Coin stack 3 */}
-      {[0,6,12].map((y, i) => (
-        <ellipse key={i} cx="180" cy={140 - y} rx="28" ry="8" stroke={amber} strokeWidth="0.8" opacity={0.2 + i * 0.1} fill={amber} fillOpacity={0.02} />
+      {/* Coin stack 3 — medium */}
+      {[0,7,14,21].map((y, i) => (
+        <ellipse key={i} cx="188" cy={148 - y} rx="30" ry="9" stroke={amber} strokeWidth={i === 3 ? 1.4 : 1.1} opacity={0.3 + i * 0.1} fill={amber} fillOpacity={0.04 + i * 0.01} />
       ))}
-      {/* Labels */}
-      <line x1="60" y1="152" x2="100" y2="152" stroke={muted} strokeWidth="0.5" opacity="0.2" />
-      <line x1="110" y1="152" x2="150" y2="152" stroke={amber} strokeWidth="0.7" opacity="0.4" />
-      <line x1="160" y1="152" x2="200" y2="152" stroke={muted} strokeWidth="0.5" opacity="0.2" />
-      {/* Dollar sign */}
-      <line x1="130" y1="28" x2="130" y2="52" stroke={amber} strokeWidth="1" opacity="0.55" />
-      <path d="M118 36 Q118 28 130 28 Q142 28 142 36 Q142 44 130 44 Q118 44 118 52 Q118 60 130 60 Q142 60 142 52" stroke={amber} strokeWidth="1.2" opacity="0.6" />
-      {/* Grid lines */}
-      <line x1="40" y1="140" x2="220" y2="140" stroke={muted} strokeWidth="0.5" opacity="0.18" />
+      {/* Dollar sign — top center */}
+      <line x1="130" y1="22" x2="130" y2="50" stroke={amber} strokeWidth="1.4" opacity="0.65" />
+      <path d="M116 30 Q116 22 130 22 Q144 22 144 30 Q144 38 130 38 Q116 38 116 46 Q116 54 130 54 Q144 54 144 46"
+        stroke={amber} strokeWidth="1.6" opacity="0.7" fill="none" />
+      {/* Label lines under stacks */}
+      <line x1="50" y1="158" x2="94" y2="158" stroke={muted} strokeWidth="0.9" opacity="0.3" />
+      <line x1="108" y1="158" x2="152" y2="158" stroke={amber} strokeWidth="1.1" opacity="0.55" />
+      <line x1="166" y1="158" x2="210" y2="158" stroke={muted} strokeWidth="0.9" opacity="0.3" />
     </svg>
   );
 }
@@ -141,24 +141,26 @@ function SketchTimeline() {
   const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Horizontal timeline */}
-      <line x1="30" y1="90" x2="230" y2="90" stroke={muted} strokeWidth="0.7" opacity="0.25" />
-      {/* Arrow */}
-      <polyline points="222,83 230,90 222,97" stroke={amber} strokeWidth="1" opacity="0.6" />
-      {/* Milestones */}
-      {[60, 110, 160, 210].map((x, i) => (
+      {/* Track */}
+      <line x1="26" y1="94" x2="238" y2="94" stroke={muted} strokeWidth="1.2" opacity="0.4" />
+      {/* Arrow cap */}
+      <polyline points="228,86 238,94 228,102" stroke={amber} strokeWidth="1.6" opacity="0.75" />
+      {/* Milestone dots */}
+      {[56, 106, 156, 206].map((x, i) => (
         <g key={x}>
-          <circle cx={x} cy="90" r={i === 0 ? 5 : 3.5} fill={i === 0 ? amber : "none"} stroke={amber} strokeWidth="0.9" opacity={0.7 - i * 0.12} />
-          <line x1={x} y1="90" x2={x} y2={i % 2 === 0 ? 68 : 112} stroke={muted} strokeWidth="0.5" strokeDasharray="2 2" opacity="0.22" />
+          <circle cx={x} cy="94" r={i === 0 ? 6 : 5} fill={i === 0 ? amber : "none"} fillOpacity={i === 0 ? 0.25 : 0} stroke={amber} strokeWidth="1.5" opacity={0.8 - i * 0.14} />
+          {/* Connector to label */}
+          <line x1={x} y1="94" x2={x} y2={i % 2 === 0 ? 66 : 122} stroke={muted} strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
         </g>
       ))}
-      {/* Label blocks */}
-      <rect x="42" y="52" width="36" height="12" rx="2" fill={amber} fillOpacity="0.12" stroke={amber} strokeWidth="0.6" opacity="0.5" />
-      <rect x="92" y="112" width="36" height="12" rx="2" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      <rect x="142" y="52" width="36" height="12" rx="2" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      <rect x="192" y="112" width="36" height="12" rx="2" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      {/* "Now" marker */}
-      <line x1="60" y1="72" x2="60" y2="66" stroke={amber} strokeWidth="0.7" opacity="0.5" />
+      {/* Label blocks — alternating above/below */}
+      <rect x="36" y="50" width="40" height="14" rx="2" fill={amber} fillOpacity="0.15" stroke={amber} strokeWidth="1.2" opacity="0.7" />
+      <rect x="86" y="124" width="40" height="14" rx="2" stroke={muted} strokeWidth="1" opacity="0.4" />
+      <rect x="136" y="50" width="40" height="14" rx="2" stroke={muted} strokeWidth="1" opacity="0.4" />
+      <rect x="186" y="124" width="40" height="14" rx="2" stroke={muted} strokeWidth="1" opacity="0.35" />
+      {/* "Now" tick above first node */}
+      <line x1="56" y1="46" x2="56" y2="38" stroke={amber} strokeWidth="1.4" opacity="0.65" />
+      <line x1="50" y1="38" x2="62" y2="38" stroke={amber} strokeWidth="1.2" opacity="0.55" />
     </svg>
   );
 }
@@ -169,41 +171,36 @@ function SketchMessage() {
   return (
     <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Speech bubble */}
-      <path d="M30 30 Q30 20 40 20 L220 20 Q230 20 230 30 L230 120 Q230 130 220 130 L100 130 L70 158 L70 130 L40 130 Q30 130 30 120 Z"
-        stroke={purple} strokeWidth="1" opacity="0.5" fill={purple} fillOpacity="0.04" />
+      <path d="M26 28 Q26 16 38 16 L222 16 Q234 16 234 28 L234 124 Q234 136 222 136 L104 136 L74 164 L74 136 L38 136 Q26 136 26 124 Z"
+        stroke={purple} strokeWidth="1.6" opacity="0.65" fill={purple} fillOpacity="0.05" />
       {/* Text lines */}
-      <line x1="52" y1="50" x2="208" y2="50" stroke={muted} strokeWidth="0.9" opacity="0.28" />
-      <line x1="52" y1="64" x2="208" y2="64" stroke={muted} strokeWidth="0.9" opacity="0.28" />
-      <line x1="52" y1="78" x2="180" y2="78" stroke={muted} strokeWidth="0.9" opacity="0.28" />
-      <line x1="52" y1="92" x2="208" y2="92" stroke={muted} strokeWidth="0.9" opacity="0.22" />
-      <line x1="52" y1="106" x2="160" y2="106" stroke={muted} strokeWidth="0.9" opacity="0.22" />
-      {/* Cursor blink */}
-      <line x1="168" y1="100" x2="168" y2="112" stroke={purple} strokeWidth="1.5" opacity="0.7" strokeLinecap="butt" />
-      {/* Corner accent */}
-      <circle cx="220" cy="20" r="0" />
-      <polyline points="196,20 208,20 208,32" stroke={purple} strokeWidth="0.8" opacity="0.4" />
+      <line x1="48" y1="46" x2="212" y2="46" stroke={muted} strokeWidth="1.1" opacity="0.4" />
+      <line x1="48" y1="62" x2="212" y2="62" stroke={muted} strokeWidth="1.1" opacity="0.4" />
+      <line x1="48" y1="78" x2="186" y2="78" stroke={muted} strokeWidth="1.1" opacity="0.4" />
+      <line x1="48" y1="94" x2="212" y2="94" stroke={muted} strokeWidth="1.1" opacity="0.35" />
+      <line x1="48" y1="110" x2="164" y2="110" stroke={muted} strokeWidth="1.1" opacity="0.35" />
+      {/* Cursor */}
+      <line x1="172" y1="104" x2="172" y2="118" stroke={purple} strokeWidth="2" opacity="0.8" strokeLinecap="butt" />
+      {/* Corner bracket accent */}
+      <polyline points="200,16 214,16 214,30" stroke={purple} strokeWidth="1.4" opacity="0.6" />
     </svg>
   );
 }
 
 function SketchSent() {
   const green = "rgb(var(--green))";
-  const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Large checkmark circle */}
-      <circle cx="130" cy="90" r="60" stroke={green} strokeWidth="1" opacity="0.3" />
-      <circle cx="130" cy="90" r="44" stroke={green} strokeWidth="0.8" opacity="0.45" fill={green} fillOpacity="0.04" />
-      {/* Check */}
-      <polyline points="104,90 122,108 158,72" stroke={green} strokeWidth="2.5" opacity="0.75" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Radiating lines */}
+      <circle cx="130" cy="90" r="64" stroke={green} strokeWidth="1.2" opacity="0.3" />
+      <circle cx="130" cy="90" r="48" stroke={green} strokeWidth="1.6" opacity="0.6" fill={green} fillOpacity="0.06" />
+      <polyline points="104,90 122,110 158,68" stroke={green} strokeWidth="3" opacity="0.85" strokeLinecap="round" strokeLinejoin="round" />
       {[0,45,90,135,180,225,270,315].map((deg) => {
         const r = Math.PI * deg / 180;
-        const x1 = 130 + Math.cos(r) * 68;
-        const y1 = 90 + Math.sin(r) * 68;
-        const x2 = 130 + Math.cos(r) * 76;
-        const y2 = 90 + Math.sin(r) * 76;
-        return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke={green} strokeWidth="0.7" opacity="0.35" />;
+        const x1 = 130 + Math.cos(r) * 72;
+        const y1 = 90 + Math.sin(r) * 72;
+        const x2 = 130 + Math.cos(r) * 82;
+        const y2 = 90 + Math.sin(r) * 82;
+        return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke={green} strokeWidth="1.2" opacity="0.5" />;
       })}
     </svg>
   );
@@ -394,7 +391,7 @@ export function ContactForm() {
         >
           <div
             key={`sk-${animKey}-${status}`}
-            className="w-full max-w-[260px]"
+            className="w-full max-w-[320px]"
             style={{ animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both", animationDelay: "80ms" }}
           >
             {sketch}

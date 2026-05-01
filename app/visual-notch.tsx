@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
+import { HeaderAuth } from "./dashboard/header-auth";
 import { SiShopify } from "react-icons/si";
 import {
   HiOutlineSparkles,
@@ -379,6 +380,7 @@ export function VisualNotch() {
 
           {/* Right side */}
           <div className="site-header__actions">
+            <HeaderAuth />
             <ThemeToggle />
             {/* Hamburger — mobile only */}
             <button

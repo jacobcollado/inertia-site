@@ -4,9 +4,7 @@ import { ThemeProvider } from "./theme-provider";
 import { RouteFade } from "./route-fade";
 import { LenisProvider } from "./lenis-provider";
 import { ViewModeProvider } from "./view-mode-context";
-import { VisualNotch } from "./visual-notch";
-import { SiteFooter } from "./site-footer";
-import { WelcomePopup } from "./ambient";
+import { SiteShell } from "./site-shell";
 
 const BASE_URL = "https://inertia.dev";
 
@@ -65,12 +63,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <ViewModeProvider>
             <LenisProvider />
-            <VisualNotch />
-            <RouteFade>
-              {children}
-            </RouteFade>
-            <SiteFooter />
-            <WelcomePopup />
+            <SiteShell>
+              <RouteFade>
+                {children}
+              </RouteFade>
+            </SiteShell>
           </ViewModeProvider>
         </ThemeProvider>
       </body>
