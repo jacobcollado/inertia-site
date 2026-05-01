@@ -19,137 +19,144 @@ function formatDate(iso: string): string {
 
 function SketchInertia() {
   return (
-    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
+    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Ground plane — perspective grid */}
-      <line x1="100" y1="60" x2="10"  y2="110" strokeWidth="0.8" />
-      <line x1="100" y1="60" x2="190" y2="110" strokeWidth="0.8" />
-      <line x1="100" y1="60" x2="10"  y2="85"  strokeWidth="0.6" />
-      <line x1="100" y1="60" x2="190" y2="85"  strokeWidth="0.6" />
-      <line x1="37"  y1="110" x2="163" y2="110" strokeWidth="0.8" />
-      <line x1="22"  y1="96"  x2="178" y2="96"  strokeWidth="0.6" />
-      <line x1="55"  y1="73"  x2="145" y2="73"  strokeWidth="0.5" />
-      {/* Vertical columns rising */}
-      <line x1="37"  y1="110" x2="37"  y2="52"  strokeWidth="0.8" />
-      <line x1="163" y1="110" x2="163" y2="52"  strokeWidth="0.8" />
-      <line x1="22"  y1="96"  x2="22"  y2="38"  strokeWidth="0.6" />
-      <line x1="178" y1="96"  x2="178" y2="38"  strokeWidth="0.6" />
-      {/* Top face */}
-      <line x1="100" y1="8"   x2="22"  y2="38"  strokeWidth="0.8" />
-      <line x1="100" y1="8"   x2="178" y2="38"  strokeWidth="0.8" />
-      <line x1="22"  y1="38"  x2="178" y2="38"  strokeWidth="0.8" />
-      <line x1="37"  y1="52"  x2="163" y2="52"  strokeWidth="0.8" />
-      <line x1="22"  y1="38"  x2="37"  y2="52"  strokeWidth="0.6" />
-      <line x1="178" y1="38"  x2="163" y2="52"  strokeWidth="0.6" />
-      {/* Motion lines — velocity streaks */}
-      <line x1="4"   y1="22"  x2="28"  y2="22"  strokeWidth="0.7" />
-      <line x1="4"   y1="28"  x2="22"  y2="28"  strokeWidth="0.5" />
-      <line x1="4"   y1="34"  x2="18"  y2="34"  strokeWidth="0.4" />
-      <line x1="172" y1="22"  x2="196" y2="22"  strokeWidth="0.7" />
-      <line x1="178" y1="28"  x2="196" y2="28"  strokeWidth="0.5" />
-      <line x1="182" y1="34"  x2="196" y2="34"  strokeWidth="0.4" />
-      {/* Vanishing point cross */}
-      <line x1="96"  y1="8"   x2="104" y2="8"   strokeWidth="0.5" />
-      <line x1="100" y1="4"   x2="100" y2="12"  strokeWidth="0.5" />
+      <line x1="100" y1="60" x2="10"  y2="110" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.32" />
+      <line x1="100" y1="60" x2="190" y2="110" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.32" />
+      <line x1="100" y1="60" x2="10"  y2="85"  stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      <line x1="100" y1="60" x2="190" y2="85"  stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      <line x1="37"  y1="110" x2="163" y2="110" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.32" />
+      <line x1="22"  y1="96"  x2="178" y2="96"  stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      <line x1="55"  y1="73"  x2="145" y2="73"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
+      {/* Vertical columns — accent tinted */}
+      <line x1="37"  y1="110" x2="37"  y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
+      <line x1="163" y1="110" x2="163" y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
+      <line x1="22"  y1="96"  x2="22"  y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.7" opacity="0.35" />
+      <line x1="178" y1="96"  x2="178" y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.7" opacity="0.35" />
+      {/* Top face — accent tinted */}
+      <line x1="100" y1="8"   x2="22"  y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
+      <line x1="100" y1="8"   x2="178" y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
+      <line x1="22"  y1="38"  x2="178" y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.8" opacity="0.45" />
+      <line x1="37"  y1="52"  x2="163" y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.8" opacity="0.45" />
+      <line x1="22"  y1="38"  x2="37"  y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.35" />
+      <line x1="178" y1="38"  x2="163" y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.35" />
+      {/* Motion lines */}
+      <line x1="4"   y1="22"  x2="28"  y2="22"  stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
+      <line x1="4"   y1="28"  x2="22"  y2="28"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
+      <line x1="4"   y1="34"  x2="18"  y2="34"  stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.16" />
+      <line x1="172" y1="22"  x2="196" y2="22"  stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
+      <line x1="178" y1="28"  x2="196" y2="28"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
+      <line x1="182" y1="34"  x2="196" y2="34"  stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.16" />
+      {/* Vanishing point cross — accent */}
+      <line x1="96"  y1="8"   x2="104" y2="8"   stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.6" />
+      <line x1="100" y1="4"   x2="100" y2="12"  stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.6" />
       {/* Dimension tick marks */}
-      <line x1="10"  y1="110" x2="10"  y2="115" strokeWidth="0.5" />
-      <line x1="190" y1="110" x2="190" y2="115" strokeWidth="0.5" />
-      <line x1="10"  y1="112" x2="190" y2="112" strokeWidth="0.4" />
+      <line x1="10"  y1="110" x2="10"  y2="115" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
+      <line x1="190" y1="110" x2="190" y2="115" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
+      <line x1="10"  y1="112" x2="190" y2="112" stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.18" />
     </svg>
   );
 }
 
 function SketchDashboard() {
+  const blue = "rgb(56,180,255)";
+  const muted = "rgb(var(--muted))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
+    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* App chrome */}
-      <rect x="8" y="8" width="184" height="104" rx="3" strokeWidth="0.9" />
+      <rect x="8" y="8" width="184" height="104" rx="3" stroke={muted} strokeWidth="0.9" opacity="0.32" />
       {/* Sidebar */}
-      <line x1="48" y1="8" x2="48" y2="112" strokeWidth="0.6" />
+      <line x1="48" y1="8" x2="48" y2="112" stroke={muted} strokeWidth="0.6" opacity="0.22" />
       {/* Sidebar nav items */}
-      <rect x="14" y="18" width="26" height="5" rx="1.5" strokeWidth="0.5" />
-      {[30,40,50,60,70].map(y => (
-        <line key={y} x1="14" y1={y} x2="40" y2={y} strokeWidth="0.5" />
+      <rect x="14" y="18" width="26" height="5" rx="1.5" stroke={muted} strokeWidth="0.5" opacity="0.28" />
+      {[30,50,60,70].map(y => (
+        <line key={y} x1="14" y1={y} x2="40" y2={y} stroke={muted} strokeWidth="0.5" opacity="0.22" />
       ))}
-      {/* Active nav indicator */}
-      <rect x="12" y="37.5" width="2.5" height="7" rx="1" strokeWidth="0" fill="currentColor" opacity="0.5" />
-      <line x1="17" y1="41" x2="40" y2="41" strokeWidth="0.8" />
-      {/* Main content area */}
-      {/* Stat cards row */}
-      {[0,1,2].map(i => (
+      {/* Active nav — accent */}
+      <rect x="12" y="37.5" width="2.5" height="7" rx="1" fill={blue} opacity="0.7" />
+      <line x1="17" y1="41" x2="40" y2="41" stroke={blue} strokeWidth="0.9" opacity="0.65" />
+      {/* Stat cards row — first card accented */}
+      <rect x="56" y="16" width="38" height="22" rx="2" stroke={blue} strokeWidth="0.7" opacity="0.5" fill={blue} fillOpacity="0.05" />
+      <line x1="62" y1="24" x2="84" y2="24" stroke={blue} strokeWidth="1.2" opacity="0.6" />
+      <line x1="62" y1="30" x2="76" y2="30" stroke={muted} strokeWidth="0.5" opacity="0.28" />
+      {[1,2].map(i => (
         <g key={i}>
-          <rect x={56 + i * 44} y="16" width="38" height="22" rx="2" strokeWidth="0.6" />
-          <line x1={62 + i * 44} y1="24" x2={84 + i * 44} y2="24" strokeWidth="1.1" />
-          <line x1={62 + i * 44} y1="30" x2={76 + i * 44} y2="30" strokeWidth="0.5" />
+          <rect x={56 + i * 44} y="16" width="38" height="22" rx="2" stroke={muted} strokeWidth="0.6" opacity="0.28" />
+          <line x1={62 + i * 44} y1="24" x2={84 + i * 44} y2="24" stroke={muted} strokeWidth="1.1" opacity="0.32" />
+          <line x1={62 + i * 44} y1="30" x2={76 + i * 44} y2="30" stroke={muted} strokeWidth="0.5" opacity="0.22" />
         </g>
       ))}
       {/* Theme card */}
-      <rect x="56" y="44" width="82" height="36" rx="2" strokeWidth="0.7" />
-      <line x1="62" y1="52" x2="108" y2="52" strokeWidth="0.9" />
-      <line x1="62" y1="58" x2="96" y2="58" strokeWidth="0.5" />
-      <line x1="62" y1="64" x2="100" y2="64" strokeWidth="0.5" />
-      <rect x="62" y="70" width="28" height="5" rx="1.5" strokeWidth="0.5" />
+      <rect x="56" y="44" width="82" height="36" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.28" />
+      <line x1="62" y1="52" x2="108" y2="52" stroke={muted} strokeWidth="0.9" opacity="0.32" />
+      <line x1="62" y1="58" x2="96" y2="58" stroke={muted} strokeWidth="0.5" opacity="0.22" />
+      <line x1="62" y1="64" x2="100" y2="64" stroke={muted} strokeWidth="0.5" opacity="0.22" />
+      {/* CTA button — accent */}
+      <rect x="62" y="70" width="28" height="5" rx="1.5" fill={blue} fillOpacity="0.18" stroke={blue} strokeWidth="0.5" opacity="0.6" />
       {/* Activity feed */}
-      <rect x="146" y="44" width="38" height="64" rx="2" strokeWidth="0.6" />
-      <line x1="152" y1="52" x2="178" y2="52" strokeWidth="0.6" />
+      <rect x="146" y="44" width="38" height="64" rx="2" stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      <line x1="152" y1="52" x2="178" y2="52" stroke={muted} strokeWidth="0.6" opacity="0.26" />
       {[62,72,82,96].map(y => (
         <g key={y}>
-          <circle cx="155" cy={y} r="2" strokeWidth="0.5" />
-          <line x1="161" y1={y} x2="178" y2={y} strokeWidth="0.5" />
-          <line x1="161" y1={y + 4} x2="172" y2={y + 4} strokeWidth="0.4" />
+          <circle cx="155" cy={y} r="2" stroke={muted} strokeWidth="0.5" opacity="0.26" />
+          <line x1="161" y1={y} x2="178" y2={y} stroke={muted} strokeWidth="0.5" opacity="0.26" />
+          <line x1="161" y1={y + 4} x2="172" y2={y + 4} stroke={muted} strokeWidth="0.4" opacity="0.2" />
         </g>
       ))}
-      {/* Support / message thread */}
-      <rect x="56" y="86" width="82" height="20" rx="2" strokeWidth="0.6" />
-      <line x1="62" y1="93" x2="110" y2="93" strokeWidth="0.6" />
-      <line x1="62" y1="99" x2="96" y2="99" strokeWidth="0.5" />
-      {/* Online dot */}
-      <circle cx="184" cy="16" r="2.5" strokeWidth="0" fill="currentColor" opacity="0.4" />
+      {/* Support thread */}
+      <rect x="56" y="86" width="82" height="20" rx="2" stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      <line x1="62" y1="93" x2="110" y2="93" stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      <line x1="62" y1="99" x2="96" y2="99" stroke={muted} strokeWidth="0.5" opacity="0.22" />
+      {/* Online dot — accent */}
+      <circle cx="184" cy="16" r="2.5" fill={blue} opacity="0.55" />
     </svg>
   );
 }
 
 function SketchAether() {
+  const blue = "rgb(56,180,255)";
+  const muted = "rgb(var(--muted))";
   return (
-    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
+    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Browser chrome */}
-      <rect x="8" y="8" width="184" height="104" rx="3" strokeWidth="0.9" />
+      <rect x="8" y="8" width="184" height="104" rx="3" stroke={muted} strokeWidth="0.9" opacity="0.32" />
       {/* Nav bar */}
-      <line x1="8" y1="22" x2="192" y2="22" strokeWidth="0.7" />
+      <line x1="8" y1="22" x2="192" y2="22" stroke={muted} strokeWidth="0.7" opacity="0.22" />
       {/* Logo placeholder */}
-      <rect x="16" y="13" width="18" height="6" rx="1" strokeWidth="0.6" />
+      <rect x="16" y="13" width="18" height="6" rx="1" stroke={muted} strokeWidth="0.6" opacity="0.32" />
       {/* Nav links */}
-      <line x1="46"  y1="16" x2="62"  y2="16" strokeWidth="0.6" />
-      <line x1="68"  y1="16" x2="84"  y2="16" strokeWidth="0.6" />
-      <line x1="90"  y1="16" x2="106" y2="16" strokeWidth="0.6" />
-      {/* CTA button top-right */}
-      <rect x="162" y="13" width="22" height="6" rx="2" strokeWidth="0.6" />
+      <line x1="46"  y1="16" x2="62"  y2="16" stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      <line x1="68"  y1="16" x2="84"  y2="16" stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      <line x1="90"  y1="16" x2="106" y2="16" stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      {/* CTA button top-right — accent */}
+      <rect x="162" y="13" width="22" height="6" rx="2" fill={blue} fillOpacity="0.18" stroke={blue} strokeWidth="0.6" opacity="0.65" />
       {/* Hero block */}
-      <rect x="16" y="28" width="168" height="38" rx="2" strokeWidth="0.7" />
+      <rect x="16" y="28" width="168" height="38" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.26" />
       {/* Hero title lines */}
-      <line x1="30" y1="38" x2="120" y2="38" strokeWidth="1.2" />
-      <line x1="30" y1="44" x2="100" y2="44" strokeWidth="1.2" />
-      <line x1="30" y1="50" x2="80"  y2="50" strokeWidth="0.8" />
-      {/* Hero CTA */}
-      <rect x="30" y="55" width="32" height="7" rx="2" strokeWidth="0.7" />
-      {/* Product grid — 3 cards */}
-      <rect x="16"  y="72" width="50" height="34" rx="2" strokeWidth="0.7" />
-      <rect x="75"  y="72" width="50" height="34" rx="2" strokeWidth="0.7" />
-      <rect x="134" y="72" width="50" height="34" rx="2" strokeWidth="0.7" />
+      <line x1="30" y1="38" x2="120" y2="38" stroke={muted} strokeWidth="1.2" opacity="0.38" />
+      <line x1="30" y1="44" x2="100" y2="44" stroke={muted} strokeWidth="1.2" opacity="0.38" />
+      <line x1="30" y1="50" x2="80"  y2="50" stroke={muted} strokeWidth="0.8" opacity="0.26" />
+      {/* Hero CTA — accent */}
+      <rect x="30" y="55" width="32" height="7" rx="2" fill={blue} fillOpacity="0.2" stroke={blue} strokeWidth="0.7" opacity="0.65" />
+      {/* Product grid — first card accented */}
+      <rect x="16"  y="72" width="50" height="34" rx="2" stroke={blue} strokeWidth="0.8" opacity="0.45" fill={blue} fillOpacity="0.04" />
+      <rect x="75"  y="72" width="50" height="34" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.26" />
+      <rect x="134" y="72" width="50" height="34" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.26" />
       {/* Card image area top */}
-      <rect x="20"  y="75" width="42" height="20" rx="1" strokeWidth="0.5" />
-      <rect x="79"  y="75" width="42" height="20" rx="1" strokeWidth="0.5" />
-      <rect x="138" y="75" width="42" height="20" rx="1" strokeWidth="0.5" />
+      <rect x="20"  y="75" width="42" height="20" rx="1" stroke={blue} strokeWidth="0.5" opacity="0.35" fill={blue} fillOpacity="0.06" />
+      <rect x="79"  y="75" width="42" height="20" rx="1" stroke={muted} strokeWidth="0.5" opacity="0.22" />
+      <rect x="138" y="75" width="42" height="20" rx="1" stroke={muted} strokeWidth="0.5" opacity="0.22" />
       {/* Card title lines */}
-      <line x1="20"  y1="99"  x2="52"  y2="99"  strokeWidth="0.6" />
-      <line x1="79"  y1="99"  x2="111" y2="99"  strokeWidth="0.6" />
-      <line x1="138" y1="99"  x2="170" y2="99"  strokeWidth="0.6" />
-      <line x1="20"  y1="103" x2="40"  y2="103" strokeWidth="0.5" />
-      <line x1="79"  y1="103" x2="99"  y2="103" strokeWidth="0.5" />
-      <line x1="138" y1="103" x2="158" y2="103" strokeWidth="0.5" />
+      <line x1="20"  y1="99"  x2="52"  y2="99"  stroke={muted} strokeWidth="0.6" opacity="0.28" />
+      <line x1="79"  y1="99"  x2="111" y2="99"  stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      <line x1="138" y1="99"  x2="170" y2="99"  stroke={muted} strokeWidth="0.6" opacity="0.26" />
+      <line x1="20"  y1="103" x2="40"  y2="103" stroke={muted} strokeWidth="0.5" opacity="0.22" />
+      <line x1="79"  y1="103" x2="99"  y2="103" stroke={muted} strokeWidth="0.5" opacity="0.2" />
+      <line x1="138" y1="103" x2="158" y2="103" stroke={muted} strokeWidth="0.5" opacity="0.2" />
       {/* Dimension marks */}
-      <line x1="8"  y1="118" x2="192" y2="118" strokeWidth="0.4" />
-      <line x1="8"  y1="116" x2="8"   y2="120" strokeWidth="0.5" />
-      <line x1="192" y1="116" x2="192" y2="120" strokeWidth="0.5" />
+      <line x1="8"  y1="118" x2="192" y2="118" stroke={muted} strokeWidth="0.4" opacity="0.18" />
+      <line x1="8"  y1="116" x2="8"   y2="120" stroke={muted} strokeWidth="0.5" opacity="0.22" />
+      <line x1="192" y1="116" x2="192" y2="120" stroke={muted} strokeWidth="0.5" opacity="0.22" />
     </svg>
   );
 }
@@ -200,127 +207,124 @@ function GridRule() {
 // Blueprint sketches for the perspectives (think) cards
 const THINK_SKETCHES = [
   // Drafting compass — precision, craft
-  <svg key="compass" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
-    {/* Compass pivot point */}
-    <circle cx="100" cy="28" r="3" strokeWidth="0.8" />
-    {/* Left leg */}
-    <line x1="100" y1="28" x2="62" y2="100" strokeWidth="0.9" />
-    {/* Right leg */}
-    <line x1="100" y1="28" x2="138" y2="100" strokeWidth="0.9" />
-    {/* Needle tip left */}
-    <line x1="62" y1="100" x2="60" y2="107" strokeWidth="0.8" />
-    <line x1="60" y1="107" x2="64" y2="107" strokeWidth="0.6" />
-    {/* Pencil tip right */}
-    <line x1="138" y1="100" x2="136" y2="107" strokeWidth="0.8" />
-    <line x1="136" y1="107" x2="140" y2="104" strokeWidth="0.6" />
-    {/* Arc being drawn */}
-    <path d="M 52 95 A 58 58 0 0 1 148 95" strokeWidth="0.7" strokeDasharray="3 2" />
+  <svg key="compass" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+    {/* Compass legs */}
+    <line x1="100" y1="28" x2="62" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.32" />
+    <line x1="100" y1="28" x2="138" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.32" />
+    {/* Needle tip */}
+    <line x1="62" y1="100" x2="60" y2="107" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
+    <line x1="60" y1="107" x2="64" y2="107" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+    {/* Pencil tip */}
+    <line x1="138" y1="100" x2="136" y2="107" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
+    <line x1="136" y1="107" x2="140" y2="104" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+    {/* Arc being drawn — amber accent */}
+    <path d="M 52 95 A 58 58 0 0 1 148 95" stroke="rgb(251,191,36)" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.65" />
     {/* Hinge crossbar */}
-    <line x1="88" y1="52" x2="112" y2="52" strokeWidth="0.7" />
-    <circle cx="94" cy="52" r="1.5" strokeWidth="0.6" />
-    <circle cx="106" cy="52" r="1.5" strokeWidth="0.6" />
+    <line x1="88" y1="52" x2="112" y2="52" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
+    <circle cx="94" cy="52" r="1.5" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.28" />
+    <circle cx="106" cy="52" r="1.5" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.28" />
     {/* Adjustment screw */}
-    <line x1="100" y1="28" x2="100" y2="18" strokeWidth="0.8" />
-    <line x1="96" y1="18" x2="104" y2="18" strokeWidth="0.7" />
-    <line x1="97" y1="15" x2="103" y2="15" strokeWidth="0.6" />
-    <line x1="98" y1="12" x2="102" y2="12" strokeWidth="0.5" />
+    <line x1="100" y1="28" x2="100" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
+    <line x1="96" y1="18" x2="104" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.26" />
+    <line x1="97" y1="15" x2="103" y2="15" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+    <line x1="98" y1="12" x2="102" y2="12" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
+    {/* Pivot point — amber accent */}
+    <circle cx="100" cy="28" r="3" stroke="rgb(251,191,36)" strokeWidth="0.9" opacity="0.7" />
+    <circle cx="100" cy="28" r="1.2" fill="rgb(251,191,36)" opacity="0.55" />
     {/* Construction lines */}
-    <line x1="100" y1="95" x2="100" y2="110" strokeWidth="0.4" strokeDasharray="2 2" />
-    <line x1="60" y1="95" x2="140" y2="95" strokeWidth="0.4" strokeDasharray="2 2" />
-    {/* Radius dimension */}
-    <line x1="100" y1="97" x2="138" y2="97" strokeWidth="0.4" />
-    <line x1="100" y1="95" x2="100" y2="99" strokeWidth="0.5" />
-    <line x1="138" y1="95" x2="138" y2="99" strokeWidth="0.5" />
+    <line x1="100" y1="95" x2="100" y2="110" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.18" />
+    <line x1="60" y1="95" x2="140" y2="95" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.18" />
+    {/* Radius dimension — amber */}
+    <line x1="100" y1="97" x2="138" y2="97" stroke="rgb(251,191,36)" strokeWidth="0.5" opacity="0.45" />
+    <line x1="100" y1="95" x2="100" y2="99" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.5" />
+    <line x1="138" y1="95" x2="138" y2="99" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.5" />
   </svg>,
 
   // Type specimen grid — hierarchy, rhythm
-  <svg key="type" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
+  <svg key="type" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
     {/* Baseline grid */}
-    <line x1="12" y1="32"  x2="188" y2="32"  strokeWidth="0.4" strokeDasharray="2 3" />
-    <line x1="12" y1="48"  x2="188" y2="48"  strokeWidth="0.4" strokeDasharray="2 3" />
-    <line x1="12" y1="64"  x2="188" y2="64"  strokeWidth="0.4" strokeDasharray="2 3" />
-    <line x1="12" y1="80"  x2="188" y2="80"  strokeWidth="0.4" strokeDasharray="2 3" />
-    <line x1="12" y1="96"  x2="188" y2="96"  strokeWidth="0.4" strokeDasharray="2 3" />
-    <line x1="12" y1="112" x2="188" y2="112" strokeWidth="0.4" strokeDasharray="2 3" />
-    {/* Display headline — tall thick strokes */}
-    <line x1="12" y1="12" x2="12"  y2="32" strokeWidth="3.5" />
-    <line x1="22" y1="12" x2="22"  y2="32" strokeWidth="3.5" />
-    <line x1="12" y1="21" x2="22"  y2="21" strokeWidth="2.5" />
-    <line x1="32" y1="12" x2="32"  y2="32" strokeWidth="3.5" />
-    <line x1="32" y1="12" x2="44"  y2="32" strokeWidth="3.5" />
-    <line x1="54" y1="12" x2="54"  y2="32" strokeWidth="3.5" />
-    <line x1="54" y1="12" x2="66"  y2="12" strokeWidth="3.5" />
-    <line x1="54" y1="22" x2="63"  y2="22" strokeWidth="2.5" />
-    <line x1="54" y1="32" x2="66"  y2="32" strokeWidth="3.5" />
-    {/* Subhead — medium */}
-    <line x1="12" y1="44" x2="90"  y2="44" strokeWidth="1.8" />
-    <line x1="12" y1="52" x2="75"  y2="52" strokeWidth="1.8" />
-    {/* Body copy — thin lines */}
-    <line x1="12" y1="60" x2="186" y2="60" strokeWidth="0.9" />
-    <line x1="12" y1="68" x2="186" y2="68" strokeWidth="0.9" />
-    <line x1="12" y1="76" x2="160" y2="76" strokeWidth="0.9" />
-    <line x1="12" y1="84" x2="186" y2="84" strokeWidth="0.9" />
-    <line x1="12" y1="92" x2="140" y2="92" strokeWidth="0.9" />
-    {/* Cap-height marker */}
-    <line x1="6" y1="12" x2="10"  y2="12" strokeWidth="0.6" />
-    <line x1="6" y1="32" x2="10"  y2="32" strokeWidth="0.6" />
-    <line x1="8" y1="12" x2="8"   y2="32" strokeWidth="0.5" />
-    {/* x-height marker */}
-    <line x1="192" y1="44" x2="196" y2="44" strokeWidth="0.6" />
-    <line x1="192" y1="52" x2="196" y2="52" strokeWidth="0.6" />
-    <line x1="194" y1="44" x2="194" y2="52" strokeWidth="0.5" />
+    {[32,48,64,80,96,112].map(y => (
+      <line key={y} x1="12" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 3" opacity="0.16" />
+    ))}
+    {/* Display headline — amber accent */}
+    <line x1="12" y1="12" x2="12"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    <line x1="22" y1="12" x2="22"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    <line x1="12" y1="21" x2="22"  y2="21" stroke="rgb(251,191,36)" strokeWidth="2.5" opacity="0.45" />
+    <line x1="32" y1="12" x2="32"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    <line x1="32" y1="12" x2="44"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    <line x1="54" y1="12" x2="54"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    <line x1="54" y1="12" x2="66"  y2="12" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    <line x1="54" y1="22" x2="63"  y2="22" stroke="rgb(251,191,36)" strokeWidth="2.5" opacity="0.45" />
+    <line x1="54" y1="32" x2="66"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    {/* Subhead — medium muted */}
+    <line x1="12" y1="44" x2="90"  y2="44" stroke="rgb(var(--muted))" strokeWidth="1.8" opacity="0.35" />
+    <line x1="12" y1="52" x2="75"  y2="52" stroke="rgb(var(--muted))" strokeWidth="1.8" opacity="0.35" />
+    {/* Body copy */}
+    <line x1="12" y1="60" x2="186" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
+    <line x1="12" y1="68" x2="186" y2="68" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
+    <line x1="12" y1="76" x2="160" y2="76" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
+    <line x1="12" y1="84" x2="186" y2="84" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
+    <line x1="12" y1="92" x2="140" y2="92" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
+    {/* Cap-height marker — amber */}
+    <line x1="6" y1="12" x2="10"  y2="12" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.55" />
+    <line x1="6" y1="32" x2="10"  y2="32" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.55" />
+    <line x1="8" y1="12" x2="8"   y2="32" stroke="rgb(251,191,36)" strokeWidth="0.5" opacity="0.45" />
+    {/* x-height marker — amber */}
+    <line x1="192" y1="44" x2="196" y2="44" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.5" />
+    <line x1="192" y1="52" x2="196" y2="52" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.5" />
+    <line x1="194" y1="44" x2="194" y2="52" stroke="rgb(251,191,36)" strokeWidth="0.5" opacity="0.4" />
   </svg>,
 
   // Light bulb cross-section — ideas, clarity
-  <svg key="bulb" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
-    {/* Bulb outer profile */}
-    <path d="M 100 10 C 130 10 148 30 148 55 C 148 75 136 88 128 95 L 72 95 C 64 88 52 75 52 55 C 52 30 70 10 100 10 Z" strokeWidth="0.9" />
+  <svg key="bulb" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+    {/* Bulb glow fill — amber */}
+    <path d="M 100 10 C 130 10 148 30 148 55 C 148 75 136 88 128 95 L 72 95 C 64 88 52 75 52 55 C 52 30 70 10 100 10 Z" fill="rgb(251,191,36)" fillOpacity="0.06" stroke="rgb(251,191,36)" strokeWidth="0.9" opacity="0.5" />
     {/* Filament support wires */}
-    <line x1="84" y1="95" x2="84" y2="72" strokeWidth="0.7" />
-    <line x1="116" y1="95" x2="116" y2="72" strokeWidth="0.7" />
-    {/* Filament coil */}
-    <path d="M 84 72 Q 88 62 92 68 Q 96 74 100 64 Q 104 54 108 64 Q 112 74 116 68 Q 116 66 116 64" strokeWidth="0.8" />
+    <line x1="84" y1="95" x2="84" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
+    <line x1="116" y1="95" x2="116" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
+    {/* Filament coil — amber accent */}
+    <path d="M 84 72 Q 88 62 92 68 Q 96 74 100 64 Q 104 54 108 64 Q 112 74 116 68 Q 116 66 116 64" stroke="rgb(251,191,36)" strokeWidth="1.0" opacity="0.7" />
     {/* Glass neck / base */}
-    <line x1="72" y1="95" x2="72"  y2="108" strokeWidth="0.9" />
-    <line x1="128" y1="95" x2="128" y2="108" strokeWidth="0.9" />
-    <line x1="72" y1="100" x2="128" y2="100" strokeWidth="0.7" />
-    <line x1="72" y1="104" x2="128" y2="104" strokeWidth="0.7" />
-    <line x1="72" y1="108" x2="128" y2="108" strokeWidth="0.9" />
+    <line x1="72" y1="95" x2="72"  y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+    <line x1="128" y1="95" x2="128" y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+    <line x1="72" y1="100" x2="128" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.22" />
+    <line x1="72" y1="104" x2="128" y2="104" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.22" />
+    <line x1="72" y1="108" x2="128" y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
     {/* Base screw threads */}
-    <path d="M 72 108 Q 80 112 88 108 Q 96 104 104 108 Q 112 112 120 108 Q 126 105 128 108" strokeWidth="0.6" />
-    <path d="M 74 114 Q 82 118 90 114 Q 98 110 106 114 Q 114 118 122 114 Q 126 112 128 114" strokeWidth="0.5" />
-    {/* Radiation lines — light emanating */}
-    <line x1="100" y1="8"  x2="100" y2="2"  strokeWidth="0.5" />
-    <line x1="118" y1="13" x2="122" y2="9"  strokeWidth="0.5" />
-    <line x1="130" y1="26" x2="135" y2="23" strokeWidth="0.5" />
-    <line x1="82"  y1="13" x2="78"  y2="9"  strokeWidth="0.5" />
-    <line x1="70"  y1="26" x2="65"  y2="23" strokeWidth="0.5" />
-    {/* Cross-section center line */}
-    <line x1="100" y1="10" x2="100" y2="95" strokeWidth="0.35" strokeDasharray="3 2" />
-    {/* Dimension: bulb width */}
-    <line x1="52"  y1="115" x2="148" y2="115" strokeWidth="0.4" />
-    <line x1="52"  y1="113" x2="52"  y2="117" strokeWidth="0.5" />
-    <line x1="148" y1="113" x2="148" y2="117" strokeWidth="0.5" />
+    <path d="M 72 108 Q 80 112 88 108 Q 96 104 104 108 Q 112 112 120 108 Q 126 105 128 108" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+    <path d="M 74 114 Q 82 118 90 114 Q 98 110 106 114 Q 114 118 122 114 Q 126 112 128 114" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
+    {/* Radiation lines — amber */}
+    <line x1="100" y1="8"  x2="100" y2="2"  stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.55" />
+    <line x1="118" y1="13" x2="122" y2="9"  stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.45" />
+    <line x1="130" y1="26" x2="135" y2="23" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.38" />
+    <line x1="82"  y1="13" x2="78"  y2="9"  stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.45" />
+    <line x1="70"  y1="26" x2="65"  y2="23" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.38" />
+    {/* Center line */}
+    <line x1="100" y1="10" x2="100" y2="95" stroke="rgb(var(--muted))" strokeWidth="0.35" strokeDasharray="3 2" opacity="0.18" />
+    {/* Dimension marks */}
+    <line x1="52"  y1="115" x2="148" y2="115" stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.18" />
+    <line x1="52"  y1="113" x2="52"  y2="117" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
+    <line x1="148" y1="113" x2="148" y2="117" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
   </svg>,
 ];
 
 // Slug-specific sketch overrides for the think section
 const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
   "hello-world": (
-    <svg key="hello-world" viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
-      {/* Origin point */}
-      <circle cx="44" cy="60" r="3.5" fill="currentColor" stroke="none" opacity="0.7" />
-      {/* Concentric arcs expanding outward */}
-      <path d="M 55 43 A 20 20 0 0 1 55 77" strokeWidth="1.0" />
-      <path d="M 68 30 A 34 34 0 0 1 68 90" strokeWidth="0.7" />
-      <path d="M 84 19 A 48 48 0 0 1 84 101" strokeWidth="0.45" />
-      <path d="M 103 10 A 62 62 0 0 1 103 110" strokeWidth="0.28" />
+    <svg key="hello-world" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Origin point — amber */}
+      <circle cx="44" cy="60" r="3.5" fill="rgb(251,191,36)" opacity="0.65" />
+      {/* Concentric arcs — amber fading out */}
+      <path d="M 55 43 A 20 20 0 0 1 55 77" stroke="rgb(251,191,36)" strokeWidth="1.0" opacity="0.55" />
+      <path d="M 68 30 A 34 34 0 0 1 68 90" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.38" />
+      <path d="M 84 19 A 48 48 0 0 1 84 101" stroke="rgb(var(--muted))" strokeWidth="0.45" opacity="0.28" />
+      <path d="M 103 10 A 62 62 0 0 1 103 110" stroke="rgb(var(--muted))" strokeWidth="0.28" opacity="0.18" />
       {/* Dashed axis */}
-      <line x1="44" y1="60" x2="170" y2="60" strokeWidth="0.3" strokeDasharray="2 5" />
-      {/* Arrival tick + arrow */}
-      <line x1="170" y1="51" x2="170" y2="69" strokeWidth="0.75" />
-      <line x1="177" y1="60" x2="190" y2="60" strokeWidth="0.5" />
-      <polyline points="184,55 190,60 184,65" strokeWidth="0.65" />
+      <line x1="44" y1="60" x2="170" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.3" strokeDasharray="2 5" opacity="0.2" />
+      {/* Arrival tick + arrow — amber */}
+      <line x1="170" y1="51" x2="170" y2="69" stroke="rgb(251,191,36)" strokeWidth="0.8" opacity="0.55" />
+      <line x1="177" y1="60" x2="190" y2="60" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.5" />
+      <polyline points="184,55 190,60 184,65" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.5" />
     </svg>
   ),
 };
@@ -340,7 +344,7 @@ function TechMarquee() {
     <div className="overflow-hidden py-5" aria-hidden="true">
       <div className="marquee-track">
         {items.map((tech, i) => (
-          <div key={i} className="flex items-center gap-2.5 px-10 text-[rgb(var(--muted))] opacity-30 hover:opacity-70 transition-opacity duration-300">
+          <div key={i} className="flex items-center gap-1.5 px-8 text-[rgb(var(--muted))] opacity-30 hover:opacity-70 transition-opacity duration-300">
             <tech.icon className="w-5 h-5 shrink-0" />
             <span className="text-[13px] tracking-tight font-medium whitespace-nowrap">{tech.name}</span>
           </div>
@@ -373,7 +377,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <div className="flex items-center justify-center gap-3 py-6">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">What we're actively</span>
             <TooltipPill tip="Products and themes we're currently developing under the Inertia name.">
-              <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2 cursor-default">
+              <div className="flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3.5 py-2 cursor-default">
                 <SiShopify className="w-4 h-4 text-[rgb(var(--fg))]" />
                 <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">building</span>
               </div>
@@ -383,38 +387,41 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
 
           <GridRule />
 
-          {/* Items side by side */}
-          <div className="flex">
+          {/* Items — 2×2 on mobile, row on sm+ */}
+          <div className="grid grid-cols-2 sm:flex">
             {BUILDING.map((item, i) => {
               const external = item.href.startsWith("http");
               const Cmp: any = external ? "a" : Link;
               const extra = external ? { target: "_blank", rel: "noreferrer" } : {};
               const isActive = item.tag === "Active" || item.tag === "Building";
+              // 2×2 grid on mobile: col0 has right border, row0 has bottom border; 3rd item spans 2 cols
+              const borderClass = [
+                i === 0 ? "border-r border-[rgb(var(--line))]" : "",
+                i === 1 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
+                i < 2   ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
+                i === 2 ? "col-span-2 sm:col-span-1" : "",
+              ].filter(Boolean).join(" ");
               return (
-                <React.Fragment key={item.name}>
-                  {i > 0 && <div className="w-px bg-[rgb(var(--line))] shrink-0" />}
-                  <Cmp href={item.href} {...extra} className="group flex-1 flex flex-col justify-between gap-6 px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[220px]">
-                    <div className="flex-1 flex flex-col gap-5">
-                      {/* Blueprint sketch */}
-                      <div className="w-full scale-[1.35] sm:scale-100 origin-center sm:origin-top-left">
-                        {item.sketch}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
-                        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
-                      </div>
+                <Cmp key={item.name} href={item.href} {...extra} className={`group flex-1 flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px] ${borderClass}`}>
+                  <div className="flex-1 flex flex-col gap-5">
+                    <div className="w-full">
+                      {item.sketch}
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="flex items-center gap-1.5 text-[11px] tracking-tight text-[rgb(var(--muted))]">
-                        <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-400" : "bg-[rgb(var(--muted))] opacity-50"}`} />
-                        {item.tag}
-                      </span>
-                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" aria-hidden="true">
-                        <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
+                      <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
                     </div>
-                  </Cmp>
-                </React.Fragment>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="flex items-center gap-1.5 text-[11px] tracking-tight text-[rgb(var(--muted))]">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-400" : "bg-[rgb(var(--muted))] opacity-50"}`} />
+                      {item.tag}
+                    </span>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" aria-hidden="true">
+                      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </Cmp>
               );
             })}
           </div>
@@ -426,7 +433,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
             <div className="flex items-center justify-center gap-3">
               <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">How we</span>
               <TooltipPill tip="Short posts on design, development, and the decisions behind what we build.">
-                <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2 cursor-default">
+                <div className="flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3.5 py-2 cursor-default">
                   <SiSubstack className="w-4 h-4 text-[rgb(var(--fg))]" />
                   <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">think</span>
                 </div>
@@ -484,7 +491,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <div className="flex items-center justify-center gap-3">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
             <TooltipPill tip="Selected client work spanning Shopify builds, brand identities, and custom web projects.">
-              <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2 cursor-default">
+              <div className="flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3.5 py-2 cursor-default">
                 <SiDribbble className="w-4 h-4 text-[rgb(var(--fg))]" />
                 <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">shipped</span>
               </div>

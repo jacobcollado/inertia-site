@@ -44,7 +44,7 @@ function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: numbe
             alt={item.client}
             fill
             sizes="(min-width: 768px) 33vw, 50vw"
-            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04] grayscale"
           />
         ) : (
           <div className="absolute inset-0 bg-[rgb(var(--line))]" />
