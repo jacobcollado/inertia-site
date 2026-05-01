@@ -67,7 +67,7 @@ const NAV: NavItem[] = [
       { label: "About", description: "Who we are and why we build this way.", href: "/about", icon: <HiOutlineInformationCircle /> },
       { label: "Careers", description: "Join us when the time is right.", disabled: true, icon: <HiOutlineBriefcase /> },
       { label: "Help", description: "Get support for anything we've shipped.", href: "/contact", icon: <HiOutlineQuestionMarkCircle /> },
-      { label: "Legal", description: "Terms, licenses, and policies.", disabled: true, icon: <HiOutlineShieldCheck /> },
+      { label: "Legal", description: "Terms, licenses, and policies.", href: "/legal", icon: <HiOutlineShieldCheck /> },
     ],
   },
   {
