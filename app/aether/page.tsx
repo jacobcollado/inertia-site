@@ -73,164 +73,183 @@ function rgb([r, g, b]: [number, number, number], a = 1) {
 }
 
 function SketchStorefront({ accent }: { accent: [number, number, number] }) {
+  const g = (a: number) => rgb([160,160,160], a);
   return (
-    <svg viewBox="0 0 200 130" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+    <svg viewBox="0 0 200 134" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Browser chrome */}
-      <rect x="8" y="8" width="184" height="114" rx="3" stroke={rgb([160,160,160], 0.18)} strokeWidth="0.9" />
-      {/* Nav */}
-      <line x1="8" y1="22" x2="192" y2="22" stroke={rgb([160,160,160], 0.15)} strokeWidth="0.7" />
-      <line x1="18" y1="33" x2="46" y2="33" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.8" />
-      <line x1="80" y1="33" x2="96" y2="33" stroke={rgb([160,160,160], 0.18)} strokeWidth="0.5" />
-      <line x1="103" y1="33" x2="119" y2="33" stroke={rgb([160,160,160], 0.18)} strokeWidth="0.5" />
-      <line x1="126" y1="33" x2="142" y2="33" stroke={rgb([160,160,160], 0.18)} strokeWidth="0.5" />
-      {/* CTA button in nav — accent filled */}
-      <rect x="158" y="28" width="28" height="8" rx="2.5" fill={rgb(accent, 0.22)} stroke={rgb(accent, 0.75)} strokeWidth="0.8" />
-      {/* Hero image block */}
-      <rect x="16" y="40" width="110" height="58" rx="2" fill={rgb(accent, 0.06)} stroke={rgb([160,160,160], 0.15)} strokeWidth="0.7" />
-      <line x1="16" y1="40" x2="126" y2="98" stroke={rgb([160,160,160], 0.08)} strokeWidth="0.4" />
-      <line x1="126" y1="40" x2="16" y2="98" stroke={rgb([160,160,160], 0.08)} strokeWidth="0.4" />
-      {/* Product info — headline accent */}
-      <line x1="140" y1="45" x2="186" y2="45" stroke={rgb(accent, 0.9)} strokeWidth="1.4" />
-      <line x1="140" y1="52" x2="180" y2="52" stroke={rgb(accent, 0.6)} strokeWidth="1.0" />
-      <line x1="140" y1="58" x2="164" y2="58" stroke={rgb([160,160,160], 0.3)} strokeWidth="0.6" />
-      <line x1="140" y1="64" x2="176" y2="64" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.5" />
-      <line x1="140" y1="69" x2="168" y2="69" stroke={rgb([160,160,160], 0.22)} strokeWidth="0.5" />
-      {/* Add to cart — filled accent */}
-      <rect x="140" y="75" width="46" height="10" rx="3" fill={rgb(accent, 0.9)} stroke="none" />
-      {/* Swatch dots */}
-      <circle cx="141" cy="92" r="3" fill={rgb(accent, 0.35)} stroke="none" />
-      <circle cx="150" cy="92" r="3" fill={rgb(accent, 0.2)} stroke="none" />
-      <circle cx="159" cy="92" r="3" fill={rgb([160,160,160], 0.15)} stroke="none" />
-      <circle cx="168" cy="92" r="3" fill={rgb([160,160,160], 0.15)} stroke="none" />
+      <rect x="6" y="6" width="188" height="122" rx="3" stroke={g(0.16)} strokeWidth="0.9" />
+      <rect x="6" y="6" width="188" height="18" rx="3" fill={g(0.05)} stroke={g(0.14)} strokeWidth="0.7" />
+      {/* URL pill */}
+      <rect x="62" y="10" width="76" height="9" rx="2.5" stroke={g(0.2)} strokeWidth="0.6" />
+      <circle cx="20" cy="15" r="2.5" fill={g(0.18)} />
+      <circle cx="29" cy="15" r="2.5" fill={g(0.12)} />
+      <circle cx="38" cy="15" r="2.5" fill={g(0.1)} />
+      {/* Nav bar */}
+      <line x1="6" y1="24" x2="194" y2="24" stroke={g(0.12)} strokeWidth="0.6" />
+      <line x1="16" y1="30" x2="34" y2="30" stroke={g(0.22)} strokeWidth="0.9" />
+      <line x1="68" y1="30" x2="82" y2="30" stroke={g(0.14)} strokeWidth="0.5" />
+      <line x1="88" y1="30" x2="102" y2="30" stroke={g(0.14)} strokeWidth="0.5" />
+      <line x1="108" y1="30" x2="122" y2="30" stroke={g(0.14)} strokeWidth="0.5" />
+      <rect x="152" y="26" width="32" height="9" rx="2" fill={rgb(accent, 0.18)} stroke={rgb(accent, 0.65)} strokeWidth="0.8" />
+      {/* PDP layout — two column */}
+      {/* Product image: left col */}
+      <rect x="14" y="38" width="88" height="72" rx="2" fill={rgb(accent, 0.05)} stroke={g(0.14)} strokeWidth="0.7" />
+      {/* Thumbnail strip */}
+      <rect x="14" y="114" width="20" height="14" rx="1.5" fill={rgb(accent, 0.08)} stroke={rgb(accent, 0.3)} strokeWidth="0.7" />
+      <rect x="38" y="114" width="20" height="14" rx="1.5" fill={g(0.05)} stroke={g(0.15)} strokeWidth="0.6" />
+      <rect x="62" y="114" width="20" height="14" rx="1.5" fill={g(0.05)} stroke={g(0.15)} strokeWidth="0.6" />
+      {/* Right col — product info */}
+      <line x1="112" y1="44" x2="186" y2="44" stroke={rgb(accent, 0.85)} strokeWidth="1.5" />
+      <line x1="112" y1="51" x2="176" y2="51" stroke={rgb(accent, 0.5)} strokeWidth="1.0" />
+      <line x1="112" y1="58" x2="152" y2="58" stroke={g(0.3)} strokeWidth="0.6" />
+      {/* Price */}
+      <line x1="112" y1="66" x2="138" y2="66" stroke={rgb(accent, 0.7)} strokeWidth="1.2" />
+      {/* Swatches */}
+      <circle cx="115" cy="76" r="3.5" fill={rgb(accent, 0.5)} />
+      <circle cx="125" cy="76" r="3.5" fill={rgb(accent, 0.25)} />
+      <circle cx="135" cy="76" r="3.5" stroke={g(0.3)} strokeWidth="0.8" />
+      <circle cx="145" cy="76" r="3.5" stroke={g(0.25)} strokeWidth="0.8" />
+      {/* Size pills */}
+      <rect x="112" y="84" width="14" height="8" rx="1.5" stroke={g(0.2)} strokeWidth="0.6" />
+      <rect x="130" y="84" width="14" height="8" rx="1.5" fill={rgb(accent, 0.12)} stroke={rgb(accent, 0.5)} strokeWidth="0.7" />
+      <rect x="148" y="84" width="14" height="8" rx="1.5" stroke={g(0.2)} strokeWidth="0.6" />
+      {/* Add to cart */}
+      <rect x="112" y="96" width="74" height="13" rx="2" fill={rgb(accent, 0.9)} />
+      <line x1="136" y1="102" x2="162" y2="102" stroke="white" strokeWidth="1.2" opacity="0.7" />
     </svg>
   );
 }
 
 function SketchTimeline({ accent }: { accent: [number, number, number] }) {
+  const g = (a: number) => rgb([160,160,160], a);
+  // 4-step customer journey: Land → Browse → Product → Checkout
+  const steps = [
+    { x: 28,  label: "Land",     active: true  },
+    { x: 78,  label: "Browse",   active: true  },
+    { x: 128, label: "Product",  active: true  },
+    { x: 178, label: "Checkout", active: false },
+  ];
   return (
-    <svg viewBox="0 0 200 130" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Timeline spine */}
-      <line x1="20" y1="65" x2="180" y2="65" stroke={rgb([160,160,160], 0.2)} strokeWidth="0.8" />
-      <line x1="20" y1="61" x2="20" y2="69" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.9" />
-      <polyline points="175,61 180,65 175,69" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.8" />
+    <svg viewBox="0 0 206 134" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Progress track */}
+      <line x1="28" y1="62" x2="178" y2="62" stroke={g(0.15)} strokeWidth="2" strokeLinecap="round" />
+      {/* Filled progress — up to Product */}
+      <line x1="28" y1="62" x2="128" y2="62" stroke={rgb(accent, 0.5)} strokeWidth="2" strokeLinecap="round" />
 
-      {/* Node 1 — active (accent) */}
-      <circle cx="46" cy="65" r="5" fill={rgb(accent, 0.18)} stroke={rgb(accent, 0.85)} strokeWidth="1.2" />
-      <line x1="46" y1="60" x2="46" y2="36" stroke={rgb(accent, 0.55)} strokeWidth="0.8" />
-      <rect x="28" y="22" width="52" height="14" rx="2" fill={rgb(accent, 0.1)} stroke={rgb(accent, 0.45)} strokeWidth="0.7" />
-      <line x1="32" y1="28" x2="68" y2="28" stroke={rgb(accent, 0.55)} strokeWidth="0.9" />
-      <line x1="32" y1="32" x2="56" y2="32" stroke={rgb(accent, 0.3)} strokeWidth="0.5" />
-      {/* Connector arc */}
-      <path d="M 34 52 Q 42 44 50 36" stroke={rgb(accent, 0.3)} strokeWidth="0.6" strokeDasharray="2 2" />
+      {steps.map((s, i) => {
+        const done = i < 3;
+        const current = i === 2;
+        return (
+          <g key={s.x}>
+            {/* Node */}
+            <circle cx={s.x} cy="62" r={current ? 7 : 5}
+              fill={done ? rgb(accent, current ? 0.9 : 0.25) : g(0.07)}
+              stroke={done ? rgb(accent, current ? 1 : 0.6) : g(0.25)}
+              strokeWidth={current ? 1.5 : 1} />
+            {/* Check on completed past nodes */}
+            {done && !current && (
+              <polyline
+                points={`${s.x-2.5},${62} ${s.x-0.5},${64} ${s.x+3},${59}`}
+                stroke="white" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+            )}
+            {/* Stem */}
+            <line x1={s.x} y1={i % 2 === 0 ? 55 : 69}
+              x2={s.x} y2={i % 2 === 0 ? 32 : 92}
+              stroke={done ? rgb(accent, 0.3) : g(0.15)} strokeWidth="0.7" strokeDasharray="2 2" />
+            {/* Label card */}
+            <rect
+              x={s.x - 22} y={i % 2 === 0 ? 18 : 94}
+              width="44" height="14" rx="2"
+              fill={current ? rgb(accent, 0.1) : "none"}
+              stroke={done ? rgb(accent, current ? 0.55 : 0.3) : g(0.2)}
+              strokeWidth={current ? 0.9 : 0.6} />
+            <line
+              x1={s.x - 14} y1={i % 2 === 0 ? 25 : 101}
+              x2={s.x + 14} y2={i % 2 === 0 ? 25 : 101}
+              stroke={done ? rgb(accent, current ? 0.65 : 0.35) : g(0.2)}
+              strokeWidth={current ? 1.0 : 0.6} />
+          </g>
+        );
+      })}
 
-      {/* Node 2 — passive */}
-      <circle cx="100" cy="65" r="4" fill={rgb([160,160,160], 0.08)} stroke={rgb([160,160,160], 0.3)} strokeWidth="0.9" />
-      <line x1="100" y1="70" x2="100" y2="94" stroke={rgb([160,160,160], 0.2)} strokeWidth="0.7" />
-      <rect x="80" y="94" width="40" height="14" rx="2" fill="none" stroke={rgb([160,160,160], 0.2)} strokeWidth="0.6" />
-      <line x1="84" y1="99" x2="116" y2="99" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.7" />
-      <line x1="84" y1="103" x2="106" y2="103" stroke={rgb([160,160,160], 0.18)} strokeWidth="0.5" />
+      {/* Arrow at end of track */}
+      <polyline points="176,58 181,62 176,66" stroke={g(0.2)} strokeWidth="0.8" />
 
-      {/* Node 3 — passive */}
-      <circle cx="154" cy="65" r="4" fill={rgb([160,160,160], 0.08)} stroke={rgb([160,160,160], 0.3)} strokeWidth="0.9" />
-      <line x1="154" y1="60" x2="154" y2="40" stroke={rgb([160,160,160], 0.2)} strokeWidth="0.7" />
-      <rect x="134" y="26" width="40" height="14" rx="2" fill="none" stroke={rgb([160,160,160], 0.2)} strokeWidth="0.6" />
-      <line x1="138" y1="31" x2="170" y2="31" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.7" />
-      <line x1="138" y1="35" x2="158" y2="35" stroke={rgb([160,160,160], 0.18)} strokeWidth="0.5" />
-
-      {/* Duration bracket */}
-      <line x1="46" y1="114" x2="154" y2="114" stroke={rgb([160,160,160], 0.2)} strokeWidth="0.5" />
-      <line x1="46" y1="111" x2="46" y2="117" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.6" />
-      <line x1="154" y1="111" x2="154" y2="117" stroke={rgb([160,160,160], 0.25)} strokeWidth="0.6" />
+      {/* Conversion rate badge — top right */}
+      <rect x="152" y="6" width="48" height="14" rx="3" fill={rgb(accent, 0.1)} stroke={rgb(accent, 0.4)} strokeWidth="0.8" />
+      <line x1="158" y1="13" x2="168" y2="13" stroke={rgb(accent, 0.6)} strokeWidth="1.0" />
+      <line x1="172" y1="13" x2="194" y2="13" stroke={rgb(accent, 0.35)} strokeWidth="0.7" />
     </svg>
   );
 }
 
 function SketchConversion({ accent }: { accent: [number, number, number] }) {
-  // Bar chart: "default store" vs "Aether" — showing ~6x lift
-  // Baseline at y=112, chart top at y=14. Total height = 98px.
-  const baseline = 112;
-  const chartH = 92;
-  // Bar dims
-  const defaultH = 14; // ~15% — typical default CR
-  const aetherH  = 84; // ~91% of chart height — 6x
-  const barW = 28;
+  const g = (a: number) => rgb([160,160,160], a);
+  const baseline = 108;
+  const chartH = 86;
+  const barW = 24;
 
-  // Default bar: centered around x=62
-  const dx = 62;
-  // Aether bar: centered around x=138
-  const ax = 138;
+  // 5 bars: Default → Theme A → Theme B → Aether prev → Aether
+  const bars = [
+    { x: 34,  h: 12, label: "default",  a: false },
+    { x: 66,  h: 22, label: "",         a: false },
+    { x: 98,  h: 30, label: "",         a: false },
+    { x: 130, h: 44, label: "",         a: false },
+    { x: 162, h: chartH, label: "Aether", a: true },
+  ];
 
   return (
     <svg viewBox="0 0 200 130" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Horizontal grid lines */}
-      {[0.25, 0.5, 0.75, 1].map((t) => {
+      {/* Y-axis */}
+      <line x1="22" y1={baseline - chartH - 6} x2="22" y2={baseline} stroke={g(0.2)} strokeWidth="0.7" />
+      {/* Grid lines */}
+      {[0.33, 0.66, 1].map((t) => {
         const y = baseline - chartH * t;
-        return <line key={t} x1="30" y1={y} x2="170" y2={y} stroke={rgb([160,160,160], 0.1)} strokeWidth="0.6" strokeDasharray="3 3" />;
+        return <line key={t} x1="22" y1={y} x2="192" y2={y} stroke={g(0.08)} strokeWidth="0.5" strokeDasharray="3 3" />;
       })}
-
       {/* Baseline */}
-      <line x1="30" y1={baseline} x2="170" y2={baseline} stroke={rgb([160,160,160], 0.25)} strokeWidth="0.8" />
+      <line x1="22" y1={baseline} x2="192" y2={baseline} stroke={g(0.22)} strokeWidth="0.8" />
 
-      {/* Default bar — muted, short */}
-      <rect
-        x={dx - barW / 2} y={baseline - defaultH}
-        width={barW} height={defaultH}
-        rx="2"
-        fill={rgb([160,160,160], 0.14)}
-        stroke={rgb([160,160,160], 0.3)}
-        strokeWidth="0.7"
-      />
+      {bars.map((b) => (
+        <g key={b.x}>
+          {/* Bar body */}
+          <rect x={b.x - barW / 2} y={baseline - b.h} width={barW} height={b.h} rx="1.5"
+            fill={b.a ? rgb(accent, 0.2) : g(0.1)}
+            stroke={b.a ? rgb(accent, 0.65) : g(0.22)}
+            strokeWidth={b.a ? 1.0 : 0.6} />
+          {/* Top cap on Aether bar */}
+          {b.a && (
+            <rect x={b.x - barW / 2} y={baseline - b.h} width={barW} height={7} rx="1.5"
+              fill={rgb(accent, 0.85)} />
+          )}
+        </g>
+      ))}
 
-      {/* Aether bar — accent, tall */}
-      <rect
-        x={ax - barW / 2} y={baseline - aetherH}
-        width={barW} height={aetherH}
-        rx="2"
-        fill={rgb(accent, 0.18)}
-        stroke={rgb(accent, 0.7)}
-        strokeWidth="0.9"
-      />
-      {/* Accent fill top cap to make it pop */}
-      <rect
-        x={ax - barW / 2} y={baseline - aetherH}
-        width={barW} height={8}
-        rx="2"
-        fill={rgb(accent, 0.85)}
-        stroke="none"
-      />
+      {/* 6x badge — top right of Aether bar */}
+      <line x1={162 + barW / 2 + 3} y1={baseline - chartH + 5}
+        x2={162 + barW / 2 + 14} y2={baseline - chartH + 5}
+        stroke={rgb(accent, 0.4)} strokeWidth="0.6" strokeDasharray="2 2" />
+      <rect x={162 + barW / 2 + 14} y={baseline - chartH}
+        width={20} height={12} rx="2.5"
+        fill={rgb(accent, 0.14)} stroke={rgb(accent, 0.5)} strokeWidth="0.7" />
+      {/* "6×" as strokes */}
+      <line x1={162 + barW / 2 + 17} y1={baseline - chartH + 4} x2={162 + barW / 2 + 21} y2={baseline - chartH + 4} stroke={rgb(accent, 0.85)} strokeWidth="1.1" />
+      <line x1={162 + barW / 2 + 17} y1={baseline - chartH + 7} x2={162 + barW / 2 + 21} y2={baseline - chartH + 7} stroke={rgb(accent, 0.55)} strokeWidth="0.8" />
+      <line x1={162 + barW / 2 + 24} y1={baseline - chartH + 2} x2={162 + barW / 2 + 30} y2={baseline - chartH + 9} stroke={rgb(accent, 0.8)} strokeWidth="1.0" />
+      <line x1={162 + barW / 2 + 24} y1={baseline - chartH + 9} x2={162 + barW / 2 + 30} y2={baseline - chartH + 2} stroke={rgb(accent, 0.8)} strokeWidth="1.0" />
 
-      {/* Labels below baseline */}
-      <line x1={dx} y1={baseline + 2} x2={dx} y2={baseline + 6} stroke={rgb([160,160,160], 0.3)} strokeWidth="0.6" />
-      <line x1={ax} y1={baseline + 2} x2={ax} y2={baseline + 6} stroke={rgb(accent, 0.5)} strokeWidth="0.6" />
-      {/* Default label line */}
-      <line x1={dx - 10} y1={baseline + 10} x2={dx + 10} y2={baseline + 10} stroke={rgb([160,160,160], 0.3)} strokeWidth="0.7" />
-      <line x1={dx - 6}  y1={baseline + 13} x2={dx + 6}  y2={baseline + 13} stroke={rgb([160,160,160], 0.2)} strokeWidth="0.5" />
-      {/* Aether label line */}
-      <line x1={ax - 10} y1={baseline + 10} x2={ax + 10} y2={baseline + 10} stroke={rgb(accent, 0.6)} strokeWidth="0.9" />
-      <line x1={ax - 6}  y1={baseline + 13} x2={ax + 6}  y2={baseline + 13} stroke={rgb(accent, 0.35)} strokeWidth="0.5" />
+      {/* Trend arrow connecting bar tops */}
+      <polyline
+        points={`34,${baseline - 12} 66,${baseline - 22} 98,${baseline - 30} 130,${baseline - 44} 162,${baseline - chartH}`}
+        stroke={rgb(accent, 0.25)} strokeWidth="0.8" strokeDasharray="2 3" fill="none" />
 
-      {/* 6x callout badge anchored to Aether bar top */}
-      <line
-        x1={ax + barW / 2 + 2} y1={baseline - aetherH + 4}
-        x2={ax + barW / 2 + 18} y2={baseline - aetherH + 4}
-        stroke={rgb(accent, 0.4)} strokeWidth="0.6" strokeDasharray="2 2"
-      />
-      <rect
-        x={ax + barW / 2 + 18} y={baseline - aetherH - 2}
-        width={22} height={13}
-        rx="3"
-        fill={rgb(accent, 0.15)}
-        stroke={rgb(accent, 0.55)}
-        strokeWidth="0.7"
-      />
-      {/* "6x" text rendered as lines */}
-      <line x1={ax + barW / 2 + 22} y1={baseline - aetherH + 3} x2={ax + barW / 2 + 26} y2={baseline - aetherH + 3} stroke={rgb(accent, 0.8)} strokeWidth="1.0" />
-      <line x1={ax + barW / 2 + 22} y1={baseline - aetherH + 6} x2={ax + barW / 2 + 26} y2={baseline - aetherH + 6} stroke={rgb(accent, 0.5)} strokeWidth="0.7" />
-      <line x1={ax + barW / 2 + 28} y1={baseline - aetherH + 2} x2={ax + barW / 2 + 32} y2={baseline - aetherH + 8} stroke={rgb(accent, 0.75)} strokeWidth="0.9" />
-      <line x1={ax + barW / 2 + 28} y1={baseline - aetherH + 8} x2={ax + barW / 2 + 32} y2={baseline - aetherH + 2} stroke={rgb(accent, 0.75)} strokeWidth="0.9" />
-
-      {/* Vertical lift arrow between bars */}
-      <line x1="100" y1={baseline - defaultH - 3} x2="100" y2={baseline - aetherH + 3} stroke={rgb([160,160,160], 0.15)} strokeWidth="0.6" strokeDasharray="2 3" />
+      {/* X-axis label stubs */}
+      <line x1="34" y1={baseline + 2} x2="34" y2={baseline + 5} stroke={g(0.2)} strokeWidth="0.6" />
+      <line x1="162" y1={baseline + 2} x2="162" y2={baseline + 5} stroke={rgb(accent, 0.5)} strokeWidth="0.6" />
+      <line x1={34 - 10} y1={baseline + 9} x2={34 + 10} y2={baseline + 9} stroke={g(0.25)} strokeWidth="0.7" />
+      <line x1={34 - 6}  y1={baseline + 12} x2={34 + 6}  y2={baseline + 12} stroke={g(0.15)} strokeWidth="0.5" />
+      <line x1={162 - 12} y1={baseline + 9} x2={162 + 12} y2={baseline + 9} stroke={rgb(accent, 0.55)} strokeWidth="0.9" />
+      <line x1={162 - 8}  y1={baseline + 12} x2={162 + 8}  y2={baseline + 12} stroke={rgb(accent, 0.3)} strokeWidth="0.6" />
     </svg>
   );
 }

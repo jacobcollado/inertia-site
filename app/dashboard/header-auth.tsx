@@ -26,7 +26,7 @@ export function HeaderAuth() {
 
   if (user) {
     return (
-      <div className="hidden sm:flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <Link
           href="/dashboard"
           className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
@@ -45,7 +45,7 @@ export function HeaderAuth() {
   }
 
   return (
-    <div className="hidden sm:flex items-center gap-2">
+    <div className="flex items-center gap-2">
       <Link
         href="/login"
         className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors px-2"

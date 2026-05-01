@@ -226,7 +226,6 @@ function MobileAccordion({ item, onNavigate }: { item: NavItem; onNavigate: () =
 }
 
 function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  // Lock body scroll while open
   useEffect(() => {
     if (open) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -235,19 +234,21 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="mobile-nav__backdrop"
         data-open={open}
         aria-hidden="true"
         onClick={onClose}
       />
-      {/* Drawer */}
       <div className="mobile-nav__drawer" data-open={open} aria-label="Mobile navigation">
         <div className="mobile-nav__drawer-inner">
           {NAV.map((item) => (
             <MobileAccordion key={item.label} item={item} onNavigate={onClose} />
           ))}
+          {/* Auth row */}
+          <div className="px-4 py-4 border-t border-[rgb(var(--line))] mt-1">
+            <HeaderAuth />
+          </div>
         </div>
       </div>
     </>
@@ -380,7 +381,9 @@ export function VisualNotch() {
 
           {/* Right side */}
           <div className="site-header__actions">
-            <HeaderAuth />
+            <div className="hidden sm:contents">
+              <HeaderAuth />
+            </div>
             <ThemeToggle />
             {/* Hamburger — mobile only */}
             <button

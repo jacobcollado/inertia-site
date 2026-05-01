@@ -40,32 +40,37 @@ function SketchStandard() {
   const blue = "rgb(var(--blue))";
   const muted = "rgb(var(--muted))";
   return (
-    <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Outer browser frame */}
-      <rect x="30" y="22" width="200" height="136" rx="4" stroke={muted} strokeWidth="1" opacity="0.35" />
-      {/* Browser chrome bar */}
-      <rect x="30" y="22" width="200" height="24" rx="4" stroke={blue} strokeWidth="1.2" opacity="0.65" fill={blue} fillOpacity="0.07" />
-      {/* Traffic light dots */}
-      <circle cx="48" cy="34" r="4" stroke={blue} strokeWidth="1.2" opacity="0.7" fill={blue} fillOpacity="0.15" />
-      <circle cx="62" cy="34" r="4" stroke={muted} strokeWidth="1" opacity="0.4" />
-      <circle cx="76" cy="34" r="4" stroke={muted} strokeWidth="1" opacity="0.4" />
-      {/* URL bar */}
-      <rect x="96" y="27" width="90" height="14" rx="3" stroke={muted} strokeWidth="0.8" opacity="0.3" />
-      {/* Hero image zone with X */}
-      <rect x="42" y="58" width="176" height="58" rx="2" stroke={blue} strokeWidth="1.2" opacity="0.55" fill={blue} fillOpacity="0.05" />
-      <line x1="42" y1="58" x2="218" y2="116" stroke={blue} strokeWidth="0.7" opacity="0.2" />
-      <line x1="218" y1="58" x2="42" y2="116" stroke={blue} strokeWidth="0.7" opacity="0.2" />
-      {/* Product cards row */}
-      {[42, 103, 164].map((x) => (
-        <rect key={x} x={x} y="126" width="52" height="22" rx="2" stroke={muted} strokeWidth="0.9" opacity="0.3" />
+    <svg viewBox="0 0 260 176" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Browser frame */}
+      <rect x="20" y="14" width="192" height="148" rx="3" stroke={muted} strokeWidth="0.9" opacity="0.28" />
+      {/* Chrome */}
+      <rect x="20" y="14" width="192" height="20" rx="3" fill={blue} fillOpacity="0.05" stroke={blue} strokeWidth="1" opacity="0.5" />
+      <circle cx="35" cy="24" r="3" fill={blue} fillOpacity="0.2" stroke={blue} strokeWidth="0.9" opacity="0.6" />
+      <circle cx="46" cy="24" r="3" stroke={muted} strokeWidth="0.8" opacity="0.3" />
+      <circle cx="57" cy="24" r="3" stroke={muted} strokeWidth="0.8" opacity="0.3" />
+      <rect x="88" y="19" width="72" height="10" rx="2.5" stroke={muted} strokeWidth="0.7" opacity="0.25" />
+      {/* Nav strip */}
+      <line x1="20" y1="34" x2="212" y2="34" stroke={muted} strokeWidth="0.5" opacity="0.2" />
+      {/* Hero — full width */}
+      <rect x="28" y="42" width="176" height="64" rx="2" fill={blue} fillOpacity="0.05" stroke={blue} strokeWidth="1.1" opacity="0.45" />
+      <line x1="28" y1="42" x2="204" y2="106" stroke={blue} strokeWidth="0.5" opacity="0.12" />
+      <line x1="204" y1="42" x2="28" y2="106" stroke={blue} strokeWidth="0.5" opacity="0.12" />
+      {/* Product grid — 3 cards */}
+      {[28, 90, 152].map((x) => (
+        <g key={x}>
+          <rect x={x} y="114" width="52" height="38" rx="2" stroke={muted} strokeWidth="0.8" opacity="0.25" />
+          <line x1={x + 8} y1="138" x2={x + 36} y2="138" stroke={muted} strokeWidth="0.7" opacity="0.3" />
+          <line x1={x + 8} y1="144" x2={x + 28} y2="144" stroke={muted} strokeWidth="0.5" opacity="0.2" />
+        </g>
       ))}
-      {/* Calendar badge — 1 year, floating top-right */}
-      <rect x="190" y="14" width="40" height="34" rx="3" fill={blue} fillOpacity="0.08" stroke={blue} strokeWidth="1.4" opacity="0.75" />
-      <line x1="190" y1="26" x2="230" y2="26" stroke={blue} strokeWidth="1" opacity="0.55" />
-      <line x1="201" y1="14" x2="201" y2="9" stroke={blue} strokeWidth="1.4" opacity="0.7" />
-      <line x1="219" y1="14" x2="219" y2="9" stroke={blue} strokeWidth="1.4" opacity="0.7" />
-      {/* "1" inside calendar */}
-      <line x1="210" y1="33" x2="210" y2="42" stroke={blue} strokeWidth="2" opacity="0.65" />
+      {/* Calendar badge — 1 year */}
+      <rect x="178" y="6" width="36" height="32" rx="3" fill={blue} fillOpacity="0.08" stroke={blue} strokeWidth="1.4" opacity="0.7" />
+      <line x1="178" y1="17" x2="214" y2="17" stroke={blue} strokeWidth="1" opacity="0.5" />
+      <line x1="188" y1="6" x2="188" y2="2" stroke={blue} strokeWidth="1.3" opacity="0.6" />
+      <line x1="204" y1="6" x2="204" y2="2" stroke={blue} strokeWidth="1.3" opacity="0.6" />
+      {/* "1" digit */}
+      <line x1="196" y1="22" x2="196" y2="30" stroke={blue} strokeWidth="2.2" opacity="0.7" strokeLinecap="round" />
+      <line x1="192" y1="24" x2="196" y2="22" stroke={blue} strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -74,30 +79,27 @@ function SketchLifetime() {
   const green = "rgb(var(--green))";
   const muted = "rgb(var(--muted))";
   return (
-    <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Document body */}
-      <rect x="55" y="18" width="150" height="148" rx="4" stroke={muted} strokeWidth="1.2" opacity="0.4" />
+    <svg viewBox="0 0 260 176" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Document — centred, shorter so seal fits */}
+      <rect x="52" y="12" width="156" height="124" rx="3" stroke={muted} strokeWidth="1.1" opacity="0.35" />
       {/* Header band */}
-      <rect x="55" y="18" width="150" height="26" rx="4" stroke={green} strokeWidth="1.4" opacity="0.65" fill={green} fillOpacity="0.08" />
-      {/* Title line in header */}
-      <line x1="82" y1="31" x2="178" y2="31" stroke={green} strokeWidth="1.6" opacity="0.65" />
-      {/* Body text lines */}
-      <line x1="74" y1="62" x2="186" y2="62" stroke={muted} strokeWidth="1" opacity="0.35" />
-      <line x1="74" y1="76" x2="186" y2="76" stroke={muted} strokeWidth="1" opacity="0.35" />
-      <line x1="74" y1="90" x2="166" y2="90" stroke={muted} strokeWidth="1" opacity="0.3" />
-      <line x1="74" y1="104" x2="186" y2="104" stroke={muted} strokeWidth="0.9" opacity="0.25" />
-      <line x1="74" y1="118" x2="154" y2="118" stroke={muted} strokeWidth="0.9" opacity="0.25" />
-      {/* Wax seal — outer ring */}
-      <circle cx="130" cy="148" r="22" stroke={green} strokeWidth="1.6" opacity="0.65" fill={green} fillOpacity="0.07" />
-      {/* Seal inner ring */}
-      <circle cx="130" cy="148" r="15" stroke={green} strokeWidth="1" opacity="0.45" />
-      {/* Checkmark inside seal */}
-      <polyline points="120,148 127,156 142,139" stroke={green} strokeWidth="2.5" opacity="0.85" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="52" y="12" width="156" height="24" rx="3" fill={green} fillOpacity="0.07" stroke={green} strokeWidth="1.4" opacity="0.6" />
+      <line x1="76" y1="24" x2="188" y2="24" stroke={green} strokeWidth="1.6" opacity="0.6" />
+      {/* Body lines */}
+      <line x1="70" y1="52" x2="190" y2="52" stroke={muted} strokeWidth="0.9" opacity="0.32" />
+      <line x1="70" y1="64" x2="190" y2="64" stroke={muted} strokeWidth="0.9" opacity="0.28" />
+      <line x1="70" y1="76" x2="172" y2="76" stroke={muted} strokeWidth="0.9" opacity="0.24" />
+      <line x1="70" y1="88" x2="186" y2="88" stroke={muted} strokeWidth="0.8" opacity="0.2" />
+      <line x1="70" y1="100" x2="158" y2="100" stroke={muted} strokeWidth="0.8" opacity="0.18" />
+      {/* Wax seal — bottom, overlapping doc edge */}
+      <circle cx="130" cy="138" r="26" fill={green} fillOpacity="0.06" stroke={green} strokeWidth="1.6" opacity="0.6" />
+      <circle cx="130" cy="138" r="18" stroke={green} strokeWidth="1" opacity="0.4" />
+      <polyline points="119,138 127,147 143,128" stroke={green} strokeWidth="2.6" opacity="0.85" strokeLinecap="round" strokeLinejoin="round" />
       {/* Ribbon tails */}
-      <path d="M116 166 L110 178 L130 171 L150 178 L144 166" stroke={green} strokeWidth="1.2" opacity="0.45" fill={green} fillOpacity="0.05" />
-      {/* "One store" pill — top right corner */}
-      <rect x="174" y="12" width="46" height="18" rx="4" stroke={green} strokeWidth="1.2" opacity="0.6" fill={green} fillOpacity="0.1" />
-      <line x1="183" y1="21" x2="211" y2="21" stroke={green} strokeWidth="1.2" opacity="0.55" />
+      <path d="M112,160 L104,174 L130,165 L156,174 L148,160" stroke={green} strokeWidth="1.2" opacity="0.4" fill={green} fillOpacity="0.05" />
+      {/* "Forever" pill — top right */}
+      <rect x="178" y="4" width="52" height="16" rx="3" fill={green} fillOpacity="0.1" stroke={green} strokeWidth="1.1" opacity="0.55" />
+      <line x1="186" y1="12" x2="222" y2="12" stroke={green} strokeWidth="1.1" opacity="0.5" />
     </svg>
   );
 }
@@ -106,33 +108,47 @@ function SketchCustom() {
   const purple = "rgb(var(--purple))";
   const muted = "rgb(var(--muted))";
   return (
-    <svg viewBox="0 0 260 180" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Blueprint grid */}
-      {[45, 75, 105, 135, 165, 195, 225].map((x) => (
-        <line key={`v${x}`} x1={x} y1="14" x2={x} y2="166" stroke={muted} strokeWidth="0.5" opacity="0.15" />
+    <svg viewBox="0 0 260 176" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Blueprint grid — subtle */}
+      {[52, 82, 112, 142, 172, 202].map((x) => (
+        <line key={`v${x}`} x1={x} y1="10" x2={x} y2="162" stroke={muted} strokeWidth="0.45" opacity="0.12" />
       ))}
-      {[14, 44, 74, 104, 134, 164].map((y) => (
-        <line key={`h${y}`} x1="26" y1={y} x2="234" y2={y} stroke={muted} strokeWidth="0.5" opacity="0.15" />
+      {[10, 40, 70, 100, 130, 160].map((y) => (
+        <line key={`h${y}`} x1="22" y1={y} x2="238" y2={y} stroke={muted} strokeWidth="0.45" opacity="0.12" />
       ))}
-      {/* Main wireframe */}
-      <rect x="36" y="20" width="188" height="130" rx="4" stroke={purple} strokeWidth="1.6" opacity="0.6" fill={purple} fillOpacity="0.04" />
-      {/* Hero zone */}
-      <rect x="48" y="32" width="164" height="46" rx="2" stroke={purple} strokeWidth="1.3" opacity="0.6" fill={purple} fillOpacity="0.06" />
-      {/* Content blocks */}
-      <rect x="48" y="86" width="74" height="54" rx="2" stroke={muted} strokeWidth="1.1" opacity="0.45" />
-      <rect x="130" y="86" width="82" height="54" rx="2" stroke={muted} strokeWidth="1.1" opacity="0.45" />
-      {/* Dimension line — left */}
-      <line x1="24" y1="20" x2="24" y2="150" stroke={purple} strokeWidth="1" opacity="0.5" />
-      <line x1="19" y1="20" x2="29" y2="20" stroke={purple} strokeWidth="1" opacity="0.5" />
-      <line x1="19" y1="150" x2="29" y2="150" stroke={purple} strokeWidth="1" opacity="0.5" />
+      {/* Outer frame */}
+      <rect x="30" y="16" width="200" height="140" rx="3" stroke={purple} strokeWidth="1.5" opacity="0.55" fill={purple} fillOpacity="0.03" />
+      {/* Nav bar */}
+      <rect x="30" y="16" width="200" height="20" rx="3" fill={purple} fillOpacity="0.05" stroke={purple} strokeWidth="1.1" opacity="0.45" />
+      <line x1="44" y1="26" x2="70" y2="26" stroke={purple} strokeWidth="1.2" opacity="0.5" />
+      <line x1="148" y1="26" x2="164" y2="26" stroke={muted} strokeWidth="0.8" opacity="0.3" />
+      <line x1="170" y1="26" x2="186" y2="26" stroke={muted} strokeWidth="0.8" opacity="0.3" />
+      <rect x="196" y="21" width="26" height="10" rx="2" fill={purple} fillOpacity="0.12" stroke={purple} strokeWidth="0.8" opacity="0.5" />
+      {/* Hero block */}
+      <rect x="38" y="44" width="184" height="50" rx="2" fill={purple} fillOpacity="0.05" stroke={purple} strokeWidth="1.2" opacity="0.5" />
+      {/* Hero content lines */}
+      <line x1="54" y1="60" x2="140" y2="60" stroke={purple} strokeWidth="1.4" opacity="0.55" />
+      <line x1="54" y1="70" x2="118" y2="70" stroke={purple} strokeWidth="0.9" opacity="0.35" />
+      <rect x="54" y="78" width="38" height="10" rx="2" fill={purple} fillOpacity="0.2" stroke={purple} strokeWidth="0.8" opacity="0.5" />
+      {/* Two content columns */}
+      <rect x="38" y="102" width="88" height="46" rx="2" stroke={muted} strokeWidth="1" opacity="0.38" />
+      <rect x="134" y="102" width="88" height="46" rx="2" stroke={muted} strokeWidth="1" opacity="0.38" />
+      <line x1="50" y1="116" x2="114" y2="116" stroke={muted} strokeWidth="0.8" opacity="0.28" />
+      <line x1="50" y1="124" x2="104" y2="124" stroke={muted} strokeWidth="0.8" opacity="0.22" />
+      <line x1="146" y1="116" x2="210" y2="116" stroke={muted} strokeWidth="0.8" opacity="0.28" />
+      <line x1="146" y1="124" x2="196" y2="124" stroke={muted} strokeWidth="0.8" opacity="0.22" />
+      {/* Dimension line — left edge */}
+      <line x1="18" y1="16" x2="18" y2="156" stroke={purple} strokeWidth="0.9" opacity="0.45" />
+      <line x1="13" y1="16" x2="23" y2="16" stroke={purple} strokeWidth="0.9" opacity="0.45" />
+      <line x1="13" y1="156" x2="23" y2="156" stroke={purple} strokeWidth="0.9" opacity="0.45" />
       {/* Dimension line — bottom */}
-      <line x1="36" y1="162" x2="224" y2="162" stroke={purple} strokeWidth="1" opacity="0.5" />
-      <line x1="36" y1="157" x2="36" y2="167" stroke={purple} strokeWidth="1" opacity="0.5" />
-      <line x1="224" y1="157" x2="224" y2="167" stroke={purple} strokeWidth="1" opacity="0.5" />
-      {/* Pencil — top right, diagonal */}
-      <line x1="196" y1="14" x2="238" y2="2" stroke={purple} strokeWidth="1.8" opacity="0.7" />
-      <path d="M196 14 L189 22 L196 19 Z" fill={purple} fillOpacity="0.6" stroke={purple} strokeWidth="0.5" opacity="0.6" />
-      <line x1="234" y1="4" x2="242" y2="-2" stroke={purple} strokeWidth="1.8" opacity="0.5" />
+      <line x1="30" y1="168" x2="230" y2="168" stroke={purple} strokeWidth="0.9" opacity="0.45" />
+      <line x1="30" y1="163" x2="30" y2="173" stroke={purple} strokeWidth="0.9" opacity="0.45" />
+      <line x1="230" y1="163" x2="230" y2="173" stroke={purple} strokeWidth="0.9" opacity="0.45" />
+      {/* Pencil — top right corner, within bounds */}
+      <line x1="206" y1="8" x2="240" y2="2" stroke={purple} strokeWidth="1.6" opacity="0.6" />
+      <path d="M206 8 L200 16 L207 13 Z" fill={purple} fillOpacity="0.55" stroke={purple} strokeWidth="0.5" opacity="0.55" />
+      <line x1="237" y1="3" x2="243" y2="0" stroke={purple} strokeWidth="1.4" opacity="0.35" strokeLinecap="round" />
     </svg>
   );
 }
@@ -317,8 +333,8 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
 
             {/* Tier selector */}
             <fieldset className="mb-8">
-              <legend className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-50 mb-3">
-                License
+              <legend className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-3">
+                Choose a license
               </legend>
               <div className="flex flex-col gap-2">
                 {TIERS.map((t) => {

@@ -93,21 +93,44 @@ function VisualProgressArc({ pct, color }: { pct: number; color: string }) {
 
 function VisualTimeline({ projects }: { projects: Project[] }) {
   const muted = "rgb(var(--muted))";
-  const statuses = projects.map(p => p.status);
+  const ROW_H = 40, PAD_Y = 6;
+  const W = 340;
+  const totalH = projects.length * ROW_H + PAD_Y * 2;
   return (
-    <svg viewBox="0 0 320 80" fill="none" className="w-full" aria-hidden="true">
-      <line x1="24" y1="40" x2="296" y2="40" stroke={muted} strokeWidth="1" opacity="0.25" />
+    <svg viewBox={`0 0 ${W} ${totalH}`} fill="none" className="w-full" aria-hidden="true">
+      {/* Spine */}
+      <line x1="18" y1={PAD_Y + 8} x2="18" y2={PAD_Y + (projects.length - 1) * ROW_H + 8}
+        stroke={muted} strokeWidth="1" opacity="0.2" />
       {projects.map((p, i) => {
-        const x = 24 + (i / Math.max(projects.length - 1, 1)) * 272;
+        const cy = PAD_Y + i * ROW_H + 8;
         const color = STATUS_COLOR[p.status] ?? muted;
         const done = p.status === "completed";
+        const pillW = 58, pillX = W - pillW - 4;
         return (
           <g key={p.id}>
-            <circle cx={x} cy="40" r={done ? 7 : 6} fill={done ? color : "rgb(var(--bg))"} stroke={color} strokeWidth="1.8" opacity="0.85" />
-            {done && <polyline points={`${x-3},40 ${x-1},43 ${x+4},36`} stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />}
-            <line x1={x} y1={i % 2 === 0 ? 34 : 46} x2={x} y2={i % 2 === 0 ? 18 : 62} stroke={color} strokeWidth="1" opacity="0.4" strokeDasharray="2 2" />
-            <text x={x} y={i % 2 === 0 ? 13 : 72} textAnchor="middle" fontSize="9" fill={color} fontFamily="inherit" opacity="0.75">
-              {p.title.split(" ").slice(0, 2).join(" ")}
+            <circle cx="18" cy={cy} r="4.5" fill={done ? color : "rgb(var(--bg))"}
+              stroke={color} strokeWidth="1.5" opacity="0.85" />
+            {done && (
+              <polyline points={`15.5,${cy} 17.5,${cy+2} 21,${cy-2.5}`}
+                stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            )}
+            {/* Title */}
+            <text x="30" y={cy + 4} fontSize="10.5" fill="rgb(var(--fg))" fontFamily="inherit"
+              opacity="0.75" fontWeight="500">
+              {p.title}
+            </text>
+            {/* Phase — offset below if row is tall enough */}
+            {p.phase && (
+              <text x="30" y={cy + 17} fontSize="9" fill={muted} fontFamily="inherit" opacity="0.45">
+                {p.phase}
+              </text>
+            )}
+            {/* Status pill — right-aligned, safely within viewBox */}
+            <rect x={pillX} y={cy - 8} width={pillW} height="15" rx="7"
+              fill={color} fillOpacity="0.12" stroke={color} strokeWidth="0.8" opacity="0.65" />
+            <text x={pillX + pillW / 2} y={cy + 3} fontSize="8" fill={color} fontFamily="inherit"
+              opacity="0.9" textAnchor="middle" fontWeight="500">
+              {p.status}
             </text>
           </g>
         );
@@ -144,29 +167,37 @@ function VisualBars({ invoices }: { invoices: Invoice[] }) {
 function VisualFiles({ files }: { files: DFile[] }) {
   const blue = "rgb(var(--blue))";
   const muted = "rgb(var(--muted))";
-  const cols = 3, rows = Math.ceil(files.length / cols);
-  const W = 220, H = rows * 56 + 8;
+  const shown = files.slice(0, 3);
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} fill="none" className="w-full max-w-[220px]" aria-hidden="true">
-      {Array.from({ length: rows }).map((_, row) =>
-        Array.from({ length: cols }).map((_, col) => {
-          const idx = row * cols + col;
-          const x = col * 76, y = row * 56;
-          const exists = idx < files.length;
-          return (
-            <g key={`${row}-${col}`} opacity={exists ? 1 : 0.15}>
-              <rect x={x + 2} y={y + 2} width="66" height="48" rx="4"
-                stroke={exists ? blue : muted} strokeWidth="1.2"
-                fill={exists ? blue : muted} fillOpacity={exists ? 0.05 : 0.02} />
-              <path d={`M${x+40} ${y+2} L${x+40} ${y+14} L${x+52} ${y+14}`}
-                stroke={exists ? blue : muted} strokeWidth="1" opacity="0.5" />
-              <path d={`M${x+38} ${y+2} L${x+52} ${y+14} L${x+68} ${y+14} L${x+68} ${y+2} Z`}
-                fill={exists ? blue : muted} fillOpacity="0.08" stroke={exists ? blue : muted} strokeWidth="1" opacity="0.4" />
-              <line x1={x+10} y1={y+26} x2={x+58} y2={y+26} stroke={exists ? blue : muted} strokeWidth="0.9" opacity="0.35" />
-              <line x1={x+10} y1={y+34} x2={x+50} y2={y+34} stroke={exists ? blue : muted} strokeWidth="0.9" opacity="0.25" />
-            </g>
-          );
-        })
+    <svg viewBox="0 0 88 80" fill="none" className="w-20 h-[72px] shrink-0" aria-hidden="true">
+      {/* Stacked cards */}
+      {shown.length > 2 && (
+        <rect x="10" y="8" width="60" height="46" rx="2"
+          stroke={blue} strokeWidth="1" fill={blue} fillOpacity="0.03" opacity="0.28"
+          transform="rotate(-5 40 31)" />
+      )}
+      {shown.length > 1 && (
+        <rect x="10" y="8" width="60" height="46" rx="2"
+          stroke={blue} strokeWidth="1" fill={blue} fillOpacity="0.04" opacity="0.42"
+          transform="rotate(-2.5 40 31)" />
+      )}
+      {/* Front card */}
+      <rect x="10" y="8" width="60" height="46" rx="2"
+        stroke={blue} strokeWidth="1.4" fill={blue} fillOpacity="0.06" />
+      {/* Dog-ear */}
+      <path d="M54 8 L70 8 L70 18 Z" fill={blue} fillOpacity="0.14" stroke={blue} strokeWidth="1" opacity="0.5" />
+      {/* Content lines */}
+      <line x1="18" y1="26" x2="62" y2="26" stroke={muted} strokeWidth="1" opacity="0.3" />
+      <line x1="18" y1="33" x2="62" y2="33" stroke={muted} strokeWidth="1" opacity="0.22" />
+      <line x1="18" y1="40" x2="48" y2="40" stroke={muted} strokeWidth="1" opacity="0.17" />
+      {/* Count badge — bottom-right, within viewBox */}
+      {files.length > 0 && (
+        <>
+          <circle cx="72" cy="62" r="9" fill={blue} fillOpacity="0.15" stroke={blue} strokeWidth="1" opacity="0.65" />
+          <text x="72" y="66" textAnchor="middle" fontSize="8.5" fill={blue} fontFamily="inherit" fontWeight="600" opacity="0.9">
+            {files.length}
+          </text>
+        </>
       )}
     </svg>
   );
@@ -176,17 +207,26 @@ function VisualSupport() {
   const purple = "rgb(var(--purple))";
   const muted = "rgb(var(--muted))";
   return (
-    <svg viewBox="0 0 200 100" fill="none" className="w-full max-w-[200px]" aria-hidden="true">
-      <path d="M8 8 Q8 2 14 2 L124 2 Q130 2 130 8 L130 58 Q130 64 124 64 L72 64 L56 80 L56 64 L14 64 Q8 64 8 58 Z"
-        stroke={purple} strokeWidth="1.4" opacity="0.6" fill={purple} fillOpacity="0.05" />
-      <line x1="22" y1="22" x2="116" y2="22" stroke={muted} strokeWidth="1" opacity="0.35" />
-      <line x1="22" y1="34" x2="116" y2="34" stroke={muted} strokeWidth="1" opacity="0.35" />
-      <line x1="22" y1="46" x2="90"  y2="46" stroke={muted} strokeWidth="1" opacity="0.3" />
-      <line x1="102" y1="50" x2="102" y2="60" stroke={purple} strokeWidth="1.8" opacity="0.75" strokeLinecap="butt" />
-      <path d="M148 30 Q148 24 154 24 L186 24 Q192 24 192 30 L192 60 Q192 66 186 66 L162 66 L154 76 L154 66 L154 66 Q148 66 148 60 Z"
-        stroke={purple} strokeWidth="1" opacity="0.35" fill={purple} fillOpacity="0.03" />
-      <line x1="158" y1="38" x2="184" y2="38" stroke={muted} strokeWidth="0.9" opacity="0.28" />
-      <line x1="158" y1="48" x2="178" y2="48" stroke={muted} strokeWidth="0.9" opacity="0.22" />
+    <svg viewBox="0 0 120 96" fill="none" className="w-24 h-20 shrink-0" aria-hidden="true">
+      {/* Inertia bubble — top, full width */}
+      <rect x="4" y="4" width="88" height="44" rx="9"
+        stroke={purple} strokeWidth="1.4" fill={purple} fillOpacity="0.06" opacity="0.85" />
+      {/* Tail bottom-left */}
+      <path d="M16 48 L10 60 L30 48" fill={purple} fillOpacity="0.06"
+        stroke={purple} strokeWidth="1.3" strokeLinejoin="round" opacity="0.65" />
+      {/* Typing dots */}
+      <circle cx="30" cy="26" r="3.2" fill={purple} opacity="0.6" />
+      <circle cx="46" cy="26" r="3.2" fill={purple} opacity="0.42" />
+      <circle cx="62" cy="26" r="3.2" fill={purple} opacity="0.24" />
+
+      {/* Client reply bubble — below, right-aligned */}
+      <rect x="28" y="56" width="88" height="34" rx="8"
+        stroke={muted} strokeWidth="1" fill={muted} fillOpacity="0.04" opacity="0.5" />
+      {/* Tail bottom-right */}
+      <path d="M100 90 L108 96 L94 90" fill="none"
+        stroke={muted} strokeWidth="1" strokeLinejoin="round" opacity="0.38" />
+      <line x1="40" y1="69" x2="108" y2="69" stroke={muted} strokeWidth="0.9" opacity="0.28" />
+      <line x1="40" y1="78" x2="84"  y2="78" stroke={muted} strokeWidth="0.9" opacity="0.2" />
     </svg>
   );
 }
@@ -195,31 +235,42 @@ function VisualSupport() {
 
 const icons: Record<Tab, React.ReactNode> = {
   overview: (
+    /* home / house */
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-      <rect x="2" y="2" width="7" height="7" rx="1.5" /><rect x="11" y="2" width="7" height="7" rx="1.5" />
-      <rect x="2" y="11" width="7" height="7" rx="1.5" /><rect x="11" y="11" width="7" height="7" rx="1.5" />
+      <path d="M3 8.5L10 3l7 5.5V17H13v-4H7v4H3V8.5z" />
     </svg>
   ),
   projects: (
+    /* kanban columns */
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-      <path d="M3 5h14M3 10h14M3 15h8" />
+      <rect x="2" y="4" width="4" height="12" rx="1" />
+      <rect x="8" y="4" width="4" height="8"  rx="1" />
+      <rect x="14" y="4" width="4" height="10" rx="1" />
     </svg>
   ),
   invoices: (
+    /* receipt with dollar line */
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-      <rect x="3" y="2" width="14" height="16" rx="2" /><path d="M7 7h6M7 10h6M7 13h3" />
+      <path d="M4 2h12v16l-2-1.5L12 18l-2-1.5L8 18l-2-1.5L4 18V2z" />
+      <path d="M10 6v8M7.5 8.5C7.5 7.5 8.5 7 10 7s2.5.5 2.5 1.5S11.5 10 10 10s-2.5.5-2.5 1.5S8.5 13 10 13s2.5-.5 2.5-1.5" />
     </svg>
   ),
   files: (
+    /* stacked pages */
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-      <path d="M11 2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
-      <polyline points="11 2 11 7 16 7" />
+      <path d="M5 4h8l3 3v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+      <polyline points="13 4 13 7 16 7" />
+      <line x1="7" y1="10" x2="13" y2="10" />
+      <line x1="7" y1="13" x2="11" y2="13" />
     </svg>
   ),
   support: (
+    /* speech bubble with dot */
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-      <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2z" />
-      <path d="M10 12v.5M10 7.5a1.5 1.5 0 0 1 1.5 1.5c0 1-1.5 1.5-1.5 2.5" />
+      <path d="M2 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6l-4 4V4z" />
+      <circle cx="7" cy="8" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="10" cy="8" r="0.8" fill="currentColor" stroke="none" />
+      <circle cx="13" cy="8" r="0.8" fill="currentColor" stroke="none" />
     </svg>
   ),
 };
@@ -245,20 +296,30 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
 
   const inner = (
     <div className="flex flex-col h-full overflow-y-auto">
-      {/* Brand */}
-      <div className="px-5 py-5 border-b border-[rgb(var(--line))]">
-        <p className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</p>
-        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mt-0.5 opacity-60">Client portal</p>
-      </div>
-
-      {/* Client */}
-      <div className="px-5 py-4 border-b border-[rgb(var(--line))]">
-        <p className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">
-          {client?.company ?? client?.name ?? "Client"}
-        </p>
-        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60 truncate mt-0.5">
-          {client?.email}
-        </p>
+      {/* Header — brand + client identity */}
+      <div className="px-4 pt-5 pb-4 border-b border-[rgb(var(--line))]">
+        {/* Wordmark row */}
+        <div className="flex items-center gap-2 mb-5">
+          <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
+          <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40">/</span>
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">Client portal</span>
+        </div>
+        {/* Client row */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 shrink-0 border border-[rgb(var(--line))] flex items-center justify-center bg-[rgb(var(--line))]">
+            <span className="text-[11px] font-medium tracking-tight text-[rgb(var(--fg))] opacity-60 select-none">
+              {(client?.company ?? client?.name ?? "C").charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] truncate leading-tight">
+              {client?.company ?? client?.name ?? "Client"}
+            </p>
+            <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-45 truncate mt-0.5 leading-tight">
+              {client?.email}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Nav */}
@@ -269,7 +330,7 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
             <button
               key={id}
               onClick={() => { setTab(id); setMobileOpen(false); }}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-all duration-150"
+              className="flex items-center gap-3 w-full px-3 py-2.5 text-left transition-all duration-150"
               style={{
                 background: active ? "rgb(var(--line))" : "transparent",
                 color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
 import { RouteFade } from "./route-fade";
@@ -57,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap"
         />
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} suppressHydrationWarning />
+        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider>
