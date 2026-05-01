@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { SiNextdotjs, SiShopify, SiReact, SiTypescript, SiTailwindcss, SiFigma, SiSubstack, SiDribbble } from "react-icons/si";
 import { useEffect, useState } from "react";
+import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
 import { SoundwaveHero } from "./soundwave-hero";
 import type { WorkMeta } from "@/lib/work";
@@ -314,10 +315,12 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           {/* ── What we're shipping ── */}
           <div className="flex items-center justify-center gap-3 py-6">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">What we're actively</span>
-            <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2">
-              <SiShopify className="w-4 h-4 text-[rgb(var(--fg))]" />
-              <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">building</span>
-            </div>
+            <TooltipPill tip="Products and themes we're currently developing under the Inertia name.">
+              <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2 cursor-default">
+                <SiShopify className="w-4 h-4 text-[rgb(var(--fg))]" />
+                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">building</span>
+              </div>
+            </TooltipPill>
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">right now</span>
           </div>
 
@@ -365,10 +368,12 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">
             <div className="flex items-center justify-center gap-3">
               <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">How we</span>
-              <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2">
-                <SiSubstack className="w-4 h-4 text-[rgb(var(--fg))]" />
-                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">think</span>
-              </div>
+              <TooltipPill tip="Short posts on design, development, and the decisions behind what we build.">
+                <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2 cursor-default">
+                  <SiSubstack className="w-4 h-4 text-[rgb(var(--fg))]" />
+                  <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">think</span>
+                </div>
+              </TooltipPill>
               <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">about the craft</span>
             </div>
             <Link href="/blog" className="sm:absolute sm:right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center sm:text-left">all posts →</Link>
@@ -421,10 +426,12 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">
           <div className="flex items-center justify-center gap-3">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
-            <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2">
-              <SiDribbble className="w-4 h-4 text-[rgb(var(--fg))]" />
-              <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">shipped</span>
-            </div>
+            <TooltipPill tip="Selected client work spanning Shopify builds, brand identities, and custom web projects.">
+              <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-4 py-2 cursor-default">
+                <SiDribbble className="w-4 h-4 text-[rgb(var(--fg))]" />
+                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">shipped</span>
+              </div>
+            </TooltipPill>
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
           </div>
           <Link href="/work" className="sm:absolute sm:right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center sm:text-left">all work →</Link>

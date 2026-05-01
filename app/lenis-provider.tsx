@@ -3,6 +3,10 @@
 import { useEffect } from "react";
 import Lenis from "lenis";
 
+declare global {
+  interface Window { __lenis?: Lenis }
+}
+
 export function LenisProvider() {
   useEffect(() => {
     const prefersReduced = window.matchMedia(
@@ -17,6 +21,8 @@ export function LenisProvider() {
       wheelMultiplier: 1,
       touchMultiplier: 1.2,
     });
+
+    window.__lenis = lenis;
 
     let rafId = 0;
     const raf = (time: number) => {
@@ -33,6 +39,7 @@ export function LenisProvider() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      delete window.__lenis;
       window.removeEventListener("lenis:lock",   onLock);
       window.removeEventListener("lenis:unlock", onUnlock);
     };

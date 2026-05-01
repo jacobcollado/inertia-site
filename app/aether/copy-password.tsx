@@ -20,11 +20,9 @@ export function CopyPassword({ password }: { password: string }) {
       type="button"
       onClick={copy}
       aria-label={copied ? "Password copied" : "Copy demo password"}
-      className="group inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] px-3 py-1.5 text-sm tracking-tight text-[rgb(var(--muted))] hover:border-[rgb(var(--fg))] hover:text-[rgb(var(--fg))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] transition-colors duration-300 [-webkit-tap-highlight-color:transparent]"
+      className="group w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-[rgb(var(--line))] px-5 py-2.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:border-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--fg))] focus-visible:ring-offset-2 focus-visible:ring-offset-[rgb(var(--bg))] transition-colors duration-300 [-webkit-tap-highlight-color:transparent]"
     >
-      <span className="text-xs tracking-tight text-[rgb(var(--muted))] group-hover:text-[rgb(var(--muted))]">
-        password
-      </span>
+      <span className="text-[rgb(var(--muted))]">password:</span>
       <span className="font-medium text-[rgb(var(--fg))] tabular-nums">
         {password}
       </span>

@@ -16,7 +16,11 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
     const el = ref.current;
     if (!el) return;
 
-    window.scrollTo({ top: 0, behavior: "auto" });
+    if (window.__lenis) {
+      window.__lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
 
     el.classList.remove("route-enter");
     void el.offsetWidth;

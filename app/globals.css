@@ -353,8 +353,8 @@ h1:hover .redact > span.redact-inner,
 
 .rise {
   opacity: 0;
-  transform: translateY(14px);
-  animation: rise 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translateY(18px);
+  animation: rise 1000ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: var(--rise-delay, 0ms);
 }
 
@@ -362,6 +362,25 @@ h1:hover .redact > span.redact-inner,
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes hero-canvas {
+  0%   { opacity: 0; }
+  30%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes hero-line {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
   }
 }
 
@@ -383,6 +402,13 @@ h1:hover .redact > span.redact-inner,
     animation: none;
     opacity: 1;
     transform: none;
+  }
+  [style*="hero-canvas"],
+  [style*="hero-line"] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
   *,
   *::before,

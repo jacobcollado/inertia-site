@@ -245,16 +245,38 @@ export function SoundwaveHero() {
         className="pointer-events-none absolute inset-x-0 top-0"
         style={{ height: "20%", background: "linear-gradient(to top, transparent, rgb(var(--bg)))", zIndex: 2 }}
       />
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" style={{ display: "block" }} />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{
+          display: "block",
+          opacity: 0,
+          animation: "hero-canvas 1400ms cubic-bezier(0.22,1,0.36,1) 0ms forwards",
+        }}
+      />
 
       {/* Centered tagline */}
       <div
-        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3"
+        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4"
         style={{ zIndex: 3 }}
         aria-hidden="true"
       >
-        <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]">A body in motion stays in motion.</p>
-        <h1 className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] text-center">
+        <p
+          className="text-[13px] tracking-tight text-[rgb(var(--muted))]"
+          style={{
+            opacity: 0,
+            animation: "hero-line 700ms cubic-bezier(0.22,1,0.36,1) 180ms forwards",
+          }}
+        >
+          A body in motion stays in motion.
+        </p>
+        <h1
+          className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center"
+          style={{
+            opacity: 0,
+            animation: "hero-line 800ms cubic-bezier(0.22,1,0.36,1) 340ms forwards",
+          }}
+        >
           We build the thing<br />that keeps you moving.
         </h1>
       </div>
