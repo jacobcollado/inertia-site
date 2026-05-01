@@ -58,6 +58,56 @@ function SketchInertia() {
   );
 }
 
+function SketchDashboard() {
+  return (
+    <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
+      {/* App chrome */}
+      <rect x="8" y="8" width="184" height="104" rx="3" strokeWidth="0.9" />
+      {/* Sidebar */}
+      <line x1="48" y1="8" x2="48" y2="112" strokeWidth="0.6" />
+      {/* Sidebar nav items */}
+      <rect x="14" y="18" width="26" height="5" rx="1.5" strokeWidth="0.5" />
+      {[30,40,50,60,70].map(y => (
+        <line key={y} x1="14" y1={y} x2="40" y2={y} strokeWidth="0.5" />
+      ))}
+      {/* Active nav indicator */}
+      <rect x="12" y="37.5" width="2.5" height="7" rx="1" strokeWidth="0" fill="currentColor" opacity="0.5" />
+      <line x1="17" y1="41" x2="40" y2="41" strokeWidth="0.8" />
+      {/* Main content area */}
+      {/* Stat cards row */}
+      {[0,1,2].map(i => (
+        <g key={i}>
+          <rect x={56 + i * 44} y="16" width="38" height="22" rx="2" strokeWidth="0.6" />
+          <line x1={62 + i * 44} y1="24" x2={84 + i * 44} y2="24" strokeWidth="1.1" />
+          <line x1={62 + i * 44} y1="30" x2={76 + i * 44} y2="30" strokeWidth="0.5" />
+        </g>
+      ))}
+      {/* Theme card */}
+      <rect x="56" y="44" width="82" height="36" rx="2" strokeWidth="0.7" />
+      <line x1="62" y1="52" x2="108" y2="52" strokeWidth="0.9" />
+      <line x1="62" y1="58" x2="96" y2="58" strokeWidth="0.5" />
+      <line x1="62" y1="64" x2="100" y2="64" strokeWidth="0.5" />
+      <rect x="62" y="70" width="28" height="5" rx="1.5" strokeWidth="0.5" />
+      {/* Activity feed */}
+      <rect x="146" y="44" width="38" height="64" rx="2" strokeWidth="0.6" />
+      <line x1="152" y1="52" x2="178" y2="52" strokeWidth="0.6" />
+      {[62,72,82,96].map(y => (
+        <g key={y}>
+          <circle cx="155" cy={y} r="2" strokeWidth="0.5" />
+          <line x1="161" y1={y} x2="178" y2={y} strokeWidth="0.5" />
+          <line x1="161" y1={y + 4} x2="172" y2={y + 4} strokeWidth="0.4" />
+        </g>
+      ))}
+      {/* Support / message thread */}
+      <rect x="56" y="86" width="82" height="20" rx="2" strokeWidth="0.6" />
+      <line x1="62" y1="93" x2="110" y2="93" strokeWidth="0.6" />
+      <line x1="62" y1="99" x2="96" y2="99" strokeWidth="0.5" />
+      {/* Online dot */}
+      <circle cx="184" cy="16" r="2.5" strokeWidth="0" fill="currentColor" opacity="0.4" />
+    </svg>
+  );
+}
+
 function SketchAether() {
   return (
     <svg viewBox="0 0 200 120" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
@@ -118,6 +168,13 @@ const BUILDING = [
     tag: "In Progress",
     href: "/aether",
     sketch: <SketchAether />,
+  },
+  {
+    name: "Inertia Dashboard",
+    description: "Client portal for theme management, support, and updates.",
+    tag: "Building",
+    href: "#",
+    sketch: <SketchDashboard />,
   },
 ];
 
@@ -332,7 +389,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
               const external = item.href.startsWith("http");
               const Cmp: any = external ? "a" : Link;
               const extra = external ? { target: "_blank", rel: "noreferrer" } : {};
-              const isActive = item.tag === "Active";
+              const isActive = item.tag === "Active" || item.tag === "Building";
               return (
                 <React.Fragment key={item.name}>
                   {i > 0 && <div className="w-px bg-[rgb(var(--line))] shrink-0" />}

@@ -1116,101 +1116,112 @@ export default function DocsPage() {
         );
       })()}
 
-      {/* Mobile sheet */}
-      {sheetOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
-          <div
-            className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.3)", animation: "fade-in 180ms ease both" }}
-            onClick={() => setSheetOpen(false)}
-          />
-          <div
-            className="relative z-10 rounded-t-2xl border-t border-[rgb(var(--line))] flex flex-col"
-            style={{
-              background: "rgb(var(--bg))",
-              animation: "sheet-up 300ms cubic-bezier(0.22,1,0.36,1) both",
-              maxHeight: "78vh",
-            }}
-          >
-            {/* Sheet header — sticky */}
-            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] shrink-0">
-              <div className="flex items-center gap-2.5">
-                <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(product.accent, 0.8) }} />
-                <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">{product.name} docs</p>
-              </div>
-              <button
-                onClick={() => setSheetOpen(false)}
-                className="h-7 w-7 flex items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors"
-                style={{ background: "rgba(128,128,128,0.08)" }}
-                aria-label="Close"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+      {/* Mobile sheet — always mounted, transitions in/out */}
+      <div
+        className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end"
+        style={{
+          pointerEvents: sheetOpen ? "auto" : "none",
+        }}
+      >
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0"
+          onClick={() => setSheetOpen(false)}
+          style={{
+            background: "rgba(0,0,0,0.35)",
+            opacity: sheetOpen ? 1 : 0,
+            transition: "opacity 260ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        />
+        {/* Sheet */}
+        <div
+          className="relative z-10 rounded-t-2xl border-t border-[rgb(var(--line))] flex flex-col"
+          style={{
+            background: "rgb(var(--bg))",
+            maxHeight: "78vh",
+            transform: sheetOpen ? "translateY(0)" : "translateY(105%)",
+            transition: "transform 360ms cubic-bezier(0.32,0.72,0,1)",
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] shrink-0">
+            <div className="flex items-center gap-2.5">
+              <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(product.accent, 0.8) }} />
+              <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">{product.name} docs</p>
+            </div>
+            <button
+              onClick={() => setSheetOpen(false)}
+              className="h-7 w-7 flex items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors"
+              style={{ background: "rgba(128,128,128,0.08)" }}
+              aria-label="Close"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Scrollable body */}
+          <div className="overflow-y-auto flex-1" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
+            {/* Product switcher */}
+            <div className="px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] flex gap-2">
+              {PRODUCTS.map((p) => {
+                const active = p.id === activeProductId;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectProduct(p.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] tracking-tight transition-colors [-webkit-tap-highlight-color:transparent]"
+                    style={{
+                      background: active ? rgba(p.accent, 0.1) : "rgba(128,128,128,0.06)",
+                      color: active ? rgba(p.accent, 0.9) : "rgb(var(--muted))",
+                      border: `1px solid ${active ? rgba(p.accent, 0.25) : "rgb(var(--line))"}`,
+                    }}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(p.accent, active ? 0.9 : 0.3) }} />
+                    {p.name}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Scrollable content */}
-            <div className="overflow-y-auto flex-1" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
-              {/* Product switcher */}
-              <div className="px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] flex gap-2">
-                {PRODUCTS.map((p) => {
-                  const active = p.id === activeProductId;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => { handleSelectProduct(p.id); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] tracking-tight transition-colors"
-                      style={{
-                        background: active ? rgba(p.accent, 0.1) : "rgba(128,128,128,0.06)",
-                        color: active ? rgba(p.accent, 0.9) : "rgb(var(--muted))",
-                        border: `1px solid ${active ? rgba(p.accent, 0.25) : "rgb(var(--line))"}`,
-                      }}
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(p.accent, active ? 0.9 : 0.3) }} />
-                      {p.name}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Sections + articles */}
-              <div className="px-5 py-4 flex flex-col gap-5">
-                {product.sections.map((section) => (
-                  <div key={section.id}>
-                    <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] mb-2 px-1" style={{ opacity: 0.45 }}>
-                      {section.title}
-                    </p>
-                    <div className="flex flex-col gap-0.5">
-                      {section.articles.map((article) => {
-                        const active = activeArticleId === article.id;
-                        return (
-                          <a
-                            key={article.id}
-                            href={`#${article.id}`}
-                            onClick={() => setSheetOpen(false)}
-                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[14px] tracking-tight transition-colors"
-                            style={{
-                              background: active ? rgba(product.accent, 0.08) : undefined,
-                              color: active ? rgba(product.accent, 0.9) : "rgb(var(--muted))",
-                            }}
-                          >
-                            {active && (
-                              <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(product.accent, 0.8) }} />
-                            )}
-                            {!active && <span className="h-1.5 w-1.5 shrink-0" />}
-                            {article.title}
-                          </a>
-                        );
-                      })}
-                    </div>
+            {/* Sections + articles */}
+            <div className="px-4 py-4 flex flex-col gap-4">
+              {product.sections.map((section) => (
+                <div key={section.id}>
+                  <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] mb-1.5 px-2" style={{ opacity: 0.45 }}>
+                    {section.title}
+                  </p>
+                  <div className="flex flex-col gap-0.5">
+                    {section.articles.map((article) => {
+                      const active = activeArticleId === article.id;
+                      return (
+                        <a
+                          key={article.id}
+                          href={`#${article.id}`}
+                          onClick={() => setSheetOpen(false)}
+                          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent]"
+                          style={{
+                            background: active ? rgba(product.accent, 0.08) : undefined,
+                            color: active ? rgba(product.accent, 0.9) : "rgb(var(--muted))",
+                            transition: "background 150ms ease, color 150ms ease",
+                          }}
+                        >
+                          <span
+                            className="h-1.5 w-1.5 rounded-full shrink-0"
+                            style={{ background: active ? rgba(product.accent, 0.8) : "transparent" }}
+                          />
+                          {article.title}
+                        </a>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       <style>{`
         @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
