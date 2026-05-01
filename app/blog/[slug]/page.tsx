@@ -18,97 +18,75 @@ import {
 // ai-capability-forecast: neural network / signal diagram
 function SketchAI() {
   return (
-    <svg viewBox="0 0 560 160" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
-      {/* Input nodes */}
-      <circle cx="60"  cy="40"  r="6" strokeWidth="0.8" />
-      <circle cx="60"  cy="80"  r="6" strokeWidth="0.8" />
-      <circle cx="60"  cy="120" r="6" strokeWidth="0.8" />
-      {/* Hidden layer 1 */}
-      <circle cx="190" cy="28"  r="6" strokeWidth="0.8" />
-      <circle cx="190" cy="64"  r="6" strokeWidth="0.8" />
-      <circle cx="190" cy="100" r="6" strokeWidth="0.8" />
-      <circle cx="190" cy="136" r="6" strokeWidth="0.8" />
-      {/* Hidden layer 2 */}
-      <circle cx="320" cy="40"  r="6" strokeWidth="0.8" />
-      <circle cx="320" cy="80"  r="6" strokeWidth="0.8" />
-      <circle cx="320" cy="120" r="6" strokeWidth="0.8" />
-      {/* Output nodes */}
-      <circle cx="450" cy="56"  r="6" strokeWidth="0.8" />
-      <circle cx="450" cy="104" r="6" strokeWidth="0.8" />
-      {/* Input → H1 edges */}
-      {[40, 80, 120].flatMap(y1 => [28, 64, 100, 136].map(y2 => (
-        <line key={`i${y1}h${y2}`} x1="66" y1={y1} x2="184" y2={y2} strokeWidth="0.35" />
-      )))}
-      {/* H1 → H2 edges */}
-      {[28, 64, 100, 136].flatMap(y1 => [40, 80, 120].map(y2 => (
-        <line key={`h1${y1}h2${y2}`} x1="196" y1={y1} x2="314" y2={y2} strokeWidth="0.35" />
-      )))}
-      {/* H2 → Output edges */}
-      {[40, 80, 120].flatMap(y1 => [56, 104].map(y2 => (
-        <line key={`h2${y1}o${y2}`} x1="326" y1={y1} x2="444" y2={y2} strokeWidth="0.35" />
-      )))}
-      {/* Signal pulses — dashed highlights on a few paths */}
-      <line x1="66" y1="80" x2="184" y2="64" strokeWidth="0.9" strokeDasharray="4 3" />
-      <line x1="196" y1="64" x2="314" y2="80" strokeWidth="0.9" strokeDasharray="4 3" />
-      <line x1="326" y1="80" x2="444" y2="104" strokeWidth="0.9" strokeDasharray="4 3" />
-      {/* Output arrow */}
-      <line x1="456" y1="56"  x2="500" y2="56"  strokeWidth="0.6" />
-      <line x1="456" y1="104" x2="500" y2="104" strokeWidth="0.6" />
-      <polyline points="494,52 500,56 494,60" strokeWidth="0.6" />
-      <polyline points="494,100 500,104 494,108" strokeWidth="0.6" />
-      {/* Layer labels — tick marks */}
-      <line x1="60"  y1="148" x2="60"  y2="152" strokeWidth="0.5" />
-      <line x1="190" y1="148" x2="190" y2="152" strokeWidth="0.5" />
-      <line x1="320" y1="148" x2="320" y2="152" strokeWidth="0.5" />
-      <line x1="450" y1="148" x2="450" y2="152" strokeWidth="0.5" />
-      <line x1="60"  y1="150" x2="450" y2="150" strokeWidth="0.35" />
+    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      <g stroke="rgb(var(--muted))" opacity="0.5">
+        {[40, 80, 120].flatMap(y1 => [28, 64, 100, 136].map(y2 => (
+          <line key={`i${y1}h${y2}`} x1="66" y1={y1} x2="184" y2={y2} strokeWidth="0.7" />
+        )))}
+        {[28, 64, 100, 136].flatMap(y1 => [40, 80, 120].map(y2 => (
+          <line key={`h1${y1}h2${y2}`} x1="196" y1={y1} x2="314" y2={y2} strokeWidth="0.7" />
+        )))}
+        {[40, 80, 120].flatMap(y1 => [56, 104].map(y2 => (
+          <line key={`h2${y1}o${y2}`} x1="326" y1={y1} x2="444" y2={y2} strokeWidth="0.7" />
+        )))}
+      </g>
+      <g stroke="#60a5fa" strokeDasharray="5 3" strokeWidth="2">
+        <line x1="66" y1="80" x2="184" y2="64" />
+        <line x1="196" y1="64" x2="314" y2="80" />
+        <line x1="326" y1="80" x2="444" y2="104" />
+      </g>
+      <g stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5">
+        <circle cx="60"  cy="40"  r="6" /><circle cx="60"  cy="80"  r="6" /><circle cx="60"  cy="120" r="6" />
+        <circle cx="190" cy="28"  r="6" /><circle cx="190" cy="64"  r="6" /><circle cx="190" cy="100" r="6" /><circle cx="190" cy="136" r="6" />
+        <circle cx="320" cy="40"  r="6" /><circle cx="320" cy="80"  r="6" /><circle cx="320" cy="120" r="6" />
+        <circle cx="450" cy="56"  r="6" /><circle cx="450" cy="104" r="6" />
+      </g>
+      <g fill="#60a5fa" stroke="none">
+        <circle cx="60"  cy="80"  r="5" />
+        <circle cx="190" cy="64"  r="5" />
+        <circle cx="320" cy="80"  r="5" />
+        <circle cx="450" cy="104" r="5" />
+      </g>
+      <g stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5">
+        <line x1="456" y1="56"  x2="500" y2="56"  />
+        <line x1="456" y1="104" x2="500" y2="104" />
+        <polyline points="493,51 500,56 493,61" />
+        <polyline points="493,99 500,104 493,109" />
+      </g>
     </svg>
   );
 }
 
-// hello-world: signal origin — concentric arcs expanding from a point
 function SketchTerminal() {
   return (
-    <svg viewBox="0 0 560 160" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
-      {/* Origin point */}
-      <circle cx="120" cy="80" r="4.5" fill="currentColor" stroke="none" opacity="0.7" />
-      {/* Concentric arcs expanding outward */}
-      <path d="M 138 54 A 30 30 0 0 1 138 106" strokeWidth="1.1" />
-      <path d="M 158 36 A 50 50 0 0 1 158 124" strokeWidth="0.75" />
-      <path d="M 182 20 A 70 70 0 0 1 182 140" strokeWidth="0.5" />
-      <path d="M 210 8 A 90 90 0 0 1 210 152" strokeWidth="0.3" />
-      {/* Axis — dashed transmission line */}
-      <line x1="120" y1="80" x2="460" y2="80" strokeWidth="0.35" strokeDasharray="3 6" />
-      {/* Arrival marker */}
-      <line x1="460" y1="68" x2="460" y2="92" strokeWidth="0.8" />
-      <line x1="468" y1="80" x2="490" y2="80" strokeWidth="0.55" />
-      <polyline points="482,74 490,80 482,86" strokeWidth="0.7" />
+    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      <circle cx="120" cy="80" r="6" fill="#34d399" stroke="none" />
+      <path d="M 138 54 A 30 30 0 0 1 138 106" stroke="#34d399" strokeWidth="2" />
+      <path d="M 158 36 A 50 50 0 0 1 158 124" stroke="#34d399" strokeWidth="1.4" opacity="0.6" />
+      <path d="M 182 20 A 70 70 0 0 1 182 140" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.5" />
+      <path d="M 210 8 A 90 90 0 0 1 210 152" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <line x1="120" y1="80" x2="460" y2="80" stroke="rgb(var(--muted))" strokeWidth="0.8" strokeDasharray="4 6" opacity="0.4" />
+      <line x1="460" y1="64" x2="460" y2="96" stroke="rgb(var(--muted))" strokeWidth="1.5" opacity="0.5" />
+      <line x1="470" y1="80" x2="496" y2="80" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5" />
+      <polyline points="488,73 496,80 488,87" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5" />
     </svg>
   );
 }
 
-// Fallback: abstract waveform / thought signal
 function SketchWave() {
   return (
-    <svg viewBox="0 0 560 160" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" className="w-full text-[rgb(var(--muted))] opacity-[0.32]" aria-hidden="true">
-      {/* Baseline */}
-      <line x1="20" y1="80" x2="540" y2="80" strokeWidth="0.4" strokeDasharray="2 4" />
-      {/* Primary wave */}
-      <path d="M 20 80 C 60 20 100 20 140 80 C 180 140 220 140 260 80 C 300 20 340 20 380 80 C 420 140 460 140 500 80 C 520 40 530 30 540 80" strokeWidth="1.0" />
-      {/* Secondary wave — offset, quieter */}
-      <path d="M 20 80 C 50 50 90 50 120 80 C 150 110 190 110 220 80 C 250 50 290 50 320 80 C 350 110 390 110 420 80 C 450 50 490 50 520 80" strokeWidth="0.5" strokeDasharray="3 3" />
-      {/* Amplitude markers */}
-      <line x1="140" y1="20" x2="140" y2="80"  strokeWidth="0.4" />
-      <line x1="136" y1="20" x2="144" y2="20"  strokeWidth="0.5" />
-      <line x1="136" y1="80" x2="144" y2="80"  strokeWidth="0.5" />
-      <line x1="260" y1="80" x2="260" y2="140" strokeWidth="0.4" />
-      <line x1="256" y1="140" x2="264" y2="140" strokeWidth="0.5" />
-      {/* Period bracket */}
-      <line x1="20"  y1="152" x2="260" y2="152" strokeWidth="0.4" />
-      <line x1="20"  y1="149" x2="20"  y2="155" strokeWidth="0.5" />
-      <line x1="260" y1="149" x2="260" y2="155" strokeWidth="0.5" />
-      {/* Frequency ticks */}
-      <line x1="140" y1="155" x2="140" y2="159" strokeWidth="0.4" />
+    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      <line x1="20" y1="80" x2="540" y2="80" stroke="rgb(var(--muted))" strokeWidth="0.8" strokeDasharray="3 5" opacity="0.4" />
+      <path d="M 20 80 C 60 20 100 20 140 80 C 180 140 220 140 260 80 C 300 20 340 20 380 80 C 420 140 460 140 500 80 C 520 40 530 30 540 80" stroke="#fbbf24" strokeWidth="2" />
+      <path d="M 20 80 C 50 50 90 50 120 80 C 150 110 190 110 220 80 C 250 50 290 50 320 80 C 350 110 390 110 420 80 C 450 50 490 50 520 80" stroke="rgb(var(--muted))" strokeWidth="1" strokeDasharray="3 4" opacity="0.4" />
+      <line x1="140" y1="20" x2="140" y2="80"  stroke="#fbbf24" strokeWidth="1.2" />
+      <line x1="134" y1="20" x2="146" y2="20"  stroke="#fbbf24" strokeWidth="1.4" />
+      <line x1="134" y1="80" x2="146" y2="80"  stroke="#fbbf24" strokeWidth="1.4" />
+      <line x1="260" y1="80" x2="260" y2="140" stroke="#fbbf24" strokeWidth="1.2" />
+      <line x1="254" y1="140" x2="266" y2="140" stroke="#fbbf24" strokeWidth="1.4" />
+      <line x1="20"  y1="152" x2="260" y2="152" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      <line x1="20"  y1="148" x2="20"  y2="156" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
+      <line x1="260" y1="148" x2="260" y2="156" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
     </svg>
   );
 }
@@ -249,21 +227,18 @@ export default async function BlogPost({
 
       <Highlighter slug={slug} />
 
-      {/* Footer — back to top only */}
-      <footer className="mx-auto max-w-2xl px-8 pt-10 mt-6 border-t border-[rgb(var(--line))/0.5]">
-        <div className="flex items-center justify-end">
-          <a
-            href="#"
-            className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
-              <line x1="12" y1="19" x2="12" y2="5" />
-              <polyline points="5 12 12 5 19 12" />
-            </svg>
-            Back to top
-          </a>
-        </div>
-      </footer>
+      <div className="mx-auto max-w-2xl px-8 pt-6 pb-16 flex items-center justify-end">
+        <a
+          href="#"
+          className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
+            <line x1="12" y1="19" x2="12" y2="5" />
+            <polyline points="5 12 12 5 19 12" />
+          </svg>
+          Back to top
+        </a>
+      </div>
     </main>
   );
 }

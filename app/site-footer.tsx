@@ -14,7 +14,7 @@ export function SiteFooter() {
     <footer className="px-8 pt-12 pb-10">
 
       {/* Menu columns */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-10 mb-14">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-10 mb-14">
 
         {/* Get started */}
         <div className="flex flex-col gap-3">
@@ -33,6 +33,22 @@ export function SiteFooter() {
             <li><Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Blog</Link></li>
             <li><Link href="/aether/changelog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Changelog</Link></li>
             <li><Link href="/docs" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Docs</Link></li>
+          </ul>
+        </div>
+
+        {/* Pricing */}
+        <div className="flex flex-col gap-3">
+          <p className="text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50">Pricing</p>
+          <ul className="space-y-2.5">
+            <li><Link href="/aether" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Aether theme</Link></li>
+            <li className="flex items-center gap-2">
+              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-30 cursor-not-allowed select-none">Enterprise</span>
+              <span className="inline-flex items-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-40 px-1.5 pt-[2px] pb-[3px] text-[9px] tracking-tight leading-none">soon</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-30 cursor-not-allowed select-none">Add-ons</span>
+              <span className="inline-flex items-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-40 px-1.5 pt-[2px] pb-[3px] text-[9px] tracking-tight leading-none">soon</span>
+            </li>
           </ul>
         </div>
 

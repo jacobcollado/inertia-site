@@ -28,31 +28,31 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
 }
 
 function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: number; total: number; onOpen: () => void }) {
+  const preserveColor = item.slug === "trippie-redd" || item.slug === "ft-gioo";
   return (
     <button
       onClick={onOpen}
-      className="work-grid-card group relative flex flex-col text-left bg-transparent transition-colors hover:bg-[rgb(var(--line))/0.08]"
+      className="work-grid-card group relative flex flex-col text-left bg-transparent transition-colors hover:bg-[rgb(var(--line))/0.06]"
       data-index={index}
       data-total={total}
       style={{ ["--row-i" as any]: index }}
     >
-      {/* Cover image */}
-      <div className="relative w-full aspect-[4/3] overflow-hidden bg-[rgb(var(--line))]">
-        {item.cover ? (
+      {/* Logo area — fixed aspect, logo constrained to 40% width so all feel balanced */}
+      <div className="w-full aspect-[4/3] flex items-center justify-center p-10">
+        <div className="relative w-[60%] md:w-[40%] h-full flex items-center justify-center">
           <Image
-            src={item.cover}
+            src={`/work/logos/${item.slug}.png`}
             alt={item.client}
-            fill
-            sizes="(min-width: 768px) 33vw, 50vw"
-            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04] grayscale"
+            fill={false}
+            width={160}
+            height={80}
+            className={`object-contain w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]${preserveColor ? "" : " dark:invert"}`}
           />
-        ) : (
-          <div className="absolute inset-0 bg-[rgb(var(--line))]" />
-        )}
+        </div>
       </div>
 
       {/* Info */}
-      <div className="flex flex-col gap-0.5 px-5 py-4">
+      <div className="flex flex-col gap-0.5 px-5 pb-5">
         <span className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{item.client}</span>
         {item.role && (
           <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">{item.role}</span>

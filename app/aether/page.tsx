@@ -243,9 +243,9 @@ export default function AetherPage() {
       <div className="px-6 sm:px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
         <Link
           href="/"
-          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
-          back
+          ← back
         </Link>
       </div>
 
@@ -264,26 +264,32 @@ export default function AetherPage() {
           A Shopify theme for brands that treat the storefront as the product.
         </p>
         <div className="flex flex-col items-center gap-4 w-full text-[13px] tracking-tight">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full">
+          <div className="flex flex-row items-center justify-center gap-2.5">
             <Link
               href="/aether/buy"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-4 py-2 sm:px-5 sm:py-2.5 hover:opacity-90 transition-opacity"
+              className="inline-flex items-center justify-center gap-2 bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-6 py-2.5 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
             >
               Buy a license
             </Link>
             <DemoButton href={DEMO_URL} password="aether" />
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2.5">
             <Link
               href="/docs"
-              className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+              className="inline-flex items-center gap-1.5 border border-[rgb(var(--line))] px-3.5 py-1.5 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
             >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
+                <path d="M3 4h10M3 8h7M3 12h5" />
+              </svg>
               Docs
             </Link>
             <Link
               href="/aether/changelog"
-              className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+              className="inline-flex items-center gap-1.5 border border-[rgb(var(--line))] px-3.5 py-1.5 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
             >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
+                <circle cx="8" cy="8" r="5.5" /><line x1="8" y1="5" x2="8" y2="8.5" /><line x1="8" y1="8.5" x2="10.5" y2="8.5" />
+              </svg>
               Changelog
             </Link>
           </div>
