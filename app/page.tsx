@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { SiShopify, SiReact, SiTypescript, SiTailwindcss, SiFigma, SiSwift, SiMeta, SiSubstack, SiDribbble } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
 import { SoundwaveHero } from "./soundwave-hero";
+import { createClient } from "@/lib/supabase/client";
 import type { WorkMeta } from "@/lib/work";
 import type { PostMeta } from "@/lib/posts";
 
@@ -204,163 +206,87 @@ function GridRule() {
   return <div className="grid-rule" aria-hidden="true" />;
 }
 
-// Blueprint sketches for the perspectives (think) cards
-const THINK_SKETCHES = [
-  // Drafting compass — precision, craft
-  <svg key="compass" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-    {/* Compass legs */}
-    <line x1="100" y1="28" x2="62" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.32" />
-    <line x1="100" y1="28" x2="138" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.32" />
-    {/* Needle tip */}
-    <line x1="62" y1="100" x2="60" y2="107" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
-    <line x1="60" y1="107" x2="64" y2="107" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-    {/* Pencil tip */}
-    <line x1="138" y1="100" x2="136" y2="107" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
-    <line x1="136" y1="107" x2="140" y2="104" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-    {/* Arc being drawn — amber accent */}
-    <path d="M 52 95 A 58 58 0 0 1 148 95" stroke="rgb(var(--amber))" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.65" />
-    {/* Hinge crossbar */}
-    <line x1="88" y1="52" x2="112" y2="52" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
-    <circle cx="94" cy="52" r="1.5" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.28" />
-    <circle cx="106" cy="52" r="1.5" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.28" />
-    {/* Adjustment screw */}
-    <line x1="100" y1="28" x2="100" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
-    <line x1="96" y1="18" x2="104" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.26" />
-    <line x1="97" y1="15" x2="103" y2="15" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-    <line x1="98" y1="12" x2="102" y2="12" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
-    {/* Pivot point — amber accent */}
-    <circle cx="100" cy="28" r="3" stroke="rgb(var(--amber))" strokeWidth="0.9" opacity="0.7" />
-    <circle cx="100" cy="28" r="1.2" fill="rgb(var(--amber))" opacity="0.55" />
-    {/* Construction lines */}
-    <line x1="100" y1="95" x2="100" y2="110" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.18" />
-    <line x1="60" y1="95" x2="140" y2="95" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.18" />
-    {/* Radius dimension — amber */}
-    <line x1="100" y1="97" x2="138" y2="97" stroke="rgb(var(--amber))" strokeWidth="0.5" opacity="0.45" />
-    <line x1="100" y1="95" x2="100" y2="99" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.5" />
-    <line x1="138" y1="95" x2="138" y2="99" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.5" />
-  </svg>,
-
-  // Type specimen grid — hierarchy, rhythm
-  <svg key="type" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-    {/* Baseline grid */}
-    {[32,48,64,80,96,112].map(y => (
-      <line key={y} x1="12" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 3" opacity="0.16" />
-    ))}
-    {/* Display headline — amber accent */}
-    <line x1="12" y1="12" x2="12"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
-    <line x1="22" y1="12" x2="22"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
-    <line x1="12" y1="21" x2="22"  y2="21" stroke="rgb(var(--amber))" strokeWidth="2.5" opacity="0.45" />
-    <line x1="32" y1="12" x2="32"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
-    <line x1="32" y1="12" x2="44"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
-    <line x1="54" y1="12" x2="54"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
-    <line x1="54" y1="12" x2="66"  y2="12" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
-    <line x1="54" y1="22" x2="63"  y2="22" stroke="rgb(var(--amber))" strokeWidth="2.5" opacity="0.45" />
-    <line x1="54" y1="32" x2="66"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
-    {/* Subhead — medium muted */}
-    <line x1="12" y1="44" x2="90"  y2="44" stroke="rgb(var(--muted))" strokeWidth="1.8" opacity="0.35" />
-    <line x1="12" y1="52" x2="75"  y2="52" stroke="rgb(var(--muted))" strokeWidth="1.8" opacity="0.35" />
-    {/* Body copy */}
-    <line x1="12" y1="60" x2="186" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
-    <line x1="12" y1="68" x2="186" y2="68" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
-    <line x1="12" y1="76" x2="160" y2="76" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
-    <line x1="12" y1="84" x2="186" y2="84" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
-    <line x1="12" y1="92" x2="140" y2="92" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
-    {/* Cap-height marker — amber */}
-    <line x1="6" y1="12" x2="10"  y2="12" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.55" />
-    <line x1="6" y1="32" x2="10"  y2="32" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.55" />
-    <line x1="8" y1="12" x2="8"   y2="32" stroke="rgb(var(--amber))" strokeWidth="0.5" opacity="0.45" />
-    {/* x-height marker — amber */}
-    <line x1="192" y1="44" x2="196" y2="44" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.5" />
-    <line x1="192" y1="52" x2="196" y2="52" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.5" />
-    <line x1="194" y1="44" x2="194" y2="52" stroke="rgb(var(--amber))" strokeWidth="0.5" opacity="0.4" />
-  </svg>,
-
-  // Light bulb cross-section — ideas, clarity
-  <svg key="bulb" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-    {/* Bulb glow fill — amber */}
-    <path d="M 100 10 C 130 10 148 30 148 55 C 148 75 136 88 128 95 L 72 95 C 64 88 52 75 52 55 C 52 30 70 10 100 10 Z" fill="rgb(var(--amber))" fillOpacity="0.06" stroke="rgb(var(--amber))" strokeWidth="0.9" opacity="0.5" />
-    {/* Filament support wires */}
-    <line x1="84" y1="95" x2="84" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
-    <line x1="116" y1="95" x2="116" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
-    {/* Filament coil — amber accent */}
-    <path d="M 84 72 Q 88 62 92 68 Q 96 74 100 64 Q 104 54 108 64 Q 112 74 116 68 Q 116 66 116 64" stroke="rgb(var(--amber))" strokeWidth="1.0" opacity="0.7" />
-    {/* Glass neck / base */}
-    <line x1="72" y1="95" x2="72"  y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
-    <line x1="128" y1="95" x2="128" y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
-    <line x1="72" y1="100" x2="128" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.22" />
-    <line x1="72" y1="104" x2="128" y2="104" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.22" />
-    <line x1="72" y1="108" x2="128" y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
-    {/* Base screw threads */}
-    <path d="M 72 108 Q 80 112 88 108 Q 96 104 104 108 Q 112 112 120 108 Q 126 105 128 108" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-    <path d="M 74 114 Q 82 118 90 114 Q 98 110 106 114 Q 114 118 122 114 Q 126 112 128 114" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
-    {/* Radiation lines — amber */}
-    <line x1="100" y1="8"  x2="100" y2="2"  stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.55" />
-    <line x1="118" y1="13" x2="122" y2="9"  stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.45" />
-    <line x1="130" y1="26" x2="135" y2="23" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.38" />
-    <line x1="82"  y1="13" x2="78"  y2="9"  stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.45" />
-    <line x1="70"  y1="26" x2="65"  y2="23" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.38" />
-    {/* Center line */}
-    <line x1="100" y1="10" x2="100" y2="95" stroke="rgb(var(--muted))" strokeWidth="0.35" strokeDasharray="3 2" opacity="0.18" />
-    {/* Dimension marks */}
-    <line x1="52"  y1="115" x2="148" y2="115" stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.18" />
-    <line x1="52"  y1="113" x2="52"  y2="117" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
-    <line x1="148" y1="113" x2="148" y2="117" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
-  </svg>,
-];
-
-// Slug-specific sketch overrides for the think section
+// Slug-specific sketches for the think section — one per post
 const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
-  "hello-world": (
-    <svg key="hello-world" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Origin point — amber */}
-      <circle cx="44" cy="60" r="3.5" fill="rgb(var(--amber))" opacity="0.65" />
-      {/* Concentric arcs — amber fading out */}
-      <path d="M 55 43 A 20 20 0 0 1 55 77" stroke="rgb(var(--amber))" strokeWidth="1.0" opacity="0.55" />
-      <path d="M 68 30 A 34 34 0 0 1 68 90" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.38" />
-      <path d="M 84 19 A 48 48 0 0 1 84 101" stroke="rgb(var(--muted))" strokeWidth="0.45" opacity="0.28" />
-      <path d="M 103 10 A 62 62 0 0 1 103 110" stroke="rgb(var(--muted))" strokeWidth="0.28" opacity="0.18" />
-      {/* Dashed axis */}
-      <line x1="44" y1="60" x2="170" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.3" strokeDasharray="2 5" opacity="0.2" />
-      {/* Arrival tick + arrow — amber */}
-      <line x1="170" y1="51" x2="170" y2="69" stroke="rgb(var(--amber))" strokeWidth="0.8" opacity="0.55" />
-      <line x1="177" y1="60" x2="190" y2="60" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.5" />
-      <polyline points="184,55 190,60 184,65" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.5" />
+  // "A quiet forecast on AI capability" — capability curve with horizon line and uncertainty band
+  "ai-capability-forecast": (
+    <svg key="ai-capability-forecast" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Grid */}
+      {[30, 55, 80].map(y => (
+        <line key={y} x1="18" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 4" opacity="0.2" />
+      ))}
+      <line x1="18" y1="100" x2="188" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <line x1="18" y1="12"  x2="18"  y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      {/* Historical curve — solid blue */}
+      <path d="M 18 98 C 40 97 60 92 80 84 C 95 78 108 68 120 56" stroke="rgb(var(--blue))" strokeWidth="1.8" opacity="0.8" />
+      {/* Forecast zone — dashed, fanning uncertainty */}
+      <path d="M 120 56 C 133 44 148 30 165 18" stroke="rgb(var(--blue))" strokeWidth="1.4" strokeDasharray="4 3" opacity="0.55" />
+      {/* Upper uncertainty bound */}
+      <path d="M 120 56 C 133 38 150 22 170 12" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="2 3" opacity="0.3" />
+      {/* Lower uncertainty bound */}
+      <path d="M 120 56 C 133 52 148 42 165 32" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="2 3" opacity="0.3" />
+      {/* Horizon divider */}
+      <line x1="120" y1="10" x2="120" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 3" opacity="0.25" />
+      {/* "Now" tick */}
+      <line x1="120" y1="100" x2="120" y2="106" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.4" />
+      {/* Milestone dots on curve */}
+      <circle cx="50"  cy="95" r="2.5" fill="rgb(var(--blue))" opacity="0.5" />
+      <circle cx="80"  cy="84" r="2.5" fill="rgb(var(--blue))" opacity="0.65" />
+      <circle cx="120" cy="56" r="3.5" fill="rgb(var(--blue))" opacity="0.85" />
+      <circle cx="120" cy="56" r="6"   stroke="rgb(var(--blue))" strokeWidth="0.8" opacity="0.25" />
+      {/* Arrow on forecast line */}
+      <polyline points="159,14 165,18 159,22" stroke="rgb(var(--blue))" strokeWidth="1.2" opacity="0.6" />
     </svg>
   ),
+
+  // "Four years in" — growth curve, starts slow, accelerates
   "four-years": (
     <svg key="four-years" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Grid lines — faint */}
-      {[30, 55, 80, 105].map(y => (
-        <line key={y} x1="20" y1={y} x2="185" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.35" strokeDasharray="2 4" opacity="0.16" />
+      {/* Grid */}
+      {[30, 55, 80].map(y => (
+        <line key={y} x1="18" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 4" opacity="0.2" />
       ))}
-      {/* Baseline */}
-      <line x1="20" y1="105" x2="185" y2="105" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-      {/* Y axis */}
-      <line x1="20" y1="20" x2="20" y2="105" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-      {/* Growth curve — starts flat, accelerates — green accent */}
-      <path
-        d="M 20 103 C 50 102 70 96 90 86 C 110 74 128 55 148 38 C 158 30 168 24 185 18"
-        stroke="rgb(var(--green))"
-        strokeWidth="1.4"
-        opacity="0.75"
-      />
-      {/* Milestone dots along the curve */}
-      <circle cx="55"  cy="100" r="2.2" fill="rgb(var(--green))" opacity="0.45" />
-      <circle cx="90"  cy="86"  r="2.2" fill="rgb(var(--green))" opacity="0.55" />
-      <circle cx="125" cy="62"  r="2.5" fill="rgb(var(--green))" opacity="0.65" />
-      <circle cx="160" cy="33"  r="3"   fill="rgb(var(--green))" opacity="0.8"  />
-      {/* Vertical drops from milestones to baseline — dashed */}
-      <line x1="55"  y1="100" x2="55"  y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" />
-      <line x1="90"  y1="86"  x2="90"  y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
-      <line x1="125" y1="62"  x2="125" y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
-      <line x1="160" y1="33"  x2="160" y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
-      {/* Year labels on baseline */}
-      <line x1="55"  y1="105" x2="55"  y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
-      <line x1="90"  y1="105" x2="90"  y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
-      <line x1="125" y1="105" x2="125" y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
-      <line x1="160" y1="105" x2="160" y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
-      {/* Arrow tip on curve end */}
-      <polyline points="179,14 185,18 179,22" stroke="rgb(var(--green))" strokeWidth="1.0" opacity="0.7" />
+      <line x1="18" y1="100" x2="188" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <line x1="18" y1="12"  x2="18"  y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      {/* Growth curve — slow start, then hockey stick */}
+      <path d="M 18 98 C 50 97 72 94 90 86 C 110 74 130 52 150 34 C 162 24 172 17 188 12"
+        stroke="rgb(var(--green))" strokeWidth="2.0" opacity="0.85" />
+      {/* Milestone dots */}
+      <circle cx="55"  cy="97" r="2.5" fill="rgb(var(--green))" opacity="0.5" />
+      <circle cx="90"  cy="86" r="2.5" fill="rgb(var(--green))" opacity="0.65" />
+      <circle cx="130" cy="52" r="3"   fill="rgb(var(--green))" opacity="0.8" />
+      <circle cx="170" cy="18" r="3.5" fill="rgb(var(--green))" opacity="0.95" />
+      {/* Drop lines */}
+      <line x1="55"  y1="97" x2="55"  y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" opacity="0.4" />
+      <line x1="90"  y1="86" x2="90"  y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.35" />
+      <line x1="130" y1="52" x2="130" y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.35" />
+      <line x1="170" y1="18" x2="170" y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.3" />
+      {/* Baseline ticks */}
+      {[55, 90, 130, 170].map(x => (
+        <line key={x} x1={x} y1="100" x2={x} y2="106" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.35" />
+      ))}
+      {/* Arrow */}
+      <polyline points="182,8 188,12 182,16" stroke="rgb(var(--green))" strokeWidth="1.3" opacity="0.75" />
+    </svg>
+  ),
+
+  // "Hello, world" — radio signal / first broadcast
+  "hello-world": (
+    <svg key="hello-world" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Origin dot */}
+      <circle cx="44" cy="60" r="4" fill="rgb(var(--amber))" opacity="0.8" />
+      <circle cx="44" cy="60" r="7" stroke="rgb(var(--amber))" strokeWidth="1.0" opacity="0.4" />
+      {/* Signal arcs — amber to muted */}
+      <path d="M 56 42 A 22 22 0 0 1 56 78" stroke="rgb(var(--amber))" strokeWidth="1.6" opacity="0.7" />
+      <path d="M 70 28 A 38 38 0 0 1 70 92" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.45" />
+      <path d="M 87 15 A 55 55 0 0 1 87 105" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      <path d="M 108 6  A 72 72 0 0 1 108 114" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      <path d="M 132 2  A 88 88 0 0 1 132 118" stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.14" />
+      {/* Horizontal axis */}
+      <line x1="44" y1="60" x2="188" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 5" opacity="0.22" />
+      {/* Destination tick */}
+      <line x1="176" y1="50" x2="176" y2="70" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.6" />
+      <polyline points="180,55 188,60 180,65" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.6" />
     </svg>
   ),
 };
@@ -422,8 +348,202 @@ function TechMarquee() {
   );
 }
 
+/* ── Dashboard waitlist modal ────────────────────────────────────── */
+
+type Plan = "free" | "service";
+
+function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [plan, setPlan] = useState<Plan>("free");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => { setDone(false); setError(""); setEmail(""); setName(""); setPlan("free"); }, 300);
+    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    if (open) { document.addEventListener("keydown", onKey); document.body.style.overflow = "hidden"; }
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [open, onClose]);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const supabase = createClient();
+      const { error: err } = await supabase.from("dashboard_waitlist").insert({ name, email, plan });
+      if (err) throw err;
+      setDone(true);
+    } catch {
+      setError("Something went wrong. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const accent = "rgb(var(--blue))";
+  const inputBase = "w-full bg-transparent border-0 border-b py-3 text-[16px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200";
+
+  const PLANS = [
+    {
+      key: "free" as Plan,
+      label: "Get early access",
+      sub: "Free, no commitment",
+    },
+    {
+      key: "service" as Plan,
+      label: "Work with us",
+      sub: "Already a client or ready to start",
+    },
+  ];
+
+  const modal = (
+    <div
+      ref={backdropRef}
+      className="fixed z-50 flex items-end sm:items-center justify-center"
+      style={{
+        inset: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: "100dvh",
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        opacity: open ? 1 : 0,
+        pointerEvents: open ? "auto" : "none",
+        transition: "opacity 220ms ease",
+      }}
+      onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
+    >
+      <div
+        className="relative w-full sm:max-w-[420px] bg-[rgb(var(--bg))] border border-[rgb(var(--line))] rounded-t-2xl sm:rounded-sm mx-0 sm:mx-4 overflow-y-auto overscroll-contain"
+        style={{
+          maxHeight: "90dvh",
+          animation: open ? "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both" : "none",
+        }}
+      >
+        {/* Drag handle — mobile */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1">
+          <div className="w-8 h-1 rounded-full bg-[rgb(var(--line))]" />
+        </div>
+
+        {/* Close — desktop */}
+        <button
+          onClick={onClose}
+          className="hidden sm:flex absolute top-4 right-4 w-7 h-7 items-center justify-center text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          aria-label="Close"
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-4 h-4">
+            <path d="M3 3l10 10M13 3L3 13" />
+          </svg>
+        </button>
+
+        <div className="px-6 sm:px-8 pt-5 sm:pt-7 pb-8 sm:pb-8">
+          {done ? (
+            <div style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center mb-4" style={{ background: "rgb(var(--blue)/0.1)" }}>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ color: accent }}>
+                  <polyline points="2 8 6 12 14 4" />
+                </svg>
+              </div>
+              <p className="text-[20px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug mb-2">
+                {plan === "service" ? "We'll be in touch soon." : "You're on the list."}
+              </p>
+              <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
+                {plan === "service"
+                  ? "We'll review your details and reach out within a day to get things moving."
+                  : "Access is limited while we build. We'll email you when your spot is ready."}
+              </p>
+              <button onClick={onClose} className="mt-6 text-[13px] tracking-tight transition-colors hover:text-[rgb(var(--fg))]" style={{ color: accent }}>
+                Done
+              </button>
+            </div>
+          ) : (
+            <>
+              <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-3">Inertia Dashboard</p>
+              <h2 className="text-[clamp(1.25rem,4vw,1.5rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug mb-2">
+                Your project, all in one place.
+              </h2>
+              <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mb-7">
+                Status updates, files, invoices, and support — built for clients who want visibility without the back-and-forth.
+              </p>
+
+              {/* Plan selector */}
+              <div className="grid grid-cols-2 gap-2.5 mb-7">
+                {PLANS.map(({ key, label, sub }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setPlan(key)}
+                    className="flex flex-col gap-1 p-3.5 border text-left transition-all duration-150 rounded-sm"
+                    style={{
+                      borderColor: plan === key ? accent : "rgb(var(--line))",
+                      background: plan === key ? "rgb(var(--blue)/0.07)" : "transparent",
+                    }}
+                  >
+                    <span className="text-[13px] font-medium tracking-tight" style={{ color: plan === key ? accent : "rgb(var(--fg))" }}>{label}</span>
+                    <span className="text-[11.5px] tracking-tight text-[rgb(var(--muted))] leading-snug">{sub}</span>
+                  </button>
+                ))}
+              </div>
+
+              <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+                <input
+                  type="text" value={name} onChange={(e) => setName(e.target.value)}
+                  placeholder="your name" autoComplete="name" className={inputBase}
+                  style={{ borderColor: name ? accent : "rgb(var(--line))" }}
+                  onFocus={(e) => { e.target.style.borderColor = accent; }}
+                  onBlur={(e) => { e.target.style.borderColor = name ? accent : "rgb(var(--line))"; }}
+                />
+                <input
+                  type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email address" autoComplete="email" className={inputBase}
+                  style={{ borderColor: email ? accent : "rgb(var(--line))" }}
+                  onFocus={(e) => { e.target.style.borderColor = accent; }}
+                  onBlur={(e) => { e.target.style.borderColor = email ? accent : "rgb(var(--line))"; }}
+                />
+                {plan === "service" && (
+                  <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] -mt-2 leading-relaxed">
+                    Tell us a bit about your project in the next step and we'll take it from there.
+                  </p>
+                )}
+                {error && <p className="text-[13px] tracking-tight text-red-500 -mt-1">{error}</p>}
+                <button
+                  type="submit"
+                  disabled={loading || !email}
+                  className="w-full flex items-center justify-center gap-2 rounded-full py-3 text-[15px] tracking-tight font-medium transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed mt-1"
+                  style={{ background: accent, color: "white" }}
+                >
+                  {loading ? "Sending..." : plan === "free" ? "Get early access" : "Start the conversation"}
+                  {!loading && (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  return typeof document !== "undefined" ? createPortal(modal, document.body) : null;
+}
+
 function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) {
+  const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   return (
+    <>
+    <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container mx-auto w-full max-w-5xl pb-16 sm:pb-20 min-h-screen flex flex-col">
 
       {/* Soundwave hero — touches both grid lines */}
@@ -458,23 +578,20 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           {/* Items — 2×2 on mobile, row on sm+ */}
           <div className="grid grid-cols-2 sm:flex">
             {BUILDING.map((item, i) => {
-              const external = item.href.startsWith("http");
-              const Cmp: any = external ? "a" : Link;
-              const extra = external ? { target: "_blank", rel: "noreferrer" } : {};
+              const isDashboard = item.name === "Inertia Dashboard";
+              const external = !isDashboard && item.href.startsWith("http");
               const isActive = item.tag === "Active" || item.tag === "Building";
-              // 2×2 grid on mobile: col0 has right border, row0 has bottom border; 3rd item spans 2 cols
               const borderClass = [
                 i === 0 ? "border-r border-[rgb(var(--line))]" : "",
                 i === 1 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
                 i < 2   ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
                 i === 2 ? "col-span-2 sm:col-span-1" : "",
               ].filter(Boolean).join(" ");
-              return (
-                <Cmp key={item.name} href={item.href} {...extra} className={`group flex-1 flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px] ${borderClass}`}>
+              const sharedClass = `group flex-1 flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px] text-left ${borderClass}`;
+              const inner = (
+                <>
                   <div className="flex-1 flex flex-col gap-5">
-                    <div className="w-full">
-                      {item.sketch}
-                    </div>
+                    <div className="w-full">{item.sketch}</div>
                     <div className="flex flex-col gap-1">
                       <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
                       <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
@@ -489,7 +606,16 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                       <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
-                </Cmp>
+                </>
+              );
+              if (isDashboard) return (
+                <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={sharedClass}>{inner}</button>
+              );
+              if (external) return (
+                <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={sharedClass}>{inner}</a>
+              );
+              return (
+                <Link key={item.name} href={item.href} className={sharedClass}>{inner}</Link>
               );
             })}
           </div>
@@ -529,7 +655,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                 >
                   <div className="flex flex-col gap-4">
                     <div className="w-full overflow-hidden">
-                      {THINK_SLUG_SKETCHES[post.slug] ?? THINK_SKETCHES[i % THINK_SKETCHES.length]}
+                      {THINK_SLUG_SKETCHES[post.slug]}
                     </div>
                     <div className="flex flex-col gap-1">
                       <span className="text-[14px] sm:text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
@@ -583,5 +709,6 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
       <GridRule />
 
     </main>
+    </>
   );
 }
