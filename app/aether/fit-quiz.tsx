@@ -265,12 +265,12 @@ export function FitQuiz() {
       {/* Two-column layout */}
       <div className="flex flex-col sm:flex-row gap-0">
         {/* Sketch pane */}
-        <div className="w-full sm:w-[200px] shrink-0 flex items-center justify-center py-6 sm:py-8 sm:border-r border-[rgb(var(--line))] sm:pr-8"
+        <div className="w-full sm:w-[260px] shrink-0 flex items-center justify-center py-8 sm:py-10 px-6 sm:border-r border-[rgb(var(--line))] sm:pr-8"
           style={{
             borderBottom: "1px solid rgb(var(--line))",
           }}
         >
-          <div className="w-[120px] h-[90px] sm:w-full sm:h-[120px] relative">
+          <div className="w-full max-w-[220px] h-[160px] sm:max-w-none sm:w-full sm:h-[160px] relative">
             {/* Stack all sketches, only the active one is visible */}
             {!done ? (
               SKETCHES.map((Sketch, i) => (
@@ -289,7 +289,7 @@ export function FitQuiz() {
         </div>
 
         {/* Content pane */}
-        <div className="flex-1 sm:pl-8 pt-6 sm:pt-8 pb-6 sm:pb-8 flex flex-col justify-between min-h-[180px]">
+        <div className="flex-1 px-6 sm:pl-8 sm:pr-8 pt-6 sm:pt-10 pb-6 sm:pb-10 flex flex-col justify-between min-h-[200px]">
           <div
             key={done ? "verdict" : `q-${index}`}
             className="flex flex-col gap-3 flex-1"
@@ -309,10 +309,10 @@ export function FitQuiz() {
                 <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums">
                   {String(index + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
                 </p>
-                <h3 className="text-[1.2rem] sm:text-[1.45rem] font-medium tracking-tighter leading-[1.25] text-[rgb(var(--fg))]">
+                <h3 className="text-[1.35rem] sm:text-[1.45rem] font-medium tracking-tighter leading-[1.25] text-[rgb(var(--fg))]">
                   {q.text}
                 </h3>
-                <p className="text-[12.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md flex-1">
+                <p className="text-[13.5px] sm:text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md flex-1">
                   {q.sub}
                 </p>
                 <div className="flex items-center gap-3 pt-2">
@@ -343,7 +343,7 @@ export function FitQuiz() {
                 <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums">
                   {yesCount} of {TOTAL} yes
                 </p>
-                <h3 className="text-[1.2rem] sm:text-[1.45rem] font-medium tracking-tighter leading-[1.25] text-[rgb(var(--fg))]">
+                <h3 className="text-[1.35rem] sm:text-[1.45rem] font-medium tracking-tighter leading-[1.25] text-[rgb(var(--fg))]">
                   {verdict.title}
                 </h3>
                 <p className="text-[12.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md flex-1">

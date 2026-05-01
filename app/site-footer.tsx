@@ -32,10 +32,7 @@ export function SiteFooter() {
           <ul className="space-y-2.5">
             <li><Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Blog</Link></li>
             <li><Link href="/aether/changelog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Changelog</Link></li>
-            <li className="flex items-center gap-2">
-              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-30 cursor-not-allowed select-none">Docs</span>
-              <span className="inline-flex items-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-40 px-1.5 pt-[2px] pb-[3px] text-[9px] tracking-tight leading-none">soon</span>
-            </li>
+            <li><Link href="/docs" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Docs</Link></li>
           </ul>
         </div>
 

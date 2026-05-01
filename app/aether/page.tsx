@@ -273,12 +273,20 @@ export default function AetherPage() {
             </Link>
             <DemoButton href={DEMO_URL} password="aether" />
           </div>
-          <Link
-            href="/aether/changelog"
-            className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-          >
-            Changelog
-          </Link>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/docs"
+              className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+            >
+              Docs
+            </Link>
+            <Link
+              href="/aether/changelog"
+              className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+            >
+              Changelog
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -320,10 +328,10 @@ export default function AetherPage() {
               {i === 2 && <SketchConversion accent={f.accent} />}
             </div>
             <div className="flex flex-col gap-2">
-              <h3 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
+              <h3 className="text-[18px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
                 {f.title}
               </h3>
-              <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+              <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
                 {f.body}
               </p>
             </div>
@@ -347,8 +355,8 @@ export default function AetherPage() {
 
       <GridRule />
 
-      {/* Fit quiz — inline */}
-      <div className="px-6 sm:px-8 py-8 sm:py-10 rise" style={{ ["--rise-delay" as any]: "220ms" }}>
+      {/* Fit quiz — inline, edge-to-edge */}
+      <div className="py-8 sm:py-10 rise" style={{ ["--rise-delay" as any]: "220ms" }}>
         <FitQuiz />
       </div>
 
