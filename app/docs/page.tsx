@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 
@@ -437,7 +438,7 @@ function SketchTimeline({ accent }: { accent: [number, number, number] }) {
 
 // ─── Sketch registry ──────────────────────────────────────────────────────────
 
-const SKETCH_MAP: Record<string, (p: { accent: [number, number, number] }) => JSX.Element> = {
+const SKETCH_MAP: Record<string, (p: { accent: [number, number, number] }) => React.ReactElement> = {
   install: SketchInstall,
   colors: SketchColors,
   productPage: SketchProductPage,
@@ -1051,7 +1052,7 @@ export default function DocsPage() {
           </div>
         </aside>
 
-        <div className="flex-1 min-w-0 pb-24 lg:pb-0">
+        <div className="flex-1 min-w-0 pb-32 lg:pb-0">
           {product.sections.map((section) =>
             section.articles.map((article) => (
               <article
@@ -1069,26 +1070,49 @@ export default function DocsPage() {
         </div>
       </div>
 
-      {/* Mobile sticky TOC pill */}
+      {/* Mobile sticky TOC bar */}
       {(() => {
         const activeArticle = allArticles.find((a) => a.id === activeArticleId);
+        const articleIndex = allArticles.findIndex((a) => a.id === activeArticleId);
+        const progress = allArticles.length > 1 ? (articleIndex + 1) / allArticles.length : 1;
         return (
-          <div className="lg:hidden fixed bottom-6 inset-x-0 z-40 flex justify-center pointer-events-none">
-            <button
-              onClick={() => setSheetOpen(true)}
-              className="pointer-events-auto flex items-center gap-2.5 pl-3.5 pr-4 h-10 rounded-full border border-[rgb(var(--line))] shadow-lg text-[13px] tracking-tight transition-all active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
-              style={{
-                background: "rgb(var(--bg))",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.08)",
-              }}
-            >
-              <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(product.accent, 0.85) }} />
-              <span className="text-[rgb(var(--fg))] max-w-[200px] truncate">{activeArticle?.title ?? "Contents"}</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 text-[rgb(var(--muted))] shrink-0">
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="lg:hidden fixed bottom-0 inset-x-0 z-40 w-full flex items-center gap-3 px-5 [-webkit-tap-highlight-color:transparent]"
+            style={{
+              height: 56,
+              background: "rgb(var(--bg))",
+              borderTop: "1px solid rgb(var(--line))",
+              paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            }}
+          >
+            {/* Progress ring / dot */}
+            <svg width="20" height="20" viewBox="0 0 20 20" className="shrink-0" aria-hidden="true">
+              <circle cx="10" cy="10" r="8" fill="none" stroke={rgba(product.accent, 0.12)} strokeWidth="1.5" />
+              <circle cx="10" cy="10" r="8" fill="none"
+                stroke={rgba(product.accent, 0.75)} strokeWidth="1.5"
+                strokeDasharray={`${2 * Math.PI * 8}`}
+                strokeDashoffset={`${2 * Math.PI * 8 * (1 - progress)}`}
+                strokeLinecap="round"
+                style={{ transform: "rotate(-90deg)", transformOrigin: "10px 10px" }}
+              />
+              <circle cx="10" cy="10" r="2.5" fill={rgba(product.accent, 0.7)} />
+            </svg>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] leading-none mb-0.5" style={{ opacity: 0.5 }}>
+                {articleIndex + 1} of {allArticles.length}
+              </p>
+              <p className="text-[13px] tracking-tight text-[rgb(var(--fg))] truncate leading-snug">
+                {activeArticle?.title ?? "Contents"}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 text-[12px] tracking-tight shrink-0" style={{ color: rgba(product.accent, 0.7) }}>
+              <span>Contents</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
-            </button>
-          </div>
+            </div>
+          </button>
         );
       })()}
 
@@ -1097,27 +1121,27 @@ export default function DocsPage() {
         <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
           <div
             className="absolute inset-0"
-            style={{ background: "rgba(0,0,0,0.25)", animation: "fade-in 180ms ease both" }}
+            style={{ background: "rgba(0,0,0,0.3)", animation: "fade-in 180ms ease both" }}
             onClick={() => setSheetOpen(false)}
           />
           <div
-            className="relative z-10 rounded-t-2xl border-t border-[rgb(var(--line))] max-h-[82vh] overflow-y-auto"
+            className="relative z-10 rounded-t-2xl border-t border-[rgb(var(--line))] flex flex-col"
             style={{
               background: "rgb(var(--bg))",
               animation: "sheet-up 300ms cubic-bezier(0.22,1,0.36,1) both",
-              paddingBottom: "env(safe-area-inset-bottom, 24px)",
+              maxHeight: "78vh",
             }}
           >
-            {/* Handle */}
-            <div className="sticky top-0 z-10 flex items-center justify-between px-5 pt-4 pb-3 border-b border-[rgb(var(--line))]" style={{ background: "rgb(var(--bg))" }}>
-              <div className="flex items-center gap-2">
+            {/* Sheet header — sticky */}
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] shrink-0">
+              <div className="flex items-center gap-2.5">
                 <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(product.accent, 0.8) }} />
                 <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">{product.name} docs</p>
               </div>
               <button
                 onClick={() => setSheetOpen(false)}
-                className="h-7 w-7 flex items-center justify-center rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-                style={{ background: "rgba(var(--fg-rgb,128,128,128),0.06)" }}
+                className="h-7 w-7 flex items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors"
+                style={{ background: "rgba(128,128,128,0.08)" }}
                 aria-label="Close"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
@@ -1125,8 +1149,64 @@ export default function DocsPage() {
                 </svg>
               </button>
             </div>
-            <div className="px-5 pb-6">
-              <SidebarNav {...sidebarProps} onNav={() => setSheetOpen(false)} />
+
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-1" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
+              {/* Product switcher */}
+              <div className="px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] flex gap-2">
+                {PRODUCTS.map((p) => {
+                  const active = p.id === activeProductId;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => { handleSelectProduct(p.id); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] tracking-tight transition-colors"
+                      style={{
+                        background: active ? rgba(p.accent, 0.1) : "rgba(128,128,128,0.06)",
+                        color: active ? rgba(p.accent, 0.9) : "rgb(var(--muted))",
+                        border: `1px solid ${active ? rgba(p.accent, 0.25) : "rgb(var(--line))"}`,
+                      }}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(p.accent, active ? 0.9 : 0.3) }} />
+                      {p.name}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Sections + articles */}
+              <div className="px-5 py-4 flex flex-col gap-5">
+                {product.sections.map((section) => (
+                  <div key={section.id}>
+                    <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] mb-2 px-1" style={{ opacity: 0.45 }}>
+                      {section.title}
+                    </p>
+                    <div className="flex flex-col gap-0.5">
+                      {section.articles.map((article) => {
+                        const active = activeArticleId === article.id;
+                        return (
+                          <a
+                            key={article.id}
+                            href={`#${article.id}`}
+                            onClick={() => setSheetOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[14px] tracking-tight transition-colors"
+                            style={{
+                              background: active ? rgba(product.accent, 0.08) : undefined,
+                              color: active ? rgba(product.accent, 0.9) : "rgb(var(--muted))",
+                            }}
+                          >
+                            {active && (
+                              <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(product.accent, 0.8) }} />
+                            )}
+                            {!active && <span className="h-1.5 w-1.5 shrink-0" />}
+                            {article.title}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
