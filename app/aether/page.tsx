@@ -401,7 +401,7 @@ export default function AetherPage() {
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{t.name}</span>
                 {t.badge && (
-                  <span className="inline-flex items-center rounded-full border border-[rgb(56,180,255,0.5)] text-[rgb(56,180,255)] px-2 pt-[3px] pb-[4px] text-[10px] font-medium tracking-tight leading-none">
+                  <span className="inline-flex items-center rounded-full border border-[rgb(var(--blue)/0.5)] text-[rgb(var(--blue))] px-2 pt-[3px] pb-[4px] text-[10px] font-medium tracking-tight leading-none">
                     {t.badge}
                   </span>
                 )}
@@ -410,7 +410,7 @@ export default function AetherPage() {
               {/* Price */}
               <div>
                 <p className="text-[2.6rem] font-medium tracking-[-0.05em] leading-none tabular-nums"
-                  style={{ color: t.featured ? "rgb(56,180,255)" : "rgb(var(--fg))" }}>
+                  style={{ color: t.featured ? "rgb(var(--blue))" : "rgb(var(--fg))" }}>
                   {t.price}
                 </p>
                 <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] mt-2">{t.term}</p>
@@ -425,7 +425,7 @@ export default function AetherPage() {
                   <li key={line} className="flex items-center gap-2 text-[12.5px] tracking-tight text-[rgb(var(--fg))]">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
                       className="h-3 w-3 shrink-0"
-                      style={{ color: t.featured ? "rgb(56,180,255)" : "rgb(var(--muted))" }}
+                      style={{ color: t.featured ? "rgb(var(--blue))" : "rgb(var(--muted))" }}
                       aria-hidden="true">
                       <polyline points="2 8 6 12 14 4" />
                     </svg>
@@ -442,7 +442,7 @@ export default function AetherPage() {
               </span>
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"
                 className="w-3.5 h-3.5 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-200"
-                style={{ color: t.featured ? "rgb(56,180,255)" : "rgb(var(--fg))" }}
+                style={{ color: t.featured ? "rgb(var(--blue))" : "rgb(var(--fg))" }}
                 aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

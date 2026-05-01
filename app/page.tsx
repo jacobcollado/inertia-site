@@ -29,17 +29,17 @@ function SketchInertia() {
       <line x1="22"  y1="96"  x2="178" y2="96"  stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
       <line x1="55"  y1="73"  x2="145" y2="73"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
       {/* Vertical columns — accent tinted */}
-      <line x1="37"  y1="110" x2="37"  y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
-      <line x1="163" y1="110" x2="163" y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
-      <line x1="22"  y1="96"  x2="22"  y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.7" opacity="0.35" />
-      <line x1="178" y1="96"  x2="178" y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.7" opacity="0.35" />
+      <line x1="37"  y1="110" x2="37"  y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
+      <line x1="163" y1="110" x2="163" y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
+      <line x1="22"  y1="96"  x2="22"  y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.7" opacity="0.35" />
+      <line x1="178" y1="96"  x2="178" y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.7" opacity="0.35" />
       {/* Top face — accent tinted */}
-      <line x1="100" y1="8"   x2="22"  y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
-      <line x1="100" y1="8"   x2="178" y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.9" opacity="0.55" />
-      <line x1="22"  y1="38"  x2="178" y2="38"  stroke="rgb(160,140,255)" strokeWidth="0.8" opacity="0.45" />
-      <line x1="37"  y1="52"  x2="163" y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.8" opacity="0.45" />
-      <line x1="22"  y1="38"  x2="37"  y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.35" />
-      <line x1="178" y1="38"  x2="163" y2="52"  stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.35" />
+      <line x1="100" y1="8"   x2="22"  y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
+      <line x1="100" y1="8"   x2="178" y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
+      <line x1="22"  y1="38"  x2="178" y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.8" opacity="0.45" />
+      <line x1="37"  y1="52"  x2="163" y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.8" opacity="0.45" />
+      <line x1="22"  y1="38"  x2="37"  y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.35" />
+      <line x1="178" y1="38"  x2="163" y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.35" />
       {/* Motion lines */}
       <line x1="4"   y1="22"  x2="28"  y2="22"  stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
       <line x1="4"   y1="28"  x2="22"  y2="28"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
@@ -48,8 +48,8 @@ function SketchInertia() {
       <line x1="178" y1="28"  x2="196" y2="28"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
       <line x1="182" y1="34"  x2="196" y2="34"  stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.16" />
       {/* Vanishing point cross — accent */}
-      <line x1="96"  y1="8"   x2="104" y2="8"   stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.6" />
-      <line x1="100" y1="4"   x2="100" y2="12"  stroke="rgb(160,140,255)" strokeWidth="0.6" opacity="0.6" />
+      <line x1="96"  y1="8"   x2="104" y2="8"   stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.6" />
+      <line x1="100" y1="4"   x2="100" y2="12"  stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.6" />
       {/* Dimension tick marks */}
       <line x1="10"  y1="110" x2="10"  y2="115" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
       <line x1="190" y1="110" x2="190" y2="115" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
@@ -59,7 +59,7 @@ function SketchInertia() {
 }
 
 function SketchDashboard() {
-  const blue = "rgb(56,180,255)";
+  const blue = "rgb(var(--blue))";
   const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
@@ -114,7 +114,7 @@ function SketchDashboard() {
 }
 
 function SketchAether() {
-  const blue = "rgb(56,180,255)";
+  const blue = "rgb(var(--blue))";
   const muted = "rgb(var(--muted))";
   return (
     <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
@@ -218,7 +218,7 @@ const THINK_SKETCHES = [
     <line x1="138" y1="100" x2="136" y2="107" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
     <line x1="136" y1="107" x2="140" y2="104" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
     {/* Arc being drawn — amber accent */}
-    <path d="M 52 95 A 58 58 0 0 1 148 95" stroke="rgb(251,191,36)" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.65" />
+    <path d="M 52 95 A 58 58 0 0 1 148 95" stroke="rgb(var(--amber))" strokeWidth="0.8" strokeDasharray="3 2" opacity="0.65" />
     {/* Hinge crossbar */}
     <line x1="88" y1="52" x2="112" y2="52" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
     <circle cx="94" cy="52" r="1.5" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.28" />
@@ -229,15 +229,15 @@ const THINK_SKETCHES = [
     <line x1="97" y1="15" x2="103" y2="15" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
     <line x1="98" y1="12" x2="102" y2="12" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
     {/* Pivot point — amber accent */}
-    <circle cx="100" cy="28" r="3" stroke="rgb(251,191,36)" strokeWidth="0.9" opacity="0.7" />
-    <circle cx="100" cy="28" r="1.2" fill="rgb(251,191,36)" opacity="0.55" />
+    <circle cx="100" cy="28" r="3" stroke="rgb(var(--amber))" strokeWidth="0.9" opacity="0.7" />
+    <circle cx="100" cy="28" r="1.2" fill="rgb(var(--amber))" opacity="0.55" />
     {/* Construction lines */}
     <line x1="100" y1="95" x2="100" y2="110" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.18" />
     <line x1="60" y1="95" x2="140" y2="95" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 2" opacity="0.18" />
     {/* Radius dimension — amber */}
-    <line x1="100" y1="97" x2="138" y2="97" stroke="rgb(251,191,36)" strokeWidth="0.5" opacity="0.45" />
-    <line x1="100" y1="95" x2="100" y2="99" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.5" />
-    <line x1="138" y1="95" x2="138" y2="99" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.5" />
+    <line x1="100" y1="97" x2="138" y2="97" stroke="rgb(var(--amber))" strokeWidth="0.5" opacity="0.45" />
+    <line x1="100" y1="95" x2="100" y2="99" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.5" />
+    <line x1="138" y1="95" x2="138" y2="99" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.5" />
   </svg>,
 
   // Type specimen grid — hierarchy, rhythm
@@ -247,15 +247,15 @@ const THINK_SKETCHES = [
       <line key={y} x1="12" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 3" opacity="0.16" />
     ))}
     {/* Display headline — amber accent */}
-    <line x1="12" y1="12" x2="12"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
-    <line x1="22" y1="12" x2="22"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
-    <line x1="12" y1="21" x2="22"  y2="21" stroke="rgb(251,191,36)" strokeWidth="2.5" opacity="0.45" />
-    <line x1="32" y1="12" x2="32"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
-    <line x1="32" y1="12" x2="44"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
-    <line x1="54" y1="12" x2="54"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
-    <line x1="54" y1="12" x2="66"  y2="12" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
-    <line x1="54" y1="22" x2="63"  y2="22" stroke="rgb(251,191,36)" strokeWidth="2.5" opacity="0.45" />
-    <line x1="54" y1="32" x2="66"  y2="32" stroke="rgb(251,191,36)" strokeWidth="3.5" opacity="0.55" />
+    <line x1="12" y1="12" x2="12"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
+    <line x1="22" y1="12" x2="22"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
+    <line x1="12" y1="21" x2="22"  y2="21" stroke="rgb(var(--amber))" strokeWidth="2.5" opacity="0.45" />
+    <line x1="32" y1="12" x2="32"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
+    <line x1="32" y1="12" x2="44"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
+    <line x1="54" y1="12" x2="54"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
+    <line x1="54" y1="12" x2="66"  y2="12" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
+    <line x1="54" y1="22" x2="63"  y2="22" stroke="rgb(var(--amber))" strokeWidth="2.5" opacity="0.45" />
+    <line x1="54" y1="32" x2="66"  y2="32" stroke="rgb(var(--amber))" strokeWidth="3.5" opacity="0.55" />
     {/* Subhead — medium muted */}
     <line x1="12" y1="44" x2="90"  y2="44" stroke="rgb(var(--muted))" strokeWidth="1.8" opacity="0.35" />
     <line x1="12" y1="52" x2="75"  y2="52" stroke="rgb(var(--muted))" strokeWidth="1.8" opacity="0.35" />
@@ -266,24 +266,24 @@ const THINK_SKETCHES = [
     <line x1="12" y1="84" x2="186" y2="84" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
     <line x1="12" y1="92" x2="140" y2="92" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.22" />
     {/* Cap-height marker — amber */}
-    <line x1="6" y1="12" x2="10"  y2="12" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.55" />
-    <line x1="6" y1="32" x2="10"  y2="32" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.55" />
-    <line x1="8" y1="12" x2="8"   y2="32" stroke="rgb(251,191,36)" strokeWidth="0.5" opacity="0.45" />
+    <line x1="6" y1="12" x2="10"  y2="12" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.55" />
+    <line x1="6" y1="32" x2="10"  y2="32" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.55" />
+    <line x1="8" y1="12" x2="8"   y2="32" stroke="rgb(var(--amber))" strokeWidth="0.5" opacity="0.45" />
     {/* x-height marker — amber */}
-    <line x1="192" y1="44" x2="196" y2="44" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.5" />
-    <line x1="192" y1="52" x2="196" y2="52" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.5" />
-    <line x1="194" y1="44" x2="194" y2="52" stroke="rgb(251,191,36)" strokeWidth="0.5" opacity="0.4" />
+    <line x1="192" y1="44" x2="196" y2="44" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.5" />
+    <line x1="192" y1="52" x2="196" y2="52" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.5" />
+    <line x1="194" y1="44" x2="194" y2="52" stroke="rgb(var(--amber))" strokeWidth="0.5" opacity="0.4" />
   </svg>,
 
   // Light bulb cross-section — ideas, clarity
   <svg key="bulb" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
     {/* Bulb glow fill — amber */}
-    <path d="M 100 10 C 130 10 148 30 148 55 C 148 75 136 88 128 95 L 72 95 C 64 88 52 75 52 55 C 52 30 70 10 100 10 Z" fill="rgb(251,191,36)" fillOpacity="0.06" stroke="rgb(251,191,36)" strokeWidth="0.9" opacity="0.5" />
+    <path d="M 100 10 C 130 10 148 30 148 55 C 148 75 136 88 128 95 L 72 95 C 64 88 52 75 52 55 C 52 30 70 10 100 10 Z" fill="rgb(var(--amber))" fillOpacity="0.06" stroke="rgb(var(--amber))" strokeWidth="0.9" opacity="0.5" />
     {/* Filament support wires */}
     <line x1="84" y1="95" x2="84" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
     <line x1="116" y1="95" x2="116" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
     {/* Filament coil — amber accent */}
-    <path d="M 84 72 Q 88 62 92 68 Q 96 74 100 64 Q 104 54 108 64 Q 112 74 116 68 Q 116 66 116 64" stroke="rgb(251,191,36)" strokeWidth="1.0" opacity="0.7" />
+    <path d="M 84 72 Q 88 62 92 68 Q 96 74 100 64 Q 104 54 108 64 Q 112 74 116 68 Q 116 66 116 64" stroke="rgb(var(--amber))" strokeWidth="1.0" opacity="0.7" />
     {/* Glass neck / base */}
     <line x1="72" y1="95" x2="72"  y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
     <line x1="128" y1="95" x2="128" y2="108" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
@@ -294,11 +294,11 @@ const THINK_SKETCHES = [
     <path d="M 72 108 Q 80 112 88 108 Q 96 104 104 108 Q 112 112 120 108 Q 126 105 128 108" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
     <path d="M 74 114 Q 82 118 90 114 Q 98 110 106 114 Q 114 118 122 114 Q 126 112 128 114" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
     {/* Radiation lines — amber */}
-    <line x1="100" y1="8"  x2="100" y2="2"  stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.55" />
-    <line x1="118" y1="13" x2="122" y2="9"  stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.45" />
-    <line x1="130" y1="26" x2="135" y2="23" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.38" />
-    <line x1="82"  y1="13" x2="78"  y2="9"  stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.45" />
-    <line x1="70"  y1="26" x2="65"  y2="23" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.38" />
+    <line x1="100" y1="8"  x2="100" y2="2"  stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.55" />
+    <line x1="118" y1="13" x2="122" y2="9"  stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.45" />
+    <line x1="130" y1="26" x2="135" y2="23" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.38" />
+    <line x1="82"  y1="13" x2="78"  y2="9"  stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.45" />
+    <line x1="70"  y1="26" x2="65"  y2="23" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.38" />
     {/* Center line */}
     <line x1="100" y1="10" x2="100" y2="95" stroke="rgb(var(--muted))" strokeWidth="0.35" strokeDasharray="3 2" opacity="0.18" />
     {/* Dimension marks */}
@@ -313,18 +313,18 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
   "hello-world": (
     <svg key="hello-world" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Origin point — amber */}
-      <circle cx="44" cy="60" r="3.5" fill="rgb(251,191,36)" opacity="0.65" />
+      <circle cx="44" cy="60" r="3.5" fill="rgb(var(--amber))" opacity="0.65" />
       {/* Concentric arcs — amber fading out */}
-      <path d="M 55 43 A 20 20 0 0 1 55 77" stroke="rgb(251,191,36)" strokeWidth="1.0" opacity="0.55" />
-      <path d="M 68 30 A 34 34 0 0 1 68 90" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.38" />
+      <path d="M 55 43 A 20 20 0 0 1 55 77" stroke="rgb(var(--amber))" strokeWidth="1.0" opacity="0.55" />
+      <path d="M 68 30 A 34 34 0 0 1 68 90" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.38" />
       <path d="M 84 19 A 48 48 0 0 1 84 101" stroke="rgb(var(--muted))" strokeWidth="0.45" opacity="0.28" />
       <path d="M 103 10 A 62 62 0 0 1 103 110" stroke="rgb(var(--muted))" strokeWidth="0.28" opacity="0.18" />
       {/* Dashed axis */}
       <line x1="44" y1="60" x2="170" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.3" strokeDasharray="2 5" opacity="0.2" />
       {/* Arrival tick + arrow — amber */}
-      <line x1="170" y1="51" x2="170" y2="69" stroke="rgb(251,191,36)" strokeWidth="0.8" opacity="0.55" />
-      <line x1="177" y1="60" x2="190" y2="60" stroke="rgb(251,191,36)" strokeWidth="0.6" opacity="0.5" />
-      <polyline points="184,55 190,60 184,65" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.5" />
+      <line x1="170" y1="51" x2="170" y2="69" stroke="rgb(var(--amber))" strokeWidth="0.8" opacity="0.55" />
+      <line x1="177" y1="60" x2="190" y2="60" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.5" />
+      <polyline points="184,55 190,60 184,65" stroke="rgb(var(--amber))" strokeWidth="0.7" opacity="0.5" />
     </svg>
   ),
   "four-years": (
@@ -340,27 +340,27 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
       {/* Growth curve — starts flat, accelerates — green accent */}
       <path
         d="M 20 103 C 50 102 70 96 90 86 C 110 74 128 55 148 38 C 158 30 168 24 185 18"
-        stroke="rgb(52,211,153)"
+        stroke="rgb(var(--green))"
         strokeWidth="1.4"
         opacity="0.75"
       />
       {/* Milestone dots along the curve */}
-      <circle cx="55"  cy="100" r="2.2" fill="rgb(52,211,153)" opacity="0.45" />
-      <circle cx="90"  cy="86"  r="2.2" fill="rgb(52,211,153)" opacity="0.55" />
-      <circle cx="125" cy="62"  r="2.5" fill="rgb(52,211,153)" opacity="0.65" />
-      <circle cx="160" cy="33"  r="3"   fill="rgb(52,211,153)" opacity="0.8"  />
+      <circle cx="55"  cy="100" r="2.2" fill="rgb(var(--green))" opacity="0.45" />
+      <circle cx="90"  cy="86"  r="2.2" fill="rgb(var(--green))" opacity="0.55" />
+      <circle cx="125" cy="62"  r="2.5" fill="rgb(var(--green))" opacity="0.65" />
+      <circle cx="160" cy="33"  r="3"   fill="rgb(var(--green))" opacity="0.8"  />
       {/* Vertical drops from milestones to baseline — dashed */}
-      <line x1="55"  y1="100" x2="55"  y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" />
-      <line x1="90"  y1="86"  x2="90"  y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
-      <line x1="125" y1="62"  x2="125" y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
-      <line x1="160" y1="33"  x2="160" y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
+      <line x1="55"  y1="100" x2="55"  y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" />
+      <line x1="90"  y1="86"  x2="90"  y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
+      <line x1="125" y1="62"  x2="125" y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
+      <line x1="160" y1="33"  x2="160" y2="105" stroke="rgb(var(--green))" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
       {/* Year labels on baseline */}
       <line x1="55"  y1="105" x2="55"  y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
       <line x1="90"  y1="105" x2="90"  y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
       <line x1="125" y1="105" x2="125" y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
       <line x1="160" y1="105" x2="160" y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
       {/* Arrow tip on curve end */}
-      <polyline points="179,14 185,18 179,22" stroke="rgb(52,211,153)" strokeWidth="1.0" opacity="0.7" />
+      <polyline points="179,14 185,18 179,22" stroke="rgb(var(--green))" strokeWidth="1.0" opacity="0.7" />
     </svg>
   ),
 };
@@ -502,20 +502,24 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
             <p className="px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing yet.</p>
           ) : (
             <div className="grid grid-cols-2">
-              {posts.slice(0, 4).map((post, i) => (
+              {posts.slice(0, 4).map((post, i, arr) => {
+                const isLastOdd = i === arr.length - 1 && arr.length % 2 !== 0;
+                return (
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
                   className={[
-                    "group flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px]",
-                    // right border on left-column cells
-                    i % 2 === 0 ? "border-r border-[rgb(var(--line))]" : "",
+                    "group flex flex-col justify-between gap-4 px-5 sm:px-6 pt-6 pb-5 transition-colors hover:bg-[rgb(var(--line))/0.15]",
+                    // last odd item spans full width on desktop
+                    isLastOdd ? "sm:col-span-2" : "",
+                    // right border: only left-column cells that are not spanning full width
+                    !isLastOdd && i % 2 === 0 ? "border-r border-[rgb(var(--line))]" : "",
                     // bottom border on top-row cells
                     i < 2 ? "border-b border-[rgb(var(--line))]" : "",
                   ].filter(Boolean).join(" ")}
                 >
-                  <div className="flex-1 flex flex-col gap-5">
-                    <div className="w-full">
+                  <div className="flex flex-col gap-4">
+                    <div className="w-full overflow-hidden">
                       {THINK_SLUG_SKETCHES[post.slug] ?? THINK_SKETCHES[i % THINK_SKETCHES.length]}
                     </div>
                     <div className="flex flex-col gap-1">
@@ -533,7 +537,8 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                     </svg>
                   </div>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
 

@@ -256,7 +256,7 @@ export function FitQuiz() {
           className="h-full"
           style={{
             width: `${progress * 100}%`,
-            background: "rgb(56,180,255)",
+            background: "rgb(var(--blue))",
             transition: "width 500ms cubic-bezier(0.22,1,0.36,1)",
           }}
         />

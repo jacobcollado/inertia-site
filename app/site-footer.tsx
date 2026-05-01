@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { WelcomeBack } from "./ambient";
+import { useState, useEffect, useRef } from "react";
 
 function BackToTop() {
   return (
@@ -25,6 +25,42 @@ function BackToTop() {
 
 function GridRule() {
   return <div className="grid-rule" aria-hidden="true" />;
+}
+
+const KONAMI = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+
+function EasterEgg() {
+  const [unlocked, setUnlocked] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const seq = useRef<string[]>([]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      seq.current = [...seq.current, e.key].slice(-KONAMI.length);
+      if (seq.current.join(",") === KONAMI.join(",")) {
+        setUnlocked(true);
+        setVisible(true);
+        setTimeout(() => setVisible(false), 4000);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  if (!unlocked) return null;
+
+  return (
+    <span
+      className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums"
+      style={{
+        opacity: visible ? 1 : 0,
+        transition: "opacity 600ms ease",
+        pointerEvents: "none",
+      }}
+    >
+      you found it ✦
+    </span>
+  );
 }
 
 export function SiteFooter() {
@@ -118,7 +154,7 @@ export function SiteFooter() {
       {/* Bottom bar */}
       <GridRule />
       <div className="flex items-center justify-between gap-6 pt-6">
-        <WelcomeBack />
+        <EasterEgg />
         <div className="flex items-center gap-6">
           <BackToTop />
           <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 tabular-nums">

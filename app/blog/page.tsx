@@ -160,7 +160,7 @@ function SketchAI() {
           <line key={`h${y1}o${y2}`} x1="115" y1={y1} x2="185" y2={y2} strokeWidth="0.6" />
         )))}
       </g>
-      <g stroke="#60a5fa" strokeDasharray="4 3" strokeWidth="1.8">
+      <g stroke="rgb(var(--blue))" strokeDasharray="4 3" strokeWidth="1.8">
         <line x1="35" y1="50" x2="105" y2="37" />
         <line x1="115" y1="37" x2="185" y2="32" />
       </g>
@@ -169,7 +169,7 @@ function SketchAI() {
         <circle cx="110" cy="10"  r="5" /><circle cx="110" cy="37"  r="5" /><circle cx="110" cy="63"  r="5" /><circle cx="110" cy="90"  r="5" />
         <circle cx="190" cy="32"  r="5" /><circle cx="190" cy="68"  r="5" />
       </g>
-      <g fill="#60a5fa" stroke="none">
+      <g fill="rgb(var(--blue))" stroke="none">
         <circle cx="30"  cy="50"  r="4" />
         <circle cx="110" cy="37"  r="4" />
         <circle cx="190" cy="32"  r="4" />
@@ -186,11 +186,11 @@ function SketchTerminal() {
   return (
     <svg viewBox="0 0 280 100" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Origin */}
-      <circle cx="32" cy="50" r="6" fill="#34d399" stroke="none" />
+      <circle cx="32" cy="50" r="6" fill="rgb(var(--green))" stroke="none" />
       {/* Arcs — green fading out */}
-      <path d="M 46 28 A 26 26 0 0 1 46 72" stroke="#34d399" strokeWidth="2.2" />
-      <path d="M 62 14 A 42 42 0 0 1 62 86" stroke="#34d399" strokeWidth="1.6" opacity="0.65" />
-      <path d="M 80 4 A 58 58 0 0 1 80 96" stroke="#34d399" strokeWidth="1.1" opacity="0.35" />
+      <path d="M 46 28 A 26 26 0 0 1 46 72" stroke="rgb(var(--green))" strokeWidth="2.2" />
+      <path d="M 62 14 A 42 42 0 0 1 62 86" stroke="rgb(var(--green))" strokeWidth="1.6" opacity="0.65" />
+      <path d="M 80 4 A 58 58 0 0 1 80 96" stroke="rgb(var(--green))" strokeWidth="1.1" opacity="0.35" />
       <path d="M 100 0 A 74 74 0 0 1 100 100" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.25" />
       {/* Axis */}
       <line x1="32" y1="50" x2="248" y2="50" stroke="rgb(var(--muted))" strokeWidth="1" strokeDasharray="4 6" opacity="0.35" />
@@ -208,10 +208,10 @@ function SketchWave({ index }: { index: number }) {
   return (
     <svg viewBox="0 0 280 100" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       <line x1="10" y1="50" x2="270" y2="50" stroke="rgb(var(--muted))" strokeWidth="0.8" strokeDasharray="3 5" opacity="0.4" />
-      <path d={`M 10 50 C ${35+shift} ${50-a} ${65+shift} ${50-a} ${90+shift} 50 C ${115+shift} ${50+a} ${145+shift} ${50+a} ${170+shift} 50 C ${195+shift} ${50-a} ${225+shift} ${50-a} 250 50`} stroke="#fbbf24" strokeWidth="2" />
+      <path d={`M 10 50 C ${35+shift} ${50-a} ${65+shift} ${50-a} ${90+shift} 50 C ${115+shift} ${50+a} ${145+shift} ${50+a} ${170+shift} 50 C ${195+shift} ${50-a} ${225+shift} ${50-a} 250 50`} stroke="rgb(var(--amber))" strokeWidth="2" />
       <path d={`M 10 50 C ${25+shift} ${50-a*0.5} ${55+shift} ${50-a*0.5} ${80+shift} 50 C ${105+shift} ${50+a*0.5} ${135+shift} ${50+a*0.5} ${160+shift} 50 C ${185+shift} ${50-a*0.5} ${215+shift} ${50-a*0.5} 250 50`} stroke="rgb(var(--muted))" strokeWidth="0.9" strokeDasharray="3 4" opacity="0.4" />
-      <line x1={90+shift} y1={50-a} x2={90+shift} y2="50" stroke="#fbbf24" strokeWidth="1.2" />
-      <line x1={85+shift} y1={50-a} x2={95+shift} y2={50-a} stroke="#fbbf24" strokeWidth="1.4" />
+      <line x1={90+shift} y1={50-a} x2={90+shift} y2="50" stroke="rgb(var(--amber))" strokeWidth="1.2" />
+      <line x1={85+shift} y1={50-a} x2={95+shift} y2={50-a} stroke="rgb(var(--amber))" strokeWidth="1.4" />
       <line x1="10" y1="88" x2={90+shift} y2="88" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
       <line x1="10" y1="84" x2="10" y2="92" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
       <line x1={90+shift} y1="84" x2={90+shift} y2="92" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
