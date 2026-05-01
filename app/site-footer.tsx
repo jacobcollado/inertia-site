@@ -3,6 +3,26 @@
 import Link from "next/link";
 import { WelcomeBack } from "./ambient";
 
+function BackToTop() {
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Back to top"
+      className="group flex items-center gap-2 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+    >
+      <span
+        className="flex items-center justify-center w-6 h-6 border border-[rgb(var(--line))] group-hover:border-[rgb(var(--fg))/0.3] transition-colors"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+          <path d="M8 12V4M4 7l4-4 4 4" />
+        </svg>
+      </span>
+      Back to top
+    </button>
+  );
+}
+
 function GridRule() {
   return <div className="grid-rule" aria-hidden="true" />;
 }
@@ -99,9 +119,12 @@ export function SiteFooter() {
       <GridRule />
       <div className="flex items-center justify-between gap-6 pt-6">
         <WelcomeBack />
-        <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 tabular-nums">
-          © {new Date().getFullYear()} Inertia
-        </p>
+        <div className="flex items-center gap-6">
+          <BackToTop />
+          <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 tabular-nums">
+            © {new Date().getFullYear()} Inertia
+          </p>
+        </div>
       </div>
 
     </footer>

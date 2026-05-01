@@ -11,15 +11,28 @@ type Entry = { version: string; date: string; label: ReleaseLabel; summary: stri
 
 const CHANGELOG: Entry[] = [
   {
+    version: "1.3.0",
+    date: "2026-05-01",
+    label: "minor",
+    summary: "Custom font loading, collection page filters, and a performance pass on the product image gallery.",
+    notes: [
+      { type: "added", title: "Custom font support via theme settings", detail: "Merchants can now specify a Google Fonts URL or upload a WOFF2 directly through the theme editor. Aether handles font-display: swap and preconnect headers automatically, so there is no FOUT and no manual code edits required." },
+      { type: "added", title: "Collection page sidebar filters", detail: "A new optional sidebar filter panel for collection pages renders available filter groups from the Shopify storefront API. Each group collapses independently, selected filters are shown as removable pills at the top, and the product grid re-renders without a full page reload." },
+      { type: "improved", title: "Product gallery image loading", detail: "Thumbnail images are now loaded with loading=lazy and decoded asynchronously. The main image slot uses fetchpriority=high to start loading before the browser finishes parsing the page. On a mid-tier mobile device over 4G this cuts gallery-ready time by about 600ms." },
+      { type: "improved", title: "Cart line item update debounce", detail: "Previously every quantity change fired a cart update request immediately, which caused race conditions when users tapped quickly. Updates are now batched with a 300ms debounce and a loading state is shown on the stepper so the UI never reflects stale data." },
+      { type: "fixed", title: "Section padding ignored on mobile", detail: "The padding-top and padding-bottom theme settings for several sections were being overridden by a hardcoded media query in the compiled CSS. The media query has been removed and padding now scales correctly across all breakpoints." },
+    ],
+  },
+  {
     version: "1.2.0",
     date: "2026-04-29",
     label: "minor",
     summary: "Sticky cart improvements, mobile nav overhaul, and a fix for a rare quantity bug on iOS Safari.",
     notes: [
       { type: "improved", title: "Sticky add-to-cart rewrite", detail: "The sticky bar now uses an Intersection Observer instead of a scroll event listener. This removes the jank at the fold threshold and cuts CPU paint cost by roughly 40% on low-end Android devices. The bar appears only once the native button has fully left the viewport." },
-      { type: "improved", title: "Mobile nav drawer gesture support", detail: "The slide-in navigation drawer now responds to horizontal swipe-to-close gestures. We added a touch velocity threshold so quick flicks close the drawer even when the drag distance is short. Tap-outside dismissal is unchanged." },
+      { type: "improved", title: "Mobile nav drawer gesture support", detail: "The slide-in navigation drawer now responds to horizontal swipe-to-close gestures. A touch velocity threshold means quick flicks close the drawer even when the drag distance is short. Tap-outside dismissal is unchanged." },
       { type: "fixed", title: "Quantity stepper double-submit on iOS Safari", detail: "Safari's 300ms click delay was causing the stepper's increment handler to fire twice in quick succession, which could push cart quantities above available inventory. Replaced the click listener with a pointer event and added a leading debounce at 120ms." },
-      { type: "added", title: "Announcement bar supports rich text", detail: "The announcement bar section now accepts an inline rich text field instead of a plain text input. This lets merchants bold a promo code or link to a sale collection directly from the bar without editing theme code." },
+      { type: "added", title: "Announcement bar supports rich text", detail: "The announcement bar section now accepts an inline rich text field instead of a plain text input. Merchants can bold a promo code or link to a sale collection directly from the bar without touching theme code." },
     ],
   },
   {
@@ -30,7 +43,7 @@ const CHANGELOG: Entry[] = [
     notes: [
       { type: "improved", title: "Product page layout restructured", detail: "Media and form columns now use a 7/5 split on large screens instead of 6/6. In user testing, giving more space to the imagery increased time-on-page by roughly 18%. The form column is sticky by default and de-stickies automatically when content overflows the viewport height." },
       { type: "added", title: "Editorial grid section", detail: "A new homepage section that renders up to 6 products or collections in an asymmetric masonry-style grid. Each cell supports an optional overlay caption. Built entirely with CSS Grid, no JavaScript, no layout shift." },
-      { type: "improved", title: "Color swatches now lazy-load variant images", detail: "Hovering a swatch prefetches the corresponding variant image using a link[rel=prefetch] tag injected at hover start. This means the image is almost always in browser cache by the time the customer clicks, making variant switching feel instant." },
+      { type: "improved", title: "Color swatches now lazy-load variant images", detail: "Hovering a swatch prefetches the corresponding variant image using a link rel=prefetch tag injected at hover start. The image is almost always in browser cache by the time the customer clicks, making variant switching feel instant." },
       { type: "fixed", title: "Predictive search z-index conflict with header", detail: "On pages with a transparent header, the predictive search dropdown was rendering beneath the hero section. Moved the search overlay to a portal at the body root and set its z-index above the header layer." },
     ],
   },
@@ -52,16 +65,17 @@ const CHANGELOG: Entry[] = [
     notes: [
       { type: "added", title: "Animated product reveal on scroll", detail: "Every product card and section block enters with a staggered translate-y fade driven by an Intersection Observer. The animation is disabled automatically for users who have prefers-reduced-motion set, with no extra configuration required." },
       { type: "added", title: "Mega menu with editorial layout", detail: "The header supports a two-column mega menu where the right panel can display a featured image, collection link, or promotional tile. Menus are built in the Shopify navigation editor, no metafields or custom data required." },
-      { type: "added", title: "OS-aware dark mode", detail: "Aether reads prefers-color-scheme on first load and applies the correct theme without a flash of unstyled content. Merchants can also expose a manual toggle to customers via a theme setting. Both modes are fully designed — not inverted." },
-      { type: "added", title: "Conversion-tuned product page", detail: "The product page layout is the result of testing against 11 live stores over 6 weeks. Key decisions: trust badges directly beneath the ATC button, accordion-style tabs to keep the page short, and a persistent sticky bar that appears after the native button scrolls out of view." },
+      { type: "added", title: "OS-aware dark mode", detail: "Aether reads prefers-color-scheme on first load and applies the correct theme without a flash of unstyled content. Merchants can also expose a manual toggle to customers via a theme setting. Both modes are fully designed, not inverted." },
+      { type: "added", title: "Conversion-tuned product page", detail: "The product page layout is the result of testing across 11 live stores over 6 weeks. Key decisions: trust badges directly beneath the add-to-cart button, accordion-style tabs to keep the page short, and a persistent sticky bar that appears after the native button scrolls out of view." },
       { type: "added", title: "Section presets for fast setup", detail: "Every section ships with at least one preset so merchants can drag it onto any page template and get something that looks good immediately. Presets cover typography, spacing, and color defaults tuned to each section's purpose." },
+      { type: "added", title: "Accessible focus styles throughout", detail: "All interactive elements have visible focus rings that meet WCAG 2.1 AA contrast requirements. Focus styles are hidden for mouse users via :focus-visible and shown only on keyboard navigation, so accessibility is built in without visual noise." },
     ],
   },
 ];
 
 const GUIDE: { title: string; body: string }[] = [
   { title: "How to update", body: "Download the latest .zip from your license email, then go to Shopify Admin › Online Store › Themes › Add theme › Upload zip. Your live theme is untouched until you manually publish." },
-  { title: "Version numbers", body: "Major releases may include breaking schema changes. Minor adds features without breaking existing ones. Patch fixes bugs only — always safe to apply." },
+  { title: "Version numbers", body: "Major releases may include breaking schema changes. Minor adds features without breaking existing ones. Patch fixes bugs only, always safe to apply." },
   { title: "Backup first", body: "Shopify keeps your previous theme as an unpublished copy when you publish a new one. Re-publish the old version from the theme list in seconds if needed." },
   { title: "Custom code", body: "Note which files you edited before updating. The changelog lists touched files per release so you know where conflicts might occur. Re-apply changes to the fresh files after uploading." },
 ];
@@ -117,7 +131,7 @@ function SidebarContent({
 
       {/* Filter by type */}
       <div className="py-6 border-b border-[rgb(var(--line))]">
-        <p className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] mb-4">Type</p>
+        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Type</p>
         <div className="flex flex-col gap-1">
           {ALL_TYPES.map((t) => {
             const active = activeTypes.has(t);
@@ -141,7 +155,7 @@ function SidebarContent({
 
       {/* Filter by release */}
       <div className="py-6 border-b border-[rgb(var(--line))]">
-        <p className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] mb-4">Release</p>
+        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Release</p>
         <div className="flex flex-col gap-1">
           {ALL_LABELS.map((l) => {
             const active = activeLabels.has(l);
@@ -171,7 +185,7 @@ function SidebarContent({
 
       {/* Version index */}
       <div className="py-6 border-b border-[rgb(var(--line))]">
-        <p className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] mb-4">Versions</p>
+        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Versions</p>
         <ul className="flex flex-col gap-1">
           {CHANGELOG.map((entry) => {
             const c = LABEL_COLOR[entry.label];
@@ -198,7 +212,7 @@ function SidebarContent({
 
       {/* Guide */}
       <div className="py-6">
-        <p className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] mb-4">Guide</p>
+        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Guide</p>
         <ul className="flex flex-col">
           {GUIDE.map((g, i) => (
             <li key={i} className="border-b border-[rgb(var(--line))] last:border-0">
@@ -291,7 +305,7 @@ export default function AetherChangelog() {
       <div className="px-8 py-10 rise" style={{ ["--rise-delay" as any]: "60ms" }}>
         <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none mb-3">Changelog</h1>
         <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-          Every change documented with context — what changed, why, and how it works.
+          Every change documented with context: what changed, why, and how it works.
         </p>
       </div>
 

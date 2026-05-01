@@ -91,9 +91,47 @@ function SketchWave() {
   );
 }
 
+function SketchGrowth() {
+  return (
+    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Grid lines */}
+      {[40, 80, 120].map(y => (
+        <line key={y} x1="30" y1={y} x2="530" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.18" />
+      ))}
+      {/* Axes */}
+      <line x1="30" y1="140" x2="530" y2="140" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.25" />
+      <line x1="30" y1="20"  x2="30"  y2="140" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.25" />
+      {/* Growth curve */}
+      <path
+        d="M 30 138 C 100 136 160 128 220 112 C 280 94 320 70 380 50 C 420 36 470 26 530 18"
+        stroke="rgb(52,211,153)"
+        strokeWidth="2"
+        opacity="0.8"
+      />
+      {/* Milestone dots */}
+      <circle cx="110" cy="134" r="3"   fill="rgb(52,211,153)" opacity="0.4" />
+      <circle cx="220" cy="112" r="3.5" fill="rgb(52,211,153)" opacity="0.55" />
+      <circle cx="340" cy="60"  r="4"   fill="rgb(52,211,153)" opacity="0.7" />
+      <circle cx="470" cy="26"  r="4.5" fill="rgb(52,211,153)" opacity="0.85" />
+      {/* Vertical drops */}
+      <line x1="110" y1="134" x2="110" y2="140" stroke="rgb(52,211,153)" strokeWidth="0.6" opacity="0.35" />
+      <line x1="220" y1="112" x2="220" y2="140" stroke="rgb(52,211,153)" strokeWidth="0.6" strokeDasharray="2 3" opacity="0.3" />
+      <line x1="340" y1="60"  x2="340" y2="140" stroke="rgb(52,211,153)" strokeWidth="0.6" strokeDasharray="2 3" opacity="0.3" />
+      <line x1="470" y1="26"  x2="470" y2="140" stroke="rgb(52,211,153)" strokeWidth="0.6" strokeDasharray="2 3" opacity="0.3" />
+      {/* Year ticks */}
+      {[110, 220, 340, 470].map(x => (
+        <line key={x} x1={x} y1="140" x2={x} y2="146" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      ))}
+      {/* Arrow */}
+      <polyline points="523,13 530,18 523,23" stroke="rgb(52,211,153)" strokeWidth="1.4" opacity="0.75" />
+    </svg>
+  );
+}
+
 const SLUG_SKETCHES: Record<string, () => React.ReactElement> = {
   "ai-capability-forecast": SketchAI,
   "hello-world": SketchTerminal,
+  "four-years": SketchGrowth,
 };
 
 function PostSketch({ slug }: { slug: string }) {
@@ -137,7 +175,7 @@ export default async function BlogPost({
   const stats = readingStats(post.content);
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl pb-24 sm:pb-32">
+    <main className="relative mx-auto w-full max-w-5xl pb-36 sm:pb-32">
       <ReadingProgress />
       <TOC headings={headings} />
 

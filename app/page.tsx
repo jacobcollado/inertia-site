@@ -327,6 +327,42 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
       <polyline points="184,55 190,60 184,65" stroke="rgb(251,191,36)" strokeWidth="0.7" opacity="0.5" />
     </svg>
   ),
+  "four-years": (
+    <svg key="four-years" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Grid lines — faint */}
+      {[30, 55, 80, 105].map(y => (
+        <line key={y} x1="20" y1={y} x2="185" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.35" strokeDasharray="2 4" opacity="0.16" />
+      ))}
+      {/* Baseline */}
+      <line x1="20" y1="105" x2="185" y2="105" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      {/* Y axis */}
+      <line x1="20" y1="20" x2="20" y2="105" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      {/* Growth curve — starts flat, accelerates — green accent */}
+      <path
+        d="M 20 103 C 50 102 70 96 90 86 C 110 74 128 55 148 38 C 158 30 168 24 185 18"
+        stroke="rgb(52,211,153)"
+        strokeWidth="1.4"
+        opacity="0.75"
+      />
+      {/* Milestone dots along the curve */}
+      <circle cx="55"  cy="100" r="2.2" fill="rgb(52,211,153)" opacity="0.45" />
+      <circle cx="90"  cy="86"  r="2.2" fill="rgb(52,211,153)" opacity="0.55" />
+      <circle cx="125" cy="62"  r="2.5" fill="rgb(52,211,153)" opacity="0.65" />
+      <circle cx="160" cy="33"  r="3"   fill="rgb(52,211,153)" opacity="0.8"  />
+      {/* Vertical drops from milestones to baseline — dashed */}
+      <line x1="55"  y1="100" x2="55"  y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" />
+      <line x1="90"  y1="86"  x2="90"  y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
+      <line x1="125" y1="62"  x2="125" y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
+      <line x1="160" y1="33"  x2="160" y2="105" stroke="rgb(52,211,153)" strokeWidth="0.5" opacity="0.3" strokeDasharray="2 2" />
+      {/* Year labels on baseline */}
+      <line x1="55"  y1="105" x2="55"  y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
+      <line x1="90"  y1="105" x2="90"  y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
+      <line x1="125" y1="105" x2="125" y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
+      <line x1="160" y1="105" x2="160" y2="109" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.3" />
+      {/* Arrow tip on curve end */}
+      <polyline points="179,14 185,18 179,22" stroke="rgb(52,211,153)" strokeWidth="1.0" opacity="0.7" />
+    </svg>
+  ),
 };
 
 const IconPhotoshop = () => (
@@ -465,31 +501,38 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           {posts.length === 0 ? (
             <p className="px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing yet.</p>
           ) : (
-            <div className="flex">
-              {posts.slice(0, 3).map((post, i) => (
-                <React.Fragment key={post.slug}>
-                  {i > 0 && <div className="w-px bg-[rgb(var(--line))] shrink-0" />}
-                  <Link href={`/blog/${post.slug}`} className="group flex-1 flex flex-col justify-between gap-6 px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[220px]">
-                    <div className="flex-1 flex flex-col gap-5">
-                      <div className="w-full scale-[1.35] sm:scale-100 origin-center sm:origin-top-left">
-                        {THINK_SLUG_SKETCHES[post.slug] ?? THINK_SKETCHES[i % THINK_SKETCHES.length]}
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
-                        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums">{formatDate(post.date)}</span>
-                      </div>
+            <div className="grid grid-cols-2">
+              {posts.slice(0, 4).map((post, i) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className={[
+                    "group flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px]",
+                    // right border on left-column cells
+                    i % 2 === 0 ? "border-r border-[rgb(var(--line))]" : "",
+                    // bottom border on top-row cells
+                    i < 2 ? "border-b border-[rgb(var(--line))]" : "",
+                  ].filter(Boolean).join(" ")}
+                >
+                  <div className="flex-1 flex flex-col gap-5">
+                    <div className="w-full">
+                      {THINK_SLUG_SKETCHES[post.slug] ?? THINK_SKETCHES[i % THINK_SKETCHES.length]}
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      {i === 0
-                        ? <span className="inline-flex items-center justify-center rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-2.5 pt-[3px] pb-[4px] text-[10.5px] font-medium tracking-tight leading-none">New</span>
-                        : <span />
-                      }
-                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" aria-hidden="true">
-                        <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[14px] sm:text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
+                      <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums">{formatDate(post.date)}</span>
                     </div>
-                  </Link>
-                </React.Fragment>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    {i === 0
+                      ? <span className="inline-flex items-center justify-center rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-2.5 pt-[3px] pb-[4px] text-[10.5px] font-medium tracking-tight leading-none">New</span>
+                      : <span />
+                    }
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" aria-hidden="true">
+                      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                </Link>
               ))}
             </div>
           )}

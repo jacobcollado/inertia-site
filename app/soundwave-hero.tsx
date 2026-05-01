@@ -102,17 +102,29 @@ export function SoundwaveHero() {
       if (!touchActiveRef.current) mouseRef.current = null;
     };
 
-    // Pointer handlers let touch users slide across the wave like hover.
+    // Touch: only activate horizontal drags so vertical scroll is never blocked.
+    const touchStartRef = { x: 0, y: 0 };
+
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType === "mouse") return;
-      touchActiveRef.current = true;
-      setPointFromEvent(e.clientX, e.clientY);
-      canvas.setPointerCapture(e.pointerId);
+      touchStartRef.x = e.clientX;
+      touchStartRef.y = e.clientY;
     };
 
     const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse" && !touchActiveRef.current) return;
-      setPointFromEvent(e.clientX, e.clientY);
+      if (e.pointerType === "mouse") {
+        setPointFromEvent(e.clientX, e.clientY);
+        return;
+      }
+      // Only engage after a clearly horizontal gesture (dx > dy)
+      const dx = Math.abs(e.clientX - touchStartRef.x);
+      const dy = Math.abs(e.clientY - touchStartRef.y);
+      if (!touchActiveRef.current && dy > dx) return; // vertical scroll — ignore
+      if (!touchActiveRef.current && dx > 8) {
+        touchActiveRef.current = true;
+        canvas.setPointerCapture(e.pointerId);
+      }
+      if (touchActiveRef.current) setPointFromEvent(e.clientX, e.clientY);
     };
 
     const clearPointer = (e: PointerEvent) => {
@@ -235,7 +247,7 @@ export function SoundwaveHero() {
   return (
     <section
       className="relative overflow-hidden cursor-crosshair"
-      style={{ width: "100%", height: "520px", zIndex: 1, touchAction: "none" }}
+      style={{ width: "100%", height: "520px", zIndex: 1, touchAction: "pan-y" }}
     >
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0"

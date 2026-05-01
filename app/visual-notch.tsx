@@ -82,18 +82,29 @@ const NAV: NavItem[] = [
 
 /* ── Desktop mega menu ───────────────────────────────────────────── */
 
-function MegaMenu({ item }: { item: NavItem }) {
-  const [open, setOpen] = useState(false);
-  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+function MegaMenu({
+  item,
+  index,
+  openIndex,
+  prevIndex,
+  onEnter,
+  onLeave,
+  onClose,
+}: {
+  item: NavItem;
+  index: number;
+  openIndex: number | null;
+  prevIndex: number | null;
+  onEnter: (i: number) => void;
+  onLeave: () => void;
+  onClose: () => void;
+}) {
+  const open = openIndex === index;
 
-  const enter = useCallback(() => {
-    if (leaveTimer.current) clearTimeout(leaveTimer.current);
-    setOpen(true);
-  }, []);
-
-  const leave = useCallback(() => {
-    leaveTimer.current = setTimeout(() => setOpen(false), 80);
-  }, []);
+  // Slide direction: positive = sliding in from right, negative = from left
+  const direction = prevIndex !== null && openIndex !== null
+    ? (openIndex > prevIndex ? 1 : -1)
+    : 0;
 
   const DropdownItem = ({ child }: { child: Child }) => {
     const inner = (
@@ -116,12 +127,16 @@ function MegaMenu({ item }: { item: NavItem }) {
       <a href={child.href} target="_blank" rel="noreferrer" className="site-header__dropdown-item">{inner}</a>
     );
     return (
-      <Link href={child.href!} className="site-header__dropdown-item" onClick={() => setOpen(false)}>{inner}</Link>
+      <Link href={child.href!} className="site-header__dropdown-item" onClick={onClose}>{inner}</Link>
     );
   };
 
   return (
-    <div className="site-header__menu-root" onMouseEnter={enter} onMouseLeave={leave}>
+    <div
+      className="site-header__menu-root"
+      onMouseEnter={() => onEnter(index)}
+      onMouseLeave={onLeave}
+    >
       <button className="site-header__link" aria-expanded={open} aria-haspopup="true">
         {item.label}
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
@@ -132,7 +147,17 @@ function MegaMenu({ item }: { item: NavItem }) {
       </button>
 
       <div className="site-header__dropdown" data-open={open} aria-hidden={!open}>
-        {item.children.map((child) => <DropdownItem key={child.label} child={child} />)}
+        <div
+          style={{
+            transform: open ? "translateX(0)" : `translateX(${direction * 12}px)`,
+            opacity: open ? 1 : 0,
+            transition: open
+              ? "transform 240ms cubic-bezier(0.22,1,0.36,1), opacity 180ms ease"
+              : "transform 160ms cubic-bezier(0.4,0,1,1), opacity 120ms ease",
+          }}
+        >
+          {item.children.map((child) => <DropdownItem key={child.label} child={child} />)}
+        </div>
       </div>
     </div>
   );
@@ -303,6 +328,29 @@ function InertiaLogo() {
 
 export function VisualNotch() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleEnter = useCallback((i: number) => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    setOpenIndex((prev) => {
+      if (prev !== null && prev !== i) setPrevIndex(prev);
+      return i;
+    });
+  }, []);
+
+  const handleLeave = useCallback(() => {
+    leaveTimer.current = setTimeout(() => {
+      setPrevIndex(null);
+      setOpenIndex(null);
+    }, 80);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setPrevIndex(null);
+    setOpenIndex(null);
+  }, []);
 
   return (
     <>
@@ -315,8 +363,17 @@ export function VisualNotch() {
 
           {/* Desktop nav */}
           <nav className="site-header__nav" aria-label="Main navigation">
-            {NAV.map((item) => (
-              <MegaMenu key={item.label} item={item} />
+            {NAV.map((item, i) => (
+              <MegaMenu
+                key={item.label}
+                item={item}
+                index={i}
+                openIndex={openIndex}
+                prevIndex={prevIndex}
+                onEnter={handleEnter}
+                onLeave={handleLeave}
+                onClose={handleClose}
+              />
             ))}
           </nav>
 
