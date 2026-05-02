@@ -22,8 +22,6 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!ready) return null;
-
   if (mobile) {
     if (user) {
       return (
@@ -86,9 +84,14 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
     );
   }
 
+  const fadeStyle: React.CSSProperties = {
+    opacity: ready ? 1 : 0,
+    transition: ready ? "opacity 300ms ease" : "none",
+  };
+
   if (user) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" style={fadeStyle}>
         <Link
           href="/dashboard"
           className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
@@ -107,7 +110,7 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" style={fadeStyle}>
       <Link
         href="/login"
         className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors px-2"
