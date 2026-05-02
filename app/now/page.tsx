@@ -11,7 +11,7 @@ export default function NowPage() {
     <main className="mx-auto w-full max-w-5xl flex min-h-screen flex-col px-8 pt-6 pb-16 sm:pt-8 sm:pb-20">
       <header
         className="flex items-center mb-16 rise"
-        style={{ ["--rise-delay" as any]: "0ms" }}
+        style={{}}
       >
         <Link
           href="/"
@@ -21,7 +21,7 @@ export default function NowPage() {
         </Link>
       </header>
 
-      <article className="rise" style={{ ["--rise-delay" as any]: "100ms" }}>
+      <article className="rise" style={{ ["--rise-delay" as any]: "40ms" }}>
         <h1 className="text-5xl sm:text-6xl font-medium tracking-tighter leading-none mb-10">
           Now
         </h1>

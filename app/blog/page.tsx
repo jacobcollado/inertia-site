@@ -41,7 +41,7 @@ export default function BlogIndex() {
     <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Nav */}
-      <div className="flex items-center justify-between px-8 py-5">
+      <div className="flex items-center justify-between px-8 py-5 rise">
         <Link href="/" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
           ← back
         </Link>
@@ -53,7 +53,7 @@ export default function BlogIndex() {
       <div className="grid-rule" aria-hidden="true" />
 
       {/* Filter — segmented control with sliding pill */}
-      <div className="flex items-center justify-center py-5">
+      <div className="flex items-center justify-center py-5 rise">
         <div className="relative flex items-center gap-0 rounded-full border border-[rgb(var(--line))] p-1">
           {/* Sliding background pill */}
           <span
@@ -91,7 +91,8 @@ export default function BlogIndex() {
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="blog-card group flex flex-col p-8 hover:bg-[rgb(var(--line))/0.1] transition-colors min-h-[340px]"
+              className="blog-card group flex flex-col p-8 hover:bg-[rgb(var(--line))/0.1] transition-colors min-h-[340px] rise"
+              style={{ ["--rise-delay" as any]: `${i * 70}ms` }}
             >
               {/* Sketch — fixed height so all cards align */}
               <div className="w-full h-[140px] flex items-center mb-8">
@@ -151,53 +152,66 @@ function formatDate(iso: string): string {
 
 function SketchAI() {
   return (
-    <svg viewBox="0 0 280 100" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <g stroke="rgb(var(--muted))" opacity="0.5">
-        {[20, 50, 80].flatMap(y1 => [10, 37, 63, 90].map(y2 => (
-          <line key={`i${y1}h${y2}`} x1="35" y1={y1} x2="105" y2={y2} strokeWidth="0.6" />
-        )))}
-        {[10, 37, 63, 90].flatMap(y1 => [32, 68].map(y2 => (
-          <line key={`h${y1}o${y2}`} x1="115" y1={y1} x2="185" y2={y2} strokeWidth="0.6" />
-        )))}
-      </g>
-      <g stroke="rgb(var(--blue))" strokeDasharray="4 3" strokeWidth="1.8">
-        <line x1="35" y1="50" x2="105" y2="37" />
-        <line x1="115" y1="37" x2="185" y2="32" />
-      </g>
-      <g stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5">
-        <circle cx="30"  cy="20"  r="5" /><circle cx="30"  cy="50"  r="5" /><circle cx="30"  cy="80"  r="5" />
-        <circle cx="110" cy="10"  r="5" /><circle cx="110" cy="37"  r="5" /><circle cx="110" cy="63"  r="5" /><circle cx="110" cy="90"  r="5" />
-        <circle cx="190" cy="32"  r="5" /><circle cx="190" cy="68"  r="5" />
-      </g>
-      <g fill="rgb(var(--blue))" stroke="none">
-        <circle cx="30"  cy="50"  r="4" />
-        <circle cx="110" cy="37"  r="4" />
-        <circle cx="190" cy="32"  r="4" />
-      </g>
-      <g stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5">
-        <line x1="195" y1="32" x2="250" y2="32" /><line x1="195" y1="68" x2="250" y2="68" />
-        <polyline points="244,27 250,32 244,37" /><polyline points="244,63 250,68 244,73" />
-      </g>
+    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {[30, 55, 80].map(y => (
+        <line key={y} x1="18" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 4" opacity="0.2" />
+      ))}
+      <line x1="18" y1="100" x2="188" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <line x1="18" y1="12"  x2="18"  y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <path d="M 18 98 C 40 97 60 92 80 84 C 95 78 108 68 120 56" stroke="rgb(var(--blue))" strokeWidth="1.8" opacity="0.8" />
+      <path d="M 120 56 C 133 44 148 30 165 18" stroke="rgb(var(--blue))" strokeWidth="1.4" strokeDasharray="4 3" opacity="0.55" />
+      <path d="M 120 56 C 133 38 150 22 170 12" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="2 3" opacity="0.3" />
+      <path d="M 120 56 C 133 52 148 42 165 32" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="2 3" opacity="0.3" />
+      <line x1="120" y1="10" x2="120" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 3" opacity="0.25" />
+      <line x1="120" y1="100" x2="120" y2="106" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.4" />
+      <circle cx="50"  cy="95" r="2.5" fill="rgb(var(--blue))" opacity="0.5" />
+      <circle cx="80"  cy="84" r="2.5" fill="rgb(var(--blue))" opacity="0.65" />
+      <circle cx="120" cy="56" r="3.5" fill="rgb(var(--blue))" opacity="0.85" />
+      <circle cx="120" cy="56" r="6"   stroke="rgb(var(--blue))" strokeWidth="0.8" opacity="0.25" />
+      <polyline points="159,14 165,18 159,22" stroke="rgb(var(--blue))" strokeWidth="1.2" opacity="0.6" />
     </svg>
   );
 }
 
 function SketchTerminal() {
   return (
-    <svg viewBox="0 0 280 100" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Origin */}
-      <circle cx="32" cy="50" r="6" fill="rgb(var(--green))" stroke="none" />
-      {/* Arcs — green fading out */}
-      <path d="M 46 28 A 26 26 0 0 1 46 72" stroke="rgb(var(--green))" strokeWidth="2.2" />
-      <path d="M 62 14 A 42 42 0 0 1 62 86" stroke="rgb(var(--green))" strokeWidth="1.6" opacity="0.65" />
-      <path d="M 80 4 A 58 58 0 0 1 80 96" stroke="rgb(var(--green))" strokeWidth="1.1" opacity="0.35" />
-      <path d="M 100 0 A 74 74 0 0 1 100 100" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.25" />
-      {/* Axis */}
-      <line x1="32" y1="50" x2="248" y2="50" stroke="rgb(var(--muted))" strokeWidth="1" strokeDasharray="4 6" opacity="0.35" />
-      {/* Arrival — bold tick */}
-      <line x1="248" y1="36" x2="248" y2="64" stroke="rgb(var(--fg))" strokeWidth="2" opacity="0.7" />
-      <line x1="256" y1="50" x2="274" y2="50" stroke="rgb(var(--fg))" strokeWidth="1.5" opacity="0.7" />
-      <polyline points="265,42 274,50 265,58" stroke="rgb(var(--fg))" strokeWidth="1.5" opacity="0.7" />
+    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      <circle cx="44" cy="60" r="4" fill="rgb(var(--amber))" opacity="0.8" />
+      <circle cx="44" cy="60" r="7" stroke="rgb(var(--amber))" strokeWidth="1.0" opacity="0.4" />
+      <path d="M 56 42 A 22 22 0 0 1 56 78" stroke="rgb(var(--amber))" strokeWidth="1.6" opacity="0.7" />
+      <path d="M 70 28 A 38 38 0 0 1 70 92" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.45" />
+      <path d="M 87 15 A 55 55 0 0 1 87 105" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      <path d="M 108 6  A 72 72 0 0 1 108 114" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      <path d="M 132 2  A 88 88 0 0 1 132 118" stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.14" />
+      <line x1="44" y1="60" x2="188" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 5" opacity="0.22" />
+      <line x1="176" y1="50" x2="176" y2="70" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.6" />
+      <polyline points="180,55 188,60 180,65" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.6" />
+    </svg>
+  );
+}
+
+function SketchGrowth() {
+  return (
+    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {[30, 55, 80].map(y => (
+        <line key={y} x1="18" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 4" opacity="0.2" />
+      ))}
+      <line x1="18" y1="100" x2="188" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <line x1="18" y1="12"  x2="18"  y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <path d="M 18 98 C 50 97 72 94 90 86 C 110 74 130 52 150 34 C 162 24 172 17 188 12"
+        stroke="rgb(var(--green))" strokeWidth="2.0" opacity="0.85" />
+      <circle cx="55"  cy="97" r="2.5" fill="rgb(var(--green))" opacity="0.5" />
+      <circle cx="90"  cy="86" r="2.5" fill="rgb(var(--green))" opacity="0.65" />
+      <circle cx="130" cy="52" r="3"   fill="rgb(var(--green))" opacity="0.8" />
+      <circle cx="170" cy="18" r="3.5" fill="rgb(var(--green))" opacity="0.95" />
+      <line x1="55"  y1="97" x2="55"  y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" opacity="0.4" />
+      <line x1="90"  y1="86" x2="90"  y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.35" />
+      <line x1="130" y1="52" x2="130" y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.35" />
+      <line x1="170" y1="18" x2="170" y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.3" />
+      {[55, 90, 130, 170].map(x => (
+        <line key={x} x1={x} y1="100" x2={x} y2="106" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.35" />
+      ))}
+      <polyline points="182,8 188,12 182,16" stroke="rgb(var(--green))" strokeWidth="1.3" opacity="0.75" />
     </svg>
   );
 }
@@ -222,6 +236,7 @@ function SketchWave({ index }: { index: number }) {
 const SLUG_SKETCHES: Record<string, () => React.ReactElement> = {
   "ai-capability-forecast": SketchAI,
   "hello-world": SketchTerminal,
+  "four-years": SketchGrowth,
 };
 
 function PostSketch({ slug, index }: { slug: string; index: number }) {

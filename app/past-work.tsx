@@ -27,27 +27,62 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
   );
 }
 
+function LogoImage({ slug, alt }: { slug: string; alt: string }) {
+  const [errored, setErrored] = useState(false);
+  if (errored) {
+    return (
+      <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 font-medium">{alt}</span>
+    );
+  }
+  const invertCls = logoInvertClass(slug);
+  return (
+    <Image
+      src={`/work/logos/${slug}.png`}
+      alt={alt}
+      fill={false}
+      width={160}
+      height={80}
+      onError={() => setErrored(true)}
+      className={`object-contain w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]${invertCls ? ` ${invertCls}` : ""}`}
+    />
+  );
+}
+
+const LOGO_SIZE: Record<string, string> = {
+  "ellora-la": "w-[75%] md:w-[55%]",
+};
+
+// "dark-on-light" = dark logo, needs dark:invert (default)
+// "light-on-dark" = white logo, needs invert in light mode
+// "color"         = preserve as-is
+type LogoInvert = "dark-on-light" | "light-on-dark" | "color";
+
+const LOGO_INVERT: Record<string, LogoInvert> = {
+  "ellora-la":   "light-on-dark",
+  "trippie-redd": "color",
+  "ft-gioo":      "color",
+};
+
+function logoInvertClass(slug: string): string {
+  const mode = LOGO_INVERT[slug] ?? "dark-on-light";
+  if (mode === "color")        return "";
+  if (mode === "light-on-dark") return "invert dark:invert-0";
+  return "dark:invert"; // dark-on-light default
+}
+
 function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: number; total: number; onOpen: () => void }) {
-  const preserveColor = item.slug === "trippie-redd" || item.slug === "ft-gioo";
   return (
     <button
       onClick={onOpen}
-      className="work-grid-card group relative flex flex-col text-left bg-transparent transition-colors hover:bg-[rgb(var(--line))/0.06]"
+      className="work-grid-card group relative flex flex-col text-left bg-transparent transition-colors hover:bg-[rgb(var(--line))/0.06] rise"
       data-index={index}
       data-total={total}
-      style={{ ["--row-i" as any]: index }}
+      style={{ ["--row-i" as any]: index, ["--rise-delay" as any]: `${index * 70}ms` }}
     >
       {/* Logo area — fixed aspect, logo constrained to 40% width so all feel balanced */}
       <div className="w-full aspect-[4/3] flex items-center justify-center p-10">
-        <div className="relative w-[60%] md:w-[40%] h-full flex items-center justify-center">
-          <Image
-            src={`/work/logos/${item.slug}.png`}
-            alt={item.client}
-            fill={false}
-            width={160}
-            height={80}
-            className={`object-contain w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]${preserveColor ? "" : " dark:invert"}`}
-          />
+        <div className={`relative ${LOGO_SIZE[item.slug] ?? "w-[60%] md:w-[40%]"} h-full flex items-center justify-center`}>
+          <LogoImage slug={item.slug} alt={item.client} />
         </div>
       </div>
 

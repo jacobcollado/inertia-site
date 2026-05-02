@@ -58,7 +58,7 @@ const NAV: NavItem[] = [
     label: "Pricing",
     children: [
       { label: "Aether theme", description: "One-time purchase, lifetime updates.", href: "/aether", icon: <HiOutlineCreditCard /> },
-      { label: "Enterprise", description: "Custom licensing for larger teams.", disabled: true, icon: <HiOutlineBuildingOffice /> },
+      { label: "Enterprise", description: "Custom licensing for larger teams.", href: "/aether/enterprise", icon: <HiOutlineBuildingOffice /> },
       { label: "Add-ons", description: "Extend your theme with optional modules.", disabled: true, icon: <HiOutlinePuzzlePiece /> },
     ],
   },
@@ -333,6 +333,26 @@ export function VisualNotch() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    el.style.opacity = "0";
+    el.style.transform = "translateY(-8px)";
+    const raf = requestAnimationFrame(() => {
+      el.style.transition = "opacity 420ms cubic-bezier(0.16,1,0.3,1), transform 420ms cubic-bezier(0.16,1,0.3,1)";
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+      const onEnd = () => {
+        el.style.transition = "";
+        el.style.opacity = "";
+        el.style.transform = "";
+      };
+      el.addEventListener("transitionend", onEnd, { once: true });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   const handleEnter = useCallback((i: number) => {
     if (leaveTimer.current) clearTimeout(leaveTimer.current);
@@ -356,7 +376,7 @@ export function VisualNotch() {
 
   return (
     <>
-      <div className="site-header">
+      <div className="site-header" ref={headerRef}>
         <div className="site-header__inner">
           {/* Brand */}
           <span className="site-header__brand">

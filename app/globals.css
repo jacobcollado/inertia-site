@@ -2,8 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 150ms;
+  animation-timing-function: ease;
+}
+
 :root {
-  --bg: 255 255 255;
+  --bg: 250 249 247;
   --fg: 14 14 14;
   --muted: 100 100 100;
   --line: 200 200 200;
@@ -35,7 +41,6 @@ html {
   color: rgb(var(--fg));
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
-  transition: background-color 250ms ease, color 250ms ease;
 }
 
 
@@ -114,19 +119,13 @@ html {
 }
 
 @keyframes route-enter {
-  from {
-    opacity: 0;
-    filter: blur(6px);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .route-enter {
-  animation: route-enter 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: opacity, filter;
+  animation: route-enter 200ms ease both;
+  will-change: opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -135,13 +134,6 @@ html {
   }
 }
 
-body *,
-body *::before,
-body *::after {
-  transition: border-color 400ms cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 400ms cubic-bezier(0.22, 1, 0.36, 1),
-    color 400ms cubic-bezier(0.22, 1, 0.36, 1);
-}
 
 
 ::selection {
@@ -366,8 +358,12 @@ h1:hover .redact > span.redact-inner,
 
 .rise {
   opacity: 0;
-  transform: translateY(18px);
-  animation: rise 1000ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform: translateY(16px);
+  will-change: opacity, transform;
+}
+
+.rise.is-visible {
+  animation: rise 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: var(--rise-delay, 0ms);
 }
 
@@ -415,20 +411,17 @@ h1:hover .redact > span.redact-inner,
 
 @keyframes hero-canvas {
   0%   { opacity: 0; }
-  30%  { opacity: 0; }
   100% { opacity: 1; }
 }
 
 @keyframes hero-line {
   from {
     opacity: 0;
-    transform: translateY(10px);
-    filter: blur(4px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
   }
 }
 
@@ -446,7 +439,8 @@ h1:hover .redact > span.redact-inner,
 
 @media (prefers-reduced-motion: reduce) {
   .fade-in,
-  .rise {
+  .rise,
+  .rise.is-visible {
     animation: none;
     opacity: 1;
     transform: none;
@@ -573,11 +567,6 @@ h1:hover .redact > span.redact-inner,
 
 /* ── Site header — grid-aligned bar ─────────────────────────────── */
 
-@keyframes notch-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 .site-header {
   position: sticky;
   top: 0;
@@ -585,7 +574,6 @@ h1:hover .redact > span.redact-inner,
   width: 100%;
   background: rgb(var(--bg));
   border-bottom: 1px solid rgb(var(--line));
-  animation: notch-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Inner constrained to max-w-5xl — left/right edges align with page-container lines */
@@ -713,11 +701,11 @@ h1:hover .redact > span.redact-inner,
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border: 1px solid rgb(var(--line));
-  color: rgb(var(--muted));
-  font-size: 15px;
+  color: rgb(var(--fg));
+  font-size: 20px;
   margin-top: 1px;
 }
 
@@ -735,7 +723,7 @@ h1:hover .redact > span.redact-inner,
   font-size: 13.5px;
   font-weight: 500;
   letter-spacing: -0.025em;
-  color: rgb(var(--muted));
+  color: rgb(var(--fg));
   transition: color 160ms cubic-bezier(0.22, 1, 0.36, 1);
   white-space: nowrap;
 }

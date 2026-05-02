@@ -12,7 +12,7 @@ export default function ContactPage() {
     <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
 
       {/* Nav */}
-      <div className="flex items-center px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
+      <div className="flex items-center px-8 py-5 rise">
         <Link
           href="/"
           className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
@@ -23,7 +23,7 @@ export default function ContactPage() {
 
       <div className="grid-rule" aria-hidden="true" />
 
-      <div className="flex-1 rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+      <div className="flex-1 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
         <ContactForm />
       </div>
 

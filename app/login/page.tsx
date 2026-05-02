@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
-  title: "Client portal — Inertia",
+  title: "Client portal | Inertia",
 };
 
 type Search = { tab?: string };

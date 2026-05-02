@@ -263,7 +263,7 @@ export function SoundwaveHero() {
         style={{
           display: "block",
           opacity: 0,
-          animation: "hero-canvas 1400ms cubic-bezier(0.22,1,0.36,1) 0ms forwards",
+          animation: "hero-canvas 1100ms cubic-bezier(0.16,1,0.3,1) 60ms forwards",
         }}
       />
 
@@ -277,7 +277,7 @@ export function SoundwaveHero() {
           className="text-[13px] tracking-tight text-[rgb(var(--muted))]"
           style={{
             opacity: 0,
-            animation: "hero-line 700ms cubic-bezier(0.22,1,0.36,1) 180ms forwards",
+            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 80ms forwards",
           }}
         >
           A body in motion stays in motion.
@@ -286,7 +286,7 @@ export function SoundwaveHero() {
           className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center"
           style={{
             opacity: 0,
-            animation: "hero-line 800ms cubic-bezier(0.22,1,0.36,1) 340ms forwards",
+            animation: "hero-line 700ms cubic-bezier(0.16,1,0.3,1) 180ms forwards",
           }}
         >
           We build the thing<br />that keeps you moving.

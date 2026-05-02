@@ -15,44 +15,35 @@ import {
   readingStats,
 } from "@/lib/posts";
 
-// ai-capability-forecast: neural network / signal diagram
+// Sketches match the index card designs, scaled to 560x160 viewBox
 function SketchAI() {
   return (
     <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <g stroke="rgb(var(--muted))" opacity="0.5">
-        {[40, 80, 120].flatMap(y1 => [28, 64, 100, 136].map(y2 => (
-          <line key={`i${y1}h${y2}`} x1="66" y1={y1} x2="184" y2={y2} strokeWidth="0.7" />
-        )))}
-        {[28, 64, 100, 136].flatMap(y1 => [40, 80, 120].map(y2 => (
-          <line key={`h1${y1}h2${y2}`} x1="196" y1={y1} x2="314" y2={y2} strokeWidth="0.7" />
-        )))}
-        {[40, 80, 120].flatMap(y1 => [56, 104].map(y2 => (
-          <line key={`h2${y1}o${y2}`} x1="326" y1={y1} x2="444" y2={y2} strokeWidth="0.7" />
-        )))}
-      </g>
-      <g stroke="#60a5fa" strokeDasharray="5 3" strokeWidth="2">
-        <line x1="66" y1="80" x2="184" y2="64" />
-        <line x1="196" y1="64" x2="314" y2="80" />
-        <line x1="326" y1="80" x2="444" y2="104" />
-      </g>
-      <g stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5">
-        <circle cx="60"  cy="40"  r="6" /><circle cx="60"  cy="80"  r="6" /><circle cx="60"  cy="120" r="6" />
-        <circle cx="190" cy="28"  r="6" /><circle cx="190" cy="64"  r="6" /><circle cx="190" cy="100" r="6" /><circle cx="190" cy="136" r="6" />
-        <circle cx="320" cy="40"  r="6" /><circle cx="320" cy="80"  r="6" /><circle cx="320" cy="120" r="6" />
-        <circle cx="450" cy="56"  r="6" /><circle cx="450" cy="104" r="6" />
-      </g>
-      <g fill="#60a5fa" stroke="none">
-        <circle cx="60"  cy="80"  r="5" />
-        <circle cx="190" cy="64"  r="5" />
-        <circle cx="320" cy="80"  r="5" />
-        <circle cx="450" cy="104" r="5" />
-      </g>
-      <g stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5">
-        <line x1="456" y1="56"  x2="500" y2="56"  />
-        <line x1="456" y1="104" x2="500" y2="104" />
-        <polyline points="493,51 500,56 493,61" />
-        <polyline points="493,99 500,104 493,109" />
-      </g>
+      {/* Grid — scaled from 200x120 index card */}
+      {[40, 73, 107].map(y => (
+        <line key={y} x1="50" y1={y} x2="526" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 6" opacity="0.2" />
+      ))}
+      <line x1="50" y1="133" x2="526" y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      <line x1="50" y1="16"  x2="50"  y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      {/* Historical curve — solid blue */}
+      <path d="M 50 131 C 112 129 168 122 224 112 C 266 103 302 90 336 74" stroke="rgb(var(--blue))" strokeWidth="2.2" opacity="0.8" />
+      {/* Forecast zone — dashed, fanning uncertainty */}
+      <path d="M 336 74 C 373 58 415 40 462 24" stroke="rgb(var(--blue))" strokeWidth="1.6" strokeDasharray="5 4" opacity="0.55" />
+      {/* Upper uncertainty bound */}
+      <path d="M 336 74 C 373 50 418 29 476 16" stroke="rgb(var(--blue))" strokeWidth="0.9" strokeDasharray="3 4" opacity="0.3" />
+      {/* Lower uncertainty bound */}
+      <path d="M 336 74 C 373 69 415 55 462 43" stroke="rgb(var(--blue))" strokeWidth="0.9" strokeDasharray="3 4" opacity="0.3" />
+      {/* Horizon divider */}
+      <line x1="336" y1="13" x2="336" y2="133" stroke="rgb(var(--muted))" strokeWidth="0.6" strokeDasharray="4 4" opacity="0.25" />
+      {/* "Now" tick */}
+      <line x1="336" y1="133" x2="336" y2="141" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.4" />
+      {/* Milestone dots on curve */}
+      <circle cx="140" cy="127" r="3.5" fill="rgb(var(--blue))" opacity="0.5" />
+      <circle cx="224" cy="112" r="3.5" fill="rgb(var(--blue))" opacity="0.65" />
+      <circle cx="336" cy="74"  r="5"   fill="rgb(var(--blue))" opacity="0.85" />
+      <circle cx="336" cy="74"  r="9"   stroke="rgb(var(--blue))" strokeWidth="1" opacity="0.25" />
+      {/* Arrow on forecast line */}
+      <polyline points="446,20 462,24 446,28" stroke="rgb(var(--blue))" strokeWidth="1.5" opacity="0.6" />
     </svg>
   );
 }
@@ -60,15 +51,20 @@ function SketchAI() {
 function SketchTerminal() {
   return (
     <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <circle cx="120" cy="80" r="6" fill="#34d399" stroke="none" />
-      <path d="M 138 54 A 30 30 0 0 1 138 106" stroke="#34d399" strokeWidth="2" />
-      <path d="M 158 36 A 50 50 0 0 1 158 124" stroke="#34d399" strokeWidth="1.4" opacity="0.6" />
-      <path d="M 182 20 A 70 70 0 0 1 182 140" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.5" />
-      <path d="M 210 8 A 90 90 0 0 1 210 152" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      <line x1="120" y1="80" x2="460" y2="80" stroke="rgb(var(--muted))" strokeWidth="0.8" strokeDasharray="4 6" opacity="0.4" />
-      <line x1="460" y1="64" x2="460" y2="96" stroke="rgb(var(--muted))" strokeWidth="1.5" opacity="0.5" />
-      <line x1="470" y1="80" x2="496" y2="80" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5" />
-      <polyline points="488,73 496,80 488,87" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.5" />
+      {/* Origin dot */}
+      <circle cx="123" cy="80" r="5.5" fill="rgb(var(--amber))" opacity="0.8" />
+      <circle cx="123" cy="80" r="10"  stroke="rgb(var(--amber))" strokeWidth="1.2" opacity="0.4" />
+      {/* Signal arcs — amber to muted */}
+      <path d="M 157 53 A 31 31 0 0 1 157 107" stroke="rgb(var(--amber))" strokeWidth="2.2" opacity="0.7" />
+      <path d="M 196 36 A 51 51 0 0 1 196 124" stroke="rgb(var(--amber))" strokeWidth="1.4" opacity="0.45" />
+      <path d="M 243 20 A 72 72 0 0 1 243 140" stroke="rgb(var(--muted))" strokeWidth="1.1" opacity="0.35" />
+      <path d="M 302 8  A 92 92 0 0 1 302 152" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.22" />
+      <path d="M 369 2  A 114 114 0 0 1 369 158" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.14" />
+      {/* Horizontal axis */}
+      <line x1="123" y1="80" x2="526" y2="80" stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 7" opacity="0.22" />
+      {/* Destination tick */}
+      <line x1="493" y1="66" x2="493" y2="94" stroke="rgb(var(--amber))" strokeWidth="1.4" opacity="0.6" />
+      <polyline points="504,73 526,80 504,87" stroke="rgb(var(--amber))" strokeWidth="1.4" opacity="0.6" />
     </svg>
   );
 }
@@ -77,13 +73,13 @@ function SketchWave() {
   return (
     <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       <line x1="20" y1="80" x2="540" y2="80" stroke="rgb(var(--muted))" strokeWidth="0.8" strokeDasharray="3 5" opacity="0.4" />
-      <path d="M 20 80 C 60 20 100 20 140 80 C 180 140 220 140 260 80 C 300 20 340 20 380 80 C 420 140 460 140 500 80 C 520 40 530 30 540 80" stroke="#fbbf24" strokeWidth="2" />
+      <path d="M 20 80 C 60 20 100 20 140 80 C 180 140 220 140 260 80 C 300 20 340 20 380 80 C 420 140 460 140 500 80 C 520 40 530 30 540 80" stroke="rgb(var(--amber))" strokeWidth="2" />
       <path d="M 20 80 C 50 50 90 50 120 80 C 150 110 190 110 220 80 C 250 50 290 50 320 80 C 350 110 390 110 420 80 C 450 50 490 50 520 80" stroke="rgb(var(--muted))" strokeWidth="1" strokeDasharray="3 4" opacity="0.4" />
-      <line x1="140" y1="20" x2="140" y2="80"  stroke="#fbbf24" strokeWidth="1.2" />
-      <line x1="134" y1="20" x2="146" y2="20"  stroke="#fbbf24" strokeWidth="1.4" />
-      <line x1="134" y1="80" x2="146" y2="80"  stroke="#fbbf24" strokeWidth="1.4" />
-      <line x1="260" y1="80" x2="260" y2="140" stroke="#fbbf24" strokeWidth="1.2" />
-      <line x1="254" y1="140" x2="266" y2="140" stroke="#fbbf24" strokeWidth="1.4" />
+      <line x1="140" y1="20" x2="140" y2="80"  stroke="rgb(var(--amber))" strokeWidth="1.2" />
+      <line x1="134" y1="20" x2="146" y2="20"  stroke="rgb(var(--amber))" strokeWidth="1.4" />
+      <line x1="134" y1="80" x2="146" y2="80"  stroke="rgb(var(--amber))" strokeWidth="1.4" />
+      <line x1="260" y1="80" x2="260" y2="140" stroke="rgb(var(--amber))" strokeWidth="1.2" />
+      <line x1="254" y1="140" x2="266" y2="140" stroke="rgb(var(--amber))" strokeWidth="1.4" />
       <line x1="20"  y1="152" x2="260" y2="152" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
       <line x1="20"  y1="148" x2="20"  y2="156" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
       <line x1="260" y1="148" x2="260" y2="156" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
@@ -94,36 +90,31 @@ function SketchWave() {
 function SketchGrowth() {
   return (
     <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Grid lines */}
-      {[40, 80, 120].map(y => (
-        <line key={y} x1="30" y1={y} x2="530" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.18" />
+      {/* Grid — scaled from 200x120 index card */}
+      {[40, 73, 107].map(y => (
+        <line key={y} x1="50" y1={y} x2="526" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 6" opacity="0.2" />
       ))}
-      {/* Axes */}
-      <line x1="30" y1="140" x2="530" y2="140" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.25" />
-      <line x1="30" y1="20"  x2="30"  y2="140" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.25" />
-      {/* Growth curve */}
-      <path
-        d="M 30 138 C 100 136 160 128 220 112 C 280 94 320 70 380 50 C 420 36 470 26 530 18"
-        stroke="rgb(var(--green))"
-        strokeWidth="2"
-        opacity="0.8"
-      />
+      <line x1="50" y1="133" x2="526" y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      <line x1="50" y1="16"  x2="50"  y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      {/* Growth curve — slow start, hockey stick */}
+      <path d="M 50 131 C 140 129 202 124 252 114 C 308 98 364 69 420 45 C 454 32 482 22 526 16"
+        stroke="rgb(var(--green))" strokeWidth="2.4" opacity="0.85" />
       {/* Milestone dots */}
-      <circle cx="110" cy="134" r="3"   fill="rgb(var(--green))" opacity="0.4" />
-      <circle cx="220" cy="112" r="3.5" fill="rgb(var(--green))" opacity="0.55" />
-      <circle cx="340" cy="60"  r="4"   fill="rgb(var(--green))" opacity="0.7" />
-      <circle cx="470" cy="26"  r="4.5" fill="rgb(var(--green))" opacity="0.85" />
-      {/* Vertical drops */}
-      <line x1="110" y1="134" x2="110" y2="140" stroke="rgb(var(--green))" strokeWidth="0.6" opacity="0.35" />
-      <line x1="220" y1="112" x2="220" y2="140" stroke="rgb(var(--green))" strokeWidth="0.6" strokeDasharray="2 3" opacity="0.3" />
-      <line x1="340" y1="60"  x2="340" y2="140" stroke="rgb(var(--green))" strokeWidth="0.6" strokeDasharray="2 3" opacity="0.3" />
-      <line x1="470" y1="26"  x2="470" y2="140" stroke="rgb(var(--green))" strokeWidth="0.6" strokeDasharray="2 3" opacity="0.3" />
-      {/* Year ticks */}
-      {[110, 220, 340, 470].map(x => (
-        <line key={x} x1={x} y1="140" x2={x} y2="146" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <circle cx="154" cy="129" r="3.5" fill="rgb(var(--green))" opacity="0.5" />
+      <circle cx="252" cy="114" r="3.5" fill="rgb(var(--green))" opacity="0.65" />
+      <circle cx="364" cy="69"  r="4"   fill="rgb(var(--green))" opacity="0.8" />
+      <circle cx="476" cy="24"  r="5"   fill="rgb(var(--green))" opacity="0.95" />
+      {/* Drop lines */}
+      <line x1="154" y1="129" x2="154" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" opacity="0.4" />
+      <line x1="252" y1="114" x2="252" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.35" />
+      <line x1="364" y1="69"  x2="364" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.35" />
+      <line x1="476" y1="24"  x2="476" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.3" />
+      {/* Baseline ticks */}
+      {[154, 252, 364, 476].map(x => (
+        <line key={x} x1={x} y1="133" x2={x} y2="141" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.35" />
       ))}
       {/* Arrow */}
-      <polyline points="523,13 530,18 523,23" stroke="rgb(var(--green))" strokeWidth="1.4" opacity="0.75" />
+      <polyline points="510,12 526,16 510,20" stroke="rgb(var(--green))" strokeWidth="1.6" opacity="0.75" />
     </svg>
   );
 }
@@ -280,16 +271,16 @@ function ArticleBody({ html }: { html: string }) {
         const before = chunk.slice(0, firstPEnd + 4);
         const after = chunk.slice(firstPEnd + 4);
         rendered.push(
-          <div key={`${i}a`} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "200ms" }} dangerouslySetInnerHTML={{ __html: before }} />,
+          <div key={`${i}a`} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "0ms" }} dangerouslySetInnerHTML={{ __html: before }} />,
           <div key={`${i}s`} className="mx-auto max-w-2xl px-8 py-6">{sketch}</div>,
-          after.trim() && <div key={`${i}b`} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "200ms" }} dangerouslySetInnerHTML={{ __html: after }} />,
+          after.trim() && <div key={`${i}b`} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "0ms" }} dangerouslySetInnerHTML={{ __html: after }} />,
         );
         return;
       }
     }
 
     rendered.push(
-      <div key={i} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "200ms" }} dangerouslySetInnerHTML={{ __html: chunk }} />
+      <div key={i} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "0ms" }} dangerouslySetInnerHTML={{ __html: chunk }} />
     );
   });
 
@@ -337,7 +328,7 @@ export default async function BlogPost({
       <TOC headings={headings} />
 
       {/* Back nav */}
-      <div className="px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
+      <div className="px-8 py-5 rise">
         <Link
           href="/blog"
           className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
@@ -348,7 +339,7 @@ export default async function BlogPost({
 
       <article>
         {/* Hero header — centered */}
-        <header className="px-8 pt-12 pb-8 text-center rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+        <header className="px-8 pt-12 pb-8 text-center rise" style={{ ["--rise-delay" as any]: "40ms" }}>
           {/* Author byline — directly under title */}
           <div className="flex items-center justify-center gap-2 mb-7">
             <div className="w-5 h-5 rounded-full bg-[rgb(var(--line))] flex items-center justify-center shrink-0">
@@ -373,7 +364,7 @@ export default async function BlogPost({
         </header>
 
         {/* Meta bar */}
-        <div className="mx-auto max-w-2xl px-8 rise" style={{ ["--rise-delay" as any]: "120ms" }}>
+        <div className="mx-auto max-w-2xl px-8 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
           <div className="flex items-center justify-between gap-6 py-3.5 border-y border-[rgb(var(--line))]">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))]">
@@ -392,7 +383,7 @@ export default async function BlogPost({
         </div>
 
         {/* Article sketch */}
-        <div className="mx-auto max-w-2xl px-8 pt-12 pb-4 rise" style={{ ["--rise-delay" as any]: "160ms" }}>
+        <div className="mx-auto max-w-2xl px-8 pt-12 pb-4 rise" style={{ ["--rise-delay" as any]: "120ms" }}>
           <PostSketch slug={post.slug} />
         </div>
 

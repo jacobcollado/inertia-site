@@ -1026,7 +1026,7 @@ export default function DocsPage() {
   return (
     <div className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
 
-      <header className="px-6 sm:px-8 pt-6 sm:pt-8 pb-10 sm:pb-12 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
+      <header className="px-6 sm:px-8 pt-6 sm:pt-8 pb-10 sm:pb-12 rise">
         <Link href="/" className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
           ← Inertia
         </Link>
@@ -1034,7 +1034,7 @@ export default function DocsPage() {
 
       <Divider />
 
-      <div className="px-6 sm:px-8 py-8 sm:py-10 rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+      <div className="px-6 sm:px-8 py-8 sm:py-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
         <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none mb-3">Docs</h1>
         <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
           Everything you need to set up, configure, and get the most out of Inertia products.
@@ -1044,7 +1044,7 @@ export default function DocsPage() {
       <Divider />
 
 
-      <div className="rise flex flex-1" style={{ ["--rise-delay" as any]: "120ms" }}>
+      <div className="rise flex flex-1" style={{ ["--rise-delay" as any]: "80ms" }}>
 
         <aside className="hidden lg:block w-52 xl:w-60 shrink-0 border-r border-[rgb(var(--line))]">
           <div className="sticky top-0 px-6 max-h-screen overflow-y-auto">

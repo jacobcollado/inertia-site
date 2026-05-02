@@ -54,11 +54,11 @@ const TIERS: {
     badge: "Most popular",
   },
   {
-    name: "Custom",
-    price: "On request",
-    term: "Foundation + bespoke build",
-    description: "Aether as the base, tailored end to end around your brand.",
-    includes: ["Bespoke design pass", "Custom sections", "Brand-tuned interactions", "Direct line to us"],
+    name: "Enterprise",
+    price: "From $59",
+    term: "Per store or unlimited",
+    description: "Aether as a foundation for agencies, studios, and operators running multiple stores.",
+    includes: ["Commercial deployment rights", "Multi-store licensing", "Lifetime updates", "Dedicated support"],
   },
 ];
 
@@ -271,7 +271,7 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Hero */}
-      <section className="px-6 sm:px-8 pt-12 pb-10 flex flex-col items-center text-center rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+      <section className="px-6 sm:px-8 pt-12 pb-10 flex flex-col items-center text-center rise">
         <p className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] mb-6">
           <ShopifyLogo />
           <span>Shopify theme by Inertia</span>
@@ -316,14 +316,14 @@ export default function AetherPage() {
       </section>
 
       {/* Animated wave */}
-      <div className="rise" style={{ ["--rise-delay" as any]: "80ms" }}>
+      <div className="rise">
         <AetherWave />
       </div>
 
       <GridRule />
 
       {/* Section label */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise" style={{ ["--rise-delay" as any]: "100ms" }}>
+      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
         <span className="text-[19px] sm:text-[21px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Why brands</span>
         <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" aria-hidden="true">
@@ -337,14 +337,15 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Features */}
-      <div className="flex flex-col sm:flex-row rise" style={{ ["--rise-delay" as any]: "140ms" }}>
+      <div className="flex flex-col sm:flex-row">
         {FEATURES.map((f, i) => (
           <div
             key={f.title}
-            className="flex-1 flex flex-col gap-5 px-6 sm:px-8 pt-8 pb-8"
+            className="flex-1 flex flex-col gap-5 px-6 sm:px-8 pt-8 pb-8 rise"
             style={{
               borderLeft: i > 0 ? "1px solid rgb(var(--line))" : undefined,
               borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined,
+              ["--rise-delay" as any]: `${i * 80}ms`,
             }}
           >
             <div className="w-full">
@@ -367,7 +368,7 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label — fit quiz */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise" style={{ ["--rise-delay" as any]: "180ms" }}>
+      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
         <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" aria-hidden="true">
             <circle cx="8" cy="8" r="6" />
@@ -381,14 +382,14 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Fit quiz — inline, edge-to-edge */}
-      <div className="py-8 sm:py-10 rise" style={{ ["--rise-delay" as any]: "220ms" }}>
+      <div className="py-8 sm:py-10 rise">
         <FitQuiz />
       </div>
 
       <GridRule />
 
       {/* Section label — pricing */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise" style={{ ["--rise-delay" as any]: "260ms" }}>
+      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
         <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" aria-hidden="true">
             <rect x="2" y="4" width="12" height="9" rx="1.5" />
@@ -403,16 +404,17 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Pricing */}
-      <div id="pricing" className="flex flex-col sm:flex-row scroll-mt-20 rise" style={{ ["--rise-delay" as any]: "300ms" }}>
+      <div id="pricing" className="flex flex-col sm:flex-row scroll-mt-20">
         {TIERS.map((t, i) => (
           <Link
             key={t.name}
-            href={`/aether/buy?tier=${t.name.toLowerCase()}`}
-            className="group flex-1 flex flex-col justify-between gap-8 px-6 sm:px-8 pt-8 pb-8 transition-colors hover:bg-[rgb(var(--line))/0.06]"
+            href={t.name === "Enterprise" ? "/aether/enterprise" : `/aether/buy?tier=${t.name.toLowerCase()}`}
+            className="group flex-1 flex flex-col justify-between gap-8 px-6 sm:px-8 pt-8 pb-8 transition-colors hover:bg-[rgb(var(--line))/0.06] rise"
             style={{
               borderLeft: i > 0 ? "1px solid rgb(var(--line))" : undefined,
               borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined,
               background: t.featured ? "rgba(56,180,255,0.035)" : undefined,
+              ["--rise-delay" as any]: `${i * 80}ms`,
             }}
           >
             <div className="flex flex-col gap-5">
@@ -457,7 +459,7 @@ export default function AetherPage() {
             {/* CTA row */}
             <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-[rgb(var(--line))]">
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] transition-colors">
-                {t.price === "On request" ? "Get in touch" : "Get Aether"}
+                {t.name === "Enterprise" ? "See enterprise plans" : "Get Aether"}
               </span>
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"
                 className="w-3.5 h-3.5 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-200"

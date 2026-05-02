@@ -290,7 +290,7 @@ export default function AetherChangelog() {
     <div className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
 
       {/* Header */}
-      <header className="px-8 pt-6 sm:pt-8 pb-12 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
+      <header className="px-8 pt-6 sm:pt-8 pb-12 rise">
         <Link
           href="/aether"
           className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
@@ -302,7 +302,7 @@ export default function AetherChangelog() {
       <Divider />
 
       {/* Title row */}
-      <div className="px-8 py-10 rise" style={{ ["--rise-delay" as any]: "60ms" }}>
+      <div className="px-8 py-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
         <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none mb-3">Changelog</h1>
         <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
           Every change documented with context: what changed, why, and how it works.
@@ -339,7 +339,7 @@ export default function AetherChangelog() {
       <div className="lg:hidden h-px bg-[rgb(var(--line))]" />
 
       {/* Body */}
-      <div className="rise flex flex-1" style={{ ["--rise-delay" as any]: "120ms" }}>
+      <div className="rise flex flex-1" style={{ ["--rise-delay" as any]: "80ms" }}>
 
         {/* Sidebar */}
         <aside className="hidden lg:block w-52 xl:w-60 shrink-0 border-r border-[rgb(var(--line))]">

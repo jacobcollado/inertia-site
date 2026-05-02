@@ -40,7 +40,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
       {/* Nav */}
       <header
         className="flex items-center mb-16 rise"
-        style={{ ["--rise-delay" as any]: "0ms" }}
+        style={{}}
       >
         <Link
           href="/"
@@ -54,7 +54,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         {/* Hero */}
         <div
           className="rise"
-          style={{ ["--rise-delay" as any]: "60ms" }}
+          style={{ ["--rise-delay" as any]: "40ms" }}
         >
           <h1 className="text-5xl sm:text-6xl font-medium tracking-tighter leading-[1.0] text-[rgb(var(--fg))] mb-6">
             {piece.client}
@@ -71,7 +71,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         {piece.summary && (
           <p
             className="mt-10 text-lg sm:text-xl leading-[1.5] tracking-tight text-[rgb(var(--muted))] rise"
-            style={{ ["--rise-delay" as any]: "160ms" }}
+            style={{ ["--rise-delay" as any]: "80ms" }}
           >
             {piece.summary}
           </p>
@@ -81,7 +81,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         {piece.preview && (
           <div
             className="mt-10 overflow-hidden rounded-xl border border-[rgb(var(--line))] rise"
-            style={{ ["--rise-delay" as any]: "200ms" }}
+            style={{ ["--rise-delay" as any]: "0ms" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={piece.preview} alt={`${piece.client} site`} className="w-full h-auto" />
@@ -92,7 +92,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         {piece.cover && (
           <div
             className="mt-10 overflow-hidden rounded-xl border border-[rgb(var(--line))] bg-[rgb(var(--line))]/20 aspect-[16/9] rise"
-            style={{ ["--rise-delay" as any]: "280ms" }}
+            style={{ ["--rise-delay" as any]: "0ms" }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={piece.cover} alt="" className="w-full h-full object-cover" />
@@ -102,7 +102,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         {/* Body */}
         <div
           className="rise mt-12 space-y-5 text-base leading-relaxed tracking-tight text-[rgb(var(--fg))] [&_h2]:text-xl [&_h2]:font-medium [&_h2]:tracking-tighter [&_h2]:mt-12 [&_h2]:mb-3 [&_h2]:text-[rgb(var(--fg))] [&_h3]:text-base [&_h3]:font-medium [&_h3]:tracking-tight [&_h3]:mt-8 [&_h3]:mb-2 [&_p]:text-[rgb(var(--muted))] [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-[rgb(var(--line))] hover:[&_a]:decoration-[rgb(var(--fg))] [&_img]:rounded-xl [&_img]:border [&_img]:border-[rgb(var(--line))] [&_img]:my-8 [&_img]:w-full"
-          style={{ ["--rise-delay" as any]: "320ms" }}
+          style={{ ["--rise-delay" as any]: "0ms" }}
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </article>
@@ -111,7 +111,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
       {next && next.slug !== slug && (
         <nav
           className="mt-20 rise"
-          style={{ ["--rise-delay" as any]: "420ms" }}
+          style={{ ["--rise-delay" as any]: "0ms" }}
         >
           <Link
             href={`/work/${next.slug}`}
