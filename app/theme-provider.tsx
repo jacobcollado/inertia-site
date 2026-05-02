@@ -25,15 +25,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const toggle = () => {
     const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
-    const apply = () => {
-      document.documentElement.classList.toggle("dark", next === "dark");
-      setTheme(next);
-    };
-    if (!document.startViewTransition) {
-      apply();
-    } else {
-      document.startViewTransition(apply);
-    }
+    document.documentElement.classList.toggle("dark", next === "dark");
+    setTheme(next);
   };
 
   return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
