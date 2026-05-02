@@ -353,6 +353,7 @@ function TechMarquee() {
 type Plan = "free" | "service";
 
 function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [mounted, setMounted] = useState(false);
   const [plan, setPlan] = useState<Plan>("free");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -360,6 +361,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const backdropRef = useRef<HTMLDivElement>(null);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) {
@@ -536,7 +538,8 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
     </div>
   );
 
-  return typeof document !== "undefined" ? createPortal(modal, document.body) : null;
+  if (!mounted) return null;
+  return createPortal(modal, document.body);
 }
 
 function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) {
@@ -559,7 +562,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
       {/* Shipping + Perspectives */}
       <div className="flex flex-col md:flex-row gap-y-0 overflow-visible">
 
-        <div className="w-full rise flex flex-col" style={{ ["--rise-delay" as any]: "120ms" }}>
+        <div className="w-full rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
 
           {/* ── What we're shipping ── */}
           <div className="flex items-center justify-center gap-3 py-6">
@@ -587,7 +590,8 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                 i < 2   ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
                 i === 2 ? "col-span-2 sm:col-span-1" : "",
               ].filter(Boolean).join(" ");
-              const sharedClass = `group flex-1 flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px] text-left ${borderClass}`;
+              const sharedClass = `group flex-1 flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px] text-left rise ${borderClass}`;
+              const riseDelay = { ["--rise-delay" as any]: `${i * 70}ms` };
               const inner = (
                 <>
                   <div className="flex-1 flex flex-col gap-5">
@@ -609,13 +613,13 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                 </>
               );
               if (isDashboard) return (
-                <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={sharedClass}>{inner}</button>
+                <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={sharedClass} style={riseDelay}>{inner}</button>
               );
               if (external) return (
-                <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={sharedClass}>{inner}</a>
+                <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={sharedClass} style={riseDelay}>{inner}</a>
               );
               return (
-                <Link key={item.name} href={item.href} className={sharedClass}>{inner}</Link>
+                <Link key={item.name} href={item.href} className={sharedClass} style={riseDelay}>{inner}</Link>
               );
             })}
           </div>
@@ -648,10 +652,11 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                   key={post.slug}
                   href={`/blog/${post.slug}`}
                   className={[
-                    "group flex flex-col justify-between gap-4 px-5 sm:px-6 pt-6 pb-5 transition-colors hover:bg-[rgb(var(--line))/0.15]",
+                    "group flex flex-col justify-between gap-4 px-5 sm:px-6 pt-6 pb-5 transition-colors hover:bg-[rgb(var(--line))/0.15] rise",
                     i % 2 === 0 ? "border-r border-[rgb(var(--line))]" : "",
                     i < 2 ? "border-b border-[rgb(var(--line))]" : "",
                   ].filter(Boolean).join(" ")}
+                  style={{ ["--rise-delay" as any]: `${i * 60}ms` }}
                 >
                   <div className="flex flex-col gap-4">
                     <div className="w-full overflow-hidden">
@@ -683,7 +688,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
       </div>
 
       {/* Past work */}
-      <section className="rise flex flex-col" style={{ ["--rise-delay" as any]: "60ms" }}>
+      <section className="rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
 
         {/* Label cell */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">

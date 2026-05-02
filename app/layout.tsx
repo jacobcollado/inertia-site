@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "./theme-provider";
 import { RouteFade } from "./route-fade";
 import { LenisProvider } from "./lenis-provider";
 import { ViewModeProvider } from "./view-mode-context";
 import { SiteShell } from "./site-shell";
+import { ScrollReveal } from "./scroll-reveal";
 
 const BASE_URL = "https://inertia.dev";
 
@@ -58,13 +58,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap"
         />
-        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider>
           <ViewModeProvider>
             <LenisProvider />
             <SiteShell>
+              <ScrollReveal />
               <RouteFade>
                 {children}
               </RouteFade>
