@@ -236,9 +236,9 @@ export function FitQuiz() {
 
       <div className="flex flex-col sm:flex-row">
 
-        {/* Sketch pane */}
-        <div className="w-full sm:w-[280px] shrink-0 flex items-center justify-center py-10 px-8 border-b sm:border-b-0 sm:border-r border-[rgb(var(--line))]">
-          <div className="w-full max-w-[220px] sm:max-w-none h-[180px] sm:h-[200px] relative">
+        {/* Sketch pane — hidden on mobile */}
+        <div className="hidden sm:flex w-[280px] shrink-0 items-center justify-center py-10 px-8 border-r border-[rgb(var(--line))]">
+          <div className="w-full h-[200px] relative">
             {!done ? (
               SKETCHES.map((Sketch, i) => (
                 <div key={i} className="absolute inset-0"
@@ -259,7 +259,7 @@ export function FitQuiz() {
         <div className="flex-1 px-6 sm:px-10 py-8 sm:py-10 flex flex-col justify-between gap-6 min-h-[220px]">
           <div
             key={done ? "verdict" : `q-${index}`}
-            className="flex flex-col gap-4 flex-1"
+            className="flex flex-col gap-5 flex-1"
             style={{
               opacity: transitioning ? 0 : 1,
               transform: transitioning ? `translateX(${dir * 12}px)` : "translateX(0)",
@@ -268,12 +268,11 @@ export function FitQuiz() {
           >
             {!done ? (
               <>
-                {/* Counter */}
+                {/* Counter + dots */}
                 <div className="flex items-center gap-3">
                   <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums">
                     {String(index + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
                   </span>
-                  {/* Dot indicators */}
                   <div className="flex items-center gap-1.5">
                     {QUESTIONS.map((_, i) => (
                       <span key={i} className="block w-1.5 h-1.5 rounded-full transition-colors duration-200"
@@ -282,30 +281,33 @@ export function FitQuiz() {
                   </div>
                 </div>
 
-                <h3 className="text-[1.5rem] sm:text-[1.65rem] font-medium tracking-[-0.03em] leading-[1.15] text-[rgb(var(--fg))]">
+                <h3 className="text-[1.35rem] sm:text-[1.65rem] font-medium tracking-[-0.03em] leading-[1.2] text-[rgb(var(--fg))]">
                   {q.text}
                 </h3>
                 <p className="text-[13.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md">
                   {q.sub}
                 </p>
 
-                <div className="flex items-center gap-3 pt-1">
-                  <button
-                    onClick={() => pick("yes")}
-                    className="inline-flex items-center justify-center bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-9 text-[13px] tracking-tight font-medium hover:opacity-90 transition-opacity active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
-                  >
-                    Yes
-                  </button>
-                  <button
-                    onClick={() => pick("no")}
-                    className="inline-flex items-center justify-center border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-7 h-9 text-[13px] tracking-tight hover:border-[rgb(var(--fg))] transition-colors active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
-                  >
-                    No
-                  </button>
+                {/* Yes / No — full-width on mobile, inline on desktop */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => pick("yes")}
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-12 sm:h-9 text-[14px] sm:text-[13px] tracking-tight font-medium hover:opacity-90 transition-opacity active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => pick("no")}
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-7 h-12 sm:h-9 text-[14px] sm:text-[13px] tracking-tight hover:border-[rgb(var(--fg))] transition-colors active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
+                    >
+                      No
+                    </button>
+                  </div>
                   {answers.length > 0 && (
                     <button
                       onClick={goBack}
-                      className="ml-auto text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors [-webkit-tap-highlight-color:transparent]"
+                      className="sm:ml-auto text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors [-webkit-tap-highlight-color:transparent]"
                     >
                       back
                     </button>
@@ -326,17 +328,17 @@ export function FitQuiz() {
                   </div>
                 </div>
 
-                <h3 className="text-[1.5rem] sm:text-[1.65rem] font-medium tracking-[-0.03em] leading-[1.15] text-[rgb(var(--fg))]">
+                <h3 className="text-[1.35rem] sm:text-[1.65rem] font-medium tracking-[-0.03em] leading-[1.2] text-[rgb(var(--fg))]">
                   {verdict.title}
                 </h3>
                 <p className="text-[13.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md">
                   {verdict.body}
                 </p>
 
-                <div className="flex items-center gap-4 pt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
                   <Link
                     href={verdict.cta.href}
-                    className="inline-flex items-center gap-2 bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-9 text-[13px] tracking-tight font-medium hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center justify-center bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-12 sm:h-9 text-[14px] sm:text-[13px] tracking-tight font-medium hover:opacity-90 transition-opacity"
                   >
                     {verdict.cta.label}
                   </Link>

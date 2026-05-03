@@ -206,6 +206,226 @@ function GridRule() {
   return <div className="grid-rule" aria-hidden="true" />;
 }
 
+const SERVICE_GROUPS = [
+  { category: "Storefronts", v: "--blue",   items: ["Shopify Liquid", "Theme development", "Theme licensing"] },
+  { category: "Development", v: "--green",  items: ["Mobile apps", "Framer", "Vercel", "Custom builds"] },
+  { category: "Marketing",   v: "--amber",  items: ["Meta ad campaigns", "Whop setup"] },
+  { category: "Design",      v: "--purple", items: ["Brand identity", "UI design"] },
+];
+
+const ALL_PHRASES: { text: string; v: string; icon: React.ReactNode; cta: { label: string; href: string } }[] = [
+  {
+    text: "Shopify Liquid",
+    v: "--blue",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>,
+    cta: { label: "See Aether theme", href: "/aether" },
+  },
+  {
+    text: "Theme development",
+    v: "--blue",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
+    cta: { label: "View our work", href: "/work" },
+  },
+  {
+    text: "Theme licensing",
+    v: "--blue",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+    cta: { label: "License Aether", href: "/aether/buy" },
+  },
+  {
+    text: "Mobile apps",
+    v: "--green",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2"/></svg>,
+    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    text: "Framer",
+    v: "--green",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M5 3h14v8H5z"/><path d="M5 11h7l7 10H5z"/><path d="M5 11v5"/></svg>,
+    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    text: "Custom builds",
+    v: "--green",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
+    cta: { label: "Start a project", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    text: "Meta ad campaigns",
+    v: "--amber",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    text: "Whop setup",
+    v: "--amber",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    text: "Brand identity",
+    v: "--purple",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>,
+    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    text: "UI design",
+    v: "--purple",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
+    cta: { label: "View our work", href: "/work" },
+  },
+];
+
+function RotatingPanel() {
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [displayed, setDisplayed] = useState("");
+  const [phase, setPhase] = useState<"typing" | "erasing">("typing");
+
+  useEffect(() => {
+    const target = ALL_PHRASES[phraseIdx].text;
+    let t: ReturnType<typeof setTimeout>;
+    if (phase === "typing") {
+      if (displayed.length < target.length) {
+        t = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), 55);
+      } else {
+        t = setTimeout(() => setPhase("erasing"), 2200);
+      }
+    } else {
+      if (displayed.length > 0) {
+        t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 28);
+      } else {
+        setPhraseIdx(i => (i + 1) % ALL_PHRASES.length);
+        setPhase("typing");
+      }
+    }
+    return () => clearTimeout(t);
+  }, [displayed, phase, phraseIdx]);
+
+  const current = ALL_PHRASES[phraseIdx];
+  const isExternal = current.cta.href.startsWith("http");
+  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors";
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-6 px-6 sm:px-10 py-8 sm:py-10 text-center">
+      {/* Icon — fades in per phrase */}
+      <span
+        key={`icon-${phraseIdx}`}
+        className="transition-colors duration-300"
+        style={{
+          color: `rgb(var(${current.v}))`,
+          opacity: 0.65,
+          animation: "rise-in 350ms cubic-bezier(0.22,1,0.36,1) both",
+        }}
+      >
+        {current.icon}
+      </span>
+
+      {/* Label */}
+      <span className="text-[clamp(0.9rem,2vw,1rem)] tracking-tight text-[rgb(var(--muted))] -mb-3">Right now</span>
+
+      {/* Phrase */}
+      <p
+        className="text-[clamp(1.9rem,5vw,2.75rem)] tracking-tight leading-tight font-medium transition-colors duration-300"
+        style={{ color: `rgb(var(${current.v}))` }}
+      >
+        {displayed}<span className="opacity-30 animate-pulse font-light">|</span>
+      </p>
+
+      {/* CTA — slides up per phrase */}
+      <div
+        key={`cta-${phraseIdx}`}
+        style={{ animation: "rise-in 400ms 80ms cubic-bezier(0.22,1,0.36,1) both" }}
+      >
+        {isExternal ? (
+          <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass}>
+            {current.cta.label}
+            <span aria-hidden="true">↗</span>
+          </a>
+        ) : (
+          <Link href={current.cta.href} className={ctaClass}>
+            {current.cta.label}
+            <span aria-hidden="true">→</span>
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LaptopWithText() {
+  const muted = "rgb(var(--muted))";
+  const line = "rgb(var(--line))";
+  return (
+    <div className="relative w-full select-none">
+      <svg viewBox="0 0 320 215" fill="none" className="w-full">
+        <defs>
+          <clipPath id="screen-clip">
+            <rect x="28" y="18" width="264" height="158" rx="3" />
+          </clipPath>
+        </defs>
+        <rect x="12" y="6" width="296" height="180" rx="10" stroke={muted} strokeWidth="1.2" opacity="0.35" />
+        <rect x="28" y="18" width="264" height="158" rx="3" fill="rgb(var(--bg))" stroke={line} strokeWidth="0.5" opacity="0.5" />
+        <circle cx="160" cy="11" r="1.8" fill={muted} opacity="0.3" />
+        <line x1="28" y1="35" x2="292" y2="35" stroke={line} strokeWidth="0.5" opacity="0.5" />
+        <circle cx="42" cy="26.5" r="2.5" fill={muted} opacity="0.22" />
+        <circle cx="51" cy="26.5" r="2.5" fill={muted} opacity="0.22" />
+        <circle cx="60" cy="26.5" r="2.5" fill={muted} opacity="0.22" />
+        <rect x="96" y="22" width="128" height="9" rx="2.5" stroke={muted} strokeWidth="0.4" opacity="0.18" />
+        <path d="M4 186 Q8 190 20 190 L300 190 Q312 190 316 186 L319 198 Q319 202 160 202 Q1 202 1 198 Z" fill="rgb(var(--bg))" stroke={muted} strokeWidth="0.8" opacity="0.28" />
+        <rect x="126" y="192" width="68" height="8" rx="2" stroke={muted} strokeWidth="0.4" opacity="0.18" />
+        <foreignObject x="36" y="40" width="248" height="132" clipPath="url(#screen-clip)">
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              padding: "10px 12px",
+              fontFamily: "inherit",
+            }}
+          >
+            <p style={{
+              fontSize: "11.5px",
+              lineHeight: 1.6,
+              letterSpacing: "-0.01em",
+              color: "rgb(var(--fg))",
+              margin: 0,
+            }}>
+              We build{" "}
+              <span style={{
+                fontWeight: 500,
+                background: "linear-gradient(90deg, rgb(var(--fg)) 0%, rgb(var(--muted)) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}>
+                Shopify storefronts, themes, and tools
+              </span>{" "}
+              for client projects, our own products, and the craft in between.
+            </p>
+          </div>
+        </foreignObject>
+      </svg>
+    </div>
+  );
+}
+
+function WhatWeDo() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2">
+      {/* Laptop */}
+      <div className="px-6 sm:px-10 py-8 sm:py-10 flex items-center justify-center sm:border-r sm:border-[rgb(var(--line))]">
+        <LaptopWithText />
+      </div>
+
+      {/* Rotating panel */}
+      <div className="border-t border-[rgb(var(--line))] sm:border-t-0">
+        <RotatingPanel />
+      </div>
+    </div>
+  );
+}
+
 // Slug-specific sketches for the think section — one per post
 const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
   // "A quiet forecast on AI capability" — capability curve with horizon line and uncertainty band
@@ -270,23 +490,29 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
     </svg>
   ),
 
-  // "Hello, world" — radio signal / first broadcast
+  // "Hello, world" — first page going live
   "hello-world": (
     <svg key="hello-world" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Origin dot */}
-      <circle cx="44" cy="60" r="4" fill="rgb(var(--amber))" opacity="0.8" />
-      <circle cx="44" cy="60" r="7" stroke="rgb(var(--amber))" strokeWidth="1.0" opacity="0.4" />
-      {/* Signal arcs — amber to muted */}
-      <path d="M 56 42 A 22 22 0 0 1 56 78" stroke="rgb(var(--amber))" strokeWidth="1.6" opacity="0.7" />
-      <path d="M 70 28 A 38 38 0 0 1 70 92" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.45" />
-      <path d="M 87 15 A 55 55 0 0 1 87 105" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
-      <path d="M 108 6  A 72 72 0 0 1 108 114" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-      <path d="M 132 2  A 88 88 0 0 1 132 118" stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.14" />
-      {/* Horizontal axis */}
-      <line x1="44" y1="60" x2="188" y2="60" stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 5" opacity="0.22" />
-      {/* Destination tick */}
-      <line x1="176" y1="50" x2="176" y2="70" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.6" />
-      <polyline points="180,55 188,60 180,65" stroke="rgb(var(--amber))" strokeWidth="1.1" opacity="0.6" />
+      {/* Page chrome */}
+      <rect x="14" y="10" width="172" height="100" rx="2" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
+      {/* Nav bar */}
+      <line x1="14" y1="26" x2="186" y2="26" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.2" />
+      <line x1="24" y1="18" x2="52" y2="18" stroke="rgb(var(--fg))" strokeWidth="1.0" opacity="0.5" />
+      <line x1="80" y1="18" x2="100" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      <line x1="108" y1="18" x2="128" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
+      {/* Big heading lines */}
+      <line x1="24" y1="42" x2="130" y2="42" stroke="rgb(var(--fg))" strokeWidth="2.2" opacity="0.7" strokeLinecap="round" />
+      <line x1="24" y1="52" x2="96" y2="52" stroke="rgb(var(--fg))" strokeWidth="2.2" opacity="0.7" strokeLinecap="round" />
+      {/* Sub text */}
+      <line x1="24" y1="64" x2="148" y2="64" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <line x1="24" y1="71" x2="120" y2="71" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      <line x1="24" y1="78" x2="136" y2="78" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
+      {/* Cursor blink */}
+      <rect x="138" y="73" width="5" height="9" rx="0.5" fill="rgb(var(--fg))" opacity="0.6" />
+      {/* URL bar */}
+      <rect x="60" y="13" width="80" height="10" rx="2" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
+      <circle cx="67" cy="18" r="2" fill="rgb(var(--green))" opacity="0.55" />
+      <line x1="73" y1="18" x2="132" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
     </svg>
   ),
 };
@@ -541,6 +767,11 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
 
       {/* Tech marquee */}
       <TechMarquee />
+
+      <GridRule />
+
+      {/* What we do */}
+      <WhatWeDo />
 
       <GridRule />
 

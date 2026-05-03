@@ -271,47 +271,31 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Hero */}
-      <section className="px-6 sm:px-8 pt-12 pb-10 flex flex-col items-center text-center rise">
-        <p className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] mb-6">
+      <section className="px-6 sm:px-8 pt-10 pb-4 flex flex-col items-center text-center rise">
+        <div className="inline-flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3 py-1 mb-4">
           <ShopifyLogo />
-          <span>Shopify theme by Inertia</span>
-        </p>
-        <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-5">
+          <span className="text-[11px] font-medium tracking-tight text-[rgb(var(--muted))]">Shopify theme</span>
+        </div>
+        <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-3">
           Aether
         </h1>
-        <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] mb-10 max-w-sm sm:max-w-md">
+        <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] mb-6 max-w-sm sm:max-w-md">
           A Shopify theme for brands that treat the storefront as the product.
         </p>
-        <div className="flex flex-col items-center gap-4 w-full text-[13px] tracking-tight">
-          <div className="flex flex-row items-center justify-center gap-2.5">
-            <Link
-              href="/aether/buy"
-              className="inline-flex items-center justify-center gap-2 bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-6 py-2.5 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
-            >
-              Buy a license
-            </Link>
-            <DemoButton href={DEMO_URL} password="aether" />
-          </div>
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="/docs"
-              className="inline-flex items-center gap-1.5 border border-[rgb(var(--line))] px-3.5 py-1.5 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-                <path d="M3 4h10M3 8h7M3 12h5" />
-              </svg>
-              Docs
-            </Link>
-            <Link
-              href="/aether/changelog"
-              className="inline-flex items-center gap-1.5 border border-[rgb(var(--line))] px-3.5 py-1.5 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-                <circle cx="8" cy="8" r="5.5" /><line x1="8" y1="5" x2="8" y2="8.5" /><line x1="8" y1="8.5" x2="10.5" y2="8.5" />
-              </svg>
-              Changelog
-            </Link>
-          </div>
+        <div className="flex flex-row items-center justify-center gap-2 text-[13px] tracking-tight">
+          <Link
+            href="/aether/buy"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
+          >
+            Buy a license
+          </Link>
+          <DemoButton href={DEMO_URL} password="aether" />
+          <Link
+            href="/docs"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-4 py-2 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
+          >
+            Docs
+          </Link>
         </div>
       </section>
 
@@ -325,11 +309,11 @@ export default function AetherPage() {
       {/* Section label */}
       <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
         <span className="text-[19px] sm:text-[21px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Why brands</span>
-        <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" aria-hidden="true">
-            <path d="M8 2l1.8 3.6L14 6.5l-3 2.9.7 4.1L8 11.4l-3.7 2 .7-4.1-3-2.9 4.2-.9z" />
+        <div className="flex items-center gap-2 border border-[rgb(var(--blue)/0.4)] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--blue))]" aria-hidden="true">
+            <path d="M9 2L5 9h4l-2 5 6-7H9l2-5z" />
           </svg>
-          <span className="text-[17px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">choose it</span>
+          <span className="text-[17px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--blue))] whitespace-nowrap">choose it</span>
         </div>
         <span className="text-[19px] sm:text-[21px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">over anything else</span>
       </div>
@@ -369,12 +353,12 @@ export default function AetherPage() {
 
       {/* Section label — fit quiz */}
       <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" aria-hidden="true">
+        <div className="flex items-center gap-2 border border-[rgb(var(--blue)/0.35)] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--blue))]" aria-hidden="true">
             <circle cx="8" cy="8" r="6" />
             <path d="M8 5.5c0-1 1.5-1 1.5 0S8 7 8 8M8 10.5v.5" />
           </svg>
-          <span className="text-[17px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">Does it fit?</span>
+          <span className="text-[17px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--blue))] whitespace-nowrap">Does it fit?</span>
         </div>
         <span className="text-[19px] sm:text-[21px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Four questions.</span>
       </div>
@@ -382,21 +366,19 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Fit quiz — inline, edge-to-edge */}
-      <div className="py-8 sm:py-10 rise">
-        <FitQuiz />
-      </div>
+      <FitQuiz />
 
       <GridRule />
 
       {/* Section label — pricing */}
       <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <div className="flex items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" aria-hidden="true">
+        <div className="flex items-center gap-2 border border-[rgb(var(--blue)/0.35)] rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shrink-0">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--blue))]" aria-hidden="true">
             <rect x="2" y="4" width="12" height="9" rx="1.5" />
             <path d="M2 7h12" />
             <path d="M5 10h2" />
           </svg>
-          <span className="text-[17px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">One payment.</span>
+          <span className="text-[17px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--blue))] whitespace-nowrap">One payment.</span>
         </div>
         <span className="text-[19px] sm:text-[21px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Yours forever.</span>
       </div>

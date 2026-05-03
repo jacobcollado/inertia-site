@@ -3,26 +3,42 @@
 import { useEffect, useRef } from "react";
 
 const DARK_COLORS: [number, number, number][] = [
-  [56, 180, 255],
-  [24, 220, 200],
-  [80, 140, 255],
-  [0, 200, 180],
-  [100, 160, 255],
-  [32, 210, 220],
-  [60, 120, 255],
-  [0, 190, 200],
+  [56, 108, 255],
+  [24, 214, 255],
+  [122, 88, 255],
+  [0, 164, 255],
+  [82, 132, 255],
+  [40, 196, 255],
+  [146, 96, 255],
+  [0, 142, 255],
+  [0, 196, 168],
+  [82, 90, 255],
+  [32, 232, 255],
+  [176, 96, 255],
 ];
 
 const LIGHT_COLORS: [number, number, number][] = [
-  [0, 140, 255],
-  [0, 180, 200],
-  [60, 100, 255],
-  [0, 160, 180],
-  [80, 120, 255],
-  [0, 200, 180],
-  [40, 110, 255],
-  [0, 170, 210],
+  [0, 116, 255],
+  [0, 196, 255],
+  [94, 72, 255],
+  [0, 164, 232],
+  [255, 86, 166],
+  [0, 186, 140],
+  [126, 56, 255],
+  [0, 142, 255],
+  [255, 124, 64],
+  [0, 170, 204],
+  [196, 72, 255],
+  [32, 128, 255],
 ];
+
+const CELL_SIZE = 48;
+const GAP = 4;
+const ROWS = 5;
+const WAVE_SPEED = 90;
+const FADE_MS = 2000;
+const HOVER_FADE_MS = 1100;
+const HOVER_RADIUS = 3;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -30,9 +46,9 @@ function lerp(a: number, b: number, t: number) {
 
 function getColor(col: number, isDark: boolean): [number, number, number] {
   const palette = isDark ? DARK_COLORS : LIGHT_COLORS;
-  const i = Math.floor(col / 3) % palette.length;
+  const i = Math.floor(col / 4) % palette.length;
   const j = (i + 1) % palette.length;
-  const t = (col % 3) / 3;
+  const t = (col % 4) / 4;
   return [
     lerp(palette[i][0], palette[j][0], t),
     lerp(palette[i][1], palette[j][1], t),
@@ -40,44 +56,12 @@ function getColor(col: number, isDark: boolean): [number, number, number] {
   ];
 }
 
-const CELL_W = 9;
-const CELL_MAX_H = 52;
-const GAP = 3;
-const WAVE_SPEED = 55;
-const FADE_MS = 2800;
-const HOVER_FADE_MS = 1000;
-const HOVER_RADIUS = 6;
-const RADIUS = 3; // bar corner radius
-
-type Cell = { born: number; col: number; height: number; hover?: boolean; layer?: number };
-
-function drawRoundedBar(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number
-) {
-  const clampR = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + clampR, y);
-  ctx.lineTo(x + w - clampR, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + clampR);
-  ctx.lineTo(x + w, y + h - clampR);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - clampR, y + h);
-  ctx.lineTo(x + clampR, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - clampR);
-  ctx.lineTo(x, y + clampR);
-  ctx.quadraticCurveTo(x, y, x + clampR, y);
-  ctx.closePath();
-  ctx.fill();
-}
+type CellState = { born: number; col: number; row: number; hover?: boolean };
 
 export function AetherWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef<{ x: number } | null>(null);
-  const lastHoverColRef = useRef(-999);
+  const mouseRef = useRef<{ x: number; y: number } | null>(null);
+  const lastHoverColRef = useRef<number>(-999);
   const touchActiveRef = useRef(false);
 
   useEffect(() => {
@@ -89,7 +73,7 @@ export function AetherWave() {
     let running = true;
     let lastWave = 0;
     let waveFront = 0;
-    const active = new Map<string, Cell>();
+    const active = new Map<string, CellState>();
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
@@ -102,23 +86,30 @@ export function AetherWave() {
 
     const isDark = () => document.documentElement.classList.contains("dark");
 
-    const setX = (clientX: number) => {
+    const setPointFromEvent = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect();
-      mouseRef.current = { x: clientX - rect.left };
+      mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top };
     };
 
-    const onMouseMove = (e: MouseEvent) => setX(e.clientX);
+    const onMouseMove = (e: MouseEvent) => setPointFromEvent(e.clientX, e.clientY);
     const onMouseLeave = () => { if (!touchActiveRef.current) mouseRef.current = null; };
 
+    const touchStartRef = { x: 0, y: 0 };
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType === "mouse") return;
-      touchActiveRef.current = true;
-      setX(e.clientX);
-      canvas.setPointerCapture(e.pointerId);
+      touchStartRef.x = e.clientX;
+      touchStartRef.y = e.clientY;
     };
     const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerType !== "mouse" && !touchActiveRef.current) return;
-      setX(e.clientX);
+      if (e.pointerType === "mouse") { setPointFromEvent(e.clientX, e.clientY); return; }
+      const dx = Math.abs(e.clientX - touchStartRef.x);
+      const dy = Math.abs(e.clientY - touchStartRef.y);
+      if (!touchActiveRef.current && dy > dx) return;
+      if (!touchActiveRef.current && dx > 8) {
+        touchActiveRef.current = true;
+        canvas.setPointerCapture(e.pointerId);
+      }
+      if (touchActiveRef.current) setPointFromEvent(e.clientX, e.clientY);
     };
     const clearPointer = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") {
@@ -140,41 +131,34 @@ export function AetherWave() {
 
       const W = canvas.width / devicePixelRatio;
       const H = canvas.height / devicePixelRatio;
-      const stride = CELL_W + GAP;
-      const totalCols = Math.ceil(W / stride) + 2;
+      const totalCols = Math.ceil(W / CELL_SIZE) + 2;
+      const cellH = H / ROWS;
 
       if (now - lastWave > WAVE_SPEED) {
         lastWave = now;
         const col = waveFront % totalCols;
-        // Primary wave: smooth organic shape
-        const p = (waveFront / 10) * Math.PI;
-        const amp = 0.18 + 0.82 * Math.abs(Math.sin(p) * Math.cos(p * 0.38) + 0.15 * Math.sin(p * 2.3));
-        const clampedAmp = Math.min(1, amp);
-        active.set(`w-${col}`, { born: now, col, height: clampedAmp });
-
-        // Secondary offset wave — softer, slightly different phase
-        const p2 = ((waveFront + 4) / 10) * Math.PI;
-        const amp2 = 0.1 + 0.45 * Math.abs(Math.sin(p2 * 1.3));
-        const col2 = (waveFront + 2) % totalCols;
-        const existing = active.get(`w-${col2}`);
-        if (!existing) {
-          active.set(`s-${col2}`, { born: now, col: col2, height: amp2, layer: 1 });
+        const phase = (waveFront / 12) * Math.PI;
+        const amp = 0.35 + 0.65 * Math.abs(Math.sin(phase) * Math.cos(phase * 0.37));
+        const barH = Math.max(1, Math.round(ROWS * amp));
+        for (let r = ROWS - 1; r >= ROWS - barH; r--) {
+          active.set(`${col}-${r}`, { born: now, col, row: r });
         }
-
         waveFront++;
       }
 
-      // Hover ripple
       if (mouseRef.current) {
-        const cursorCol = Math.floor(mouseRef.current.x / stride);
+        const cursorCol = Math.floor(mouseRef.current.x / CELL_SIZE);
         if (cursorCol !== lastHoverColRef.current) {
           lastHoverColRef.current = cursorCol;
           for (let dc = -HOVER_RADIUS; dc <= HOVER_RADIUS; dc++) {
             const col = cursorCol + dc;
             if (col < 0 || col >= totalCols) continue;
             const dist = Math.abs(dc);
-            const amp = Math.max(0.12, 1 - (dist / (HOVER_RADIUS + 1)) * 0.85);
-            active.set(`h-${col}`, { born: now, col, height: amp, hover: true });
+            const amp = 1 - dist / (HOVER_RADIUS + 1);
+            const barH = Math.max(1, Math.round(ROWS * amp));
+            for (let r = ROWS - 1; r >= ROWS - barH; r--) {
+              active.set(`h-${col}-${r}`, { born: now, col, row: r, hover: true });
+            }
           }
         }
       } else {
@@ -186,42 +170,30 @@ export function AetherWave() {
       ctx.clearRect(0, 0, W, H);
 
       const dark = isDark();
-      const colCount = Math.ceil(W / stride) + 1;
+      const colCount = Math.ceil(W / CELL_SIZE) + 1;
 
-      // Base dots — tiny rounded rests
-      ctx.fillStyle = dark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)";
+      ctx.fillStyle = dark ? "rgba(255,255,255,0.038)" : "rgba(15,23,42,0.048)";
       for (let c = 0; c < colCount; c++) {
-        const x = c * stride;
-        const dotH = 5;
-        drawRoundedBar(ctx, x, H / 2 - dotH / 2, CELL_W, dotH, 2);
+        for (let r = 0; r < ROWS; r++) {
+          ctx.fillRect(c * CELL_SIZE + GAP / 2, r * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
+        }
       }
 
-      // Active bars
       const expired: string[] = [];
       active.forEach((cell, key) => {
         const fadeDur = cell.hover ? HOVER_FADE_MS : FADE_MS;
         const age = now - cell.born;
         if (age > fadeDur) { expired.push(key); return; }
-
         const t = age / fadeDur;
-        // Smooth in/out: fast bloom, slow fade
-        const fade = t < 0.07 ? t / 0.07 : 1 - Math.pow((t - 0.07) / 0.93, 0.48);
-        const isSecondary = cell.layer === 1;
-        const maxAlpha = cell.hover
-          ? (dark ? 0.95 : 0.9)
-          : isSecondary
-          ? (dark ? 0.38 : 0.3)
-          : (dark ? 0.78 : 0.72);
-        const alpha = fade * maxAlpha;
-
-        const barH = Math.max(5, cell.height * CELL_MAX_H);
-        const x = cell.col * stride;
-        const y = H / 2 - barH / 2;
-
-        const colorCol = cell.col + Math.floor(waveFront / 3) + (isSecondary ? 4 : 0);
+        const fade = t < 0.08 ? t / 0.08 : 1 - Math.pow((t - 0.08) / 0.92, 0.55);
+        const fromBottom = ROWS - 1 - cell.row;
+        const brightBoost = 0.45 + 0.55 * (fromBottom / (ROWS - 1));
+        const maxAlpha = cell.hover ? (dark ? 1.0 : 0.98) : (dark ? 0.92 : 0.88);
+        const alpha = fade * brightBoost * maxAlpha;
+        const colorCol = cell.col + Math.floor(waveFront / 4);
         const [r, g, b] = getColor(colorCol, dark);
         ctx.fillStyle = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${alpha})`;
-        drawRoundedBar(ctx, x, y, CELL_W, barH, RADIUS);
+        ctx.fillRect(cell.col * CELL_SIZE + GAP / 2, cell.row * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
       });
       expired.forEach((k) => active.delete(k));
 
@@ -244,10 +216,27 @@ export function AetherWave() {
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: 96, touchAction: "none" }}>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 z-10" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 z-10" style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full cursor-crosshair" style={{ display: "block" }} />
+    <div
+      className="relative w-full overflow-hidden cursor-crosshair"
+      style={{ height: 160, touchAction: "pan-y" }}
+    >
+      {/* Left fade */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 z-10"
+        style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
+      {/* Right fade */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 z-10"
+        style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
+      {/* Top fade */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10"
+        style={{ height: 32, background: "linear-gradient(to bottom, rgb(var(--bg)), transparent)" }} />
+      {/* Bottom fade */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10"
+        style={{ height: 32, background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ display: "block" }}
+      />
     </div>
   );
 }

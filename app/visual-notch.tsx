@@ -166,10 +166,14 @@ function MegaMenu({
 
 /* ── Mobile drawer ───────────────────────────────────────────────── */
 
-function MobileAccordion({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
+function MobileAccordion({ item, onNavigate, drawerOpen }: { item: NavItem; onNavigate: () => void; drawerOpen: boolean }) {
   const [open, setOpen] = useState(false);
   const [height, setHeight] = useState(0);
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!drawerOpen) setOpen(false);
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (!bodyRef.current) return;
@@ -243,7 +247,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
       <div className="mobile-nav__drawer" data-open={open} aria-label="Mobile navigation">
         <div className="mobile-nav__drawer-inner">
           {NAV.map((item) => (
-            <MobileAccordion key={item.label} item={item} onNavigate={onClose} />
+            <MobileAccordion key={item.label} item={item} onNavigate={onClose} drawerOpen={open} />
           ))}
           {/* Auth section */}
           <div className="mobile-nav__section">

@@ -576,6 +576,25 @@ h1:hover .redact > span.redact-inner,
   border-bottom: 1px solid rgb(var(--line));
 }
 
+/* Extend grid lines through the header using pseudo-elements that mirror
+   page-container::before/after — clamped to max-w-5xl (64rem) */
+.site-header::before,
+.site-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgb(var(--line));
+  pointer-events: none;
+  left: max(0px, calc(50% - 32rem));
+}
+
+.site-header::after {
+  left: auto;
+  right: max(0px, calc(50% - 32rem));
+}
+
 /* Inner constrained to max-w-5xl — left/right edges align with page-container lines */
 .site-header__inner {
   display: flex;
@@ -1547,24 +1566,10 @@ h1:hover .redact > span.redact-inner,
 
 /* ── Blog card grid ───────────────────────────────────────────────── */
 
+.blog-grid {
+  margin: -1px;
+}
+
 .blog-card {
-  border-bottom: 1px solid rgb(var(--line));
-  border-right: none;
-}
-
-@media (min-width: 640px) {
-  .blog-card { border-right: 1px solid rgb(var(--line)); }
-  .blog-card:nth-child(2n) { border-right: none; }
-  .blog-card:last-child { border-bottom: none; }
-  .blog-card:nth-last-child(2):nth-child(2n+1) { border-bottom: none; }
-}
-
-@media (min-width: 1024px) {
-  .blog-card { border-right: 1px solid rgb(var(--line)); }
-  .blog-card:nth-child(3n) { border-right: none; }
-  .blog-card:last-child { border-bottom: none; }
-  .blog-card:nth-last-child(2) { border-bottom: none; }
-  .blog-card:nth-last-child(3):nth-child(3n+1) { border-bottom: none; }
-  /* restore sm override that doesn't apply at lg */
-  .blog-card:nth-last-child(2):nth-child(2n+1) { border-bottom: 1px solid rgb(var(--line)); }
+  border: 1px solid rgb(var(--line));
 }
