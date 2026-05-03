@@ -873,7 +873,6 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
             {BUILDING.map((item, i) => {
               const isDashboard = item.name === "Inertia Dashboard";
               const external = !isDashboard && item.href.startsWith("http");
-              const isActive = item.tag === "Active" || item.tag === "Building";
               const borderClass = [
                 i === 0 ? "border-r border-[rgb(var(--line))]" : "",
                 i === 1 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
@@ -891,11 +890,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                       <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="flex items-center gap-1.5 text-[11px] tracking-tight text-[rgb(var(--muted))]">
-                      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-400" : "bg-[rgb(var(--muted))] opacity-50"}`} />
-                      {item.tag}
-                    </span>
+                  <div className="flex items-center justify-end mt-2">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" aria-hidden="true">
                       <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>

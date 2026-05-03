@@ -21,6 +21,7 @@ import {
   HiOutlineShieldCheck,
   HiOutlinePhoto,
   HiOutlineGlobeAlt,
+  HiOutlineMapPin,
 } from "react-icons/hi2";
 
 type Child = {
@@ -66,6 +67,7 @@ const NAV: NavItem[] = [
     label: "Company",
     children: [
       { label: "About", description: "Who we are and why we build this way.", href: "/about", icon: <HiOutlineInformationCircle /> },
+      { label: "Roadmap", description: "What we've shipped and what's coming.", href: "/roadmap", icon: <HiOutlineMapPin /> },
       { label: "Careers", description: "Join us when the time is right.", href: "/careers", icon: <HiOutlineBriefcase /> },
       { label: "Help", description: "Get support for anything we've shipped.", href: "/contact", icon: <HiOutlineQuestionMarkCircle /> },
       { label: "Legal", description: "Terms, licenses, and policies.", href: "/legal", icon: <HiOutlineShieldCheck /> },

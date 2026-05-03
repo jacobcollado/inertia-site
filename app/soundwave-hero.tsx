@@ -269,28 +269,80 @@ export function SoundwaveHero() {
 
       {/* Centered tagline */}
       <div
-        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4"
+        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-5"
         style={{ zIndex: 3 }}
-        aria-hidden="true"
       >
         <p
-          className="text-[13px] tracking-tight text-[rgb(var(--muted))]"
+          className="pointer-events-none text-[13px] tracking-tight text-[rgb(var(--muted))]"
           style={{
             opacity: 0,
             animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 80ms forwards",
           }}
+          aria-hidden="true"
         >
           A body in motion stays in motion.
         </p>
+
         <h1
-          className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center"
+          className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none"
+          aria-label="We build the thing that keeps you moving."
+        >
+          {["We build the thing", "that keeps you moving."].map((line, li) =>
+            <span key={li} style={{ display: "block" }}>
+              {line.split("").map((ch, i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  style={{
+                    display: "inline-block",
+                    width: ch === " " ? "0.28em" : undefined,
+                    opacity: 0,
+                    animation: `char-in 500ms cubic-bezier(0.22,1,0.36,1) ${220 + li * 120 + i * 28}ms forwards`,
+                  }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </span>
+          )}
+        </h1>
+
+        {/* CTAs */}
+        <div
+          className="pointer-events-auto flex items-center gap-3 flex-wrap justify-center"
           style={{
             opacity: 0,
-            animation: "hero-line 700ms cubic-bezier(0.16,1,0.3,1) 180ms forwards",
+            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 820ms forwards",
           }}
         >
-          We build the thing<br />that keeps you moving.
-        </h1>
+          <a
+            href="https://www.instagram.com/by.inertia/"
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-75"
+            style={{
+              background: "rgb(var(--fg))",
+              color: "rgb(var(--bg))",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+            }}
+          >
+            Work with us ↗
+          </a>
+          <a
+            href="/aether"
+            className="rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-75"
+            style={{
+              background: "rgb(var(--bg) / 0.85)",
+              color: "rgb(var(--fg))",
+              border: "1px solid rgb(var(--fg) / 0.15)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+            }}
+          >
+            See Aether →
+          </a>
+        </div>
       </div>
     </section>
   );
