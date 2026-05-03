@@ -341,7 +341,7 @@ function RotatingPanel() {
 
       {/* Icon + animated phrase */}
       <p
-        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(1.55rem,3.8vw,2.4rem)] tracking-tight leading-none font-semibold"
+        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(2rem,5vw,2.4rem)] tracking-tight leading-none font-semibold"
         style={{
           color: `rgb(var(${current.v}))`,
           textShadow: `0 1px 0 color-mix(in srgb, rgb(var(${current.v})) 35%, transparent), 0 2px 8px color-mix(in srgb, rgb(var(${current.v})) 18%, transparent)`,
