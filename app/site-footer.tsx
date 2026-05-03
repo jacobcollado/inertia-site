@@ -97,10 +97,7 @@ export function SiteFooter() {
           <p className="text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50">Pricing</p>
           <ul className="space-y-2.5">
             <li><Link href="/aether" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Aether theme</Link></li>
-            <li className="flex items-center gap-2">
-              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-30 cursor-not-allowed select-none">Enterprise</span>
-              <span className="inline-flex items-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-40 px-1.5 pt-[2px] pb-[3px] text-[9px] tracking-tight leading-none">soon</span>
-            </li>
+            <li><Link href="/aether/enterprise" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Enterprise</Link></li>
             <li className="flex items-center gap-2">
               <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-30 cursor-not-allowed select-none">Add-ons</span>
               <span className="inline-flex items-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-40 px-1.5 pt-[2px] pb-[3px] text-[9px] tracking-tight leading-none">soon</span>
@@ -113,10 +110,7 @@ export function SiteFooter() {
           <p className="text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50">Company</p>
           <ul className="space-y-2.5">
             <li><Link href="/about" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">About</Link></li>
-            <li className="flex items-center gap-2">
-              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-30 cursor-not-allowed select-none">Careers</span>
-              <span className="inline-flex items-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-40 px-1.5 pt-[2px] pb-[3px] text-[9px] tracking-tight leading-none">soon</span>
-            </li>
+            <li><Link href="/careers" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Careers</Link></li>
             <li><Link href="/contact" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Help</Link></li>
             <li><Link href="/legal" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Legal</Link></li>
           </ul>
@@ -128,7 +122,7 @@ export function SiteFooter() {
           <ul className="space-y-2.5">
             <li><Link href="/work" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Shipped using Inertia</Link></li>
             <li>
-              <a href="https://www.instagram.com/inertia.dev/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+              <a href="https://www.instagram.com/by.inertia/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
                   <rect x="3" y="3" width="18" height="18" rx="5" />
                   <circle cx="12" cy="12" r="4" />
@@ -142,7 +136,7 @@ export function SiteFooter() {
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L2.25 2.25h6.562l4.258 5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
-                X / Twitter
+                X (Twitter)
               </a>
             </li>
           </ul>

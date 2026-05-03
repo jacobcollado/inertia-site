@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { SiShopify, SiReact, SiTypescript, SiTailwindcss, SiFigma, SiSwift, SiMeta, SiSubstack, SiDribbble } from "react-icons/si";
+import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiSubstack, SiDribbble } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
@@ -168,7 +168,7 @@ const BUILDING = [
     name: "Inertia",
     description: "We turn your vision into something real.",
     tag: "Active",
-    href: "https://www.instagram.com/kayz.xyz/",
+    href: "https://www.instagram.com/by.inertia/",
     sketch: <SketchInertia />,
   },
   {
@@ -305,14 +305,10 @@ const IconWhop = () => (
   </svg>
 );
 
-const TECH_ROW1 = [
+const TECH_ALL = [
   { name: "Shopify",    icon: SiShopify },
-  { name: "React",      icon: SiReact },
   { name: "TypeScript", icon: SiTypescript },
   { name: "Tailwind",   icon: SiTailwindcss },
-  { name: "Figma",      icon: SiFigma },
-];
-const TECH_ROW2 = [
   { name: "Photoshop",  icon: IconPhotoshop },
   { name: "Swift",      icon: SiSwift },
   { name: "Whop",       icon: IconWhop },
@@ -322,23 +318,12 @@ const TECH_ROW2 = [
 ];
 
 function TechMarquee() {
-  const r1 = [...TECH_ROW1, ...TECH_ROW1, ...TECH_ROW1];
-  const r2 = [...TECH_ROW2, ...TECH_ROW2, ...TECH_ROW2];
+  const items = [...TECH_ALL, ...TECH_ALL, ...TECH_ALL];
   return (
     <div className="overflow-hidden py-4 select-none" aria-hidden="true">
-      {/* Row 1 — scrolls left, closer / brighter */}
-      <div className="marquee-row marquee-row--fwd mb-3">
-        {r1.map((tech, i) => (
+      <div className="marquee-row marquee-row--fwd">
+        {items.map((tech, i) => (
           <div key={i} className="marquee-item">
-            <tech.icon />
-            <span>{tech.name}</span>
-          </div>
-        ))}
-      </div>
-      {/* Row 2 — scrolls right, farther / dimmer */}
-      <div className="marquee-row marquee-row--rev">
-        {r2.map((tech, i) => (
-          <div key={i} className="marquee-item marquee-item--far">
             <tech.icon />
             <span>{tech.name}</span>
           </div>
@@ -547,7 +532,7 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
-    <main className="page-container mx-auto w-full max-w-5xl pb-16 sm:pb-20 min-h-screen flex flex-col">
+    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
 
       {/* Soundwave hero — touches both grid lines */}
       <SoundwaveHero />
@@ -568,9 +553,9 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <div className="flex items-center justify-center gap-3 py-6">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">What we're actively</span>
             <TooltipPill tip="Products and themes we're currently developing under the Inertia name.">
-              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--blue)/0.08)", border: "1px solid rgb(var(--blue)/0.25)" }}>
-                <SiShopify className="w-4 h-4" style={{ color: "rgb(var(--blue))" }} />
-                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--blue))" }}>building</span>
+              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
+                <SiShopify className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
+                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>building</span>
               </div>
             </TooltipPill>
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">right now</span>
@@ -629,16 +614,16 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           {/* ── Perspectives ── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">
             <div className="flex items-center justify-center gap-3">
-              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">How we</span>
+              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">The way we</span>
               <TooltipPill tip="Short posts on design, development, and the decisions behind what we build.">
-                <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--amber)/0.08)", border: "1px solid rgb(var(--amber)/0.25)" }}>
-                  <SiSubstack className="w-4 h-4" style={{ color: "rgb(var(--amber))" }} />
-                  <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--amber))" }}>think</span>
+                <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
+                  <SiSubstack className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
+                  <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>think</span>
                 </div>
               </TooltipPill>
-              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">about the craft</span>
+              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">about our work</span>
             </div>
-            <Link href="/blog" className="sm:absolute sm:right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center sm:text-left">all posts →</Link>
+            <Link href="/blog" className="sm:absolute sm:right-8 text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors text-center sm:text-left">All Posts →</Link>
           </div>
 
           <GridRule />
@@ -695,14 +680,14 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           <div className="flex items-center justify-center gap-3">
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
             <TooltipPill tip="Selected client work spanning Shopify builds, brand identities, and custom web projects.">
-              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--green)/0.08)", border: "1px solid rgb(var(--green)/0.25)" }}>
-                <SiDribbble className="w-4 h-4" style={{ color: "rgb(var(--green))" }} />
-                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--green))" }}>shipped</span>
+              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
+                <SiDribbble className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
+                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>shipped</span>
               </div>
             </TooltipPill>
             <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
           </div>
-          <Link href="/work" className="sm:absolute sm:right-8 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center sm:text-left">all work →</Link>
+          <Link href="/work" className="sm:absolute sm:right-8 text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors text-center sm:text-left">All Work →</Link>
         </div>
 
         <GridRule />

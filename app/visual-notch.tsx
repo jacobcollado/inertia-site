@@ -66,7 +66,7 @@ const NAV: NavItem[] = [
     label: "Company",
     children: [
       { label: "About", description: "Who we are and why we build this way.", href: "/about", icon: <HiOutlineInformationCircle /> },
-      { label: "Careers", description: "Join us when the time is right.", disabled: true, icon: <HiOutlineBriefcase /> },
+      { label: "Careers", description: "Join us when the time is right.", href: "/careers", icon: <HiOutlineBriefcase /> },
       { label: "Help", description: "Get support for anything we've shipped.", href: "/contact", icon: <HiOutlineQuestionMarkCircle /> },
       { label: "Legal", description: "Terms, licenses, and policies.", href: "/legal", icon: <HiOutlineShieldCheck /> },
     ],
@@ -75,8 +75,8 @@ const NAV: NavItem[] = [
     label: "Community",
     children: [
       { label: "Shipped using Inertia", description: "Real stores built on our themes.", href: "/work", icon: <HiOutlineSparkles /> },
-      { label: "Instagram", description: "Behind the build, process shots.", href: "https://www.instagram.com/inertia.dev/", external: true, icon: <HiOutlinePhoto /> },
-      { label: "X / Twitter", description: "Updates and hot takes.", href: "https://x.com/inertia_dev", external: true, icon: <HiOutlineGlobeAlt /> },
+      { label: "Instagram", description: "Behind the build, process shots.", href: "https://www.instagram.com/by.inertia/", external: true, icon: <HiOutlinePhoto /> },
+      { label: "X (Twitter)", description: "Updates and hot takes.", href: "https://x.com/inertia_dev", external: true, icon: <HiOutlineGlobeAlt /> },
     ],
   },
 ];
