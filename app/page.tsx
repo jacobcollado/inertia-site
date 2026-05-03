@@ -232,49 +232,49 @@ const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNo
     label: "Right now we're building",
     text: "Shopify storefronts",
     v: "--blue",
-    icon: <SiShopify className="w-6 h-6 shrink-0" />,
+    icon: <SiShopify className="w-5 h-5 shrink-0" />,
     cta: { label: "See Aether", href: "/aether" },
   },
   {
     label: "Right now we're writing",
     text: "Shopify Liquid",
     v: "--blue",
-    icon: <SiShopify className="w-6 h-6 shrink-0" />,
+    icon: <SiShopify className="w-5 h-5 shrink-0" />,
     cta: { label: "See Aether", href: "/aether" },
   },
   {
     label: "Right now we're licensing",
     text: "Aether Theme",
     v: "--blue",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
     cta: { label: "License Aether", href: "/aether/buy" },
   },
   {
     label: "Right now we're shipping",
     text: "iOS Apps",
     v: "--green",
-    icon: <SiApple className="w-6 h-6 shrink-0" />,
+    icon: <SiApple className="w-5 h-5 shrink-0" />,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
     label: "Right now we're designing in",
     text: "Framer",
     v: "--green",
-    icon: <SiFramer className="w-6 h-6 shrink-0" />,
+    icon: <SiFramer className="w-5 h-5 shrink-0" />,
     cta: { label: "Start a project", href: "https://www.instagram.com/by.inertia/" },
   },
   {
     label: "Right now we're deploying on",
     text: "Vercel",
     v: "--green",
-    icon: <SiVercel className="w-6 h-6 shrink-0" />,
+    icon: <SiVercel className="w-5 h-5 shrink-0" />,
     cta: { label: "Start a project", href: "https://www.instagram.com/by.inertia/" },
   },
   {
     label: "Right now we're running",
     text: "Meta Ad Campaigns",
     v: "--amber",
-    icon: <SiMeta className="w-6 h-6 shrink-0" />,
+    icon: <SiMeta className="w-5 h-5 shrink-0" />,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
@@ -288,14 +288,14 @@ const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNo
     label: "Right now we're crafting",
     text: "Brand Identities",
     v: "--purple",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
     label: "Right now we're doing",
     text: "UI Design",
     v: "--purple",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
     cta: { label: "View our work", href: "/work" },
   },
 ];
@@ -341,23 +341,30 @@ function RotatingPanel() {
         {current.label}
       </p>
 
-      {/* Icon + typed phrase on one line */}
+      {/* Icon + typed phrase — single line, no wrap */}
       <p
-        className="flex items-center justify-center gap-2.5 text-[clamp(2rem,5.5vw,3rem)] tracking-tight leading-tight font-medium transition-colors duration-300"
-        style={{ color: `rgb(var(${current.v}))` }}
+        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(1.4rem,3.8vw,2.4rem)] tracking-tight leading-none font-semibold transition-colors duration-300"
+        style={{
+          color: `rgb(var(${current.v}))`,
+          textShadow: `0 1px 0 color-mix(in srgb, rgb(var(${current.v})) 35%, transparent), 0 2px 8px color-mix(in srgb, rgb(var(${current.v})) 18%, transparent)`,
+        }}
       >
         <span
           key={`icon-${phraseIdx}`}
           style={{
-            opacity: 0.8,
+            opacity: 0.75,
             animation: "rise-in 380ms 30ms cubic-bezier(0.22,1,0.36,1) both",
             display: "inline-flex",
             alignItems: "center",
+            flexShrink: 0,
           }}
         >
           {current.icon}
         </span>
-        <span>{displayed}<span className="opacity-25 animate-pulse font-light">|</span></span>
+        <span>
+          {displayed}
+          <span className="opacity-20 animate-pulse font-light">|</span>
+        </span>
       </p>
 
       {/* CTA */}
