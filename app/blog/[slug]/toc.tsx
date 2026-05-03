@@ -9,7 +9,6 @@ export function TOC({ headings }: { headings: Heading[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [entered, setEntered] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -18,19 +17,6 @@ export function TOC({ headings }: { headings: Heading[] }) {
     const id = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(id);
   }, [mounted]);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("toc-collapsed");
-      if (stored === "1") setCollapsed(true);
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("toc-collapsed", collapsed ? "1" : "0");
-    } catch {}
-  }, [collapsed]);
 
   useEffect(() => {
     if (headings.length === 0) return;
@@ -74,113 +60,61 @@ export function TOC({ headings }: { headings: Heading[] }) {
   const activeIndex = headings.findIndex((h) => h.id === activeId);
   const progress = headings.length > 1 ? Math.max(0, activeIndex) / (headings.length - 1) : 0;
 
-  // Desktop sidebar
+  // Desktop TOC — fixed inside its grid column
   const desktopAside = (
-    <aside
-      className="fixed left-6 top-28 z-40 hidden lg:block"
+    <nav aria-label="Table of contents" className="fixed top-24 pt-10 pb-16 px-6 w-[14rem]"
       style={{
-        width: collapsed ? "2rem" : "13rem",
         opacity: entered ? 1 : 0,
-        transform: entered ? "translateX(0)" : "translateX(-12px)",
-        transition:
-          "width 380ms cubic-bezier(0.22, 1, 0.36, 1)," +
-          "opacity 600ms cubic-bezier(0.22, 1, 0.36, 1)," +
-          "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
+        transform: entered ? "translateX(0)" : "translateX(-8px)",
+        transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1) 100ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 100ms",
       }}
     >
-      {/* Header row */}
-      <div className="flex items-center gap-2 mb-5 pl-[9px]">
-        <button
-          onClick={() => setCollapsed((v) => !v)}
-          aria-label={collapsed ? "Expand contents" : "Collapse contents"}
-          aria-expanded={!collapsed}
-          className="shrink-0 flex items-center justify-center w-[18px] h-[18px] rounded-sm text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors focus:outline-none"
-        >
-          <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            className="w-3 h-3"
-            style={{
-              transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)",
-              transition: "transform 300ms cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-            aria-hidden="true"
-          >
-            <polyline points="4 6 8 10 12 6" />
-          </svg>
-        </button>
-        <span
-          className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] whitespace-nowrap"
-          style={{
-            opacity: collapsed ? 0 : 0.5,
-            transition: "opacity 200ms cubic-bezier(0.22, 1, 0.36, 1)",
-            pointerEvents: "none",
-          }}
-        >
-          On this page
-        </span>
-      </div>
-
-      {/* List */}
-      <div
-        className="pl-[9px] border-l border-[rgb(var(--line))] overflow-y-auto"
-        style={{
-          maxHeight: "calc(100vh - 12rem)",
-          opacity: collapsed ? 0 : 1,
-          transform: collapsed ? "translateX(-4px)" : "translateX(0)",
-          transition:
-            "opacity 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 250ms cubic-bezier(0.22, 1, 0.36, 1)",
-          pointerEvents: collapsed ? "none" : "auto",
-        }}
-      >
-        <ul className="space-y-px">
-          {headings.map((h, i) => {
-            const active = activeId === h.id;
-            const delay = 160 + i * 45;
-            const isH3 = h.level === 3;
-            return (
-              <li
-                key={h.id}
-                style={{
-                  opacity: entered ? 1 : 0,
-                  transform: entered ? "translateX(0)" : "translateX(-8px)",
-                  transition: `opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms, transform 600ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms`,
-                }}
+      <p className="text-[11px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50 mb-4">
+        On this page
+      </p>
+      <ul className="space-y-px border-l border-[rgb(var(--line))]">
+        {headings.map((h, i) => {
+          const active = activeId === h.id;
+          const delay = 80 + i * 40;
+          const isH3 = h.level === 3;
+          return (
+            <li
+              key={h.id}
+              style={{
+                opacity: entered ? 1 : 0,
+                transform: entered ? "translateX(0)" : "translateX(-6px)",
+                transition: `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+              }}
+            >
+              <a
+                href={`#${h.id}`}
+                onClick={(e) => handleClick(e, h.id)}
+                className="group relative flex items-center py-1.5 transition-colors duration-200"
+                style={{ paddingLeft: isH3 ? "20px" : "12px" }}
               >
-                <a
-                  href={`#${h.id}`}
-                  onClick={(e) => handleClick(e, h.id)}
-                  className="group relative flex items-center gap-2.5 py-1 transition-colors duration-200"
-                  style={{ paddingLeft: isH3 ? "12px" : "0" }}
+                <span
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] rounded-full transition-all duration-300"
+                  style={{
+                    height: active ? "14px" : "0px",
+                    background: "rgb(var(--fg))",
+                    opacity: active ? 1 : 0,
+                  }}
+                />
+                <span
+                  className={`text-[12px] leading-snug tracking-tight transition-colors duration-200 ${
+                    active
+                      ? "text-[rgb(var(--fg))]"
+                      : "text-[rgb(var(--muted))] opacity-60 group-hover:opacity-100 group-hover:text-[rgb(var(--fg))]"
+                  }`}
                 >
-                  <span
-                    className="absolute top-1/2 -translate-y-1/2 w-[2px] rounded-full transition-all duration-300"
-                    style={{
-                      height: active ? "14px" : "0px",
-                      background: "rgb(var(--fg))",
-                      opacity: active ? 1 : 0,
-                      left: isH3 ? "-1px" : "-9px",
-                    }}
-                  />
-                  <span
-                    className={`text-[12px] leading-snug tracking-tight transition-colors duration-200 ${
-                      active
-                        ? "text-[rgb(var(--fg))]"
-                        : "text-[rgb(var(--muted))] opacity-60 group-hover:opacity-100 group-hover:text-[rgb(var(--fg))]"
-                    }`}
-                  >
-                    {h.text}
-                  </span>
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </aside>
+                  {h.text}
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 
   // Mobile fixed bar — always visible at bottom, taps to open sheet
@@ -271,7 +205,9 @@ export function TOC({ headings }: { headings: Heading[] }) {
 
   return (
     <>
-      {mounted && createPortal(desktopAside, document.body)}
+      {/* Desktop: inline inside grid column */}
+      <div className="hidden lg:block">{desktopAside}</div>
+      {/* Mobile: portaled bottom bar */}
       {mounted && createPortal(mobileBar, document.body)}
 
       {mounted && (

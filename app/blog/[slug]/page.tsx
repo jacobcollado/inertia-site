@@ -15,106 +15,105 @@ import {
   readingStats,
 } from "@/lib/posts";
 
-// Sketches match the index card designs, scaled to 560x160 viewBox
 function SketchAI() {
   return (
-    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Grid — scaled from 200x120 index card */}
-      {[40, 73, 107].map(y => (
+    <svg viewBox="0 0 560 280" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {[70, 128, 187].map(y => (
         <line key={y} x1="50" y1={y} x2="526" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 6" opacity="0.2" />
       ))}
-      <line x1="50" y1="133" x2="526" y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
-      <line x1="50" y1="16"  x2="50"  y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
-      {/* Historical curve — solid blue */}
-      <path d="M 50 131 C 112 129 168 122 224 112 C 266 103 302 90 336 74" stroke="rgb(var(--blue))" strokeWidth="2.2" opacity="0.8" />
-      {/* Forecast zone — dashed, fanning uncertainty */}
-      <path d="M 336 74 C 373 58 415 40 462 24" stroke="rgb(var(--blue))" strokeWidth="1.6" strokeDasharray="5 4" opacity="0.55" />
-      {/* Upper uncertainty bound */}
-      <path d="M 336 74 C 373 50 418 29 476 16" stroke="rgb(var(--blue))" strokeWidth="0.9" strokeDasharray="3 4" opacity="0.3" />
-      {/* Lower uncertainty bound */}
-      <path d="M 336 74 C 373 69 415 55 462 43" stroke="rgb(var(--blue))" strokeWidth="0.9" strokeDasharray="3 4" opacity="0.3" />
-      {/* Horizon divider */}
-      <line x1="336" y1="13" x2="336" y2="133" stroke="rgb(var(--muted))" strokeWidth="0.6" strokeDasharray="4 4" opacity="0.25" />
-      {/* "Now" tick */}
-      <line x1="336" y1="133" x2="336" y2="141" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.4" />
-      {/* Milestone dots on curve */}
-      <circle cx="140" cy="127" r="3.5" fill="rgb(var(--blue))" opacity="0.5" />
-      <circle cx="224" cy="112" r="3.5" fill="rgb(var(--blue))" opacity="0.65" />
-      <circle cx="336" cy="74"  r="5"   fill="rgb(var(--blue))" opacity="0.85" />
-      <circle cx="336" cy="74"  r="9"   stroke="rgb(var(--blue))" strokeWidth="1" opacity="0.25" />
-      {/* Arrow on forecast line */}
-      <polyline points="446,20 462,24 446,28" stroke="rgb(var(--blue))" strokeWidth="1.5" opacity="0.6" />
+      <line x1="50" y1="233" x2="526" y2="233" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      <line x1="50" y1="28"  x2="50"  y2="233" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      <path d="M 50 229 C 112 226 168 213 224 196 C 266 180 302 157 336 129" stroke="rgb(var(--blue))" strokeWidth="2.2" opacity="0.8" />
+      <path d="M 336 129 C 373 101 415 70 462 42" stroke="rgb(var(--blue))" strokeWidth="1.6" strokeDasharray="5 4" opacity="0.55" />
+      <path d="M 336 129 C 373 87 418 50 476 28" stroke="rgb(var(--blue))" strokeWidth="0.9" strokeDasharray="3 4" opacity="0.3" />
+      <path d="M 336 129 C 373 120 415 96 462 75" stroke="rgb(var(--blue))" strokeWidth="0.9" strokeDasharray="3 4" opacity="0.3" />
+      <line x1="336" y1="23" x2="336" y2="233" stroke="rgb(var(--muted))" strokeWidth="0.6" strokeDasharray="4 4" opacity="0.25" />
+      <line x1="336" y1="233" x2="336" y2="247" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.4" />
+      <circle cx="140" cy="222" r="3.5" fill="rgb(var(--blue))" opacity="0.5" />
+      <circle cx="224" cy="196" r="3.5" fill="rgb(var(--blue))" opacity="0.65" />
+      <circle cx="336" cy="129" r="5"   fill="rgb(var(--blue))" opacity="0.85" />
+      <circle cx="336" cy="129" r="9"   stroke="rgb(var(--blue))" strokeWidth="1" opacity="0.25" />
+      <polyline points="446,35 462,42 446,49" stroke="rgb(var(--blue))" strokeWidth="1.5" opacity="0.6" />
     </svg>
   );
 }
 
 function SketchTerminal() {
   return (
-    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Origin dot */}
-      <circle cx="123" cy="80" r="5.5" fill="rgb(var(--amber))" opacity="0.8" />
-      <circle cx="123" cy="80" r="10"  stroke="rgb(var(--amber))" strokeWidth="1.2" opacity="0.4" />
-      {/* Signal arcs — amber to muted */}
-      <path d="M 157 53 A 31 31 0 0 1 157 107" stroke="rgb(var(--amber))" strokeWidth="2.2" opacity="0.7" />
-      <path d="M 196 36 A 51 51 0 0 1 196 124" stroke="rgb(var(--amber))" strokeWidth="1.4" opacity="0.45" />
-      <path d="M 243 20 A 72 72 0 0 1 243 140" stroke="rgb(var(--muted))" strokeWidth="1.1" opacity="0.35" />
-      <path d="M 302 8  A 92 92 0 0 1 302 152" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.22" />
-      <path d="M 369 2  A 114 114 0 0 1 369 158" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.14" />
-      {/* Horizontal axis */}
-      <line x1="123" y1="80" x2="526" y2="80" stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 7" opacity="0.22" />
-      {/* Destination tick */}
-      <line x1="493" y1="66" x2="493" y2="94" stroke="rgb(var(--amber))" strokeWidth="1.4" opacity="0.6" />
-      <polyline points="504,73 526,80 504,87" stroke="rgb(var(--amber))" strokeWidth="1.4" opacity="0.6" />
+    <svg viewBox="0 0 560 320" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Page chrome */}
+      <rect x="40" y="20" width="480" height="280" rx="4" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.28" />
+      {/* Nav bar */}
+      <line x1="40" y1="58" x2="520" y2="58" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.2" />
+      {/* Logo text */}
+      <line x1="64" y1="40" x2="130" y2="40" stroke="rgb(var(--fg))" strokeWidth="1.8" opacity="0.55" />
+      {/* Nav links */}
+      <line x1="170" y1="40" x2="220" y2="40" stroke="rgb(var(--muted))" strokeWidth="1.0" opacity="0.25" />
+      <line x1="234" y1="40" x2="284" y2="40" stroke="rgb(var(--muted))" strokeWidth="1.0" opacity="0.25" />
+      <line x1="298" y1="40" x2="348" y2="40" stroke="rgb(var(--muted))" strokeWidth="1.0" opacity="0.25" />
+      {/* URL bar */}
+      <rect x="176" y="28" width="208" height="22" rx="4" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.2" />
+      <circle cx="192" cy="39" r="4" fill="rgb(var(--green))" opacity="0.6" />
+      <line x1="204" y1="39" x2="368" y2="39" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.22" />
+      {/* Big heading lines */}
+      <line x1="64" y1="100" x2="400" y2="100" stroke="rgb(var(--fg))" strokeWidth="4.5" opacity="0.7" strokeLinecap="round" />
+      <line x1="64" y1="124" x2="296" y2="124" stroke="rgb(var(--fg))" strokeWidth="4.5" opacity="0.7" strokeLinecap="round" />
+      {/* Body text lines */}
+      <line x1="64" y1="160" x2="456" y2="160" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.3" />
+      <line x1="64" y1="178" x2="420" y2="178" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.3" />
+      <line x1="64" y1="196" x2="440" y2="196" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.3" />
+      <line x1="64" y1="214" x2="340" y2="214" stroke="rgb(var(--muted))" strokeWidth="1.2" opacity="0.3" />
+      {/* Section divider */}
+      <line x1="64" y1="240" x2="496" y2="240" stroke="rgb(var(--line))" strokeWidth="0.8" opacity="0.4" />
+      {/* More body lines */}
+      <line x1="64" y1="258" x2="460" y2="258" stroke="rgb(var(--muted))" strokeWidth="1.0" opacity="0.22" />
+      <line x1="64" y1="274" x2="390" y2="274" stroke="rgb(var(--muted))" strokeWidth="1.0" opacity="0.22" />
+      {/* Cursor */}
+      <rect x="394" y="267" width="10" height="14" rx="1" fill="rgb(var(--fg))" opacity="0.55" />
     </svg>
   );
 }
 
 function SketchWave() {
   return (
-    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <line x1="20" y1="80" x2="540" y2="80" stroke="rgb(var(--muted))" strokeWidth="0.8" strokeDasharray="3 5" opacity="0.4" />
-      <path d="M 20 80 C 60 20 100 20 140 80 C 180 140 220 140 260 80 C 300 20 340 20 380 80 C 420 140 460 140 500 80 C 520 40 530 30 540 80" stroke="rgb(var(--amber))" strokeWidth="2" />
-      <path d="M 20 80 C 50 50 90 50 120 80 C 150 110 190 110 220 80 C 250 50 290 50 320 80 C 350 110 390 110 420 80 C 450 50 490 50 520 80" stroke="rgb(var(--muted))" strokeWidth="1" strokeDasharray="3 4" opacity="0.4" />
-      <line x1="140" y1="20" x2="140" y2="80"  stroke="rgb(var(--amber))" strokeWidth="1.2" />
-      <line x1="134" y1="20" x2="146" y2="20"  stroke="rgb(var(--amber))" strokeWidth="1.4" />
-      <line x1="134" y1="80" x2="146" y2="80"  stroke="rgb(var(--amber))" strokeWidth="1.4" />
-      <line x1="260" y1="80" x2="260" y2="140" stroke="rgb(var(--amber))" strokeWidth="1.2" />
-      <line x1="254" y1="140" x2="266" y2="140" stroke="rgb(var(--amber))" strokeWidth="1.4" />
-      <line x1="20"  y1="152" x2="260" y2="152" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
-      <line x1="20"  y1="148" x2="20"  y2="156" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
-      <line x1="260" y1="148" x2="260" y2="156" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
+    <svg viewBox="0 0 560 280" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      <line x1="20" y1="140" x2="540" y2="140" stroke="rgb(var(--muted))" strokeWidth="0.8" strokeDasharray="3 5" opacity="0.4" />
+      <path d="M 20 140 C 60 35 100 35 140 140 C 180 245 220 245 260 140 C 300 35 340 35 380 140 C 420 245 460 245 500 140 C 520 70 530 52 540 140" stroke="rgb(var(--amber))" strokeWidth="2" />
+      <path d="M 20 140 C 50 87 90 87 120 140 C 150 193 190 193 220 140 C 250 87 290 87 320 140 C 350 193 390 193 420 140 C 450 87 490 87 520 140" stroke="rgb(var(--muted))" strokeWidth="1" strokeDasharray="3 4" opacity="0.4" />
+      <line x1="140" y1="35"  x2="140" y2="140" stroke="rgb(var(--amber))" strokeWidth="1.2" />
+      <line x1="134" y1="35"  x2="146" y2="35"  stroke="rgb(var(--amber))" strokeWidth="1.4" />
+      <line x1="134" y1="140" x2="146" y2="140" stroke="rgb(var(--amber))" strokeWidth="1.4" />
+      <line x1="260" y1="140" x2="260" y2="245" stroke="rgb(var(--amber))" strokeWidth="1.2" />
+      <line x1="254" y1="245" x2="266" y2="245" stroke="rgb(var(--amber))" strokeWidth="1.4" />
+      <line x1="20"  y1="266" x2="260" y2="266" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      <line x1="20"  y1="259" x2="20"  y2="273" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
+      <line x1="260" y1="259" x2="260" y2="273" stroke="rgb(var(--muted))" strokeWidth="1" opacity="0.35" />
     </svg>
   );
 }
 
 function SketchGrowth() {
   return (
-    <svg viewBox="0 0 560 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Grid — scaled from 200x120 index card */}
-      {[40, 73, 107].map(y => (
+    <svg viewBox="0 0 560 280" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {[70, 128, 187].map(y => (
         <line key={y} x1="50" y1={y} x2="526" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 6" opacity="0.2" />
       ))}
-      <line x1="50" y1="133" x2="526" y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
-      <line x1="50" y1="16"  x2="50"  y2="133" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
-      {/* Growth curve — slow start, hockey stick */}
-      <path d="M 50 131 C 140 129 202 124 252 114 C 308 98 364 69 420 45 C 454 32 482 22 526 16"
+      <line x1="50" y1="233" x2="526" y2="233" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      <line x1="50" y1="28"  x2="50"  y2="233" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.3" />
+      <path d="M 50 229 C 140 226 202 217 252 200 C 308 171 364 120 420 79 C 454 56 482 38 526 28"
         stroke="rgb(var(--green))" strokeWidth="2.4" opacity="0.85" />
-      {/* Milestone dots */}
-      <circle cx="154" cy="129" r="3.5" fill="rgb(var(--green))" opacity="0.5" />
-      <circle cx="252" cy="114" r="3.5" fill="rgb(var(--green))" opacity="0.65" />
-      <circle cx="364" cy="69"  r="4"   fill="rgb(var(--green))" opacity="0.8" />
-      <circle cx="476" cy="24"  r="5"   fill="rgb(var(--green))" opacity="0.95" />
-      {/* Drop lines */}
-      <line x1="154" y1="129" x2="154" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" opacity="0.4" />
-      <line x1="252" y1="114" x2="252" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.35" />
-      <line x1="364" y1="69"  x2="364" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.35" />
-      <line x1="476" y1="24"  x2="476" y2="133" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.3" />
-      {/* Baseline ticks */}
+      <circle cx="154" cy="226" r="3.5" fill="rgb(var(--green))" opacity="0.5" />
+      <circle cx="252" cy="200" r="3.5" fill="rgb(var(--green))" opacity="0.65" />
+      <circle cx="364" cy="120" r="4"   fill="rgb(var(--green))" opacity="0.8" />
+      <circle cx="476" cy="42"  r="5"   fill="rgb(var(--green))" opacity="0.95" />
+      <line x1="154" y1="226" x2="154" y2="233" stroke="rgb(var(--green))" strokeWidth="0.9" opacity="0.4" />
+      <line x1="252" y1="200" x2="252" y2="233" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.35" />
+      <line x1="364" y1="120" x2="364" y2="233" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.35" />
+      <line x1="476" y1="42"  x2="476" y2="233" stroke="rgb(var(--green))" strokeWidth="0.9" strokeDasharray="3 3" opacity="0.3" />
       {[154, 252, 364, 476].map(x => (
-        <line key={x} x1={x} y1="133" x2={x} y2="141" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.35" />
+        <line key={x} x1={x} y1="233" x2={x} y2="247" stroke="rgb(var(--muted))" strokeWidth="0.9" opacity="0.35" />
       ))}
-      {/* Arrow */}
-      <polyline points="510,12 526,16 510,20" stroke="rgb(var(--green))" strokeWidth="1.6" opacity="0.75" />
+      <polyline points="510,21 526,28 510,35" stroke="rgb(var(--green))" strokeWidth="1.6" opacity="0.75" />
     </svg>
   );
 }
@@ -323,9 +322,8 @@ export default async function BlogPost({
   const stats = readingStats(post.content);
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl pb-36 sm:pb-32">
+    <main className="page-container relative mx-auto w-full max-w-5xl">
       <ReadingProgress />
-      <TOC headings={headings} />
 
       {/* Back nav */}
       <div className="px-8 py-5 rise">
@@ -337,36 +335,43 @@ export default async function BlogPost({
         </Link>
       </div>
 
-      <article>
-        {/* Hero header — centered */}
-        <header className="px-8 pt-12 pb-8 text-center rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-          {/* Author byline — directly under title */}
-          <div className="flex items-center justify-center gap-2 mb-7">
-            <div className="w-5 h-5 rounded-full bg-[rgb(var(--line))] flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-[rgb(var(--muted))]" aria-hidden="true">
-                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-              </svg>
+      <div className="grid-rule" aria-hidden="true" />
+
+      {/* Page grid: TOC | Article */}
+      <div className="grid grid-cols-1 lg:grid-cols-[14rem_1fr]">
+
+        {/* TOC column */}
+        <div className="lg:border-r lg:border-[rgb(var(--line))] self-stretch">
+          <TOC headings={headings} />
+        </div>
+
+        {/* Article column */}
+        <article>
+          {/* Hero header */}
+          <header className="px-8 pt-12 pb-8 border-b border-[rgb(var(--line))] rise" style={{ ["--rise-delay" as any]: "40ms" }}>
+            <div className="flex items-center gap-2 mb-7">
+              <div className="w-5 h-5 rounded-full bg-[rgb(var(--line))] flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-[rgb(var(--muted))]" aria-hidden="true">
+                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                </svg>
+              </div>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Jacob Collado</span>
+              <span className="text-[rgb(var(--line))] text-[10px]">·</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">Founder, Inertia</span>
             </div>
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Jacob Collado</span>
-            <span className="text-[rgb(var(--line))] text-[10px]">·</span>
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">building Inertia</span>
-          </div>
 
-          <h1 className="text-[clamp(2.25rem,5.5vw,4rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] max-w-3xl mx-auto">
-            {post.title}
-          </h1>
+            <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] max-w-2xl">
+              {post.title}
+            </h1>
 
-          {post.subtitle && (
-            <p className="mt-5 text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mx-auto">
-              {post.subtitle}
-            </p>
-          )}
-        </header>
+            {post.subtitle && (
+              <p className="mt-5 text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl">
+                {post.subtitle}
+              </p>
+            )}
 
-        {/* Meta bar */}
-        <div className="mx-auto max-w-2xl px-8 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
-          <div className="flex items-center justify-between gap-6 py-3.5 border-y border-[rgb(var(--line))]">
-            <div className="flex items-center gap-4">
+            {/* Meta */}
+            <div className="flex items-center gap-4 mt-7 pt-5 border-t border-[rgb(var(--line))]">
               <span className="flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))]">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50" aria-hidden="true">
                   <circle cx="8" cy="8" r="6" />
@@ -374,36 +379,37 @@ export default async function BlogPost({
                 </svg>
                 {stats.minutes} min read
               </span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-60">
+                {formatDate(post.date)}
+              </span>
               <CopyURL />
             </div>
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-60">
-              {formatDate(post.date)}
-            </span>
+          </header>
+
+          {/* Sketch */}
+          <div className="px-8 pt-10 pb-6 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
+            <PostSketch slug={post.slug} />
           </div>
-        </div>
 
-        {/* Article sketch */}
-        <div className="mx-auto max-w-2xl px-8 pt-12 pb-4 rise" style={{ ["--rise-delay" as any]: "120ms" }}>
-          <PostSketch slug={post.slug} />
-        </div>
+          {/* Body */}
+          <ArticleBody html={html} />
 
-        {/* Body */}
-        <ArticleBody html={html} />
-      </article>
+          <Highlighter slug={slug} />
 
-      <Highlighter slug={slug} />
+          <div className="px-8 pt-6 pb-16 flex items-center justify-end border-t border-[rgb(var(--line))]">
+            <a
+              href="#"
+              className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
+                <line x1="12" y1="19" x2="12" y2="5" />
+                <polyline points="5 12 12 5 19 12" />
+              </svg>
+              Back to top
+            </a>
+          </div>
+        </article>
 
-      <div className="mx-auto max-w-2xl px-8 pt-6 pb-16 flex items-center justify-end">
-        <a
-          href="#"
-          className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
-            <line x1="12" y1="19" x2="12" y2="5" />
-            <polyline points="5 12 12 5 19 12" />
-          </svg>
-          Back to top
-        </a>
       </div>
     </main>
   );

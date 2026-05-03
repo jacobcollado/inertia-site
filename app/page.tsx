@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiSubstack, SiDribbble } from "react-icons/si";
+import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiSubstack, SiDribbble, SiFramer, SiVercel, SiApple } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
@@ -213,65 +213,75 @@ const SERVICE_GROUPS = [
   { category: "Design",      v: "--purple", items: ["Brand identity", "UI design"] },
 ];
 
-const ALL_PHRASES: { text: string; v: string; icon: React.ReactNode; cta: { label: string; href: string } }[] = [
+const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNode; cta: { label: string; href: string } }[] = [
   {
+    label: "Right now we're building",
+    text: "Shopify storefronts",
+    v: "--blue",
+    icon: <SiShopify className="w-6 h-6 shrink-0" />,
+    cta: { label: "See Aether", href: "/aether" },
+  },
+  {
+    label: "Right now we're writing",
     text: "Shopify Liquid",
     v: "--blue",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>,
-    cta: { label: "See Aether theme", href: "/aether" },
+    icon: <SiShopify className="w-6 h-6 shrink-0" />,
+    cta: { label: "See Aether", href: "/aether" },
   },
   {
-    text: "Theme development",
+    label: "Right now we're licensing",
+    text: "Aether Theme",
     v: "--blue",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
-    cta: { label: "View our work", href: "/work" },
-  },
-  {
-    text: "Theme licensing",
-    v: "--blue",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
     cta: { label: "License Aether", href: "/aether/buy" },
   },
   {
-    text: "Mobile apps",
+    label: "Right now we're shipping",
+    text: "iOS Apps",
     v: "--green",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2"/></svg>,
+    icon: <SiApple className="w-6 h-6 shrink-0" />,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
+    label: "Right now we're designing in",
     text: "Framer",
     v: "--green",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M5 3h14v8H5z"/><path d="M5 11h7l7 10H5z"/><path d="M5 11v5"/></svg>,
-    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
-  },
-  {
-    text: "Custom builds",
-    v: "--green",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
+    icon: <SiFramer className="w-6 h-6 shrink-0" />,
     cta: { label: "Start a project", href: "https://www.instagram.com/by.inertia/" },
   },
   {
-    text: "Meta ad campaigns",
+    label: "Right now we're deploying on",
+    text: "Vercel",
+    v: "--green",
+    icon: <SiVercel className="w-6 h-6 shrink-0" />,
+    cta: { label: "Start a project", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    label: "Right now we're running",
+    text: "Meta Ad Campaigns",
     v: "--amber",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+    icon: <SiMeta className="w-6 h-6 shrink-0" />,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
-    text: "Whop setup",
+    label: "Right now we're setting up",
+    text: "Whop Storefronts",
     v: "--amber",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+    icon: <IconWhop />,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
-    text: "Brand identity",
+    label: "Right now we're crafting",
+    text: "Brand Identities",
     v: "--purple",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
-    text: "UI design",
+    label: "Right now we're doing",
+    text: "UI Design",
     v: "--purple",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
     cta: { label: "View our work", href: "/work" },
   },
 ];
@@ -286,13 +296,13 @@ function RotatingPanel() {
     let t: ReturnType<typeof setTimeout>;
     if (phase === "typing") {
       if (displayed.length < target.length) {
-        t = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), 55);
+        t = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), 58);
       } else {
-        t = setTimeout(() => setPhase("erasing"), 2200);
+        t = setTimeout(() => setPhase("erasing"), 2400);
       }
     } else {
       if (displayed.length > 0) {
-        t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 28);
+        t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 26);
       } else {
         setPhraseIdx(i => (i + 1) % ALL_PHRASES.length);
         setPhase("typing");
@@ -306,35 +316,40 @@ function RotatingPanel() {
   const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors";
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-6 px-6 sm:px-10 py-8 sm:py-10 text-center">
-      {/* Icon — fades in per phrase */}
-      <span
-        key={`icon-${phraseIdx}`}
-        className="transition-colors duration-300"
-        style={{
-          color: `rgb(var(${current.v}))`,
-          opacity: 0.65,
-          animation: "rise-in 350ms cubic-bezier(0.22,1,0.36,1) both",
-        }}
-      >
-        {current.icon}
-      </span>
+    <div className="flex flex-col items-center justify-center h-full gap-5 px-6 sm:px-10 py-8 sm:py-10 text-center">
 
       {/* Label */}
-      <span className="text-[clamp(0.9rem,2vw,1rem)] tracking-tight text-[rgb(var(--muted))] -mb-3">Right now</span>
-
-      {/* Phrase */}
       <p
-        className="text-[clamp(1.9rem,5vw,2.75rem)] tracking-tight leading-tight font-medium transition-colors duration-300"
-        style={{ color: `rgb(var(${current.v}))` }}
+        key={`label-${phraseIdx}`}
+        className="text-[clamp(0.85rem,1.8vw,0.95rem)] tracking-tight text-[rgb(var(--muted))]"
+        style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}
       >
-        {displayed}<span className="opacity-30 animate-pulse font-light">|</span>
+        {current.label}
       </p>
 
-      {/* CTA — slides up per phrase */}
+      {/* Icon + typed phrase on one line */}
+      <p
+        className="flex items-center justify-center gap-2.5 text-[clamp(2rem,5.5vw,3rem)] tracking-tight leading-tight font-medium transition-colors duration-300"
+        style={{ color: `rgb(var(${current.v}))` }}
+      >
+        <span
+          key={`icon-${phraseIdx}`}
+          style={{
+            opacity: 0.8,
+            animation: "rise-in 380ms 30ms cubic-bezier(0.22,1,0.36,1) both",
+            display: "inline-flex",
+            alignItems: "center",
+          }}
+        >
+          {current.icon}
+        </span>
+        <span>{displayed}<span className="opacity-25 animate-pulse font-light">|</span></span>
+      </p>
+
+      {/* CTA */}
       <div
         key={`cta-${phraseIdx}`}
-        style={{ animation: "rise-in 400ms 80ms cubic-bezier(0.22,1,0.36,1) both" }}
+        style={{ animation: "rise-in 420ms 100ms cubic-bezier(0.22,1,0.36,1) both" }}
       >
         {isExternal ? (
           <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass}>
@@ -355,8 +370,34 @@ function RotatingPanel() {
 function LaptopWithText() {
   const muted = "rgb(var(--muted))";
   const line = "rgb(var(--line))";
+  const ref = useRef<HTMLDivElement>(null);
+  const [style, setStyle] = useState({ opacity: 0, transform: "perspective(900px) rotateX(8deg) translateY(24px)" });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // how far into viewport (0 = just entered bottom, 1 = fully visible)
+      const progress = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.55)));
+      const scrolled = Math.max(0, -rect.top);
+      const tilt = Math.min(18, scrolled / 18);
+      setStyle({
+        opacity: Math.min(1, progress * 1.8),
+        transform: `perspective(900px) rotateX(${tilt}deg) translateY(${Math.max(0, 24 - progress * 24)}px)`,
+      });
+    };
+
+    // Trigger once on mount after a tick so initial reveal runs
+    const raf = requestAnimationFrame(() => { onScroll(); });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); };
+  }, []);
+
   return (
-    <div className="relative w-full select-none">
+    <div ref={ref} className="relative w-full select-none" style={{ ...style, transition: "opacity 500ms ease, transform 500ms cubic-bezier(0.22,1,0.36,1)", willChange: "transform, opacity" }}>
       <svg viewBox="0 0 320 215" fill="none" className="w-full">
         <defs>
           <clipPath id="screen-clip">
@@ -374,31 +415,10 @@ function LaptopWithText() {
         <path d="M4 186 Q8 190 20 190 L300 190 Q312 190 316 186 L319 198 Q319 202 160 202 Q1 202 1 198 Z" fill="rgb(var(--bg))" stroke={muted} strokeWidth="0.8" opacity="0.28" />
         <rect x="126" y="192" width="68" height="8" rx="2" stroke={muted} strokeWidth="0.4" opacity="0.18" />
         <foreignObject x="36" y="40" width="248" height="132" clipPath="url(#screen-clip)">
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              padding: "10px 12px",
-              fontFamily: "inherit",
-            }}
-          >
-            <p style={{
-              fontSize: "11.5px",
-              lineHeight: 1.6,
-              letterSpacing: "-0.01em",
-              color: "rgb(var(--fg))",
-              margin: 0,
-            }}>
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", padding: "10px 12px", fontFamily: "inherit" }}>
+            <p style={{ fontSize: "11.5px", lineHeight: 1.6, letterSpacing: "-0.01em", color: "rgb(var(--fg))", margin: 0 }}>
               We build{" "}
-              <span style={{
-                fontWeight: 500,
-                background: "linear-gradient(90deg, rgb(var(--fg)) 0%, rgb(var(--muted)) 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>
+              <span style={{ fontWeight: 500, background: "linear-gradient(90deg, rgb(var(--fg)) 0%, rgb(var(--muted)) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
                 Shopify storefronts, themes, and tools
               </span>{" "}
               for client projects, our own products, and the craft in between.
