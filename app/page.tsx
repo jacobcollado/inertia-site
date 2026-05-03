@@ -302,75 +302,102 @@ const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNo
 
 function RotatingPanel() {
   const [phraseIdx, setPhraseIdx] = useState(0);
-  const [displayed, setDisplayed] = useState("");
-  const [phase, setPhase] = useState<"typing" | "erasing">("typing");
+  const [animKey, setAnimKey] = useState(0);
+  const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
-    const target = ALL_PHRASES[phraseIdx].text;
-    let t: ReturnType<typeof setTimeout>;
-    if (phase === "typing") {
-      if (displayed.length < target.length) {
-        t = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), 58);
-      } else {
-        t = setTimeout(() => setPhase("erasing"), 2400);
-      }
-    } else {
-      if (displayed.length > 0) {
-        t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 26);
-      } else {
+    const hold = setTimeout(() => {
+      setExiting(true);
+      setTimeout(() => {
         setPhraseIdx(i => (i + 1) % ALL_PHRASES.length);
-        setPhase("typing");
-      }
-    }
-    return () => clearTimeout(t);
-  }, [displayed, phase, phraseIdx]);
+        setAnimKey(k => k + 1);
+        setExiting(false);
+      }, 420);
+    }, 3000);
+    return () => clearTimeout(hold);
+  }, [animKey]);
 
   const current = ALL_PHRASES[phraseIdx];
   const isExternal = current.cta.href.startsWith("http");
   const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors";
+
+  const chars = [...current.icon ? [] : [], ...current.text.split("")];
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-5 px-6 sm:px-10 py-8 sm:py-10 text-center">
 
       {/* Label */}
       <p
-        key={`label-${phraseIdx}`}
+        key={`label-${animKey}`}
         className="text-[clamp(0.85rem,1.8vw,0.95rem)] tracking-tight text-[rgb(var(--muted))]"
-        style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}
+        style={{
+          opacity: exiting ? 0 : 1,
+          transform: exiting ? "translateY(-6px)" : "translateY(0px)",
+          transition: "opacity 300ms ease, transform 300ms ease",
+        }}
       >
         {current.label}
       </p>
 
-      {/* Icon + typed phrase — single line, no wrap */}
+      {/* Icon + animated phrase */}
       <p
-        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(1.55rem,3.8vw,2.4rem)] tracking-tight leading-none font-semibold transition-colors duration-300"
+        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(1.55rem,3.8vw,2.4rem)] tracking-tight leading-none font-semibold"
         style={{
           color: `rgb(var(${current.v}))`,
           textShadow: `0 1px 0 color-mix(in srgb, rgb(var(${current.v})) 35%, transparent), 0 2px 8px color-mix(in srgb, rgb(var(${current.v})) 18%, transparent)`,
+          perspective: "600px",
         }}
       >
+        {/* Icon */}
         <span
-          key={`icon-${phraseIdx}`}
+          key={`icon-${animKey}`}
           style={{
-            opacity: 0.75,
-            animation: "rise-in 380ms 30ms cubic-bezier(0.22,1,0.36,1) both",
             display: "inline-flex",
             alignItems: "center",
             flexShrink: 0,
+            opacity: exiting ? 0 : 0.75,
+            filter: exiting ? "blur(4px)" : "blur(0px)",
+            transform: exiting ? "translateY(-10px) rotateX(60deg)" : "translateY(0px) rotateX(0deg)",
+            transition: "opacity 300ms ease, filter 300ms ease, transform 300ms ease",
+            animation: exiting ? "none" : `char-in 380ms cubic-bezier(0.22,1,0.36,1) both`,
           }}
         >
           {current.icon}
         </span>
-        <span>
-          {displayed}
-          <span className="opacity-20 animate-pulse font-light">|</span>
+
+        {/* Per-character animated text */}
+        <span aria-label={current.text} style={{ display: "inline-flex" }}>
+          {current.text.split("").map((ch, i) => (
+            <span
+              key={`${animKey}-${i}`}
+              aria-hidden="true"
+              style={{
+                display: "inline-block",
+                width: ch === " " ? "0.3em" : undefined,
+                opacity: exiting ? 0 : 1,
+                filter: exiting ? "blur(4px)" : "blur(0px)",
+                transform: exiting
+                  ? "translateY(-12px) rotateX(70deg)"
+                  : "translateY(0px) rotateX(0deg)",
+                transition: `opacity 280ms ease ${i * 14}ms, filter 280ms ease ${i * 14}ms, transform 280ms ease ${i * 14}ms`,
+                animation: exiting ? "none" : `char-in 420ms cubic-bezier(0.22,1,0.36,1) ${i * 30}ms both`,
+              }}
+            >
+              {ch}
+            </span>
+          ))}
         </span>
       </p>
 
       {/* CTA */}
       <div
-        key={`cta-${phraseIdx}`}
-        style={{ animation: "rise-in 420ms 100ms cubic-bezier(0.22,1,0.36,1) both" }}
+        key={`cta-${animKey}`}
+        style={{
+          opacity: exiting ? 0 : 1,
+          transform: exiting ? "translateY(-6px)" : "translateY(0px)",
+          transition: "opacity 300ms ease, transform 300ms ease",
+          animation: exiting ? "none" : "rise-in 450ms 120ms cubic-bezier(0.22,1,0.36,1) both",
+        }}
       >
         {isExternal ? (
           <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass}>
@@ -391,9 +418,6 @@ function RotatingPanel() {
 function LaptopWithText() {
   const muted = "rgb(var(--muted))";
   const line = "rgb(var(--line))";
-  const blue = "rgb(var(--blue))";
-  const green = "rgb(var(--green))";
-  const purple = "rgb(var(--purple))";
   const ref = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [tilt, setTilt] = useState(0);
@@ -437,10 +461,6 @@ function LaptopWithText() {
           <clipPath id="screen-clip">
             <rect x="28" y="18" width="264" height="158" rx="3" />
           </clipPath>
-          <linearGradient id="fg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgb(var(--fg))" />
-            <stop offset="100%" stopColor="rgb(var(--muted))" />
-          </linearGradient>
         </defs>
 
         {/* Lid bezel */}
@@ -459,45 +479,20 @@ function LaptopWithText() {
         <circle cx="60" cy="27" r="2.8" fill={muted} opacity="0.18" />
         {/* URL bar */}
         <rect x="94" y="22" width="132" height="10" rx="3" stroke={muted} strokeWidth="0.4" opacity="0.16" />
-        {/* Lock icon in URL */}
-        <rect x="100" y="24.5" width="4" height="5" rx="1" stroke={muted} strokeWidth="0.4" opacity="0.22" />
-        <path d="M101 24.5 v-1.5 a1.5 1.5 0 0 1 3 0 v1.5" stroke={muted} strokeWidth="0.4" opacity="0.22" fill="none" />
         <line x1="108" y1="27" x2="218" y2="27" stroke={muted} strokeWidth="0.4" opacity="0.15" />
 
-        {/* Page nav bar */}
-        <line x1="36" y1="46" x2="56" y2="46" stroke={muted} strokeWidth="1.1" strokeLinecap="round" opacity="0.45" />
-        <line x1="62" y1="46" x2="76" y2="46" stroke={muted} strokeWidth="0.8" strokeLinecap="round" opacity="0.25" />
-        <line x1="82" y1="46" x2="96" y2="46" stroke={muted} strokeWidth="0.8" strokeLinecap="round" opacity="0.25" />
-        <line x1="102" y1="46" x2="116" y2="46" stroke={muted} strokeWidth="0.8" strokeLinecap="round" opacity="0.25" />
-        {/* Nav CTA */}
-        <rect x="258" y="41" width="26" height="10" rx="5" fill={blue} fillOpacity="0.15" stroke={blue} strokeWidth="0.5" opacity="0.5" />
-
-        {/* Hero section */}
-        <line x1="36" y1="64" x2="190" y2="64" stroke="url(#fg-grad)" strokeWidth="3.2" strokeLinecap="round" opacity="0.8" />
-        <line x1="36" y1="74" x2="152" y2="74" stroke="url(#fg-grad)" strokeWidth="3.2" strokeLinecap="round" opacity="0.75" />
-
-        {/* Gradient keyword lines */}
-        <line x1="36" y1="86" x2="130" y2="86" stroke={blue} strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
-        <line x1="134" y1="86" x2="164" y2="86" stroke={green} strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
-        <line x1="168" y1="86" x2="210" y2="86" stroke={purple} strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
-
-        {/* Body copy */}
-        <line x1="36" y1="98" x2="278" y2="98" stroke={muted} strokeWidth="0.9" strokeLinecap="round" opacity="0.28" />
-        <line x1="36" y1="106" x2="254" y2="106" stroke={muted} strokeWidth="0.9" strokeLinecap="round" opacity="0.28" />
-        <line x1="36" y1="114" x2="268" y2="114" stroke={muted} strokeWidth="0.9" strokeLinecap="round" opacity="0.28" />
-
-        {/* CTA button */}
-        <rect x="36" y="126" width="58" height="16" rx="8" fill={blue} fillOpacity="0.12" stroke={blue} strokeWidth="0.7" opacity="0.55" />
-        <line x1="48" y1="134" x2="80" y2="134" stroke={blue} strokeWidth="1.1" strokeLinecap="round" opacity="0.6" />
-
-        {/* 3-column card row */}
-        {[36, 118, 200].map((x, i) => (
-          <g key={x}>
-            <rect x={x} y="152" width="74" height="18" rx="2" stroke={i === 0 ? blue : muted} strokeWidth="0.6" opacity={i === 0 ? 0.4 : 0.2} fill={i === 0 ? blue : "none"} fillOpacity="0.04" />
-            <line x1={x + 8} y1="158" x2={x + 50} y2="158" stroke={i === 0 ? blue : muted} strokeWidth="0.7" strokeLinecap="round" opacity={i === 0 ? 0.45 : 0.2} />
-            <line x1={x + 8} y1="163" x2={x + 36} y2="163" stroke={muted} strokeWidth="0.5" strokeLinecap="round" opacity="0.16" />
-          </g>
-        ))}
+        {/* About text */}
+        <foreignObject x="28" y="36" width="264" height="140" clipPath="url(#screen-clip)">
+          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", padding: "8px 10px", fontFamily: "inherit" }}>
+            <p style={{ fontSize: "11px", lineHeight: 1.65, letterSpacing: "-0.01em", color: "rgb(var(--fg))", margin: 0 }}>
+              We build{" "}
+              <span style={{ fontWeight: 500, background: "linear-gradient(90deg, rgb(var(--fg)) 0%, rgb(var(--muted)) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                Shopify storefronts, themes, and tools
+              </span>{" "}
+              for client projects, our own products, and the craft in between.
+            </p>
+          </div>
+        </foreignObject>
       </svg>
     </div>
   );
