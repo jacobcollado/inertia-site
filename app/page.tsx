@@ -343,7 +343,7 @@ function RotatingPanel() {
 
       {/* Icon + typed phrase — single line, no wrap */}
       <p
-        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(1.4rem,3.8vw,2.4rem)] tracking-tight leading-none font-semibold transition-colors duration-300"
+        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(1.55rem,3.8vw,2.4rem)] tracking-tight leading-none font-semibold transition-colors duration-300"
         style={{
           color: `rgb(var(${current.v}))`,
           textShadow: `0 1px 0 color-mix(in srgb, rgb(var(${current.v})) 35%, transparent), 0 2px 8px color-mix(in srgb, rgb(var(${current.v})) 18%, transparent)`,
@@ -391,8 +391,12 @@ function RotatingPanel() {
 function LaptopWithText() {
   const muted = "rgb(var(--muted))";
   const line = "rgb(var(--line))";
+  const blue = "rgb(var(--blue))";
+  const green = "rgb(var(--green))";
+  const purple = "rgb(var(--purple))";
   const ref = useRef<HTMLDivElement>(null);
-  const [style, setStyle] = useState({ opacity: 0, transform: "perspective(900px) rotateX(8deg) translateY(24px)" });
+  const [revealed, setRevealed] = useState(false);
+  const [tilt, setTilt] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
@@ -401,51 +405,99 @@ function LaptopWithText() {
     const onScroll = () => {
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      // how far into viewport (0 = just entered bottom, 1 = fully visible)
-      const progress = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.55)));
-      const scrolled = Math.max(0, -rect.top);
-      const tilt = Math.min(18, scrolled / 18);
-      setStyle({
-        opacity: Math.min(1, progress * 1.8),
-        transform: `perspective(900px) rotateX(${tilt}deg) translateY(${Math.max(0, 24 - progress * 24)}px)`,
-      });
+      const progress = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.5)));
+      if (progress > 0.05 && !revealed) setRevealed(true);
+      // Parallax tilt: increases as element scrolls up past center
+      const pastCenter = Math.max(0, vh / 2 - rect.bottom + rect.height / 2);
+      setTilt(Math.min(14, pastCenter / 22));
     };
 
-    // Trigger once on mount after a tick so initial reveal runs
-    const raf = requestAnimationFrame(() => { onScroll(); });
+    const raf = requestAnimationFrame(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); };
-  }, []);
+  }, [revealed]);
+
+  const transform = revealed
+    ? `perspective(1000px) rotateX(${tilt}deg) translateY(0px)`
+    : "perspective(1000px) rotateX(6deg) translateY(32px)";
 
   return (
-    <div ref={ref} className="relative w-full select-none" style={{ ...style, transition: "opacity 500ms ease, transform 500ms cubic-bezier(0.22,1,0.36,1)", willChange: "transform, opacity" }}>
-      <svg viewBox="0 0 320 215" fill="none" className="w-full">
+    <div
+      ref={ref}
+      className="relative w-full select-none"
+      style={{
+        opacity: revealed ? 1 : 0,
+        transform,
+        transition: "opacity 650ms cubic-bezier(0.22,1,0.36,1), transform 650ms cubic-bezier(0.22,1,0.36,1)",
+        willChange: "transform, opacity",
+      }}
+    >
+      <svg viewBox="0 0 320 186" fill="none" className="w-full">
         <defs>
           <clipPath id="screen-clip">
             <rect x="28" y="18" width="264" height="158" rx="3" />
           </clipPath>
+          <linearGradient id="fg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="rgb(var(--fg))" />
+            <stop offset="100%" stopColor="rgb(var(--muted))" />
+          </linearGradient>
         </defs>
-        <rect x="12" y="6" width="296" height="180" rx="10" stroke={muted} strokeWidth="1.2" opacity="0.35" />
-        <rect x="28" y="18" width="264" height="158" rx="3" fill="rgb(var(--bg))" stroke={line} strokeWidth="0.5" opacity="0.5" />
-        <circle cx="160" cy="11" r="1.8" fill={muted} opacity="0.3" />
-        <line x1="28" y1="35" x2="292" y2="35" stroke={line} strokeWidth="0.5" opacity="0.5" />
-        <circle cx="42" cy="26.5" r="2.5" fill={muted} opacity="0.22" />
-        <circle cx="51" cy="26.5" r="2.5" fill={muted} opacity="0.22" />
-        <circle cx="60" cy="26.5" r="2.5" fill={muted} opacity="0.22" />
-        <rect x="96" y="22" width="128" height="9" rx="2.5" stroke={muted} strokeWidth="0.4" opacity="0.18" />
-        <path d="M4 186 Q8 190 20 190 L300 190 Q312 190 316 186 L319 198 Q319 202 160 202 Q1 202 1 198 Z" fill="rgb(var(--bg))" stroke={muted} strokeWidth="0.8" opacity="0.28" />
-        <rect x="126" y="192" width="68" height="8" rx="2" stroke={muted} strokeWidth="0.4" opacity="0.18" />
-        <foreignObject x="36" y="40" width="248" height="132" clipPath="url(#screen-clip)">
-          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", padding: "10px 12px", fontFamily: "inherit" }}>
-            <p style={{ fontSize: "11.5px", lineHeight: 1.6, letterSpacing: "-0.01em", color: "rgb(var(--fg))", margin: 0 }}>
-              We build{" "}
-              <span style={{ fontWeight: 500, background: "linear-gradient(90deg, rgb(var(--fg)) 0%, rgb(var(--muted)) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Shopify storefronts, themes, and tools
-              </span>{" "}
-              for client projects, our own products, and the craft in between.
-            </p>
-          </div>
-        </foreignObject>
+
+        {/* Lid bezel */}
+        <rect x="12" y="6" width="296" height="174" rx="10" stroke={muted} strokeWidth="1.2" opacity="0.35" />
+        {/* Screen */}
+        <rect x="28" y="18" width="264" height="158" rx="3" fill="rgb(var(--bg))" stroke={line} strokeWidth="0.6" opacity="0.55" />
+        {/* Camera */}
+        <circle cx="160" cy="12" r="2" fill={muted} opacity="0.28" />
+
+        {/* Browser bar */}
+        <rect x="28" y="18" width="264" height="18" rx="3" fill="rgb(var(--bg))" clipPath="url(#screen-clip)" />
+        <line x1="28" y1="36" x2="292" y2="36" stroke={line} strokeWidth="0.5" opacity="0.55" />
+        {/* Traffic lights */}
+        <circle cx="42" cy="27" r="2.8" fill={muted} opacity="0.18" />
+        <circle cx="51" cy="27" r="2.8" fill={muted} opacity="0.18" />
+        <circle cx="60" cy="27" r="2.8" fill={muted} opacity="0.18" />
+        {/* URL bar */}
+        <rect x="94" y="22" width="132" height="10" rx="3" stroke={muted} strokeWidth="0.4" opacity="0.16" />
+        {/* Lock icon in URL */}
+        <rect x="100" y="24.5" width="4" height="5" rx="1" stroke={muted} strokeWidth="0.4" opacity="0.22" />
+        <path d="M101 24.5 v-1.5 a1.5 1.5 0 0 1 3 0 v1.5" stroke={muted} strokeWidth="0.4" opacity="0.22" fill="none" />
+        <line x1="108" y1="27" x2="218" y2="27" stroke={muted} strokeWidth="0.4" opacity="0.15" />
+
+        {/* Page nav bar */}
+        <line x1="36" y1="46" x2="56" y2="46" stroke={muted} strokeWidth="1.1" strokeLinecap="round" opacity="0.45" />
+        <line x1="62" y1="46" x2="76" y2="46" stroke={muted} strokeWidth="0.8" strokeLinecap="round" opacity="0.25" />
+        <line x1="82" y1="46" x2="96" y2="46" stroke={muted} strokeWidth="0.8" strokeLinecap="round" opacity="0.25" />
+        <line x1="102" y1="46" x2="116" y2="46" stroke={muted} strokeWidth="0.8" strokeLinecap="round" opacity="0.25" />
+        {/* Nav CTA */}
+        <rect x="258" y="41" width="26" height="10" rx="5" fill={blue} fillOpacity="0.15" stroke={blue} strokeWidth="0.5" opacity="0.5" />
+
+        {/* Hero section */}
+        <line x1="36" y1="64" x2="190" y2="64" stroke="url(#fg-grad)" strokeWidth="3.2" strokeLinecap="round" opacity="0.8" />
+        <line x1="36" y1="74" x2="152" y2="74" stroke="url(#fg-grad)" strokeWidth="3.2" strokeLinecap="round" opacity="0.75" />
+
+        {/* Gradient keyword lines */}
+        <line x1="36" y1="86" x2="130" y2="86" stroke={blue} strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
+        <line x1="134" y1="86" x2="164" y2="86" stroke={green} strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
+        <line x1="168" y1="86" x2="210" y2="86" stroke={purple} strokeWidth="1.8" strokeLinecap="round" opacity="0.7" />
+
+        {/* Body copy */}
+        <line x1="36" y1="98" x2="278" y2="98" stroke={muted} strokeWidth="0.9" strokeLinecap="round" opacity="0.28" />
+        <line x1="36" y1="106" x2="254" y2="106" stroke={muted} strokeWidth="0.9" strokeLinecap="round" opacity="0.28" />
+        <line x1="36" y1="114" x2="268" y2="114" stroke={muted} strokeWidth="0.9" strokeLinecap="round" opacity="0.28" />
+
+        {/* CTA button */}
+        <rect x="36" y="126" width="58" height="16" rx="8" fill={blue} fillOpacity="0.12" stroke={blue} strokeWidth="0.7" opacity="0.55" />
+        <line x1="48" y1="134" x2="80" y2="134" stroke={blue} strokeWidth="1.1" strokeLinecap="round" opacity="0.6" />
+
+        {/* 3-column card row */}
+        {[36, 118, 200].map((x, i) => (
+          <g key={x}>
+            <rect x={x} y="152" width="74" height="18" rx="2" stroke={i === 0 ? blue : muted} strokeWidth="0.6" opacity={i === 0 ? 0.4 : 0.2} fill={i === 0 ? blue : "none"} fillOpacity="0.04" />
+            <line x1={x + 8} y1="158" x2={x + 50} y2="158" stroke={i === 0 ? blue : muted} strokeWidth="0.7" strokeLinecap="round" opacity={i === 0 ? 0.45 : 0.2} />
+            <line x1={x + 8} y1="163" x2={x + 36} y2="163" stroke={muted} strokeWidth="0.5" strokeLinecap="round" opacity="0.16" />
+          </g>
+        ))}
       </svg>
     </div>
   );
