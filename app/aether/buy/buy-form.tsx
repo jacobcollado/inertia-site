@@ -183,7 +183,7 @@ function SketchCustom() {
       <line x1="72" y1="23" x2="94" y2="23" stroke={g(0.25)} strokeWidth="0.8"/>
       <line x1="102" y1="23" x2="124" y2="23" stroke={g(0.2)} strokeWidth="0.8"/>
       <line x1="132" y1="23" x2="154" y2="23" stroke={g(0.2)} strokeWidth="0.8"/>
-      <rect x="216" y="17" width="20" height="12" rx="2" fill={c} opacity="0.22" stroke={c} strokeWidth="0.7" opacity2="0.5"/>
+      <rect x="216" y="17" width="20" height="12" rx="2" fill={c} opacity="0.22" stroke={c} strokeWidth="0.7"/>
 
       {/* Hero zone */}
       <rect x="18" y="34" width="224" height="54" fill={c} fillOpacity="0.04" stroke={c} strokeWidth="1" opacity="0.45"/>
