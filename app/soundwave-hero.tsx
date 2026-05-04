@@ -273,7 +273,7 @@ export function SoundwaveHero() {
         style={{ zIndex: 3 }}
       >
         <h1
-          className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none"
+          className="text-[clamp(2.6rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none"
           aria-label="We build the thing that keeps you moving."
         >
           {["We build the thing", "that keeps you moving."].map((line, li) =>

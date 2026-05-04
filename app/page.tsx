@@ -4,6 +4,8 @@ import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiSubstack, SiDribbble, SiFramer, SiVercel, SiApple } from "react-icons/si";
+import { LuHandshake } from "react-icons/lu";
+import { HiOutlineCube, HiOutlineCommandLine, HiOutlineClock, HiOutlineWrenchScrewdriver, HiOutlineDevicePhoneMobile, HiOutlineShoppingBag, HiOutlineCheckCircle, HiOutlineArrowPath } from "react-icons/hi2";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
@@ -503,9 +505,33 @@ function LaptopWithText() {
 function WhatWeDo() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2">
-      {/* Laptop */}
-      <div className="px-6 sm:px-10 py-8 sm:py-10 flex items-center justify-center sm:border-r sm:border-[rgb(var(--line))]">
-        <LaptopWithText />
+      {/* About */}
+      <div className="grid grid-rows-[1fr_auto] sm:border-r sm:border-[rgb(var(--line))]">
+        <div className="px-6 sm:px-10 py-8 sm:py-10 flex flex-col gap-3 justify-center">
+          <p
+            className="text-[32px] sm:text-[40px] font-medium tracking-[-0.03em] leading-[1.2] text-[rgb(var(--fg))]"
+            style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 80ms forwards" }}
+          >
+            The kind of{" "}
+            <span style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>partner</span>{" "}
+            <LuHandshake className="inline align-middle w-6 h-6 sm:w-7 sm:h-7 shrink-0" style={{ color: "rgb(var(--fg))", opacity: 0.75 }} />{" "}
+            you'll actually want to{" "}
+            <span style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>work with again</span>.
+          </p>
+        </div>
+        <div className="grid grid-cols-3 border-t border-[rgb(var(--line))]">
+          {[
+            { title: "Custom builds", desc: "Every project from scratch.", href: "/contact" },
+            { title: "Any stack", desc: "Web, mobile, Shopify.", href: "/aether" },
+            { title: "On time", desc: "Deadlines are respected.", href: "/work" },
+          ].map(({ title, desc, href }) => (
+            <Link key={title} href={href} className="group px-4 py-5 border-r border-[rgb(var(--line))] last:border-r-0 flex flex-col gap-2 hover:bg-[rgb(var(--line))/0.15] transition-colors">
+              <span className="text-[14px] sm:text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{title}</span>
+              <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-50 leading-snug flex-1">{desc}</span>
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[10px] self-start transition-colors duration-200 group-hover:border-[rgb(var(--fg)/0.3)] group-hover:text-[rgb(var(--fg))]">→</span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* Rotating panel */}
@@ -594,7 +620,7 @@ const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }
   { name: "Tailwind",   icon: SiTailwindcss,color: "#38BDF8" },
   { name: "Photoshop",  icon: IconPhotoshop,color: "#31A8FF" },
   { name: "Swift",      icon: SiSwift,      color: "#F05138" },
-  { name: "Whop",       icon: IconWhop,     color: "#ffffff" },
+  { name: "Whop",       icon: IconWhop,     color: "#E8470A" },
   { name: "Meta",       icon: SiMeta,       color: "#0082FB" },
   { name: "Substack",   icon: SiSubstack,   color: "#FF6719" },
 ];
@@ -611,7 +637,7 @@ function TechMarquee() {
             style={{ "--tech-color": tech.color } as React.CSSProperties}
           >
             <tech.icon className="transition-colors duration-200 group-hover:text-[var(--tech-color)]" />
-            <span className="transition-colors duration-200 group-hover:text-[var(--tech-color)]">{tech.name}</span>
+            <span>{tech.name}</span>
           </div>
         ))}
       </div>
@@ -880,12 +906,12 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                   <span className="inline-flex self-start items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full mb-5 text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">
                     →
                   </span>
-                  <div className={`mt-auto relative overflow-hidden ${isInertia ? "-mt-4 sm:mt-auto" : isMockup ? "mt-6 sm:mt-auto max-h-[140px] sm:max-h-none" : ""}`}>
+                  <div className={`relative overflow-hidden ${isInertia || isMockup ? "mt-auto h-[110px] sm:h-auto" : "mt-auto"}`}>
                     {isInertia && (
                       <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-0 h-4 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
                     )}
                     {isMockup && (
-                      <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-0 h-8 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
+                      <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-0 h-4 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
                     )}
                     {item.sketch}
                   </div>
@@ -912,14 +938,14 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           {/* ── Perspectives ── */}
           <div className="relative flex items-center justify-center py-6 px-8 sm:px-0">
             <div className="flex items-center gap-3">
-              <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">The way we</span>
+              <span className="text-[22px] tracking-tight text-[rgb(var(--muted))]">The way we</span>
               <TooltipPill tip="Short posts on design, development, and the decisions behind what we build.">
                 <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
                   <SiSubstack className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                  <span className="text-[20px] sm:text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>think</span>
+                  <span className="text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>think</span>
                 </div>
               </TooltipPill>
-              <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">about our work</span>
+              <span className="hidden sm:inline text-[22px] tracking-tight text-[rgb(var(--muted))]">about our work</span>
               <Link href="/blog" className="sm:absolute sm:right-8 inline-flex items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">→</Link>
             </div>
           </div>
@@ -1010,14 +1036,14 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
         {/* Label cell */}
         <div className="relative flex items-center justify-center py-6 px-8 sm:px-0">
           <div className="flex items-center gap-3">
-            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
+            <span className="text-[22px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
             <TooltipPill tip="Selected client work spanning Shopify builds, brand identities, and custom web projects.">
               <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
                 <SiDribbble className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                <span className="text-[20px] sm:text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>shipped</span>
+                <span className="text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>shipped</span>
               </div>
             </TooltipPill>
-            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
+            <span className="hidden sm:inline text-[22px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
             <Link href="/work" className="sm:absolute sm:right-8 inline-flex items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">→</Link>
           </div>
         </div>
