@@ -12,14 +12,24 @@ export function PastWork({ work }: { work: WorkMeta[] }) {
 
 /* ── Work grid ────────────────────────────────────────────────── */
 
+function MasonryItem({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="masonry-item">
+      {children}
+    </div>
+  );
+}
+
 function WorkGrid({ work }: { work: WorkMeta[] }) {
   const [active, setActive] = useState<WorkMeta | null>(null);
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3">
+      <div className="masonry-grid">
         {work.map((w, i) => (
-          <WorkCard key={w.slug} item={w} index={i} total={work.length} onOpen={() => setActive(w)} />
+          <MasonryItem key={w.slug}>
+            <WorkCard item={w} index={i} total={work.length} onOpen={() => setActive(w)} />
+          </MasonryItem>
         ))}
       </div>
       {active && <WorkSheet item={active} onClose={() => setActive(null)} />}
@@ -49,8 +59,11 @@ function LogoImage({ slug, alt }: { slug: string; alt: string }) {
 }
 
 const LOGO_SIZE: Record<string, string> = {
-  "ellora-la": "w-[75%] md:w-[55%]",
+  "ellora-la": "w-[60%]",
 };
+
+const CARD_MIN_H: Record<string, string> = {};
+
 
 // "dark-on-light" = dark logo, needs dark:invert (default)
 // "light-on-dark" = white logo, needs invert in light mode
@@ -74,34 +87,33 @@ function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: numbe
   return (
     <button
       onClick={onOpen}
-      className="work-grid-card group relative flex flex-col text-left bg-transparent transition-colors hover:bg-[rgb(var(--line))/0.06] rise"
+      className="work-grid-card group relative flex flex-col text-left overflow-hidden rise"
       data-index={index}
       data-total={total}
       style={{ ["--row-i" as any]: index, ["--rise-delay" as any]: `${index * 70}ms` }}
     >
-      {/* Logo area — fixed aspect, logo constrained to 40% width so all feel balanced */}
-      <div className="w-full aspect-[4/3] flex items-center justify-center p-10">
-        <div className={`relative ${LOGO_SIZE[item.slug] ?? "w-[60%] md:w-[40%]"} h-full flex items-center justify-center`}>
+      {/* Logo area — flex-1 so it fills all available height in the masonry cell */}
+      <div className={`relative w-full flex-1 ${CARD_MIN_H[item.slug] ?? "min-h-[260px]"} flex items-center justify-center overflow-hidden`}>
+        <div className={`relative ${LOGO_SIZE[item.slug] ?? "w-[50%]"} h-16 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]`}>
           <LogoImage slug={item.slug} alt={item.client} />
         </div>
       </div>
 
-      {/* Info */}
-      <div className="flex flex-col gap-0.5 px-5 pb-5">
-        <span className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{item.client}</span>
-        {item.role && (
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">{item.role}</span>
-        )}
-        {item.year && (
-          <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-60 mt-1">{item.year}</span>
-        )}
-      </div>
+      {/* Divider */}
+      <div className="h-px bg-[rgb(var(--line))]" />
 
-      {/* Hover arrow */}
-      <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 rounded-full bg-[rgb(var(--bg))] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3 h-3 text-[rgb(var(--fg))] -rotate-45" aria-hidden="true">
-          <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      {/* Info */}
+      <div className="flex items-center justify-between gap-2 px-5 py-3.5">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[13px] sm:text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.client}</span>
+          {item.role && <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] mt-0.5">{item.role}</span>}
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          {item.year && <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-40">{item.year}</span>}
+          <span className="flex items-center justify-center w-6 h-6 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[11px] opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0">
+            →
+          </span>
+        </div>
       </div>
     </button>
   );

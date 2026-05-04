@@ -147,7 +147,13 @@ export function SiteFooter() {
       {/* Bottom bar */}
       <GridRule />
       <div className="flex items-center justify-between gap-6 pt-6">
-        <EasterEgg />
+        <div className="flex items-center gap-4">
+          <EasterEgg />
+          <div className="flex items-center gap-1.5 border border-[rgb(var(--line))] px-2 py-1">
+            <span className="w-1.5 h-1.5 rounded-sm bg-[rgb(var(--muted))] opacity-30 shrink-0" />
+            <span className="text-[10px] font-mono tracking-wider text-[rgb(var(--muted))] opacity-40 uppercase">sys:ok</span>
+          </div>
+        </div>
         <div className="flex items-center gap-6">
           <BackToTop />
           <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 tabular-nums">

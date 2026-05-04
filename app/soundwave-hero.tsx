@@ -327,7 +327,7 @@ export function SoundwaveHero() {
               WebkitBackdropFilter: "blur(12px)",
             }}
           >
-            Work with us ↗
+            Start a project ↗
           </a>
           <a
             href="/aether"

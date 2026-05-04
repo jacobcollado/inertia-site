@@ -329,7 +329,16 @@ function InertiaLogo() {
     };
   }, []);
 
-  return <span ref={ref} style={{ display: "inline-block", willChange: "transform" }}>Inertia</span>;
+  return (
+    <span ref={ref} style={{ display: "inline-block", willChange: "transform" }}>
+      <img
+        src="/logo.png"
+        alt="Inertia"
+        className="h-5 w-auto dark:invert-0 invert"
+        style={{ display: "block" }}
+      />
+    </span>
+  );
 }
 
 /* ── Root ────────────────────────────────────────────────────────── */

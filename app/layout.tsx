@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "./theme-provider";
 import { RouteFade } from "./route-fade";
 import { LenisProvider } from "./lenis-provider";
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </SiteShell>
           </ViewModeProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

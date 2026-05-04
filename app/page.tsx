@@ -60,130 +60,118 @@ function SketchInertia() {
   );
 }
 
-function SketchDashboard() {
-  const blue = "rgb(var(--blue))";
-  const muted = "rgb(var(--muted))";
+function MockupDashboard() {
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* App chrome */}
-      <rect x="8" y="8" width="184" height="104" rx="3" stroke={muted} strokeWidth="0.9" opacity="0.32" />
-      {/* Sidebar */}
-      <line x1="48" y1="8" x2="48" y2="112" stroke={muted} strokeWidth="0.6" opacity="0.22" />
-      {/* Sidebar nav items */}
-      <rect x="14" y="18" width="26" height="5" rx="1.5" stroke={muted} strokeWidth="0.5" opacity="0.28" />
-      {[30,50,60,70].map(y => (
-        <line key={y} x1="14" y1={y} x2="40" y2={y} stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      ))}
-      {/* Active nav — accent */}
-      <rect x="12" y="37.5" width="2.5" height="7" rx="1" fill={blue} opacity="0.7" />
-      <line x1="17" y1="41" x2="40" y2="41" stroke={blue} strokeWidth="0.9" opacity="0.65" />
-      {/* Stat cards row — first card accented */}
-      <rect x="56" y="16" width="38" height="22" rx="2" stroke={blue} strokeWidth="0.7" opacity="0.5" fill={blue} fillOpacity="0.05" />
-      <line x1="62" y1="24" x2="84" y2="24" stroke={blue} strokeWidth="1.2" opacity="0.6" />
-      <line x1="62" y1="30" x2="76" y2="30" stroke={muted} strokeWidth="0.5" opacity="0.28" />
-      {[1,2].map(i => (
-        <g key={i}>
-          <rect x={56 + i * 44} y="16" width="38" height="22" rx="2" stroke={muted} strokeWidth="0.6" opacity="0.28" />
-          <line x1={62 + i * 44} y1="24" x2={84 + i * 44} y2="24" stroke={muted} strokeWidth="1.1" opacity="0.32" />
-          <line x1={62 + i * 44} y1="30" x2={76 + i * 44} y2="30" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-        </g>
-      ))}
-      {/* Theme card */}
-      <rect x="56" y="44" width="82" height="36" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.28" />
-      <line x1="62" y1="52" x2="108" y2="52" stroke={muted} strokeWidth="0.9" opacity="0.32" />
-      <line x1="62" y1="58" x2="96" y2="58" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      <line x1="62" y1="64" x2="100" y2="64" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      {/* CTA button — accent */}
-      <rect x="62" y="70" width="28" height="5" rx="1.5" fill={blue} fillOpacity="0.18" stroke={blue} strokeWidth="0.5" opacity="0.6" />
-      {/* Activity feed */}
-      <rect x="146" y="44" width="38" height="64" rx="2" stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      <line x1="152" y1="52" x2="178" y2="52" stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      {[62,72,82,96].map(y => (
-        <g key={y}>
-          <circle cx="155" cy={y} r="2" stroke={muted} strokeWidth="0.5" opacity="0.26" />
-          <line x1="161" y1={y} x2="178" y2={y} stroke={muted} strokeWidth="0.5" opacity="0.26" />
-          <line x1="161" y1={y + 4} x2="172" y2={y + 4} stroke={muted} strokeWidth="0.4" opacity="0.2" />
-        </g>
-      ))}
-      {/* Support thread */}
-      <rect x="56" y="86" width="82" height="20" rx="2" stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      <line x1="62" y1="93" x2="110" y2="93" stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      <line x1="62" y1="99" x2="96" y2="99" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      {/* Online dot — accent */}
-      <circle cx="184" cy="16" r="2.5" fill={blue} opacity="0.55" />
-    </svg>
+    <div className="w-full overflow-hidden border border-b-0 border-[rgb(var(--line))]" style={{ fontFamily: "inherit", background: "rgb(var(--bg))", borderRadius: "8px 8px 0 0" }}>
+      {/* Top bar */}
+      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-[rgb(var(--line))]">
+        <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-20" />
+        <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-20" />
+        <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-20" />
+        <div className="ml-2 w-20 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-10" />
+      </div>
+      {/* Body */}
+      <div className="flex" style={{ minHeight: "160px" }}>
+        {/* Sidebar */}
+        <div className="flex flex-col gap-1.5 border-r border-[rgb(var(--line))] py-3 px-2" style={{ width: "48px" }}>
+          {[true, false, false, false, false].map((active, i) => (
+            <div key={i} className="h-1.5 rounded-full" style={{ background: active ? "rgb(var(--blue))" : "rgb(var(--muted))", opacity: active ? 0.55 : 0.12 }} />
+          ))}
+        </div>
+        {/* Content */}
+        <div className="flex-1 p-3 flex flex-col gap-3">
+          {/* Header row */}
+          <div className="flex items-center justify-between">
+            <div className="w-16 h-2 rounded-full bg-[rgb(var(--muted))] opacity-15" />
+            <div className="w-8 h-2 rounded-full bg-[rgb(var(--blue))] opacity-30" />
+          </div>
+          {/* Stat cards */}
+          <div className="grid grid-cols-3 gap-1.5">
+            {[0,1,2].map(i => (
+              <div key={i} className="flex flex-col gap-1 p-2 border border-[rgb(var(--line))]" style={{ borderColor: i === 0 ? "rgb(var(--blue)/0.25)" : undefined, background: i === 0 ? "rgb(var(--blue)/0.04)" : undefined }}>
+                <div className="w-full h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />
+                <div className="w-1/2 h-2 rounded-full" style={{ background: i === 0 ? "rgb(var(--blue))" : "rgb(var(--muted))", opacity: i === 0 ? 0.5 : 0.2 }} />
+              </div>
+            ))}
+          </div>
+          {/* Progress bar */}
+          <div className="flex flex-col gap-1.5 border border-[rgb(var(--line))] p-2">
+            <div className="flex items-center justify-between">
+              <div className="w-20 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-15" />
+              <div className="w-6 h-1.5 rounded-full bg-[rgb(var(--blue))] opacity-35" />
+            </div>
+            <div className="w-full rounded-full overflow-hidden" style={{ height: "3px", background: "rgb(var(--line))" }}>
+              <div className="h-full rounded-full" style={{ width: "62%", background: "rgb(var(--blue))", opacity: 0.5 }} />
+            </div>
+          </div>
+          {/* Activity rows */}
+          <div className="flex flex-col gap-1.5">
+            {[0.9, 0.65, 0.4].map((op, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] shrink-0" style={{ opacity: op * 0.3 }} />
+                <div className="h-1 rounded-full bg-[rgb(var(--muted))]" style={{ width: `${55 - i * 12}%`, opacity: op * 0.18 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function SketchAether() {
-  const blue = "rgb(var(--blue))";
-  const muted = "rgb(var(--muted))";
+function MockupAether() {
   return (
-    <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Browser chrome */}
-      <rect x="8" y="8" width="184" height="104" rx="3" stroke={muted} strokeWidth="0.9" opacity="0.32" />
-      {/* Nav bar */}
-      <line x1="8" y1="22" x2="192" y2="22" stroke={muted} strokeWidth="0.7" opacity="0.22" />
-      {/* Logo placeholder */}
-      <rect x="16" y="13" width="18" height="6" rx="1" stroke={muted} strokeWidth="0.6" opacity="0.32" />
-      {/* Nav links */}
-      <line x1="46"  y1="16" x2="62"  y2="16" stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      <line x1="68"  y1="16" x2="84"  y2="16" stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      <line x1="90"  y1="16" x2="106" y2="16" stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      {/* CTA button top-right — accent */}
-      <rect x="162" y="13" width="22" height="6" rx="2" fill={blue} fillOpacity="0.18" stroke={blue} strokeWidth="0.6" opacity="0.65" />
-      {/* Hero block */}
-      <rect x="16" y="28" width="168" height="38" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.26" />
-      {/* Hero title lines */}
-      <line x1="30" y1="38" x2="120" y2="38" stroke={muted} strokeWidth="1.2" opacity="0.38" />
-      <line x1="30" y1="44" x2="100" y2="44" stroke={muted} strokeWidth="1.2" opacity="0.38" />
-      <line x1="30" y1="50" x2="80"  y2="50" stroke={muted} strokeWidth="0.8" opacity="0.26" />
-      {/* Hero CTA — accent */}
-      <rect x="30" y="55" width="32" height="7" rx="2" fill={blue} fillOpacity="0.2" stroke={blue} strokeWidth="0.7" opacity="0.65" />
-      {/* Product grid — first card accented */}
-      <rect x="16"  y="72" width="50" height="34" rx="2" stroke={blue} strokeWidth="0.8" opacity="0.45" fill={blue} fillOpacity="0.04" />
-      <rect x="75"  y="72" width="50" height="34" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.26" />
-      <rect x="134" y="72" width="50" height="34" rx="2" stroke={muted} strokeWidth="0.7" opacity="0.26" />
-      {/* Card image area top */}
-      <rect x="20"  y="75" width="42" height="20" rx="1" stroke={blue} strokeWidth="0.5" opacity="0.35" fill={blue} fillOpacity="0.06" />
-      <rect x="79"  y="75" width="42" height="20" rx="1" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      <rect x="138" y="75" width="42" height="20" rx="1" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      {/* Card title lines */}
-      <line x1="20"  y1="99"  x2="52"  y2="99"  stroke={muted} strokeWidth="0.6" opacity="0.28" />
-      <line x1="79"  y1="99"  x2="111" y2="99"  stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      <line x1="138" y1="99"  x2="170" y2="99"  stroke={muted} strokeWidth="0.6" opacity="0.26" />
-      <line x1="20"  y1="103" x2="40"  y2="103" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      <line x1="79"  y1="103" x2="99"  y2="103" stroke={muted} strokeWidth="0.5" opacity="0.2" />
-      <line x1="138" y1="103" x2="158" y2="103" stroke={muted} strokeWidth="0.5" opacity="0.2" />
-      {/* Dimension marks */}
-      <line x1="8"  y1="118" x2="192" y2="118" stroke={muted} strokeWidth="0.4" opacity="0.18" />
-      <line x1="8"  y1="116" x2="8"   y2="120" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-      <line x1="192" y1="116" x2="192" y2="120" stroke={muted} strokeWidth="0.5" opacity="0.22" />
-    </svg>
+    <div className="w-full overflow-hidden border border-b-0 border-[rgb(var(--line))]" style={{ fontFamily: "inherit", background: "rgb(var(--bg))", borderRadius: "8px 8px 0 0" }}>
+      {/* Nav */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[rgb(var(--line))]">
+        <div className="w-8 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-25" />
+        <div className="flex gap-2">
+          {[0,1,2].map(i => <div key={i} className="w-5 h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />)}
+        </div>
+        <div className="w-6 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-15" />
+      </div>
+      {/* Hero */}
+      <div className="px-3 py-4 flex flex-col gap-2" style={{ minHeight: "90px" }}>
+        <div className="w-14 h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />
+        <div className="w-28 h-3 rounded-full bg-[rgb(var(--muted))] opacity-25" />
+        <div className="w-20 h-2 rounded-full bg-[rgb(var(--muted))] opacity-15" />
+        <div className="w-12 h-5 rounded-full border border-[rgb(var(--line))] mt-1" />
+      </div>
+      {/* Product row */}
+      <div className="grid grid-cols-3 border-t border-[rgb(var(--line))]">
+        {[0,1,2].map(i => (
+          <div key={i} className="flex flex-col gap-1.5 p-2" style={{ borderRight: i < 2 ? "1px solid rgb(var(--line))" : "none" }}>
+            <div className="rounded-sm bg-[rgb(var(--muted))] opacity-8" style={{ height: "30px" }} />
+            <div className="w-8 h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />
+            <div className="w-5 h-1 rounded-full bg-[rgb(var(--muted))] opacity-10" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
 const BUILDING = [
   {
     name: "Inertia",
-    description: "We turn your vision into something real.",
+    description: "We become the technical partner your vision deserves.",
     tag: "Active",
     href: "https://www.instagram.com/by.inertia/",
     sketch: <SketchInertia />,
   },
   {
     name: "Aether Theme",
-    description: "High-end Shopify theme.",
+    description: "A high-end Shopify theme built for conversion and presence.",
     tag: "In Progress",
     href: "/aether",
-    sketch: <SketchAether />,
+    sketch: <MockupAether />,
   },
   {
     name: "Inertia Dashboard",
-    description: "Client portal for theme management, support, and updates.",
+    description: "Project status, files, invoices, and support in one place.",
     tag: "Building",
     href: "#",
-    sketch: <SketchDashboard />,
+    sketch: <MockupDashboard />,
   },
 ];
 
@@ -319,7 +307,7 @@ function RotatingPanel() {
 
   const current = ALL_PHRASES[phraseIdx];
   const isExternal = current.cta.href.startsWith("http");
-  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors";
+  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity";
 
   const chars = [...current.icon ? [] : [], ...current.text.split("")];
 
@@ -343,8 +331,7 @@ function RotatingPanel() {
       <p
         className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(2rem,5vw,2.4rem)] tracking-tight leading-none font-semibold"
         style={{
-          color: `rgb(var(${current.v}))`,
-          textShadow: `0 1px 0 color-mix(in srgb, rgb(var(${current.v})) 35%, transparent), 0 2px 8px color-mix(in srgb, rgb(var(${current.v})) 18%, transparent)`,
+          color: "rgb(var(--fg))",
           perspective: "600px",
         }}
       >
@@ -400,12 +387,12 @@ function RotatingPanel() {
         }}
       >
         {isExternal ? (
-          <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass}>
+          <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass} >
             {current.cta.label}
             <span aria-hidden="true">↗</span>
           </a>
         ) : (
-          <Link href={current.cta.href} className={ctaClass}>
+          <Link href={current.cta.href} className={ctaClass} >
             {current.cta.label}
             <span aria-hidden="true">→</span>
           </Link>
@@ -459,38 +446,53 @@ function LaptopWithText() {
       <svg viewBox="0 0 320 186" fill="none" className="w-full">
         <defs>
           <clipPath id="screen-clip">
-            <rect x="28" y="18" width="264" height="158" rx="3" />
+            <rect x="22" y="14" width="276" height="162" rx="6" />
           </clipPath>
         </defs>
 
         {/* Lid bezel */}
-        <rect x="12" y="6" width="296" height="174" rx="10" stroke={muted} strokeWidth="1.2" opacity="0.35" />
-        {/* Screen */}
-        <rect x="28" y="18" width="264" height="158" rx="3" fill="rgb(var(--bg))" stroke={line} strokeWidth="0.6" opacity="0.55" />
+        <rect x="12" y="6" width="296" height="174" rx="12" fill="rgb(var(--line))" fillOpacity="0.08" stroke={line} strokeWidth="0.8" opacity="0.6" />
+        {/* Screen bezel inset */}
+        <rect x="22" y="14" width="276" height="162" rx="6" fill="rgb(var(--bg))" stroke={line} strokeWidth="0.6" opacity="0.5" />
         {/* Camera */}
-        <circle cx="160" cy="12" r="2" fill={muted} opacity="0.28" />
+        <circle cx="160" cy="10" r="1.6" fill={muted} opacity="0.2" />
 
-        {/* Browser bar */}
-        <rect x="28" y="18" width="264" height="18" rx="3" fill="rgb(var(--bg))" clipPath="url(#screen-clip)" />
-        <line x1="28" y1="36" x2="292" y2="36" stroke={line} strokeWidth="0.5" opacity="0.55" />
-        {/* Traffic lights */}
-        <circle cx="42" cy="27" r="2.8" fill={muted} opacity="0.18" />
-        <circle cx="51" cy="27" r="2.8" fill={muted} opacity="0.18" />
-        <circle cx="60" cy="27" r="2.8" fill={muted} opacity="0.18" />
+        {/* Title bar */}
+        <rect x="22" y="14" width="276" height="20" rx="6" fill="rgb(var(--line))" fillOpacity="0.18" clipPath="url(#screen-clip)" />
+        <line x1="22" y1="34" x2="298" y2="34" stroke={line} strokeWidth="0.5" opacity="0.5" />
+        {/* Window buttons */}
+        <circle cx="38" cy="24" r="3" fill="#ff5f57" opacity="0.7" />
+        <circle cx="49" cy="24" r="3" fill="#febc2e" opacity="0.7" />
+        <circle cx="60" cy="24" r="3" fill="#28c840" opacity="0.7" />
         {/* URL bar */}
-        <rect x="94" y="22" width="132" height="10" rx="3" stroke={muted} strokeWidth="0.4" opacity="0.16" />
-        <line x1="108" y1="27" x2="218" y2="27" stroke={muted} strokeWidth="0.4" opacity="0.15" />
+        <rect x="104" y="19" width="112" height="10" rx="3" fill="rgb(var(--line))" fillOpacity="0.25" opacity="0.6" />
 
-        {/* About text */}
-        <foreignObject x="28" y="36" width="264" height="140" clipPath="url(#screen-clip)">
-          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", padding: "8px 10px", fontFamily: "inherit" }}>
-            <p style={{ fontSize: "11px", lineHeight: 1.65, letterSpacing: "-0.01em", color: "rgb(var(--fg))", margin: 0 }}>
-              We build{" "}
-              <span style={{ fontWeight: 500, background: "linear-gradient(90deg, rgb(var(--fg)) 0%, rgb(var(--muted)) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-                Shopify storefronts, themes, and tools
-              </span>{" "}
-              for client projects, our own products, and the craft in between.
-            </p>
+        {/* Screen content */}
+        <foreignObject x="22" y="34" width="276" height="142" clipPath="url(#screen-clip)">
+          <div style={{ width: "100%", height: "100%", fontFamily: "inherit", background: "rgb(var(--bg))", display: "flex", flexDirection: "column", padding: "14px 16px 12px", gap: "10px" }}>
+            {/* Skeleton nav row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ height: "5px", borderRadius: "3px", background: "rgb(var(--fg))", opacity: 0.55, width: "36px" }} />
+              <div style={{ flex: 1 }} />
+              {[28, 22, 24].map((w, i) => (
+                <div key={i} style={{ height: "4px", borderRadius: "2px", background: "rgb(var(--muted))", opacity: 0.18, width: `${w}px` }} />
+              ))}
+              <div style={{ height: "10px", borderRadius: "5px", background: "rgb(var(--fg))", opacity: 0.5, width: "32px" }} />
+            </div>
+            {/* Divider */}
+            <div style={{ height: "1px", background: "rgb(var(--line))", opacity: 0.6 }} />
+            {/* About text */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: "6px" }}>
+              <p style={{ fontSize: "10.5px", lineHeight: 1.7, letterSpacing: "-0.01em", color: "rgb(var(--fg))", margin: 0, opacity: 0.85 }}>
+                <span style={{ fontWeight: 600 }}>We build whatever your vision demands.</span>{" "}
+                Storefronts, apps, brands, tools.
+              </p>
+              {/* CTAs */}
+              <div style={{ display: "flex", gap: "5px", marginTop: "4px" }}>
+                <div style={{ height: "14px", borderRadius: "7px", background: "rgb(var(--fg))", opacity: 0.65, width: "56px" }} />
+                <div style={{ height: "14px", borderRadius: "7px", border: "1px solid rgb(var(--line))", width: "44px" }} />
+              </div>
+            </div>
           </div>
         </foreignObject>
       </svg>
@@ -516,105 +518,85 @@ function WhatWeDo() {
 
 // Slug-specific sketches for the think section — one per post
 const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
-  // "A quiet forecast on AI capability" — capability curve with horizon line and uncertainty band
+  // "A quiet forecast on AI capability" — concentric signal rings dissolving into noise
   "ai-capability-forecast": (
-    <svg key="ai-capability-forecast" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Grid */}
-      {[30, 55, 80].map(y => (
-        <line key={y} x1="18" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 4" opacity="0.2" />
-      ))}
-      <line x1="18" y1="100" x2="188" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      <line x1="18" y1="12"  x2="18"  y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      {/* Historical curve — solid blue */}
-      <path d="M 18 98 C 40 97 60 92 80 84 C 95 78 108 68 120 56" stroke="rgb(var(--blue))" strokeWidth="1.8" opacity="0.8" />
-      {/* Forecast zone — dashed, fanning uncertainty */}
-      <path d="M 120 56 C 133 44 148 30 165 18" stroke="rgb(var(--blue))" strokeWidth="1.4" strokeDasharray="4 3" opacity="0.55" />
-      {/* Upper uncertainty bound */}
-      <path d="M 120 56 C 133 38 150 22 170 12" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="2 3" opacity="0.3" />
-      {/* Lower uncertainty bound */}
-      <path d="M 120 56 C 133 52 148 42 165 32" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="2 3" opacity="0.3" />
-      {/* Horizon divider */}
-      <line x1="120" y1="10" x2="120" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.5" strokeDasharray="3 3" opacity="0.25" />
-      {/* "Now" tick */}
-      <line x1="120" y1="100" x2="120" y2="106" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.4" />
-      {/* Milestone dots on curve */}
-      <circle cx="50"  cy="95" r="2.5" fill="rgb(var(--blue))" opacity="0.5" />
-      <circle cx="80"  cy="84" r="2.5" fill="rgb(var(--blue))" opacity="0.65" />
-      <circle cx="120" cy="56" r="3.5" fill="rgb(var(--blue))" opacity="0.85" />
-      <circle cx="120" cy="56" r="6"   stroke="rgb(var(--blue))" strokeWidth="0.8" opacity="0.25" />
-      {/* Arrow on forecast line */}
-      <polyline points="159,14 165,18 159,22" stroke="rgb(var(--blue))" strokeWidth="1.2" opacity="0.6" />
+    <svg key="ai-capability-forecast" viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
+      {/* Concentric rings — tight at center, spacing grows to suggest uncertainty */}
+      <circle cx="100" cy="60" r="6"  stroke="rgb(var(--blue))" strokeWidth="1.4" opacity="0.9" />
+      <circle cx="100" cy="60" r="16" stroke="rgb(var(--blue))" strokeWidth="1.1" opacity="0.7" />
+      <circle cx="100" cy="60" r="28" stroke="rgb(var(--blue))" strokeWidth="0.9" opacity="0.5" />
+      <circle cx="100" cy="60" r="43" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="4 3" opacity="0.35" />
+      <circle cx="100" cy="60" r="60" stroke="rgb(var(--blue))" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.2" />
+      <circle cx="100" cy="60" r="80" stroke="rgb(var(--blue))" strokeWidth="0.4" strokeDasharray="2 6" opacity="0.1" />
+      {/* Center dot */}
+      <circle cx="100" cy="60" r="2.5" fill="rgb(var(--blue))" opacity="0.95" />
+      {/* Noise scatter — random dots outside rings */}
+      <circle cx="38"  cy="22"  r="1.2" fill="rgb(var(--muted))" opacity="0.3" />
+      <circle cx="162" cy="18"  r="1"   fill="rgb(var(--muted))" opacity="0.25" />
+      <circle cx="22"  cy="88"  r="1.4" fill="rgb(var(--muted))" opacity="0.2" />
+      <circle cx="178" cy="95"  r="1"   fill="rgb(var(--muted))" opacity="0.2" />
+      <circle cx="52"  cy="108" r="1.2" fill="rgb(var(--muted))" opacity="0.25" />
+      <circle cx="148" cy="105" r="1"   fill="rgb(var(--muted))" opacity="0.2" />
+      <circle cx="12"  cy="50"  r="1"   fill="rgb(var(--muted))" opacity="0.18" />
+      <circle cx="188" cy="60"  r="1.2" fill="rgb(var(--muted))" opacity="0.18" />
     </svg>
   ),
 
-  // "Four years in" — growth curve, starts slow, accelerates
+  // "Four years in" — four stacked horizontal bars, each taller, like annual rings or layers of sediment
   "four-years": (
-    <svg key="four-years" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Grid */}
-      {[30, 55, 80].map(y => (
-        <line key={y} x1="18" y1={y} x2="188" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" strokeDasharray="2 4" opacity="0.2" />
-      ))}
-      <line x1="18" y1="100" x2="188" y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      <line x1="18" y1="12"  x2="18"  y2="100" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      {/* Growth curve — slow start, then hockey stick */}
-      <path d="M 18 98 C 50 97 72 94 90 86 C 110 74 130 52 150 34 C 162 24 172 17 188 12"
-        stroke="rgb(var(--green))" strokeWidth="2.0" opacity="0.85" />
-      {/* Milestone dots */}
-      <circle cx="55"  cy="97" r="2.5" fill="rgb(var(--green))" opacity="0.5" />
-      <circle cx="90"  cy="86" r="2.5" fill="rgb(var(--green))" opacity="0.65" />
-      <circle cx="130" cy="52" r="3"   fill="rgb(var(--green))" opacity="0.8" />
-      <circle cx="170" cy="18" r="3.5" fill="rgb(var(--green))" opacity="0.95" />
-      {/* Drop lines */}
-      <line x1="55"  y1="97" x2="55"  y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" opacity="0.4" />
-      <line x1="90"  y1="86" x2="90"  y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.35" />
-      <line x1="130" y1="52" x2="130" y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.35" />
-      <line x1="170" y1="18" x2="170" y2="100" stroke="rgb(var(--green))" strokeWidth="0.7" strokeDasharray="2 2" opacity="0.3" />
-      {/* Baseline ticks */}
-      {[55, 90, 130, 170].map(x => (
-        <line key={x} x1={x} y1="100" x2={x} y2="106" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.35" />
-      ))}
-      {/* Arrow */}
-      <polyline points="182,8 188,12 182,16" stroke="rgb(var(--green))" strokeWidth="1.3" opacity="0.75" />
+    <svg key="four-years" viewBox="0 0 200 120" fill="none" strokeLinecap="round" className="w-full" aria-hidden="true">
+      {/* Year bars — bottom to top, growing width */}
+      <rect x="80" y="94" width="40"  height="7" rx="1" fill="rgb(var(--green))" opacity="0.25" />
+      <rect x="62" y="82" width="76"  height="7" rx="1" fill="rgb(var(--green))" opacity="0.4" />
+      <rect x="40" y="70" width="120" height="7" rx="1" fill="rgb(var(--green))" opacity="0.6" />
+      <rect x="16" y="58" width="168" height="7" rx="1" fill="rgb(var(--green))" opacity="0.85" />
+      {/* Year labels — right aligned */}
+      <line x1="192" y1="97" x2="194" y2="97" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      <line x1="192" y1="85" x2="194" y2="85" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      <line x1="192" y1="73" x2="194" y2="73" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      <line x1="192" y1="61" x2="194" y2="61" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
+      {/* Vertical spine */}
+      <line x1="193" y1="56" x2="193" y2="102" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.25" />
+      {/* Arrow at top */}
+      <polyline points="190,26 193,20 196,26" stroke="rgb(var(--green))" strokeWidth="1.2" strokeLinejoin="round" opacity="0.7" />
+      <line x1="193" y1="20" x2="193" y2="56" stroke="rgb(var(--green))" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.4" />
     </svg>
   ),
 
-  // "Hello, world" — first page going live
+  // "Hello, world" — a single terminal cursor blinking on an otherwise empty canvas
   "hello-world": (
-    <svg key="hello-world" viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Page chrome */}
-      <rect x="14" y="10" width="172" height="100" rx="2" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.28" />
-      {/* Nav bar */}
-      <line x1="14" y1="26" x2="186" y2="26" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.2" />
-      <line x1="24" y1="18" x2="52" y2="18" stroke="rgb(var(--fg))" strokeWidth="1.0" opacity="0.5" />
-      <line x1="80" y1="18" x2="100" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-      <line x1="108" y1="18" x2="128" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
-      {/* Big heading lines */}
-      <line x1="24" y1="42" x2="130" y2="42" stroke="rgb(var(--fg))" strokeWidth="2.2" opacity="0.7" strokeLinecap="round" />
-      <line x1="24" y1="52" x2="96" y2="52" stroke="rgb(var(--fg))" strokeWidth="2.2" opacity="0.7" strokeLinecap="round" />
-      {/* Sub text */}
-      <line x1="24" y1="64" x2="148" y2="64" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      <line x1="24" y1="71" x2="120" y2="71" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      <line x1="24" y1="78" x2="136" y2="78" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
-      {/* Cursor blink */}
-      <rect x="138" y="73" width="5" height="9" rx="0.5" fill="rgb(var(--fg))" opacity="0.6" />
-      {/* URL bar */}
-      <rect x="60" y="13" width="80" height="10" rx="2" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
-      <circle cx="67" cy="18" r="2" fill="rgb(var(--green))" opacity="0.55" />
-      <line x1="73" y1="18" x2="132" y2="18" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
+    <svg key="hello-world" viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
+      {/* Terminal window outline */}
+      <rect x="24" y="18" width="152" height="84" rx="4" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.22" />
+      {/* Title bar */}
+      <line x1="24" y1="34" x2="176" y2="34" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
+      <circle cx="37" cy="26" r="3" fill="rgb(var(--muted))" opacity="0.18" />
+      <circle cx="48" cy="26" r="3" fill="rgb(var(--muted))" opacity="0.18" />
+      <circle cx="59" cy="26" r="3" fill="rgb(var(--muted))" opacity="0.18" />
+      {/* Prompt character */}
+      <text x="38" y="57" fontFamily="monospace" fontSize="11" fill="rgb(var(--green))" opacity="0.7">$</text>
+      {/* Typed text — dashes representing characters */}
+      <line x1="50" y1="52" x2="66"  y2="52" stroke="rgb(var(--fg))" strokeWidth="1.4" opacity="0.55" strokeLinecap="round" />
+      <line x1="69" y1="52" x2="80"  y2="52" stroke="rgb(var(--fg))" strokeWidth="1.4" opacity="0.55" strokeLinecap="round" />
+      <line x1="83" y1="52" x2="100" y2="52" stroke="rgb(var(--fg))" strokeWidth="1.4" opacity="0.55" strokeLinecap="round" />
+      {/* Cursor block */}
+      <rect x="103" y="44" width="7" height="11" rx="1" fill="rgb(var(--fg))" opacity="0.7" />
+      {/* Output line */}
+      <line x1="38" y1="68" x2="120" y2="68" stroke="rgb(var(--green))" strokeWidth="1.0" opacity="0.45" strokeLinecap="round" />
+      <line x1="38" y1="76" x2="90"  y2="76" stroke="rgb(var(--green))" strokeWidth="1.0" opacity="0.3" strokeLinecap="round" />
     </svg>
   ),
 };
 
-const TECH_ALL = [
-  { name: "Shopify",    icon: SiShopify },
-  { name: "TypeScript", icon: SiTypescript },
-  { name: "Tailwind",   icon: SiTailwindcss },
-  { name: "Photoshop",  icon: IconPhotoshop },
-  { name: "Swift",      icon: SiSwift },
-  { name: "Whop",       icon: IconWhop },
-  { name: "Meta",       icon: SiMeta },
-  { name: "Substack",   icon: SiSubstack },
-  { name: "Dribbble",   icon: SiDribbble },
+const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
+  { name: "Shopify",    icon: SiShopify,    color: "#96BF48" },
+  { name: "TypeScript", icon: SiTypescript, color: "#3178C6" },
+  { name: "Tailwind",   icon: SiTailwindcss,color: "#38BDF8" },
+  { name: "Photoshop",  icon: IconPhotoshop,color: "#31A8FF" },
+  { name: "Swift",      icon: SiSwift,      color: "#F05138" },
+  { name: "Whop",       icon: IconWhop,     color: "#ffffff" },
+  { name: "Meta",       icon: SiMeta,       color: "#0082FB" },
+  { name: "Substack",   icon: SiSubstack,   color: "#FF6719" },
 ];
 
 function TechMarquee() {
@@ -623,9 +605,13 @@ function TechMarquee() {
     <div className="overflow-hidden py-4 select-none" aria-hidden="true">
       <div className="marquee-row marquee-row--fwd">
         {items.map((tech, i) => (
-          <div key={i} className="marquee-item">
-            <tech.icon />
-            <span>{tech.name}</span>
+          <div
+            key={i}
+            className="marquee-item group"
+            style={{ "--tech-color": tech.color } as React.CSSProperties}
+          >
+            <tech.icon className="transition-colors duration-200 group-hover:text-[var(--tech-color)]" />
+            <span className="transition-colors duration-200 group-hover:text-[var(--tech-color)]">{tech.name}</span>
           </div>
         ))}
       </div>
@@ -759,7 +745,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
                 Your project, all in one place.
               </h2>
               <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mb-7">
-                Status updates, files, invoices, and support — built for clients who want visibility without the back-and-forth.
+                Status updates, files, invoices, and support. Built for clients who want visibility without the back-and-forth.
               </p>
 
               {/* Plan selector */}
@@ -856,20 +842,22 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
 
           {/* ── What we're shipping ── */}
           <div className="flex items-center justify-center gap-3 py-6">
-            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">What we're actively</span>
+            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">What we're actively</span>
             <TooltipPill tip="Products and themes we're currently developing under the Inertia name.">
-              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
+              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
                 <SiShopify className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>building</span>
+                <span className="text-[20px] sm:text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>building</span>
               </div>
             </TooltipPill>
-            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">right now</span>
+            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">right now</span>
           </div>
 
           <GridRule />
 
           {/* Items — 2×2 on mobile, row on sm+ */}
-          <div className="grid grid-cols-2 sm:flex">
+          <div className="relative">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 sm:h-20 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
+          <div className="grid grid-cols-2 sm:flex pb-14">
             {BUILDING.map((item, i) => {
               const isDashboard = item.name === "Inertia Dashboard";
               const external = !isDashboard && item.href.startsWith("http");
@@ -879,22 +867,31 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
                 i < 2   ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
                 i === 2 ? "col-span-2 sm:col-span-1" : "",
               ].filter(Boolean).join(" ");
-              const sharedClass = `group flex-1 flex flex-col justify-between gap-6 px-5 sm:px-8 pt-8 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[200px] sm:min-h-[220px] text-left rise ${borderClass}`;
+              const isMockup = item.name === "Aether Theme";
+              const isInertia = item.name === "Inertia";
+              const sharedClass = `group flex-1 flex flex-col px-5 sm:px-8 pt-6 ${isMockup ? "pb-0" : "pb-6"} transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[280px] sm:min-h-[260px] text-left rise overflow-hidden ${borderClass}`;
               const riseDelay = { ["--rise-delay" as any]: `${i * 70}ms` };
               const inner = (
                 <>
-                  <div className="flex-1 flex flex-col gap-5">
-                    <div className="w-full">{item.sketch}</div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
-                      <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
-                    </div>
+                  <div className="flex flex-col gap-1 mb-2">
+                    <span className="text-[20px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
+                    <span className="text-[13px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
                   </div>
-                  <div className="flex items-center justify-end mt-2">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" aria-hidden="true">
-                      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                  <span className="inline-flex self-start items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full mb-5 text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">
+                    →
+                  </span>
+                  <div className={`mt-auto relative overflow-hidden ${isInertia ? "-mt-4 sm:mt-auto" : isMockup ? "mt-6 sm:mt-auto max-h-[140px] sm:max-h-none" : ""}`}>
+                    {isInertia && (
+                      <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-0 h-4 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
+                    )}
+                    {isMockup && (
+                      <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-0 h-8 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
+                    )}
+                    {item.sketch}
                   </div>
+                  {!isMockup && (
+                    <div className="pb-2" />
+                  )}
                 </>
               );
               if (isDashboard) return (
@@ -908,22 +905,23 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
               );
             })}
           </div>
+          </div>
 
           <GridRule />
 
           {/* ── Perspectives ── */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">The way we</span>
+          <div className="relative flex items-center justify-center py-6 px-8 sm:px-0">
+            <div className="flex items-center gap-3">
+              <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">The way we</span>
               <TooltipPill tip="Short posts on design, development, and the decisions behind what we build.">
-                <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
+                <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
                   <SiSubstack className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                  <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>think</span>
+                  <span className="text-[20px] sm:text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>think</span>
                 </div>
               </TooltipPill>
-              <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">about our work</span>
+              <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">about our work</span>
+              <Link href="/blog" className="sm:absolute sm:right-8 inline-flex items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">→</Link>
             </div>
-            <Link href="/blog" className="sm:absolute sm:right-8 text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors text-center sm:text-left">All Posts →</Link>
           </div>
 
           <GridRule />
@@ -931,38 +929,72 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
           {posts.length === 0 ? (
             <p className="px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing yet.</p>
           ) : (
-            <div className="grid grid-cols-2">
-              {posts.slice(0, 4).map((post, i) => (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  className={[
-                    "group flex flex-col justify-between gap-4 px-5 sm:px-6 pt-6 pb-5 transition-colors hover:bg-[rgb(var(--line))/0.15] rise",
-                    i % 2 === 0 ? "border-r border-[rgb(var(--line))]" : "",
-                    i < 2 ? "border-b border-[rgb(var(--line))]" : "",
-                  ].filter(Boolean).join(" ")}
-                  style={{ ["--rise-delay" as any]: `${i * 60}ms` }}
-                >
-                  <div className="flex flex-col gap-4">
-                    <div className="w-full overflow-hidden">
-                      {THINK_SLUG_SKETCHES[post.slug]}
+            <div className="relative flex flex-col pb-16">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-36 sm:h-24 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
+              {/* Featured post */}
+              {(() => {
+                const post = posts[0];
+                return (
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="group grid sm:grid-cols-2 border-b border-[rgb(var(--line))] transition-colors hover:bg-[rgb(var(--line))/0.15] rise"
+                    style={{ ["--rise-delay" as any]: "0ms" }}
+                  >
+                    <div className="px-6 sm:px-10 pt-8 pb-6 sm:border-r border-[rgb(var(--line))] flex items-center">
+                      <div className="w-full">
+                        {THINK_SLUG_SKETCHES[post.slug]}
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[14px] sm:text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
-                      <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums">{formatDate(post.date)}</span>
+                    <div className="px-6 sm:px-10 pt-6 sm:pt-8 pb-6 sm:pb-8 flex flex-col justify-between gap-6">
+                      <div className="flex flex-col gap-3">
+                        <span className="inline-flex items-center self-start border border-[rgb(var(--line))] text-[rgb(var(--muted))] px-2 py-0.5 text-[11px] tracking-tight leading-none rounded-sm">
+                          New post
+                        </span>
+                        <span className="text-[20px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
+                        {post.summary && (
+                          <span className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">{post.summary}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-60">{formatDate(post.date)}</span>
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[12px] opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0">→</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    {i === 0
-                      ? <span className="inline-flex items-center justify-center rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-2.5 pt-[3px] pb-[4px] text-[10.5px] font-medium tracking-tight leading-none">New</span>
-                      : <span />
-                    }
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1 group-hover:translate-x-0 duration-200" aria-hidden="true">
-                      <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })()}
+
+              {/* Remaining posts — 2x2 on mobile, 3 cols on sm+ */}
+              {posts.length > 1 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3">
+                  {posts.slice(1, 4).map((post, i) => (
+                    <Link
+                      key={post.slug}
+                      href={`/blog/${post.slug}`}
+                      className={[
+                        "group flex flex-col justify-between gap-4 px-4 sm:px-6 pt-5 pb-5 transition-colors hover:bg-[rgb(var(--line))/0.15] rise",
+                        i < 2 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
+                        i === 0 ? "border-r border-[rgb(var(--line))]" : "",
+                        i < 2 ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
+                        i === 2 ? "col-span-2 sm:col-span-1 border-t border-[rgb(var(--line))] sm:border-t-0" : "",
+                      ].filter(Boolean).join(" ")}
+                      style={{ ["--rise-delay" as any]: `${(i + 1) * 60}ms` }}
+                    >
+                      <div className="hidden sm:block w-full overflow-hidden">
+                        {THINK_SLUG_SKETCHES[post.slug]}
+                      </div>
+                      <div className="flex flex-col gap-1.5 sm:mt-1">
+                        <span className="text-[14px] sm:text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
+                        {post.summary && <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 line-clamp-2">{post.summary}</span>}
+                      </div>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-50">{formatDate(post.date)}</span>
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[11px] opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0">→</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -976,18 +1008,18 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
       <section className="rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
 
         {/* Label cell */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-3 py-6 px-8 sm:px-0 sm:relative">
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
+        <div className="relative flex items-center justify-center py-6 px-8 sm:px-0">
+          <div className="flex items-center gap-3">
+            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
             <TooltipPill tip="Selected client work spanning Shopify builds, brand identities, and custom web projects.">
-              <div className="flex items-center gap-1.5 rounded-full px-3.5 py-2 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
+              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
                 <SiDribbble className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                <span className="text-[17px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>shipped</span>
+                <span className="text-[20px] sm:text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>shipped</span>
               </div>
             </TooltipPill>
-            <span className="text-[19px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
+            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
+            <Link href="/work" className="sm:absolute sm:right-8 inline-flex items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">→</Link>
           </div>
-          <Link href="/work" className="sm:absolute sm:right-8 text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors text-center sm:text-left">All Work →</Link>
         </div>
 
         <GridRule />

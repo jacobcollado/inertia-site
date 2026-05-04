@@ -1544,37 +1544,38 @@ h1:hover .redact > span.redact-inner,
   animation-delay: calc(60ms + var(--row-i, 0) * 40ms);
 }
 
-/* ── Work grid cards ──────────────────────────────────────────────── */
+/* ── Work masonry grid ────────────────────────────────────────────── */
+
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+}
+
+.masonry-item {
+  display: flex;
+}
 
 .work-grid-card {
   border: none;
   appearance: none;
   cursor: pointer;
-  /* Every cell: right + bottom border; nth-child rules remove the outer edges */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid rgb(var(--line));
   border-bottom: 1px solid rgb(var(--line));
 }
 
-/* 2-col mobile: remove right border from right column */
-.work-grid-card:nth-child(2n) { border-right: none; }
+/* Remove right border from every even card (right column) */
+.masonry-grid > .masonry-item:nth-child(2n) > .work-grid-card {
+  border-right: none;
+}
 
-/* 2-col mobile: remove bottom border from last row */
-.work-grid-card:last-child { border-bottom: none; }
-.work-grid-card:nth-last-child(2):nth-child(2n+1) { border-bottom: none; }
-
-@media (min-width: 768px) {
-  /* 3-col: restore right border on all, remove from every 3rd */
-  .work-grid-card { border-right: 1px solid rgb(var(--line)); }
-  .work-grid-card:nth-child(3n) { border-right: none; }
-
-  /* 3-col: last row only — combine nth-last-child with nth-child(3n+x) to target only last-row items */
-  .work-grid-card:last-child { border-bottom: none; }
-  .work-grid-card:nth-last-child(2):nth-child(3n+2) { border-bottom: none; }
-  .work-grid-card:nth-last-child(2):nth-child(3n+1) { border-bottom: none; }
-
-  /* restore 2-col mobile overrides that shouldn't apply at md+ */
-  .work-grid-card:nth-child(2n) { border-right: 1px solid rgb(var(--line)); }
-  .work-grid-card:nth-last-child(2):nth-child(2n+1) { border-bottom: 1px solid rgb(var(--line)); }
+/* Remove bottom border from last two cards (last row in 2-col) */
+.masonry-grid > .masonry-item:nth-last-child(1) > .work-grid-card,
+.masonry-grid > .masonry-item:nth-last-child(2) > .work-grid-card {
+  border-bottom: none;
 }
 
 /* ── Blog card grid ───────────────────────────────────────────────── */
