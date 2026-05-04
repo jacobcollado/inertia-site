@@ -272,17 +272,6 @@ export function SoundwaveHero() {
         className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-5"
         style={{ zIndex: 3 }}
       >
-        <p
-          className="pointer-events-none text-[13px] tracking-tight text-[rgb(var(--muted))]"
-          style={{
-            opacity: 0,
-            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 80ms forwards",
-          }}
-          aria-hidden="true"
-        >
-          A body in motion stays in motion.
-        </p>
-
         <h1
           className="text-[clamp(2rem,5vw,3.5rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none"
           aria-label="We build the thing that keeps you moving."
@@ -306,6 +295,17 @@ export function SoundwaveHero() {
             </span>
           )}
         </h1>
+
+        <p
+          className="pointer-events-none text-[13px] tracking-tight text-[rgb(var(--muted))]"
+          style={{
+            opacity: 0,
+            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 600ms forwards",
+          }}
+          aria-hidden="true"
+        >
+          A body in motion stays in motion.
+        </p>
 
         {/* CTAs */}
         <div
