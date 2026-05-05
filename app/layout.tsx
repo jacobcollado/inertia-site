@@ -7,6 +7,10 @@ import { LenisProvider } from "./lenis-provider";
 import { ViewModeProvider } from "./view-mode-context";
 import { SiteShell } from "./site-shell";
 import { ScrollReveal } from "./scroll-reveal";
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const BASE_URL = "https://inertia.dev";
 
@@ -51,7 +55,7 @@ const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={cn("dark", "font-sans", geist.variable)} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
         <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />

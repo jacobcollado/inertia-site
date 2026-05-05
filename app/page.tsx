@@ -502,36 +502,88 @@ function LaptopWithText() {
   );
 }
 
+
+function PulseGrid() {
+  const COLS = 11;
+  const ROWS = 9;
+  const W = 480;
+  const H = 360;
+  const HORIZON = 0.52;
+
+  const dots: { cx: number; cy: number; r: number; opacity: number; delay: number }[] = [];
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const t = row / (ROWS - 1);
+      const px = W / 2 + (col - (COLS - 1) / 2) * (18 + t * 38);
+      const py = HORIZON * H + t * H * (1 - HORIZON);
+      const r = 0.9 + t * 2.4;
+      const edgeFade = 1 - Math.abs(col - (COLS - 1) / 2) / ((COLS - 1) / 2) * 0.55;
+      const opacity = (0.06 + t * 0.3) * edgeFade;
+      const distFromCenter = Math.sqrt(
+        Math.pow((col - (COLS - 1) / 2) / ((COLS - 1) / 2), 2) +
+        Math.pow(1 - t, 2)
+      );
+      dots.push({ cx: px, cy: py, r, opacity, delay: distFromCenter * 800 });
+    }
+  }
+
+  return (
+    <div className="relative w-full select-none overflow-hidden" style={{ height: 380 }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="absolute inset-0 w-full h-full"
+        style={{ opacity: 0, animation: "hero-line 800ms cubic-bezier(0.16,1,0.3,1) 100ms forwards" }}
+      >
+        <defs>
+          <style>{`
+            @keyframes dot-pulse {
+              0%, 100% { opacity: var(--base-op); }
+              50% { opacity: calc(var(--base-op) * 4); }
+            }
+          `}</style>
+        </defs>
+        {dots.map((d, i) => (
+          <circle
+            key={i}
+            cx={d.cx}
+            cy={d.cy}
+            r={d.r}
+            fill="rgb(var(--fg))"
+            style={{
+              "--base-op": d.opacity,
+              opacity: d.opacity,
+              animation: `dot-pulse 3000ms ease-in-out ${d.delay}ms infinite`,
+            } as React.CSSProperties}
+          />
+        ))}
+      </svg>
+
+      <div className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: "25%", background: "linear-gradient(to bottom, rgb(var(--bg)) 0%, transparent 100%)" }} />
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "20%", background: "linear-gradient(to top, rgb(var(--bg)) 0%, transparent 100%)" }} />
+      <div className="absolute inset-y-0 left-0 pointer-events-none" style={{ width: "10%", background: "linear-gradient(to right, rgb(var(--bg)) 0%, transparent 100%)" }} />
+      <div className="absolute inset-y-0 right-0 pointer-events-none" style={{ width: "10%", background: "linear-gradient(to left, rgb(var(--bg)) 0%, transparent 100%)" }} />
+
+      <div className="absolute inset-x-0 flex flex-col items-center px-5 pointer-events-none" style={{ top: "18%" }}>
+        <p
+          className="text-center tracking-tight leading-snug font-semibold pulse-grid-text"
+          style={{
+            fontSize: "clamp(1.6rem, 4vw, 1.75rem)",
+            maxWidth: 340,
+          }}
+        >
+          The kind of partner you'll actually want to work with again.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function WhatWeDo() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2">
-      {/* About */}
-      <div className="grid grid-rows-[1fr_auto] sm:border-r sm:border-[rgb(var(--line))]">
-        <div className="px-6 sm:px-10 py-8 sm:py-10 flex flex-col gap-3 justify-center">
-          <p
-            className="text-[32px] sm:text-[40px] font-medium tracking-[-0.03em] leading-[1.2] text-[rgb(var(--fg))]"
-            style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 80ms forwards" }}
-          >
-            The kind of{" "}
-            <span style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>partner</span>{" "}
-            <LuHandshake className="inline align-middle w-6 h-6 sm:w-7 sm:h-7 shrink-0" style={{ color: "rgb(var(--fg))", opacity: 0.75 }} />{" "}
-            you'll actually want to{" "}
-            <span style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>work with again</span>.
-          </p>
-        </div>
-        <div className="grid grid-cols-3 border-t border-[rgb(var(--line))]">
-          {[
-            { title: "Custom builds", desc: "Every project from scratch.", href: "/contact" },
-            { title: "Any stack", desc: "Web, mobile, Shopify.", href: "/aether" },
-            { title: "On time", desc: "Deadlines are respected.", href: "/work" },
-          ].map(({ title, desc, href }) => (
-            <Link key={title} href={href} className="group px-4 py-5 border-r border-[rgb(var(--line))] last:border-r-0 flex flex-col gap-2 hover:bg-[rgb(var(--line))/0.15] transition-colors">
-              <span className="text-[14px] sm:text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{title}</span>
-              <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-50 leading-snug flex-1">{desc}</span>
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[10px] self-start transition-colors duration-200 group-hover:border-[rgb(var(--fg)/0.3)] group-hover:text-[rgb(var(--fg))]">→</span>
-            </Link>
-          ))}
-        </div>
+      <div className="sm:border-r sm:border-[rgb(var(--line))] overflow-hidden">
+        <PulseGrid />
       </div>
 
       {/* Rotating panel */}
