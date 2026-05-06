@@ -63,12 +63,13 @@ function MockupAether() {
       <line x1="0" y1="16" x2="200" y2="16" stroke="rgb(var(--line))" strokeWidth="0.5" opacity="0.4" />
       {/* Product image hint */}
       <rect x="62" y="22" width="76" height="44" rx="1" fill="rgb(var(--muted))" fillOpacity="0.09" stroke="rgb(var(--line))" strokeWidth="0.4" strokeOpacity="0.3" />
-      {/* Shopify icon centered in image area */}
-      <foreignObject x="88" y="28" width="24" height="24">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", opacity: 0.22 }}>
-          <SiShopify style={{ width: 20, height: 20, color: "rgb(var(--fg))" }} />
-        </div>
-      </foreignObject>
+      {/* Shopify bag icon — pure SVG, no foreignObject */}
+      <g transform="translate(88, 28)" opacity="0.22">
+        {/* bag body */}
+        <rect x="2" y="8" width="20" height="14" rx="1.5" fill="rgb(var(--fg))" />
+        {/* bag handle */}
+        <path d="M8 8 C8 4, 16 4, 16 8" stroke="rgb(var(--fg))" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+      </g>
       {/* Product info row */}
       <rect x="12" y="82" width="72" height="5" rx="2.5" fill="rgb(var(--fg))" opacity="0.28" />
       <rect x="12" y="92" width="48" height="3" rx="1.5" fill="rgb(var(--muted))" opacity="0.18" />
@@ -103,12 +104,8 @@ function MockupDashboard() {
             fill="rgb(var(--muted))" opacity="0.12" />
         </g>
       ))}
-      {/* Vercel icon — top right, represents the web platform */}
-      <foreignObject x="176" y="8" width="18" height="18">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", opacity: 0.2 }}>
-          <SiVercel style={{ width: 14, height: 14, color: "rgb(var(--fg))" }} />
-        </div>
-      </foreignObject>
+      {/* Vercel triangle — pure SVG, no foreignObject */}
+      <polygon points="185,9 192,22 178,22" fill="rgb(var(--fg))" opacity="0.18" />
       {/* Progress row */}
       <rect x="4" y="48" width="192" height="22" rx="2" stroke="rgb(var(--line))" strokeWidth="0.6" strokeOpacity="0.35" />
       <rect x="10" y="54" width="90" height="2.5" rx="1.25" fill="rgb(var(--muted))" opacity="0.12" />
@@ -300,17 +297,18 @@ function RotatingPanel() {
   return (
     <div
       ref={panelRef}
-      className="flex flex-col items-center justify-center gap-5 text-center px-6 sm:px-10"
-      style={{ height: isMobile ? 240 : 380 }}
+      className="flex flex-col items-center justify-center text-center px-6 sm:px-10"
+      style={{ height: isMobile ? 240 : 380, gap: 0 }}
     >
-      {/* Label */}
+      {/* Label — sits just above phrase, tightly grouped */}
       <p
         key={`label-${animKey}`}
-        className="text-[clamp(0.85rem,1.8vw,0.95rem)] tracking-tight text-[rgb(var(--muted))]"
+        className="text-[clamp(0.78rem,1.6vw,0.88rem)] tracking-tight text-[rgb(var(--muted))]"
         style={{
           opacity: exiting ? 0 : 1,
-          transform: exiting ? "translateY(-5px)" : "translateY(0px)",
-          transition: "opacity 280ms ease, transform 280ms ease",
+          transform: exiting ? "translateY(-4px)" : "translateY(0px)",
+          transition: "opacity 260ms ease, transform 260ms ease",
+          marginBottom: "10px",
         }}
       >
         {current.label}
@@ -319,7 +317,7 @@ function RotatingPanel() {
       {/* Icon + phrase — letter-by-letter 3D flip */}
       <p
         className="flex items-center gap-2 whitespace-nowrap text-[clamp(2rem,5vw,2.4rem)] tracking-tight leading-none font-normal"
-        style={{ color: "rgb(var(--fg))", perspective: "800px", perspectiveOrigin: "50% 50%" }}
+        style={{ color: "rgb(var(--fg))", perspective: "800px", perspectiveOrigin: "50% 50%", marginBottom: "20px" }}
       >
         <span
           key={`icon-${animKey}`}
@@ -360,14 +358,14 @@ function RotatingPanel() {
         </span>
       </p>
 
-      {/* CTA */}
+      {/* CTA — anchored below phrase at consistent distance */}
       <div
         key={`cta-${animKey}`}
         style={{
           opacity: exiting ? 0 : 1,
-          transform: exiting ? "translateY(-5px)" : "translateY(0)",
-          transition: "opacity 260ms ease 30ms, transform 260ms ease 30ms",
-          animation: exiting ? "none" : "rise-in 420ms 80ms cubic-bezier(0.22,1,0.36,1) both",
+          transform: exiting ? "translateY(4px)" : "translateY(0)",
+          transition: "opacity 240ms ease 40ms, transform 240ms ease 40ms",
+          animation: exiting ? "none" : "rise-in 400ms 100ms cubic-bezier(0.22,1,0.36,1) both",
         }}
       >
         {isExternal ? (
