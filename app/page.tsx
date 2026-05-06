@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiSubstack, SiDribbble, SiFramer, SiVercel, SiApple } from "react-icons/si";
+import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiSubstack, SiFramer, SiVercel, SiApple } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
@@ -270,8 +270,15 @@ function RotatingPanel() {
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [animKey, setAnimKey] = useState(0);
   const [exiting, setExiting] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   useEffect(() => {
     const hold = setTimeout(() => {
@@ -285,51 +292,34 @@ function RotatingPanel() {
     return () => clearTimeout(hold);
   }, [animKey]);
 
-  useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const current = ALL_PHRASES[phraseIdx];
   const isExternal = current.cta.href.startsWith("http");
   const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity";
 
-  // parallax: phrase drifts down at 0.18x scroll speed
-  const phraseOffset = scrollY * 0.18;
-
   return (
-    <div ref={panelRef} className="relative overflow-hidden" style={{ height: 380 }}>
-      {/* Centered at 26% — same vertical midpoint as PulseGrid about text */}
-      <div
-        className="absolute inset-x-0 flex flex-col items-center gap-5 text-center px-6 sm:px-10"
-        style={{
-          top: "32%",
-          transform: `translateY(calc(-50% + ${phraseOffset}px))`,
-          willChange: "transform",
-        }}
-      >
-
+    <div
+      ref={panelRef}
+      className="flex flex-col items-center justify-center gap-5 text-center px-6 sm:px-10"
+      style={{ height: isMobile ? 240 : 380 }}
+    >
       {/* Label */}
       <p
         key={`label-${animKey}`}
         className="text-[clamp(0.85rem,1.8vw,0.95rem)] tracking-tight text-[rgb(var(--muted))]"
         style={{
           opacity: exiting ? 0 : 1,
-          transform: exiting ? "translateY(-6px)" : "translateY(0px)",
-          transition: "opacity 300ms ease, transform 300ms ease",
+          transform: exiting ? "translateY(-5px)" : "translateY(0px)",
+          transition: "opacity 280ms ease, transform 280ms ease",
         }}
       >
         {current.label}
       </p>
 
-      {/* Icon + animated phrase — left-aligned, parallax on scroll */}
+      {/* Icon + phrase — letter-by-letter 3D flip */}
       <p
         className="flex items-center gap-2 whitespace-nowrap text-[clamp(2rem,5vw,2.4rem)] tracking-tight leading-none font-normal"
-        style={{
-          color: "rgb(var(--fg))",
-          perspective: "600px",
-        }}
+        style={{ color: "rgb(var(--fg))", perspective: "800px", perspectiveOrigin: "50% 50%" }}
       >
         <span
           key={`icon-${animKey}`}
@@ -338,10 +328,10 @@ function RotatingPanel() {
             alignItems: "center",
             flexShrink: 0,
             opacity: exiting ? 0 : 0.75,
-            filter: exiting ? "blur(4px)" : "blur(0px)",
-            transform: exiting ? "translateY(-10px) rotateX(60deg)" : "translateY(0px) rotateX(0deg)",
-            transition: "opacity 300ms ease, filter 300ms ease, transform 300ms ease",
-            animation: exiting ? "none" : `char-in 380ms cubic-bezier(0.22,1,0.36,1) both`,
+            filter: exiting ? "blur(3px)" : "blur(0px)",
+            transform: exiting ? "translateY(-8px) rotateX(45deg)" : "translateY(0) rotateX(0)",
+            transition: "opacity 260ms ease, filter 260ms ease, transform 260ms cubic-bezier(0.22,1,0.36,1)",
+            animation: exiting ? "none" : "char-in 360ms cubic-bezier(0.22,1,0.36,1) both",
           }}
         >
           {current.icon}
@@ -354,14 +344,14 @@ function RotatingPanel() {
               aria-hidden="true"
               style={{
                 display: "inline-block",
-                width: ch === " " ? "0.3em" : undefined,
+                width: ch === " " ? "0.28em" : undefined,
                 opacity: exiting ? 0 : 1,
-                filter: exiting ? "blur(4px)" : "blur(0px)",
+                filter: exiting ? "blur(3px)" : "blur(0px)",
                 transform: exiting
-                  ? "translateY(-12px) rotateX(70deg)"
-                  : "translateY(0px) rotateX(0deg)",
-                transition: `opacity 280ms ease ${i * 14}ms, filter 280ms ease ${i * 14}ms, transform 280ms ease ${i * 14}ms`,
-                animation: exiting ? "none" : `char-in 420ms cubic-bezier(0.22,1,0.36,1) ${i * 30}ms both`,
+                  ? "translateY(-10px) rotateX(60deg)"
+                  : "translateY(0) rotateX(0)",
+                transition: `opacity 220ms ease ${i * 12}ms, filter 220ms ease ${i * 12}ms, transform 220ms cubic-bezier(0.22,1,0.36,1) ${i * 12}ms`,
+                animation: exiting ? "none" : `char-in 380ms cubic-bezier(0.22,1,0.36,1) ${i * 22}ms both`,
               }}
             >
               {ch}
@@ -375,9 +365,9 @@ function RotatingPanel() {
         key={`cta-${animKey}`}
         style={{
           opacity: exiting ? 0 : 1,
-          transform: exiting ? "translateY(-6px)" : "translateY(0px)",
-          transition: "opacity 300ms ease, transform 300ms ease",
-          animation: exiting ? "none" : "rise-in 450ms 120ms cubic-bezier(0.22,1,0.36,1) both",
+          transform: exiting ? "translateY(-5px)" : "translateY(0)",
+          transition: "opacity 260ms ease 30ms, transform 260ms ease 30ms",
+          animation: exiting ? "none" : "rise-in 420ms 80ms cubic-bezier(0.22,1,0.36,1) both",
         }}
       >
         {isExternal ? (
@@ -391,7 +381,6 @@ function RotatingPanel() {
             <span aria-hidden="true">→</span>
           </Link>
         )}
-      </div>
       </div>
     </div>
   );
@@ -643,18 +632,18 @@ function PulseGrid() {
 }
 
 const DIAGRAM_INPUTS = [
-  { icon: SiShopify,    iconColor: "#96BF48" },
-  { icon: SiSwift,      iconColor: "#F05138" },
-  { icon: SiFramer,     iconColor: "#8B5CF6" },
-  { icon: SiMeta,       iconColor: "#0082FB" },
-  { icon: SiTailwindcss,iconColor: "#38BDF8" },
+  { icon: SiShopify },
+  { icon: SiSwift },
+  { icon: SiFramer },
+  { icon: SiMeta },
+  { icon: SiTailwindcss },
 ];
 
 const DIAGRAM_OUTPUTS = [
-  { icon: SiVercel,   iconColor: "#e2e8f0", lineColor: "#94a3b8" },
-  { icon: SiApple,    iconColor: "#cbd5e1", lineColor: "#7dd3fc" },
-  { icon: SiDribbble, iconColor: "#f9a8d4", lineColor: "#f472b6" },
-  { icon: SiSubstack, iconColor: "#fdba74", lineColor: "#fb923c" },
+  { icon: SiVercel,  color: "#e2e8f0", darkColor: "#e2e8f0", negDelay: 0.5  },
+  { icon: SiApple,   color: "#94a3b8", darkColor: "#cbd5e1", negDelay: 1.1  },
+  { icon: SiFramer,  color: "#8B5CF6", darkColor: "#a78bfa", negDelay: 1.7  },
+  { icon: SiMeta,    color: "#0082FB", darkColor: "#60a5fa", negDelay: 2.3  },
 ];
 
 function StackDiagram() {
@@ -665,7 +654,7 @@ function StackDiagram() {
 
   const iconSize = 36;
   const iconGap = 8;
-  const foSize = 26; // foreignObject icon area
+  const foSize = iconSize; // foreignObject matches icon slot exactly
 
   // Input pill (left)
   const totalInputH = DIAGRAM_INPUTS.length * iconSize + (DIAGRAM_INPUTS.length - 1) * iconGap;
@@ -688,84 +677,69 @@ function StackDiagram() {
     <div className="flex flex-col sm:flex-row border-b border-[rgb(var(--line))]" >
       {/* Left: diagram */}
       <div className="sm:border-r border-[rgb(var(--line))] flex items-center justify-center overflow-hidden sm:w-1/3 sm:shrink-0 sm:self-stretch">
-        <svg viewBox={`0 0 ${W} ${H}`} fill="none" className="w-full h-full" preserveAspectRatio="xMidYMid meet" style={{ minHeight: 340 }}>
-          <defs>
-            <style>{`
-              @keyframes pulse-dash {
-                0%   { stroke-dashoffset: 1; }
-                100% { stroke-dashoffset: -1; }
-              }
-            `}</style>
-            {/* Input gradient — userSpaceOnUse so it works on near-horizontal paths */}
-            <linearGradient id="pulse-in" x1={connectorX1} y1={nodeY} x2={connectorX2} y2={nodeY} gradientUnits="userSpaceOnUse">
-              <stop offset="0%"   stopColor="rgb(var(--fg))" stopOpacity="0.08" />
-              <stop offset="50%"  stopColor="rgb(var(--fg))" stopOpacity="0.55" />
-              <stop offset="100%" stopColor="rgb(var(--fg))" stopOpacity="0.08" />
-              <animate attributeName="x1" from={connectorX1 - (connectorX2 - connectorX1)} to={connectorX2} dur="1.8s" repeatCount="indefinite" />
-              <animate attributeName="x2" from={connectorX1} to={connectorX2 + (connectorX2 - connectorX1)} dur="1.8s" repeatCount="indefinite" />
-            </linearGradient>
-            {/* Output gradients */}
-            {DIAGRAM_OUTPUTS.map((out, i) => {
-              const cy = outputTopY + i * (iconSize + iconGap) + iconSize / 2;
-              return (
-                <linearGradient key={i} id={`pulse-out-${i}`} x1={connectorX3} y1={nodeY} x2={connectorX4} y2={cy} gradientUnits="userSpaceOnUse">
-                  <stop offset="0%"   stopColor={out.lineColor} stopOpacity="0.08" />
-                  <stop offset="50%"  stopColor={out.lineColor} stopOpacity="0.9" />
-                  <stop offset="100%" stopColor={out.lineColor} stopOpacity="0.08" />
-                  <animate attributeName="x1" from={connectorX3 - (connectorX4 - connectorX3)} to={connectorX4} dur="1.8s" begin={`${i * 0.35}s`} repeatCount="indefinite" />
-                  <animate attributeName="x2" from={connectorX3} to={connectorX4 + (connectorX4 - connectorX3)} dur="1.8s" begin={`${i * 0.35}s`} repeatCount="indefinite" />
-                </linearGradient>
-              );
-            })}
-          </defs>
-          {/* Input connector — static base + gradient pulse on same path */}
+        <svg viewBox={`0 0 ${W} ${H}`} fill="none" className="w-full h-full" preserveAspectRatio="xMidYMid meet" style={{ minHeight: 240 }}>
+          {/* Input connector — flowing dashes travel left to right */}
           {(() => {
             const d = `M ${connectorX1} ${nodeY} C ${connectorX1 + 28} ${nodeY}, ${connectorX2 - 28} ${nodeY}, ${connectorX2} ${nodeY}`;
             return (
               <g>
-                <path d={d} stroke="rgb(var(--fg))" strokeWidth="1.2" strokeLinecap="round" opacity="0.18" />
-                <path d={d} stroke="url(#pulse-in)" strokeWidth="2" strokeLinecap="round" />
+                <path d={d} stroke="rgb(var(--fg))" strokeWidth="1" strokeLinecap="round" opacity="0.12" pathLength="1" />
+                <path d={d} stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round"
+                  strokeDasharray="0.08 0.12" opacity="0.7" pathLength="1"
+                  style={{ animation: "line-travel 2s linear infinite" }} />
               </g>
             );
           })()}
-          {/* Output connectors — static base + gradient pulse */}
+          {/* Output connectors — static, no animation */}
           {DIAGRAM_OUTPUTS.map((out, i) => {
             const cy = outputTopY + i * (iconSize + iconGap) + iconSize / 2;
             const d = `M ${connectorX3} ${nodeY} C ${connectorX3 + 40} ${nodeY}, ${connectorX4 - 40} ${cy}, ${connectorX4} ${cy}`;
             return (
               <g key={i}>
-                <path d={d} stroke={out.lineColor} strokeWidth="1.2" strokeLinecap="round" opacity="0.2" />
-                <path d={d} stroke={`url(#pulse-out-${i})`} strokeWidth="2.5" strokeLinecap="round" />
+                <path d={d} stroke={out.color} strokeWidth="1.5" strokeLinecap="round" opacity="0.35" pathLength="1" />
               </g>
             );
           })}
           {/* Central node */}
-          <circle cx={nodeX} cy={nodeY} r="20" fill="rgb(var(--fg))" opacity="0.08" stroke="rgb(var(--line))" strokeWidth="1.2" strokeOpacity="0.9" />
+          <circle cx={nodeX} cy={nodeY} r="20" fill="rgb(var(--fg))" opacity="0.07" stroke="rgb(var(--fg))" strokeWidth="1" strokeOpacity="0.25" />
           <text x={nodeX} y={nodeY + 5} textAnchor="middle" fontSize="14" fontWeight="500" fill="rgb(var(--fg))" opacity="0.85" fontFamily="inherit">I</text>
           {/* Input pill */}
           <rect x={inputPillX} y={inputTopY - 4} width={pillW} height={totalInputH + 8} rx="8"
-            fill="rgb(var(--bg))" stroke="rgb(var(--line))" strokeWidth="1" strokeOpacity="0.7" />
+            fill="rgb(var(--bg))" stroke="rgb(var(--fg))" strokeWidth="1" strokeOpacity="0.2" />
           {DIAGRAM_INPUTS.map((inp, i) => {
             const cy = inputTopY + i * (iconSize + iconGap) + iconSize / 2;
+            const iSize = 18;
             return (
-              <foreignObject key={i} x={inputPillCX - foSize / 2} y={cy - foSize / 2} width={foSize} height={foSize}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
-                  <inp.icon style={{ width: 18, height: 18, color: "rgb(var(--fg))", opacity: 0.55 }} />
-                </div>
+              <foreignObject key={i} x={inputPillCX - iSize / 2} y={cy - iSize / 2} width={iSize} height={iSize}>
+                <inp.icon style={{ width: iSize, height: iSize, color: "rgb(var(--fg))", opacity: 0.5 }} />
               </foreignObject>
             );
           })}
-          {/* Output pill */}
-          <rect x={outputPillX} y={outputTopY - 4} width={pillW} height={totalOutputH + 8} rx="8"
-            fill="rgb(var(--bg))" stroke="rgb(var(--line))" strokeWidth="1" strokeOpacity="0.7" />
+          {/* Output glow filter */}
+          <defs>
+            <filter id="out-glow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="out-dither" x="-5%" y="-5%" width="110%" height="110%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="2" result="noise" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+          </defs>
+          {/* Output pill with glow */}
+          <g filter="url(#out-glow)">
+            <rect x={outputPillX} y={outputTopY - 4} width={pillW} height={totalOutputH + 8} rx="8"
+              fill="rgb(var(--bg))" stroke="rgb(var(--fg))" strokeWidth="1" strokeOpacity="0.15" />
+          </g>
           {DIAGRAM_OUTPUTS.map((out, i) => {
             const cy = outputTopY + i * (iconSize + iconGap) + iconSize / 2;
+            const iSize = 18;
             return (
-              <foreignObject key={i} x={outputPillCX - foSize / 2} y={cy - foSize / 2} width={foSize} height={foSize}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
-                  <out.icon style={{ width: 18, height: 18, color: "rgb(var(--fg))", opacity: 0.55 }} />
-                </div>
-              </foreignObject>
+              <g key={i} filter="url(#out-dither)">
+                <foreignObject x={outputPillCX - iSize / 2} y={cy - iSize / 2} width={iSize} height={iSize}>
+                  <out.icon style={{ width: iSize, height: iSize, color: out.color, opacity: 0.9 }} />
+                </foreignObject>
+              </g>
             );
           })}
         </svg>
@@ -774,10 +748,12 @@ function StackDiagram() {
       {/* Right: copy */}
       <div className="flex flex-col justify-center px-6 sm:px-8 py-6 gap-3 sm:flex-1 border-t border-[rgb(var(--line))] sm:border-t-0">
         <span className="inline-flex items-center gap-1.5 text-[14px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] self-start">
-          <SiShopify className="w-3.5 h-3.5 opacity-60" />
-          One partner. Every layer.
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 opacity-60" aria-hidden="true">
+            <rect x="7" y="7" width="10" height="10" rx="1" /><line x1="7" y1="9" x2="4" y2="9" /><line x1="7" y1="12" x2="4" y2="12" /><line x1="7" y1="15" x2="4" y2="15" /><line x1="17" y1="9" x2="20" y2="9" /><line x1="17" y1="12" x2="20" y2="12" /><line x1="17" y1="15" x2="20" y2="15" /><line x1="9" y1="7" x2="9" y2="4" /><line x1="12" y1="7" x2="12" y2="4" /><line x1="15" y1="7" x2="15" y2="4" /><line x1="9" y1="17" x2="9" y2="20" /><line x1="12" y1="17" x2="12" y2="20" /><line x1="15" y1="17" x2="15" y2="20" />
+          </svg>
+          End-to-end. One team.
         </span>
-        <p className="text-[clamp(1.4rem,3vw,1.75rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
+        <p className="text-[clamp(1.4rem,3vw,1.75rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug">
           Full-stack execution. One team owns the storefront, the app, the brand, and the campaign.
         </p>
       </div>
@@ -1145,40 +1121,58 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
 
           <GridRule />
 
-          {posts.length === 0 ? (
-            <p className="px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing yet.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3">
-              {posts.slice(0, 3).map((post, i) => (
-                <Link
-                  key={post.slug}
-                  href={`/blog/${post.slug}`}
-                  className={[
-                    "group flex flex-col justify-between gap-4 px-6 pt-6 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] rise border-b border-[rgb(var(--line))]",
-                    i < 2 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
-                  ].filter(Boolean).join(" ")}
-                  style={{ ["--rise-delay" as any]: `${i * 60}ms` }}
-                >
-                  <div className="w-full overflow-hidden">
-                    {THINK_SLUG_SKETCHES[post.slug]}
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    {i === 0 && (
-                      <span className="inline-flex items-center self-start border border-[rgb(var(--line))] text-[rgb(var(--muted))] px-2 py-0.5 text-[11px] tracking-tight leading-none rounded-sm mb-1">
-                        New post
-                      </span>
-                    )}
-                    <span className="text-[18px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
-                    {post.summary && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 line-clamp-2">{post.summary}</span>}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-50">{formatDate(post.date)}</span>
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[14px] opacity-100 transition-all duration-200">→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 border-l border-[rgb(var(--line))]">
+            {/* Intro card */}
+            <Link href="/blog" className="group flex flex-col justify-between gap-4 px-6 pt-6 pb-6 border-r border-b border-[rgb(var(--line))] transition-colors hover:bg-[rgb(var(--line))/0.15] rise" style={{ ["--rise-delay" as any]: "0ms" }}>
+              <div className="w-full overflow-hidden">
+                <svg viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
+                  <line x1="12" y1="16" x2="188" y2="16" stroke="rgb(var(--line))" strokeWidth="0.6" opacity="0.6" />
+                  <rect x="12" y="24" width="72" height="8" rx="4" fill="rgb(var(--fg))" opacity="0.25" />
+                  <rect x="12" y="38" width="140" height="5" rx="2.5" fill="rgb(var(--muted))" opacity="0.18" />
+                  <rect x="12" y="47" width="110" height="5" rx="2.5" fill="rgb(var(--muted))" opacity="0.13" />
+                  <rect x="12" y="56" width="128" height="5" rx="2.5" fill="rgb(var(--muted))" opacity="0.1" />
+                  <line x1="12" y1="70" x2="188" y2="70" stroke="rgb(var(--line))" strokeWidth="0.6" opacity="0.4" />
+                  <rect x="12" y="78" width="56" height="5" rx="2.5" fill="rgb(var(--muted))" opacity="0.15" />
+                  <rect x="12" y="87" width="80" height="5" rx="2.5" fill="rgb(var(--muted))" opacity="0.11" />
+                  <rect x="12" y="96" width="64" height="5" rx="2.5" fill="rgb(var(--muted))" opacity="0.08" />
+                </svg>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[18px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">Inertia Writes</span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70">Short essays on building products, running a brand, and what the industry gets wrong.</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-50">Journal</span>
+                <span className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[14px] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200">→</span>
+              </div>
+            </Link>
+            {/* Post cards */}
+            {posts.slice(0, 3).map((post, i) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="group flex flex-col justify-between gap-4 px-6 pt-6 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] rise border-r border-b border-[rgb(var(--line))]"
+                style={{ ["--rise-delay" as any]: `${(i + 1) * 60}ms` }}
+              >
+                <div className="w-full overflow-hidden">
+                  {THINK_SLUG_SKETCHES[post.slug]}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {i === 0 && (
+                    <span className="inline-flex items-center self-start border border-[rgb(var(--line))] text-[rgb(var(--muted))] px-2 py-0.5 text-[11px] tracking-tight leading-none rounded-sm mb-1">
+                      Latest
+                    </span>
+                  )}
+                  <span className="text-[18px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
+                  {post.summary && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 line-clamp-2">{post.summary}</span>}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-50">{formatDate(post.date)}</span>
+                  <span className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[14px] opacity-100 transition-all duration-200">→</span>
+                </div>
+              </Link>
+            ))}
+          </div>
 
         </div>
 

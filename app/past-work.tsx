@@ -65,15 +65,10 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
         </div>
       </div>
       {/* Drag indicator */}
-      <div className="flex items-center gap-3 px-6 py-3 border-t border-[rgb(var(--line))]">
-        <div className="flex items-center gap-1" style={{ animation: "drag-hint 1.6s ease-in-out infinite" }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" style={{ color: "rgb(var(--muted))", opacity: 0.6 }}>
-            <path d="M5 12h14M15 7l5 5-5 5" />
-          </svg>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" style={{ color: "rgb(var(--muted))", opacity: 0.3 }}>
-            <path d="M5 12h14M15 7l5 5-5 5" />
-          </svg>
-        </div>
+      <div className="flex items-center gap-2 px-6 py-3 border-t border-[rgb(var(--line))]">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0" style={{ color: "rgb(var(--muted))", opacity: 0.4 }}>
+          <path d="M5 12h14M15 7l5 5-5 5" />
+        </svg>
         <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40">Drag to explore</span>
       </div>
       {active && <WorkSheet item={active} onClose={() => setActive(null)} />}
