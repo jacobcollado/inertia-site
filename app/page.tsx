@@ -4,8 +4,6 @@ import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiSubstack, SiDribbble, SiFramer, SiVercel, SiApple } from "react-icons/si";
-import { LuHandshake } from "react-icons/lu";
-import { HiOutlineCube, HiOutlineCommandLine, HiOutlineClock, HiOutlineWrenchScrewdriver, HiOutlineDevicePhoneMobile, HiOutlineShoppingBag, HiOutlineCheckCircle, HiOutlineArrowPath } from "react-icons/hi2";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
@@ -24,7 +22,6 @@ function formatDate(iso: string): string {
 function SketchInertia() {
   return (
     <svg viewBox="0 0 200 120" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Ground plane — perspective grid */}
       <line x1="100" y1="60" x2="10"  y2="110" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.32" />
       <line x1="100" y1="60" x2="190" y2="110" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.32" />
       <line x1="100" y1="60" x2="10"  y2="85"  stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
@@ -32,124 +29,103 @@ function SketchInertia() {
       <line x1="37"  y1="110" x2="163" y2="110" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.32" />
       <line x1="22"  y1="96"  x2="178" y2="96"  stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.22" />
       <line x1="55"  y1="73"  x2="145" y2="73"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
-      {/* Vertical columns — accent tinted */}
       <line x1="37"  y1="110" x2="37"  y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
       <line x1="163" y1="110" x2="163" y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
       <line x1="22"  y1="96"  x2="22"  y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.7" opacity="0.35" />
       <line x1="178" y1="96"  x2="178" y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.7" opacity="0.35" />
-      {/* Top face — accent tinted */}
       <line x1="100" y1="8"   x2="22"  y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
       <line x1="100" y1="8"   x2="178" y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.9" opacity="0.55" />
       <line x1="22"  y1="38"  x2="178" y2="38"  stroke="rgb(var(--purple))" strokeWidth="0.8" opacity="0.45" />
       <line x1="37"  y1="52"  x2="163" y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.8" opacity="0.45" />
       <line x1="22"  y1="38"  x2="37"  y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.35" />
       <line x1="178" y1="38"  x2="163" y2="52"  stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.35" />
-      {/* Motion lines */}
       <line x1="4"   y1="22"  x2="28"  y2="22"  stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
       <line x1="4"   y1="28"  x2="22"  y2="28"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
       <line x1="4"   y1="34"  x2="18"  y2="34"  stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.16" />
       <line x1="172" y1="22"  x2="196" y2="22"  stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
       <line x1="178" y1="28"  x2="196" y2="28"  stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.2" />
       <line x1="182" y1="34"  x2="196" y2="34"  stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.16" />
-      {/* Vanishing point cross — accent */}
       <line x1="96"  y1="8"   x2="104" y2="8"   stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.6" />
       <line x1="100" y1="4"   x2="100" y2="12"  stroke="rgb(var(--purple))" strokeWidth="0.6" opacity="0.6" />
-      {/* Dimension tick marks */}
-      <line x1="10"  y1="110" x2="10"  y2="115" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
-      <line x1="190" y1="110" x2="190" y2="115" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
-      <line x1="10"  y1="112" x2="190" y2="112" stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.18" />
     </svg>
   );
 }
 
-function MockupDashboard() {
+// Aether — abstract storefront sketch: product image block, title, price, buy CTA
+function MockupAether() {
   return (
-    <div className="w-full overflow-hidden border border-b-0 border-[rgb(var(--line))]" style={{ fontFamily: "inherit", background: "rgb(var(--bg))", borderRadius: "8px 8px 0 0" }}>
-      {/* Top bar */}
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-[rgb(var(--line))]">
-        <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-20" />
-        <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-20" />
-        <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-20" />
-        <div className="ml-2 w-20 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-10" />
-      </div>
-      {/* Body */}
-      <div className="flex" style={{ minHeight: "160px" }}>
-        {/* Sidebar */}
-        <div className="flex flex-col gap-1.5 border-r border-[rgb(var(--line))] py-3 px-2" style={{ width: "48px" }}>
-          {[true, false, false, false, false].map((active, i) => (
-            <div key={i} className="h-1.5 rounded-full" style={{ background: active ? "rgb(var(--blue))" : "rgb(var(--muted))", opacity: active ? 0.55 : 0.12 }} />
-          ))}
+    <svg viewBox="0 0 200 130" fill="none" className="w-full" aria-hidden="true">
+      {/* Full-bleed product image area */}
+      <rect x="0" y="0" width="200" height="72" fill="rgb(var(--muted))" fillOpacity="0.07" />
+      {/* Thin nav */}
+      <rect x="12" y="6" width="22" height="4" rx="2" fill="rgb(var(--fg))" opacity="0.22" />
+      <rect x="160" y="5" width="28" height="6" rx="3" fill="rgb(var(--fg))" opacity="0.12" />
+      <line x1="0" y1="16" x2="200" y2="16" stroke="rgb(var(--line))" strokeWidth="0.5" opacity="0.4" />
+      {/* Product image hint */}
+      <rect x="62" y="22" width="76" height="44" rx="1" fill="rgb(var(--muted))" fillOpacity="0.09" stroke="rgb(var(--line))" strokeWidth="0.4" strokeOpacity="0.3" />
+      {/* Shopify icon centered in image area */}
+      <foreignObject x="88" y="28" width="24" height="24">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", opacity: 0.22 }}>
+          <SiShopify style={{ width: 20, height: 20, color: "rgb(var(--fg))" }} />
         </div>
-        {/* Content */}
-        <div className="flex-1 p-3 flex flex-col gap-3">
-          {/* Header row */}
-          <div className="flex items-center justify-between">
-            <div className="w-16 h-2 rounded-full bg-[rgb(var(--muted))] opacity-15" />
-            <div className="w-8 h-2 rounded-full bg-[rgb(var(--blue))] opacity-30" />
-          </div>
-          {/* Stat cards */}
-          <div className="grid grid-cols-3 gap-1.5">
-            {[0,1,2].map(i => (
-              <div key={i} className="flex flex-col gap-1 p-2 border border-[rgb(var(--line))]" style={{ borderColor: i === 0 ? "rgb(var(--blue)/0.25)" : undefined, background: i === 0 ? "rgb(var(--blue)/0.04)" : undefined }}>
-                <div className="w-full h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />
-                <div className="w-1/2 h-2 rounded-full" style={{ background: i === 0 ? "rgb(var(--blue))" : "rgb(var(--muted))", opacity: i === 0 ? 0.5 : 0.2 }} />
-              </div>
-            ))}
-          </div>
-          {/* Progress bar */}
-          <div className="flex flex-col gap-1.5 border border-[rgb(var(--line))] p-2">
-            <div className="flex items-center justify-between">
-              <div className="w-20 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-15" />
-              <div className="w-6 h-1.5 rounded-full bg-[rgb(var(--blue))] opacity-35" />
-            </div>
-            <div className="w-full rounded-full overflow-hidden" style={{ height: "3px", background: "rgb(var(--line))" }}>
-              <div className="h-full rounded-full" style={{ width: "62%", background: "rgb(var(--blue))", opacity: 0.5 }} />
-            </div>
-          </div>
-          {/* Activity rows */}
-          <div className="flex flex-col gap-1.5">
-            {[0.9, 0.65, 0.4].map((op, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] shrink-0" style={{ opacity: op * 0.3 }} />
-                <div className="h-1 rounded-full bg-[rgb(var(--muted))]" style={{ width: `${55 - i * 12}%`, opacity: op * 0.18 }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+      </foreignObject>
+      {/* Product info row */}
+      <rect x="12" y="82" width="72" height="5" rx="2.5" fill="rgb(var(--fg))" opacity="0.28" />
+      <rect x="12" y="92" width="48" height="3" rx="1.5" fill="rgb(var(--muted))" opacity="0.18" />
+      {/* Price + button */}
+      <rect x="144" y="80" width="44" height="7" rx="3.5" fill="rgb(var(--fg))" opacity="0.3" />
+      <rect x="144" y="94" width="44" height="14" rx="7" fill="rgb(var(--fg))" opacity="0.18" />
+      {/* Product strip */}
+      <line x1="0" y1="114" x2="200" y2="114" stroke="rgb(var(--line))" strokeWidth="0.5" opacity="0.3" />
+      {[0,1,2,3].map((i) => (
+        <rect key={i} x={6 + i * 49} y="118" width="40" height="10" rx="1" fill="rgb(var(--muted))" fillOpacity={0.07 + i * 0.01} />
+      ))}
+    </svg>
   );
 }
 
-function MockupAether() {
+// Dashboard — abstract portal sketch: stat cards, progress, file list
+function MockupDashboard() {
   return (
-    <div className="w-full overflow-hidden border border-b-0 border-[rgb(var(--line))]" style={{ fontFamily: "inherit", background: "rgb(var(--bg))", borderRadius: "8px 8px 0 0" }}>
-      {/* Nav */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-[rgb(var(--line))]">
-        <div className="w-8 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-25" />
-        <div className="flex gap-2">
-          {[0,1,2].map(i => <div key={i} className="w-5 h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />)}
+    <svg viewBox="0 0 200 130" fill="none" className="w-full" aria-hidden="true">
+      {/* Three stat cards */}
+      {[0, 67, 134].map((x, i) => (
+        <g key={i}>
+          <rect x={x + 4} y="8" width="58" height="30" rx="2"
+            stroke="rgb(var(--line))" strokeWidth="0.6"
+            strokeOpacity={i === 0 ? 0.7 : 0.4}
+            fill={i === 0 ? "rgb(var(--blue))" : "none"}
+            fillOpacity={i === 0 ? 0.05 : 0} />
+          <rect x={x + 10} y="16" width={30 - i * 5} height="4" rx="2"
+            fill={i === 0 ? "rgb(var(--blue))" : "rgb(var(--muted))"}
+            opacity={i === 0 ? 0.5 : 0.2} />
+          <rect x={x + 10} y="24" width={20 - i * 3} height="2.5" rx="1.25"
+            fill="rgb(var(--muted))" opacity="0.12" />
+        </g>
+      ))}
+      {/* Vercel icon — top right, represents the web platform */}
+      <foreignObject x="176" y="8" width="18" height="18">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", opacity: 0.2 }}>
+          <SiVercel style={{ width: 14, height: 14, color: "rgb(var(--fg))" }} />
         </div>
-        <div className="w-6 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-15" />
-      </div>
-      {/* Hero */}
-      <div className="px-3 py-4 flex flex-col gap-2" style={{ minHeight: "90px" }}>
-        <div className="w-14 h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />
-        <div className="w-28 h-3 rounded-full bg-[rgb(var(--muted))] opacity-25" />
-        <div className="w-20 h-2 rounded-full bg-[rgb(var(--muted))] opacity-15" />
-        <div className="w-12 h-5 rounded-full border border-[rgb(var(--line))] mt-1" />
-      </div>
-      {/* Product row */}
-      <div className="grid grid-cols-3 border-t border-[rgb(var(--line))]">
-        {[0,1,2].map(i => (
-          <div key={i} className="flex flex-col gap-1.5 p-2" style={{ borderRight: i < 2 ? "1px solid rgb(var(--line))" : "none" }}>
-            <div className="rounded-sm bg-[rgb(var(--muted))] opacity-8" style={{ height: "30px" }} />
-            <div className="w-8 h-1 rounded-full bg-[rgb(var(--muted))] opacity-15" />
-            <div className="w-5 h-1 rounded-full bg-[rgb(var(--muted))] opacity-10" />
-          </div>
-        ))}
-      </div>
-    </div>
+      </foreignObject>
+      {/* Progress row */}
+      <rect x="4" y="48" width="192" height="22" rx="2" stroke="rgb(var(--line))" strokeWidth="0.6" strokeOpacity="0.35" />
+      <rect x="10" y="54" width="90" height="2.5" rx="1.25" fill="rgb(var(--muted))" opacity="0.12" />
+      <rect x="10" y="60" width="180" height="3" rx="1.5" fill="rgb(var(--line))" fillOpacity="0.5" />
+      <rect x="10" y="60" width="112" height="3" rx="1.5" fill="rgb(var(--blue))" opacity="0.38" />
+      {/* File rows */}
+      {[0, 1, 2, 3].map(i => (
+        <g key={i}>
+          <rect x="4" y={80 + i * 12} width="8" height="8" rx="1"
+            stroke="rgb(var(--line))" strokeWidth="0.6" strokeOpacity="0.4" />
+          <rect x="16" y={82 + i * 12} width={110 - i * 16} height="3" rx="1.5"
+            fill="rgb(var(--muted))" opacity={0.18 - i * 0.03} />
+          <rect x={168} y={82 + i * 12} width="28" height="3" rx="1.5"
+            fill="rgb(var(--muted))" opacity="0.09" />
+        </g>
+      ))}
+    </svg>
   );
 }
 
@@ -157,21 +133,21 @@ const BUILDING = [
   {
     name: "Inertia",
     description: "We become the technical partner your vision deserves.",
-    tag: "Active",
+    cta: "Work with us",
     href: "https://www.instagram.com/by.inertia/",
     sketch: <SketchInertia />,
   },
   {
     name: "Aether Theme",
     description: "A high-end Shopify theme built for conversion and presence.",
-    tag: "In Progress",
+    cta: "See Aether",
     href: "/aether",
     sketch: <MockupAether />,
   },
   {
     name: "Inertia Dashboard",
     description: "Project status, files, invoices, and support in one place.",
-    tag: "Building",
+    cta: "Join waitlist",
     href: "#",
     sketch: <MockupDashboard />,
   },
@@ -294,6 +270,8 @@ function RotatingPanel() {
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [animKey, setAnimKey] = useState(0);
   const [exiting, setExiting] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const hold = setTimeout(() => {
@@ -307,14 +285,30 @@ function RotatingPanel() {
     return () => clearTimeout(hold);
   }, [animKey]);
 
+  useEffect(() => {
+    const onScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const current = ALL_PHRASES[phraseIdx];
   const isExternal = current.cta.href.startsWith("http");
   const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity";
 
-  const chars = [...current.icon ? [] : [], ...current.text.split("")];
+  // parallax: phrase drifts down at 0.18x scroll speed
+  const phraseOffset = scrollY * 0.18;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-5 px-6 sm:px-10 py-8 sm:py-10 text-center">
+    <div ref={panelRef} className="relative overflow-hidden" style={{ height: 380 }}>
+      {/* Centered at 26% — same vertical midpoint as PulseGrid about text */}
+      <div
+        className="absolute inset-x-0 flex flex-col items-center gap-5 text-center px-6 sm:px-10"
+        style={{
+          top: "32%",
+          transform: `translateY(calc(-50% + ${phraseOffset}px))`,
+          willChange: "transform",
+        }}
+      >
 
       {/* Label */}
       <p
@@ -329,15 +323,14 @@ function RotatingPanel() {
         {current.label}
       </p>
 
-      {/* Icon + animated phrase */}
+      {/* Icon + animated phrase — left-aligned, parallax on scroll */}
       <p
-        className="flex items-center justify-center gap-2 whitespace-nowrap text-[clamp(2rem,5vw,2.4rem)] tracking-tight leading-none font-semibold"
+        className="flex items-center gap-2 whitespace-nowrap text-[clamp(2rem,5vw,2.4rem)] tracking-tight leading-none font-normal"
         style={{
           color: "rgb(var(--fg))",
           perspective: "600px",
         }}
       >
-        {/* Icon */}
         <span
           key={`icon-${animKey}`}
           style={{
@@ -354,7 +347,6 @@ function RotatingPanel() {
           {current.icon}
         </span>
 
-        {/* Per-character animated text */}
         <span aria-label={current.text} style={{ display: "inline-flex" }}>
           {current.text.split("").map((ch, i) => (
             <span
@@ -389,16 +381,17 @@ function RotatingPanel() {
         }}
       >
         {isExternal ? (
-          <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass} >
+          <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass}>
             {current.cta.label}
             <span aria-hidden="true">↗</span>
           </a>
         ) : (
-          <Link href={current.cta.href} className={ctaClass} >
+          <Link href={current.cta.href} className={ctaClass}>
             {current.cta.label}
             <span aria-hidden="true">→</span>
           </Link>
         )}
+      </div>
       </div>
     </div>
   );
@@ -420,7 +413,6 @@ function LaptopWithText() {
       const vh = window.innerHeight;
       const progress = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.5)));
       if (progress > 0.05 && !revealed) setRevealed(true);
-      // Parallax tilt: increases as element scrolls up past center
       const pastCenter = Math.max(0, vh / 2 - rect.bottom + rect.height / 2);
       setTilt(Math.min(14, pastCenter / 22));
     };
@@ -452,27 +444,19 @@ function LaptopWithText() {
           </clipPath>
         </defs>
 
-        {/* Lid bezel */}
         <rect x="12" y="6" width="296" height="174" rx="12" fill="rgb(var(--line))" fillOpacity="0.08" stroke={line} strokeWidth="0.8" opacity="0.6" />
-        {/* Screen bezel inset */}
         <rect x="22" y="14" width="276" height="162" rx="6" fill="rgb(var(--bg))" stroke={line} strokeWidth="0.6" opacity="0.5" />
-        {/* Camera */}
         <circle cx="160" cy="10" r="1.6" fill={muted} opacity="0.2" />
 
-        {/* Title bar */}
         <rect x="22" y="14" width="276" height="20" rx="6" fill="rgb(var(--line))" fillOpacity="0.18" clipPath="url(#screen-clip)" />
         <line x1="22" y1="34" x2="298" y2="34" stroke={line} strokeWidth="0.5" opacity="0.5" />
-        {/* Window buttons */}
         <circle cx="38" cy="24" r="3" fill="#ff5f57" opacity="0.7" />
         <circle cx="49" cy="24" r="3" fill="#febc2e" opacity="0.7" />
         <circle cx="60" cy="24" r="3" fill="#28c840" opacity="0.7" />
-        {/* URL bar */}
         <rect x="104" y="19" width="112" height="10" rx="3" fill="rgb(var(--line))" fillOpacity="0.25" opacity="0.6" />
 
-        {/* Screen content */}
         <foreignObject x="22" y="34" width="276" height="142" clipPath="url(#screen-clip)">
           <div style={{ width: "100%", height: "100%", fontFamily: "inherit", background: "rgb(var(--bg))", display: "flex", flexDirection: "column", padding: "14px 16px 12px", gap: "10px" }}>
-            {/* Skeleton nav row */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <div style={{ height: "5px", borderRadius: "3px", background: "rgb(var(--fg))", opacity: 0.55, width: "36px" }} />
               <div style={{ flex: 1 }} />
@@ -481,15 +465,12 @@ function LaptopWithText() {
               ))}
               <div style={{ height: "10px", borderRadius: "5px", background: "rgb(var(--fg))", opacity: 0.5, width: "32px" }} />
             </div>
-            {/* Divider */}
             <div style={{ height: "1px", background: "rgb(var(--line))", opacity: 0.6 }} />
-            {/* About text */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: "6px" }}>
               <p style={{ fontSize: "10.5px", lineHeight: 1.7, letterSpacing: "-0.01em", color: "rgb(var(--fg))", margin: 0, opacity: 0.85 }}>
                 <span style={{ fontWeight: 600 }}>We build whatever your vision demands.</span>{" "}
                 Storefronts, apps, brands, tools.
               </p>
-              {/* CTAs */}
               <div style={{ display: "flex", gap: "5px", marginTop: "4px" }}>
                 <div style={{ height: "14px", borderRadius: "7px", background: "rgb(var(--fg))", opacity: 0.65, width: "56px" }} />
                 <div style={{ height: "14px", borderRadius: "7px", border: "1px solid rgb(var(--line))", width: "44px" }} />
@@ -502,77 +483,302 @@ function LaptopWithText() {
   );
 }
 
+// ── Pulse grid ────────────────────────────────────────────────────────
 
-function PulseGrid() {
-  const COLS = 11;
-  const ROWS = 9;
-  const W = 480;
-  const H = 360;
-  const HORIZON = 0.52;
+const GRID_W = 480;
+const GRID_H = 360;
+const GRID_COLS = 9;
+const GRID_ROWS = 7;
+const VP_X = GRID_W / 2;
+const VP_Y = GRID_H * 0.5; // horizon sits at vertical midpoint
+const ABOUT_TEXT = "The kind of partner you'll actually want to work with again.";
 
-  const dots: { cx: number; cy: number; r: number; opacity: number; delay: number }[] = [];
-
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      const t = row / (ROWS - 1);
-      const px = W / 2 + (col - (COLS - 1) / 2) * (18 + t * 38);
-      const py = HORIZON * H + t * H * (1 - HORIZON);
-      const r = 0.9 + t * 2.4;
-      const edgeFade = 1 - Math.abs(col - (COLS - 1) / 2) / ((COLS - 1) / 2) * 0.55;
-      const opacity = (0.06 + t * 0.3) * edgeFade;
-      const distFromCenter = Math.sqrt(
-        Math.pow((col - (COLS - 1) / 2) / ((COLS - 1) / 2), 2) +
-        Math.pow(1 - t, 2)
-      );
-      dots.push({ cx: px, cy: py, r, opacity, delay: distFromCenter * 800 });
+// Perspective grid points below the horizon
+const GRID_POINTS = (() => {
+  const pts: { cx: number; cy: number; r: number; baseOp: number; row: number; col: number }[] = [];
+  for (let row = 0; row < GRID_ROWS; row++) {
+    // linear t so rows are evenly spaced in perspective depth
+    const t = (row + 1) / GRID_ROWS;
+    const cy = VP_Y + t * (GRID_H - VP_Y) * 1.05; // slight overshoot
+    const halfSpread = t * (GRID_W / 2) * 1.05;   // slight overshoot so edges bleed
+    for (let col = 0; col < GRID_COLS; col++) {
+      const norm = (col / (GRID_COLS - 1)) - 0.5;
+      const cx = VP_X + norm * halfSpread * 2;
+      const edgeFade = 1 - Math.abs(norm) * 0.35;
+      const r = 0.7 + t * 1.8;
+      const baseOp = (0.07 + t * 0.22) * edgeFade;
+      pts.push({ cx, cy, r, baseOp, row, col });
     }
   }
+  return pts;
+})();
+
+function PulseGrid() {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const circleRefs = useRef<(SVGCircleElement | null)[]>([]);
+  const ripples = useRef<{ x: number; y: number; t: number }[]>([]);
+  const rafRef = useRef<number>(0);
+  const lastIdleRipple = useRef<number>(0);
+
+  useEffect(() => {
+    let running = true;
+
+    const animate = (now: number) => {
+      if (!running) return;
+
+      if (now - lastIdleRipple.current > 2800) {
+        const col = Math.floor(Math.random() * GRID_COLS);
+        const pt = GRID_POINTS[(GRID_ROWS - 1) * GRID_COLS + col];
+        if (pt) ripples.current.push({ x: pt.cx, y: pt.cy, t: now });
+        lastIdleRipple.current = now;
+      }
+
+      ripples.current = ripples.current.filter(r => now - r.t < 2000);
+
+      circleRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const d = GRID_POINTS[i];
+        let boost = 0;
+        for (const rip of ripples.current) {
+          const age = (now - rip.t) / 1000;
+          const dist = Math.sqrt((d.cx - rip.x) ** 2 + (d.cy - rip.y) ** 2);
+          const waveFront = age * 260;
+          const spread = 32;
+          const delta = Math.abs(dist - waveFront);
+          if (delta < spread) {
+            const wave = Math.cos((delta / spread) * Math.PI * 0.5);
+            const fade = Math.max(0, 1 - age / 2.0);
+            boost = Math.max(boost, wave * fade * 0.7);
+          }
+        }
+        el.style.opacity = String(Math.min(1, d.baseOp + boost));
+        el.setAttribute("r", String(d.r * (1 + boost * 0.6)));
+      });
+
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+    return () => { running = false; cancelAnimationFrame(rafRef.current); };
+  }, []);
+
+  const addRipple = (clientX: number, clientY: number) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * GRID_W;
+    const y = ((clientY - rect.top) / rect.height) * GRID_H;
+    ripples.current.push({ x, y, t: performance.now() });
+  };
+
+  // Radial lines: from VP to bottom edge
+  const radialLines = Array.from({ length: GRID_COLS }, (_, col) => {
+    const norm = (col / (GRID_COLS - 1)) - 0.5;
+    const x2 = VP_X + norm * GRID_W * 1.05;
+    return { x1: VP_X, y1: VP_Y, x2, y2: GRID_H };
+  });
+
+  // Horizontal lines: connect left to right at each row
+  const horizontalLines = Array.from({ length: GRID_ROWS }, (_, row) => {
+    const left = GRID_POINTS[row * GRID_COLS];
+    const right = GRID_POINTS[row * GRID_COLS + GRID_COLS - 1];
+    const t = (row + 1) / GRID_ROWS;
+    return { x1: left.cx, y1: left.cy, x2: right.cx, y2: right.cy, op: 0.04 + t * 0.08 };
+  });
 
   return (
-    <div className="relative w-full select-none overflow-hidden" style={{ height: 380 }}>
+    <div
+      className="relative w-full select-none overflow-hidden cursor-crosshair"
+      style={{ height: 380 }}
+      onMouseMove={e => addRipple(e.clientX, e.clientY)}
+      onClick={e => addRipple(e.clientX, e.clientY)}
+      onTouchMove={e => { const t = e.touches[0]; if (t) addRipple(t.clientX, t.clientY); }}
+    >
       <svg
-        viewBox={`0 0 ${W} ${H}`}
+        ref={svgRef}
+        viewBox={`0 0 ${GRID_W} ${GRID_H}`}
         className="absolute inset-0 w-full h-full"
-        style={{ opacity: 0, animation: "hero-line 800ms cubic-bezier(0.16,1,0.3,1) 100ms forwards" }}
+        style={{ opacity: 0, animation: "rise-in 1000ms cubic-bezier(0.16,1,0.3,1) 300ms forwards" }}
       >
-        <defs>
-          <style>{`
-            @keyframes dot-pulse {
-              0%, 100% { opacity: var(--base-op); }
-              50% { opacity: calc(var(--base-op) * 4); }
-            }
-          `}</style>
-        </defs>
-        {dots.map((d, i) => (
+        {radialLines.map((l, i) => (
+          <line key={`r${i}`} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
+            stroke="rgb(var(--fg))" strokeWidth="0.4" opacity={0.07} />
+        ))}
+        {horizontalLines.map((l, i) => (
+          <line key={`h${i}`} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
+            stroke="rgb(var(--fg))" strokeWidth="0.4" opacity={l.op} />
+        ))}
+        {GRID_POINTS.map((d, i) => (
           <circle
             key={i}
-            cx={d.cx}
-            cy={d.cy}
-            r={d.r}
+            ref={el => { circleRefs.current[i] = el; }}
+            cx={d.cx} cy={d.cy} r={d.r}
             fill="rgb(var(--fg))"
-            style={{
-              "--base-op": d.opacity,
-              opacity: d.opacity,
-              animation: `dot-pulse 3000ms ease-in-out ${d.delay}ms infinite`,
-            } as React.CSSProperties}
+            style={{ opacity: d.baseOp }}
           />
         ))}
       </svg>
 
-      <div className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: "25%", background: "linear-gradient(to bottom, rgb(var(--bg)) 0%, transparent 100%)" }} />
-      <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "20%", background: "linear-gradient(to top, rgb(var(--bg)) 0%, transparent 100%)" }} />
-      <div className="absolute inset-y-0 left-0 pointer-events-none" style={{ width: "10%", background: "linear-gradient(to right, rgb(var(--bg)) 0%, transparent 100%)" }} />
-      <div className="absolute inset-y-0 right-0 pointer-events-none" style={{ width: "10%", background: "linear-gradient(to left, rgb(var(--bg)) 0%, transparent 100%)" }} />
+      {/* Gradient: solid bg top half (text lives here), fade at sides */}
+      <div className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: "55%", background: "linear-gradient(to bottom, rgb(var(--bg)) 60%, transparent 100%)" }} />
+      <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "8%", background: "linear-gradient(to top, rgb(var(--bg)) 0%, transparent 100%)" }} />
+      <div className="absolute inset-y-0 left-0 pointer-events-none" style={{ width: "5%", background: "linear-gradient(to right, rgb(var(--bg)) 0%, transparent 100%)" }} />
+      <div className="absolute inset-y-0 right-0 pointer-events-none" style={{ width: "5%", background: "linear-gradient(to left, rgb(var(--bg)) 0%, transparent 100%)" }} />
 
-      <div className="absolute inset-x-0 flex flex-col items-center px-5 pointer-events-none" style={{ top: "18%" }}>
+      <div className="absolute inset-x-0 flex flex-col items-center justify-center px-6 pointer-events-none" style={{ top: 0, height: "52%" }}>
         <p
-          className="text-center tracking-tight leading-snug font-semibold pulse-grid-text"
+          className="pulse-grid-text text-center tracking-tight leading-tight font-medium"
           style={{
-            fontSize: "clamp(1.6rem, 4vw, 1.75rem)",
+            fontSize: "clamp(1.75rem, 4.5vw, 2.1rem)",
             maxWidth: 340,
+            opacity: 0,
+            animation: "rise-in 700ms cubic-bezier(0.22,1,0.36,1) 400ms forwards",
           }}
         >
-          The kind of partner you'll actually want to work with again.
+          {ABOUT_TEXT}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const DIAGRAM_INPUTS = [
+  { icon: SiShopify,    iconColor: "#96BF48" },
+  { icon: SiSwift,      iconColor: "#F05138" },
+  { icon: SiFramer,     iconColor: "#8B5CF6" },
+  { icon: SiMeta,       iconColor: "#0082FB" },
+  { icon: SiTailwindcss,iconColor: "#38BDF8" },
+];
+
+const DIAGRAM_OUTPUTS = [
+  { icon: SiVercel,   iconColor: "#e2e8f0", lineColor: "#94a3b8" },
+  { icon: SiApple,    iconColor: "#cbd5e1", lineColor: "#7dd3fc" },
+  { icon: SiDribbble, iconColor: "#f9a8d4", lineColor: "#f472b6" },
+  { icon: SiSubstack, iconColor: "#fdba74", lineColor: "#fb923c" },
+];
+
+function StackDiagram() {
+  const W = 340;
+  const H = 300;
+  const nodeX = W / 2;
+  const nodeY = H / 2;
+
+  const iconSize = 36;
+  const iconGap = 8;
+  const foSize = 26; // foreignObject icon area
+
+  // Input pill (left)
+  const totalInputH = DIAGRAM_INPUTS.length * iconSize + (DIAGRAM_INPUTS.length - 1) * iconGap;
+  const pillW = 48;
+  const inputPillX = 16;
+  const inputPillCX = inputPillX + pillW / 2;
+  const inputTopY = nodeY - totalInputH / 2;
+  const connectorX1 = inputPillX + pillW + 2;
+  const connectorX2 = nodeX - 22;
+
+  // Output pill (right)
+  const totalOutputH = DIAGRAM_OUTPUTS.length * iconSize + (DIAGRAM_OUTPUTS.length - 1) * iconGap;
+  const outputPillX = W - 16 - pillW;
+  const outputPillCX = outputPillX + pillW / 2;
+  const outputTopY = nodeY - totalOutputH / 2;
+  const connectorX3 = nodeX + 22;
+  const connectorX4 = outputPillX - 2;
+
+  return (
+    <div className="flex flex-col sm:flex-row border-b border-[rgb(var(--line))]" >
+      {/* Left: diagram */}
+      <div className="sm:border-r border-[rgb(var(--line))] flex items-center justify-center overflow-hidden sm:w-1/3 sm:shrink-0 sm:self-stretch">
+        <svg viewBox={`0 0 ${W} ${H}`} fill="none" className="w-full h-full" preserveAspectRatio="xMidYMid meet" style={{ minHeight: 340 }}>
+          <defs>
+            <style>{`
+              @keyframes pulse-dash {
+                0%   { stroke-dashoffset: 1; }
+                100% { stroke-dashoffset: -1; }
+              }
+            `}</style>
+            {/* Input gradient — userSpaceOnUse so it works on near-horizontal paths */}
+            <linearGradient id="pulse-in" x1={connectorX1} y1={nodeY} x2={connectorX2} y2={nodeY} gradientUnits="userSpaceOnUse">
+              <stop offset="0%"   stopColor="rgb(var(--fg))" stopOpacity="0.08" />
+              <stop offset="50%"  stopColor="rgb(var(--fg))" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="rgb(var(--fg))" stopOpacity="0.08" />
+              <animate attributeName="x1" from={connectorX1 - (connectorX2 - connectorX1)} to={connectorX2} dur="1.8s" repeatCount="indefinite" />
+              <animate attributeName="x2" from={connectorX1} to={connectorX2 + (connectorX2 - connectorX1)} dur="1.8s" repeatCount="indefinite" />
+            </linearGradient>
+            {/* Output gradients */}
+            {DIAGRAM_OUTPUTS.map((out, i) => {
+              const cy = outputTopY + i * (iconSize + iconGap) + iconSize / 2;
+              return (
+                <linearGradient key={i} id={`pulse-out-${i}`} x1={connectorX3} y1={nodeY} x2={connectorX4} y2={cy} gradientUnits="userSpaceOnUse">
+                  <stop offset="0%"   stopColor={out.lineColor} stopOpacity="0.08" />
+                  <stop offset="50%"  stopColor={out.lineColor} stopOpacity="0.9" />
+                  <stop offset="100%" stopColor={out.lineColor} stopOpacity="0.08" />
+                  <animate attributeName="x1" from={connectorX3 - (connectorX4 - connectorX3)} to={connectorX4} dur="1.8s" begin={`${i * 0.35}s`} repeatCount="indefinite" />
+                  <animate attributeName="x2" from={connectorX3} to={connectorX4 + (connectorX4 - connectorX3)} dur="1.8s" begin={`${i * 0.35}s`} repeatCount="indefinite" />
+                </linearGradient>
+              );
+            })}
+          </defs>
+          {/* Input connector — static base + gradient pulse on same path */}
+          {(() => {
+            const d = `M ${connectorX1} ${nodeY} C ${connectorX1 + 28} ${nodeY}, ${connectorX2 - 28} ${nodeY}, ${connectorX2} ${nodeY}`;
+            return (
+              <g>
+                <path d={d} stroke="rgb(var(--fg))" strokeWidth="1.2" strokeLinecap="round" opacity="0.18" />
+                <path d={d} stroke="url(#pulse-in)" strokeWidth="2" strokeLinecap="round" />
+              </g>
+            );
+          })()}
+          {/* Output connectors — static base + gradient pulse */}
+          {DIAGRAM_OUTPUTS.map((out, i) => {
+            const cy = outputTopY + i * (iconSize + iconGap) + iconSize / 2;
+            const d = `M ${connectorX3} ${nodeY} C ${connectorX3 + 40} ${nodeY}, ${connectorX4 - 40} ${cy}, ${connectorX4} ${cy}`;
+            return (
+              <g key={i}>
+                <path d={d} stroke={out.lineColor} strokeWidth="1.2" strokeLinecap="round" opacity="0.2" />
+                <path d={d} stroke={`url(#pulse-out-${i})`} strokeWidth="2.5" strokeLinecap="round" />
+              </g>
+            );
+          })}
+          {/* Central node */}
+          <circle cx={nodeX} cy={nodeY} r="20" fill="rgb(var(--fg))" opacity="0.08" stroke="rgb(var(--line))" strokeWidth="1.2" strokeOpacity="0.9" />
+          <text x={nodeX} y={nodeY + 5} textAnchor="middle" fontSize="14" fontWeight="500" fill="rgb(var(--fg))" opacity="0.85" fontFamily="inherit">I</text>
+          {/* Input pill */}
+          <rect x={inputPillX} y={inputTopY - 4} width={pillW} height={totalInputH + 8} rx="8"
+            fill="rgb(var(--bg))" stroke="rgb(var(--line))" strokeWidth="1" strokeOpacity="0.7" />
+          {DIAGRAM_INPUTS.map((inp, i) => {
+            const cy = inputTopY + i * (iconSize + iconGap) + iconSize / 2;
+            return (
+              <foreignObject key={i} x={inputPillCX - foSize / 2} y={cy - foSize / 2} width={foSize} height={foSize}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
+                  <inp.icon style={{ width: 18, height: 18, color: "rgb(var(--fg))", opacity: 0.55 }} />
+                </div>
+              </foreignObject>
+            );
+          })}
+          {/* Output pill */}
+          <rect x={outputPillX} y={outputTopY - 4} width={pillW} height={totalOutputH + 8} rx="8"
+            fill="rgb(var(--bg))" stroke="rgb(var(--line))" strokeWidth="1" strokeOpacity="0.7" />
+          {DIAGRAM_OUTPUTS.map((out, i) => {
+            const cy = outputTopY + i * (iconSize + iconGap) + iconSize / 2;
+            return (
+              <foreignObject key={i} x={outputPillCX - foSize / 2} y={cy - foSize / 2} width={foSize} height={foSize}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
+                  <out.icon style={{ width: 18, height: 18, color: "rgb(var(--fg))", opacity: 0.55 }} />
+                </div>
+              </foreignObject>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Right: copy */}
+      <div className="flex flex-col justify-center px-6 sm:px-8 py-6 gap-3 sm:flex-1 border-t border-[rgb(var(--line))] sm:border-t-0">
+        <span className="inline-flex items-center gap-1.5 text-[14px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] self-start">
+          <SiShopify className="w-3.5 h-3.5 opacity-60" />
+          One partner. Every layer.
+        </span>
+        <p className="text-[clamp(1.4rem,3vw,1.75rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
+          Full-stack execution. One team owns the storefront, the app, the brand, and the campaign.
         </p>
       </div>
     </div>
@@ -596,19 +802,15 @@ function WhatWeDo() {
 
 // Slug-specific sketches for the think section — one per post
 const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
-  // "A quiet forecast on AI capability" — concentric signal rings dissolving into noise
   "ai-capability-forecast": (
     <svg key="ai-capability-forecast" viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
-      {/* Concentric rings — tight at center, spacing grows to suggest uncertainty */}
       <circle cx="100" cy="60" r="6"  stroke="rgb(var(--blue))" strokeWidth="1.4" opacity="0.9" />
       <circle cx="100" cy="60" r="16" stroke="rgb(var(--blue))" strokeWidth="1.1" opacity="0.7" />
       <circle cx="100" cy="60" r="28" stroke="rgb(var(--blue))" strokeWidth="0.9" opacity="0.5" />
       <circle cx="100" cy="60" r="43" stroke="rgb(var(--blue))" strokeWidth="0.7" strokeDasharray="4 3" opacity="0.35" />
       <circle cx="100" cy="60" r="60" stroke="rgb(var(--blue))" strokeWidth="0.5" strokeDasharray="3 5" opacity="0.2" />
       <circle cx="100" cy="60" r="80" stroke="rgb(var(--blue))" strokeWidth="0.4" strokeDasharray="2 6" opacity="0.1" />
-      {/* Center dot */}
       <circle cx="100" cy="60" r="2.5" fill="rgb(var(--blue))" opacity="0.95" />
-      {/* Noise scatter — random dots outside rings */}
       <circle cx="38"  cy="22"  r="1.2" fill="rgb(var(--muted))" opacity="0.3" />
       <circle cx="162" cy="18"  r="1"   fill="rgb(var(--muted))" opacity="0.25" />
       <circle cx="22"  cy="88"  r="1.4" fill="rgb(var(--muted))" opacity="0.2" />
@@ -620,46 +822,34 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
     </svg>
   ),
 
-  // "Four years in" — four stacked horizontal bars, each taller, like annual rings or layers of sediment
   "four-years": (
     <svg key="four-years" viewBox="0 0 200 120" fill="none" strokeLinecap="round" className="w-full" aria-hidden="true">
-      {/* Year bars — bottom to top, growing width */}
       <rect x="80" y="94" width="40"  height="7" rx="1" fill="rgb(var(--green))" opacity="0.25" />
       <rect x="62" y="82" width="76"  height="7" rx="1" fill="rgb(var(--green))" opacity="0.4" />
       <rect x="40" y="70" width="120" height="7" rx="1" fill="rgb(var(--green))" opacity="0.6" />
       <rect x="16" y="58" width="168" height="7" rx="1" fill="rgb(var(--green))" opacity="0.85" />
-      {/* Year labels — right aligned */}
       <line x1="192" y1="97" x2="194" y2="97" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
       <line x1="192" y1="85" x2="194" y2="85" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
       <line x1="192" y1="73" x2="194" y2="73" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
       <line x1="192" y1="61" x2="194" y2="61" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.35" />
-      {/* Vertical spine */}
       <line x1="193" y1="56" x2="193" y2="102" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.25" />
-      {/* Arrow at top */}
       <polyline points="190,26 193,20 196,26" stroke="rgb(var(--green))" strokeWidth="1.2" strokeLinejoin="round" opacity="0.7" />
       <line x1="193" y1="20" x2="193" y2="56" stroke="rgb(var(--green))" strokeWidth="0.8" strokeDasharray="3 3" opacity="0.4" />
     </svg>
   ),
 
-  // "Hello, world" — a single terminal cursor blinking on an otherwise empty canvas
   "hello-world": (
     <svg key="hello-world" viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
-      {/* Terminal window outline */}
       <rect x="24" y="18" width="152" height="84" rx="4" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.22" />
-      {/* Title bar */}
       <line x1="24" y1="34" x2="176" y2="34" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.18" />
       <circle cx="37" cy="26" r="3" fill="rgb(var(--muted))" opacity="0.18" />
       <circle cx="48" cy="26" r="3" fill="rgb(var(--muted))" opacity="0.18" />
       <circle cx="59" cy="26" r="3" fill="rgb(var(--muted))" opacity="0.18" />
-      {/* Prompt character */}
       <text x="38" y="57" fontFamily="monospace" fontSize="11" fill="rgb(var(--green))" opacity="0.7">$</text>
-      {/* Typed text — dashes representing characters */}
       <line x1="50" y1="52" x2="66"  y2="52" stroke="rgb(var(--fg))" strokeWidth="1.4" opacity="0.55" strokeLinecap="round" />
       <line x1="69" y1="52" x2="80"  y2="52" stroke="rgb(var(--fg))" strokeWidth="1.4" opacity="0.55" strokeLinecap="round" />
       <line x1="83" y1="52" x2="100" y2="52" stroke="rgb(var(--fg))" strokeWidth="1.4" opacity="0.55" strokeLinecap="round" />
-      {/* Cursor block */}
       <rect x="103" y="44" width="7" height="11" rx="1" fill="rgb(var(--fg))" opacity="0.7" />
-      {/* Output line */}
       <line x1="38" y1="68" x2="120" y2="68" stroke="rgb(var(--green))" strokeWidth="1.0" opacity="0.45" strokeLinecap="round" />
       <line x1="38" y1="76" x2="90"  y2="76" stroke="rgb(var(--green))" strokeWidth="1.0" opacity="0.3" strokeLinecap="round" />
     </svg>
@@ -741,16 +931,8 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
   const inputBase = "w-full bg-transparent border-0 border-b py-3 text-[16px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200";
 
   const PLANS = [
-    {
-      key: "free" as Plan,
-      label: "Get early access",
-      sub: "Free, no commitment",
-    },
-    {
-      key: "service" as Plan,
-      label: "Work with us",
-      sub: "Already a client or ready to start",
-    },
+    { key: "free" as Plan, label: "Get early access", sub: "Free, no commitment" },
+    { key: "service" as Plan, label: "Work with us", sub: "Already a client or ready to start" },
   ];
 
   const modal = (
@@ -780,12 +962,10 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
           animation: open ? "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both" : "none",
         }}
       >
-        {/* Drag handle — mobile */}
         <div className="sm:hidden flex justify-center pt-3 pb-1">
           <div className="w-8 h-1 rounded-full bg-[rgb(var(--line))]" />
         </div>
 
-        {/* Close — desktop */}
         <button
           onClick={onClose}
           className="hidden sm:flex absolute top-4 right-4 w-7 h-7 items-center justify-center text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
@@ -826,7 +1006,6 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
                 Status updates, files, invoices, and support. Built for clients who want visibility without the back-and-forth.
               </p>
 
-              {/* Plan selector */}
               <div className="grid grid-cols-2 gap-2.5 mb-7">
                 {PLANS.map(({ key, label, sub }) => (
                   <button
@@ -898,78 +1077,54 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
 
-      {/* Soundwave hero — touches both grid lines */}
       <SoundwaveHero />
 
       <GridRule />
 
-      {/* Tech marquee */}
       <TechMarquee />
 
       <GridRule />
 
-      {/* What we do */}
       <WhatWeDo />
 
       <GridRule />
 
-      {/* Shipping + Perspectives */}
       <div className="flex flex-col md:flex-row gap-y-0 overflow-visible">
 
         <div className="w-full rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
 
-          {/* ── What we're shipping ── */}
-          <div className="flex items-center justify-center gap-3 py-6">
-            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">What we're actively</span>
-            <TooltipPill tip="Products and themes we're currently developing under the Inertia name.">
-              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
-                <SiShopify className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                <span className="text-[20px] sm:text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>building</span>
-              </div>
-            </TooltipPill>
-            <span className="text-[22px] sm:text-[22px] tracking-tight text-[rgb(var(--muted))]">right now</span>
-          </div>
-
-          <GridRule />
-
-          {/* Items — 2×2 on mobile, row on sm+ */}
-          <div className="relative">
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 sm:h-20 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
-          <div className="grid grid-cols-2 sm:flex pb-14">
+          {/* Building grid — no section label, cards speak for themselves */}
+          <div className="grid grid-cols-2 sm:grid-cols-3">
             {BUILDING.map((item, i) => {
               const isDashboard = item.name === "Inertia Dashboard";
               const external = !isDashboard && item.href.startsWith("http");
               const borderClass = [
                 i === 0 ? "border-r border-[rgb(var(--line))]" : "",
-                i === 1 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
-                i < 2   ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
+                i < 2 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
+                i < 2 ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
                 i === 2 ? "col-span-2 sm:col-span-1" : "",
               ].filter(Boolean).join(" ");
-              const isMockup = item.name === "Aether Theme";
-              const isInertia = item.name === "Inertia";
-              const sharedClass = `group flex-1 flex flex-col px-5 sm:px-8 pt-6 ${isMockup ? "pb-0" : "pb-6"} transition-colors hover:bg-[rgb(var(--line))/0.15] min-h-[280px] sm:min-h-[260px] text-left rise overflow-hidden ${borderClass}`;
-              const riseDelay = { ["--rise-delay" as any]: `${i * 70}ms` };
+              // third card (col-span-2) is shorter on mobile, normal on sm+
+              const heightClass = i === 2 ? "min-h-[160px] sm:min-h-0" : "";
+              const sharedClass = `group flex flex-col px-6 pt-6 pb-0 overflow-hidden transition-colors hover:bg-[rgb(var(--line))/0.12] text-left rise ${borderClass} ${heightClass}`;
+              const riseDelay = { ["--rise-delay" as any]: `${i * 60}ms` };
+              // first two cards get a taller sketch on mobile
+              const sketchClass = i < 2 ? "mt-auto w-full overflow-hidden [&_svg]:h-40 [&_svg]:w-full sm:[&_svg]:h-auto" : "mt-auto w-full overflow-hidden";
               const inner = (
                 <>
-                  <div className="flex flex-col gap-1 mb-2">
-                    <span className="text-[20px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
-                    <span className="text-[13px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
+                  {/* Text content */}
+                  <div className="flex flex-col gap-1.5 mb-4">
+                    <span className="text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
+                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
                   </div>
-                  <span className="inline-flex self-start items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full mb-5 text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">
+                  {/* CTA arrow */}
+                  <span className="inline-flex self-start items-center justify-center w-9 h-9 border border-[rgb(var(--line))] rounded-full mb-6 text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[14px]">
                     →
                   </span>
-                  <div className={`relative overflow-hidden ${isInertia || isMockup ? "mt-auto h-[110px] sm:h-auto" : "mt-auto"}`}>
-                    {isInertia && (
-                      <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-0 h-4 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
-                    )}
-                    {isMockup && (
-                      <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-0 h-4 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
-                    )}
+                  {/* Mockup flush to bottom */}
+                  <div className={sketchClass}>
                     {item.sketch}
                   </div>
-                  {!isMockup && (
-                    <div className="pb-2" />
-                  )}
                 </>
               );
               if (isDashboard) return (
@@ -983,124 +1138,69 @@ function VisualLayout({ posts, work }: { posts: PostMeta[]; work: WorkMeta[] }) 
               );
             })}
           </div>
-          </div>
 
           <GridRule />
 
-          {/* ── Perspectives ── */}
-          <div className="relative flex items-center justify-center py-6 px-8 sm:px-0">
-            <div className="flex items-center gap-3">
-              <span className="text-[22px] tracking-tight text-[rgb(var(--muted))]">The way we</span>
-              <TooltipPill tip="Short posts on design, development, and the decisions behind what we build.">
-                <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
-                  <SiSubstack className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                  <span className="text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>think</span>
-                </div>
-              </TooltipPill>
-              <span className="hidden sm:inline text-[22px] tracking-tight text-[rgb(var(--muted))]">about our work</span>
-              <Link href="/blog" className="sm:absolute sm:right-8 inline-flex items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">→</Link>
-            </div>
-          </div>
+          <StackDiagram />
 
           <GridRule />
 
           {posts.length === 0 ? (
             <p className="px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing yet.</p>
           ) : (
-            <div className="relative flex flex-col pb-16">
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-36 sm:h-24 z-10" style={{ background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
-              {/* Featured post */}
-              {(() => {
-                const post = posts[0];
-                return (
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="group grid sm:grid-cols-2 border-b border-[rgb(var(--line))] transition-colors hover:bg-[rgb(var(--line))/0.15] rise"
-                    style={{ ["--rise-delay" as any]: "0ms" }}
-                  >
-                    <div className="px-6 sm:px-10 pt-8 pb-6 sm:border-r border-[rgb(var(--line))] flex items-center">
-                      <div className="w-full">
-                        {THINK_SLUG_SKETCHES[post.slug]}
-                      </div>
-                    </div>
-                    <div className="px-6 sm:px-10 pt-6 sm:pt-8 pb-6 sm:pb-8 flex flex-col justify-between gap-6">
-                      <div className="flex flex-col gap-3">
-                        <span className="inline-flex items-center self-start border border-[rgb(var(--line))] text-[rgb(var(--muted))] px-2 py-0.5 text-[11px] tracking-tight leading-none rounded-sm">
-                          New post
-                        </span>
-                        <span className="text-[20px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
-                        {post.summary && (
-                          <span className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">{post.summary}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-60">{formatDate(post.date)}</span>
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[12px] opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0">→</span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })()}
-
-              {/* Remaining posts — 2x2 on mobile, 3 cols on sm+ */}
-              {posts.length > 1 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3">
-                  {posts.slice(1, 4).map((post, i) => (
-                    <Link
-                      key={post.slug}
-                      href={`/blog/${post.slug}`}
-                      className={[
-                        "group flex flex-col justify-between gap-4 px-4 sm:px-6 pt-5 pb-5 transition-colors hover:bg-[rgb(var(--line))/0.15] rise",
-                        i < 2 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
-                        i === 0 ? "border-r border-[rgb(var(--line))]" : "",
-                        i < 2 ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
-                        i === 2 ? "col-span-2 sm:col-span-1 border-t border-[rgb(var(--line))] sm:border-t-0" : "",
-                      ].filter(Boolean).join(" ")}
-                      style={{ ["--rise-delay" as any]: `${(i + 1) * 60}ms` }}
-                    >
-                      <div className="hidden sm:block w-full overflow-hidden">
-                        {THINK_SLUG_SKETCHES[post.slug]}
-                      </div>
-                      <div className="flex flex-col gap-1.5 sm:mt-1">
-                        <span className="text-[14px] sm:text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
-                        {post.summary && <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 line-clamp-2">{post.summary}</span>}
-                      </div>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-50">{formatDate(post.date)}</span>
-                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[11px] opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0">→</span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
+            <div className="grid grid-cols-1 sm:grid-cols-3">
+              {posts.slice(0, 3).map((post, i) => (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className={[
+                    "group flex flex-col justify-between gap-4 px-6 pt-6 pb-6 transition-colors hover:bg-[rgb(var(--line))/0.15] rise border-b border-[rgb(var(--line))]",
+                    i < 2 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
+                  ].filter(Boolean).join(" ")}
+                  style={{ ["--rise-delay" as any]: `${i * 60}ms` }}
+                >
+                  <div className="w-full overflow-hidden">
+                    {THINK_SLUG_SKETCHES[post.slug]}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {i === 0 && (
+                      <span className="inline-flex items-center self-start border border-[rgb(var(--line))] text-[rgb(var(--muted))] px-2 py-0.5 text-[11px] tracking-tight leading-none rounded-sm mb-1">
+                        New post
+                      </span>
+                    )}
+                    <span className="text-[18px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
+                    {post.summary && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 line-clamp-2">{post.summary}</span>}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-50">{formatDate(post.date)}</span>
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[14px] opacity-100 transition-all duration-200">→</span>
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
-
-          <GridRule />
 
         </div>
 
       </div>
 
-      {/* Past work */}
       <section className="rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
 
-        {/* Label cell */}
-        <div className="relative flex items-center justify-center py-6 px-8 sm:px-0">
-          <div className="flex items-center gap-3">
-            <span className="text-[22px] tracking-tight text-[rgb(var(--muted))]">Things we've</span>
+        <div className="relative flex items-center justify-center gap-3 py-6 px-6 sm:px-8 border-b border-[rgb(var(--line))]">
+          <p className="text-[clamp(1.25rem,3vw,1.6rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug flex items-center gap-2 flex-wrap justify-center">
+            Ship faster without
             <TooltipPill tip="Selected client work spanning Shopify builds, brand identities, and custom web projects.">
-              <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
-                <SiDribbble className="w-4 h-4" style={{ color: "rgb(var(--fg))" }} />
-                <span className="text-[20px] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>shipped</span>
-              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 cursor-default" style={{ background: "rgb(var(--muted)/0.08)", border: "1px solid rgb(var(--muted)/0.25)" }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 opacity-70" style={{ color: "rgb(var(--fg))" }}>
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>
+                </svg>
+                <span className="text-[0.85em] font-medium tracking-tight" style={{ color: "rgb(var(--fg))" }}>compromise</span>
+              </span>
             </TooltipPill>
-            <span className="hidden sm:inline text-[22px] tracking-tight text-[rgb(var(--muted))]">for real clients</span>
-            <Link href="/work" className="sm:absolute sm:right-8 inline-flex items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px]">→</Link>
-          </div>
+            on quality.
+          </p>
+          <Link href="/work" className="absolute right-6 sm:right-8 inline-flex items-center justify-center w-7 h-7 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[12px] shrink-0">→</Link>
         </div>
-
-        <GridRule />
 
         <PastWork work={work} />
 

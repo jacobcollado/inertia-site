@@ -12,25 +12,69 @@ export function PastWork({ work }: { work: WorkMeta[] }) {
 
 /* ── Work grid ────────────────────────────────────────────────── */
 
-function MasonryItem({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="masonry-item">
-      {children}
-    </div>
-  );
-}
 
 function WorkGrid({ work }: { work: WorkMeta[] }) {
   const [active, setActive] = useState<WorkMeta | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+  const dragMoved = useRef(false);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    dragMoved.current = false;
+    startX.current = e.pageX - (trackRef.current?.offsetLeft ?? 0);
+    scrollLeft.current = trackRef.current?.scrollLeft ?? 0;
+    e.preventDefault();
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !trackRef.current) return;
+    const x = e.pageX - trackRef.current.offsetLeft;
+    const walk = x - startX.current;
+    if (Math.abs(walk) > 4) dragMoved.current = true;
+    trackRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
+  const onMouseUp = () => { isDragging.current = false; };
+
+  useEffect(() => {
+    const onGlobalUp = () => { isDragging.current = false; };
+    window.addEventListener("mouseup", onGlobalUp);
+    return () => window.removeEventListener("mouseup", onGlobalUp);
+  }, []);
 
   return (
     <>
-      <div className="masonry-grid">
-        {work.map((w, i) => (
-          <MasonryItem key={w.slug}>
-            <WorkCard item={w} index={i} total={work.length} onOpen={() => setActive(w)} />
-          </MasonryItem>
-        ))}
+      <div className="relative">
+        <div
+          ref={trackRef}
+          className="flex overflow-x-auto gap-0 select-none"
+          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch", cursor: "grab" }}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+        >
+          {work.map((w, i) => (
+            <div key={w.slug} className="shrink-0 w-[80vw] sm:w-[33.333%] border-r border-[rgb(var(--line))]">
+              <WorkCard item={w} index={i} total={work.length} onOpen={() => { if (!dragMoved.current) setActive(w); }} />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Drag indicator */}
+      <div className="flex items-center gap-3 px-6 py-3 border-t border-[rgb(var(--line))]">
+        <div className="flex items-center gap-1" style={{ animation: "drag-hint 1.6s ease-in-out infinite" }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" style={{ color: "rgb(var(--muted))", opacity: 0.6 }}>
+            <path d="M5 12h14M15 7l5 5-5 5" />
+          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" style={{ color: "rgb(var(--muted))", opacity: 0.3 }}>
+            <path d="M5 12h14M15 7l5 5-5 5" />
+          </svg>
+        </div>
+        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40">Drag to explore</span>
       </div>
       {active && <WorkSheet item={active} onClose={() => setActive(null)} />}
     </>
@@ -87,13 +131,11 @@ function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: numbe
   return (
     <button
       onClick={onOpen}
-      className="work-grid-card group relative flex flex-col text-left overflow-hidden rise"
-      data-index={index}
-      data-total={total}
-      style={{ ["--row-i" as any]: index, ["--rise-delay" as any]: `${index * 70}ms` }}
+      className="group relative flex flex-col text-left overflow-hidden w-full h-full rise"
+      style={{ ["--rise-delay" as any]: `${index * 60}ms` }}
     >
-      {/* Logo area — flex-1 so it fills all available height in the masonry cell */}
-      <div className={`relative w-full flex-1 ${CARD_MIN_H[item.slug] ?? "min-h-[260px]"} flex items-center justify-center overflow-hidden`}>
+      {/* Logo area */}
+      <div className={`relative w-full ${CARD_MIN_H[item.slug] ?? "min-h-[220px]"} flex items-center justify-center overflow-hidden`}>
         <div className={`relative ${LOGO_SIZE[item.slug] ?? "w-[50%]"} h-16 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]`}>
           <LogoImage slug={item.slug} alt={item.client} />
         </div>
@@ -105,8 +147,8 @@ function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: numbe
       {/* Info */}
       <div className="flex items-center justify-between gap-2 px-5 py-3.5">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[13px] sm:text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.client}</span>
-          {item.role && <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] mt-0.5">{item.role}</span>}
+          <span className="text-[18px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.client}</span>
+          {item.role && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] mt-0.5">{item.role}</span>}
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {item.year && <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-40">{item.year}</span>}

@@ -292,8 +292,9 @@ export default function RoadmapPage() {
 
       {/* Nav */}
       <div className="px-6 sm:px-8 py-5 rise">
-        <Link href="/" className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-          ← Home
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
+          back
         </Link>
       </div>
 

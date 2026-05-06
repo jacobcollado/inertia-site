@@ -241,8 +241,9 @@ export default function EnterprisePage() {
 
       {/* Nav */}
       <div className="px-6 sm:px-8 py-5 rise">
-        <Link href="/aether" className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-          ← Aether
+        <Link href="/aether" className="inline-flex items-center gap-1.5 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
+          Aether
         </Link>
       </div>
 
@@ -250,23 +251,22 @@ export default function EnterprisePage() {
 
       {/* Hero */}
       <section className="px-6 sm:px-8 pt-14 pb-12 flex flex-col items-center text-center rise">
-        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mb-5">Aether for business</p>
-        <h1 className="text-[clamp(2.4rem,7vw,5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-5 max-w-2xl">
+        <h1 className="text-[clamp(2.4rem,7vw,5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4 max-w-2xl">
           Scale faster.<br />Keep more margin.
         </h1>
-        <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] mb-9 max-w-md">
-          A production-ready Shopify foundation for agencies, studios, and operators who ship stores for a living.
+        <p className="text-[1rem] leading-[1.5] tracking-tight text-[rgb(var(--muted))] mb-8 max-w-sm">
+          A Shopify foundation for agencies and studios that ship stores for a living.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/contact?ref=enterprise"
-            className="inline-flex items-center gap-2 bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-6 py-2.5 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
+            className="inline-flex items-center gap-2 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
           >
             Talk to us
           </Link>
           <Link
             href="#pricing"
-            className="inline-flex items-center gap-2 border border-[rgb(var(--line))] px-6 py-2.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))] transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] px-5 py-2 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))] transition-colors"
           >
             See pricing
           </Link>
@@ -501,16 +501,16 @@ export default function EnterprisePage() {
 
       {/* Closing CTA */}
       <div className="px-6 sm:px-8 py-14 sm:py-16 flex flex-col items-center text-center rise">
-        <h2 className="text-[clamp(1.6rem,4vw,2.8rem)] font-medium tracking-[-0.04em] leading-[1.08] text-[rgb(var(--fg))] mb-4 max-w-lg">
+        <h2 className="text-[clamp(1.6rem,4vw,2.8rem)] font-medium tracking-[-0.04em] leading-[1.08] text-[rgb(var(--fg))] mb-3 max-w-lg">
           Ready to ship <span className="text-[rgb(var(--blue))]">more</span>, build less?
         </h2>
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] mb-8 max-w-sm leading-relaxed">
-          We work with a small number of agencies and studios. If you are serious about scaling, get in touch and we will find the right arrangement.
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] mb-7 max-w-xs leading-[1.5]">
+          We work with a small number of agencies. Serious about scaling — get in touch.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/contact?ref=enterprise-cta"
-            className="inline-flex items-center gap-2 bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 py-3 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
+            className="inline-flex items-center gap-2 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
           >
             Talk to us
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
@@ -519,7 +519,7 @@ export default function EnterprisePage() {
           </Link>
           <Link
             href="/aether"
-            className="inline-flex items-center gap-2 border border-[rgb(var(--line))] px-7 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))] transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] px-5 py-2 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))] transition-colors"
           >
             View standard plans
           </Link>

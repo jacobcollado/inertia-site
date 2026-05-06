@@ -262,9 +262,10 @@ export default function AetherPage() {
       <div className="px-6 sm:px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
         <Link
           href="/"
-          className="text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
-          ← back
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
+          back
         </Link>
       </div>
 
@@ -272,10 +273,6 @@ export default function AetherPage() {
 
       {/* Hero */}
       <section className="px-6 sm:px-8 pt-10 pb-4 flex flex-col items-center text-center rise">
-        <div className="inline-flex items-center gap-1.5 border border-[rgb(var(--line))] rounded-full px-3 py-1 mb-4">
-          <ShopifyLogo />
-          <span className="text-[11px] font-medium tracking-tight text-[rgb(var(--muted))]">Shopify theme</span>
-        </div>
         <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-3">
           Aether
         </h1>
@@ -458,8 +455,22 @@ export default function AetherPage() {
 
       {/* Footer */}
       <footer className="px-6 sm:px-8 py-8 flex items-center justify-between gap-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">
-        <Link href="/" className="hover:text-[rgb(var(--fg))] transition-colors">Inertia</Link>
-        <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch →</Link>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="hover:text-[rgb(var(--fg))] transition-colors">Inertia</Link>
+          <div className="flex items-center gap-1.5">
+            <ShopifyLogo />
+            <span className="text-[11px] tracking-tight">Shopify theme</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 text-[11px] tracking-tight">
+            <svg viewBox="0 0 8 8" className="w-2 h-2 shrink-0" aria-hidden="true">
+              <circle cx="4" cy="4" r="3" fill="rgb(var(--green))" />
+            </svg>
+            All systems operational
+          </div>
+          <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch →</Link>
+        </div>
       </footer>
 
     </main>

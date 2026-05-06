@@ -89,12 +89,12 @@ export function WelcomePopup() {
         </button>
 
         <div className="px-4 pt-4 pb-4">
-          <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 rounded-full px-2.5 py-1 mb-3">
+          <div className="inline-flex items-center gap-1.5 mb-3">
             <span className="relative flex h-1.5 w-1.5 shrink-0">
-              <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="absolute inset-0 rounded-full bg-[rgb(var(--fg))] animate-ping opacity-30" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[rgb(var(--fg))] opacity-50" />
             </span>
-            <span className="text-[10.5px] tracking-tight text-emerald-600 dark:text-emerald-400 font-medium">Available for work</span>
+            <span className="text-[10.5px] tracking-tight text-[rgb(var(--muted))] font-medium">Taking on projects</span>
           </div>
 
           <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug mb-1">

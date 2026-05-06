@@ -157,9 +157,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
       <div className="hidden sm:flex sm:w-[48%] flex-col justify-between px-14 py-16 border-r border-[rgb(var(--line))]">
         <Link
           href="/"
-          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start"
+          className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start"
         >
-          ← Inertia
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
+          Inertia
         </Link>
 
         <div style={{ animation: "rise-in 500ms cubic-bezier(0.22,1,0.36,1) both", animationDelay: "60ms" }}>
@@ -186,9 +187,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         {/* Mobile: back link */}
         <Link
           href="/"
-          className="sm:hidden text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors mb-8 self-start"
+          className="sm:hidden inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors mb-8 self-start"
         >
-          ← Inertia
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
+          Inertia
         </Link>
 
         {/* Mobile: value prop summary */}
