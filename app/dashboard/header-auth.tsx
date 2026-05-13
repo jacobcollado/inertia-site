@@ -94,14 +94,14 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
       <div className="flex items-center gap-3" style={fadeStyle}>
         <Link
           href="/dashboard"
-          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          className="text-[13.5px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
           Dashboard
         </Link>
         <button
           onClick={() => startTransition(() => signOut())}
           disabled={pending}
-          className="inline-flex items-center rounded-full border border-[rgb(var(--line))] px-3.5 py-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:border-[rgb(var(--fg))/0.3] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-40"
+          className="inline-flex items-center rounded-full border border-[rgb(var(--line))] px-3.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:border-[rgb(var(--fg))/0.3] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-40"
         >
           {pending ? "…" : "Sign out"}
         </button>
@@ -113,13 +113,13 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
     <div className="flex items-center gap-2" style={fadeStyle}>
       <Link
         href="/login"
-        className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors px-2"
+        className="text-[13.5px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors px-2"
       >
         Sign in
       </Link>
       <Link
         href="/login?tab=signup"
-        className="inline-flex items-center rounded-full border border-[rgb(var(--line))] px-3.5 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] hover:bg-[rgb(var(--line))/0.3] transition-colors"
+        className="inline-flex items-center rounded-full border border-[rgb(var(--line))] px-3.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--fg))] hover:bg-[rgb(var(--line))/0.3] transition-colors"
       >
         Client portal →
       </Link>

@@ -30,134 +30,174 @@ const QUESTIONS: { id: string; text: string; sub: string }[] = [
 
 const TOTAL = QUESTIONS.length;
 
-function rgba([a, b, c]: [number, number, number], alpha = 1) {
-  return `rgba(${a},${b},${c},${alpha})`;
+// Neutral SVG visuals — use currentColor so they adapt to light/dark
+function VisualBrand() {
+  return (
+    <svg viewBox="0 0 200 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true">
+      {/* Browser chrome */}
+      <rect x="10" y="10" width="180" height="140" rx="4" stroke="currentColor" strokeOpacity="0.12" strokeWidth="1" />
+      <line x1="10" y1="26" x2="190" y2="26" stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.8" />
+      <circle cx="22" cy="18" r="2.5" fill="currentColor" fillOpacity="0.1" />
+      <circle cx="32" cy="18" r="2.5" fill="currentColor" fillOpacity="0.1" />
+      <circle cx="42" cy="18" r="2.5" fill="currentColor" fillOpacity="0.1" />
+      {/* Hero image area */}
+      <rect x="18" y="33" width="164" height="62" rx="2" fill="currentColor" fillOpacity="0.05" stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.6" />
+      {/* Headline */}
+      <rect x="18" y="104" width="120" height="10" rx="2" fill="currentColor" fillOpacity="0.18" />
+      <rect x="18" y="118" width="88" height="7" rx="2" fill="currentColor" fillOpacity="0.1" />
+      {/* CTA pill */}
+      <rect x="18" y="132" width="52" height="12" rx="6" fill="currentColor" fillOpacity="0.15" stroke="currentColor" strokeOpacity="0.25" strokeWidth="0.8" />
+      <line x1="28" y1="138" x2="60" y2="138" stroke="currentColor" strokeOpacity="0.35" strokeWidth="1.1" />
+    </svg>
+  );
 }
 
-const A: [number, number, number] = [56, 180, 255];
-
-function SketchBrand({ visible }: { visible: boolean }) {
-  const o = (v: number) => visible ? v : 0;
+function VisualConversion() {
+  const baseline = 130;
+  const bars = [
+    { x: 35,  h: 14 },
+    { x: 65,  h: 26 },
+    { x: 95,  h: 42 },
+    { x: 125, h: 62 },
+    { x: 158, h: 90 },
+  ];
+  const barW = 20;
   return (
-    <svg viewBox="0 0 200 150" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true"
-      style={{ transition: "opacity 300ms ease", opacity: visible ? 1 : 0 }}>
-      <rect x="6" y="6" width="188" height="138" rx="3" stroke={rgba([160,160,160], o(0.18))} strokeWidth="0.8" />
-      <line x1="6" y1="20" x2="194" y2="20" stroke={rgba([160,160,160], o(0.12))} strokeWidth="0.6" />
-      <line x1="16" y1="13" x2="48" y2="13" stroke={rgba([160,160,160], o(0.28))} strokeWidth="1.1" />
-      <rect x="6" y="20" width="188" height="66" fill={rgba(A, o(0.06))} stroke="none" />
-      <line x1="20" y1="42" x2="130" y2="42" stroke={rgba(A, o(0.85))} strokeWidth="2.8" />
-      <line x1="20" y1="52" x2="106" y2="52" stroke={rgba(A, o(0.5))} strokeWidth="1.8" />
-      <line x1="20" y1="61" x2="76" y2="61" stroke={rgba([160,160,160], o(0.28))} strokeWidth="0.9" />
-      <rect x="20" y="70" width="48" height="12" rx="2" fill={rgba(A, o(0.9))} stroke="none" />
-      <line x1="74" y1="76" x2="120" y2="76" stroke={rgba([160,160,160], o(0.18))} strokeWidth="0.7" />
-      {[0,1,2].map(i => (
-        <g key={i}>
-          <rect x={8 + i * 62} y="94" width="56" height="42" rx="1.5" fill={rgba([160,160,160], o(0.04))} stroke={rgba([160,160,160], o(0.14))} strokeWidth="0.6" />
-          <line x1={16 + i * 62} y1="124" x2={56 + i * 62} y2="124" stroke={rgba([160,160,160], o(0.2))} strokeWidth="0.6" />
-          <line x1={16 + i * 62} y1="130" x2={40 + i * 62} y2="130" stroke={rgba([160,160,160], o(0.13))} strokeWidth="0.5" />
+    <svg viewBox="0 0 200 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true">
+      {/* Grid */}
+      {[0.33, 0.66, 1].map(t => (
+        <line key={t} x1="20" y1={baseline - 90 * t} x2="185" y2={baseline - 90 * t}
+          stroke="currentColor" strokeOpacity="0.07" strokeWidth="0.6" strokeDasharray="3 3" />
+      ))}
+      <line x1="20" y1={baseline} x2="185" y2={baseline} stroke="currentColor" strokeOpacity="0.18" strokeWidth="0.7" />
+      {/* Bars */}
+      {bars.map((b, i) => (
+        <g key={b.x}>
+          <rect x={b.x - barW / 2} y={baseline - b.h} width={barW} height={b.h} rx="2"
+            fill={i === 4 ? "currentColor" : "currentColor"}
+            fillOpacity={i === 4 ? 0.18 : 0.07}
+            stroke="currentColor"
+            strokeOpacity={i === 4 ? 0.4 : 0.18}
+            strokeWidth={i === 4 ? 1.0 : 0.55} />
+          {i === 4 && (
+            <rect x={b.x - barW / 2} y={baseline - b.h} width={barW} height={9} rx="2"
+              fill="currentColor" fillOpacity="0.5" />
+          )}
         </g>
       ))}
+      {/* Trend */}
+      <polyline points={bars.map(b => `${b.x},${baseline - b.h}`).join(" ")}
+        stroke="currentColor" strokeOpacity="0.2" strokeWidth="0.8" strokeDasharray="3 3" fill="none" />
+      {/* 6× label */}
+      <rect x="170" y={baseline - 90 - 14} width="18" height="12" rx="2.5"
+        fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.25" strokeWidth="0.7" />
+      <line x1="173" y1={baseline - 90 - 8} x2="185" y2={baseline - 90 - 8}
+        stroke="currentColor" strokeOpacity="0.3" strokeWidth="0.9" />
     </svg>
   );
 }
 
-function SketchTarget({ visible }: { visible: boolean }) {
-  const o = (v: number) => visible ? v : 0;
-  const cx = 100, cy = 72;
+function VisualLaunch() {
   return (
-    <svg viewBox="0 0 200 150" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true"
-      style={{ transition: "opacity 300ms ease", opacity: visible ? 1 : 0 }}>
-      {[48, 34, 20, 9].map((r, i) => (
-        <circle key={i} cx={cx} cy={cy} r={r}
-          fill={i === 0 ? rgba([160,160,160], o(0.03)) : "none"}
-          stroke={i === 3 ? rgba(A, o(0.85)) : rgba([160,160,160], o(0.18 - i * 0.02))}
-          strokeWidth={i === 3 ? 1.4 : 0.7} />
+    <svg viewBox="0 0 200 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true">
+      {/* Timeline track */}
+      <line x1="24" y1="80" x2="176" y2="80" stroke="currentColor" strokeOpacity="0.12" strokeWidth="1.5" />
+      {/* Steps */}
+      {[
+        { x: 44,  done: true,  current: false },
+        { x: 84,  done: true,  current: false },
+        { x: 124, done: true,  current: true  },
+        { x: 164, done: false, current: false },
+      ].map((s, i) => (
+        <g key={i}>
+          <circle cx={s.x} cy={80} r={s.current ? 8 : 5.5}
+            fill={s.done ? "currentColor" : "none"}
+            fillOpacity={s.done ? (s.current ? 0.2 : 0.1) : 0}
+            stroke="currentColor"
+            strokeOpacity={s.done ? (s.current ? 0.7 : 0.35) : 0.2}
+            strokeWidth={s.current ? 1.2 : 0.8} />
+          {s.done && !s.current && (
+            <polyline
+              points={`${s.x - 2.5},80 ${s.x - 0.5},82 ${s.x + 3},77`}
+              stroke="currentColor" strokeOpacity="0.5" strokeWidth="1.1" fill="none" />
+          )}
+          {/* Label card */}
+          <rect x={s.x - 18} y={i % 2 === 0 ? 56 : 92} width="36" height="12" rx="2"
+            fill="currentColor" fillOpacity={s.current ? 0.07 : 0.03}
+            stroke="currentColor" strokeOpacity={s.current ? 0.3 : 0.14} strokeWidth="0.6" />
+          <line x1={s.x - 10} y1={i % 2 === 0 ? 62 : 98}
+            x2={s.x + 10} y2={i % 2 === 0 ? 62 : 98}
+            stroke="currentColor" strokeOpacity={s.current ? 0.35 : 0.18} strokeWidth={s.current ? 0.9 : 0.6} />
+          <line x1={s.x} y1={i % 2 === 0 ? 68 : 86}
+            x2={s.x} y2={i % 2 === 0 ? 74 : 88}
+            stroke="currentColor" strokeOpacity="0.15" strokeWidth="0.6" />
+        </g>
       ))}
-      <line x1={cx - 58} y1={cy} x2={cx - 52} y2={cy} stroke={rgba([160,160,160], o(0.2))} strokeWidth="0.6" />
-      <line x1={cx + 52} y1={cy} x2={cx + 58} y2={cy} stroke={rgba([160,160,160], o(0.2))} strokeWidth="0.6" />
-      <line x1={cx} y1={cy - 60} x2={cx} y2={cy - 52} stroke={rgba([160,160,160], o(0.2))} strokeWidth="0.6" />
-      <line x1={cx} y1={cy + 52} x2={cx} y2={cy + 60} stroke={rgba([160,160,160], o(0.2))} strokeWidth="0.6" />
-      <circle cx={cx} cy={cy} r={3} fill={rgba(A, o(1))} stroke="none" />
-      <line x1={cx + 38} y1={cy - 34} x2={cx + 12} y2={cy - 8} stroke={rgba(A, o(0.55))} strokeWidth="0.9" strokeDasharray="2 2" />
-      <circle cx={cx + 41} cy={cy - 37} r={2.5} fill={rgba(A, o(0.5))} stroke="none" />
-      <line x1="20" y1="128" x2="90" y2="128" stroke={rgba([160,160,160], o(0.16))} strokeWidth="0.7" />
-      <line x1="20" y1="134" x2="68" y2="134" stroke={rgba([160,160,160], o(0.1))} strokeWidth="0.5" />
+      {/* Days badge */}
+      <rect x="74" y="108" width="52" height="18" rx="9"
+        fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.18" strokeWidth="0.8" />
+      <line x1="84" y1="117" x2="116" y2="117" stroke="currentColor" strokeOpacity="0.22" strokeWidth="0.9" />
     </svg>
   );
 }
 
-function SketchLaunch({ visible }: { visible: boolean }) {
-  const o = (v: number) => visible ? v : 0;
+function VisualOwnership() {
   return (
-    <svg viewBox="0 0 200 150" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true"
-      style={{ transition: "opacity 300ms ease", opacity: visible ? 1 : 0 }}>
-      <line x1="24" y1="100" x2="176" y2="100" stroke={rgba([160,160,160], o(0.2))} strokeWidth="0.7" />
-      <circle cx="48" cy="100" r="3.5" fill={rgba([160,160,160], o(0.12))} stroke={rgba([160,160,160], o(0.28))} strokeWidth="0.7" />
-      <line x1="48" y1="96" x2="48" y2="78" stroke={rgba([160,160,160], o(0.18))} strokeWidth="0.6" />
-      <line x1="34" y1="76" x2="74" y2="76" stroke={rgba([160,160,160], o(0.18))} strokeWidth="0.6" />
-      <line x1="34" y1="71" x2="64" y2="71" stroke={rgba([160,160,160], o(0.12))} strokeWidth="0.5" />
-      <circle cx="144" cy="100" r="5" fill={rgba(A, o(0.14))} stroke={rgba(A, o(0.8))} strokeWidth="1.1" />
-      <line x1="144" y1="95" x2="144" y2="52" stroke={rgba(A, o(0.5))} strokeWidth="0.9" />
-      <path d="M132 52 Q144 34 156 52 L156 70 Q144 76 132 70 Z" fill={rgba(A, o(0.12))} stroke={rgba(A, o(0.65))} strokeWidth="1.0" />
-      <circle cx="144" cy="57" r="4" fill={rgba(A, o(0.3))} stroke={rgba(A, o(0.6))} strokeWidth="0.7" />
-      <path d="M138 70 Q144 80 150 70" fill={rgba(A, o(0.18))} stroke={rgba(A, o(0.4))} strokeWidth="0.8" />
-      <line x1="48" y1="114" x2="144" y2="114" stroke={rgba([160,160,160], o(0.16))} strokeWidth="0.5" />
-      <line x1="48" y1="111" x2="48" y2="117" stroke={rgba([160,160,160], o(0.2))} strokeWidth="0.5" />
-      <line x1="144" y1="111" x2="144" y2="117" stroke={rgba(A, o(0.4))} strokeWidth="0.6" />
-      <line x1="80" y1="120" x2="116" y2="120" stroke={rgba([160,160,160], o(0.16))} strokeWidth="0.6" />
-      <line x1="80" y1="125" x2="106" y2="125" stroke={rgba([160,160,160], o(0.1))} strokeWidth="0.5" />
+    <svg viewBox="0 0 200 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true">
+      {/* Receipt / card */}
+      <rect x="52" y="22" width="96" height="116" rx="4"
+        fill="currentColor" fillOpacity="0.04" stroke="currentColor" strokeOpacity="0.14" strokeWidth="0.8" />
+      {/* Tear line */}
+      <line x1="52" y1="100" x2="148" y2="100" stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.6" strokeDasharray="4 3" />
+      {/* Amount */}
+      <rect x="64" y="34" width="48" height="16" rx="2" fill="currentColor" fillOpacity="0.12" />
+      <line x1="64" y1="60" x2="136" y2="60" stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.6" />
+      {/* Line items */}
+      <line x1="64" y1="72" x2="108" y2="72" stroke="currentColor" strokeOpacity="0.18" strokeWidth="0.8" />
+      <line x1="64" y1="80" x2="98" y2="80" stroke="currentColor" strokeOpacity="0.12" strokeWidth="0.6" />
+      {/* Checkmark stamp */}
+      <circle cx="100" cy="120" r="14" fill="currentColor" fillOpacity="0.06" stroke="currentColor" strokeOpacity="0.22" strokeWidth="0.9" />
+      <polyline points="92,120 98,126 110,113" stroke="currentColor" strokeOpacity="0.45" strokeWidth="1.5" fill="none" />
+      {/* "No renewals" line below */}
+      <line x1="68" y1="144" x2="132" y2="144" stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.6" />
     </svg>
   );
 }
 
-function SketchOwnership({ visible }: { visible: boolean }) {
-  const o = (v: number) => visible ? v : 0;
-  return (
-    <svg viewBox="0 0 200 150" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true"
-      style={{ transition: "opacity 300ms ease", opacity: visible ? 1 : 0 }}>
-      <circle cx="78" cy="64" r="26" fill={rgba(A, o(0.07))} stroke={rgba(A, o(0.65))} strokeWidth="1.2" />
-      <circle cx="78" cy="64" r="15" fill="none" stroke={rgba(A, o(0.28))} strokeWidth="0.7" />
-      <circle cx="78" cy="64" r="5" fill={rgba(A, o(0.5))} stroke="none" />
-      <line x1="98" y1="74" x2="152" y2="106" stroke={rgba(A, o(0.7))} strokeWidth="1.6" />
-      <line x1="118" y1="88" x2="124" y2="81" stroke={rgba(A, o(0.6))} strokeWidth="1.1" />
-      <line x1="128" y1="94" x2="134" y2="87" stroke={rgba(A, o(0.5))} strokeWidth="1.1" />
-      <line x1="138" y1="100" x2="144" y2="93" stroke={rgba(A, o(0.4))} strokeWidth="1.1" />
-      <rect x="28" y="104" width="66" height="30" rx="3" fill={rgba([160,160,160], o(0.04))} stroke={rgba([160,160,160], o(0.16))} strokeWidth="0.6" />
-      <line x1="36" y1="114" x2="84" y2="114" stroke={rgba([160,160,160], o(0.22))} strokeWidth="0.7" />
-      <line x1="36" y1="120" x2="68" y2="120" stroke={rgba([160,160,160], o(0.14))} strokeWidth="0.5" />
-      <line x1="36" y1="114" x2="60" y2="114" stroke={rgba(A, o(0.55))} strokeWidth="0.9" />
-      <line x1="60" y1="44" x2="65" y2="38" stroke={rgba(A, o(0.3))} strokeWidth="0.7" />
-      <line x1="68" y1="38" x2="70" y2="32" stroke={rgba(A, o(0.18))} strokeWidth="0.5" />
-    </svg>
-  );
-}
-
-function SketchVerdict({ yesCount }: { yesCount: number }) {
+function VisualVerdict({ yesCount }: { yesCount: number }) {
   const strong = yesCount >= 3;
-  const ok = yesCount === 2;
-  const fill: [number, number, number] = strong ? A : ok ? [160, 200, 100] : [160, 160, 160];
   return (
-    <svg viewBox="0 0 200 150" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true">
-      <circle cx="100" cy="68" r="40" fill={rgba(fill, 0.07)} stroke={rgba(fill, 0.45)} strokeWidth="1.1" />
-      {strong || ok ? (
-        <polyline points="78,68 93,83 122,52" stroke={rgba(fill, 0.85)} strokeWidth="2.4" />
-      ) : (
+    <svg viewBox="0 0 200 160" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full" aria-hidden="true">
+      <circle cx="100" cy="76" r="44"
+        fill="currentColor" fillOpacity="0.05"
+        stroke="currentColor" strokeOpacity="0.18" strokeWidth="1" />
+      <circle cx="100" cy="76" r="28"
+        fill="currentColor" fillOpacity="0.05"
+        stroke="currentColor" strokeOpacity="0.1" strokeWidth="0.6" />
+      {strong ? (
+        <polyline points="82,76 94,88 120,62" stroke="currentColor" strokeOpacity="0.55" strokeWidth="2.2" fill="none" />
+      ) : yesCount === 2 ? (
         <>
-          <line x1="86" y1="55" x2="114" y2="83" stroke={rgba(fill, 0.7)} strokeWidth="1.8" />
-          <line x1="114" y1="55" x2="86" y2="83" stroke={rgba(fill, 0.7)} strokeWidth="1.8" />
+          <polyline points="86,76 96,86 114,62" stroke="currentColor" strokeOpacity="0.45" strokeWidth="2" fill="none" />
+          <line x1="90" y1="94" x2="110" y2="94" stroke="currentColor" strokeOpacity="0.2" strokeWidth="1" strokeDasharray="2 2" />
         </>
+      ) : (
+        <path d="M88 60 Q100 50 112 60 L112 78 Q100 84 88 78 Z"
+          fill="currentColor" fillOpacity="0.08" stroke="currentColor" strokeOpacity="0.3" strokeWidth="1" />
       )}
-      <line x1="40" y1="122" x2="160" y2="122" stroke={rgba(fill, 0.14)} strokeWidth="0.6" />
-      <line x1="54" y1="129" x2="146" y2="129" stroke={rgba(fill, 0.09)} strokeWidth="0.5" />
+      <line x1="44" y1="130" x2="156" y2="130" stroke="currentColor" strokeOpacity="0.08" strokeWidth="0.6" />
+      <line x1="60" y1="137" x2="140" y2="137" stroke="currentColor" strokeOpacity="0.06" strokeWidth="0.5" />
     </svg>
   );
 }
 
-const SKETCHES = [SketchBrand, SketchTarget, SketchLaunch, SketchOwnership];
+const VISUALS = [VisualBrand, VisualConversion, VisualLaunch, VisualOwnership];
 
 export function FitQuiz() {
   const [answers, setAnswers] = useState<Answer[]>([]);
-  const [transitioning, setTransitioning] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "out" | "in">("idle");
+  const [displayIndex, setDisplayIndex] = useState(0);
+  const [displayDone, setDisplayDone] = useState(false);
   const [dir, setDir] = useState<1 | -1>(1);
   const lock = useRef(false);
 
@@ -185,40 +225,55 @@ export function FitQuiz() {
           cta: { href: "/contact", label: "Send a note" },
         };
 
+  function transition(nextIndex: number, nextDone: boolean, direction: 1 | -1) {
+    if (lock.current) return;
+    lock.current = true;
+    setDir(direction);
+    setPhase("out");
+    setTimeout(() => {
+      setDisplayIndex(nextIndex);
+      setDisplayDone(nextDone);
+      setPhase("in");
+      setTimeout(() => {
+        setPhase("idle");
+        lock.current = false;
+      }, 30);
+    }, 200);
+  }
+
   const pick = (a: Answer) => {
     if (lock.current || done) return;
-    lock.current = true;
-    setDir(1);
-    setTransitioning(true);
-    setTimeout(() => {
-      setAnswers((prev) => [...prev, a]);
-      setTransitioning(false);
-      lock.current = false;
-    }, 220);
+    const nextAnswers = [...answers, a];
+    const nextDone = nextAnswers.length >= TOTAL;
+    setAnswers(nextAnswers);
+    transition(nextAnswers.length, nextDone, 1);
   };
 
   const goBack = () => {
     if (lock.current || answers.length === 0) return;
-    lock.current = true;
-    setDir(-1);
-    setTransitioning(true);
-    setTimeout(() => {
-      setAnswers((prev) => prev.slice(0, -1));
-      setTransitioning(false);
-      lock.current = false;
-    }, 220);
+    const nextAnswers = answers.slice(0, -1);
+    setAnswers(nextAnswers);
+    transition(nextAnswers.length, false, -1);
   };
 
   const reset = () => {
-    setDir(-1);
-    setTransitioning(true);
-    setTimeout(() => {
-      setAnswers([]);
-      setTransitioning(false);
-    }, 220);
+    setAnswers([]);
+    transition(0, false, -1);
   };
 
-  const q = QUESTIONS[Math.min(index, TOTAL - 1)];
+  const q = QUESTIONS[Math.min(displayIndex, TOTAL - 1)];
+  const Visual = VISUALS[Math.min(displayIndex, TOTAL - 1)];
+
+  // Slide direction for content: out slides in dir, in slides from opposite
+  const outX = dir * 16;
+  const inX = dir * -16;
+
+  const contentStyle: React.CSSProperties =
+    phase === "out"
+      ? { opacity: 0, transform: `translateX(${outX}px)`, transition: "opacity 200ms ease, transform 220ms cubic-bezier(0.4,0,1,1)" }
+      : phase === "in"
+      ? { opacity: 0, transform: `translateX(${inX}px)`, transition: "none" }
+      : { opacity: 1, transform: "translateX(0)", transition: "opacity 260ms ease, transform 300ms cubic-bezier(0.22,1,0.36,1)" };
 
   return (
     <div className="flex flex-col">
@@ -228,7 +283,8 @@ export function FitQuiz() {
           className="h-full"
           style={{
             width: `${progress * 100}%`,
-            background: "rgb(var(--blue))",
+            background: "rgb(var(--fg))",
+            opacity: 0.35,
             transition: "width 500ms cubic-bezier(0.22,1,0.36,1)",
           }}
         />
@@ -236,49 +292,45 @@ export function FitQuiz() {
 
       <div className="flex flex-col sm:flex-row">
 
-        {/* Sketch pane — hidden on mobile */}
-        <div className="hidden sm:flex w-[280px] shrink-0 items-center justify-center py-10 px-8 border-r border-[rgb(var(--line))]">
-          <div className="w-full h-[200px] relative">
-            {!done ? (
-              SKETCHES.map((Sketch, i) => (
-                <div key={i} className="absolute inset-0"
-                  style={{
-                    opacity: i === Math.min(index, TOTAL - 1) && !transitioning ? 1 : 0,
-                    transition: "opacity 280ms ease",
-                  }}>
-                  <Sketch visible={i === Math.min(index, TOTAL - 1) && !transitioning} />
-                </div>
-              ))
+        {/* Visual pane */}
+        <div className="hidden sm:flex w-[240px] shrink-0 items-center justify-center border-r border-[rgb(var(--line))] py-8 px-6 overflow-hidden">
+          <div
+            className="w-full text-[rgb(var(--fg))]"
+            style={contentStyle}
+          >
+            {!displayDone ? (
+              <Visual />
             ) : (
-              <SketchVerdict yesCount={yesCount} />
+              <VisualVerdict yesCount={yesCount} />
             )}
           </div>
         </div>
 
         {/* Content pane */}
-        <div className="flex-1 px-6 sm:px-10 py-8 sm:py-10 flex flex-col justify-between gap-6 min-h-[220px]">
-          <div
-            key={done ? "verdict" : `q-${index}`}
-            className="flex flex-col gap-5 flex-1"
-            style={{
-              opacity: transitioning ? 0 : 1,
-              transform: transitioning ? `translateX(${dir * 12}px)` : "translateX(0)",
-              transition: "opacity 220ms ease, transform 260ms cubic-bezier(0.22,1,0.36,1)",
-            }}
-          >
-            {!done ? (
+        <div className="flex-1 px-6 sm:px-10 py-8 sm:py-10 flex flex-col justify-between gap-6 min-h-[240px]">
+          <div className="flex flex-col gap-5 flex-1" style={contentStyle}>
+            {!displayDone ? (
               <>
-                {/* Counter + dots */}
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums">
-                    {String(index + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {QUESTIONS.map((_, i) => (
-                      <span key={i} className="block w-1.5 h-1.5 rounded-full transition-colors duration-200"
-                        style={{ background: i < index ? "rgb(var(--blue))" : i === index ? "rgb(var(--fg))" : "rgb(var(--line))" }} />
-                    ))}
-                  </div>
+                {/* Step dots */}
+                <div className="flex items-center gap-1.5">
+                  {QUESTIONS.map((_, i) => (
+                    <span
+                      key={i}
+                      className="block rounded-full"
+                      style={{
+                        width: i === displayIndex ? "20px" : "6px",
+                        height: "6px",
+                        background:
+                          i < displayIndex
+                            ? "rgb(var(--fg))"
+                            : i === displayIndex
+                            ? "rgb(var(--fg))"
+                            : "rgb(var(--line))",
+                        opacity: i < displayIndex ? 0.35 : i === displayIndex ? 0.8 : 1,
+                        transition: "width 300ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease",
+                      }}
+                    />
+                  ))}
                 </div>
 
                 <h3 className="text-[1.35rem] sm:text-[1.65rem] font-medium tracking-[-0.03em] leading-[1.2] text-[rgb(var(--fg))]">
@@ -288,18 +340,17 @@ export function FitQuiz() {
                   {q.sub}
                 </p>
 
-                {/* Yes / No — full-width on mobile, inline on desktop */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
-                  <div className="flex gap-3">
+                  <div className="flex gap-2.5">
                     <button
                       onClick={() => pick("yes")}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-12 sm:h-9 text-[14px] sm:text-[13px] tracking-tight font-medium hover:opacity-90 transition-opacity active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-10 sm:h-9 text-[13px] tracking-tight font-medium hover:opacity-85 transition-opacity active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
                     >
                       Yes
                     </button>
                     <button
                       onClick={() => pick("no")}
-                      className="flex-1 sm:flex-none inline-flex items-center justify-center border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-7 h-12 sm:h-9 text-[14px] sm:text-[13px] tracking-tight hover:border-[rgb(var(--fg))] transition-colors active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
+                      className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-7 h-10 sm:h-9 text-[13px] tracking-tight hover:border-[rgb(var(--fg))/0.5] hover:bg-[rgb(var(--fg))/0.04] transition-colors active:scale-[0.97] [-webkit-tap-highlight-color:transparent]"
                     >
                       No
                     </button>
@@ -316,16 +367,17 @@ export function FitQuiz() {
               </>
             ) : (
               <>
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums">
-                    {yesCount} of {TOTAL} yes
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {answers.map((a, i) => (
-                      <span key={i} className="block w-1.5 h-1.5 rounded-full"
-                        style={{ background: a === "yes" ? "rgb(var(--blue))" : "rgb(var(--line))" }} />
-                    ))}
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  {answers.map((a, i) => (
+                    <span
+                      key={i}
+                      className="block w-1.5 h-1.5 rounded-full"
+                      style={{
+                        background: a === "yes" ? "rgb(var(--fg))" : "rgb(var(--line))",
+                        opacity: a === "yes" ? 0.7 : 1,
+                      }}
+                    />
+                  ))}
                 </div>
 
                 <h3 className="text-[1.35rem] sm:text-[1.65rem] font-medium tracking-[-0.03em] leading-[1.2] text-[rgb(var(--fg))]">
@@ -338,7 +390,7 @@ export function FitQuiz() {
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
                   <Link
                     href={verdict.cta.href}
-                    className="inline-flex items-center justify-center bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-12 sm:h-9 text-[14px] sm:text-[13px] tracking-tight font-medium hover:opacity-90 transition-opacity"
+                    className="inline-flex items-center justify-center rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-7 h-10 sm:h-9 text-[13px] tracking-tight font-medium hover:opacity-85 transition-opacity"
                   >
                     {verdict.cta.label}
                   </Link>

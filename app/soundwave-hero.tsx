@@ -273,10 +273,10 @@ export function SoundwaveHero() {
         style={{ zIndex: 3 }}
       >
         <h1
-          className="text-[clamp(2.3rem,5vw,3.5rem)] font-normal tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none"
-          aria-label="We build the thing that keeps you moving."
+          className="text-[clamp(2.3rem,5vw,3.5rem)] font-[500] tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none relative"
+          aria-label="We build the infrastructure that keeps you moving."
         >
-          {["We build the thing", "that keeps you moving."].map((line, li) =>
+          {["We build the infrastructure", "that keeps you moving."].map((line, li) =>
             <span key={li} style={{ display: "block" }}>
               {line.split("").map((ch, i) => (
                 <span
@@ -286,7 +286,7 @@ export function SoundwaveHero() {
                     display: "inline-block",
                     width: ch === " " ? "0.28em" : undefined,
                     opacity: 0,
-                    animation: `char-in 500ms cubic-bezier(0.22,1,0.36,1) ${220 + li * 120 + i * 28}ms forwards`,
+                    animation: `char-in 80ms linear ${160 + li * 80 + i * 22}ms forwards`,
                   }}
                 >
                   {ch}
@@ -296,23 +296,12 @@ export function SoundwaveHero() {
           )}
         </h1>
 
-        <p
-          className="pointer-events-none text-[13px] tracking-tight text-[rgb(var(--muted))]"
-          style={{
-            opacity: 0,
-            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 600ms forwards",
-          }}
-          aria-hidden="true"
-        >
-          A body in motion stays in motion.
-        </p>
-
         {/* CTAs */}
         <div
           className="pointer-events-auto flex items-center gap-3 flex-wrap justify-center"
           style={{
             opacity: 0,
-            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 820ms forwards",
+            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 600ms forwards",
           }}
         >
           <a
@@ -343,6 +332,7 @@ export function SoundwaveHero() {
             See Aether →
           </a>
         </div>
+
       </div>
     </section>
   );

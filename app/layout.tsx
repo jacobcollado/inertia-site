@@ -9,6 +9,7 @@ import { SiteShell } from "./site-shell";
 import { ScrollReveal } from "./scroll-reveal";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import Script from "next/script";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -63,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap"
         />
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider>

@@ -140,7 +140,7 @@ function MegaMenu({
       onMouseEnter={() => onEnter(index)}
       onMouseLeave={onLeave}
     >
-      <button className="site-header__link" aria-expanded={open} aria-haspopup="true">
+      <button className={`site-header__link${item.label === "Pricing" ? " site-header__link--pricing" : ""}`} aria-expanded={open} aria-haspopup="true">
         {item.label}
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
           className="site-header__chevron" aria-hidden="true"
@@ -334,7 +334,7 @@ function InertiaLogo() {
       <img
         src="/logo.png"
         alt="Inertia"
-        className="h-5 w-auto dark:invert-0 invert"
+        className="h-5 w-auto dark:invert invert-0"
         style={{ display: "block" }}
       />
     </span>

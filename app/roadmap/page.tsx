@@ -288,7 +288,7 @@ function TimelineTrack() {
 
 export default function RoadmapPage() {
   return (
-    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
+    <main className="page-container mx-auto w-full max-w-6xl min-h-screen flex flex-col">
 
       {/* Nav */}
       <div className="px-6 sm:px-8 py-5 rise">

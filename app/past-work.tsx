@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { SiShopify } from "react-icons/si";
 import { createPortal } from "react-dom";
 import type { WorkMeta } from "@/lib/work";
 
@@ -76,81 +76,66 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
   );
 }
 
-function LogoImage({ slug, alt }: { slug: string; alt: string }) {
-  const [errored, setErrored] = useState(false);
-  if (errored) {
-    return (
-      <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 font-medium">{alt}</span>
-    );
-  }
-  const invertCls = logoInvertClass(slug);
-  return (
-    <Image
-      src={`/work/logos/${slug}.png`}
-      alt={alt}
-      fill={false}
-      width={160}
-      height={80}
-      onError={() => setErrored(true)}
-      className={`object-contain w-full h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]${invertCls ? ` ${invertCls}` : ""}`}
-    />
-  );
+function titleCase(str: string): string {
+  return str.replace(/\b\w/g, c => c.toUpperCase());
 }
 
-const LOGO_SIZE: Record<string, string> = {
-  "ellora-la": "w-[60%]",
-};
+function serviceTag(service: string | undefined): string {
+  if (!service) return "";
+  const stripped = service
+    .replace(/^An?\s+/i, "")
+    .replace(/\s+for\s+.+$/i, "")
+    .trim();
+  return titleCase(stripped);
+}
 
-const CARD_MIN_H: Record<string, string> = {};
-
-
-// "dark-on-light" = dark logo, needs dark:invert (default)
-// "light-on-dark" = white logo, needs invert in light mode
-// "color"         = preserve as-is
-type LogoInvert = "dark-on-light" | "light-on-dark" | "color";
-
-const LOGO_INVERT: Record<string, LogoInvert> = {
-  "ellora-la":   "light-on-dark",
-  "trippie-redd": "color",
-  "ft-gioo":      "color",
-};
-
-function logoInvertClass(slug: string): string {
-  const mode = LOGO_INVERT[slug] ?? "dark-on-light";
-  if (mode === "color")        return "";
-  if (mode === "light-on-dark") return "invert dark:invert-0";
-  return "dark:invert"; // dark-on-light default
+function cleanSummary(text: string): string {
+  return text.replace(/—/g, ",").replace(/\s*,\s*/g, ", ").replace(/,\s*,/g, ",");
 }
 
 function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: number; total: number; onOpen: () => void }) {
+  const tag = serviceTag(item.service);
   return (
     <button
       onClick={onOpen}
-      className="group relative flex flex-col text-left overflow-hidden w-full h-full rise"
+      className="group relative flex flex-col justify-between text-left w-full h-full rise px-6 pt-5 pb-7 min-h-[300px]"
       style={{ ["--rise-delay" as any]: `${index * 60}ms` }}
     >
-      {/* Logo area */}
-      <div className={`relative w-full ${CARD_MIN_H[item.slug] ?? "min-h-[220px]"} flex items-center justify-center overflow-hidden`}>
-        <div className={`relative ${LOGO_SIZE[item.slug] ?? "w-[50%]"} h-16 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]`}>
-          <LogoImage slug={item.slug} alt={item.client} />
+      {/* Metadata — top */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-0.5">
+          {tag && (
+            <span className="flex items-center gap-1.5 text-[17px] tracking-tight text-[rgb(var(--fg))] leading-tight">
+              <SiShopify className="w-3.5 h-3.5 shrink-0" />
+              {tag}
+            </span>
+          )}
+          {item.year && <span className="text-[17px] tracking-tight text-[rgb(var(--fg))] opacity-60 tabular-nums">{item.year}</span>}
         </div>
+        <span className="inline-flex items-center justify-center w-9 h-9 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[13px] leading-none shrink-0">
+          <span style={{ lineHeight: 1, display: "block", marginTop: "1px" }}>→</span>
+        </span>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-[rgb(var(--line))]" />
-
-      {/* Info */}
-      <div className="flex items-center justify-between gap-2 px-5 py-3.5">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[18px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.client}</span>
-          {item.role && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] mt-0.5">{item.role}</span>}
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          {item.year && <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-40">{item.year}</span>}
-          <span className="flex items-center justify-center w-6 h-6 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] text-[11px] opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-1 group-hover:translate-x-0">
-            →
-          </span>
-        </div>
+      {/* Logo or client name — centered */}
+      <div className="flex flex-1 items-center justify-center py-4">
+        {item.logo ? (
+          <img
+            src={item.logo}
+            alt={item.client}
+            style={{ maskImage: "linear-gradient(to top, transparent 0%, black 40%)", WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 40%)" }}
+            className={`w-auto object-contain grayscale opacity-25 group-hover:opacity-45 transition-opacity duration-200 dark:invert ${
+              item.client === "FT.GIOO" ? "h-24 max-w-[160px]" :
+              item.client === "Mood Swings" ? "h-20 max-w-[260px]" :
+              item.client === "Trippie Redd" ? "h-20 max-w-[240px]" :
+              item.client === "Allure New York" ? "h-16 max-w-[220px]" :
+              item.client === "Samuel Norris" ? "h-16 max-w-[220px]" :
+              "h-14 max-w-[200px]"
+            }`}
+          />
+        ) : (
+          <span className="text-[clamp(1.5rem,2.5vw,1.9rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-tight">{item.client}</span>
+        )}
       </div>
     </button>
   );
@@ -408,63 +393,22 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
         <div className="sheet__overflow-bar sheet__overflow-bar--top" aria-hidden="true" />
         <div className="sheet__overflow-bar sheet__overflow-bar--bottom" aria-hidden="true" />
 
-        {/* Hero — full bleed poster */}
+        {/* Hero — full bleed */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={displayImages[0]} alt={item.client} className="sheet__hero" />
 
         {/* Content — fades in once sheet settles */}
         <div className={`sheet__content ${revealed ? "sheet__content--revealed" : ""}`}>
-          {/* Summary */}
-          <div className="sheet__body">
-            <div className="sheet__meta">
-              <span className="sheet__meta-client">{item.client}</span>
-              {item.service && <span className="sheet__meta-service">{item.service}</span>}
+
+          {/* Header row: client name + actions */}
+          <div className="sheet__header">
+            <div className="sheet__header-left">
+              <span className="sheet__client">{item.client}</span>
+              {item.year && <span className="sheet__year">{item.year}</span>}
             </div>
-            {item.summary && (
-              <p className="sheet__summary" dangerouslySetInnerHTML={{ __html: highlightSummary(item.summary) }} />
-            )}
-          </div>
-
-          {/* Preview — full bleed outside body padding */}
-          {item.preview && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.preview} alt={`${item.client} site`} className="sheet__preview" />
-          )}
-
-          {/* Colour palette */}
-          {item.palette && item.palette.length > 0 && (
-            <SwatchRow colors={item.palette} />
-          )}
-
-          {/* Remaining images */}
-          {displayImages.slice(1).length > 0 && (
-            <div className="sheet__body">
-              {displayImages.slice(1).map((src, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={`img-${i}`} src={src} alt={`${item.client} ${i + 2}`} className="sheet__img" />
-              ))}
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="sheet__footer">
-            <div className="sheet__footer-left">
-              <span className="sheet__footer-title">{item.service ?? item.client}</span>
-              {(item.year || item.role) && (
-                <span className="sheet__footer-sub">
-                  {[item.year, item.role].filter(Boolean).join(", ")}
-                </span>
-              )}
-            </div>
-            <div className="sheet__footer-actions">
+            <div className="sheet__header-actions">
               {item.instagram && (
-                <a
-                  href={`https://instagram.com/${item.instagram}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="sheet__ig-btn"
-                  aria-label={`@${item.instagram} on Instagram`}
-                >
+                <a href={`https://instagram.com/${item.instagram}`} target="_blank" rel="noreferrer" className="sheet__ig-btn" aria-label={`@${item.instagram} on Instagram`}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                     <circle cx="12" cy="12" r="4"/>
@@ -480,6 +424,44 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
               )}
             </div>
           </div>
+
+          {/* Divider */}
+          <div className="sheet__rule" />
+
+          {/* Summary — big editorial statement */}
+          {item.summary && (
+            <p className="sheet__summary" dangerouslySetInnerHTML={{ __html: highlightSummary(item.summary) }} />
+          )}
+
+          {/* Colour palette */}
+          {item.palette && item.palette.length > 0 && (
+            <SwatchRow colors={item.palette} />
+          )}
+
+          {/* Preview */}
+          {item.preview && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={item.preview} alt={`${item.client} site`} className="sheet__preview" />
+          )}
+
+          {/* Remaining images */}
+          {displayImages.slice(1).length > 0 && (
+            <div className="sheet__body">
+              {displayImages.slice(1).map((src, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={`img-${i}`} src={src} alt={`${item.client} ${i + 2}`} className="sheet__img" />
+              ))}
+            </div>
+          )}
+
+          {/* Service + role footer line */}
+          {(item.service || item.role) && (
+            <div className="sheet__service-row">
+              {item.service && <span className="sheet__service-tag">{serviceTag(item.service)}</span>}
+              {item.role && <span className="sheet__role">{item.role}</span>}
+            </div>
+          )}
+
         </div>
       </div>
     </div>,
