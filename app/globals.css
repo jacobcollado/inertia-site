@@ -482,6 +482,11 @@ h1:hover .redact > span.redact-inner,
   to   { opacity: 1; transform: translateY(0) rotateX(0deg); }
 }
 
+@keyframes phrase-word {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes hero-canvas {
   0%   { opacity: 0; }
   100% { opacity: 1; }
@@ -659,24 +664,29 @@ h1:hover .redact > span.redact-inner,
   width: 1px;
   background: rgb(var(--line));
   pointer-events: none;
-  left: max(0px, calc(50% - 36rem));
+  left: max(12px, calc(50% - 36rem));
 }
 
 .site-header::after {
   left: auto;
-  right: max(0px, calc(50% - 36rem));
+  right: max(12px, calc(50% - 36rem));
 }
 
 /* Inner constrained to max-w-5xl â€” left/right edges align with page-container lines */
 .site-header__inner {
   display: flex;
   align-items: center;
-  margin: 0 auto;
+  margin: 0 12px;
   max-width: 72rem;
   height: 48px;
-  /* Left/right borders mirror the page-container::before/after lines */
   border-left: 1px solid rgb(var(--line));
   border-right: 1px solid rgb(var(--line));
+}
+
+@media (min-width: 640px) {
+  .site-header__inner {
+    margin: 0 auto;
+  }
 }
 
 .site-header__brand {
@@ -922,12 +932,13 @@ h1:hover .redact > span.redact-inner,
 
 .mobile-nav__drawer {
   position: fixed;
-  top: 49px; /* header height + border */
-  left: 0;
-  right: 0;
+  top: 49px;
+  left: 12px;
+  right: 12px;
   z-index: 45;
   background: rgb(var(--bg));
-  border-bottom: 1px solid rgb(var(--line));
+  border: 1px solid rgb(var(--line));
+  border-top: none;
   transform: translateY(-8px);
   opacity: 0;
   pointer-events: none;
@@ -1017,12 +1028,11 @@ h1:hover .redact > span.redact-inner,
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border: 1px solid rgb(var(--line));
+  width: 20px;
   color: rgb(var(--muted));
-  font-size: 14px;
+  font-size: 18px;
   margin-top: 1px;
+  opacity: 0.6;
 }
 
 .mobile-nav__item-text {
@@ -1417,78 +1427,6 @@ h1:hover .redact > span.redact-inner,
   transform: scale(1.04);
 }
 
-/* ── Sticky note ─────────────────────────────────────────────── */
-
-.sticky-note {
-  position: fixed;
-  bottom: 32px;
-  right: 32px;
-  z-index: 9000;
-  width: 196px;
-  background: #f9f4a8;
-  padding: 18px 18px 22px;
-  box-shadow: 2px 4px 12px rgba(0,0,0,0.18), 0 1px 3px rgba(0,0,0,0.10);
-  transform: rotate(2.4deg);
-  transform-origin: top center;
-  transition: transform 240ms ease, box-shadow 240ms ease, opacity 500ms ease;
-  cursor: default;
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .sticky-note {
-    display: block;
-  }
-}
-
-.sticky-note::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 28px;
-  background: rgba(0,0,0,0.045);
-}
-
-.sticky-note:hover {
-  transform: rotate(0deg) scale(1.03);
-  box-shadow: 4px 8px 24px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.12);
-}
-
-.sticky-note__dismiss {
-  position: absolute;
-  top: 6px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 13px;
-  color: rgba(0,0,0,0.3);
-  cursor: pointer;
-  line-height: 1;
-  padding: 2px 4px;
-  transition: color 150ms ease;
-}
-
-.sticky-note__dismiss:hover {
-  color: rgba(0,0,0,0.6);
-}
-
-.sticky-note__text {
-  font-family: "Segoe Print", "Segoe Script", "Comic Sans MS", cursive;
-  font-size: 13px;
-  line-height: 1.65;
-  color: #2a2400;
-  margin-top: 6px;
-}
-
-.sticky-note__sig {
-  margin-top: 10px;
-  font-family: "Segoe Print", "Segoe Script", "Comic Sans MS", cursive;
-  font-size: 12px;
-  color: rgba(42,36,0,0.55);
-  font-style: italic;
-}
 
 .masonry-card__placeholder {
   position: absolute;
@@ -1596,13 +1534,12 @@ h1:hover .redact > span.redact-inner,
   align-items: center;
   gap: 7px;
   padding: 16px 30px;
-  color: rgb(var(--muted));
+  color: rgb(var(--fg) / 0.28);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: -0.01em;
   white-space: nowrap;
-  opacity: 0.28;
-  transition: opacity 0.25s ease;
+  transition: color 0.25s ease;
   position: relative;
 }
 
@@ -1613,7 +1550,7 @@ h1:hover .redact > span.redact-inner,
   top: 0;
   bottom: 0;
   width: 1px;
-  background: rgb(var(--fg));
+  background: rgb(var(--fg) / 0.14);
 }
 
 .marquee-item svg {
@@ -1623,7 +1560,7 @@ h1:hover .redact > span.redact-inner,
 }
 
 .marquee-item--far {
-  opacity: 0.16;
+  color: rgb(var(--fg) / 0.16);
   font-size: 12px;
 }
 
@@ -1634,7 +1571,7 @@ h1:hover .redact > span.redact-inner,
 
 .marquee-item:hover,
 .marquee-item--far:hover {
-  opacity: 0.65;
+  color: rgb(var(--fg) / 0.65);
 }
 
 @keyframes marquee-fwd {

@@ -65,11 +65,11 @@ function EasterEgg() {
 
 export function SiteFooter() {
   return (
-    <div className="page-container mx-auto w-full max-w-6xl">
+    <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl">
     <footer className="pt-12 pb-8">
 
       {/* Menu columns */}
-      <div className="flex flex-wrap gap-x-12 gap-y-10 mb-12 px-6 sm:px-8">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 gap-y-8 mb-12 px-6 sm:px-8">
 
         <div className="flex flex-col gap-2.5 min-w-[120px]">
           <p className="text-[15px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Get started</p>
@@ -126,7 +126,7 @@ export function SiteFooter() {
 
       {/* Bottom bar */}
       <GridRule />
-      <div className="flex items-center justify-between gap-6 pt-5 px-6 sm:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6 pt-5 px-6 sm:px-8">
         <div className="flex items-center gap-4">
           <EasterEgg />
           <span className="inline-flex items-center gap-1.5 text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-30">

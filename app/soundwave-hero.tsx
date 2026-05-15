@@ -39,9 +39,9 @@ const GAP = 4;
 const ROWS = 10;
 const WAVE_SPEED = 90;
 const FADE_MS = 2000;
-// Hover ripple: how many cols wide and how long cells stay lit
 const HOVER_FADE_MS = 1100;
-const HOVER_RADIUS = 3; // columns each side of cursor
+const HOVER_RADIUS = 3;
+const PEAK_HOLD_MS = 3200;
 
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
@@ -65,7 +65,7 @@ export function SoundwaveHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
   const lastHoverColRef = useRef<number>(-999);
-  const touchActiveRef = useRef(false);
+  const touchActiveRef = useRef(false);;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -77,6 +77,9 @@ export function SoundwaveHero() {
     let lastWave = 0;
     let waveFront = 0;
     const active = new Map<string, CellState>();
+
+    // Peak hold: per-column { topRow, born }
+    const peaks = new Map<number, { topRow: number; born: number }>();
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
@@ -159,8 +162,14 @@ export function SoundwaveHero() {
         const phase = (waveFront / 12) * Math.PI;
         const amp = 0.35 + 0.65 * Math.abs(Math.sin(phase) * Math.cos(phase * 0.37));
         const barH = Math.max(1, Math.round(ROWS * amp));
-        for (let r = ROWS - 1; r >= ROWS - barH; r--) {
+        const topRow = ROWS - barH;
+        for (let r = ROWS - 1; r >= topRow; r--) {
           active.set(`${col}-${r}`, { born: now, col, row: r });
+        }
+        // Update peak: only replace if this bar is taller (topRow is lower index = higher on screen)
+        const existing = peaks.get(col);
+        if (!existing || topRow < existing.topRow) {
+          peaks.set(col, { topRow, born: now });
         }
         waveFront++;
       }
@@ -215,7 +224,6 @@ export function SoundwaveHero() {
         const fade = t < 0.08 ? t / 0.08 : 1 - Math.pow((t - 0.08) / 0.92, 0.55);
         const fromBottom = ROWS - 1 - cell.row;
         const brightBoost = 0.45 + 0.55 * (fromBottom / (ROWS - 1));
-        // Hover cells are brighter
         const maxAlpha = cell.hover ? (dark ? 1.0 : 0.98) : (dark ? 0.92 : 0.88);
         const alpha = fade * brightBoost * maxAlpha;
 
@@ -225,6 +233,21 @@ export function SoundwaveHero() {
         ctx.fillRect(cell.col * CELL_SIZE + GAP / 2, cell.row * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
       });
       expired.forEach((k) => active.delete(k));
+
+      // Peak hold ghost — faint single-cell marker at the top of each column's highest bar
+      const expiredPeaks: number[] = [];
+      peaks.forEach((peak, col) => {
+        if (col >= colCount) { expiredPeaks.push(col); return; }
+        const age = now - peak.born;
+        if (age > PEAK_HOLD_MS) { expiredPeaks.push(col); return; }
+        const t = age / PEAK_HOLD_MS;
+        const ghostAlpha = (t < 0.25 ? 1 : 1 - Math.pow((t - 0.25) / 0.75, 0.6)) * (dark ? 0.45 : 0.38);
+        const colorCol = col + Math.floor(waveFront / 4);
+        const [r, g, b] = getColor(colorCol, dark);
+        ctx.fillStyle = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${ghostAlpha})`;
+        ctx.fillRect(col * CELL_SIZE + GAP / 2, peak.topRow * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
+      });
+      expiredPeaks.forEach((c) => peaks.delete(c));
 
       ctx.restore();
       requestAnimationFrame(frame);
@@ -273,7 +296,7 @@ export function SoundwaveHero() {
         style={{ zIndex: 3 }}
       >
         <h1
-          className="text-[clamp(2.3rem,5vw,3.5rem)] font-[500] tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none relative"
+          className="text-[clamp(2.3rem,5vw,3.5rem)] font-[400] tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none relative w-[85%] sm:w-auto mx-auto"
           aria-label="We build the infrastructure that keeps you moving."
         >
           {["We build the infrastructure", "that keeps you moving."].map((line, li) =>

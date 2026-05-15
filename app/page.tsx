@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiFramer, SiVercel, SiApple, SiNextdotjs, SiReact, SiSupabase, SiFigma } from "react-icons/si";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
 import { SoundwaveHero } from "./soundwave-hero";
@@ -567,97 +567,54 @@ function PulseGrid() {
 }
 
 
-const STACK_PHRASES = [
-  "We don't pick a lane. We own the whole road.",
-  "Quality isn't a setting we turn on. It's the default.",
-  "Most studios specialize. We refused to.",
-  "Built by people who care what ships.",
-  "Every field mastered. Every project, complete.",
-];
 
-function PhraseChars({ phrase, stage }: { phrase: string; stage: "enter" | "idle" | "exit" }) {
-  const words = phrase.split(" ");
-  const total = words.length;
-  return (
-    <>
-      {words.map((word, i) => {
-        const enterDelay = i * 40;
-        const exitDelay = i * 28;
-        let opacity = 1, blur = "blur(0px)", transform = "translateY(0px)", transition = "";
-        if (stage === "enter") {
-          opacity = 0;
-          blur = "blur(3px)";
-          transform = "translateY(8px)";
-          transition = "none";
-        } else if (stage === "idle") {
-          opacity = 1;
-          blur = "blur(0px)";
-          transform = "translateY(0px)";
-          transition = `opacity 400ms cubic-bezier(0.22,1,0.36,1) ${enterDelay}ms, filter 300ms ease ${enterDelay}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${enterDelay}ms`;
-        } else {
-          opacity = 0;
-          blur = "blur(0px)";
-          transform = "translateY(-6px)";
-          transition = `opacity 180ms ease ${exitDelay}ms, transform 180ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms`;
-        }
-        return (
-          <span key={i} style={{ display: "inline", whiteSpace: "nowrap" }}>
-            <span
-              aria-hidden="true"
-              style={{
-                display: "inline-block",
-                opacity,
-                filter: blur,
-                transform,
-                transition,
-              }}
-            >
-              {word}
-            </span>
-            {i < total - 1 && " "}
-          </span>
-        );
-      })}
-    </>
-  );
-}
+const MISSION_WORDS = ["Great", "work", "is", "the", "start.", "Becoming", "infrastructure", "is", "the", "goal."];
 
-function StackPhrase() {
-  const [idx, setIdx] = useState(0);
-  const [stage, setStage] = useState<"enter" | "idle" | "exit">("enter");
-
-  useLayoutEffect(() => {
-    if (stage === "enter") {
-      // force a paint in the hidden state, then transition to idle
-      const raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => setStage("idle"));
-      });
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [stage, idx]);
+function MissionPhrase() {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (stage !== "idle") return;
-    const phrase = STACK_PHRASES[idx];
-    const idleDuration = 3600;
-    const t = setTimeout(() => {
-      setStage("exit");
-      const exitDuration = (phrase.split(" ").length - 1) * 28 + 220;
-      setTimeout(() => {
-        setIdx(i => (i + 1) % STACK_PHRASES.length);
-        setStage("enter");
-      }, exitDuration);
-    }, idleDuration);
-    return () => clearTimeout(t);
-  }, [stage, idx]);
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <p
-      aria-label={STACK_PHRASES[idx]}
-      className="text-[clamp(1.5rem,3vw,1.9rem)] font-[450] tracking-tight text-[rgb(var(--fg))] leading-snug pr-4 sm:pr-12"
-      style={{ overflow: "visible", paddingTop: "6px", paddingBottom: "12px" }}
+      ref={ref}
+      className="text-[clamp(1.5rem,3vw,1.9rem)] font-[450] tracking-tight leading-snug pr-4 sm:pr-12"
+      style={{ paddingTop: "6px", paddingBottom: "12px", color: "rgb(var(--fg))" }}
     >
-      <PhraseChars phrase={STACK_PHRASES[idx]} stage={stage} />
+      {MISSION_WORDS.map((word, i) => {
+        const isHighlight = word === "infrastructure";
+        return (
+          <span
+            key={i}
+            style={{
+              display: "inline-block",
+              whiteSpace: "nowrap",
+              marginRight: "0.28em",
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(10px)",
+              transition: visible ? `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms` : "none",
+              ...(isHighlight ? {
+                background: "linear-gradient(90deg, #387fff 0%, #a855f7 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              } : {}),
+            }}
+          >
+            {word}
+          </span>
+        );
+      })}
     </p>
   );
 }
@@ -735,13 +692,7 @@ function StackDiagram() {
     <div className="flex flex-col sm:flex-row border-b border-[rgb(var(--line))]" style={{ overflow: "visible" }}>
       {/* Left: copy */}
       <div className="flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 border-b border-[rgb(var(--line))] sm:border-b-0 sm:border-r border-[rgb(var(--line))]" style={{ overflow: "visible" }}>
-        <span className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] self-start border border-[rgb(var(--line))] rounded-full px-3 py-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 opacity-60" aria-hidden="true">
-            <rect x="7" y="7" width="10" height="10" rx="1" /><line x1="7" y1="9" x2="4" y2="9" /><line x1="7" y1="12" x2="4" y2="12" /><line x1="7" y1="15" x2="4" y2="15" /><line x1="17" y1="9" x2="20" y2="9" /><line x1="17" y1="12" x2="20" y2="12" /><line x1="17" y1="15" x2="20" y2="15" /><line x1="9" y1="7" x2="9" y2="4" /><line x1="12" y1="7" x2="12" y2="4" /><line x1="15" y1="7" x2="15" y2="4" /><line x1="9" y1="17" x2="9" y2="20" /><line x1="12" y1="17" x2="12" y2="20" /><line x1="15" y1="17" x2="15" y2="20" />
-          </svg>
-          Precision at every layer.
-        </span>
-        <StackPhrase />
+        <MissionPhrase />
         <Link href="/blog" className="self-start inline-flex items-center gap-2.5 mt-1 group">
           <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] transition-colors">Read the blog</span>
           <span className="inline-flex items-center justify-center w-9 h-9 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[13px] leading-none shrink-0">
@@ -1554,7 +1505,7 @@ function VisualLayout({ work }: { work: WorkMeta[] }) {
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
-    <main className="page-container mx-auto w-full max-w-6xl min-h-screen flex flex-col">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
       <SoundwaveHero />
 
