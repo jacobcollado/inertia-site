@@ -455,11 +455,9 @@ h1:hover .redact > span.redact-inner,
   to   { transform: translateX(23.6px); }
 }
 
-@keyframes sd-comet {
-  0%   { stroke-dashoffset: 1; opacity: 0; }
-  8%   { opacity: 1; }
-  82%  { opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
+@keyframes sd-flow {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
 }
 
 @keyframes sd-left-dash {
