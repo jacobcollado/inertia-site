@@ -1525,9 +1525,6 @@ h1:hover .redact > span.redact-inner,
   animation: marquee-rev 42s linear infinite;
 }
 
-.marquee-row:hover {
-  animation-play-state: paused;
-}
 
 .marquee-item {
   display: flex;
