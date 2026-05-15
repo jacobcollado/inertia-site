@@ -1198,10 +1198,10 @@ function TechMarquee() {
           <div
             key={i}
             className="marquee-item"
-            style={{ "--tech-color": tech.color } as React.CSSProperties}
+            style={{ "--tech-color": tech.color, color: tech.color } as React.CSSProperties}
           >
-            <tech.icon style={{ color: tech.color }} />
-            <span>{tech.name}</span>
+            <tech.icon className="w-5 h-5 shrink-0" />
+            <span style={{ color: "rgb(var(--muted))" }}>{tech.name}</span>
           </div>
         ))}
       </div>
