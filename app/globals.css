@@ -1554,6 +1554,11 @@ h1:hover .redact > span.redact-inner,
   flex-shrink: 0;
 }
 
+.marquee-item-icon {
+  color: rgb(var(--fg) / 0.28);
+  transition: color 0.25s ease;
+}
+
 .marquee-item--far {
   color: rgb(var(--fg) / 0.16);
   font-size: 12px;
@@ -1567,6 +1572,12 @@ h1:hover .redact > span.redact-inner,
 .marquee-item:hover,
 .marquee-item--far:hover {
   color: rgb(var(--fg) / 0.65);
+}
+
+@media (hover: hover) {
+  .marquee-item:hover .marquee-item-icon {
+    color: var(--tech-color);
+  }
 }
 
 @keyframes marquee-fwd {

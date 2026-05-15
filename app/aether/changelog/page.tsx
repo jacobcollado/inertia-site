@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
@@ -74,7 +74,7 @@ const CHANGELOG: Entry[] = [
 ];
 
 const GUIDE: { title: string; body: string }[] = [
-  { title: "How to update", body: "Download the latest .zip from your license email, then go to Shopify Admin › Online Store › Themes › Add theme › Upload zip. Your live theme is untouched until you manually publish." },
+  { title: "How to update", body: "Download the latest .zip from your license email, then go to Shopify Admin â€º Online Store â€º Themes â€º Add theme â€º Upload zip. Your live theme is untouched until you manually publish." },
   { title: "Version numbers", body: "Major releases may include breaking schema changes. Minor adds features without breaking existing ones. Patch fixes bugs only, always safe to apply." },
   { title: "Backup first", body: "Shopify keeps your previous theme as an unpublished copy when you publish a new one. Re-publish the old version from the theme list in seconds if needed." },
   { title: "Custom code", body: "Note which files you edited before updating. The changelog lists touched files per release so you know where conflicts might occur. Re-apply changes to the fresh files after uploading." },
@@ -287,7 +287,7 @@ export default function AetherChangelog() {
   const sidebarProps = { activeTypes, activeLabels, hasFilters, guideOpen, toggleType, toggleLabel, clearFilters, setGuideOpen };
 
   return (
-    <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl min-h-screen flex flex-col">
+    <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
       {/* Header */}
       <header className="px-8 pt-6 sm:pt-8 pb-12 rise">
@@ -461,3 +461,4 @@ export default function AetherChangelog() {
     </div>
   );
 }
+

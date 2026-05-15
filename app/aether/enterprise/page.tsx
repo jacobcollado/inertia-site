@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import {
   HiOutlineShoppingBag,
@@ -36,7 +36,7 @@ function rgb([r, g, b]: [number, number, number], a = 1) {
 
 const accent: [number, number, number] = [56, 180, 255];
 
-/* ── Sketches ──────────────────────────────────────────────────── */
+/* â”€â”€ Sketches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function SketchMultiStore() {
   const g = (a: number) => rgb([160, 160, 160], a);
@@ -146,7 +146,7 @@ function SketchMargin() {
   );
 }
 
-/* ── Data ──────────────────────────────────────────────────────── */
+/* â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 const STATS = [
   { value: "4 days", label: "avg time to launch" },
@@ -233,11 +233,11 @@ const PLANS = [
   },
 ];
 
-/* ── Page ──────────────────────────────────────────────────────── */
+/* â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 export default function EnterprisePage() {
   return (
-    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Nav */}
       <div className="px-6 sm:px-8 py-5 rise">
@@ -275,7 +275,7 @@ export default function EnterprisePage() {
 
       <GridRule />
 
-      {/* Stats bar — 2x2 on mobile, 4-col on desktop */}
+      {/* Stats bar â€” 2x2 on mobile, 4-col on desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-4 rise">
         {STATS.map((s, i) => (
           <div key={s.label}
@@ -304,7 +304,7 @@ export default function EnterprisePage() {
 
       <GridRule />
 
-      {/* Who — 2x2 on mobile, 4-col on desktop */}
+      {/* Who â€” 2x2 on mobile, 4-col on desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-4">
         {WHO.map((w, i) => {
           const Icon = w.icon;
@@ -340,7 +340,7 @@ export default function EnterprisePage() {
 
       <GridRule />
 
-      {/* Value props — stacked on mobile, 3-col on desktop */}
+      {/* Value props â€” stacked on mobile, 3-col on desktop */}
       <div className="flex flex-col sm:flex-row">
         {VALUE_PROPS.map((v, i) => {
           const Icon = v.icon;
@@ -379,7 +379,7 @@ export default function EnterprisePage() {
 
       <GridRule />
 
-      {/* How it works — 2x2 on mobile, 4-col on desktop */}
+      {/* How it works â€” 2x2 on mobile, 4-col on desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-4">
         {HOW_IT_WORKS.map((h, i) => {
           const Icon = h.icon;
@@ -436,7 +436,7 @@ export default function EnterprisePage() {
 
       <GridRule />
 
-      {/* Plans — stacked on mobile, 2-col on desktop */}
+      {/* Plans â€” stacked on mobile, 2-col on desktop */}
       <div className="flex flex-col sm:flex-row">
         {PLANS.map((plan, i) => (
           <Link
@@ -505,7 +505,7 @@ export default function EnterprisePage() {
           Ready to ship <span className="text-[rgb(var(--blue))]">more</span>, build less?
         </h2>
         <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] mb-7 max-w-xs leading-[1.5]">
-          We work with a small number of agencies. Serious about scaling — get in touch.
+          We work with a small number of agencies. Serious about scaling â€” get in touch.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
@@ -537,3 +537,4 @@ export default function EnterprisePage() {
     </main>
   );
 }
+

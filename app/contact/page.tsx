@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = {
-  title: "Contact — Inertia",
+  title: "Contact â€” Inertia",
   description: "Get in touch for work, collaborations, or a simple hello.",
 };
 
 export default function ContactPage() {
   return (
-    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl min-h-screen flex flex-col">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
       {/* Nav */}
       <div className="flex items-center px-8 py-5 rise">
@@ -45,3 +45,4 @@ export default function ContactPage() {
     </main>
   );
 }
+

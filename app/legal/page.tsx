@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Legal · Inertia",
+  title: "Legal Â· Inertia",
   description: "Terms of engagement, IP ownership, and everything worth knowing before we work together.",
 };
 
 const EFFECTIVE = "May 1, 2026";
 
-/* ── Sketches ─────────────────────────────────────────────────────── */
+/* â”€â”€ Sketches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-// Two hands clasping — side profile, fingers interlocked
+// Two hands clasping â€” side profile, fingers interlocked
 function SketchHandshake() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--blue))";
@@ -24,12 +24,12 @@ function SketchHandshake() {
       <path d="M 72 82 L 76 96 L 84 100 L 110 96" stroke={m} strokeWidth="2" opacity="0.4" />
       {/* Right palm */}
       <path d="M 148 82 L 144 96 L 136 100 L 110 96" stroke={m} strokeWidth="2" opacity="0.4" />
-      {/* Left fingers — 4 fingers extending right */}
+      {/* Left fingers â€” 4 fingers extending right */}
       <path d="M 84 80 L 96 68 L 100 72" stroke={a} strokeWidth="2" opacity="0.7" />
       <path d="M 90 76 L 104 62 L 108 67" stroke={a} strokeWidth="2" opacity="0.7" />
       <path d="M 96 74 L 112 60 L 115 65" stroke={a} strokeWidth="2" opacity="0.7" />
       <path d="M 100 76 L 116 64 L 118 70" stroke={a} strokeWidth="2" opacity="0.65" />
-      {/* Right fingers — 4 fingers extending left, interlocking */}
+      {/* Right fingers â€” 4 fingers extending left, interlocking */}
       <path d="M 136 80 L 124 68 L 120 72" stroke={a} strokeWidth="2" opacity="0.7" />
       <path d="M 130 76 L 116 62 L 112 67" stroke={a} strokeWidth="2" opacity="0.7" />
       <path d="M 124 74 L 108 60 L 105 65" stroke={a} strokeWidth="2" opacity="0.7" />
@@ -81,7 +81,7 @@ function SketchOwnership() {
   );
 }
 
-// Invoice card — two clear columns: deposit paid, balance pending
+// Invoice card â€” two clear columns: deposit paid, balance pending
 function SketchPayment() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--green))";
@@ -95,7 +95,7 @@ function SketchPayment() {
       <line x1="28" y1="30" x2="100" y2="30" stroke={a} strokeWidth="1.6" opacity="0.55" />
       {/* Vertical divider */}
       <line x1="110" y1="42" x2="110" y2="124" stroke={m} strokeWidth="1" strokeDasharray="4 3" opacity="0.35" />
-      {/* Left col — deposit paid */}
+      {/* Left col â€” deposit paid */}
       <rect x="14" y="42" width="96" height="82" rx="0" fill={a} fillOpacity="0.05" stroke="none" />
       <line x1="26" y1="60" x2="96" y2="60" stroke={a} strokeWidth="1.4" opacity="0.5" />
       <line x1="26" y1="71" x2="82" y2="71" stroke={a} strokeWidth="1.1" opacity="0.4" />
@@ -103,7 +103,7 @@ function SketchPayment() {
       <polyline points="30,96 42,108 70,82" stroke={a} strokeWidth="2.8" opacity="0.8" />
       {/* Left label */}
       <line x1="26" y1="118" x2="66" y2="118" stroke={a} strokeWidth="1.2" opacity="0.45" />
-      {/* Right col — balance due */}
+      {/* Right col â€” balance due */}
       <line x1="122" y1="60" x2="196" y2="60" stroke={m} strokeWidth="1.4" opacity="0.3" />
       <line x1="122" y1="71" x2="176" y2="71" stroke={m} strokeWidth="1.1" opacity="0.25" />
       {/* Clock / pending icon */}
@@ -122,15 +122,15 @@ function SketchRevisions() {
   const a = "rgb(var(--amber))";
   return (
     <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Doc v1 — behind */}
+      {/* Doc v1 â€” behind */}
       <rect x="14" y="26" width="86" height="104" rx="3" stroke={m} strokeWidth="1.4" opacity="0.3" />
-      {/* Doc v2 — front, accented */}
+      {/* Doc v2 â€” front, accented */}
       <rect x="30" y="12" width="86" height="104" rx="3" stroke={a} strokeWidth="1.8" opacity="0.65" fill={a} fillOpacity="0.04" />
       {/* Lines on front doc */}
       <line x1="44" y1="34" x2="104" y2="34" stroke={m} strokeWidth="1.3" opacity="0.35" />
       <line x1="44" y1="46" x2="104" y2="46" stroke={m} strokeWidth="1.3" opacity="0.35" />
       <line x1="44" y1="58" x2="88" y2="58" stroke={m} strokeWidth="1.3" opacity="0.3" />
-      {/* Pencil body — diagonal */}
+      {/* Pencil body â€” diagonal */}
       <rect x="104" y="44" width="12" height="52" rx="3"
         transform="rotate(-42 104 44)"
         stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.07" />
@@ -180,7 +180,7 @@ function SketchLaunch() {
       <line x1="178" y1="22" x2="178" y2="30" stroke={a} strokeWidth="2.2" opacity="0.65" />
       {/* Header label line */}
       <line x1="120" y1="35" x2="160" y2="35" stroke={a} strokeWidth="1.2" opacity="0.4" />
-      {/* 14 cells — 2 rows of 7 */}
+      {/* 14 cells â€” 2 rows of 7 */}
       {Array.from({length: 14}, (_, i) => {
         const col = i % 7;
         const row = Math.floor(i / 7);
@@ -210,7 +210,7 @@ function SketchLock() {
     <svg viewBox="0 0 220 140" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Lock body */}
       <rect x="72" y="66" width="76" height="62" rx="8" stroke={a} strokeWidth="2.2" opacity="0.8" fill={a} fillOpacity="0.07" />
-      {/* Shackle — proper U, sitting on top of body */}
+      {/* Shackle â€” proper U, sitting on top of body */}
       <path d="M 88 66 L 88 46 Q 88 22 110 22 Q 132 22 132 46 L 132 66"
         stroke={a} strokeWidth="2.2" opacity="0.75" />
       {/* Keyhole circle */}
@@ -237,7 +237,7 @@ function SketchLock() {
   );
 }
 
-// Two bar chart columns — left tall/unbounded, right shorter with hard cap line
+// Two bar chart columns â€” left tall/unbounded, right shorter with hard cap line
 function SketchCap() {
   const m = "rgb(var(--muted))";
   const a = "rgb(var(--amber))";
@@ -246,16 +246,16 @@ function SketchCap() {
       {/* Axis */}
       <line x1="28" y1="116" x2="196" y2="116" stroke={m} strokeWidth="1.6" opacity="0.4" />
       <line x1="28" y1="20" x2="28" y2="116" stroke={m} strokeWidth="1.2" opacity="0.3" />
-      {/* Left bar — uncapped, tall */}
+      {/* Left bar â€” uncapped, tall */}
       <rect x="48" y="22" width="52" height="94" rx="3" stroke={m} strokeWidth="1.6" opacity="0.4" fill={m} fillOpacity="0.07" />
       {/* Unbounded arrow up */}
       <line x1="74" y1="22" x2="74" y2="10" stroke={m} strokeWidth="1.4" opacity="0.35" strokeDasharray="3 2" />
       <polyline points="68,16 74,8 80,16" stroke={m} strokeWidth="1.4" opacity="0.35" />
       {/* Left label */}
       <line x1="42" y1="124" x2="106" y2="124" stroke={m} strokeWidth="1.1" opacity="0.3" />
-      {/* Right bar — capped */}
+      {/* Right bar â€” capped */}
       <rect x="124" y="58" width="52" height="58" rx="3" stroke={a} strokeWidth="2" opacity="0.75" fill={a} fillOpacity="0.09" />
-      {/* Cap line — thick horizontal */}
+      {/* Cap line â€” thick horizontal */}
       <line x1="114" y1="58" x2="186" y2="58" stroke={a} strokeWidth="3" opacity="0.85" />
       {/* Cap end ticks */}
       <line x1="114" y1="50" x2="114" y2="66" stroke={a} strokeWidth="2" opacity="0.75" />
@@ -283,7 +283,7 @@ function SketchMediation() {
       <line x1="20" y1="20" x2="78" y2="20" stroke={m} strokeWidth="1.2" opacity="0.4" />
       <line x1="20" y1="32" x2="78" y2="32" stroke={m} strokeWidth="1.2" opacity="0.4" />
       <line x1="20" y1="44" x2="56" y2="44" stroke={m} strokeWidth="1.2" opacity="0.35" />
-      {/* Right bubble — accent, facing left (tail on left) */}
+      {/* Right bubble â€” accent, facing left (tail on left) */}
       <path d="M 130 10 Q 130 4 136 4 L 206 4 Q 212 4 212 10 L 212 48 Q 212 54 206 54 L 188 54 L 192 68 L 178 54 L 136 54 Q 130 54 130 48 Z"
         stroke={a} strokeWidth="1.8" opacity="0.7" fill={a} fillOpacity="0.06" />
       <line x1="142" y1="20" x2="200" y2="20" stroke={a} strokeWidth="1.2" opacity="0.5" />
@@ -300,7 +300,7 @@ function SketchMediation() {
   );
 }
 
-/* ── Sections ─────────────────────────────────────────────────────── */
+/* â”€â”€ Sections â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 interface Section {
   id: string;
@@ -374,7 +374,7 @@ const SECTIONS: Section[] = [
           Every project includes two rounds of revisions against the original brief. A revision means changing something we built. It does not mean adding a new feature, changing the design concept, or rebuilding a section from scratch. If you&apos;re not sure whether something counts as a revision, ask before assuming it&apos;s included.
         </p>
         <p>
-          Additional revision rounds are billed at our hourly rate. Scope changes — anything outside what was agreed in the brief — require a new written estimate and your sign-off before we proceed. We won&apos;t silently absorb extra work and present a surprise invoice later.
+          Additional revision rounds are billed at our hourly rate. Scope changes â€” anything outside what was agreed in the brief â€” require a new written estimate and your sign-off before we proceed. We won&apos;t silently absorb extra work and present a surprise invoice later.
         </p>
         <p>
           If a project goes quiet on your end for more than 30 consecutive days without a scheduled pause agreed in advance, we treat it as stalled. We&apos;ll invoice for completed work and close the project out. Re-engaging after that point is a new engagement, and our availability isn&apos;t guaranteed.
@@ -407,7 +407,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          Everything you share with us stays with us. Business plans, product roadmaps, financials, customer data, unreleased work — none of it gets discussed outside the project, shared with third parties, or used for anything other than the work you hired us to do.
+          Everything you share with us stays with us. Business plans, product roadmaps, financials, customer data, unreleased work â€” none of it gets discussed outside the project, shared with third parties, or used for anything other than the work you hired us to do.
         </p>
         <p>
           We use professional tooling and don&apos;t store client credentials beyond what&apos;s needed to complete the work. Access is revoked on handover unless you instruct otherwise.
@@ -428,7 +428,7 @@ const SECTIONS: Section[] = [
           We build carefully and stand behind our work. If we make a mistake, we want to know and we want to fix it. But there are limits to what we can reasonably be held responsible for.
         </p>
         <p>
-          Our total liability for any claim arising from a project is capped at the total amount you paid us for that project. We are not liable for lost revenue, lost customers, missed launches, reputational harm, or any other downstream business impact — even if a bug or delay was on our end.
+          Our total liability for any claim arising from a project is capped at the total amount you paid us for that project. We are not liable for lost revenue, lost customers, missed launches, reputational harm, or any other downstream business impact â€” even if a bug or delay was on our end.
         </p>
         <p>
           We are also not liable for issues caused by third-party platforms (Shopify, payment processors, hosting providers, CDNs), changes to those platforms after handover, or modifications made by your team to code we delivered. Once you or someone you authorise touches the codebase, that portion is outside our warranty.
@@ -443,7 +443,7 @@ const SECTIONS: Section[] = [
     body: (
       <>
         <p>
-          If something goes wrong, message us first. We&apos;re a small studio and most issues resolve in a single conversation. We don&apos;t have a legal team waiting to fire back — we have a genuine interest in making things right and keeping the relationship intact where possible.
+          If something goes wrong, message us first. We&apos;re a small studio and most issues resolve in a single conversation. We don&apos;t have a legal team waiting to fire back â€” we have a genuine interest in making things right and keeping the relationship intact where possible.
         </p>
         <p>
           If a dispute can&apos;t be resolved between us directly, both parties agree to attempt mediation before pursuing any legal action. Formal proceedings, if it comes to that, will be governed by the laws of Illinois, United States.
@@ -456,11 +456,11 @@ const SECTIONS: Section[] = [
   },
 ];
 
-/* ── Page ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 export default function LegalPage() {
   return (
-    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-24">
+    <main className="page-container mx-auto w-full max-w-6xl min-h-screen flex flex-col pb-16 sm:pb-24">
 
       {/* Nav */}
       <div className="flex items-center px-8 py-5">
@@ -545,10 +545,11 @@ export default function LegalPage() {
           before we start.
         </p>
         <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-30 tabular-nums shrink-0">
-          © {new Date().getFullYear()} Inertia
+          Â© {new Date().getFullYear()} Inertia
         </p>
       </div>
 
     </main>
   );
 }
+

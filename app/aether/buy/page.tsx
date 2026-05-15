@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { BuyForm } from "./buy-form";
 
 export const metadata: Metadata = {
-  title: "Buy Aether — Inertia",
+  title: "Buy Aether â€” Inertia",
   description:
     "Pick a license for Aether. Standard, Lifetime, or a custom build on the Aether foundation.",
 };
@@ -22,7 +22,7 @@ export default async function BuyAetherPage({
       : undefined;
 
   return (
-    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl flex flex-col">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl flex flex-col">
 
       {/* Nav */}
       <div className="flex items-center px-8 py-5 rise">
@@ -44,3 +44,4 @@ export default async function BuyAetherPage({
     </main>
   );
 }
+

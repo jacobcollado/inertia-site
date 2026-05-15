@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Not found — Inertia",
+  title: "Not found â€” Inertia",
   description: "This page doesn't exist.",
 };
 
 export default function NotFound() {
   return (
-    <main className="page-container mx-auto w-full max-w-5xl">
+    <main className="page-container mx-auto w-full max-w-6xl">
 
       <div className="flex flex-col items-center justify-center px-8 text-center rise" style={{ minHeight: "calc(100vh - 48px)", ["--rise-delay" as any]: "40ms" }}>
         <p className="text-[11px] tracking-widest text-[rgb(var(--muted))] opacity-40 mb-6 select-none uppercase">
@@ -42,3 +42,4 @@ export default function NotFound() {
     </main>
   );
 }
+

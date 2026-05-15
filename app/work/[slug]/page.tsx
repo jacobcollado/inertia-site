@@ -36,7 +36,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   const next = idx >= 0 ? all[(idx + 1) % all.length] : null;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-8 pt-6 pb-16 sm:pt-8 sm:pb-24">
+    <main className="mx-auto w-full max-w-6xl px-8 pt-6 pb-16 sm:pt-8 sm:pb-24">
       {/* Nav */}
       <header
         className="flex items-center mb-16 rise"
