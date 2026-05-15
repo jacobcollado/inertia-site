@@ -276,7 +276,7 @@ function SketchConversion({ accent }: { accent: [number, number, number] }) {
 
 export default function AetherPage() {
   return (
-    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Back nav */}
       <div className="px-6 sm:px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>

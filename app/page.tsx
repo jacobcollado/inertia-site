@@ -612,11 +612,11 @@ function MissionPhrase() {
               transform: visible ? "translateY(0)" : "translateY(10px)",
               transition: visible ? `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms` : "none",
               ...(isHighlight ? {
-                background: "linear-gradient(100deg, #b8aee0 0%, #a8c0b8 100%)",
+                background: "linear-gradient(100deg, #4a72ee 0%, #8b52f0 100%)",
                 borderRadius: "6px",
                 padding: "0 0.35em 0.05em",
                 margin: "0 0.1em",
-                color: "#1a1a2e",
+                color: "rgb(var(--fg))",
               } : {}),
             }}
           >

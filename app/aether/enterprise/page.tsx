@@ -237,7 +237,7 @@ const PLANS = [
 
 export default function EnterprisePage() {
   return (
-    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Nav */}
       <div className="px-6 sm:px-8 py-5 rise">

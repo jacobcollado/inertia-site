@@ -51,6 +51,14 @@ function yearKey(year: string | undefined): string {
   return m ? m[0] : year;
 }
 
+function yearLabel(year: string | undefined): string {
+  if (!year) return "—";
+  const monthMatch = year.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)/i);
+  const yearMatch = year.match(/\d{4}/);
+  if (monthMatch && yearMatch) return `${monthMatch[0].slice(0, 3)} ${yearMatch[0]}`;
+  return yearMatch ? yearMatch[0] : year;
+}
+
 function WorkGrid({ work }: { work: WorkMeta[] }) {
   const [active, setActive] = useState<WorkMeta | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
@@ -76,6 +84,7 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
               {grouped[year].map((w, i) => {
                 const tag = serviceTag(w.service);
                 const isHovered = hovered === w.slug;
+                const month = w.year?.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)/i)?.[0]?.slice(0, 3);
                 return (
                   <button
                     key={w.slug}
@@ -87,7 +96,10 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
                   >
                     <div className="flex flex-col gap-1 min-w-0">
                       <span className="text-[19px] sm:text-[20px] tracking-tight text-[rgb(var(--fg))] leading-none truncate">{w.client}</span>
-                      {tag && <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-none">{tag}</span>}
+                      <div className="flex items-center gap-2">
+                        {month && <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">{month}</span>}
+                        {tag && <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-none">{tag}</span>}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                       {w.cover && (

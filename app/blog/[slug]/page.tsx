@@ -231,24 +231,24 @@ const SECTION_SKETCHES: Record<string, React.ReactElement> = {
   ),
 };
 
-const BODY_CLASSES = `mx-auto max-w-2xl px-8 pt-10 pb-8 rise
-  text-[1.0625rem] leading-[1.85] tracking-tight text-[rgb(var(--fg))]
+const BODY_CLASSES = `px-8 pt-10 pb-8 rise
+  text-[1.125rem] leading-[1.9] tracking-tight text-[rgb(var(--fg))] [font-family:'Erode',serif]
   space-y-6
-  [&_p:first-of-type]:text-[1.125rem] [&_p:first-of-type]:leading-[1.8] [&_p:first-of-type]:text-[rgb(var(--fg))]
+  [&_p:first-of-type]:text-[1.1875rem] [&_p:first-of-type]:leading-[1.85] [&_p:first-of-type]:text-[rgb(var(--fg))]
   [&_a]:text-blue-500 [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-blue-500/40 [&_a]:transition-colors hover:[&_a]:text-blue-400 hover:[&_a]:decoration-blue-400
   [&_strong]:font-medium [&_strong]:text-[rgb(var(--fg))]
   [&_em]:not-italic [&_em]:text-[rgb(var(--fg))] [&_em]:font-medium
   [&_mark]:bg-transparent [&_mark]:text-[rgb(var(--fg))] [&_mark]:font-medium [&_mark]:border-b [&_mark]:border-[rgb(var(--fg))/0.25] [&_mark]:pb-px
   [&_code]:font-mono [&_code]:text-[0.875em] [&_code]:bg-[rgb(var(--line))/0.6] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded
   [&_pre]:bg-[rgb(var(--line))/0.4] [&_pre]:rounded-lg [&_pre]:p-5 [&_pre]:overflow-x-auto [&_pre]:text-[0.875em]
-  [&_blockquote]:border-l-[3px] [&_blockquote]:border-[rgb(var(--fg))/0.15] [&_blockquote]:pl-6 [&_blockquote]:text-[rgb(var(--muted))] [&_blockquote]:italic [&_blockquote]:text-[1.0625rem]
+  [&_blockquote]:border-l-[3px] [&_blockquote]:border-[rgb(var(--fg))/0.15] [&_blockquote]:pl-6 [&_blockquote]:text-[rgb(var(--muted))] [&_blockquote]:italic [&_blockquote]:text-[1.125rem]
   [&_ul]:list-none [&_ul]:space-y-2
   [&_ul_li]:relative [&_ul_li]:pl-4 [&_ul_li]:before:absolute [&_ul_li]:before:left-0 [&_ul_li]:before:top-[0.75em] [&_ul_li]:before:h-px [&_ul_li]:before:w-2.5 [&_ul_li]:before:bg-[rgb(var(--muted))] [&_ul_li]:before:opacity-30 [&_ul_li]:before:content-['']
   [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2
-  [&_h2]:text-[1.375rem] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:mt-16 [&_h2]:mb-4 [&_h2]:scroll-mt-24 [&_h2]:text-[rgb(var(--fg))]
-  [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_h3]:tracking-tight [&_h3]:mt-10 [&_h3]:mb-3 [&_h3]:scroll-mt-24
+  [&_h2]:[font-family:'Satoshi',sans-serif] [&_h2]:text-[1.5rem] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:mt-16 [&_h2]:mb-4 [&_h2]:scroll-mt-24 [&_h2]:text-[rgb(var(--fg))]
+  [&_h3]:[font-family:'Satoshi',sans-serif] [&_h3]:text-[1.1875rem] [&_h3]:font-medium [&_h3]:tracking-tight [&_h3]:mt-10 [&_h3]:mb-3 [&_h3]:scroll-mt-24
   [&_hr]:border-none [&_hr]:h-px [&_hr]:bg-[rgb(var(--line))] [&_hr]:my-14
-  [&_table]:w-full [&_table]:text-[0.9375rem] [&_th]:text-left [&_th]:pb-2 [&_th]:border-b [&_th]:border-[rgb(var(--line))] [&_th]:font-medium [&_td]:py-2 [&_td]:border-b [&_td]:border-[rgb(var(--line))/0.5]`;
+  [&_table]:w-full [&_table]:text-[1rem] [&_th]:text-left [&_th]:pb-2 [&_th]:border-b [&_th]:border-[rgb(var(--line))] [&_th]:font-medium [&_td]:py-2 [&_td]:border-b [&_td]:border-[rgb(var(--line))/0.5]`;
 
 // Split rendered HTML at h2/h3 boundaries and inject section sketches
 // after the first <p> inside each section so the sketch sits below the
@@ -271,7 +271,7 @@ function ArticleBody({ html }: { html: string }) {
         const after = chunk.slice(firstPEnd + 4);
         rendered.push(
           <div key={`${i}a`} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "0ms" }} dangerouslySetInnerHTML={{ __html: before }} />,
-          <div key={`${i}s`} className="mx-auto max-w-2xl px-8 py-6">{sketch}</div>,
+          <div key={`${i}s`} className="px-8 py-6">{sketch}</div>,
           after.trim() && <div key={`${i}b`} className={BODY_CLASSES} style={{ ["--rise-delay" as any]: "0ms" }} dangerouslySetInnerHTML={{ __html: after }} />,
         );
         return;
@@ -322,7 +322,7 @@ export default async function BlogPost({
   const stats = readingStats(post.content);
 
   return (
-    <main className="page-container relative mx-auto w-full max-w-5xl">
+    <main className="page-container relative mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl">
       <ReadingProgress />
 
       {/* Back nav */}
@@ -338,16 +338,10 @@ export default async function BlogPost({
 
       <div className="grid-rule" aria-hidden="true" />
 
-      {/* Page grid: TOC | Article */}
-      <div className="grid grid-cols-1 lg:grid-cols-[14rem_1fr]">
+      <TOC headings={headings} />
 
-        {/* TOC column */}
-        <div className="lg:border-r lg:border-[rgb(var(--line))] self-stretch">
-          <TOC headings={headings} />
-        </div>
-
-        {/* Article column */}
-        <article>
+      <article>
+          <div className="mx-auto max-w-3xl px-0">
           {/* Hero header */}
           <header className="px-8 pt-12 pb-8 border-b border-[rgb(var(--line))] rise" style={{ ["--rise-delay" as any]: "40ms" }}>
             <div className="flex items-center gap-2 mb-7">
@@ -356,17 +350,17 @@ export default async function BlogPost({
                   <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
                 </svg>
               </div>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Jacob Collado</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ fontFamily: "'Erode', serif" }}>Jacob Collado</span>
               <span className="text-[rgb(var(--line))] text-[10px]">·</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">Founder, Inertia</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60" style={{ fontFamily: "'Erode', serif" }}>Founder, Inertia</span>
             </div>
 
-            <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] max-w-2xl">
+            <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] max-w-2xl" style={{ fontFamily: "'Satoshi', sans-serif" }}>
               {post.title}
             </h1>
 
             {post.subtitle && (
-              <p className="mt-5 text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl">
+              <p className="mt-5 text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl" style={{ fontFamily: "'Erode', serif" }}>
                 {post.subtitle}
               </p>
             )}
@@ -388,7 +382,7 @@ export default async function BlogPost({
           </header>
 
           {/* Sketch */}
-          <div className="px-8 pt-10 pb-6 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
+          <div className="px-8 pt-10 pb-6 rise" style={{ ["--rise-delay" as any]: "80ms", maxWidth: "36rem" }}>
             <PostSketch slug={post.slug} />
           </div>
 
@@ -409,9 +403,8 @@ export default async function BlogPost({
               Back to top
             </a>
           </div>
+          </div>
         </article>
-
-      </div>
     </main>
   );
 }

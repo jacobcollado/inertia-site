@@ -22,7 +22,7 @@ export default async function BuyAetherPage({
       : undefined;
 
   return (
-    <main className="page-container mx-auto w-full max-w-5xl flex flex-col">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl flex flex-col">
 
       {/* Nav */}
       <div className="flex items-center px-8 py-5 rise">

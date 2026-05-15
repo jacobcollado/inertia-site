@@ -1024,7 +1024,7 @@ export default function DocsPage() {
   const sidebarProps = { products: PRODUCTS, activeProductId, activeArticleId, onSelectProduct: handleSelectProduct };
 
   return (
-    <div className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
+    <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl min-h-screen flex flex-col">
 
       <header className="px-6 sm:px-8 pt-6 sm:pt-8 pb-10 sm:pb-12 rise">
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">

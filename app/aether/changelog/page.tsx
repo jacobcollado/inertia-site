@@ -287,7 +287,7 @@ export default function AetherChangelog() {
   const sidebarProps = { activeTypes, activeLabels, hasFilters, guideOpen, toggleType, toggleLabel, clearFilters, setGuideOpen };
 
   return (
-    <div className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
+    <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-5xl min-h-screen flex flex-col">
 
       {/* Header */}
       <header className="px-8 pt-6 sm:pt-8 pb-12 rise">

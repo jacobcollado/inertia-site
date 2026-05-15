@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { PostMeta } from "@/lib/posts";
 
 const FILTERS = [
@@ -16,23 +16,9 @@ type Filter = typeof FILTERS[number]["key"];
 export default function BlogIndex() {
   const [posts, setPosts]   = useState<PostMeta[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
-  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
-  const [pillReady, setPillReady] = useState(false);
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
   useEffect(() => {
     fetch("/api/content").then((r) => r.json()).then((d) => setPosts(d.posts ?? []));
   }, []);
-
-  // Move the sliding pill to the active tab — suppress transition on first paint
-  useEffect(() => {
-    const idx = FILTERS.findIndex((f) => f.key === filter);
-    const el = tabRefs.current[idx];
-    if (!el) return;
-    const next = { left: el.offsetLeft, width: el.offsetWidth };
-    setPillStyle(next);
-    if (!pillReady) requestAnimationFrame(() => setPillReady(true));
-  }, [filter, posts.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = posts.filter((p) => {
     if (filter === "pinned") return p.pinned;
@@ -41,7 +27,7 @@ export default function BlogIndex() {
   });
 
   return (
-    <main className="page-container mx-auto w-full max-w-5xl min-h-screen flex flex-col">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
       {/* Nav */}
       <div className="flex items-center justify-between px-8 py-5 rise">
@@ -56,32 +42,22 @@ export default function BlogIndex() {
 
       <div className="grid-rule" aria-hidden="true" />
 
-      {/* Filter — segmented control with sliding pill */}
-      <div className="flex items-center justify-center py-5 rise">
-        <div className="relative flex items-center gap-0 rounded-full border border-[rgb(var(--line))] p-1">
-          {/* Sliding background pill */}
-          <span
-            className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-[rgb(var(--fg))]"
+      {/* Filter tabs */}
+      <div className="flex border-b border-[rgb(var(--line))] rise">
+        {FILTERS.map(({ key, label }, i) => (
+          <button
+            key={key}
+            onClick={() => setFilter(key)}
+            className="relative py-3 px-5 text-[12px] tracking-tight transition-colors duration-150"
             style={{
-              left: pillStyle.left,
-              width: pillStyle.width,
-              transition: pillReady ? "left 220ms cubic-bezier(0.4,0,0.2,1), width 220ms cubic-bezier(0.4,0,0.2,1)" : "none",
+              color: filter === key ? "rgb(var(--fg))" : "rgb(var(--muted))",
+              borderRight: i < FILTERS.length - 1 ? "1px solid rgb(var(--line))" : undefined,
             }}
-            aria-hidden="true"
-          />
-          {FILTERS.map(({ key, label }, idx) => (
-            <button
-              key={key}
-              ref={(el) => { tabRefs.current[idx] = el; }}
-              onClick={() => setFilter(key)}
-              className={`relative z-10 px-4 py-1.5 text-[13px] tracking-tight rounded-full transition-colors duration-150 [-webkit-tap-highlight-color:transparent] ${
-                filter === key ? "text-[rgb(var(--bg))]" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+          >
+            {label}
+            {filter === key && <span className="absolute inset-x-0 bottom-0 h-px bg-[rgb(var(--fg))]" />}
+          </button>
+        ))}
       </div>
 
       <div className="grid-rule" aria-hidden="true" />
