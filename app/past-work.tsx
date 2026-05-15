@@ -2,74 +2,116 @@
 
 import React from "react";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { SiShopify } from "react-icons/si";
 import { createPortal } from "react-dom";
 import type { WorkMeta } from "@/lib/work";
 
+const TABS = [
+  { label: "All", test: (_: WorkMeta) => true },
+  { label: "Shopify", test: (w: WorkMeta) => !!w.service && /shopify/i.test(w.service) },
+  { label: "Custom", test: (w: WorkMeta) => !!w.service && /custom|e-commerce|ecommerce|merch/i.test(w.service) && !/shopify/i.test(w.service) },
+  { label: "Brand", test: (w: WorkMeta) => !!w.service && /logo|brand|identity|portfolio/i.test(w.service) },
+];
+
 export function PastWork({ work }: { work: WorkMeta[] }) {
-  return <WorkGrid work={work} />;
+  const [tab, setTab] = useState(0);
+  const filtered = work.filter(TABS[tab].test);
+
+  return (
+    <div>
+      {/* Tab bar */}
+      <div className="flex border-b border-[rgb(var(--line))]">
+        {TABS.map((t, i) => (
+          <button
+            key={t.label}
+            onClick={() => setTab(i)}
+            className={`relative py-3 text-[12px] tracking-tight transition-colors duration-150 ${t.label === "Custom" ? "sm:px-5" : "px-5"}`}
+            style={{
+              color: tab === i ? "rgb(var(--fg))" : "rgb(var(--muted))",
+              borderRight: i < TABS.length - 1 ? "1px solid rgb(var(--line))" : undefined,
+              ...(t.label === "Custom" ? { paddingLeft: "0.9625rem", paddingRight: "0.9625rem" } : {}),
+            }}
+          >
+            {t.label}
+            {tab === i && (
+              <span className="absolute inset-x-0 bottom-0 h-px bg-[rgb(var(--fg))]" />
+            )}
+          </button>
+        ))}
+      </div>
+      <WorkGrid work={filtered} />
+    </div>
+  );
 }
 
-/* ── Work grid ────────────────────────────────────────────────── */
+/* ── Work timeline ─────────────────────────────────────────────── */
 
+function yearKey(year: string | undefined): string {
+  if (!year) return "—";
+  const m = year.match(/\d{4}/);
+  return m ? m[0] : year;
+}
 
 function WorkGrid({ work }: { work: WorkMeta[] }) {
   const [active, setActive] = useState<WorkMeta | null>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const isDragging = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-  const dragMoved = useRef(false);
+  const [hovered, setHovered] = useState<string | null>(null);
 
-  const onMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-    dragMoved.current = false;
-    startX.current = e.pageX - (trackRef.current?.offsetLeft ?? 0);
-    scrollLeft.current = trackRef.current?.scrollLeft ?? 0;
-    e.preventDefault();
-  };
-
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current || !trackRef.current) return;
-    const x = e.pageX - trackRef.current.offsetLeft;
-    const walk = x - startX.current;
-    if (Math.abs(walk) > 4) dragMoved.current = true;
-    trackRef.current.scrollLeft = scrollLeft.current - walk;
-  };
-
-  const onMouseUp = () => { isDragging.current = false; };
-
-  useEffect(() => {
-    const onGlobalUp = () => { isDragging.current = false; };
-    window.addEventListener("mouseup", onGlobalUp);
-    return () => window.removeEventListener("mouseup", onGlobalUp);
-  }, []);
+  const grouped = work.reduce<Record<string, WorkMeta[]>>((acc, w) => {
+    const y = yearKey(w.year);
+    (acc[y] ??= []).push(w);
+    return acc;
+  }, {});
+  const years = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
   return (
     <>
-      <div className="relative">
-        <div
-          ref={trackRef}
-          className="flex overflow-x-auto gap-0 select-none"
-          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch", cursor: "grab" }}
-          onMouseDown={onMouseDown}
-          onMouseMove={onMouseMove}
-          onMouseUp={onMouseUp}
-          onMouseLeave={onMouseUp}
-        >
-          {work.map((w, i) => (
-            <div key={w.slug} className="shrink-0 w-[80vw] sm:w-[33.333%] border-r border-[rgb(var(--line))]">
-              <WorkCard item={w} index={i} total={work.length} onOpen={() => { if (!dragMoved.current) setActive(w); }} />
+      <div>
+        {years.map((year) => (
+          <div key={year} className="flex border-b border-[rgb(var(--line))]">
+            {/* Year label */}
+            <div className="w-14 sm:w-24 shrink-0 border-r border-[rgb(var(--line))] px-3 sm:px-5 pt-5 pb-4">
+              <span className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 tabular-nums">{year}</span>
             </div>
-          ))}
-        </div>
-      </div>
-      {/* Drag indicator */}
-      <div className="flex items-center gap-2 px-6 py-3 border-t border-[rgb(var(--line))]">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0" style={{ color: "rgb(var(--muted))", opacity: 0.4 }}>
-          <path d="M5 12h14M15 7l5 5-5 5" />
-        </svg>
-        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40">Drag to explore</span>
+            {/* Entries */}
+            <div className="flex flex-col flex-1 min-w-0">
+              {grouped[year].map((w, i) => {
+                const tag = serviceTag(w.service);
+                const isHovered = hovered === w.slug;
+                return (
+                  <button
+                    key={w.slug}
+                    onClick={() => setActive(w)}
+                    onMouseEnter={() => setHovered(w.slug)}
+                    onMouseLeave={() => setHovered(null)}
+                    className="group relative flex items-center justify-between gap-3 sm:gap-5 px-4 sm:px-6 py-4 sm:py-5 text-left transition-colors duration-150 hover:bg-[rgb(var(--line))/0.1]"
+                    style={{ borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined }}
+                  >
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <span className="text-[19px] sm:text-[20px] tracking-tight text-[rgb(var(--fg))] leading-none truncate">{w.client}</span>
+                      {tag && <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-none">{tag}</span>}
+                    </div>
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                      {w.cover && (
+                        <div
+                          className="overflow-hidden rounded-sm transition-all duration-200 hidden sm:block"
+                          style={{ width: isHovered ? 112 : 0, height: 68, opacity: isHovered ? 1 : 0 }}
+                        >
+                          <img src={w.cover} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                        </div>
+                      )}
+                      {/* Mobile: always-visible thumbnail */}
+                      {w.cover && (
+                        <div className="sm:hidden w-16 h-12 overflow-hidden rounded-sm shrink-0">
+                          <img src={w.cover} alt="" className="w-full h-full object-cover" aria-hidden="true" />
+                        </div>
+                      )}
+                      <span className="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[11px] leading-none shrink-0">→</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
       {active && <WorkSheet item={active} onClose={() => setActive(null)} />}
     </>
@@ -93,53 +135,6 @@ function cleanSummary(text: string): string {
   return text.replace(/—/g, ",").replace(/\s*,\s*/g, ", ").replace(/,\s*,/g, ",");
 }
 
-function WorkCard({ item, index, total, onOpen }: { item: WorkMeta; index: number; total: number; onOpen: () => void }) {
-  const tag = serviceTag(item.service);
-  return (
-    <button
-      onClick={onOpen}
-      className="group relative flex flex-col justify-between text-left w-full h-full rise px-6 pt-5 pb-7 min-h-[300px]"
-      style={{ ["--rise-delay" as any]: `${index * 60}ms` }}
-    >
-      {/* Metadata — top */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-0.5">
-          {tag && (
-            <span className="flex items-center gap-1.5 text-[17px] tracking-tight text-[rgb(var(--fg))] leading-tight">
-              <SiShopify className="w-3.5 h-3.5 shrink-0" />
-              {tag}
-            </span>
-          )}
-          {item.year && <span className="text-[17px] tracking-tight text-[rgb(var(--fg))] opacity-60 tabular-nums">{item.year}</span>}
-        </div>
-        <span className="inline-flex items-center justify-center w-9 h-9 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[13px] leading-none shrink-0">
-          <span style={{ lineHeight: 1, display: "block", marginTop: "1px" }}>→</span>
-        </span>
-      </div>
-
-      {/* Logo or client name — centered */}
-      <div className="flex flex-1 items-center justify-center py-4">
-        {item.logo ? (
-          <img
-            src={item.logo}
-            alt={item.client}
-            style={{ maskImage: "linear-gradient(to top, transparent 0%, black 40%)", WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 40%)" }}
-            className={`w-auto object-contain grayscale opacity-25 group-hover:opacity-45 transition-opacity duration-200 dark:invert ${
-              item.client === "FT.GIOO" ? "h-24 max-w-[160px]" :
-              item.client === "Mood Swings" ? "h-20 max-w-[260px]" :
-              item.client === "Trippie Redd" ? "h-20 max-w-[240px]" :
-              item.client === "Allure New York" ? "h-16 max-w-[220px]" :
-              item.client === "Samuel Norris" ? "h-16 max-w-[220px]" :
-              "h-14 max-w-[200px]"
-            }`}
-          />
-        ) : (
-          <span className="text-[clamp(1.5rem,2.5vw,1.9rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-tight">{item.client}</span>
-        )}
-      </div>
-    </button>
-  );
-}
 
 
 
