@@ -1520,7 +1520,7 @@ function VisualLayout({ work }: { work: WorkMeta[] }) {
                 style={{
                   color: buildingTab === tab ? "rgb(var(--fg))" : "rgb(var(--muted))",
                   borderRight: i < BUILDING_TABS.length - 1 ? "1px solid rgb(var(--line))" : undefined,
-                  ...(tab === "Themes" ? { paddingLeft: "12.5px", paddingRight: "12.5px" } : {}),
+                  ...(tab === "Themes" ? { paddingLeft: "12.6px", paddingRight: "12.6px" } : {}),
                 }}
               >
                 {tab}
