@@ -91,7 +91,7 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
                     onClick={() => setActive(w)}
                     onMouseEnter={() => setHovered(w.slug)}
                     onMouseLeave={() => setHovered(null)}
-                    className="group relative flex items-center justify-between gap-3 sm:gap-5 px-4 sm:px-6 py-4 sm:py-5 text-left transition-colors duration-150 hover:bg-[rgb(var(--line))/0.1]"
+                    className="group relative flex items-center justify-between gap-3 sm:gap-5 px-4 sm:px-6 py-4 sm:py-5 text-left transition-colors duration-150 hover:bg-[rgb(var(--line))/0.1] overflow-visible"
                     style={{ borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined }}
                   >
                     <div className="flex flex-col gap-1 min-w-0">
@@ -101,11 +101,11 @@ function WorkGrid({ work }: { work: WorkMeta[] }) {
                         {tag && <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-none">{tag}</span>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-3 shrink-0 overflow-visible">
                       {w.cover && (
                         <div
-                          className="overflow-hidden rounded-sm transition-all duration-200 hidden sm:block"
-                          style={{ width: isHovered ? 112 : 0, height: 68, opacity: isHovered ? 1 : 0 }}
+                          className="overflow-hidden rounded transition-all duration-300 hidden sm:block"
+                          style={{ width: isHovered ? 160 : 0, height: 100, opacity: isHovered ? 1 : 0, transitionTimingFunction: "cubic-bezier(0.32,0.72,0,1)" }}
                         >
                           <img src={w.cover} alt="" className="w-full h-full object-cover" aria-hidden="true" />
                         </div>
