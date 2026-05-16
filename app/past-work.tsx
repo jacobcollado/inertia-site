@@ -221,21 +221,32 @@ function MobileCarousel({ work }: { work: WorkMeta[] }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{ startX: number; startOffset: number; dragging: boolean } | null>(null);
   const offsetRef = useRef(0);
-  const [offset, setOffsetState] = useState(0);
+  // velocity for momentum flick
+  const velRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTRef = useRef(0);
+  const rafRef = useRef(0);
 
   const items = work.slice(0, 6);
   const STRIP_W = items.length * M_COL_W + 60;
 
-  const clamp = (v: number, viewW: number) => Math.max(Math.min(v, 0), -(STRIP_W - viewW));
+  const clamp = (v: number) => {
+    const vw = viewportRef.current?.offsetWidth ?? 0;
+    return Math.max(Math.min(v, 0), -(STRIP_W - vw));
+  };
 
+  // Apply offset directly to DOM — no React re-render
   const applyOffset = (v: number) => {
     offsetRef.current = v;
-    setOffsetState(v);
+    if (stripRef.current) stripRef.current.style.transform = `translateX(${v}px)`;
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
-    const vw = viewportRef.current?.offsetWidth ?? 0;
+    cancelAnimationFrame(rafRef.current);
     dragState.current = { startX: e.clientX, startOffset: offsetRef.current, dragging: false };
+    velRef.current = 0;
+    lastXRef.current = e.clientX;
+    lastTRef.current = e.timeStamp;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
 
@@ -244,12 +255,27 @@ function MobileCarousel({ work }: { work: WorkMeta[] }) {
     const dx = e.clientX - dragState.current.startX;
     if (!dragState.current.dragging && Math.abs(dx) > 4) dragState.current.dragging = true;
     if (!dragState.current.dragging) return;
-    const vw = viewportRef.current?.offsetWidth ?? 0;
-    applyOffset(clamp(dragState.current.startOffset + dx, vw));
+    const dt = e.timeStamp - lastTRef.current || 1;
+    velRef.current = (e.clientX - lastXRef.current) / dt;
+    lastXRef.current = e.clientX;
+    lastTRef.current = e.timeStamp;
+    applyOffset(clamp(dragState.current.startOffset + dx));
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
+    if (!dragState.current) return;
+    const wasDragging = dragState.current.dragging;
     dragState.current = null;
+    if (!wasDragging) return;
+    // Momentum flick
+    let vel = velRef.current * 14;
+    const decay = () => {
+      vel *= 0.88;
+      if (Math.abs(vel) < 0.5) return;
+      applyOffset(clamp(offsetRef.current + vel));
+      rafRef.current = requestAnimationFrame(decay);
+    };
+    rafRef.current = requestAnimationFrame(decay);
   };
 
   return (
@@ -263,11 +289,11 @@ function MobileCarousel({ work }: { work: WorkMeta[] }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {/* Panning strip */}
+        {/* Panning strip — transform driven imperatively, no React state */}
         <div
           ref={stripRef}
           className="absolute top-0 left-0 h-full"
-          style={{ width: STRIP_W, transform: `translateX(${offset}px)`, transition: dragState.current?.dragging ? "none" : "transform 0ms" }}
+          style={{ width: STRIP_W }}
         >
           {/* SVG connector lines */}
           <svg className="absolute inset-0 pointer-events-none" width={STRIP_W} height={M_CANVAS_H} aria-hidden="true">
