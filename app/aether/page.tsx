@@ -489,7 +489,7 @@ export default function AetherPage() {
             </svg>
             All systems operational
           </div>
-          <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch ->'</Link>
+          <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch &rarr;</Link>
         </div>
       </footer>
 
