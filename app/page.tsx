@@ -1009,7 +1009,7 @@ function ServiceCards() {
                     <h3 className="text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{card.headline}</h3>
                     <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-snug">{card.description}</p>
                   </div>
-                  <div className="flex-1 flex items-center justify-center overflow-hidden py-4 [&>svg]:max-h-64 [&>svg]:w-auto [&>img]:max-w-[340px] [&>img]:w-full [&>img]:h-auto [&>img]:max-h-64">{card.illustration}</div>
+                  <div className="flex-1 flex items-center justify-center overflow-hidden py-4 [&>svg]:max-h-52 [&>svg]:w-full [&>img]:max-w-[300px] [&>img]:w-full [&>img]:h-auto [&>img]:max-h-52">{card.illustration}</div>
                 </div>
               );
               return (
