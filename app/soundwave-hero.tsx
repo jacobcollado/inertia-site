@@ -2,70 +2,53 @@
 
 import { useEffect, useRef } from "react";
 
-// Dark: subtle blue-grey, nearly monochrome
-const DARK_COLORS: [number, number, number][] = [
-  [56, 108, 255],
-  [24, 214, 255],
-  [122, 88, 255],
-  [0, 164, 255],
-  [82, 132, 255],
-  [40, 196, 255],
-  [146, 96, 255],
-  [0, 142, 255],
-  [0, 196, 168],
-  [82, 90, 255],
-  [32, 232, 255],
-  [176, 96, 255],
+// Noise field: sum of rotated sine waves at different frequencies and speeds
+const FIELD_WAVES = [
+  { kx: 0.0042, ky: 0.0028, speed: 0.00031, phase: 0.0  },
+  { kx: -0.003, ky: 0.0051, speed: 0.00024, phase: 1.7  },
+  { kx: 0.0061, ky: -0.002, speed: 0.00019, phase: 3.3  },
+  { kx: -0.002, ky: -0.004, speed: 0.00027, phase: 5.1  },
+  { kx: 0.0018, ky: 0.0065, speed: 0.00035, phase: 2.2  },
 ];
 
-// Light: cool mid-greys on white — no colour cast
-const LIGHT_COLORS: [number, number, number][] = [
-  [0, 116, 255],
-  [0, 196, 255],
-  [94, 72, 255],
-  [0, 164, 232],
-  [255, 86, 166],
-  [0, 186, 140],
-  [126, 56, 255],
-  [0, 142, 255],
-  [255, 124, 64],
-  [0, 170, 204],
-  [196, 72, 255],
-  [32, 128, 255],
-];
+// Number of contour levels
+const LEVELS = 14;
+// Marching squares resolution (px per cell, CSS pixels)
+const CELL = 10;
+// Mouse influence radius (CSS px)
+const MOUSE_R = 300;
+const MOUSE_STRENGTH = 0.28;
 
-const CELL_SIZE = 48;
-const GAP = 4;
-const ROWS = 10;
-const WAVE_SPEED = 90;
-const FADE_MS = 2000;
-const HOVER_FADE_MS = 1100;
-const HOVER_RADIUS = 3;
-const PEAK_HOLD_MS = 3200;
+function fieldAt(x: number, y: number, t: number, mx: number | null, my: number | null): number {
+  let v = 0;
+  for (const w of FIELD_WAVES) {
+    v += Math.sin(w.kx * x + w.ky * y + w.speed * t + w.phase);
+  }
+  v /= FIELD_WAVES.length;
 
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
+  if (mx !== null && my !== null) {
+    const dx = x - mx;
+    const dy = y - my;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    if (d < MOUSE_R) {
+      const falloff = 1 - d / MOUSE_R;
+      v += MOUSE_STRENGTH * falloff * falloff * falloff;
+    }
+  }
+
+  return v;
 }
 
-function getColor(col: number, isDark: boolean): [number, number, number] {
-  const palette = isDark ? DARK_COLORS : LIGHT_COLORS;
-  const i = Math.floor(col / 4) % palette.length;
-  const j = (i + 1) % palette.length;
-  const t = (col % 4) / 4;
-  return [
-    lerp(palette[i][0], palette[j][0], t),
-    lerp(palette[i][1], palette[j][1], t),
-    lerp(palette[i][2], palette[j][2], t),
-  ];
+// Linearly interpolate where the contour crosses an edge
+function interp(va: number, vb: number, level: number): number {
+  if (Math.abs(vb - va) < 1e-10) return 0.5;
+  return (level - va) / (vb - va);
 }
-
-type CellState = { born: number; col: number; row: number; hover?: boolean };
 
 export function SoundwaveHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef<{ x: number; y: number } | null>(null);
-  const lastHoverColRef = useRef<number>(-999);
-  const touchActiveRef = useRef(false);;
+  const touchActiveRef = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -74,12 +57,6 @@ export function SoundwaveHero() {
     if (!ctx) return;
 
     let running = true;
-    let lastWave = 0;
-    let waveFront = 0;
-    const active = new Map<string, CellState>();
-
-    // Peak hold: per-column { topRow, born }
-    const peaks = new Map<number, { topRow: number; born: number }>();
 
     const resize = () => {
       const r = canvas.getBoundingClientRect();
@@ -92,51 +69,35 @@ export function SoundwaveHero() {
 
     const isDark = () => document.documentElement.classList.contains("dark");
 
-    const setPointFromEvent = (clientX: number, clientY: number) => {
+    const setPoint = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect();
       mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top };
     };
 
-    // Mouse handlers
-    const onMouseMove = (e: MouseEvent) => {
-      setPointFromEvent(e.clientX, e.clientY);
-    };
-    const onMouseLeave = () => {
-      if (!touchActiveRef.current) mouseRef.current = null;
-    };
+    const onMouseMove = (e: MouseEvent) => setPoint(e.clientX, e.clientY);
+    const onMouseLeave = () => { if (!touchActiveRef.current) mouseRef.current = null; };
 
-    // Touch: only activate horizontal drags so vertical scroll is never blocked.
-    const touchStartRef = { x: 0, y: 0 };
-
+    const touchStart = { x: 0, y: 0 };
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType === "mouse") return;
-      touchStartRef.x = e.clientX;
-      touchStartRef.y = e.clientY;
+      touchStart.x = e.clientX; touchStart.y = e.clientY;
     };
-
     const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerType === "mouse") {
-        setPointFromEvent(e.clientX, e.clientY);
-        return;
-      }
-      // Only engage after a clearly horizontal gesture (dx > dy)
-      const dx = Math.abs(e.clientX - touchStartRef.x);
-      const dy = Math.abs(e.clientY - touchStartRef.y);
-      if (!touchActiveRef.current && dy > dx) return; // vertical scroll — ignore
+      if (e.pointerType === "mouse") { setPoint(e.clientX, e.clientY); return; }
+      const dx = Math.abs(e.clientX - touchStart.x);
+      const dy = Math.abs(e.clientY - touchStart.y);
+      if (!touchActiveRef.current && dy > dx) return;
       if (!touchActiveRef.current && dx > 8) {
         touchActiveRef.current = true;
         canvas.setPointerCapture(e.pointerId);
       }
-      if (touchActiveRef.current) setPointFromEvent(e.clientX, e.clientY);
+      if (touchActiveRef.current) setPoint(e.clientX, e.clientY);
     };
-
     const clearPointer = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") {
         touchActiveRef.current = false;
         mouseRef.current = null;
-        if (canvas.hasPointerCapture(e.pointerId)) {
-          canvas.releasePointerCapture(e.pointerId);
-        }
+        if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
       }
     };
 
@@ -152,102 +113,115 @@ export function SoundwaveHero() {
 
       const W = canvas.width / devicePixelRatio;
       const H = canvas.height / devicePixelRatio;
-      const totalCols = Math.ceil(W / CELL_SIZE) + 2;
-      const cellH = H / ROWS;
+      const dark = isDark();
 
-      // Advance wave
-      if (now - lastWave > WAVE_SPEED) {
-        lastWave = now;
-        const col = waveFront % totalCols;
-        const phase = (waveFront / 12) * Math.PI;
-        const amp = 0.35 + 0.65 * Math.abs(Math.sin(phase) * Math.cos(phase * 0.37));
-        const barH = Math.max(1, Math.round(ROWS * amp));
-        const topRow = ROWS - barH;
-        for (let r = ROWS - 1; r >= topRow; r--) {
-          active.set(`${col}-${r}`, { born: now, col, row: r });
+      const mx = mouseRef.current?.x ?? null;
+      const my = mouseRef.current?.y ?? null;
+
+      // Slow pan: terrain origin drifts at ~0.4px/sec horizontally, ~0.15px/sec vertically
+      const panX = now * 0.00042;
+      const panY = now * 0.00016;
+
+      // Build scalar field on grid
+      const cols = Math.ceil(W / CELL) + 2;
+      const rows = Math.ceil(H / CELL) + 2;
+      const field: number[] = new Array(cols * rows);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          field[r * cols + c] = fieldAt(c * CELL + panX, r * CELL + panY, now, mx, my);
         }
-        // Update peak: only replace if this bar is taller (topRow is lower index = higher on screen)
-        const existing = peaks.get(col);
-        if (!existing || topRow < existing.topRow) {
-          peaks.set(col, { topRow, born: now });
-        }
-        waveFront++;
       }
 
-      // Hover ripple — light up cells around cursor column at full height
-      if (mouseRef.current) {
-        const mx = mouseRef.current.x;
-        const cursorCol = Math.floor(mx / CELL_SIZE);
-        if (cursorCol !== lastHoverColRef.current) {
-          lastHoverColRef.current = cursorCol;
-          for (let dc = -HOVER_RADIUS; dc <= HOVER_RADIUS; dc++) {
-            const col = cursorCol + dc;
-            if (col < 0 || col >= totalCols) continue;
-            // Height tapers away from cursor
-            const dist = Math.abs(dc);
-            const amp = 1 - dist / (HOVER_RADIUS + 1);
-            const barH = Math.max(1, Math.round(ROWS * amp));
-            for (let r = ROWS - 1; r >= ROWS - barH; r--) {
-              const key = `h-${col}-${r}`;
-              active.set(key, { born: now, col, row: r, hover: true });
-            }
-          }
-        }
-      } else {
-        lastHoverColRef.current = -999;
-      }
-
-      // Draw
       ctx.save();
       ctx.scale(devicePixelRatio, devicePixelRatio);
       ctx.clearRect(0, 0, W, H);
 
-      const dark = isDark();
-      const colCount = Math.ceil(W / CELL_SIZE) + 1;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
 
-      // Grid base
-      ctx.fillStyle = dark ? "rgba(255,255,255,0.038)" : "rgba(15,23,42,0.048)";
-      for (let c = 0; c < colCount; c++) {
-        for (let r = 0; r < ROWS; r++) {
-          ctx.fillRect(c * CELL_SIZE + GAP / 2, r * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
+      // Field range is roughly [-1, 1]; spread levels evenly
+      const minVal = -1.1;
+      const maxVal = 1.1 + MOUSE_STRENGTH;
+      const step = (maxVal - minVal) / (LEVELS + 1);
+
+      // Accent line: the middle contour level, slowly cycles through levels over time
+      const accentLi = Math.floor((now * 0.00008) % LEVELS);
+
+      for (let li = 0; li < LEVELS; li++) {
+        const level = minVal + step * (li + 1);
+        const isAccent = li === accentLi;
+
+        // Occasional heavier lines: primes-ish offsets so it never feels periodic
+        const isMajor = li === 2 || li === 6 || li === 11;
+
+        if (isAccent) {
+          ctx.strokeStyle = dark ? `rgba(100,160,255,0.7)` : `rgba(60,100,255,0.45)`;
+          ctx.lineWidth = 1.6;
+        } else if (isMajor) {
+          const majorAlpha = dark ? 0.44 : 0.34;
+          ctx.strokeStyle = dark
+            ? `rgba(237,237,237,${majorAlpha})`
+            : `rgba(14,14,14,${majorAlpha})`;
+          ctx.lineWidth = 1.4;
+        } else {
+          const baseAlpha = dark ? 0.22 : 0.16;
+          ctx.strokeStyle = dark
+            ? `rgba(237,237,237,${baseAlpha})`
+            : `rgba(14,14,14,${baseAlpha})`;
+          ctx.lineWidth = 0.75;
         }
+
+        ctx.beginPath();
+
+        // Marching squares
+        for (let r = 0; r < rows - 1; r++) {
+          for (let c = 0; c < cols - 1; c++) {
+            const x0 = c * CELL;
+            const y0 = r * CELL;
+            const x1 = x0 + CELL;
+            const y1 = y0 + CELL;
+
+            const v00 = field[r * cols + c];
+            const v10 = field[r * cols + c + 1];
+            const v01 = field[(r + 1) * cols + c];
+            const v11 = field[(r + 1) * cols + c + 1];
+
+            const idx =
+              (v00 > level ? 8 : 0) |
+              (v10 > level ? 4 : 0) |
+              (v11 > level ? 2 : 0) |
+              (v01 > level ? 1 : 0);
+
+            if (idx === 0 || idx === 15) continue;
+
+            // Edge midpoints
+            const top    = { x: x0 + interp(v00, v10, level) * CELL, y: y0 };
+            const right  = { x: x1, y: y0 + interp(v10, v11, level) * CELL };
+            const bottom = { x: x0 + interp(v01, v11, level) * CELL, y: y1 };
+            const left   = { x: x0, y: y0 + interp(v00, v01, level) * CELL };
+
+            switch (idx) {
+              case 1:  case 14: ctx.moveTo(left.x, left.y);   ctx.lineTo(bottom.x, bottom.y); break;
+              case 2:  case 13: ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(right.x, right.y);  break;
+              case 3:  case 12: ctx.moveTo(left.x, left.y);   ctx.lineTo(right.x, right.y);   break;
+              case 4:  case 11: ctx.moveTo(top.x, top.y);     ctx.lineTo(right.x, right.y);   break;
+              case 6:  case 9:  ctx.moveTo(top.x, top.y);     ctx.lineTo(bottom.x, bottom.y); break;
+              case 7:  case 8:  ctx.moveTo(left.x, left.y);   ctx.lineTo(top.x, top.y);       break;
+              // Saddle cases
+              case 5:
+                ctx.moveTo(left.x, left.y);   ctx.lineTo(top.x, top.y);
+                ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(right.x, right.y);
+                break;
+              case 10:
+                ctx.moveTo(top.x, top.y);     ctx.lineTo(right.x, right.y);
+                ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(left.x, left.y);
+                break;
+            }
+          }
+        }
+
+        ctx.stroke();
       }
-
-      // Active cells
-      const expired: string[] = [];
-      active.forEach((cell, key) => {
-        const fadeDur = cell.hover ? HOVER_FADE_MS : FADE_MS;
-        const age = now - cell.born;
-        if (age > fadeDur) { expired.push(key); return; }
-
-        const t = age / fadeDur;
-        const fade = t < 0.08 ? t / 0.08 : 1 - Math.pow((t - 0.08) / 0.92, 0.55);
-        const fromBottom = ROWS - 1 - cell.row;
-        const brightBoost = 0.45 + 0.55 * (fromBottom / (ROWS - 1));
-        const maxAlpha = cell.hover ? (dark ? 1.0 : 0.98) : (dark ? 0.92 : 0.88);
-        const alpha = fade * brightBoost * maxAlpha;
-
-        const colorCol = cell.col + Math.floor(waveFront / 4);
-        const [r, g, b] = getColor(colorCol, dark);
-        ctx.fillStyle = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${alpha})`;
-        ctx.fillRect(cell.col * CELL_SIZE + GAP / 2, cell.row * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
-      });
-      expired.forEach((k) => active.delete(k));
-
-      // Peak hold ghost — faint single-cell marker at the top of each column's highest bar
-      const expiredPeaks: number[] = [];
-      peaks.forEach((peak, col) => {
-        if (col >= colCount) { expiredPeaks.push(col); return; }
-        const age = now - peak.born;
-        if (age > PEAK_HOLD_MS) { expiredPeaks.push(col); return; }
-        const t = age / PEAK_HOLD_MS;
-        const ghostAlpha = (t < 0.25 ? 1 : 1 - Math.pow((t - 0.25) / 0.75, 0.6)) * (dark ? 0.45 : 0.38);
-        const colorCol = col + Math.floor(waveFront / 4);
-        const [r, g, b] = getColor(colorCol, dark);
-        ctx.fillStyle = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${ghostAlpha})`;
-        ctx.fillRect(col * CELL_SIZE + GAP / 2, peak.topRow * cellH + GAP / 2, CELL_SIZE - GAP, cellH - GAP);
-      });
-      expiredPeaks.forEach((c) => peaks.delete(c));
 
       ctx.restore();
       requestAnimationFrame(frame);
