@@ -600,7 +600,6 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
   const [closing, setClosing] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  // drag state — imperative so we never re-render during drag
   const dragStartY = useRef(0);
   const dragCurrent = useRef(0);
   const dragging = useRef(false);
@@ -637,50 +636,63 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   });
 
+  const handleZoneRef = useRef<HTMLDivElement>(null);
+
   const triggerClose = () => {
     setClosing(true);
     setTimeout(onClose, 340);
   };
 
-  // Drag-to-dismiss — handle zone only, mobile bottom-sheet behaviour
   const setSheetY = (y: number) => {
     if (sheetRef.current) sheetRef.current.style.transform = `translateY(${y}px)`;
   };
 
-  const onHandlePointerDown = (e: React.PointerEvent) => {
-    // Only activate drag on mobile (touch pointer)
-    if (e.pointerType === "mouse") return;
-    dragging.current = true;
-    dragStartY.current = e.clientY;
-    dragCurrent.current = 0;
-    // Kill CSS animation so JS transform takes over immediately
-    if (sheetRef.current) sheetRef.current.style.animation = "none";
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
+  // Native touch drag-to-dismiss on handle zone — avoids React synthetic event issues on iOS
+  useEffect(() => {
+    if (!mounted) return;
+    const el = handleZoneRef.current;
+    if (!el) return;
 
-  const onHandlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging.current) return;
-    const dy = Math.max(0, e.clientY - dragStartY.current);
-    dragCurrent.current = dy;
-    setSheetY(dy);
-  };
+    const onTouchStart = (e: TouchEvent) => {
+      dragging.current = true;
+      dragStartY.current = e.touches[0].clientY;
+      dragCurrent.current = 0;
+    };
 
-  const onHandlePointerUp = () => {
-    if (!dragging.current) return;
-    dragging.current = false;
-    if (dragCurrent.current > DRAG_CLOSE_THRESHOLD) {
-      triggerClose();
-    } else {
-      // Snap back with spring
-      if (sheetRef.current) {
-        sheetRef.current.style.transition = "transform 400ms cubic-bezier(0.34,1.56,0.64,1)";
-        setSheetY(0);
-        setTimeout(() => {
-          if (sheetRef.current) { sheetRef.current.style.transition = ""; sheetRef.current.style.animation = ""; }
-        }, 400);
+    const onTouchMove = (e: TouchEvent) => {
+      if (!dragging.current) return;
+      const dy = Math.max(0, e.touches[0].clientY - dragStartY.current);
+      dragCurrent.current = dy;
+      setSheetY(dy);
+    };
+
+    const onTouchEnd = () => {
+      if (!dragging.current) return;
+      dragging.current = false;
+      if (dragCurrent.current > DRAG_CLOSE_THRESHOLD) {
+        triggerClose();
+      } else {
+        if (sheetRef.current) {
+          sheetRef.current.style.transition = "transform 400ms cubic-bezier(0.34,1.56,0.64,1)";
+          setSheetY(0);
+          setTimeout(() => {
+            if (sheetRef.current) sheetRef.current.style.transition = "";
+          }, 400);
+        }
       }
-    }
-  };
+    };
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    el.addEventListener("touchend", onTouchEnd);
+    el.addEventListener("touchcancel", onTouchEnd);
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
+    };
+  }, [mounted]);
 
   if (!mounted) return null;
 
@@ -699,14 +711,8 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
         data-closing={closing || undefined}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Handle zone — mobile drag-to-dismiss target */}
-        <div
-          className="sheet__handle-zone"
-          onPointerDown={onHandlePointerDown}
-          onPointerMove={onHandlePointerMove}
-          onPointerUp={onHandlePointerUp}
-          onPointerCancel={onHandlePointerUp}
-        >
+        {/* Handle zone — mobile drag-to-dismiss, native touch */}
+        <div ref={handleZoneRef} className="sheet__handle-zone">
           <div className="sheet__handle" aria-hidden="true" />
         </div>
 

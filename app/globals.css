@@ -1085,8 +1085,8 @@ h1:hover .redact > span.redact-inner,
   background: rgba(0, 0, 0, 0.45);
 }
 
-/* Blur page content when sheet is open — target Next.js root, not the portal */
-body.sheet-open #__next {
+/* Blur page content when sheet is open — exclude the portal itself */
+body.sheet-open > *:not(.sheet-backdrop) {
   filter: blur(6px) brightness(0.85);
   transition: filter 280ms ease;
   pointer-events: none;
@@ -1108,7 +1108,6 @@ body.sheet-open #__next {
   display: flex;
   flex-direction: column;
   box-shadow: 0 -16px 48px rgba(0,0,0,0.16);
-  will-change: transform;
   overflow: hidden;
   animation: sheet-up 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
