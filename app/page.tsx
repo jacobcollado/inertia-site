@@ -1516,16 +1516,15 @@ function VisualLayout({ work }: { work: WorkMeta[] }) {
                 key={tab}
                 type="button"
                 onClick={() => setBuildingTab(tab)}
-                className={`relative py-3 text-[12px] tracking-tight transition-colors duration-150 ${tab === "Themes" ? "sm:px-5" : "px-5"}`}
+                className={`relative py-3 text-[12px] tracking-tight transition-colors duration-150 ${tab === "Themes" ? "px-3 sm:px-5" : "px-5"}`}
                 style={{
                   color: buildingTab === tab ? "rgb(var(--fg))" : "rgb(var(--muted))",
                   borderRight: i < BUILDING_TABS.length - 1 ? "1px solid rgb(var(--line))" : undefined,
-                  ...(tab === "Themes" ? { paddingLeft: "0.9625rem", paddingRight: "0.9625rem" } : {}),
                 }}
               >
                 {tab}
                 {buildingTab === tab && (
-                  <span className="absolute inset-x-0 bottom-0 h-px bg-[rgb(var(--fg))]" />
+                  <span className="absolute inset-x-0 bottom-0 h-px bg-[rgb(var(--fg))]" style={{ opacity: 0.36 }} />
                 )}
               </button>
             ))}

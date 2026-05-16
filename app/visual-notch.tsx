@@ -251,10 +251,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
           {NAV.map((item) => (
             <MobileAccordion key={item.label} item={item} onNavigate={onClose} drawerOpen={open} />
           ))}
-          {/* Auth section */}
-          <div className="mobile-nav__section">
-            <HeaderAuth mobile />
-          </div>
+          <HeaderAuth mobile />
         </div>
       </div>
     </>

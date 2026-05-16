@@ -60,16 +60,17 @@ export function TOC({ headings }: { headings: Heading[] }) {
   const activeIndex = headings.findIndex((h) => h.id === activeId);
   const progress = headings.length > 1 ? Math.max(0, activeIndex) / (headings.length - 1) : 0;
 
-  // Desktop TOC — fixed inside its grid column
+  // Desktop TOC — fixed, outside the max-w-6xl page container to the left
   const desktopAside = (
-    <nav aria-label="Table of contents" className="fixed top-24 pt-10 pb-16 px-6 w-[14rem]"
+    <nav aria-label="Table of contents" className="fixed top-24 pt-10 pb-16 w-[13rem]"
       style={{
+        right: "calc(50% + 36rem + 1.5rem)",
         opacity: entered ? 1 : 0,
         transform: entered ? "translateX(0)" : "translateX(-8px)",
         transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1) 100ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 100ms",
       }}
     >
-      <p className="text-[11px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50 mb-4">
+      <p className="text-[12px] font-medium tracking-[0em] text-[rgb(var(--muted))] opacity-50 mb-4" style={{ fontFamily: "'Erode', serif" }}>
         On this page
       </p>
       <ul className="space-y-px border-l border-[rgb(var(--line))]">
@@ -101,11 +102,12 @@ export function TOC({ headings }: { headings: Heading[] }) {
                   }}
                 />
                 <span
-                  className={`text-[12px] leading-snug tracking-tight transition-colors duration-200 ${
+                  className={`text-[13px] leading-snug tracking-[0em] transition-colors duration-200 ${
                     active
                       ? "text-[rgb(var(--fg))]"
                       : "text-[rgb(var(--muted))] opacity-60 group-hover:opacity-100 group-hover:text-[rgb(var(--fg))]"
                   }`}
+                  style={{ fontFamily: "'Erode', serif" }}
                 >
                   {h.text}
                 </span>
@@ -205,7 +207,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
 
   return (
     <>
-      {/* Desktop: inline inside grid column */}
+      {/* Desktop: fixed outside article */}
       <div className="hidden lg:block">{desktopAside}</div>
       {/* Mobile: portaled bottom bar */}
       {mounted && createPortal(mobileBar, document.body)}
