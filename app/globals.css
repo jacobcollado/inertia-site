@@ -1108,7 +1108,7 @@ body.sheet-open > *:not(.sheet-backdrop) {
   display: flex;
   flex-direction: column;
   box-shadow: 0 -16px 48px rgba(0,0,0,0.16);
-  overflow: hidden;
+  clip-path: inset(0 round 12px 12px 0 0);
   animation: sheet-up 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -1131,6 +1131,7 @@ body.sheet-open > *:not(.sheet-backdrop) {
     height: 88svh;
     border-radius: 10px;
     border: 1px solid rgb(var(--line));
+    clip-path: inset(0 round 10px);
     animation: sheet-modal-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
