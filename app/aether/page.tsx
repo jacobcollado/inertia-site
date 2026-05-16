@@ -5,7 +5,7 @@ import { FitQuiz } from "./fit-quiz";
 import { AetherWave } from "./aether-wave";
 
 export const metadata: Metadata = {
-  title: "Aether Theme â€” Inertia",
+  title: "Aether Theme â€" Inertia",
   description:
     "A high-end Shopify theme built for conversion, flow, and presence.",
 };
@@ -76,13 +76,13 @@ function SketchStorefront({ accent }: { accent: [number, number, number] }) {
   const g = (a: number) => rgb([120,120,120], a);
   return (
     <svg viewBox="0 0 200 148" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Full-bleed product image â€” left 52% */}
+      {/* Full-bleed product image â€" left 52% */}
       <rect x="0" y="0" width="104" height="148" fill={rgb(accent, 0.09)} />
       {/* Image center cross-hairs */}
       <line x1="52" y1="46" x2="52" y2="96" stroke={rgb(accent, 0.25)} strokeWidth="0.9" />
       <line x1="26" y1="71" x2="78" y2="71" stroke={rgb(accent, 0.25)} strokeWidth="0.9" />
       <circle cx="52" cy="71" r="11" stroke={rgb(accent, 0.35)} strokeWidth="0.9" />
-      {/* Thumbnail strip â€” bottom of image */}
+      {/* Thumbnail strip â€" bottom of image */}
       <line x1="0" y1="120" x2="104" y2="120" stroke={g(0.18)} strokeWidth="0.5" />
       {[0,1,2,3].map(i => (
         <rect key={i} x={6 + i * 24} y="125" width="18" height="16" rx="1.5"
@@ -114,7 +114,7 @@ function SketchStorefront({ accent }: { accent: [number, number, number] }) {
           stroke={i === 1 ? rgb(accent, 0.65) : g(0.25)}
           strokeWidth={i === 1 ? 1.0 : 0.6} />
       ))}
-      {/* Add to cart â€” full width, bold */}
+      {/* Add to cart â€" full width, bold */}
       <rect x="114" y="104" width="78" height="18" rx="2.5" fill={rgb(accent, 1)} />
       <line x1="134" y1="113" x2="176" y2="113" stroke="white" strokeWidth="1.6" opacity="0.9" />
     </svg>
@@ -123,7 +123,7 @@ function SketchStorefront({ accent }: { accent: [number, number, number] }) {
 
 function SketchTimeline({ accent }: { accent: [number, number, number] }) {
   const g = (a: number) => rgb([120,120,120], a);
-  // Four panels side-by-side: Landing â†’ Product â†’ Cart â†’ Checkout
+  // Four panels side-by-side: Landing â†' Product â†' Cart â†' Checkout
   const panels = [
     { x: 0,   w: 56  },
     { x: 56,  w: 50  },
@@ -152,14 +152,14 @@ function SketchTimeline({ accent }: { accent: [number, number, number] }) {
         </g>
       ))}
 
-      {/* Panel 0: Landing â€” hero image block + headline + CTA */}
+      {/* Panel 0: Landing â€" hero image block + headline + CTA */}
       <rect x="5" y={panelY + 7} width="46" height="30" rx="1.5" fill={rgb(accent, 0.18)} />
       <line x1="5" y1={panelY + 44} x2="44" y2={panelY + 44} stroke={rgb(accent, 0.6)} strokeWidth="1.6" strokeLinecap="round" />
       <line x1="5" y1={panelY + 52} x2="36" y2={panelY + 52} stroke={rgb(accent, 0.32)} strokeWidth="1.0" strokeLinecap="round" />
       <rect x="5" y={panelY + 64} width="28" height="10" rx="2" fill={rgb(accent, 0.85)} />
       <line x1="11" y1={panelY + 69} x2="27" y2={panelY + 69} stroke="white" strokeWidth="1.3" opacity="0.9" />
 
-      {/* Panel 1: Product â€” image left, details right */}
+      {/* Panel 1: Product â€" image left, details right */}
       <rect x="59" y={panelY + 7} width="22" height="42" rx="1.5" fill={rgb(accent, 0.15)} />
       <line x1="85" y1={panelY + 12} x2="103" y2={panelY + 12} stroke={rgb(accent, 0.5)} strokeWidth="1.3" strokeLinecap="round" />
       <line x1="85" y1={panelY + 20} x2="101" y2={panelY + 20} stroke={rgb(accent, 0.28)} strokeWidth="0.9" strokeLinecap="round" />
@@ -170,7 +170,7 @@ function SketchTimeline({ accent }: { accent: [number, number, number] }) {
       ))}
       <rect x="85" y={panelY + 42} width="18" height="8" rx="2" fill={rgb(accent, 0.8)} />
 
-      {/* Panel 2: Cart â€” item rows + total + checkout btn */}
+      {/* Panel 2: Cart â€" item rows + total + checkout btn */}
       <rect x="110" y={panelY + 9} width="36" height="11" rx="1.5" fill={rgb(accent, 0.12)} stroke={rgb(accent, 0.35)} strokeWidth="0.7" />
       <rect x="110" y={panelY + 24} width="36" height="11" rx="1.5" fill={g(0.07)} stroke={g(0.2)} strokeWidth="0.55" />
       <line x1="110" y1={panelY + 44} x2="146" y2={panelY + 44} stroke={g(0.2)} strokeWidth="0.5" />
@@ -178,7 +178,7 @@ function SketchTimeline({ accent }: { accent: [number, number, number] }) {
       <rect x="110" y={panelY + 62} width="36" height="10" rx="2" fill={rgb(accent, 0.75)} />
       <line x1="118" y1={panelY + 67} x2="137" y2={panelY + 67} stroke="white" strokeWidth="1.2" opacity="0.88" />
 
-      {/* Panel 3: Checkout â€” form fields + pay button */}
+      {/* Panel 3: Checkout â€" form fields + pay button */}
       <rect x="153" y={panelY + 8} width="43" height="8" rx="1.5" fill="none" stroke={g(0.25)} strokeWidth="0.55" />
       <rect x="153" y={panelY + 20} width="43" height="8" rx="1.5" fill="none" stroke={g(0.25)} strokeWidth="0.55" />
       <rect x="153" y={panelY + 32} width="20" height="8" rx="1.5" fill="none" stroke={g(0.25)} strokeWidth="0.55" />
@@ -236,7 +236,7 @@ function SketchConversion({ accent }: { accent: [number, number, number] }) {
             {/* Filled top cap */}
             <rect x={b.x - barW / 2} y={baseline - b.h} width={barW} height={Math.min(b.h, 10)} rx="2"
               fill={isAether ? rgb(accent, 0.95) : g(0.28)} />
-            {/* Bottom of cap â€” square corners to blend into bar */}
+            {/* Bottom of cap â€" square corners to blend into bar */}
             {b.h > 10 && (
               <rect x={b.x - barW / 2} y={baseline - b.h + 5} width={barW} height={5}
                 fill={isAether ? rgb(accent, 0.95) : g(0.28)} />
@@ -368,36 +368,36 @@ export default function AetherPage() {
 
       <GridRule />
 
-      {/* Section label â€” fit quiz */}
-      <div className=”flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise”>
-        <span className=”inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0”>
-          <svg viewBox=”0 0 16 16” fill=”none” stroke=”currentColor” strokeWidth=”1.5” strokeLinecap=”round” strokeLinejoin=”round” className=”w-3 h-3 text-[rgb(var(--fg))] opacity-50” aria-hidden=”true”>
-            <circle cx=”8” cy=”8” r=”6” />
-            <path d=”M8 5.5c0-1 1.5-1 1.5 0S8 7 8 8M8 10.5v.5” />
+      {/* Section label â€" fit quiz */}
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
+        <span className="inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--fg))] opacity-50" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" />
+            <path d="M8 5.5c0-1 1.5-1 1.5 0S8 7 8 8M8 10.5v.5" />
           </svg>
-          <span className=”text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap”>Does it fit?</span>
+          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">Does it fit?</span>
         </span>
-        <span className=”text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap”>Four questions.</span>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Four questions.</span>
       </div>
 
       <GridRule />
 
-      {/* Fit quiz â€” inline, edge-to-edge */}
+      {/* Fit quiz â€" inline, edge-to-edge */}
       <FitQuiz />
 
       <GridRule />
 
-      {/* Section label â€” pricing */}
-      <div className=”flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise”>
-        <span className=”inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0”>
-          <svg viewBox=”0 0 16 16” fill=”none” stroke=”currentColor” strokeWidth=”1.5” strokeLinecap=”round” strokeLinejoin=”round” className=”w-3 h-3 text-[rgb(var(--fg))] opacity-50” aria-hidden=”true”>
-            <rect x=”2” y=”4” width=”12” height=”9” rx=”1.5” />
-            <path d=”M2 7h12” />
-            <path d=”M5 10h2” />
+      {/* Section label â€" pricing */}
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
+        <span className="inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--fg))] opacity-50" aria-hidden="true">
+            <rect x="2" y="4" width="12" height="9" rx="1.5" />
+            <path d="M2 7h12" />
+            <path d="M5 10h2" />
           </svg>
-          <span className=”text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap”>One payment.</span>
+          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">One payment.</span>
         </span>
-        <span className=”text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap”>Yours forever.</span>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Yours forever.</span>
       </div>
 
       <GridRule />
@@ -489,7 +489,7 @@ export default function AetherPage() {
             </svg>
             All systems operational
           </div>
-          <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch â†’</Link>
+          <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch â†'</Link>
         </div>
       </footer>
 
