@@ -269,6 +269,31 @@ export function SoundwaveHero() {
         className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-5"
         style={{ zIndex: 3 }}
       >
+        {/* Label */}
+        <div
+          className="flex items-center gap-2"
+          style={{
+            opacity: 0,
+            animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 80ms forwards",
+          }}
+        >
+          <span
+            className="rounded-full px-2 py-0.5 text-[11px] font-medium tracking-tight"
+            style={{
+              background: "rgb(60,100,255)",
+              color: "#fff",
+            }}
+          >
+            New
+          </span>
+          <span
+            className="text-[13px] tracking-tight"
+            style={{ color: "rgb(var(--fg) / 0.5)" }}
+          >
+            A sharper process, better outcomes.
+          </span>
+        </div>
+
         <h1
           className="text-[clamp(1.95rem,5vw,3.5rem)] font-[400] tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none relative w-[86%] sm:w-auto mx-auto"
           aria-label="We build the infrastructure that keeps you moving."
