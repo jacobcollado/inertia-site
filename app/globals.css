@@ -1177,7 +1177,7 @@ body.sheet-open #__next {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   min-height: 0;

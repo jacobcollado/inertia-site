@@ -615,20 +615,15 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
   // Lock page scroll while open; intercept wheel on scroll container so Lenis never sees it
   useEffect(() => {
     if (!mounted) return;
-    const prevBody = document.body.style.overflow;
-    const prevHtml = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
     window.dispatchEvent(new Event("lenis:lock"));
     document.body.classList.add("sheet-open");
 
     const el = scrollRef.current;
+    // Stop wheel events reaching Lenis (desktop)
     const onWheel = (e: WheelEvent) => { e.stopPropagation(); };
     el?.addEventListener("wheel", onWheel, { passive: true });
 
     return () => {
-      document.documentElement.style.overflow = prevHtml;
-      document.body.style.overflow = prevBody;
       window.dispatchEvent(new Event("lenis:unlock"));
       document.body.classList.remove("sheet-open");
       el?.removeEventListener("wheel", onWheel);
