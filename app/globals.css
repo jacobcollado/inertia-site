@@ -1086,6 +1086,14 @@ h1:hover .redact > span.redact-inner,
   background: rgba(0, 0, 0, 0.45);
 }
 
+/* Tap-to-close area — fills space above the sheet */
+.sheet-backdrop__close {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  cursor: pointer;
+}
+
 /* Blur page content when sheet is open — exclude the portal itself */
 body.sheet-open > *:not(.sheet-backdrop) {
   filter: blur(6px) brightness(0.85);
@@ -1101,6 +1109,7 @@ body.sheet-open > *:not(.sheet-backdrop) {
 /* Mobile: bottom sheet with side margins */
 .sheet {
   position: relative;
+  z-index: 1;
   width: calc(100% - 16px);
   height: 92svh;
   background: rgb(var(--bg));

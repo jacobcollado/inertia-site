@@ -700,16 +700,20 @@ function WorkSheet({ item, onClose }: { item: WorkMeta; onClose: () => void }) {
     <div
       className="sheet-backdrop"
       data-closing={closing || undefined}
-      onClick={triggerClose}
       aria-modal="true"
       role="dialog"
       aria-label={item.client}
     >
+      {/* Tap-to-close zone — only the area outside the sheet */}
+      <div
+        className="sheet-backdrop__close"
+        onClick={triggerClose}
+        aria-label="Close"
+      />
       <div
         ref={sheetRef}
         className="sheet"
         data-closing={closing || undefined}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Handle zone — mobile drag-to-dismiss, native touch */}
         <div ref={handleZoneRef} className="sheet__handle-zone">
