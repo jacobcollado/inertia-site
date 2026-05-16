@@ -324,15 +324,15 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <span className="text-[17px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Why brands</span>
-        <span className="inline-flex items-center gap-2 border border-[rgb(var(--blue)/0.4)] rounded-full px-3 py-1.5 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--blue))]" aria-hidden="true">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Why brands</span>
+        <span className="inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--fg))] opacity-50" aria-hidden="true">
             <path d="M9 2L5 9h4l-2 5 6-7H9l2-5z" />
           </svg>
-          <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--blue))] whitespace-nowrap">choose it</span>
+          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">choose it</span>
         </span>
-        <span className="text-[17px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">over anything else</span>
+        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">over anything else</span>
       </div>
 
       <GridRule />
@@ -369,15 +369,15 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label â€” fit quiz */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <span className="inline-flex items-center gap-2 border border-[rgb(var(--blue)/0.4)] rounded-full px-3 py-1.5 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--blue))]" aria-hidden="true">
-            <circle cx="8" cy="8" r="6" />
-            <path d="M8 5.5c0-1 1.5-1 1.5 0S8 7 8 8M8 10.5v.5" />
+      <div className=”flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise”>
+        <span className=”inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0”>
+          <svg viewBox=”0 0 16 16” fill=”none” stroke=”currentColor” strokeWidth=”1.5” strokeLinecap=”round” strokeLinejoin=”round” className=”w-3 h-3 text-[rgb(var(--fg))] opacity-50” aria-hidden=”true”>
+            <circle cx=”8” cy=”8” r=”6” />
+            <path d=”M8 5.5c0-1 1.5-1 1.5 0S8 7 8 8M8 10.5v.5” />
           </svg>
-          <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--blue))] whitespace-nowrap">Does it fit?</span>
+          <span className=”text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap”>Does it fit?</span>
         </span>
-        <span className="text-[17px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Four questions.</span>
+        <span className=”text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap”>Four questions.</span>
       </div>
 
       <GridRule />
@@ -388,16 +388,16 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label â€” pricing */}
-      <div className="flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <span className="inline-flex items-center gap-2 border border-[rgb(var(--blue)/0.4)] rounded-full px-3 py-1.5 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--blue))]" aria-hidden="true">
-            <rect x="2" y="4" width="12" height="9" rx="1.5" />
-            <path d="M2 7h12" />
-            <path d="M5 10h2" />
+      <div className=”flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise”>
+        <span className=”inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0”>
+          <svg viewBox=”0 0 16 16” fill=”none” stroke=”currentColor” strokeWidth=”1.5” strokeLinecap=”round” strokeLinejoin=”round” className=”w-3 h-3 text-[rgb(var(--fg))] opacity-50” aria-hidden=”true”>
+            <rect x=”2” y=”4” width=”12” height=”9” rx=”1.5” />
+            <path d=”M2 7h12” />
+            <path d=”M5 10h2” />
           </svg>
-          <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--blue))] whitespace-nowrap">One payment.</span>
+          <span className=”text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap”>One payment.</span>
         </span>
-        <span className="text-[17px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Yours forever.</span>
+        <span className=”text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap”>Yours forever.</span>
       </div>
 
       <GridRule />
@@ -421,7 +421,7 @@ export default function AetherPage() {
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{t.name}</span>
                 {t.badge && (
-                  <span className="inline-flex items-center rounded-full border border-[rgb(var(--blue)/0.5)] text-[rgb(var(--blue))] px-2 pt-[3px] pb-[4px] text-[10px] font-medium tracking-tight leading-none">
+                  <span className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.15)] bg-[rgb(var(--fg)/0.05)] text-[rgb(var(--fg))] px-2 pt-[3px] pb-[4px] text-[10px] font-medium tracking-tight leading-none opacity-70">
                     {t.badge}
                   </span>
                 )}

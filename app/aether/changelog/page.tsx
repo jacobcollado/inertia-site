@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
@@ -74,42 +74,54 @@ const CHANGELOG: Entry[] = [
 ];
 
 const GUIDE: { title: string; body: string }[] = [
-  { title: "How to update", body: "Download the latest .zip from your license email, then go to Shopify Admin â€º Online Store â€º Themes â€º Add theme â€º Upload zip. Your live theme is untouched until you manually publish." },
+  { title: "How to update", body: "Download the latest .zip from your license email, then go to Shopify Admin > Online Store > Themes > Add theme > Upload zip. Your live theme is untouched until you manually publish." },
   { title: "Version numbers", body: "Major releases may include breaking schema changes. Minor adds features without breaking existing ones. Patch fixes bugs only, always safe to apply." },
   { title: "Backup first", body: "Shopify keeps your previous theme as an unpublished copy when you publish a new one. Re-publish the old version from the theme list in seconds if needed." },
   { title: "Custom code", body: "Note which files you edited before updating. The changelog lists touched files per release so you know where conflicts might occur. Re-apply changes to the fresh files after uploading." },
 ];
 
-const TYPE_LABEL: Record<NoteType, string> = {
-  added: "Added",
-  improved: "Improved",
-  fixed: "Fixed",
-  removed: "Removed",
+const TYPE_META: Record<NoteType, { label: string; color: string; bg: string }> = {
+  added:    { label: "Added",    color: "#6a9ab0", bg: "rgba(50,68,80,0.18)"  },
+  improved: { label: "Improved", color: "#8080b8", bg: "rgba(62,62,90,0.18)"  },
+  fixed:    { label: "Fixed",    color: "#5a8a8a", bg: "rgba(52,70,82,0.18)"  },
+  removed:  { label: "Removed",  color: "#a07080", bg: "rgba(80,55,65,0.18)"  },
 };
 
-// Soundwave-matched palette: muted blue-slates in dark, cool greys in light
-const TYPE_COLOR: Record<NoteType, { bg: string; text: string; dot: string }> = {
-  added:    { bg: "rgba(50,68,80,0.18)",  text: "#6a9ab0", dot: "#6a9ab0"  },
-  improved: { bg: "rgba(62,62,90,0.18)",  text: "#8080b8", dot: "#8080b8"  },
-  fixed:    { bg: "rgba(52,70,82,0.18)",  text: "#5a8a8a", dot: "#5a8a8a"  },
-  removed:  { bg: "rgba(80,55,65,0.18)",  text: "#a07080", dot: "#a07080"  },
+const LABEL_META: Record<ReleaseLabel, { color: string; bg: string }> = {
+  major: { color: "#9090c8", bg: "rgba(62,62,90,0.22)"  },
+  minor: { color: "#6a9ab0", bg: "rgba(50,68,80,0.15)"  },
+  patch: { color: "#909090", bg: "rgba(80,80,80,0.12)"  },
 };
 
-const LABEL_COLOR: Record<ReleaseLabel, { bg: string; text: string }> = {
-  major: { bg: "rgba(62,62,90,0.22)", text: "#9090c8" },
-  minor: { bg: "rgba(50,68,80,0.15)", text: "#6a9ab0" },
-  patch: { bg: "rgba(80,80,80,0.12)", text: "#909090" },
-};
-
-const ALL_TYPES: NoteType[] = ["added", "improved", "fixed", "removed"];
+const ALL_TYPES: NoteType[]     = ["added", "improved", "fixed", "removed"];
 const ALL_LABELS: ReleaseLabel[] = ["major", "minor", "patch"];
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
-function Divider() {
-  return <div className="h-px bg-[rgb(var(--line))]" />;
+function TypeBadge({ type }: { type: NoteType }) {
+  const m = TYPE_META[type];
+  return (
+    <span
+      className="inline-flex items-center text-[10px] tracking-wide uppercase font-medium px-2 py-0.5 rounded-sm shrink-0"
+      style={{ background: m.bg, color: m.color }}
+    >
+      {m.label}
+    </span>
+  );
+}
+
+function LabelBadge({ label }: { label: ReleaseLabel }) {
+  const m = LABEL_META[label];
+  return (
+    <span
+      className="inline-flex items-center text-[10px] tracking-wide uppercase font-medium px-2 py-0.5 rounded-sm"
+      style={{ background: m.bg, color: m.color }}
+    >
+      {label}
+    </span>
+  );
 }
 
 function SidebarContent({
@@ -127,48 +139,58 @@ function SidebarContent({
   onNav?: () => void;
 }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-6 py-6">
 
       {/* Filter by type */}
-      <div className="py-6 border-b border-[rgb(var(--line))]">
-        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Type</p>
-        <div className="flex flex-col gap-1">
+      <div>
+        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Type</p>
+        <div className="flex flex-col gap-0.5">
           {ALL_TYPES.map((t) => {
             const active = activeTypes.has(t);
-            const c = TYPE_COLOR[t];
+            const m = TYPE_META[t];
             return (
               <button
                 key={t}
                 onClick={() => toggleType(t)}
-                className="w-full flex items-center justify-between py-1.5 text-[13px] tracking-tight transition-colors text-left rounded-sm px-1.5 -mx-1.5"
-                style={active ? { background: c.bg, color: c.text } : {}}
+                className="flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded text-[13px] tracking-tight transition-colors text-left"
+                style={active ? { color: m.color } : {}}
               >
-                <span className={active ? "" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"}>
-                  {TYPE_LABEL[t]}
+                <span
+                  className="h-1.5 w-1.5 rounded-full shrink-0 transition-opacity"
+                  style={{ background: m.color, opacity: active ? 1 : 0.25 }}
+                />
+                <span className={active ? "" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"}>
+                  {m.label}
                 </span>
-                {active && <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: c.dot }} />}
               </button>
             );
           })}
         </div>
       </div>
 
+      <div className="h-px bg-[rgb(var(--line))]" />
+
       {/* Filter by release */}
-      <div className="py-6 border-b border-[rgb(var(--line))]">
-        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Release</p>
-        <div className="flex flex-col gap-1">
+      <div>
+        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Release</p>
+        <div className="flex flex-col gap-0.5">
           {ALL_LABELS.map((l) => {
             const active = activeLabels.has(l);
-            const c = LABEL_COLOR[l];
+            const m = LABEL_META[l];
             return (
               <button
                 key={l}
                 onClick={() => toggleLabel(l)}
-                className="w-full flex items-center justify-between py-1.5 text-[13px] tracking-tight transition-colors text-left capitalize rounded-sm px-1.5 -mx-1.5"
-                style={active ? { background: c.bg, color: c.text } : {}}
+                className="flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded text-[13px] tracking-tight capitalize transition-colors text-left"
+                style={active ? { color: m.color } : {}}
               >
-                <span className={active ? "" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"}>{l}</span>
-                {active && <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: c.text }} />}
+                <span
+                  className="h-1.5 w-1.5 rounded-full shrink-0 transition-opacity"
+                  style={{ background: m.color, opacity: active ? 1 : 0.25 }}
+                />
+                <span className={active ? "" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"}>
+                  {l}
+                </span>
               </button>
             );
           })}
@@ -176,57 +198,53 @@ function SidebarContent({
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="mt-3 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+            className="mt-3 text-[11px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
           >
-            Clear all
+            Clear filters
           </button>
         )}
       </div>
 
+      <div className="h-px bg-[rgb(var(--line))]" />
+
       {/* Version index */}
-      <div className="py-6 border-b border-[rgb(var(--line))]">
-        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Versions</p>
-        <ul className="flex flex-col gap-1">
-          {CHANGELOG.map((entry) => {
-            const c = LABEL_COLOR[entry.label];
-            return (
-              <li key={entry.version}>
-                <a
-                  href={`#v${entry.version}`}
-                  onClick={onNav}
-                  className="flex items-center justify-between py-1 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors tabular-nums"
-                >
-                  <span>v{entry.version}</span>
-                  <span
-                    className="text-[10px] capitalize px-1.5 py-0.5 rounded-sm"
-                    style={{ background: c.bg, color: c.text }}
-                  >
-                    {entry.label}
-                  </span>
-                </a>
-              </li>
-            );
-          })}
+      <div>
+        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Versions</p>
+        <ul className="flex flex-col gap-0.5">
+          {CHANGELOG.map((entry) => (
+            <li key={entry.version}>
+              <a
+                href={`#v${entry.version}`}
+                onClick={onNav}
+                className="flex items-center justify-between py-1.5 px-2 -mx-2 rounded text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors tabular-nums"
+              >
+                <span>v{entry.version}</span>
+                <LabelBadge label={entry.label} />
+              </a>
+            </li>
+          ))}
         </ul>
       </div>
 
+      <div className="h-px bg-[rgb(var(--line))]" />
+
       {/* Guide */}
-      <div className="py-6">
-        <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 mb-4">Guide</p>
+      <div>
+        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Guide</p>
         <ul className="flex flex-col">
           {GUIDE.map((g, i) => (
             <li key={i} className="border-b border-[rgb(var(--line))] last:border-0">
               <button
                 onClick={() => setGuideOpen(guideOpen === i ? null : i)}
-                className="w-full flex items-start justify-between gap-3 py-3 text-left"
+                className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
               >
-                <span className={`text-[13px] tracking-tight leading-snug transition-colors ${guideOpen === i ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"}`}>
+                <span className={`text-[13px] tracking-tight transition-colors ${guideOpen === i ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"}`}>
                   {g.title}
                 </span>
                 <svg
                   viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"
                   strokeLinecap="round" strokeLinejoin="round"
-                  className="h-3 w-3 shrink-0 mt-[3px] text-[rgb(var(--muted))]"
+                  className="h-3 w-3 shrink-0 text-[rgb(var(--muted))]"
                   style={{ transition: "transform 300ms cubic-bezier(0.22,1,0.36,1)", transform: guideOpen === i ? "rotate(180deg)" : "rotate(0deg)" }}
                 >
                   <polyline points="6 9 12 15 18 9" />
@@ -240,7 +258,7 @@ function SidebarContent({
                   transition: "max-height 300ms cubic-bezier(0.22,1,0.36,1), opacity 250ms ease",
                 }}
               >
-                <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] pb-4">
+                <p className="text-[12px] leading-relaxed tracking-tight text-[rgb(var(--muted))] pb-3">
                   {g.body}
                 </p>
               </div>
@@ -248,15 +266,16 @@ function SidebarContent({
           ))}
         </ul>
       </div>
+
     </div>
   );
 }
 
 export default function AetherChangelog() {
-  const [activeTypes, setActiveTypes] = useState<Set<NoteType>>(new Set());
+  const [activeTypes, setActiveTypes]   = useState<Set<NoteType>>(new Set());
   const [activeLabels, setActiveLabels] = useState<Set<ReleaseLabel>>(new Set());
-  const [guideOpen, setGuideOpen] = useState<number | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [guideOpen, setGuideOpen]       = useState<number | null>(null);
+  const [sheetOpen, setSheetOpen]       = useState(false);
 
   function toggleType(t: NoteType) {
     setActiveTypes((prev) => { const n = new Set(prev); n.has(t) ? n.delete(t) : n.add(t); return n; });
@@ -289,117 +308,87 @@ export default function AetherChangelog() {
   return (
     <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
-      {/* Header */}
-      <header className="px-8 pt-6 sm:pt-8 pb-12 rise">
+      {/* Nav */}
+      <div className="flex items-center justify-between px-8 py-5 rise">
         <Link
           href="/aether"
-          className="inline-flex items-center gap-1.5 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+            <path d="M10 3L5 8l5 5" />
+          </svg>
           Aether
         </Link>
-      </header>
+        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-40">
+          {CHANGELOG.length} releases
+        </span>
+      </div>
 
-      <Divider />
+      <div className="grid-rule" aria-hidden="true" />
 
-      {/* Title row */}
+      {/* Title */}
       <div className="px-8 py-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-        <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none mb-3">Changelog</h1>
-        <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-          Every change documented with context: what changed, why, and how it works.
+        <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none mb-2">Changelog</h1>
+        <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm">
+          Every change documented. What shipped, why, and how it works.
         </p>
       </div>
 
-      <Divider />
+      <div className="grid-rule" aria-hidden="true" />
 
-      {/* Mobile filter trigger */}
-      <div className="lg:hidden px-8 py-4 flex items-center gap-3">
-        <button
-          onClick={() => setSheetOpen(true)}
-          className="inline-flex items-center gap-2 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="8" y1="12" x2="20" y2="12" />
-            <line x1="12" y1="18" x2="20" y2="18" />
-          </svg>
-          Filters &amp; guide
-          {hasFilters && (
-            <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] text-[9px] font-medium">
-              {activeTypes.size + activeLabels.size}
-            </span>
-          )}
-        </button>
-        {hasFilters && (
-          <button onClick={clearFilters} className="text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-            Clear
-          </button>
-        )}
-      </div>
-      {/* Mobile divider only */}
-      <div className="lg:hidden h-px bg-[rgb(var(--line))]" />
 
       {/* Body */}
       <div className="rise flex flex-1" style={{ ["--rise-delay" as any]: "80ms" }}>
 
         {/* Sidebar */}
-        <aside className="hidden lg:block w-52 xl:w-60 shrink-0 border-r border-[rgb(var(--line))]">
-          <div className="sticky top-8 px-8 pr-6">
+        <aside className="hidden lg:block w-48 xl:w-56 shrink-0 border-r border-[rgb(var(--line))]">
+          <div className="sticky top-8 px-6 overflow-y-auto max-h-[calc(100vh-4rem)]">
             <SidebarContent {...sidebarProps} />
           </div>
         </aside>
 
         {/* Entries */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pb-16 lg:pb-0">
           {filtered.length === 0 ? (
             <div className="px-8 py-24 text-center">
-              <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] mb-4">No releases match the current filters.</p>
+              <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] mb-4">No releases match the current filters.</p>
               <button onClick={clearFilters} className="text-[13px] tracking-tight text-[rgb(var(--fg))] underline underline-offset-2">
                 Clear filters
               </button>
             </div>
           ) : (
-            <div className="flex flex-col">
-              {filtered.map((entry, ei) => (
-                <article key={entry.version} id={`v${entry.version}`} className="scroll-mt-8">
-                  {/* Version header */}
-                  <div className="px-8 py-8 flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-5 border-b border-[rgb(var(--line))]">
-                    <span className="text-2xl font-medium tracking-tighter tabular-nums text-[rgb(var(--fg))]">
-                      v{entry.version}
-                    </span>
-                    <span
-                      className="self-start text-[11px] capitalize px-2 py-0.5 rounded-sm tracking-tight"
-                      style={{ background: LABEL_COLOR[entry.label].bg, color: LABEL_COLOR[entry.label].text }}
-                    >
-                      {entry.label}
-                    </span>
-                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] tabular-nums sm:ml-auto">
-                      {formatDate(entry.date)}
-                    </span>
-                  </div>
+            <div className="flex flex-col divide-y divide-[rgb(var(--line))]">
+              {filtered.map((entry) => (
+                <article key={entry.version} id={`v${entry.version}`} className="scroll-mt-16">
 
-                  {/* Summary */}
-                  <div className="px-8 py-6 border-b border-[rgb(var(--line))]">
-                    <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-2xl">
+                  {/* Version header */}
+                  <div className="px-8 pt-8 pb-6">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 mb-3">
+                      <h2 className="text-2xl font-medium tracking-tighter tabular-nums text-[rgb(var(--fg))]">
+                        v{entry.version}
+                      </h2>
+                      <LabelBadge label={entry.label} />
+                      <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums ml-auto opacity-60">
+                        {formatDate(entry.date)}
+                      </span>
+                    </div>
+                    <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
                       {entry.summary}
                     </p>
                   </div>
 
                   {/* Notes */}
-                  <ul className="flex flex-col">
+                  <ul className="flex flex-col border-t border-[rgb(var(--line))]">
                     {entry.notes.map((note, i) => (
                       <li
                         key={i}
-                        className="px-8 py-6 border-b border-[rgb(var(--line))] grid grid-cols-1 md:grid-cols-[120px_1fr] gap-x-8 gap-y-2"
+                        className="px-8 py-5 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6 border-b border-[rgb(var(--line))] last:border-0"
                       >
-                        <span
-                          className="self-start text-[11px] tracking-tight px-1.5 py-0.5 rounded-sm"
-                          style={{ background: TYPE_COLOR[note.type].bg, color: TYPE_COLOR[note.type].text }}
-                        >
-                          {TYPE_LABEL[note.type]}
-                        </span>
-                        <div>
-                          <p className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] mb-1.5">
+                        <div className="pt-0.5 shrink-0">
+                          <TypeBadge type={note.type} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] mb-1">
                             {note.title}
                           </p>
                           <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
@@ -410,55 +399,95 @@ export default function AetherChangelog() {
                     ))}
                   </ul>
 
-                  {/* Spacer between releases */}
-                  {ei < filtered.length - 1 && <div className="h-px bg-[rgb(var(--line))] opacity-0" />}
                 </article>
               ))}
             </div>
           )}
+
+          {/* Footer */}
+          <div className="grid-rule" aria-hidden="true" />
+          <div className="px-8 py-6 flex items-center justify-between">
+            <Link href="/aether" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+              Back to Aether
+            </Link>
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-40">
+              {CHANGELOG.length} releases
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Mobile sheet */}
-      {sheetOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
-          <div
-            className="absolute inset-0 bg-black/30"
-            onClick={() => setSheetOpen(false)}
-            style={{ animation: "fade-in 200ms ease both" }}
-          />
-          <div
-            className="relative z-10 bg-[rgb(var(--bg))] rounded-t-2xl border-t border-[rgb(var(--line))] pt-5 pb-10 max-h-[85vh] overflow-y-auto"
-            style={{ animation: "sheet-up 320ms cubic-bezier(0.22,1,0.36,1) both" }}
-          >
-            <div className="absolute left-1/2 -translate-x-1/2 top-3 h-1 w-10 rounded-full bg-[rgb(var(--line))]" />
-            <div className="flex items-center justify-between px-6 mb-2">
-              <p className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))]">Filters &amp; guide</p>
-              <button
-                onClick={() => setSheetOpen(false)}
-                className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors p-1"
-                aria-label="Close"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <div className="px-6">
-              <SidebarContent {...sidebarProps} onNav={() => setSheetOpen(false)} />
-            </div>
+      {/* Mobile sticky bottom bar */}
+      <button
+        onClick={() => setSheetOpen(true)}
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 w-full flex items-center gap-3 px-5 [-webkit-tap-highlight-color:transparent]"
+        style={{
+          height: 56,
+          background: "rgb(var(--bg))",
+          borderTop: "1px solid rgb(var(--line))",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
+          <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="20" y2="12" /><line x1="12" y1="18" x2="20" y2="18" />
+        </svg>
+        <div className="flex-1 min-w-0 text-left">
+          <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] leading-none mb-0.5 opacity-50">
+            {CHANGELOG.length} releases
+          </p>
+          <p className="text-[13px] tracking-tight text-[rgb(var(--fg))] leading-snug">
+            {hasFilters ? `${activeTypes.size + activeLabels.size} filter${activeTypes.size + activeLabels.size > 1 ? "s" : ""} active` : "Filters & guide"}
+          </p>
+        </div>
+        <div className="flex items-center gap-1 text-[12px] tracking-tight text-[rgb(var(--muted))] shrink-0">
+          <span>Contents</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+      </button>
+
+      {/* Mobile sheet — always mounted, transitions in/out */}
+      <div
+        className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end"
+        style={{ pointerEvents: sheetOpen ? "auto" : "none" }}
+      >
+        <div
+          className="absolute inset-0"
+          onClick={() => setSheetOpen(false)}
+          style={{
+            background: "rgba(0,0,0,0.35)",
+            opacity: sheetOpen ? 1 : 0,
+            transition: "opacity 260ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        />
+        <div
+          className="relative z-10 rounded-t-2xl border-t border-[rgb(var(--line))] flex flex-col"
+          style={{
+            background: "rgb(var(--bg))",
+            maxHeight: "78vh",
+            transform: sheetOpen ? "translateY(0)" : "translateY(105%)",
+            transition: "transform 360ms cubic-bezier(0.32,0.72,0,1)",
+          }}
+        >
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] shrink-0">
+            <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">Filters &amp; guide</p>
+            <button
+              onClick={() => setSheetOpen(false)}
+              className="h-7 w-7 flex items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors"
+              style={{ background: "rgba(128,128,128,0.08)" }}
+              aria-label="Close"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <div className="overflow-y-auto flex-1 px-5" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
+            <SidebarContent {...sidebarProps} onNav={() => setSheetOpen(false)} />
           </div>
         </div>
-      )}
-
-      <style>{`
-        @keyframes sheet-up {
-          from { transform: translateY(100%); }
-          to   { transform: translateY(0); }
-        }
-      `}</style>
+      </div>
     </div>
   );
 }
-
