@@ -1290,8 +1290,12 @@ h1:hover .redact > span.redact-inner,
 }
 
 .marquee-item-icon {
-  color: var(--tech-color, rgb(var(--fg) / 0.28));
+  color: rgb(var(--fg) / 0.28);
   transition: color 0.25s ease;
+}
+
+.marquee-item:hover .marquee-item-icon {
+  color: var(--tech-color, rgb(var(--fg) / 0.65));
 }
 
 .marquee-item--far {
