@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DemoButton } from "./demo-button";
 import { FitQuiz } from "./fit-quiz";
-import { AetherWave } from "./aether-wave";
+import { AetherContour } from "./aether-contour";
 
 export const metadata: Metadata = {
   title: "Aether Theme -- Inertia",
@@ -14,17 +14,14 @@ const FEATURES = [
   {
     title: "Built like a $150+ theme",
     body: "Aether ships with an experience usually reserved for themes at the very top of the market. Every interaction is considered, every transition earned.",
-    accent: [14, 120, 220] as [number, number, number],
   },
   {
     title: "Guided, end to end",
     body: "There isn't a single moment the customer doesn't see your product. The layout pulls them through, quietly, from landing to checkout.",
-    accent: [0, 148, 130] as [number, number, number],
   },
   {
     title: "Up to 6x conversion",
     body: "Layout is the lever. Aether's structure is tuned to lift conversion by up to 6x compared to the defaults most stores launch with.",
-    accent: [88, 72, 220] as [number, number, number],
   },
 ];
 
@@ -68,208 +65,106 @@ function GridRule() {
   return <div className="grid-rule" aria-hidden="true" />;
 }
 
-function rgb([r, g, b]: [number, number, number], a = 1) {
-  return `rgba(${r},${g},${b},${a})`;
+
+function g(a: number) {
+  return `rgba(120,120,120,${a})`;
 }
 
-function SketchStorefront({ accent }: { accent: [number, number, number] }) {
-  const g = (a: number) => rgb([120,120,120], a);
+function SketchStorefront() {
   return (
     <svg viewBox="0 0 200 148" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Full-bleed product image -- left 52% */}
-      <rect x="0" y="0" width="104" height="148" fill={rgb(accent, 0.09)} />
-      {/* Image center cross-hairs */}
-      <line x1="52" y1="46" x2="52" y2="96" stroke={rgb(accent, 0.25)} strokeWidth="0.9" />
-      <line x1="26" y1="71" x2="78" y2="71" stroke={rgb(accent, 0.25)} strokeWidth="0.9" />
-      <circle cx="52" cy="71" r="11" stroke={rgb(accent, 0.35)} strokeWidth="0.9" />
-      {/* Thumbnail strip -- bottom of image */}
-      <line x1="0" y1="120" x2="104" y2="120" stroke={g(0.18)} strokeWidth="0.5" />
-      {[0,1,2,3].map(i => (
-        <rect key={i} x={6 + i * 24} y="125" width="18" height="16" rx="1.5"
-          fill={i === 0 ? rgb(accent, 0.22) : g(0.08)}
-          stroke={i === 0 ? rgb(accent, 0.6) : g(0.22)}
-          strokeWidth={i === 0 ? 0.9 : 0.6} />
-      ))}
-      {/* Right col divider */}
-      <line x1="104" y1="0" x2="104" y2="148" stroke={g(0.18)} strokeWidth="0.6" />
-      {/* Nav strip top */}
-      <rect x="104" y="0" width="96" height="11" fill={g(0.06)} />
-      <line x1="104" y1="11" x2="200" y2="11" stroke={g(0.15)} strokeWidth="0.5" />
-      {/* Product name */}
-      <rect x="114" y="20" width="72" height="8" rx="2" fill={rgb(accent, 0.75)} />
-      <rect x="114" y="32" width="52" height="5.5" rx="1.5" fill={rgb(accent, 0.4)} />
-      {/* Price */}
-      <rect x="114" y="46" width="40" height="9" rx="2" fill={g(0.18)} />
-      {/* Swatches */}
-      {[0,1,2,3].map(i => (
-        <circle key={i} cx={118 + i * 14} cy="72" r="5"
-          fill={i < 2 ? rgb(accent, i === 0 ? 0.75 : 0.35) : "none"}
-          stroke={i >= 2 ? g(0.3) : "none"}
-          strokeWidth="0.9" />
-      ))}
-      {/* Size row */}
-      {[0,1,2].map(i => (
-        <rect key={i} x={114 + i * 22} y="85" width="18" height="10" rx="2"
-          fill={i === 1 ? rgb(accent, 0.18) : "none"}
-          stroke={i === 1 ? rgb(accent, 0.65) : g(0.25)}
-          strokeWidth={i === 1 ? 1.0 : 0.6} />
-      ))}
-      {/* Add to cart -- full width, bold */}
-      <rect x="114" y="104" width="78" height="18" rx="2.5" fill={rgb(accent, 1)} />
-      <line x1="134" y1="113" x2="176" y2="113" stroke="white" strokeWidth="1.6" opacity="0.9" />
+      {/* Card outline */}
+      <rect x="44" y="12" width="112" height="124" rx="3" stroke={g(0.18)} strokeWidth="0.8" />
+      {/* Image area */}
+      <rect x="44" y="12" width="112" height="72" rx="3" fill={g(0.05)} stroke={g(0.2)} strokeWidth="0.8" />
+      {/* Image crosshair */}
+      <line x1="100" y1="34" x2="100" y2="62" stroke={g(0.18)} strokeWidth="0.8" />
+      <line x1="86" y1="48" x2="114" y2="48" stroke={g(0.18)} strokeWidth="0.8" />
+      <circle cx="100" cy="48" r="9" stroke={g(0.25)} strokeWidth="0.8" />
+      {/* Title stub */}
+      <line x1="60" y1="92" x2="140" y2="92" stroke={g(0.5)} strokeWidth="1.4" />
+      {/* Price stub */}
+      <line x1="60" y1="103" x2="106" y2="103" stroke={g(0.28)} strokeWidth="0.9" />
+      {/* CTA button */}
+      <rect x="60" y="116" width="80" height="14" rx="2" fill={g(0.18)} stroke={g(0.35)} strokeWidth="0.8" />
+      <line x1="80" y1="123" x2="120" y2="123" stroke={g(0.7)} strokeWidth="1.3" />
     </svg>
   );
 }
 
-function SketchTimeline({ accent }: { accent: [number, number, number] }) {
-  const g = (a: number) => rgb([120,120,120], a);
-  // Four panels side-by-side: Landing ->' Product ->' Cart ->' Checkout
-  const panels = [
-    { x: 0,   w: 56  },
-    { x: 56,  w: 50  },
-    { x: 106, w: 44  },
-    { x: 150, w: 50  },
-  ];
-  const panelH = 112;
-  const panelY = 12;
+function SketchTimeline() {
+  const steps = [24, 76, 128, 176];
+  const cy = 74;
 
   return (
     <svg viewBox="0 0 200 148" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Panels */}
-      {panels.map((p, i) => (
-        <g key={i}>
-          <rect x={p.x} y={panelY} width={p.w - 1} height={panelH} rx="2"
-            fill={i < 3 ? rgb(accent, i === 0 ? 0.1 : 0.05) : g(0.05)}
-            stroke={i < 3 ? rgb(accent, i === 0 ? 0.45 : 0.22) : g(0.18)}
-            strokeWidth={i === 0 ? 1.0 : 0.65} />
-          {/* Chevron connector */}
-          {i < 3 && (
-            <polyline
-              points={`${p.x + p.w - 1},${panelY + panelH * 0.4} ${p.x + p.w + 4},${panelY + panelH * 0.5} ${p.x + p.w - 1},${panelY + panelH * 0.6}`}
-              stroke={i < 2 ? rgb(accent, 0.38) : g(0.22)}
-              strokeWidth="0.75" fill="none" />
-          )}
-        </g>
-      ))}
+      {/* Connecting line */}
+      <line x1={steps[0]} y1={cy} x2={steps[3]} y2={cy} stroke={g(0.15)} strokeWidth="0.8" />
+      {/* Progress fill */}
+      <line x1={steps[0]} y1={cy} x2={steps[2]} y2={cy} stroke={g(0.4)} strokeWidth="0.8" />
 
-      {/* Panel 0: Landing -- hero image block + headline + CTA */}
-      <rect x="5" y={panelY + 7} width="46" height="30" rx="1.5" fill={rgb(accent, 0.18)} />
-      <line x1="5" y1={panelY + 44} x2="44" y2={panelY + 44} stroke={rgb(accent, 0.6)} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="5" y1={panelY + 52} x2="36" y2={panelY + 52} stroke={rgb(accent, 0.32)} strokeWidth="1.0" strokeLinecap="round" />
-      <rect x="5" y={panelY + 64} width="28" height="10" rx="2" fill={rgb(accent, 0.85)} />
-      <line x1="11" y1={panelY + 69} x2="27" y2={panelY + 69} stroke="white" strokeWidth="1.3" opacity="0.9" />
-
-      {/* Panel 1: Product -- image left, details right */}
-      <rect x="59" y={panelY + 7} width="22" height="42" rx="1.5" fill={rgb(accent, 0.15)} />
-      <line x1="85" y1={panelY + 12} x2="103" y2={panelY + 12} stroke={rgb(accent, 0.5)} strokeWidth="1.3" strokeLinecap="round" />
-      <line x1="85" y1={panelY + 20} x2="101" y2={panelY + 20} stroke={rgb(accent, 0.28)} strokeWidth="0.9" strokeLinecap="round" />
-      {[0,1,2].map(j => (
-        <circle key={j} cx={85 + j * 7} cy={panelY + 33} r="2.8"
-          fill={j === 0 ? rgb(accent, 0.75) : g(0.18)}
-          stroke={j === 0 ? "none" : g(0.28)} strokeWidth="0.6" />
-      ))}
-      <rect x="85" y={panelY + 42} width="18" height="8" rx="2" fill={rgb(accent, 0.8)} />
-
-      {/* Panel 2: Cart -- item rows + total + checkout btn */}
-      <rect x="110" y={panelY + 9} width="36" height="11" rx="1.5" fill={rgb(accent, 0.12)} stroke={rgb(accent, 0.35)} strokeWidth="0.7" />
-      <rect x="110" y={panelY + 24} width="36" height="11" rx="1.5" fill={g(0.07)} stroke={g(0.2)} strokeWidth="0.55" />
-      <line x1="110" y1={panelY + 44} x2="146" y2={panelY + 44} stroke={g(0.2)} strokeWidth="0.5" />
-      <line x1="110" y1={panelY + 52} x2="138" y2={panelY + 52} stroke={rgb(accent, 0.45)} strokeWidth="1.1" strokeLinecap="round" />
-      <rect x="110" y={panelY + 62} width="36" height="10" rx="2" fill={rgb(accent, 0.75)} />
-      <line x1="118" y1={panelY + 67} x2="137" y2={panelY + 67} stroke="white" strokeWidth="1.2" opacity="0.88" />
-
-      {/* Panel 3: Checkout -- form fields + pay button */}
-      <rect x="153" y={panelY + 8} width="43" height="8" rx="1.5" fill="none" stroke={g(0.25)} strokeWidth="0.55" />
-      <rect x="153" y={panelY + 20} width="43" height="8" rx="1.5" fill="none" stroke={g(0.25)} strokeWidth="0.55" />
-      <rect x="153" y={panelY + 32} width="20" height="8" rx="1.5" fill="none" stroke={g(0.25)} strokeWidth="0.55" />
-      <rect x="176" y={panelY + 32} width="20" height="8" rx="1.5" fill="none" stroke={g(0.25)} strokeWidth="0.55" />
-      <rect x="153" y={panelY + 48} width="43" height="11" rx="2" fill={rgb(accent, 0.14)} stroke={rgb(accent, 0.4)} strokeWidth="0.85" />
-      <line x1="163" y1={panelY + 53.5} x2="186" y2={panelY + 53.5} stroke={rgb(accent, 0.65)} strokeWidth="1.2" strokeLinecap="round" />
-      <rect x="153" y={panelY + 64} width="43" height="11" rx="2.5" fill={rgb(accent, 0.9)} />
-      <line x1="164" y1={panelY + 69.5} x2="184" y2={panelY + 69.5} stroke="white" strokeWidth="1.4" opacity="0.9" />
-
-      {/* Step dots below */}
-      <line x1="24" y1="138" x2="176" y2="138" stroke={g(0.14)} strokeWidth="0.6" />
-      {[28, 81, 128, 174].map((cx, i) => (
-        <circle key={i} cx={cx} cy="138" r={i === 0 ? 3.5 : 2.5}
-          fill={i === 0 ? rgb(accent, 0.9) : i < 3 ? rgb(accent, 0.35) : g(0.18)}
-          stroke="none" />
-      ))}
-    </svg>
-  );
-}
-
-function SketchConversion({ accent }: { accent: [number, number, number] }) {
-  const g = (a: number) => rgb([120,120,120], a);
-  const baseline = 116;
-  const maxH = 90;
-  const barW = 22;
-
-  const bars = [
-    { x: 28,  h: 11 },
-    { x: 58,  h: 20 },
-    { x: 88,  h: 34 },
-    { x: 118, h: 54 },
-    { x: 152, h: maxH },
-  ];
-
-  return (
-    <svg viewBox="0 0 200 148" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Grid lines */}
-      {[0.25, 0.5, 0.75, 1].map((t) => {
-        const y = baseline - maxH * t;
-        return <line key={t} x1="14" y1={y} x2="186" y2={y} stroke={g(0.1)} strokeWidth="0.5" strokeDasharray="3 3" />;
-      })}
-      {/* Baseline */}
-      <line x1="14" y1={baseline} x2="186" y2={baseline} stroke={g(0.3)} strokeWidth="0.8" />
-
-      {/* Bars */}
-      {bars.map((b, i) => {
-        const isAether = i === 4;
+      {steps.map((x, i) => {
+        const isActive = i < 3;
+        const isCurrent = i === 0;
         return (
-          <g key={b.x}>
-            {/* Main bar fill */}
-            <rect x={b.x - barW / 2} y={baseline - b.h} width={barW} height={b.h} rx="2"
-              fill={isAether ? rgb(accent, 0.22) : g(0.1)}
-              stroke={isAether ? rgb(accent, 0.6) : g(0.25)}
-              strokeWidth={isAether ? 1.1 : 0.6} />
-            {/* Filled top cap */}
-            <rect x={b.x - barW / 2} y={baseline - b.h} width={barW} height={Math.min(b.h, 10)} rx="2"
-              fill={isAether ? rgb(accent, 0.95) : g(0.28)} />
-            {/* Bottom of cap -- square corners to blend into bar */}
-            {b.h > 10 && (
-              <rect x={b.x - barW / 2} y={baseline - b.h + 5} width={barW} height={5}
-                fill={isAether ? rgb(accent, 0.95) : g(0.28)} />
+          <g key={i}>
+            <circle cx={x} cy={cy} r={isCurrent ? 8 : 5}
+              fill={isCurrent ? g(0.12) : "none"}
+              stroke={isActive ? g(isCurrent ? 0.6 : 0.3) : g(0.15)}
+              strokeWidth={isCurrent ? 1.2 : 0.8} />
+            {isCurrent && <circle cx={x} cy={cy} r="3.5" fill={g(0.65)} />}
+            <line x1={x - (isCurrent ? 10 : 7)} y1={cy + 18} x2={x + (isCurrent ? 10 : 7)} y2={cy + 18}
+              stroke={isActive ? g(isCurrent ? 0.4 : 0.2) : g(0.12)}
+              strokeWidth={isCurrent ? 1.0 : 0.65} />
+            {isCurrent && (
+              <line x1={x - 6} y1={cy + 24} x2={x + 6} y2={cy + 24}
+                stroke={g(0.22)} strokeWidth="0.65" />
             )}
           </g>
         );
       })}
 
-      {/* Trend line */}
-      <polyline
-        points={bars.map(b => `${b.x},${baseline - b.h}`).join(" ")}
-        stroke={rgb(accent, 0.3)} strokeWidth="0.9" strokeDasharray="2.5 2.5" fill="none" />
+      <polyline points={`${steps[3] + 7},${cy - 4} ${steps[3] + 12},${cy} ${steps[3] + 7},${cy + 4}`}
+        stroke={g(0.18)} strokeWidth="0.8" fill="none" />
+    </svg>
+  );
+}
 
-      {/* 6x badge anchored to top of Aether bar */}
-      <line x1="163" y1={baseline - maxH} x2="172" y2={baseline - maxH - 6}
-        stroke={rgb(accent, 0.35)} strokeWidth="0.6" strokeDasharray="2 2" />
-      <rect x="172" y={baseline - maxH - 16} width="24" height="14" rx="3"
-        fill={rgb(accent, 0.14)} stroke={rgb(accent, 0.55)} strokeWidth="0.8" />
-      {/* "6x" strokes */}
-      <line x1="175" y1={baseline - maxH - 10} x2="182" y2={baseline - maxH - 10} stroke={rgb(accent, 0.85)} strokeWidth="1.2" />
-      <line x1="175" y1={baseline - maxH - 6}  x2="182" y2={baseline - maxH - 6}  stroke={rgb(accent, 0.5)} strokeWidth="0.8" />
-      <line x1="185" y1={baseline - maxH - 12} x2="191" y2={baseline - maxH - 4}  stroke={rgb(accent, 0.85)} strokeWidth="1.1" />
-      <line x1="185" y1={baseline - maxH - 4}  x2="191" y2={baseline - maxH - 12} stroke={rgb(accent, 0.85)} strokeWidth="1.1" />
+function SketchConversion() {
+  const pts: [number, number][] = [
+    [22, 110], [52, 98], [84, 84], [116, 65], [148, 42], [176, 22],
+  ];
+  const pathD = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x},${y}`).join(" ");
+  const [px, py] = pts[pts.length - 1];
 
-      {/* X-axis label stubs */}
-      {bars.map((b, i) => (
-        <g key={`lbl-${b.x}`}>
-          <line x1={b.x} y1={baseline + 2} x2={b.x} y2={baseline + 5} stroke={i === 4 ? rgb(accent, 0.5) : g(0.2)} strokeWidth="0.6" />
-          <line x1={b.x - (i === 4 ? 12 : 8)} y1={baseline + 9} x2={b.x + (i === 4 ? 12 : 8)} y2={baseline + 9}
-            stroke={i === 4 ? rgb(accent, 0.6) : g(0.22)} strokeWidth={i === 4 ? 1.0 : 0.6} />
-          {i === 4 && <line x1={b.x - 8} y1={baseline + 13} x2={b.x + 8} y2={baseline + 13} stroke={rgb(accent, 0.35)} strokeWidth="0.6" />}
-        </g>
+  return (
+    <svg viewBox="0 0 200 148" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Axes */}
+      <line x1="22" y1="22" x2="22" y2="118" stroke={g(0.18)} strokeWidth="0.8" />
+      <line x1="22" y1="118" x2="184" y2="118" stroke={g(0.18)} strokeWidth="0.8" />
+
+      {/* Subtle grid */}
+      {[0.33, 0.66, 1].map((t) => (
+        <line key={t} x1="22" y1={118 - 96 * t} x2="184" y2={118 - 96 * t}
+          stroke={g(0.07)} strokeWidth="0.5" strokeDasharray="3 3" />
       ))}
+
+      {/* Rising line */}
+      <path d={pathD} stroke={g(0.45)} strokeWidth="1.4" fill="none" />
+
+      {/* Peak callout */}
+      <circle cx={px} cy={py} r="5" fill={g(0.1)} stroke={g(0.55)} strokeWidth="1.0" />
+      <circle cx={px} cy={py} r="2.5" fill={g(0.7)} />
+
+      {/* Dashed drop line */}
+      <line x1={px} y1={py + 6} x2={px} y2="118"
+        stroke={g(0.18)} strokeWidth="0.7" strokeDasharray="3 3" />
+
+      {/* Label stub near peak */}
+      <line x1={px + 10} y1={py - 6} x2={px + 22} y2={py - 6}
+        stroke={g(0.5)} strokeWidth="1.1" />
+      <line x1={px + 10} y1={py - 1} x2={px + 18} y2={py - 1}
+        stroke={g(0.3)} strokeWidth="0.8" />
     </svg>
   );
 }
@@ -291,35 +186,40 @@ export default function AetherPage() {
 
       <GridRule />
 
-      {/* Hero */}
-      <section className="px-6 sm:px-8 pt-10 pb-4 flex flex-col items-center text-center rise">
-        <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-3">
-          Aether
-        </h1>
-        <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] mb-6 max-w-sm sm:max-w-md">
-          A Shopify theme for brands that treat the storefront as the product.
-        </p>
-        <div className="flex flex-row items-center justify-center gap-2 text-[13px] tracking-tight">
-          <Link
-            href="/aether/buy"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
-          >
-            Buy a license
-          </Link>
-          <DemoButton href={DEMO_URL} password="aether" />
-          <Link
-            href="/docs"
-            className="inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-4 py-2 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
-          >
-            Docs
-          </Link>
+      {/* Hero with full-background contour field */}
+      <section className="relative overflow-hidden rise" style={{ height: 420, touchAction: "pan-y" }}>
+        {/* Contour canvas fills the entire hero */}
+        <AetherContour />
+        {/* Top + bottom fades handled inside AetherContour, but add side breathing room via z-layered content */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10"
+          style={{ height: 60, background: "linear-gradient(to bottom, rgb(var(--bg)), transparent)" }} />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10"
+          style={{ height: 60, background: "linear-gradient(to top, rgb(var(--bg)), transparent)" }} />
+        {/* Centered content */}
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-5 px-6 text-center">
+          <h1 className="text-[clamp(3.5rem,10vw,6.5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
+            Aether
+          </h1>
+          <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
+            A Shopify theme for brands that treat the storefront as the product.
+          </p>
+          <div className="pointer-events-auto flex flex-row items-center justify-center gap-2 text-[13px] tracking-tight">
+            <Link
+              href="/aether/buy"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
+            >
+              Buy a license
+            </Link>
+            <DemoButton href={DEMO_URL} password="aether" />
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-4 py-2 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
+            >
+              Docs
+            </Link>
+          </div>
         </div>
       </section>
-
-      {/* Animated wave */}
-      <div className="rise">
-        <AetherWave />
-      </div>
 
       <GridRule />
 
@@ -350,9 +250,9 @@ export default function AetherPage() {
             }}
           >
             <div className="w-full">
-              {i === 0 && <SketchStorefront accent={f.accent} />}
-              {i === 1 && <SketchTimeline accent={f.accent} />}
-              {i === 2 && <SketchConversion accent={f.accent} />}
+              {i === 0 && <SketchStorefront />}
+              {i === 1 && <SketchTimeline />}
+              {i === 2 && <SketchConversion />}
             </div>
             <div className="flex flex-col gap-2">
               <h3 className="text-[18px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">

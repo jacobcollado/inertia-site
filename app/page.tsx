@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { PastWork } from "./past-work";
 import { SoundwaveHero } from "./soundwave-hero";
+import { ContourCanvas } from "./contour-canvas";
 import { createClient } from "@/lib/supabase/client";
 import type { WorkMeta } from "@/lib/work";
 import type { PostMeta } from "@/lib/posts";
@@ -576,7 +577,7 @@ function PulseGrid() {
 
 
 
-const MISSION_WORDS = ["Great", "work", "is", "the", "start.", "Becoming", "infrastructure", "is", "the", "goal."];
+const MISSION_WORDS = ["Your", "name", "is", "on", "it.", "So", "is", "ours."];
 
 function MissionPhrase() {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -702,14 +703,14 @@ function StackDiagram() {
   return (
     <div className="flex flex-col sm:flex-row border-b border-[rgb(var(--line))]" style={{ overflow: "visible" }}>
       {/* Left: copy */}
-      <div className="flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 border-b border-[rgb(var(--line))] sm:border-b-0 sm:border-r border-[rgb(var(--line))]" style={{ overflow: "visible" }}>
-        <MissionPhrase />
-        <Link href="/blog" className="self-start inline-flex items-center gap-2.5 mt-1 group">
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] transition-colors">Read the blog</span>
-          <span className="inline-flex items-center justify-center w-9 h-9 border border-[rgb(var(--line))] rounded-full text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[13px] leading-none shrink-0">
-            <span style={{ lineHeight: 1, display: "block", marginTop: "1px" }}>→</span>
-          </span>
-        </Link>
+      <div className="relative flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 border-b border-[rgb(var(--line))] sm:border-b-0 sm:border-r border-[rgb(var(--line))] overflow-hidden">
+        <ContourCanvas />
+        <div className="relative z-10 flex flex-col gap-3">
+          <MissionPhrase />
+          <Link href="/blog" className="self-start inline-flex items-center gap-2 mt-1 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity hover:opacity-80" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
+            Read the blog →
+          </Link>
+        </div>
       </div>
       {/* Right: diagram — exact SVG from design file, with animated line overlays */}
       <div className="flex items-center justify-center overflow-hidden sm:w-[38%] sm:shrink-0 sm:self-stretch py-6">
@@ -759,26 +760,18 @@ function StackDiagram() {
           <path fillRule="evenodd" clipRule="evenodd" d="M2019 418L1939.5 281L1860 418H2019Z" fill="rgb(var(--fg))" opacity="0.4"/>
           {/* Upper connector arrowhead only */}
           <path d="M1765.64 390.881L1771.02 389.741L1768.74 378.98L1763.36 380.119L1764.5 385.5L1765.64 390.881Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Upper connector — spine + flowing packets */}
-          <path d={upperConnector} fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
-          <path d={upperConnector} fill="none" stroke="#f87171" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 2.8s linear 0s infinite" }}/>
-          <path d={upperConnector} fill="none" stroke="#fecaca" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 2.8s linear 0s infinite" }}/>
+          {/* Upper connector — static */}
+          <path d={upperConnector} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
           {/* Right column */}
           <rect x="1769.5" y="161.5" width="341" height="1241" rx="37.5" stroke="rgb(var(--fg))" strokeOpacity="0.2" strokeWidth="9"/>
-          {/* Upper curve — spine + flowing packets */}
-          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
-          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 3.4s linear -0.9s infinite" }}/>
-          <path d={upperCurve} fill="none" stroke="#ede9ff" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 3.4s linear -0.9s infinite" }}/>
+          {/* Upper curve — static */}
+          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
           {/* Lower connector arrowhead only */}
           <path d="M1766.14 1202.62L1771.52 1203.76L1769.24 1214.52L1763.86 1213.38L1765 1208L1766.14 1202.62Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Lower connector — spine + flowing packets */}
-          <path d={lowerConnector} fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
-          <path d={lowerConnector} fill="none" stroke="#4ade80" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 3.8s linear -1.4s infinite" }}/>
-          <path d={lowerConnector} fill="none" stroke="#bbf7d0" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 3.8s linear -1.4s infinite" }}/>
-          {/* Lower curve — spine + flowing packets */}
-          <path d={lowerCurve} fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
-          <path d={lowerCurve} fill="none" stroke="#60a5fa" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 3.8s linear -0.6s infinite" }}/>
-          <path d={lowerCurve} fill="none" stroke="#daf0ff" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 3.8s linear -0.6s infinite" }}/>
+          {/* Lower connector — static */}
+          <path d={lowerConnector} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
+          {/* Lower curve — static */}
+          <path d={lowerCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
           {/* Next.js circle — masked, N fades to transparent */}
           <g clipPath="url(#sd-c0)" opacity="0.4">
             <mask id="sd-mask0" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="1860" y="888" width="166" height="166">
@@ -1551,7 +1544,7 @@ function VisualLayout({ work }: { work: WorkMeta[] }) {
                     <span className="text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
                     <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
                   </div>
-                  <span className="inline-flex self-start items-center gap-2 border border-[rgb(var(--line))] rounded-full px-3 py-1.5 mb-6 text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-colors text-[13px] tracking-tight">
+                  <span className="inline-flex self-start items-center gap-2 rounded-full px-3 py-1.5 mb-6 transition-opacity group-hover:opacity-80 text-[13px] tracking-tight" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
                     {item.cta}<span aria-hidden="true">→</span>
                   </span>
                   <div className={`${sketchClass} relative`}>
