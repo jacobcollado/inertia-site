@@ -56,19 +56,48 @@ function GridRule() {
   return <div className="grid-rule" aria-hidden="true" />;
 }
 
+function DownloadButton({ url, label }: { url: string; label: string }) {
+  const [loading, setLoading] = useState(false);
+
+  const onClick = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = label;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button onClick={onClick} disabled={loading}
+      className="inline-flex items-center gap-2 text-[14px] tracking-tight rounded-full border border-[rgb(var(--line))] px-4 py-2 text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors shrink-0 disabled:opacity-40">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+        <path d="M10 3v10M6 9l4 4 4-4M3 15v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2" />
+      </svg>
+      {loading ? "Downloading..." : "Download"}
+    </button>
+  );
+}
+
 function StatusPill({ status }: { status: string }) {
   const color = STATUS_COLOR[status] ?? "rgb(var(--muted))";
   return (
-    <span className="inline-flex items-center gap-1.5 text-[12px] tracking-tight px-2.5 py-1 rounded-full capitalize shrink-0"
+    <span className="inline-flex items-center gap-1.5 text-[13px] sm:text-[14px] tracking-tight px-3 py-1.5 rounded-full capitalize shrink-0"
       style={{ color, background: `color-mix(in srgb, ${color} 12%, transparent)` }}>
-      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
+      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />
       {status}
     </span>
   );
 }
 
 function Empty({ label }: { label: string }) {
-  return <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] py-10 opacity-40">{label}</p>;
+  return <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] py-10 opacity-40">{label}</p>;
 }
 
 /* ── Visuals ──────────────────────────────────────────────────────── */
@@ -297,25 +326,25 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
   const inner = (
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Header — brand + client identity */}
-      <div className="px-4 pt-5 pb-4 border-b border-[rgb(var(--line))]">
+      <div className="px-5 pt-6 pb-5 border-b border-[rgb(var(--line))]">
         {/* Wordmark row */}
-        <div className="flex items-center gap-2 mb-5">
-          <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
-          <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40">/</span>
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">Client portal</span>
+        <div className="flex items-center gap-2 mb-6">
+          <span className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">/</span>
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">Client portal</span>
         </div>
         {/* Client row */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 shrink-0 border border-[rgb(var(--line))] flex items-center justify-center bg-[rgb(var(--line))]">
-            <span className="text-[11px] font-medium tracking-tight text-[rgb(var(--fg))] opacity-60 select-none">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 shrink-0 border border-[rgb(var(--line))] flex items-center justify-center bg-[rgb(var(--line))]">
+            <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] opacity-60 select-none">
               {(client?.company ?? client?.name ?? "C").charAt(0).toUpperCase()}
             </span>
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] truncate leading-tight">
+            <p className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] truncate leading-tight">
               {client?.company ?? client?.name ?? "Client"}
             </p>
-            <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-45 truncate mt-0.5 leading-tight">
+            <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-45 truncate mt-0.5 leading-tight">
               {client?.email}
             </p>
           </div>
@@ -323,46 +352,46 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5">
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
         {NAV.map(({ id, label }) => {
           const active = tab === id;
           return (
             <button
               key={id}
               onClick={() => { setTab(id); setMobileOpen(false); }}
-              className="flex items-center gap-3 w-full px-3 py-2.5 text-left transition-all duration-150"
+              className="flex items-center gap-3 w-full px-3 py-3 text-left transition-all duration-150 rounded"
               style={{
                 background: active ? "rgb(var(--line))" : "transparent",
                 color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
               }}
             >
-              <span style={{ opacity: active ? 1 : 0.5 }}>{icons[id]}</span>
-              <span className="text-[14px] tracking-tight">{label}</span>
+              <span style={{ opacity: active ? 1 : 0.5 }} className="w-5 h-5 flex items-center justify-center">{icons[id]}</span>
+              <span className="text-[15px] tracking-tight">{label}</span>
             </button>
           );
         })}
       </nav>
 
       {/* Bottom */}
-      <div className="px-4 pb-5 pt-3 border-t border-[rgb(var(--line))] flex flex-col gap-3">
-        <Link href="/" className="flex items-center gap-2 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 opacity-60" aria-hidden="true">
+      <div className="px-5 pb-6 pt-4 border-t border-[rgb(var(--line))] flex flex-col gap-4">
+        <Link href="/" className="flex items-center gap-2 text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-60" aria-hidden="true">
             <path d="M10 3L3 10l7 7M3 10h14" />
           </svg>
           Back to site
         </Link>
         <GridRule />
         <div className="flex items-center justify-between">
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Theme</span>
+          <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Theme</span>
           <ThemeToggle />
         </div>
         <GridRule />
         <button
           onClick={() => startTransition(() => signOut())}
           disabled={pending}
-          className="flex items-center gap-2 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-40 w-full"
+          className="flex items-center gap-2 text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-40 w-full"
         >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 opacity-60" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 opacity-60" aria-hidden="true">
             <path d="M13 15l3-5-3-5M16 10H7M7 3H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h3" />
           </svg>
           {pending ? "Signing out..." : "Sign out"}
@@ -373,7 +402,7 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
 
   return (
     <>
-      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-[rgb(var(--line))] sticky top-0 h-screen">
+      <aside className="hidden md:flex flex-col w-64 shrink-0 border-r border-[rgb(var(--line))] sticky top-0 h-screen">
         {inner}
       </aside>
       {mobileOpen && (
@@ -410,7 +439,7 @@ function OverviewTab({ client, projects, invoices, files, setTab }: {
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">
             {client?.company ?? `Hey, ${firstName}.`}
           </h1>
-          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] mt-2">
+          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-2">
             {client?.company ? `Hey, ${firstName}. Here's where everything stands.` : "Here's where everything stands."}
           </p>
         </div>
@@ -429,8 +458,8 @@ function OverviewTab({ client, projects, invoices, files, setTab }: {
         ].map(({ label, value, color, tab }) => (
           <button key={label} onClick={() => setTab(tab)}
             className="text-left px-6 py-5 hover:bg-[rgb(var(--line))/0.15] transition-colors group">
-            <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 mb-2">{label}</p>
-            <p className="text-[1.75rem] font-medium tracking-tight tabular-nums" style={{ color }}>{value}</p>
+            <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mb-2">{label}</p>
+            <p className="text-[2rem] font-medium tracking-tight tabular-nums" style={{ color }}>{value}</p>
           </button>
         ))}
       </div>
@@ -439,20 +468,20 @@ function OverviewTab({ client, projects, invoices, files, setTab }: {
       {activeProjects.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">Active project</h2>
-            <button onClick={() => setTab("projects")} className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">All projects</button>
+            <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Active project</h2>
+            <button onClick={() => setTab("projects")} className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">All projects</button>
           </div>
           <GridRule />
           {activeProjects.slice(0, 1).map(p => (
             <div key={p.id} className="flex items-start justify-between gap-4 py-6">
               <div className="flex flex-col gap-2">
-                <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">{p.title}</span>
-                {p.phase && <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]">{p.phase}</span>}
-                {p.notes && <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 max-w-md">{p.notes}</p>}
+                <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">{p.title}</span>
+                {p.phase && <span className="text-[15px] tracking-tight text-[rgb(var(--muted))]">{p.phase}</span>}
+                {p.notes && <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 max-w-md">{p.notes}</p>}
               </div>
               <div className="shrink-0 flex flex-col items-end gap-2">
                 <StatusPill status={p.status} />
-                {p.last_update && <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">{p.last_update}</span>}
+                {p.last_update && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{p.last_update}</span>}
               </div>
             </div>
           ))}
@@ -464,15 +493,15 @@ function OverviewTab({ client, projects, invoices, files, setTab }: {
       {unpaid.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">Pending invoice</h2>
-            <button onClick={() => setTab("invoices")} className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">All invoices</button>
+            <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Pending invoice</h2>
+            <button onClick={() => setTab("invoices")} className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">All invoices</button>
           </div>
           <GridRule />
           {unpaid.slice(0, 1).map(inv => (
             <div key={inv.id} className="flex items-center justify-between gap-4 py-5">
-              <span className="text-[15px] tracking-tight text-[rgb(var(--fg))]">{inv.label}</span>
+              <span className="text-[16px] tracking-tight text-[rgb(var(--fg))]">{inv.label}</span>
               <div className="flex items-center gap-4 shrink-0">
-                <span className="text-[15px] font-medium tabular-nums text-[rgb(var(--fg))]">{fmt$(inv.amount)}</span>
+                <span className="text-[16px] font-medium tabular-nums text-[rgb(var(--fg))]">{fmt$(inv.amount)}</span>
                 <StatusPill status={inv.status} />
               </div>
             </div>
@@ -490,7 +519,7 @@ function ProjectsTab({ projects }: { projects: Project[] }) {
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Projects</h1>
-          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] mt-2">{projects.length} total</p>
+          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-2">{projects.length} total</p>
         </div>
       </div>
 
@@ -507,13 +536,13 @@ function ProjectsTab({ projects }: { projects: Project[] }) {
             <div key={p.id}>
               <div className="flex items-start justify-between gap-6 py-6">
                 <div className="flex flex-col gap-2 min-w-0">
-                  <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{p.title}</span>
-                  {p.phase && <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]">{p.phase}</span>}
-                  {p.notes && <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 max-w-lg">{p.notes}</p>}
+                  <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{p.title}</span>
+                  {p.phase && <span className="text-[15px] tracking-tight text-[rgb(var(--muted))]">{p.phase}</span>}
+                  {p.notes && <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 max-w-lg">{p.notes}</p>}
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <StatusPill status={p.status} />
-                  {p.last_update && <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">{p.last_update}</span>}
+                  {p.last_update && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{p.last_update}</span>}
                 </div>
               </div>
               {i < projects.length - 1 && <GridRule />}
@@ -534,14 +563,14 @@ function InvoicesTab({ invoices }: { invoices: Invoice[] }) {
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Billing</h1>
           {totalOwed > 0
-            ? <p className="text-[15px] tracking-tight mt-2" style={{ color: "rgb(var(--amber))" }}>{fmt$(totalOwed)} outstanding</p>
-            : <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] mt-2">All paid up.</p>
+            ? <p className="text-[16px] tracking-tight mt-2" style={{ color: "rgb(var(--amber))" }}>{fmt$(totalOwed)} outstanding</p>
+            : <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-2">All paid up.</p>
           }
         </div>
         {totalPaid > 0 && (
           <div className="text-right shrink-0">
-            <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 mb-1">Paid to date</p>
-            <p className="text-[1.25rem] font-medium tabular-nums" style={{ color: "rgb(var(--green))" }}>{fmt$(totalPaid)}</p>
+            <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mb-1">Paid to date</p>
+            <p className="text-[1.4rem] font-medium tabular-nums" style={{ color: "rgb(var(--green))" }}>{fmt$(totalPaid)}</p>
           </div>
         )}
       </div>
@@ -559,11 +588,11 @@ function InvoicesTab({ invoices }: { invoices: Invoice[] }) {
             <div key={inv.id}>
               <div className="flex items-center justify-between gap-6 py-5">
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate">{inv.label}</span>
-                  {inv.due_date && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">Due {fmtDate(inv.due_date)}</span>}
+                  <span className="text-[16px] tracking-tight text-[rgb(var(--fg))] truncate">{inv.label}</span>
+                  {inv.due_date && <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50">Due {fmtDate(inv.due_date)}</span>}
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
-                  <span className="text-[15px] font-medium tabular-nums text-[rgb(var(--fg))]">{fmt$(inv.amount)}</span>
+                  <span className="text-[16px] font-medium tabular-nums text-[rgb(var(--fg))]">{fmt$(inv.amount)}</span>
                   <StatusPill status={inv.status} />
                 </div>
               </div>
@@ -582,7 +611,7 @@ function FilesTab({ files }: { files: DFile[] }) {
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Files</h1>
-          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] mt-2">{files.length} shared with you</p>
+          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-2">{files.length} shared with you</p>
         </div>
         <div className="shrink-0 pt-1">
           <VisualFiles files={files} />
@@ -600,17 +629,11 @@ function FilesTab({ files }: { files: DFile[] }) {
                     <path d="M11 2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" /><polyline points="11 2 11 7 16 7" />
                   </svg>
                   <div className="min-w-0">
-                    <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate block">{f.label}</span>
-                    <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">{fmtDate(f.uploaded_at)}</span>
+                    <span className="text-[16px] tracking-tight text-[rgb(var(--fg))] truncate block">{f.label}</span>
+                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{fmtDate(f.uploaded_at)}</span>
                   </div>
                 </div>
-                <a href={f.url} target="_blank" rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[13px] tracking-tight rounded-full border border-[rgb(var(--line))] px-3.5 py-1.5 text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors shrink-0">
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
-                    <path d="M10 3v10M6 9l4 4 4-4M3 15v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2" />
-                  </svg>
-                  Download
-                </a>
+                <DownloadButton url={f.url} label={f.label} />
               </div>
               {i < files.length - 1 && <GridRule />}
             </div>
@@ -648,14 +671,14 @@ function SupportTab({ client }: { client: Client | null }) {
     }
   };
 
-  const inputBase = "w-full bg-transparent border-0 border-b border-[rgb(var(--line))] py-3 text-[16px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200";
+  const inputBase = "w-full bg-transparent border-0 border-b border-[rgb(var(--line))] py-4 text-[17px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200";
 
   return (
     <div className="flex flex-col gap-10" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Get in touch</h1>
-          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] mt-2 max-w-sm">
+          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-2 max-w-sm">
             Questions about your project, revisions, or anything else. I'll get back to you within a day.
           </p>
         </div>
@@ -669,9 +692,9 @@ function SupportTab({ client }: { client: Client | null }) {
       {sent ? (
         <div className="flex flex-col gap-3 py-8" style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}>
           <span className="text-[12px] tracking-tight" style={{ color: "rgb(var(--green))", opacity: 0.9 }}>Sent</span>
-          <p className="text-[16px] tracking-tight text-[rgb(var(--fg))]">Got it. I'll follow up at {client?.email} shortly.</p>
+          <p className="text-[17px] tracking-tight text-[rgb(var(--fg))]">Got it. I'll follow up at {client?.email} shortly.</p>
           <button onClick={() => { setSent(false); setSubject(""); setBody(""); }}
-            className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start mt-2">
+            className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start mt-2">
             Send another
           </button>
         </div>
@@ -692,7 +715,7 @@ function SupportTab({ client }: { client: Client | null }) {
           />
           <div className="pt-1">
             <button type="submit" disabled={sending || !subject || !body}
-              className="inline-flex items-center gap-2 rounded-full pl-6 pr-5 py-2.5 text-[14px] tracking-tight font-medium transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 rounded-full pl-6 pr-5 py-3 text-[15px] tracking-tight font-medium transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed"
               style={{ background: "rgb(var(--purple))", color: "white", border: "1px solid rgb(var(--purple))" }}>
               {sending ? "Sending..." : "Send message"}
               {!sending && (
@@ -716,9 +739,9 @@ export function DashboardShell({ client, projects: rp, invoices: ri, files: rf }
   const [tab, setTab] = useState<Tab>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const projects = rp.length > 0 ? rp : FAKE_PROJECTS;
-  const invoices = ri.length > 0 ? ri : FAKE_INVOICES;
-  const files    = rf.length > 0 ? rf : FAKE_FILES;
+  const projects = rp;
+  const invoices = ri;
+  const files    = rf;
 
   return (
     <div className="flex min-h-screen bg-[rgb(var(--bg))]">
@@ -727,17 +750,17 @@ export function DashboardShell({ client, projects: rp, invoices: ri, files: rf }
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile topbar */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgb(var(--line))] md:hidden">
-          <button onClick={() => setMobileOpen(true)} className="flex items-center gap-2 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" aria-label="Open menu">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-4 h-4" aria-hidden="true">
+          <button onClick={() => setMobileOpen(true)} className="flex items-center gap-2 text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" aria-label="Open menu">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-5 h-5" aria-hidden="true">
               <line x1="2" y1="5" x2="18" y2="5" /><line x1="2" y1="10" x2="18" y2="10" /><line x1="2" y1="15" x2="18" y2="15" />
             </svg>
             Menu
           </button>
-          <span className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
+          <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
           <ThemeToggle />
         </div>
 
-        <main className="flex-1 px-6 sm:px-10 py-10 max-w-3xl w-full">
+        <main className="flex-1 px-6 sm:px-12 py-10 sm:py-14 max-w-3xl w-full">
           {tab === "overview" && <OverviewTab client={client} projects={projects} invoices={invoices} files={files} setTab={setTab} />}
           {tab === "projects" && <ProjectsTab projects={projects} />}
           {tab === "invoices" && <InvoicesTab invoices={invoices} />}

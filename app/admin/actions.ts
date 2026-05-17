@@ -1,0 +1,221 @@
+"use server";
+
+import { createAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
+
+/* ── Clients ──────────────────────────────────────────────────────── */
+
+export async function inviteClient(formData: FormData) {
+  const email = formData.get("email") as string;
+  const name = formData.get("name") as string;
+  const company = formData.get("company") as string;
+
+  const admin = createAdminClient();
+
+  const { data: authData, error: authError } = await admin.auth.admin.inviteUserByEmail(email);
+  if (authError) return { error: authError.message };
+
+  const userId = authData.user.id;
+
+  await admin.from("clients").insert({ id: userId, email, name: name || null, company: company || null });
+  await admin.from("profiles").insert({ id: userId, role: "client" });
+
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function updateClient(clientId: string, email: string, formData: FormData) {
+  const admin = createAdminClient();
+  await admin.from("clients").upsert({
+    id: clientId,
+    email,
+    name: formData.get("name") as string || null,
+    company: formData.get("company") as string || null,
+  }, { onConflict: "id" });
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+/* ── Projects ─────────────────────────────────────────────────────── */
+
+async function ensureClientRow(clientId: string) {
+  const admin = createAdminClient();
+  const { data: authUser } = await admin.auth.admin.getUserById(clientId);
+  if (authUser?.user) {
+    const u = authUser.user;
+    await admin.from("clients").upsert({
+      id: clientId,
+      email: u.email ?? "",
+      name: u.user_metadata?.name ?? null,
+    }, { onConflict: "id" });
+  }
+}
+
+export async function createProject(clientId: string, formData: FormData) {
+  const admin = createAdminClient();
+  await ensureClientRow(clientId);
+  const { error } = await admin.from("projects").insert({
+    client_id: clientId,
+    title: formData.get("title") as string,
+    status: formData.get("status") as string || "active",
+    phase: formData.get("phase") as string || null,
+    last_update: formData.get("last_update") as string || null,
+    notes: formData.get("notes") as string || null,
+  });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function updateProject(projectId: string, clientId: string, formData: FormData) {
+  const admin = createAdminClient();
+  await admin.from("projects").update({
+    title: formData.get("title") as string,
+    status: formData.get("status") as string,
+    phase: formData.get("phase") as string || null,
+    last_update: formData.get("last_update") as string || null,
+    notes: formData.get("notes") as string || null,
+  }).eq("id", projectId);
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function deleteProject(projectId: string, clientId: string) {
+  const admin = createAdminClient();
+  await admin.from("projects").delete().eq("id", projectId);
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+/* ── Invoices ─────────────────────────────────────────────────────── */
+
+export async function createInvoice(clientId: string, formData: FormData) {
+  const admin = createAdminClient();
+  const amountRaw = formData.get("amount") as string;
+
+  await ensureClientRow(clientId);
+
+  const { error } = await admin.from("invoices").insert({
+    client_id: clientId,
+    label: formData.get("label") as string,
+    amount: Math.round(parseFloat(amountRaw) * 100),
+    status: formData.get("status") as string || "pending",
+    due_date: formData.get("due_date") as string || null,
+  });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function updateInvoiceStatus(invoiceId: string, clientId: string, status: string) {
+  const admin = createAdminClient();
+  await admin.from("invoices").update({ status }).eq("id", invoiceId);
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function deleteInvoice(invoiceId: string, clientId: string) {
+  const admin = createAdminClient();
+  await admin.from("invoices").delete().eq("id", invoiceId);
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+/* ── Account management ───────────────────────────────────────────── */
+
+export async function suspendAccount(clientId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(clientId, { ban_duration: "876600h" });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function unsuspendAccount(clientId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(clientId, { ban_duration: "none" });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function deleteAccount(clientId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(clientId);
+  if (error) return { error: error.message };
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function updateAccountEmail(clientId: string, email: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(clientId, { email });
+  if (error) return { error: error.message };
+  await admin.from("clients").update({ email }).eq("id", clientId);
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function updateAccountPassword(clientId: string, password: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(clientId, { password });
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function resendInvite(email: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.inviteUserByEmail(email);
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+/* ── Files ────────────────────────────────────────────────────────── */
+
+export async function addFile(clientId: string, formData: FormData) {
+  const admin = createAdminClient();
+  await ensureClientRow(clientId);
+
+  const file = formData.get("file") as File;
+  const label = formData.get("label") as string || file.name;
+  const ext = file.name.split(".").pop();
+  const path = `${clientId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { error: uploadError } = await admin.storage
+    .from("client-files")
+    .upload(path, file, { contentType: file.type, upsert: false });
+  if (uploadError) return { error: uploadError.message };
+
+  const { data: { publicUrl } } = admin.storage.from("client-files").getPublicUrl(path);
+
+  const { error } = await admin.from("files").insert({
+    client_id: clientId,
+    label,
+    url: publicUrl,
+  });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function addFileFromUrl(clientId: string, formData: FormData) {
+  const admin = createAdminClient();
+  await ensureClientRow(clientId);
+  const { error } = await admin.from("files").insert({
+    client_id: clientId,
+    label: formData.get("label") as string,
+    url: formData.get("url") as string,
+  });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function deleteFile(fileId: string, clientId: string) {
+  const admin = createAdminClient();
+  await admin.from("files").delete().eq("id", fileId);
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}

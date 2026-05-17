@@ -6,35 +6,46 @@ import { createClient } from "@/lib/supabase/client";
 import { signOut } from "./actions";
 
 export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
-  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
+    supabase.auth.getUser().then(async ({ data }) => {
+      const u = data.user ?? null;
+      setUser(u);
+      if (u) {
+        const { data: profile } = await supabase.from("profiles").select("role").eq("id", u.id).single();
+        setRole(profile?.role ?? "client");
+      }
       setReady(true);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) setRole(null);
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const portalHref = role === "admin" ? "/admin" : "/dashboard";
+  const portalLabel = role === "admin" ? "Admin" : "Dashboard";
+  const portalDesc = role === "admin" ? "Manage clients, projects, and invoices." : "View your project, invoices, and files.";
 
   if (mobile) {
     if (user) {
       return (
         <>
-          <Link href="/dashboard" className="mobile-nav__item">
+          <Link href={portalHref} className="mobile-nav__item">
             <span className="mobile-nav__item-icon">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }} aria-hidden="true">
                 <path d="M3 8.5L10 3l7 5.5V17H13v-4H7v4H3V8.5z" />
               </svg>
             </span>
             <span className="mobile-nav__item-text">
-              <span className="mobile-nav__item-label">Dashboard</span>
-              <span className="mobile-nav__item-desc">View your project, invoices, and files.</span>
+              <span className="mobile-nav__item-label">{portalLabel}</span>
+              <span className="mobile-nav__item-desc">{portalDesc}</span>
             </span>
           </Link>
           <button
@@ -93,10 +104,10 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
     return (
       <div className="flex items-center gap-3" style={fadeStyle}>
         <Link
-          href="/dashboard"
+          href={portalHref}
           className="text-[13.5px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
-          Dashboard
+          {portalLabel}
         </Link>
         <button
           onClick={() => startTransition(() => signOut())}

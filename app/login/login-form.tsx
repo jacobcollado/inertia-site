@@ -23,9 +23,11 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setError("Wrong email or password."); setLoading(false); return; }
-    router.push("/dashboard");
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
+    const dest = profile?.role === "admin" ? "/admin" : "/dashboard";
+    router.push(dest);
     router.refresh();
   };
 

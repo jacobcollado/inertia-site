@@ -26,22 +26,41 @@ export async function middleware(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-
   const { pathname } = request.nextUrl;
 
-  // Redirect unauthenticated users away from /dashboard
-  if (pathname.startsWith("/dashboard") && !user) {
+  // Unauthenticated: redirect to login for protected routes
+  if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Redirect authenticated users away from /login
-  if (pathname === "/login" && user) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // Admin route protection: check role from profiles table
+  if (user && pathname.startsWith("/admin")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role !== "admin") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  // Authenticated users don't need to be on /login
+  if (user && pathname === "/login") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const dest = profile?.role === "admin" ? "/admin" : "/dashboard";
+    return NextResponse.redirect(new URL(dest, request.url));
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/login"],
 };
