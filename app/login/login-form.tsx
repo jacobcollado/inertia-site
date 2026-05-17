@@ -27,7 +27,16 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     setError("");
     const supabase = createClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) { setError("Wrong email or password."); setLoading(false); return; }
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("banned") || msg.includes("suspended")) {
+        setError("Your account has been suspended. Contact us at hello@byinertia.com.");
+      } else {
+        setError("Wrong email or password.");
+      }
+      setLoading(false);
+      return;
+    }
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).single();
     const dest = profile?.role === "admin" ? "/admin" : "/dashboard";
     router.push(dest);
