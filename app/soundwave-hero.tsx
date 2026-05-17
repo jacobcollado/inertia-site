@@ -334,8 +334,6 @@ export function SoundwaveHero() {
             style={{
               background: "rgb(var(--fg))",
               color: "rgb(var(--bg))",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
             }}
           >
             Start a project ↗
@@ -344,11 +342,9 @@ export function SoundwaveHero() {
             href="/aether"
             className="rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-75"
             style={{
-              background: "rgb(var(--bg) / 0.85)",
+              background: "rgb(var(--fg) / 0.12)",
               color: "rgb(var(--fg))",
-              border: "1px solid rgb(var(--fg) / 0.15)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgb(var(--fg) / 0.18)",
             }}
           >
             See Aether →

@@ -759,26 +759,26 @@ function StackDiagram() {
           <path fillRule="evenodd" clipRule="evenodd" d="M2019 418L1939.5 281L1860 418H2019Z" fill="rgb(var(--fg))" opacity="0.4"/>
           {/* Upper connector arrowhead only */}
           <path d="M1765.64 390.881L1771.02 389.741L1768.74 378.98L1763.36 380.119L1764.5 385.5L1765.64 390.881Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Upper connector — spine + packet */}
-          <path d={upperConnector} fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
-          <path d={upperConnector} fill="none" stroke="#f87171" strokeWidth="9" strokeLinecap="butt" pathLength="1" strokeDasharray="0.07 0.93" style={{ animation: "sd-flow 2.4s linear 0s infinite" }}/>
-          <path d={upperConnector} fill="none" stroke="#fecaca" strokeWidth="3" strokeLinecap="butt" pathLength="1" strokeDasharray="0.005 0.995" style={{ animation: "sd-flow 2.4s linear 0s infinite" }}/>
+          {/* Upper connector — spine + flowing packets */}
+          <path d={upperConnector} fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
+          <path d={upperConnector} fill="none" stroke="#f87171" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 2.8s linear 0s infinite" }}/>
+          <path d={upperConnector} fill="none" stroke="#fecaca" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 2.8s linear 0s infinite" }}/>
           {/* Right column */}
           <rect x="1769.5" y="161.5" width="341" height="1241" rx="37.5" stroke="rgb(var(--fg))" strokeOpacity="0.2" strokeWidth="9"/>
-          {/* Upper curve — spine + packet */}
-          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
-          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="9" strokeLinecap="butt" pathLength="1" strokeDasharray="0.07 0.93" style={{ animation: "sd-flow 2.4s linear -0.4s infinite" }}/>
-          <path d={upperCurve} fill="none" stroke="#ede9ff" strokeWidth="3" strokeLinecap="butt" pathLength="1" strokeDasharray="0.005 0.995" style={{ animation: "sd-flow 2.4s linear -0.4s infinite" }}/>
+          {/* Upper curve — spine + flowing packets */}
+          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
+          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 3.4s linear -0.9s infinite" }}/>
+          <path d={upperCurve} fill="none" stroke="#ede9ff" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 3.4s linear -0.9s infinite" }}/>
           {/* Lower connector arrowhead only */}
           <path d="M1766.14 1202.62L1771.52 1203.76L1769.24 1214.52L1763.86 1213.38L1765 1208L1766.14 1202.62Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Lower connector — spine + packet */}
-          <path d={lowerConnector} fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
-          <path d={lowerConnector} fill="none" stroke="#4ade80" strokeWidth="9" strokeLinecap="butt" pathLength="1" strokeDasharray="0.07 0.93" style={{ animation: "sd-flow 3.1s linear -1.2s infinite" }}/>
-          <path d={lowerConnector} fill="none" stroke="#bbf7d0" strokeWidth="3" strokeLinecap="butt" pathLength="1" strokeDasharray="0.005 0.995" style={{ animation: "sd-flow 3.1s linear -1.2s infinite" }}/>
-          {/* Lower curve — spine + packet */}
-          <path d={lowerCurve} fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
-          <path d={lowerCurve} fill="none" stroke="#60a5fa" strokeWidth="9" strokeLinecap="butt" pathLength="1" strokeDasharray="0.07 0.93" style={{ animation: "sd-flow 3.1s linear -0.85s infinite" }}/>
-          <path d={lowerCurve} fill="none" stroke="#daf0ff" strokeWidth="3" strokeLinecap="butt" pathLength="1" strokeDasharray="0.005 0.995" style={{ animation: "sd-flow 3.1s linear -0.85s infinite" }}/>
+          {/* Lower connector — spine + flowing packets */}
+          <path d={lowerConnector} fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
+          <path d={lowerConnector} fill="none" stroke="#4ade80" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 3.8s linear -1.4s infinite" }}/>
+          <path d={lowerConnector} fill="none" stroke="#bbf7d0" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 3.8s linear -1.4s infinite" }}/>
+          {/* Lower curve — spine + flowing packets */}
+          <path d={lowerCurve} fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" opacity="0.35"/>
+          <path d={lowerCurve} fill="none" stroke="#60a5fa" strokeWidth="9" strokeLinecap="round" pathLength="1" strokeDasharray="0.06 0.3 0.06 0.3 0.06 0.22" style={{ animation: "sd-flow 3.8s linear -0.6s infinite" }}/>
+          <path d={lowerCurve} fill="none" stroke="#daf0ff" strokeWidth="3" strokeLinecap="round" pathLength="1" strokeDasharray="0.02 0.34 0.02 0.34 0.02 0.26" style={{ animation: "sd-flow 3.8s linear -0.6s infinite" }}/>
           {/* Next.js circle — masked, N fades to transparent */}
           <g clipPath="url(#sd-c0)" opacity="0.4">
             <mask id="sd-mask0" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="1860" y="888" width="166" height="166">
