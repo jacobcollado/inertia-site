@@ -10,7 +10,7 @@ function serviceTag(s: string | undefined) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function PastWork({ work }: { work: WorkMeta[] }) {
+export function PastWork({ work, showViewAll = true }: { work: WorkMeta[]; showViewAll?: boolean }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("All");
 
@@ -57,6 +57,17 @@ export function PastWork({ work }: { work: WorkMeta[] }) {
             </button>
           );
         })}
+        {showViewAll && (
+          <div className="ml-auto shrink-0 px-5 py-3 border-l border-[rgb(var(--line))]">
+            <Link
+              href="/work"
+              className="text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+              style={{ opacity: 0.55 }}
+            >
+              View all →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Grid */}
