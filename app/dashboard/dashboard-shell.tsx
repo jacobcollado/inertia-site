@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/app/theme-toggle";
-import { signOut } from "./actions";
+import { signOut, getSignedFileUrl } from "./actions";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
@@ -62,7 +62,9 @@ function DownloadButton({ url, label }: { url: string; label: string }) {
   const onClick = async () => {
     setLoading(true);
     try {
-      const res = await fetch(url);
+      const signed = await getSignedFileUrl(url);
+      if (!signed.url) return;
+      const res = await fetch(signed.url);
       const blob = await res.blob();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);

@@ -181,23 +181,32 @@ export async function addFile(clientId: string, formData: FormData) {
   const file = formData.get("file") as File;
   const label = formData.get("label") as string || file.name;
   const ext = file.name.split(".").pop();
-  const path = `${clientId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const storagePath = `${clientId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   const { error: uploadError } = await admin.storage
     .from("client-files")
-    .upload(path, file, { contentType: file.type, upsert: false });
+    .upload(storagePath, file, { contentType: file.type, upsert: false });
   if (uploadError) return { error: uploadError.message };
-
-  const { data: { publicUrl } } = admin.storage.from("client-files").getPublicUrl(path);
 
   const { error } = await admin.from("files").insert({
     client_id: clientId,
     label,
-    url: publicUrl,
+    url: storagePath,
   });
   if (error) return { error: error.message };
   revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
+}
+
+export async function getSignedFileUrl(storagePath: string) {
+  const admin = createAdminClient();
+  const isStoragePath = !storagePath.startsWith("http");
+  if (!isStoragePath) return { url: storagePath };
+  const { data, error } = await admin.storage
+    .from("client-files")
+    .createSignedUrl(storagePath, 60 * 60);
+  if (error) return { error: error.message };
+  return { url: data.signedUrl };
 }
 
 export async function addFileFromUrl(clientId: string, formData: FormData) {

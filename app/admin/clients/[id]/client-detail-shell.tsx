@@ -9,7 +9,7 @@ import {
   addFile, deleteFile, updateClient,
   suspendAccount, unsuspendAccount, deleteAccount,
   updateAccountEmail, updateAccountPassword, resendInvite,
-  addFileFromUrl,
+  addFileFromUrl, getSignedFileUrl,
 } from "../../actions";
 
 /* ── Types ────────────────────────────────────────────────────────── */
@@ -313,6 +313,22 @@ function InvoicesTab({ clientId, invoices }: { clientId: string; invoices: Invoi
 
 /* ── Files tab ────────────────────────────────────────────────────── */
 
+function OpenFileButton({ url }: { url: string }) {
+  const [loading, setLoading] = useState(false);
+  const onClick = async () => {
+    setLoading(true);
+    const res = await getSignedFileUrl(url);
+    setLoading(false);
+    if (res.url) window.open(res.url, "_blank", "noreferrer");
+  };
+  return (
+    <button onClick={onClick} disabled={loading}
+      className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-40">
+      {loading ? "..." : "Open"}
+    </button>
+  );
+}
+
 function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
   const [adding, setAdding] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -421,10 +437,7 @@ function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <a href={f.url} target="_blank" rel="noreferrer"
-                    className="text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-                    Open
-                  </a>
+                  <OpenFileButton url={f.url} />
                   <button onClick={() => onDelete(f.id)} disabled={pending}
                     className="text-[13px] tracking-tight text-red-400 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity disabled:opacity-20">
                     Delete
