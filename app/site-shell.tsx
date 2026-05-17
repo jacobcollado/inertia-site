@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { VisualNotch } from "./visual-notch";
 import { SiteFooter } from "./site-footer";
 
-const BARE_ROUTES = ["/dashboard", "/login", "/admin"];
+const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password"];
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
