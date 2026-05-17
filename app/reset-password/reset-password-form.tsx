@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -13,6 +13,15 @@ export function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setReady(true);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +66,10 @@ export function ResetPasswordForm() {
               <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
                 Taking you to your dashboard…
               </p>
+            </div>
+          ) : !ready ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-[16px] tracking-tight text-[rgb(var(--muted))]">Verifying your link…</p>
             </div>
           ) : (
             <div className="flex flex-col gap-10">
