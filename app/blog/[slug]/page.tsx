@@ -133,13 +133,13 @@ function PostSketch({ slug }: { slug: string }) {
 // Injected AFTER the first <p> that follows the heading, so they sit
 // below the intro sentence rather than floating above empty space.
 const SECTION_SKETCHES: Record<string, React.ReactElement> = {
-  // four-years — "COVID and the shift…": inflection moment, digital compression
+  // four-years - "COVID and the shift…": inflection moment, digital compression
   "covid-and-the-shift-we-do-not-talk-about-enough": (
     <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       <line x1="24" y1="72" x2="456" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" strokeDasharray="3 5" opacity="0.3" />
       {/* Flat pre-COVID line */}
       <path d="M 24 70 L 190 69 L 210 68" stroke="rgb(var(--muted))" strokeWidth="1.6" opacity="0.35" />
-      {/* Sharp inflection upward — blue */}
+      {/* Sharp inflection upward - blue */}
       <path d="M 210 68 C 250 52 300 28 370 16 L 456 10" stroke="rgb(var(--blue))" strokeWidth="2.2" opacity="0.85" />
       {/* Inflection point */}
       <circle cx="210" cy="68" r="4.5" fill="rgb(var(--blue))" opacity="0.9" />
@@ -153,7 +153,7 @@ const SECTION_SKETCHES: Record<string, React.ReactElement> = {
     </svg>
   ),
 
-  // four-years — "What actually kept me going": EQ bars with one tall spike
+  // four-years - "What actually kept me going": EQ bars with one tall spike
   "what-actually-kept-me-going": (
     <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       <line x1="24" y1="76" x2="456" y2="76" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
@@ -178,7 +178,7 @@ const SECTION_SKETCHES: Record<string, React.ReactElement> = {
     </svg>
   ),
 
-  // four-years — "Where I am now": location pin on a horizon
+  // four-years - "Where I am now": location pin on a horizon
   "where-i-am-now": (
     <svg viewBox="0 0 480 80" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       {/* Horizon */}
@@ -197,13 +197,13 @@ const SECTION_SKETCHES: Record<string, React.ReactElement> = {
     </svg>
   ),
 
-  // ai-capability-forecast — "The current plateau is misleading"
+  // ai-capability-forecast - "The current plateau is misleading"
   "the-current-plateau-is-misleading": (
     <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       <line x1="24" y1="72" x2="456" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.6" strokeDasharray="3 5" opacity="0.22" />
       {/* Visible: nearly flat */}
       <path d="M 24 60 C 120 59 240 57 456 54" stroke="rgb(var(--muted))" strokeWidth="2" opacity="0.4" />
-      {/* Interior: rising steadily — dashed blue */}
+      {/* Interior: rising steadily - dashed blue */}
       <path d="M 24 68 C 100 60 200 42 320 26 C 380 18 430 13 456 10"
         stroke="rgb(var(--blue))" strokeWidth="2" strokeDasharray="5 3" opacity="0.8" />
       {/* Labels */}
@@ -213,7 +213,7 @@ const SECTION_SKETCHES: Record<string, React.ReactElement> = {
     </svg>
   ),
 
-  // ai-capability-forecast — "Three trajectories I'd bet on"
+  // ai-capability-forecast - "Three trajectories I'd bet on"
   "three-trajectories-id-bet-on": (
     <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
       <line x1="24" y1="72" x2="456" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.2" />
@@ -298,7 +298,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Not found" };
-  const title = `${post.title} — Inertia`;
+  const title = `${post.title} - Inertia`;
   const description = post.summary || post.subtitle || `Published ${formatDate(post.date)}.`;
   return {
     title,
@@ -352,7 +352,7 @@ export default async function BlogPost({
                 </svg>
               </div>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ fontFamily: "'Erode', serif" }}>Jacob Collado</span>
-              <span className="text-[rgb(var(--line))] text-[10px]">·</span>
+              <span className="text-[rgb(var(--line))] text-[10px]">.</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60" style={{ fontFamily: "'Erode', serif" }}>Founder, Inertia</span>
             </div>
 

@@ -112,7 +112,7 @@ export function MobilePricing({
           className="flex items-center justify-center gap-1.5 py-3 w-full text-[13px] tracking-tight font-medium border border-[rgb(var(--fg))] text-[rgb(var(--fg))] hover:opacity-60 transition-opacity"
         >
           {tier.name === "Enterprise" ? "Learn more" : "Get Aether"}
-          <span aria-hidden="true">→</span>
+          <span aria-hidden="true">&#8594;</span>
         </Link>
       </div>
     </div>

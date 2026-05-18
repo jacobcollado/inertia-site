@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Types â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 type Product = {
   id: string;
@@ -39,7 +39,7 @@ function rgba([r, g, b]: [number, number, number], a = 1) {
   return `rgba(${r},${g},${b},${a})`;
 }
 
-// â”€â”€â”€ Aether sketches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Aether sketches â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function SketchInstall({ accent }: { accent: [number, number, number] }) {
   return (
@@ -265,7 +265,7 @@ function SketchLicense({ accent }: { accent: [number, number, number] }) {
   );
 }
 
-// â”€â”€â”€ Inertia sketches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Inertia sketches â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 const INERTIA_ACCENT: [number, number, number] = [160, 140, 255];
 
@@ -337,7 +337,7 @@ function SketchShopifyBuild({ accent }: { accent: [number, number, number] }) {
           stroke={i === 2 ? rgba(accent, 0.45) : rgba([160,160,160], 0.15)}
           strokeWidth={i === 2 ? "0.75" : "0.55"} />
       ))}
-      {/* Content area â€” section list */}
+      {/* Content area -" section list */}
       {[0,1,2,3].map(i => (
         <rect key={i} x="47" y={30 + i * 17} width="84" height="12" rx="2"
           fill={i === 1 ? rgba(accent, 0.07) : rgba([160,160,160], 0.03)}
@@ -416,7 +416,7 @@ function SketchTimeline({ accent }: { accent: [number, number, number] }) {
       {[
         { x: 40, week: "Wk 1", label: "Brief + discovery" },
         { x: 100, week: "Wk 2", label: "Concepts" },
-        { x: 160, week: "Wk 3â€“4", label: "Build" },
+        { x: 160, week: "Wk 3-4", label: "Build" },
         { x: 230, week: "Wk 5", label: "Launch" },
       ].map(({ x, week, label }, i) => {
         const isLast = i === 3;
@@ -436,7 +436,7 @@ function SketchTimeline({ accent }: { accent: [number, number, number] }) {
   );
 }
 
-// â”€â”€â”€ Sketch registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Sketch registry â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 const SKETCH_MAP: Record<string, (p: { accent: [number, number, number] }) => React.ReactElement> = {
   install: SketchInstall,
@@ -455,7 +455,7 @@ const SKETCH_MAP: Record<string, (p: { accent: [number, number, number] }) => Re
   timeline: SketchTimeline,
 };
 
-// â”€â”€â”€ Aether docs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Aether docs â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 const AETHER_ACCENT: [number, number, number] = [56, 180, 255];
 
@@ -472,8 +472,8 @@ const AETHER_DOCS: DocSection[] = [
           { type: "p", text: "Aether is delivered as a standard Shopify theme zip. After purchase you receive a download link via email. No accounts, no dashboards. Installation takes under two minutes." },
           { type: "h3", text: "Steps" },
           { type: "ol", items: [
-            "In your Shopify admin, go to Online Store â€º Themes.",
-            "Click Add theme â€º Upload zip file.",
+            "In your Shopify admin, go to Online Store -º Themes.",
+            "Click Add theme -º Upload zip file.",
             "Select the Aether .zip from your download.",
             "Click Customize to configure, or Publish to go live.",
           ]},
@@ -522,13 +522,13 @@ const AETHER_DOCS: DocSection[] = [
         title: "Header",
         body: [
           { type: "sketch", name: "megaMenu", accent: AETHER_ACCENT },
-          { type: "p", text: "The header supports a standard nav, a mega menu, and a transparent mode for hero sections. All options live in Theme settings â€º Header." },
+          { type: "p", text: "The header supports a standard nav, a mega menu, and a transparent mode for hero sections. All options live in Theme settings -º Header." },
           { type: "h3", text: "Mega menu" },
           { type: "p", text: "Any top-level nav item with child links renders a two-column mega menu. The right panel can show a featured image, a collection tile, or nothing at all." },
           { type: "ul", items: [
-            "Set up nav links in Shopify Admin â€º Navigation â€º Main menu.",
+            "Set up nav links in Shopify Admin -º Navigation -º Main menu.",
             "Add child links under any top-level item to trigger the mega menu.",
-            "Assign a right-panel block to each item under Header â€º Mega menu panels in the theme editor.",
+            "Assign a right-panel block to each item under Header -º Mega menu panels in the theme editor.",
           ]},
           { type: "h3", text: "Transparent mode" },
           { type: "p", text: "Enable the transparent header when your homepage hero has a full-bleed image or dark background. The header becomes opaque on scroll." },
@@ -589,7 +589,7 @@ const AETHER_DOCS: DocSection[] = [
         title: "Colors",
         body: [
           { type: "sketch", name: "colors", accent: AETHER_ACCENT },
-          { type: "p", text: "All colors in Aether are defined as CSS custom properties. You set the base values in Theme settings â€º Colors and everything else derives from them automatically." },
+          { type: "p", text: "All colors in Aether are defined as CSS custom properties. You set the base values in Theme settings -º Colors and everything else derives from them automatically." },
           { type: "h3", text: "Color roles" },
           { type: "ul", items: [
             "Primary: used for CTAs, links, and highlights. Should be your brand accent.",
@@ -598,7 +598,7 @@ const AETHER_DOCS: DocSection[] = [
             "Line: border and divider color. Derives from foreground at low opacity.",
           ]},
           { type: "h3", text: "Dark mode" },
-          { type: "p", text: "Aether reads prefers-color-scheme and applies the right values on first load with no flash. You can expose a toggle to customers via Theme settings â€º Colors. Both modes are fully designed, not just inverted." },
+          { type: "p", text: "Aether reads prefers-color-scheme and applies the right values on first load with no flash. You can expose a toggle to customers via Theme settings -º Colors. Both modes are fully designed, not just inverted." },
         ],
       },
       {
@@ -620,7 +620,7 @@ const AETHER_DOCS: DocSection[] = [
         id: "aether-custom-css",
         title: "Custom CSS",
         body: [
-          { type: "p", text: "For anything beyond the theme editor, use the Custom CSS field in Theme settings â€º Advanced." },
+          { type: "p", text: "For anything beyond the theme editor, use the Custom CSS field in Theme settings -º Advanced." },
           { type: "h3", text: "Available tokens" },
           { type: "code", text: `--color-primary     your brand accent
 --color-surface     card and overlay background
@@ -646,8 +646,8 @@ const AETHER_DOCS: DocSection[] = [
           { type: "h3", text: "Update process" },
           { type: "ol", items: [
             "Download the new .zip from the update email.",
-            "In Shopify admin, go to Online Store â€º Themes.",
-            "Click Add theme â€º Upload zip. This creates a new unpublished copy; your live theme is untouched.",
+            "In Shopify admin, go to Online Store -º Themes.",
+            "Click Add theme -º Upload zip. This creates a new unpublished copy; your live theme is untouched.",
             "Preview the new version. If it looks right, publish.",
             "Re-apply any custom code changes to the new version's files.",
           ]},
@@ -682,7 +682,7 @@ const AETHER_DOCS: DocSection[] = [
   },
 ];
 
-// â”€â”€â”€ Inertia docs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Inertia docs â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 const INERTIA_DOCS: DocSection[] = [
   {
@@ -812,7 +812,7 @@ const INERTIA_DOCS: DocSection[] = [
   },
 ];
 
-// â”€â”€â”€ Products registry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Products registry â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 const PRODUCTS: Product[] = [
   {
@@ -831,7 +831,7 @@ const PRODUCTS: Product[] = [
   },
 ];
 
-// â”€â”€â”€ Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â"€â"€â"€ Components â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, number, number] }) {
   return (
@@ -1117,7 +1117,7 @@ export default function DocsPage() {
         );
       })()}
 
-      {/* Mobile sheet â€” always mounted, transitions in/out */}
+      {/* Mobile sheet -" always mounted, transitions in/out */}
       <div
         className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end"
         style={{

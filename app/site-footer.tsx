@@ -137,7 +137,7 @@ export function SiteFooter() {
         <div className="flex items-center gap-6">
           <BackToTop />
           <p className="text-[12px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 tabular-nums">
-            © {new Date().getFullYear()} Inertia
+            &copy; {new Date().getFullYear()} Inertia
           </p>
         </div>
       </div>

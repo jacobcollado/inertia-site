@@ -65,7 +65,7 @@ export function PastWork({ work, showViewAll = true }: { work: WorkMeta[]; showV
               className="text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
               style={{ opacity: 0.55 }}
             >
-              View all →
+              View all &#8594;
             </Link>
           </div>
         )}
@@ -112,7 +112,7 @@ export function PastWork({ work, showViewAll = true }: { work: WorkMeta[]; showV
                     opacity: active ? 0.55 : 0.25,
                   }}
                 >
-                  {serviceTag(w.service)}{w.year ? ` · ${w.year.match(/\d{4}/)?.[0]}` : ""}
+                  {serviceTag(w.service)}{w.year ? ` . ${w.year.match(/\d{4}/)?.[0]}` : ""}
                 </span>
               </div>
             </Link>

@@ -246,7 +246,7 @@ function RotatingPanel() {
       className="flex flex-col items-center justify-center text-center px-6 sm:px-10"
       style={{ height: isMobile ? 240 : 380, gap: 0 }}
     >
-      {/* Label — sits just above phrase, tightly grouped */}
+      {/* Label - sits just above phrase, tightly grouped */}
       <p
         key={`label-${animKey}`}
         className="text-[clamp(0.78rem,1.6vw,0.88rem)] tracking-tight text-[rgb(var(--muted))]"
@@ -260,7 +260,7 @@ function RotatingPanel() {
         {current.label}
       </p>
 
-      {/* Icon + phrase — letter-by-letter 3D flip */}
+      {/* Icon + phrase - letter-by-letter 3D flip */}
       <p
         className="flex items-center gap-2 whitespace-nowrap text-[clamp(2rem,5vw,2.4rem)] tracking-tight leading-none font-normal"
         style={{ color: "rgb(var(--fg))", perspective: "800px", perspectiveOrigin: "50% 50%", marginBottom: "20px" }}
@@ -304,7 +304,7 @@ function RotatingPanel() {
         </span>
       </p>
 
-      {/* CTA — anchored below phrase at consistent distance */}
+      {/* CTA - anchored below phrase at consistent distance */}
       <div
         key={`cta-${animKey}`}
         style={{
@@ -416,7 +416,7 @@ function LaptopWithText() {
   );
 }
 
-// ── Pulse grid ────────────────────────────────────────────────────────
+// -- Pulse grid --------------------------------------------------------
 
 const GRID_W = 480;
 const GRID_H = 360;
@@ -712,7 +712,7 @@ function StackDiagram() {
           </Link>
         </div>
       </div>
-      {/* Right: diagram — exact SVG from design file, with animated line overlays */}
+      {/* Right: diagram - exact SVG from design file, with animated line overlays */}
       <div className="flex items-center justify-center overflow-hidden sm:w-[38%] sm:shrink-0 sm:self-stretch py-6">
         <svg ref={svgRef} viewBox="0 0 2115 1562" fill="none" className="w-full" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: 280 }} aria-hidden="true">
           <defs>
@@ -760,19 +760,19 @@ function StackDiagram() {
           <path fillRule="evenodd" clipRule="evenodd" d="M2019 418L1939.5 281L1860 418H2019Z" fill="rgb(var(--fg))" opacity="0.4"/>
           {/* Upper connector arrowhead only */}
           <path d="M1765.64 390.881L1771.02 389.741L1768.74 378.98L1763.36 380.119L1764.5 385.5L1765.64 390.881Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Upper connector — static */}
+          {/* Upper connector - static */}
           <path d={upperConnector} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
           {/* Right column */}
           <rect x="1769.5" y="161.5" width="341" height="1241" rx="37.5" stroke="rgb(var(--fg))" strokeOpacity="0.2" strokeWidth="9"/>
-          {/* Upper curve — static */}
+          {/* Upper curve - static */}
           <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
           {/* Lower connector arrowhead only */}
           <path d="M1766.14 1202.62L1771.52 1203.76L1769.24 1214.52L1763.86 1213.38L1765 1208L1766.14 1202.62Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Lower connector — static */}
+          {/* Lower connector - static */}
           <path d={lowerConnector} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
-          {/* Lower curve — static */}
+          {/* Lower curve - static */}
           <path d={lowerCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
-          {/* Next.js circle — masked, N fades to transparent */}
+          {/* Next.js circle - masked, N fades to transparent */}
           <g clipPath="url(#sd-c0)" opacity="0.4">
             <mask id="sd-mask0" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="1860" y="888" width="166" height="166">
               <path d="M1943 1054C1988.84 1054 2026 1016.84 2026 971C2026 925.16 1988.84 888 1943 888C1897.16 888 1860 925.16 1860 971C1860 1016.84 1897.16 1054 1943 1054Z" fill="rgb(var(--fg))"/>
@@ -791,7 +791,7 @@ function StackDiagram() {
             <path d="M1935.85 578.322C1936.36 578.322 1936.93 578.493 1937.44 578.834C1933.46 580.709 1929.2 585.427 1927.38 594.863C1924.77 595.659 1922.15 596.455 1919.76 597.194C1921.92 590.031 1926.93 578.322 1935.85 578.322Z" fill="rgb(var(--fg))"/>
             <path d="M1941.65 609.415L1937.95 620.328C1937.95 620.328 1934.71 618.623 1930.79 618.623C1924.99 618.623 1924.71 622.261 1924.71 623.17C1924.71 628.173 1937.73 630.048 1937.73 641.758C1937.73 650.966 1931.87 656.878 1924.03 656.878C1914.59 656.878 1909.76 651.023 1909.76 651.023L1912.26 642.667C1912.26 642.667 1917.21 646.93 1921.41 646.93C1924.14 646.93 1925.28 644.77 1925.28 643.179C1925.28 636.642 1914.59 636.358 1914.59 625.672C1914.59 616.69 1921.07 607.937 1934.09 607.937C1939.2 607.994 1941.65 609.415 1941.65 609.415Z" fill="rgb(var(--fg))"/>
           </g>
-          {/* TypeScript — solid filled box + TS letterforms */}
+          {/* TypeScript - solid filled box + TS letterforms */}
           <g clipPath="url(#sd-c1)" opacity="0.4">
             <path d="M114.25 1004H235.75C241.963 1004 247 1009.04 247 1015.25V1136.75C247 1142.96 241.963 1148 235.75 1148H114.25C108.037 1148 103 1142.96 103 1136.75V1015.25C103 1009.04 108.037 1004 114.25 1004Z" fill="rgb(var(--fg))"/>
             <path d="M187.666 1116.77V1132.3C190.193 1133.6 193.182 1134.57 196.632 1135.22C200.081 1135.86 203.717 1136.19 207.54 1136.19C211.265 1136.19 214.804 1135.83 218.157 1135.12C221.509 1134.41 224.449 1133.23 226.976 1131.6C229.502 1129.97 231.503 1127.83 232.977 1125.19C234.451 1122.55 235.188 1119.29 235.188 1115.41C235.188 1112.59 234.766 1110.12 233.924 1108C233.091 1105.9 231.853 1103.98 230.28 1102.35C228.693 1100.7 226.789 1099.22 224.571 1097.91C222.352 1096.59 219.849 1095.36 217.063 1094.19C215.022 1093.35 213.193 1092.53 211.573 1091.74C209.953 1090.95 208.576 1090.14 207.443 1089.31C206.309 1088.49 205.434 1087.61 204.819 1086.69C204.203 1085.77 203.896 1084.72 203.896 1083.56C203.896 1082.49 204.171 1081.53 204.721 1080.67C205.272 1079.81 206.05 1079.08 207.054 1078.46C208.058 1077.85 209.289 1077.37 210.747 1077.03C212.204 1076.69 213.824 1076.52 215.606 1076.52C216.902 1076.52 218.27 1076.62 219.711 1076.81C221.153 1077 222.603 1077.3 224.061 1077.71C225.514 1078.11 226.935 1078.62 228.312 1079.24C229.647 1079.83 230.924 1080.55 232.126 1081.37V1066.86C229.762 1065.95 227.178 1065.28 224.376 1064.84C221.574 1064.41 218.359 1064.19 214.731 1064.19C211.038 1064.19 207.54 1064.58 204.236 1065.38C200.932 1066.17 198.024 1067.41 195.514 1069.09C193.003 1070.77 191.019 1072.92 189.561 1075.52C188.104 1078.13 187.375 1081.24 187.375 1084.87C187.375 1089.5 188.711 1093.45 191.384 1096.72C194.056 1099.98 198.113 1102.75 203.555 1105.02C205.564 1105.84 207.557 1106.69 209.532 1107.59C211.379 1108.43 212.974 1109.31 214.318 1110.21C215.663 1111.12 216.723 1112.11 217.501 1113.17C218.278 1114.24 218.667 1115.46 218.667 1116.82C218.673 1117.79 218.422 1118.76 217.938 1119.61C217.452 1120.47 216.715 1121.21 215.727 1121.84C214.74 1122.47 213.508 1122.97 212.034 1123.32C210.561 1123.68 208.836 1123.86 206.859 1123.86C203.491 1123.86 200.154 1123.27 196.85 1122.08C193.546 1120.9 190.485 1119.13 187.666 1116.77ZM161.771 1078.1H181.75V1065.31H126.062V1078.1H145.944V1135.06H161.771V1078.1Z" fill="rgb(var(--bg))"/>
@@ -806,14 +806,14 @@ function StackDiagram() {
           </g>
           {/* Swift bird */}
           <path d="M188.004 1293.73C256.249 1340.14 234.174 1391.32 234.174 1391.32C234.174 1391.32 253.581 1413.24 245.737 1432.4C245.737 1432.4 237.732 1418.98 224.309 1418.98C211.372 1418.98 203.771 1432.4 177.734 1432.4C119.758 1432.4 92.3469 1383.97 92.3469 1383.97C144.582 1418.33 180.241 1393.99 180.241 1393.99C156.711 1380.33 106.659 1314.99 106.659 1314.99C150.242 1352.11 169.082 1361.89 169.082 1361.89C157.843 1352.59 126.308 1307.15 126.308 1307.15C151.536 1332.7 201.669 1368.36 201.669 1368.36C215.9 1328.9 188.004 1293.73 188.004 1293.73Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Vercel symbol — right column bottom */}
+          {/* Vercel symbol - right column bottom */}
           <g clipPath="url(#sd-c2)" opacity="0.4">
             <path d="M1897 1161H1982V1204H1939.5L1897 1161ZM1897 1204H1939.5L1982 1247H1939.5V1290L1897 1247V1204Z" fill="rgb(var(--fg))"/>
           </g>
-          {/* Left line — scrolling dashes, matches dashboard style */}
+          {/* Left line - scrolling dashes, matches dashboard style */}
           <circle cx="350" cy="781" r="16" fill="none" stroke="rgb(var(--fg))" strokeWidth="9" opacity="0.2"/>
           <path d={leftLine} stroke="rgb(var(--fg))" strokeWidth="9" strokeDasharray="12 8" opacity="0.2" style={{ animation: "sd-left-dash 2s linear infinite" }}/>
-          {/* Center node — static rect, only "In" text tracks mouse */}
+          {/* Center node - static rect, only "In" text tracks mouse */}
           <rect x="798" y="472" width="559" height="546" rx="52" fill="rgb(var(--fg))" fillOpacity="0.06" stroke="rgb(var(--fg))" strokeOpacity="0.2" strokeWidth="3"/>
           <g ref={nodeRef} filter="url(#sd-f0)" opacity="0.5">
             <path d="M971.476 880V639.5H1013.4V880H971.476ZM1038.95 880V702.712H1073.4L1076.33 721.562H1078.44C1084.72 714.629 1092.09 709.321 1100.54 705.637C1109.1 701.846 1118.42 699.95 1128.49 699.95C1139.11 699.95 1148.53 702.062 1156.77 706.287C1165.11 710.404 1171.66 717.175 1176.43 726.6C1181.2 736.025 1183.58 748.592 1183.58 764.3V880H1142.3V766.9C1142.3 755.308 1139.87 747.292 1134.99 742.85C1130.22 738.408 1123.72 736.187 1115.49 736.187C1111.59 736.187 1107.47 736.783 1103.14 737.975C1098.81 739.167 1094.64 741.062 1090.63 743.662C1086.73 746.154 1083.32 749.458 1080.39 753.575V880H1038.95Z" fill="rgb(var(--fg))"/>
@@ -832,22 +832,22 @@ const SERVICE_CARDS = [
     href: "https://www.instagram.com/by.inertia/",
     illustration: (
       <svg viewBox="0 0 1597 1527" fill="none" className="w-full" aria-hidden="true">
-        {/* Central "In" card — appears first */}
+        {/* Central "In" card - appears first */}
         <g className="node-fade node-fade-1">
           <rect x="340" y="378" width="694" height="694" rx="73" fill="rgb(var(--fg))" fillOpacity="0.08" stroke="rgb(var(--fg))" strokeWidth="4" strokeOpacity="0.15"/>
           <path d="M558.47 887V591H610.07V887H558.47ZM641.52 887V668.8H683.92L687.52 692H690.12C697.854 683.467 706.92 676.933 717.32 672.4C727.854 667.733 739.32 665.4 751.72 665.4C764.787 665.4 776.387 668 786.52 673.2C796.787 678.267 804.854 686.6 810.72 698.2C816.587 709.8 819.52 725.267 819.52 744.6V887H768.72V747.8C768.72 733.533 765.72 723.667 759.72 718.2C753.854 712.733 745.854 710 735.72 710C730.92 710 725.854 710.733 720.52 712.2C715.187 713.667 710.054 716 705.12 719.2C700.32 722.267 696.12 726.333 692.52 731.4V887H641.52Z" fill="rgb(var(--fg))" fillOpacity="0.25"/>
         </g>
-        {/* Top-left node — GitHub */}
+        {/* Top-left node - GitHub */}
         <g className="node-fade node-fade-2">
           <rect x="0" y="0" width="302" height="302" rx="43" fill="rgb(var(--fg))" fillOpacity="0.07" stroke="rgb(var(--fg))" strokeWidth="2" strokeOpacity="0.12"/>
           <path d="M151.146 69.6111C106.5 69.6111 70.2959 106.653 70.2959 152.349C70.2959 188.905 93.4619 219.92 125.586 230.86C129.627 231.626 131.11 229.065 131.11 226.88C131.11 224.907 131.035 218.389 131 211.476C108.508 216.481 103.762 201.713 103.762 201.713C100.084 192.15 94.7847 189.607 94.7847 189.607C87.4492 184.472 95.3376 184.577 95.3376 184.577C103.456 185.16 107.731 193.104 107.731 193.104C114.942 205.753 126.645 202.096 131.259 199.982C131.984 194.635 134.08 190.983 136.392 188.918C118.434 186.826 99.5563 179.731 99.5563 148.028C99.5563 138.994 102.715 131.614 107.887 125.819C107.047 123.734 104.28 115.32 108.67 103.923C108.67 103.923 115.459 101.699 130.909 112.404C137.359 110.571 144.275 109.652 151.146 109.62C158.017 109.652 164.939 110.571 171.4 112.404C186.831 101.699 193.611 103.923 193.611 103.923C198.012 115.32 195.243 123.734 194.404 125.819C199.588 131.614 202.725 138.994 202.725 148.028C202.725 179.806 183.811 186.804 165.808 188.852C168.708 191.42 171.292 196.455 171.292 204.174C171.292 215.243 171.198 224.153 171.198 226.88C171.198 229.082 172.653 231.662 176.751 230.849C208.858 219.896 231.995 188.893 231.995 152.349C231.995 106.653 195.796 69.6111 151.146 69.6111" fill="rgb(var(--fg))" fillOpacity="0.35"/>
         </g>
-        {/* Top-right node — Apple */}
+        {/* Top-right node - Apple */}
         <g className="node-fade node-fade-3">
           <rect x="1294" y="16" width="303" height="303" rx="43" fill="rgb(var(--fg))" fillOpacity="0.07" stroke="rgb(var(--fg))" strokeWidth="2" strokeOpacity="0.12"/>
           <path d="M1446 87C1490.74 87 1527 123.265 1527 168C1527 212.735 1490.74 249 1446 249C1401.26 249 1365 212.735 1365 168C1365 123.265 1401.26 87 1446 87ZM1465.64 141.598C1457.13 141.598 1453.53 145.668 1447.62 145.668C1441.53 145.668 1436.91 141.608 1429.55 141.608C1422.32 141.609 1414.63 146.025 1409.75 153.574C1402.9 164.207 1404.07 184.197 1415.18 201.226C1419.16 207.32 1424.47 214.167 1431.41 214.229C1437.59 214.29 1439.34 210.264 1447.71 210.22C1456.09 210.17 1457.68 214.279 1463.85 214.212C1470.8 214.156 1476.4 206.567 1480.38 200.473C1483.22 196.107 1484.29 193.904 1486.5 188.976C1470.42 182.859 1467.84 159.992 1483.76 151.216C1478.9 145.127 1472.08 141.598 1465.64 141.598ZM1463.78 119.4C1458.72 119.752 1452.81 122.985 1449.37 127.2C1446.22 131.02 1443.64 136.702 1444.65 142.217C1450.17 142.39 1455.88 139.077 1459.19 134.795C1462.28 130.803 1464.62 125.16 1463.78 119.4Z" fill="rgb(var(--fg))" fillOpacity="0.35"/>
         </g>
-        {/* Bottom-right node — Shopify */}
+        {/* Bottom-right node - Shopify */}
         <g className="node-fade node-fade-4">
           <rect x="1084" y="1225" width="302" height="302" rx="43" fill="rgb(var(--fg))" fillOpacity="0.07" stroke="rgb(var(--fg))" strokeWidth="2" strokeOpacity="0.12"/>
           <path d="M1235 1295C1279.74 1295 1316 1331.26 1316 1376C1316 1420.74 1279.74 1457 1235 1457C1190.26 1457 1154 1420.74 1154 1376C1154 1331.26 1190.26 1295 1235 1295ZM1231.19 1327.91C1218.74 1327.97 1212.83 1343.49 1210.96 1351.39C1206.12 1352.87 1202.71 1353.94 1202.26 1354.06C1199.59 1354.91 1199.47 1354.97 1199.13 1357.53C1198.85 1359.51 1191.82 1413.96 1191.8 1414.08L1246.77 1424.37L1276.55 1417.95C1276.54 1417.79 1266.1 1347.26 1266.04 1346.73C1265.98 1346.22 1265.52 1345.99 1265.18 1345.93C1264.84 1345.87 1257.4 1345.36 1257.4 1345.36C1257.38 1345.35 1252.22 1340.25 1251.71 1339.68C1251.14 1339.11 1250.06 1339.28 1249.61 1339.39C1249.55 1339.39 1248.47 1339.73 1246.71 1340.3C1245.06 1335.36 1241.99 1330.81 1236.65 1330.81H1236.19C1234.66 1328.82 1232.78 1327.91 1231.19 1327.91Z" fill="rgb(var(--fg))" fillOpacity="0.35"/>
@@ -856,7 +856,7 @@ const SERVICE_CARDS = [
           <path d="M1230.85 1331.32C1231.36 1331.32 1231.93 1331.49 1232.44 1331.83C1228.46 1333.71 1224.2 1338.43 1222.38 1347.86C1219.77 1348.66 1217.15 1349.45 1214.76 1350.19C1216.92 1343.03 1221.93 1331.32 1230.85 1331.32Z" fill="rgb(var(--fg))" fillOpacity="0.35"/>
           <path d="M1236.65 1362.41L1232.95 1373.33C1232.95 1373.33 1229.71 1371.62 1225.79 1371.62C1219.99 1371.62 1219.71 1375.26 1219.71 1376.17C1219.71 1381.17 1232.73 1383.05 1232.73 1394.76C1232.73 1403.97 1226.87 1409.88 1219.03 1409.88C1209.59 1409.88 1204.76 1404.02 1204.76 1404.02L1207.26 1395.67C1207.26 1395.67 1212.21 1399.93 1216.41 1399.93C1219.14 1399.93 1220.28 1397.77 1220.28 1396.18C1220.28 1389.64 1209.59 1389.36 1209.59 1378.67C1209.59 1369.69 1216.07 1360.94 1229.09 1360.94C1234.2 1360.99 1236.65 1362.41 1236.65 1362.41Z" fill="rgb(var(--fg))" fillOpacity="0.35"/>
         </g>
-        {/* Connectors and arrowheads — appear last */}
+        {/* Connectors and arrowheads - appear last */}
         <g className="node-fade node-fade-5">
           <path d="M1068 725 H1356 Q1446 725 1446 635 V359" stroke="rgb(var(--fg))" strokeOpacity="0.25" strokeWidth="10" strokeDasharray="16 10" strokeLinecap="round" fill="none" style={{ animation: "dash-march-sd 1.6s linear infinite" }}/>
           <path d="M340 137 H627 Q687 137 687 197 V340" stroke="rgb(var(--fg))" strokeOpacity="0.25" strokeWidth="10" strokeDasharray="16 10" strokeLinecap="round" fill="none" style={{ animation: "dash-march-sd 1.6s linear infinite", animationDelay: "0.4s" }}/>
@@ -960,7 +960,7 @@ function ServiceCards() {
 
   return (
     <>
-      {/* Tab bar — shared between mobile and desktop */}
+      {/* Tab bar - shared between mobile and desktop */}
       <div className="flex border-b border-t border-[rgb(var(--line))]">
         <span className="px-5 py-3 text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 border-r border-[rgb(var(--line))] shrink-0 hidden sm:flex items-center">Commitments</span>
         {SERVICE_TABS.map((tab, i) => (
@@ -1019,7 +1019,7 @@ function ServiceCards() {
         </div>
       </div>
 
-      {/* Desktop — active card full-width */}
+      {/* Desktop - active card full-width */}
       <div className="hidden sm:block">
         {(() => {
           const card = SERVICE_CARDS[active];
@@ -1059,23 +1059,23 @@ function WhatWeDo() {
   );
 }
 
-// Slug-specific sketches for the think section — one per post
+// Slug-specific sketches for the think section - one per post
 const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
   "ai-capability-forecast": (
-    // A curve that starts nearly flat, then rockets upward — acceleration made visible
+    // A curve that starts nearly flat, then rockets upward - acceleration made visible
     <svg key="ai-capability-forecast" viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
-      {/* Faint ruled grid — recedes into background */}
+      {/* Faint ruled grid - recedes into background */}
       {[100,80,60,40,20].map((y, i) => (
         <line key={i} x1="0" y1={y} x2="200" y2={y} stroke="rgb(var(--fg))" strokeWidth="0.3" opacity={0.03 + i * 0.015} />
       ))}
-      {/* Filled area under curve — sense of accumulation */}
+      {/* Filled area under curve - sense of accumulation */}
       <path d="M 0 108 C 40 107, 80 103, 110 90 C 135 78, 155 52, 170 28 L 200 4 L 200 120 L 0 120 Z" fill="rgb(var(--blue))" opacity="0.09" />
-      {/* The curve itself — thick, authoritative */}
+      {/* The curve itself - thick, authoritative */}
       <path d="M 0 108 C 40 107, 80 103, 110 90 C 135 78, 155 52, 170 28 L 200 4" stroke="rgb(var(--blue))" strokeWidth="2" strokeLinecap="round" opacity="0.75" />
-      {/* Inflection dot — where everything changes */}
+      {/* Inflection dot - where everything changes */}
       <circle cx="110" cy="90" r="3.5" fill="rgb(var(--blue))" opacity="0.85" />
       <circle cx="110" cy="90" r="7"   stroke="rgb(var(--blue))" strokeWidth="0.7" opacity="0.3" />
-      {/* Right-edge vertical emphasis — the wall */}
+      {/* Right-edge vertical emphasis - the wall */}
       <line x1="200" y1="4" x2="200" y2="120" stroke="rgb(var(--blue))" strokeWidth="0.5" strokeDasharray="3 4" opacity="0.2" />
       {/* Baseline */}
       <line x1="0" y1="112" x2="200" y2="112" stroke="rgb(var(--fg))" strokeWidth="0.4" opacity="0.15" />
@@ -1083,16 +1083,16 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
   ),
 
   "four-years": (
-    // Four progressively heavier bands — weight as evidence of time
+    // Four progressively heavier bands - weight as evidence of time
     <svg key="four-years" viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
-      {/* Bands grow in both height and opacity — years accumulating */}
+      {/* Bands grow in both height and opacity - years accumulating */}
       <rect x="0" y="90" width="200" height="8"  fill="rgb(var(--green))" opacity="0.15" />
       <rect x="0" y="72" width="200" height="12" fill="rgb(var(--green))" opacity="0.28" />
       <rect x="0" y="48" width="200" height="16" fill="rgb(var(--green))" opacity="0.48" />
       <rect x="0" y="16" width="200" height="22" fill="rgb(var(--green))" opacity="0.75" />
       {/* Top highlight on the heaviest band */}
       <line x1="0" y1="16" x2="200" y2="16" stroke="rgb(var(--green))" strokeWidth="1" opacity="0.5" />
-      {/* Year markers flush left — counting */}
+      {/* Year markers flush left - counting */}
       {["01","02","03","04"].map((n, i) => {
         const tops = [90, 72, 48, 16];
         const ops  = [0.25, 0.35, 0.5, 0.7];
@@ -1109,30 +1109,30 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
   ),
 
   "hello-world": (
-    // The moment before anything exists — a cursor waiting in the dark
+    // The moment before anything exists - a cursor waiting in the dark
     <svg key="hello-world" viewBox="0 0 200 120" fill="none" className="w-full" aria-hidden="true">
-      {/* Deep field — concentric rings radiating from cursor, like a stone dropped in water */}
+      {/* Deep field - concentric rings radiating from cursor, like a stone dropped in water */}
       <rect x="26" y="34" width="54" height="54" rx="12" stroke="rgb(var(--fg))" strokeWidth="0.3" opacity="0.04" />
       <rect x="34" y="41" width="38" height="40" rx="8"  stroke="rgb(var(--fg))" strokeWidth="0.4" opacity="0.07" />
       <rect x="40" y="46" width="26" height="30" rx="5"  stroke="rgb(var(--fg))" strokeWidth="0.5" opacity="0.11" />
-      {/* The cursor itself — solid, patient, inevitable */}
+      {/* The cursor itself - solid, patient, inevitable */}
       <rect x="47" y="51" width="12" height="20" rx="1.5" fill="rgb(var(--fg))" opacity="0.8" />
-      {/* The line it sits on — sparse, like ruled paper */}
+      {/* The line it sits on - sparse, like ruled paper */}
       <line x1="0" y1="71" x2="200" y2="71" stroke="rgb(var(--fg))" strokeWidth="0.3" opacity="0.07" />
-      {/* What comes after — ghost words fading into potential */}
+      {/* What comes after - ghost words fading into potential */}
       <line x1="68"  y1="61" x2="106" y2="61" stroke="rgb(var(--fg))" strokeWidth="1.5" opacity="0.09" strokeLinecap="round" />
       <line x1="68"  y1="61" x2="88"  y2="61" stroke="rgb(var(--fg))" strokeWidth="1.5" opacity="0.06" strokeLinecap="round" />
       <line x1="110" y1="61" x2="140" y2="61" stroke="rgb(var(--fg))" strokeWidth="1.5" opacity="0.04" strokeLinecap="round" />
-      {/* Second line — the idea forming */}
+      {/* Second line - the idea forming */}
       <line x1="47"  y1="83" x2="120" y2="83" stroke="rgb(var(--fg))" strokeWidth="1"   opacity="0.05" strokeLinecap="round" />
       <line x1="47"  y1="91" x2="88"  y2="91" stroke="rgb(var(--fg))" strokeWidth="1"   opacity="0.03" strokeLinecap="round" />
-      {/* Top rule — the edge of the page */}
+      {/* Top rule - the edge of the page */}
       <line x1="0" y1="8" x2="200" y2="8" stroke="rgb(var(--fg))" strokeWidth="0.3" opacity="0.08" />
     </svg>
   ),
 };
 
-// ── Tech Marquee ───────────────────────────────────────────────────────
+// -- Tech Marquee -------------------------------------------------------
 const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
   { name: "Shopify",    icon: SiShopify,    color: "#96BF48" },
   { name: "TypeScript", icon: SiTypescript, color: "#3178C6" },
@@ -1164,7 +1164,7 @@ function TechMarquee() {
   );
 }
 
-/* ── Dashboard waitlist modal ────────────────────────────────────── */
+/* -- Dashboard waitlist modal -------------------------------------- */
 
 type Plan = "free" | "service";
 
@@ -1378,23 +1378,23 @@ function BlogGrid({ posts }: { posts: PostMeta[] }) {
 
   const introCard = (extraClass = "") => (
     <Link href="/blog" className={`group flex flex-col justify-between gap-5 px-7 pt-7 pb-7 border-r border-b border-[rgb(var(--line))] transition-colors hover:bg-[rgb(var(--line))/0.15] ${extraClass}`}>
-      {/* Sketch: open magazine spread — left image block, right text column */}
+      {/* Sketch: open magazine spread - left image block, right text column */}
       <svg viewBox="0 0 280 120" fill="none" className="w-full" aria-hidden="true">
         {/* Spine */}
         <line x1="140" y1="0" x2="140" y2="120" stroke="rgb(var(--fg))" strokeWidth="0.6" strokeOpacity="0.12" />
-        {/* Left page — dominant image fill */}
+        {/* Left page - dominant image fill */}
         <rect x="8" y="8" width="122" height="104" rx="1" fill="rgb(var(--fg))" fillOpacity="0.08" />
         <rect x="8" y="8" width="122" height="104" rx="1" stroke="rgb(var(--fg))" strokeWidth="0.4" strokeOpacity="0.1" />
-        {/* Image texture — horizontal bands of varying density */}
+        {/* Image texture - horizontal bands of varying density */}
         <rect x="8"  y="8"  width="122" height="28" fill="rgb(var(--fg))" fillOpacity="0.28" />
         <rect x="8"  y="36" width="122" height="18" fill="rgb(var(--fg))" fillOpacity="0.14" />
         <rect x="8"  y="54" width="122" height="10" fill="rgb(var(--fg))" fillOpacity="0.06" />
         {/* Image caption line */}
         <rect x="14" y="104" width="60" height="3" rx="1" fill="rgb(var(--fg))" fillOpacity="0.2" />
-        {/* Right page — article text */}
+        {/* Right page - article text */}
         {/* Section label */}
         <rect x="150" y="12" width="28" height="4" rx="1" fill="rgb(var(--fg))" fillOpacity="0.3" />
-        {/* Headline — three descending bars */}
+        {/* Headline - three descending bars */}
         <rect x="150" y="22" width="118" height="9" rx="1" fill="rgb(var(--fg))" fillOpacity="0.65" />
         <rect x="150" y="35" width="100" height="9" rx="1" fill="rgb(var(--fg))" fillOpacity="0.48" />
         <rect x="150" y="48" width="72"  height="9" rx="1" fill="rgb(var(--fg))" fillOpacity="0.3" />

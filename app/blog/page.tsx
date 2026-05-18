@@ -152,7 +152,7 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
-// ── Per-slug sketches ───────────────────────────────────────────────────────
+// -- Per-slug sketches -------------------------------------------------------
 
 function SketchAI() {
   return (

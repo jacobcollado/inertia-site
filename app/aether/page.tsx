@@ -6,7 +6,7 @@ import { AetherContour } from "./aether-contour";
 import { MobilePricing } from "./mobile-pricing";
 
 export const metadata: Metadata = {
-  title: "Aether Theme -- Inertia",
+  title: "Aether",
   description:
     "A high-end Shopify theme built for conversion, flow, and presence.",
 };
@@ -27,8 +27,8 @@ const FEATURES = [
 ];
 
 const TIERS = [
-  { name: "Standard", price: "$85",      term: "1 year · single store",      badge: ""           },
-  { name: "Lifetime", price: "$105",     term: "One time · single store",     badge: "Best value" },
+  { name: "Standard", price: "$85",      term: "1 year / single store",      badge: ""           },
+  { name: "Lifetime", price: "$105",     term: "One time / single store",     badge: "Best value" },
   { name: "Enterprise", price: "From $59", term: "Per store or unlimited",    badge: ""           },
 ];
 
@@ -320,10 +320,10 @@ export default function AetherPage() {
 
       <GridRule />
 
-      {/* Pricing — mobile stacked cards */}
+      {/* Pricing - mobile stacked cards */}
       <MobilePricing tiers={TIERS} rows={PRICING_ROWS} />
 
-      {/* Pricing — desktop table */}
+      {/* Pricing - desktop table */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full min-w-[540px] border-collapse">
           <thead>
@@ -380,7 +380,7 @@ export default function AetherPage() {
                     style={{ color: "rgb(var(--fg))" }}
                   >
                     {t.name === "Enterprise" ? "Learn more" : "Get Aether"}
-                    <span aria-hidden="true">→</span>
+                    <span aria-hidden="true">&#8594;</span>
                   </Link>
                 </td>
               ))}
@@ -395,7 +395,7 @@ export default function AetherPage() {
       <footer className="px-6 sm:px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[13px] tracking-tight" style={{ color: "rgb(var(--muted))", opacity: 0.6 }}>
         <div className="flex items-center gap-5">
           <Link href="/" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.7 }}>Inertia</Link>
-          <span style={{ opacity: 0.25 }}>·</span>
+          <span style={{ opacity: 0.25 }}>.</span>
           <div className="flex items-center gap-1.5">
             <ShopifyLogo />
             <span className="text-[11px] tracking-tight">Shopify theme</span>

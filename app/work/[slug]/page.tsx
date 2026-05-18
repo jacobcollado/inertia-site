@@ -15,7 +15,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const piece = getWork(slug);
   if (!piece) return { title: "Not found" };
-  const title = `${piece.client} — Inertia`;
+  const title = `${piece.client} - Inertia`;
   const description = piece.summary || `Work by Inertia: ${piece.client}.`;
   return {
     title,
@@ -66,7 +66,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
       {/* Two-col body */}
       <div className="flex flex-col sm:flex-row flex-1">
 
-        {/* Left — text */}
+        {/* Left - text */}
         <div className="flex flex-col gap-8 px-6 sm:px-8 py-10 sm:py-14 sm:w-[42%] border-b sm:border-b-0 sm:border-r border-[rgb(var(--line))]">
           <div>
             <h1 className="text-[clamp(1.6rem,3.5vw,2.5rem)] font-[450] tracking-tighter leading-[1.05] text-[rgb(var(--fg))]">
@@ -112,7 +112,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
           </div>
         </div>
 
-        {/* Right — images */}
+        {/* Right - images */}
         <div className="flex flex-col sm:flex-1">
           {piece.cover && (
             <div className="border-b border-[rgb(var(--line))] overflow-hidden">
@@ -130,7 +130,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
 
       </div>
 
-      {/* Body markdown — only if there's content */}
+      {/* Body markdown - only if there's content */}
       {html && html.trim() !== "" && (
         <>
           <GridRule />
@@ -165,7 +165,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
               className="text-xl text-[rgb(var(--muted))] opacity-30 group-hover:opacity-70 transition-all duration-200 group-hover:translate-x-1"
               aria-hidden="true"
             >
-              →
+              &#8594;
             </span>
           </Link>
         </>

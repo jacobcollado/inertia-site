@@ -312,7 +312,7 @@ export default function RoadmapPage() {
 
       <GridRule />
 
-      {/* Horizontal timeline — scrollable on mobile, full width on desktop */}
+      {/* Horizontal timeline - scrollable on mobile, full width on desktop */}
       <div className="roadmap-scroll overflow-x-auto py-10 px-0" style={{ scrollbarWidth: "none" }}>
         <div style={{ minWidth: `${ITEMS.length * 300 + (ITEMS.length - 1) * 48 + 128}px` }}>
           <TimelineTrack />

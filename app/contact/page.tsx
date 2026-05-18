@@ -1,9 +1,9 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = {
-  title: "Contact â€” Inertia",
+  title: "Contact",
   description: "Get in touch for work, collaborations, or a simple hello.",
 };
 

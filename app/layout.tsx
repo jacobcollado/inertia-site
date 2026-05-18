@@ -13,13 +13,13 @@ import Script from "next/script";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
-const BASE_URL = "https://inertia.dev";
+const BASE_URL = "https://byinertia.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
     default: "Inertia",
-    template: "%s — Inertia",
+    template: "%s - Inertia",
   },
   description: "Inertia builds custom Shopify storefronts and digital products for brands that treat the web as the product.",
   keywords: ["Shopify", "Shopify theme", "custom storefront", "web development", "Inertia"],

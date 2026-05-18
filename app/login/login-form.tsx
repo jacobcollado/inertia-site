@@ -138,7 +138,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         </div>
       </div>
 
-      {/* Form — vertically centered */}
+      {/* Form - vertically centered */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-[380px]" style={{ animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both" }}>
 

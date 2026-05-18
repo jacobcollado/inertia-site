@@ -1,8 +1,8 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Careers | Inertia",
+  title: "Careers",
   description: "We build things that matter. Join us.",
 };
 
@@ -22,7 +22,7 @@ function SketchCraft() {
       {[24, 38, 52].map(y => (
         <line key={y} x1="14" y1={y} x2="106" y2={y} stroke="rgb(var(--muted))" strokeWidth="0.4" opacity="0.12" />
       ))}
-      {/* Precise strokes â€” accent */}
+      {/* Precise strokes -" accent */}
       <path d="M 28 50 C 36 42 44 30 56 24 C 68 18 80 22 92 18" stroke="rgb(var(--purple))" strokeWidth="1.6" opacity="0.75" />
       <circle cx="56" cy="24" r="3" fill="rgb(var(--purple))" opacity="0.6" />
       <circle cx="92" cy="18" r="2" fill="rgb(var(--purple))" opacity="0.4" />
@@ -77,7 +77,7 @@ function SketchAsync() {
       <rect x="14" y="12" width="52" height="18" rx="3" stroke="rgb(var(--amber))" strokeWidth="0.9" opacity="0.55" fill="rgb(var(--amber))" fillOpacity="0.05" />
       <line x1="22" y1="19" x2="54" y2="19" stroke="rgb(var(--amber))" strokeWidth="0.8" opacity="0.5" />
       <line x1="22" y1="25" x2="44" y2="25" stroke="rgb(var(--amber))" strokeWidth="0.6" opacity="0.35" />
-      {/* Reply bubble â€” offset right + down */}
+      {/* Reply bubble -" offset right + down */}
       <rect x="54" y="38" width="52" height="18" rx="3" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.35" />
       <line x1="62" y1="45" x2="94" y2="45" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.3" />
       <line x1="62" y1="51" x2="82" y2="51" stroke="rgb(var(--muted))" strokeWidth="0.5" opacity="0.22" />
@@ -145,7 +145,7 @@ export default function CareersPage() {
 
       <GridRule />
 
-      {/* Hero â€” centered */}
+      {/* Hero -" centered */}
       <section className="flex flex-col items-center text-center px-6 sm:px-8 pt-14 pb-12 rise">
         <h1 className="text-[clamp(2.4rem,7vw,5rem)] font-medium tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-5 max-w-2xl">
           Build things<br />that matter.
@@ -238,7 +238,7 @@ export default function CareersPage() {
           href="mailto:aftertonestudiohelp@gmail.com?subject=General inquiry"
           className="text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors"
         >
-          Get in touch â†’
+          Get in touch â†'
         </a>
       </div>
 
