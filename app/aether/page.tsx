@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DemoButton } from "./demo-button";
 import { FitQuiz } from "./fit-quiz";
 import { AetherContour } from "./aether-contour";
+import { MobilePricing } from "./mobile-pricing";
 
 export const metadata: Metadata = {
   title: "Aether Theme -- Inertia",
@@ -12,51 +13,33 @@ export const metadata: Metadata = {
 
 const FEATURES = [
   {
-    title: "Built like a $150+ theme",
-    body: "Aether ships with an experience usually reserved for themes at the very top of the market. Every interaction is considered, every transition earned.",
+    title: "Built to convert",
+    body: "Urgency indicators, low stock counters, free shipping thresholds. Every section is designed to move the customer toward a decision, not away from it.",
   },
   {
-    title: "Guided, end to end",
-    body: "There isn't a single moment the customer doesn't see your product. The layout pulls them through, quietly, from landing to checkout.",
+    title: "Guided, start to finish",
+    body: "The layout never lets go. From the first scroll to checkout, every section pulls the customer forward. No dead ends, no dropped conversions.",
   },
   {
-    title: "Up to 6x conversion",
-    body: "Layout is the lever. Aether's structure is tuned to lift conversion by up to 6x compared to the defaults most stores launch with.",
+    title: "35 sections. Yours in minutes.",
+    body: "Everything ships in the box. Fully customizable, easy to set up. Full guides and support included through the client portal the moment you're in.",
   },
 ];
 
-const TIERS: {
-  name: string;
-  price: string;
-  term: string;
-  description: string;
-  includes: string[];
-  featured?: boolean;
-  badge?: string;
-}[] = [
-  {
-    name: "Standard",
-    price: "$85",
-    term: "1 year . single store",
-    description: "The full theme, licensed for a year. Good for testing the waters.",
-    includes: ["Full Aether theme", "1 year of updates", "Single store license", "Email support"],
-  },
-  {
-    name: "Lifetime",
-    price: "$105",
-    term: "Forever . single store",
-    description: "Own it outright. One store, no renewals, updates for life.",
-    includes: ["Full Aether theme", "Lifetime updates", "Single store license", "Priority email support"],
-    featured: true,
-    badge: "Most popular",
-  },
-  {
-    name: "Enterprise",
-    price: "From $59",
-    term: "Per store or unlimited",
-    description: "Aether as a foundation for agencies, studios, and operators running multiple stores.",
-    includes: ["Commercial deployment rights", "Multi-store licensing", "Lifetime updates", "Dedicated support"],
-  },
+const TIERS = [
+  { name: "Standard", price: "$85",      term: "1 year · single store",      badge: ""           },
+  { name: "Lifetime", price: "$105",     term: "One time · single store",     badge: "Best value" },
+  { name: "Enterprise", price: "From $59", term: "Per store or unlimited",    badge: ""           },
+];
+
+const PRICING_ROWS: { label: string; standard: boolean | string; lifetime: boolean | string; enterprise: boolean | string }[] = [
+  { label: "Full Aether theme",          standard: true,             lifetime: true,              enterprise: true             },
+  { label: "All 35 sections",            standard: true,             lifetime: true,              enterprise: true             },
+  { label: "Updates",                    standard: "1 year",         lifetime: "Forever",         enterprise: "Forever"        },
+  { label: "Store license",              standard: "Single",         lifetime: "Single",          enterprise: "Multi-store"    },
+  { label: "Support via client portal",  standard: true,             lifetime: true,              enterprise: true             },
+  { label: "Priority support",           standard: false,            lifetime: true,              enterprise: true             },
+  { label: "Commercial deployment",      standard: false,            lifetime: false,             enterprise: true             },
 ];
 
 const DEMO_URL = "https://aether-starter.myshopify.com";
@@ -177,10 +160,10 @@ export default function AetherPage() {
       <div className="px-6 sm:px-8 py-5 rise" style={{ ["--rise-delay" as any]: "0ms" }}>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
-          back
+          Home
         </Link>
       </div>
 
@@ -201,22 +184,24 @@ export default function AetherPage() {
             Aether
           </h1>
           <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
-            A Shopify theme for brands that treat the storefront as the product.
+            A Shopify theme built around the customer experience. From landing to checkout, it guides them through.
           </p>
-          <div className="pointer-events-auto flex flex-row items-center justify-center gap-2 text-[13px] tracking-tight">
+          <div className="pointer-events-auto flex flex-col sm:flex-row items-center justify-center gap-2 w-full px-2 sm:px-0 text-[13px] tracking-tight">
             <Link
               href="/aether/buy"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2.5 text-[13px] font-medium tracking-tight hover:opacity-85 transition-opacity"
             >
               Buy a license
             </Link>
-            <DemoButton href={DEMO_URL} password="aether" />
-            <Link
-              href="/docs"
-              className="inline-flex items-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-4 py-2 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
-            >
-              Docs
-            </Link>
+            <div className="w-full sm:w-auto flex gap-2">
+              <DemoButton href={DEMO_URL} password="aether" />
+              <Link
+                href="/docs"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-4 py-2 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
+              >
+                Docs
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -224,15 +209,10 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label */}
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Why brands</span>
-        <span className="inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--fg))] opacity-50" aria-hidden="true">
-            <path d="M9 2L5 9h4l-2 5 6-7H9l2-5z" />
-          </svg>
-          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">choose it</span>
-        </span>
-        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">over anything else</span>
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-6 sm:py-8 px-6 sm:px-8 rise">
+        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">Why brands</span>
+        <span className="text-[22px] sm:text-[28px] font-medium tracking-tight text-[rgb(var(--fg))]" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>choose it</span>
+        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">over anything else</span>
       </div>
 
       <GridRule />
@@ -242,7 +222,7 @@ export default function AetherPage() {
         {FEATURES.map((f, i) => (
           <div
             key={f.title}
-            className="flex-1 flex flex-col gap-5 px-6 sm:px-8 pt-8 pb-8 rise"
+            className="flex-1 flex flex-col gap-4 px-6 sm:px-8 pt-6 pb-6 sm:pt-8 sm:pb-8 rise"
             style={{
               borderLeft: i > 0 ? "1px solid rgb(var(--line))" : undefined,
               borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined,
@@ -255,10 +235,10 @@ export default function AetherPage() {
               {i === 2 && <SketchConversion />}
             </div>
             <div className="flex flex-col gap-2">
-              <h3 className="text-[18px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
+              <h3 className="text-[17px] sm:text-[19px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
                 {f.title}
               </h3>
-              <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+              <p className="text-[13px] sm:text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
                 {f.body}
               </p>
             </div>
@@ -268,16 +248,78 @@ export default function AetherPage() {
 
       <GridRule />
 
+      {/* Storefront showcase */}
+      <div className="flex flex-col rise">
+        {/* Label row */}
+        <div className="flex items-center justify-between px-6 sm:px-8 py-4 border-b border-[rgb(var(--line))]">
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>Built on Aether</span>
+          <a href="https://allurenewyork.com" target="_blank" rel="noreferrer" className="text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.5 }}>
+            allurenewyork.com ↗
+          </a>
+        </div>
+
+        {/* Mobile: phone mockup */}
+        <div className="flex sm:hidden justify-center py-10 px-10">
+          <div style={{ width: "100%", maxWidth: 200 }}>
+            {/* Phone shell */}
+            <div className="overflow-hidden border border-[rgb(var(--line))]" style={{ borderRadius: 24, padding: 5 }}>
+              {/* Notch bar */}
+              <div className="relative flex justify-center items-end" style={{ height: 14, background: "rgb(var(--bg))" }}>
+                <div style={{ width: 56, height: 8, background: "rgb(var(--line))", borderRadius: 4, opacity: 0.4 }} />
+              </div>
+              {/* Screen — natural aspect ratio */}
+              <div className="overflow-hidden" style={{ borderRadius: 16 }}>
+                <img
+                  src="/allurephone.png"
+                  alt="Allure New York on mobile, built on Aether"
+                  className="w-full block"
+                  style={{ aspectRatio: "394 / 687", objectFit: "cover", objectPosition: "top" }}
+                  draggable={false}
+                />
+              </div>
+              {/* Home bar */}
+              <div className="flex justify-center items-start" style={{ height: 14, background: "rgb(var(--bg))" }}>
+                <div style={{ width: 48, height: 4, background: "rgb(var(--line))", borderRadius: 2, opacity: 0.35, marginTop: 5 }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: browser chrome */}
+        <div className="hidden sm:block mx-auto my-8 overflow-hidden border border-[rgb(var(--line))]" style={{ maxWidth: 720 }}>
+          {/* Chrome bar */}
+          <div className="flex items-center gap-2 px-3 border-b border-[rgb(var(--line))]" style={{ height: "30px", background: "rgb(var(--bg))" }}>
+            <div className="flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full" style={{ background: "rgb(var(--line))" }} />
+              <span className="w-2 h-2 rounded-full" style={{ background: "rgb(var(--line))" }} />
+              <span className="w-2 h-2 rounded-full" style={{ background: "rgb(var(--line))" }} />
+            </div>
+            <div className="flex-1 flex justify-center">
+              <div className="flex items-center gap-1.5 rounded-full px-3 py-0.5 text-[10px] tracking-tight text-[rgb(var(--muted))]" style={{ background: "rgb(var(--line) / 0.4)", opacity: 0.7 }}>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-2 h-2 shrink-0" aria-hidden="true">
+                  <rect x="2" y="4" width="12" height="9" rx="1.5" /><path d="M5 4V3a3 3 0 0 1 6 0v1" />
+                </svg>
+                allurenewyork.com
+              </div>
+            </div>
+          </div>
+          <img
+            src="/allurescreen.png"
+            alt="Allure New York storefront built on Aether"
+            className="w-full block"
+            style={{ aspectRatio: "1365 / 681", objectFit: "cover", objectPosition: "top" }}
+            draggable={false}
+          />
+        </div>
+      </div>
+
+      <GridRule />
+
       {/* Section label -- fit quiz */}
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <span className="inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--fg))] opacity-50" aria-hidden="true">
-            <circle cx="8" cy="8" r="6" />
-            <path d="M8 5.5c0-1 1.5-1 1.5 0S8 7 8 8M8 10.5v.5" />
-          </svg>
-          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">Does it fit?</span>
-        </span>
-        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Four questions.</span>
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-6 sm:py-8 px-6 sm:px-8 rise">
+        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">Is Aether</span>
+        <span className="text-[22px] sm:text-[28px] font-medium tracking-tight" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>the right fit?</span>
+        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">Four questions.</span>
       </div>
 
       <GridRule />
@@ -288,108 +330,98 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label -- pricing */}
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 px-6 sm:px-8 rise">
-        <span className="inline-flex items-center gap-1.5 border border-[rgb(var(--fg)/0.12)] bg-[rgb(var(--fg)/0.04)] rounded-full px-3 py-1 shrink-0">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--fg))] opacity-50" aria-hidden="true">
-            <rect x="2" y="4" width="12" height="9" rx="1.5" />
-            <path d="M2 7h12" />
-            <path d="M5 10h2" />
-          </svg>
-          <span className="text-[14px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] whitespace-nowrap">One payment.</span>
-        </span>
-        <span className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--muted))] whitespace-nowrap">Yours forever.</span>
+      <div id="pricing" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-6 sm:py-8 px-6 sm:px-8 rise scroll-mt-16">
+        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">$85 for a year.</span>
+        <span className="text-[22px] sm:text-[28px] font-medium tracking-tight" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>$105 to own it.</span>
       </div>
 
       <GridRule />
 
-      {/* Pricing */}
-      <div id="pricing" className="flex flex-col sm:flex-row scroll-mt-20">
-        {TIERS.map((t, i) => (
-          <Link
-            key={t.name}
-            href={t.name === "Enterprise" ? "/aether/enterprise" : `/aether/buy?tier=${t.name.toLowerCase()}`}
-            className="group flex-1 flex flex-col justify-between gap-8 px-6 sm:px-8 pt-8 pb-8 transition-colors hover:bg-[rgb(var(--line))/0.06] rise"
-            style={{
-              borderLeft: i > 0 ? "1px solid rgb(var(--line))" : undefined,
-              borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined,
-              background: t.featured ? "rgba(56,180,255,0.035)" : undefined,
-              ["--rise-delay" as any]: `${i * 80}ms`,
-            }}
-          >
-            <div className="flex flex-col gap-5">
-              {/* Name + badge */}
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{t.name}</span>
-                {t.badge && (
-                  <span className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.15)] bg-[rgb(var(--fg)/0.05)] text-[rgb(var(--fg))] px-2 pt-[3px] pb-[4px] text-[10px] font-medium tracking-tight leading-none opacity-70">
-                    {t.badge}
-                  </span>
-                )}
-              </div>
+      {/* Pricing — mobile stacked cards */}
+      <MobilePricing tiers={TIERS} rows={PRICING_ROWS} />
 
-              {/* Price */}
-              <div>
-                <p className="text-[2.6rem] font-medium tracking-[-0.05em] leading-none tabular-nums"
-                  style={{ color: t.featured ? "rgb(var(--blue))" : "rgb(var(--fg))" }}>
-                  {t.price}
-                </p>
-                <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] mt-2">{t.term}</p>
-              </div>
-
-              {/* Description */}
-              <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] border-t border-[rgb(var(--line))] pt-4">{t.description}</p>
-
-              {/* Includes */}
-              <ul className="space-y-2.5">
-                {t.includes.map((line) => (
-                  <li key={line} className="flex items-center gap-2 text-[12.5px] tracking-tight text-[rgb(var(--fg))]">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-                      className="h-3 w-3 shrink-0"
-                      style={{ color: t.featured ? "rgb(var(--blue))" : "rgb(var(--muted))" }}
-                      aria-hidden="true">
-                      <polyline points="2 8 6 12 14 4" />
-                    </svg>
-                    {line}
-                  </li>
+      {/* Pricing — desktop table */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full min-w-[540px] border-collapse">
+          <thead>
+            <tr>
+              {/* Feature label column */}
+              <th className="w-[38%] px-6 sm:px-8 py-5 text-left border-b border-[rgb(var(--line))]">
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>What's included</span>
+              </th>
+              {TIERS.map((t, i) => (
+                <th key={t.name} className="px-5 py-5 text-left border-b border-[rgb(var(--line))]" style={{ borderLeft: "1px solid rgb(var(--line))" }}>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] tracking-tight font-medium text-[rgb(var(--fg))]">{t.name}</span>
+                      {t.badge && (
+                        <span className="text-[10px] tracking-tight font-medium px-1.5 py-0.5 text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg))", borderRadius: 3 }}>{t.badge}</span>
+                      )}
+                    </div>
+                    <span className="text-[clamp(1.4rem,3vw,2rem)] font-[400] tracking-[-0.04em] leading-none tabular-nums text-[rgb(var(--fg))]">{t.price}</span>
+                    <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>{t.term}</span>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {PRICING_ROWS.map((f, fi) => (
+              <tr key={f.label} className="group">
+                <td className="px-6 sm:px-8 py-3.5 text-[12.5px] tracking-tight text-[rgb(var(--muted))] border-b border-[rgb(var(--line))]" style={{ opacity: 0.65 }}>
+                  {f.label}
+                </td>
+                {([f.standard, f.lifetime, f.enterprise] as (boolean | string)[]).map((val, ci) => (
+                  <td key={ci} className="px-5 py-3.5 border-b border-[rgb(var(--line))]" style={{ borderLeft: "1px solid rgb(var(--line))", background: ci === 1 ? "rgb(var(--fg) / 0.02)" : undefined }}>
+                    {val === true ? (
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" style={{ opacity: 0.55 }} aria-hidden="true">
+                        <polyline points="2 8 6 12 14 4" />
+                      </svg>
+                    ) : val === false ? (
+                      <span className="block w-3 h-px" style={{ background: "rgb(var(--line))" }} />
+                    ) : (
+                      <span className="text-[12px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.7 }}>{val}</span>
+                    )}
+                  </td>
                 ))}
-              </ul>
-            </div>
-
+              </tr>
+            ))}
             {/* CTA row */}
-            <div className="flex items-center justify-between gap-2 mt-auto pt-2 border-t border-[rgb(var(--line))]">
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] transition-colors">
-                {t.name === "Enterprise" ? "See enterprise plans" : "Get Aether"}
-              </span>
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"
-                className="w-3.5 h-3.5 -translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-200"
-                style={{ color: t.featured ? "rgb(var(--blue))" : "rgb(var(--fg))" }}
-                aria-hidden="true">
-                <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-          </Link>
-        ))}
+            <tr>
+              <td className="px-6 sm:px-8 py-5" />
+              {TIERS.map((t, i) => (
+                <td key={t.name} className="px-5 py-5" style={{ borderLeft: "1px solid rgb(var(--line))", background: i === 1 ? "rgb(var(--fg) / 0.02)" : undefined }}>
+                  <Link
+                    href={t.name === "Enterprise" ? "/aether/enterprise" : `/aether/buy?tier=${t.name.toLowerCase()}`}
+                    className="inline-flex items-center gap-1.5 text-[13px] tracking-tight font-medium transition-opacity hover:opacity-60"
+                    style={{ color: "rgb(var(--fg))" }}
+                  >
+                    {t.name === "Enterprise" ? "Learn more" : "Get Aether"}
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <GridRule />
 
       {/* Footer */}
-      <footer className="px-6 sm:px-8 py-8 flex items-center justify-between gap-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="hover:text-[rgb(var(--fg))] transition-colors">Inertia</Link>
+      <footer className="px-6 sm:px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[13px] tracking-tight" style={{ color: "rgb(var(--muted))", opacity: 0.6 }}>
+        <div className="flex items-center gap-5">
+          <Link href="/" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.7 }}>Inertia</Link>
+          <span style={{ opacity: 0.25 }}>·</span>
           <div className="flex items-center gap-1.5">
             <ShopifyLogo />
             <span className="text-[11px] tracking-tight">Shopify theme</span>
           </div>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-[11px] tracking-tight">
-            <svg viewBox="0 0 8 8" className="w-2 h-2 shrink-0" aria-hidden="true">
-              <circle cx="4" cy="4" r="3" fill="rgb(var(--green))" />
-            </svg>
-            All systems operational
-          </div>
-          <Link href="/contact" className="hover:text-[rgb(var(--fg))] transition-colors">Questions? Get in touch &rarr;</Link>
+        <div className="flex items-center gap-5">
+          <Link href="/aether/changelog" className="text-[12px] hover:opacity-100 transition-opacity">Changelog</Link>
+          <Link href="/docs" className="text-[12px] hover:opacity-100 transition-opacity">Docs</Link>
+          <Link href="/contact" className="text-[12px] hover:opacity-100 transition-opacity">Contact</Link>
         </div>
       </footer>
 
