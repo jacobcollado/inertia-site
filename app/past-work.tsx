@@ -30,30 +30,31 @@ export function PastWork({ work, showViewAll = true }: { work: WorkMeta[]; showV
   if (!work.length) return null;
 
   return (
-    <div className="border-b border-[rgb(var(--line))]">
+    <div>
 
       {/* Filter tabs */}
-      <div className="flex items-center border-b border-[rgb(var(--line))] overflow-x-auto">
+      <div className="flex items-stretch border-b border-[rgb(var(--line))] overflow-x-auto">
         {tags.map((tag) => {
           const active = filter === tag;
           return (
             <button
               key={tag}
               onClick={() => { setFilter(tag); setHovered(null); }}
-              className="relative shrink-0 px-5 py-3 text-[12px] tracking-tight transition-colors duration-150"
+              className="relative shrink-0 py-3 text-[12px] tracking-tight transition-colors duration-150"
               style={{
                 color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                opacity: active ? 1 : 0.45,
-                borderRight: "1px solid rgb(var(--line))",
+                paddingLeft: tag === "E-Commerce Site" ? "11px" : "20px",
+                paddingRight: tag === "E-Commerce Site" ? "11px" : "20px",
               }}
             >
-              {tag}
+              <span style={{ opacity: active ? 1 : 0.45 }}>{tag}</span>
               {active && (
                 <span
                   className="absolute bottom-0 left-0 right-0 h-px"
                   style={{ background: "rgb(var(--fg))" }}
                 />
               )}
+              <span className="absolute top-0 right-0 bottom-0 w-px bg-[rgb(var(--line))]" aria-hidden="true" />
             </button>
           );
         })}

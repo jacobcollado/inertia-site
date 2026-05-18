@@ -365,7 +365,6 @@ function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [pending, startTransition] = useTransition();
-  const fileInputRef = useState<HTMLInputElement | null>(null);
 
   const uploadFile = async (file: File, label?: string) => {
     setUploading(true);
@@ -507,7 +506,6 @@ function MessagesTab({ clientId, initial }: { clientId: string; initial: Message
       }, (payload) => {
         const incoming = payload.new as Message;
         setMessages(prev => {
-          // Replace a matching optimistic message, or append if none found
           const idx = prev.findIndex(m =>
             m.id.startsWith("optimistic-") &&
             m.sender === incoming.sender &&
@@ -569,7 +567,6 @@ function MessagesTab({ clientId, initial }: { clientId: string; initial: Message
     <div className="flex flex-col gap-0" style={{ height: "calc(100vh - 280px)", minHeight: 360 }}>
       <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] mb-6">Messages</h2>
 
-      {/* Thread */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 pb-4">
         {messages.length === 0 && (
           <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No messages yet.</p>
@@ -609,13 +606,12 @@ function MessagesTab({ clientId, initial }: { clientId: string; initial: Message
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
       <form onSubmit={onSend} className="flex items-end gap-3 pt-4 border-t border-[rgb(var(--line))]">
         <textarea
           value={body}
           onChange={e => setBody(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(e as unknown as React.FormEvent); } }}
-          placeholder="Send a message…"
+          placeholder="Send a message..."
           rows={2}
           className="flex-1 bg-transparent resize-none text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none leading-relaxed"
         />
@@ -657,7 +653,6 @@ function AccountTab({ client }: { client: Client }) {
         </p>
       )}
 
-      {/* Status */}
       <div className="flex flex-col gap-4">
         <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Status</p>
         <div className="flex items-center justify-between gap-4 py-4 border-b border-[rgb(var(--line))]">
@@ -682,7 +677,6 @@ function AccountTab({ client }: { client: Client }) {
           )}
         </div>
 
-        {/* Resend invite */}
         <div className="flex items-center justify-between gap-4 py-4 border-b border-[rgb(var(--line))]">
           <div>
             <p className="text-[15px] tracking-tight text-[rgb(var(--fg))]">Resend invite</p>
@@ -695,7 +689,6 @@ function AccountTab({ client }: { client: Client }) {
         </div>
       </div>
 
-      {/* Update email */}
       <div className="flex flex-col gap-4">
         <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Update email</p>
         <div className="flex items-end gap-3">
@@ -709,7 +702,6 @@ function AccountTab({ client }: { client: Client }) {
         </div>
       </div>
 
-      {/* Reset password */}
       <div className="flex flex-col gap-4">
         <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Set new password</p>
         <div className="flex items-end gap-3">
@@ -723,7 +715,6 @@ function AccountTab({ client }: { client: Client }) {
         </div>
       </div>
 
-      {/* Delete account */}
       <div className="flex flex-col gap-4 pt-4 border-t border-[rgb(var(--line))]">
         <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Danger zone</p>
         {!confirmDelete ? (
@@ -863,15 +854,21 @@ function ClientHeader({ client }: { client: Client }) {
           <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-1">{client.email}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          {neverSignedIn ? (
+          {client.banned && (
+            <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-red-400/30 text-red-400">
+              Suspended
+            </span>
+          )}
+          {neverSignedIn && !client.banned && (
             <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))]">
               Invite pending
             </span>
-          ) : lastSeen ? (
+          )}
+          {lastSeen && !neverSignedIn && (
             <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">
               Last seen {lastSeen}
             </span>
-          ) : null}
+          )}
         </div>
       </div>
       <button onClick={() => setEditing(true)}
@@ -893,6 +890,7 @@ export function ClientDetailShell({ client, projects, invoices, files, messages,
   adminLog: AuditEntry[];
 }) {
   const [tab, setTab] = useState<Tab>("projects");
+  const [mobileOpen, setMobileOpen] = useState(false);
   const displayName = client.company ?? client.name ?? client.email;
   const unreadCount = messages.filter(m => m.sender === "client" && !m.read_at).length;
 
@@ -906,59 +904,131 @@ export function ClientDetailShell({ client, projects, invoices, files, messages,
   ];
 
   return (
-    <div className="min-h-screen bg-[rgb(var(--bg))]">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 sm:px-10 h-14 border-b border-[rgb(var(--line))]">
-        <div className="flex items-center gap-4">
-          <Link href="/admin"
-            className="inline-flex items-center gap-2 text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors group">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true">
+    <div className="min-h-screen bg-[rgb(var(--bg))] flex">
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-[rgb(var(--bg))]/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={[
+          "fixed top-0 left-0 h-full z-30 w-[220px] border-r border-[rgb(var(--line))] bg-[rgb(var(--bg))] transition-transform duration-200 ease-in-out flex flex-col",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        ].join(" ")}
+      >
+        {/* Sidebar top */}
+        <div className="flex items-center justify-between px-6 h-14 border-b border-[rgb(var(--line))] shrink-0">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">Admin</span>
+          </div>
+          {mobileOpen && (
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity lg:hidden"
+              aria-label="Close menu"
+            >
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+                <line x1="4" y1="4" x2="16" y2="16" /><line x1="16" y1="4" x2="4" y2="16" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Back to clients */}
+        <div className="px-3 pt-4 pb-2">
+          <Link
+            href="/admin"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity group"
+          >
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true">
               <polyline points="12 4 6 10 12 16" />
             </svg>
-            Back
+            All clients
           </Link>
-          <span className="text-[rgb(var(--line))] select-none">|</span>
-          <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate max-w-[200px]">{displayName}</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-            Site
+
+        {/* Client name in sidebar */}
+        <div className="px-6 py-3 border-b border-[rgb(var(--line))]">
+          <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{displayName}</p>
+          <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate mt-0.5">{client.email}</p>
+        </div>
+
+        {/* Tab nav in sidebar */}
+        <nav className="flex flex-col gap-0.5 px-3 pt-3 flex-1">
+          {TABS.map(({ id, label, badge }) => {
+            const active = tab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => { setTab(id); setMobileOpen(false); }}
+                className="flex items-center justify-between px-3 py-2.5 text-[14px] tracking-tight transition-colors text-left w-full"
+                style={{
+                  color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                  background: active ? "rgb(var(--line))" : "transparent",
+                  opacity: active ? 1 : 0.6,
+                }}
+              >
+                {label}
+                {badge ? (
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+                    {badge}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Bottom */}
+        <div className="px-3 pb-5 pt-3 border-t border-[rgb(var(--line))] flex items-center justify-between shrink-0">
+          <Link
+            href="/"
+            className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-100 transition-opacity font-medium"
+          >
+            byinertia.com
           </Link>
           <ThemeToggle />
         </div>
-      </div>
+      </aside>
 
-      <main className="max-w-3xl mx-auto px-6 sm:px-12 py-12 sm:py-14 flex flex-col gap-10">
-        {/* Client header */}
-        <ClientHeader client={client} />
+      {/* Desktop sidebar spacer */}
+      <div className="hidden lg:block w-[220px] shrink-0" />
 
-        {/* Tab nav */}
-        <div className="flex items-center gap-1 border-b border-[rgb(var(--line))]">
-          {TABS.map(({ id, label, badge }) => (
-            <button key={id} onClick={() => setTab(id)}
-              className="px-4 py-3 text-[15px] tracking-tight transition-colors relative inline-flex items-center gap-1.5"
-              style={{ color: tab === id ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: tab === id ? 1 : 0.5 }}>
-              {label}
-              {badge ? (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
-                  {badge}
-                </span>
-              ) : null}
-              {tab === id && (
-                <span className="absolute bottom-0 left-0 right-0 h-px bg-[rgb(var(--fg))]" />
-              )}
-            </button>
-          ))}
+      {/* Main */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Mobile top bar */}
+        <div className="flex items-center justify-between px-5 h-14 border-b border-[rgb(var(--line))] lg:hidden">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="text-[rgb(var(--muted))] opacity-60 hover:opacity-100 transition-opacity"
+            aria-label="Open menu"
+          >
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+              <line x1="3" y1="6" x2="17" y2="6" /><line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="14" x2="17" y2="14" />
+            </svg>
+          </button>
+          <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate max-w-[200px]">{displayName}</span>
+          <ThemeToggle />
         </div>
 
-        {/* Tab content */}
-        {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} />}
-        {tab === "invoices" && <InvoicesTab clientId={client.id} invoices={invoices} />}
-        {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
-        {tab === "messages" && <MessagesTab clientId={client.id} initial={messages} />}
-        {tab === "account"  && <AccountTab  client={client} />}
-        {tab === "history"  && <AuditTab    clientId={client.id} initial={adminLog} />}
-      </main>
+        <main className="flex-1 px-6 sm:px-10 lg:px-14 py-12 sm:py-14 max-w-4xl w-full flex flex-col gap-10">
+          <ClientHeader client={client} />
+
+          {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} />}
+          {tab === "invoices" && <InvoicesTab clientId={client.id} invoices={invoices} />}
+          {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
+          {tab === "messages" && <MessagesTab clientId={client.id} initial={messages} />}
+          {tab === "account"  && <AccountTab  client={client} />}
+          {tab === "history"  && <AuditTab    clientId={client.id} initial={adminLog} />}
+        </main>
+      </div>
     </div>
   );
 }

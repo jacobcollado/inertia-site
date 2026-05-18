@@ -280,3 +280,31 @@ export async function deleteFile(fileId: string, clientId: string) {
   revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
 }
+
+/* ── Tools ────────────────────────────────────────────────────────── */
+
+export async function getTools() {
+  const admin = createAdminClient();
+  const { data } = await admin.from("tools").select("id, name, url, category, note, created_at").order("category").order("name");
+  return data ?? [];
+}
+
+export async function addTool(formData: FormData) {
+  const admin = createAdminClient();
+  const { error } = await admin.from("tools").insert({
+    name: formData.get("name") as string,
+    url: formData.get("url") as string || null,
+    category: formData.get("category") as string || null,
+    note: formData.get("note") as string || null,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/admin");
+  return { success: true };
+}
+
+export async function deleteTool(toolId: string) {
+  const admin = createAdminClient();
+  await admin.from("tools").delete().eq("id", toolId);
+  revalidatePath("/admin");
+  return { success: true };
+}

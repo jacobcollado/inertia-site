@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { AdminShell } from "./admin-shell";
+import { getTools } from "./actions";
 
 export const revalidate = 60; // re-fetch at most every 60s
 
@@ -188,5 +189,7 @@ export default async function AdminPage() {
     monthlyRevenue,
   };
 
-  return <AdminShell clients={clients} overview={overview} />;
+  const tools = await getTools();
+
+  return <AdminShell clients={clients} overview={overview} tools={tools} />;
 }

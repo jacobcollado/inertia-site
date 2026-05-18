@@ -250,10 +250,7 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessage
       {/* Footer utility */}
       <div className="px-5 pb-5 pt-3 flex flex-col gap-2.5">
         <Link href="/" className="flex items-center gap-2 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors opacity-40 hover:opacity-80">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-            <path d="M10 3L3 10l7 7M3 10h14" />
-          </svg>
-          Back to site
+          byinertia.com
         </Link>
         <button onClick={() => startTransition(() => signOut())} disabled={pending}
           className="flex items-center gap-2 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-20 opacity-40 hover:opacity-80 w-full">
