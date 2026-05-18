@@ -290,15 +290,15 @@ export function SoundwaveHero() {
             className="text-[15px] tracking-tight"
             style={{ color: "rgb(var(--fg) / 0.5)" }}
           >
-            A sharper process, better outcomes.
+            The digital half of your business.
           </span>
         </div>
 
         <h1
-          className="text-[clamp(1.95rem,5vw,4rem)] font-[400] tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none relative w-[86%] sm:w-auto mx-auto"
-          aria-label="We build the infrastructure that keeps you moving."
+          className="text-[clamp(2.4rem,5vw,4rem)] font-[400] tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none relative w-[86%] sm:w-auto mx-auto"
+          aria-label="Your digital presence, done right."
         >
-          {["We build the infrastructure", "that keeps you moving."].map((line, li) =>
+          {["Your digital presence,", "done right."].map((line, li) =>
             <span key={li} style={{ display: "block" }}>
               {line.split("").map((ch, i) => (
                 <span
