@@ -194,10 +194,12 @@ export default function AetherPage() {
               Buy a license
             </Link>
             <div className="w-full sm:w-auto flex gap-2">
-              <DemoButton href={DEMO_URL} password="aether" />
+              <div className="flex-[2] sm:flex-none">
+                <DemoButton href={DEMO_URL} password="aether" />
+              </div>
               <Link
                 href="/docs"
-                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-4 py-2 text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-5 py-2 text-[13px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors"
               >
                 Docs
               </Link>
@@ -209,11 +211,9 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-6 sm:py-8 px-6 sm:px-8 rise">
-        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">Why brands</span>
-        <span className="text-[22px] sm:text-[28px] font-medium tracking-tight text-[rgb(var(--fg))]" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>choose it</span>
-        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">over anything else</span>
-      </div>
+      <p className="text-[clamp(1.1rem,5vw,1.75rem)] tracking-tight text-center text-[rgb(var(--muted))] py-6 sm:py-8 px-6 sm:px-8 rise leading-snug">
+        Why brands <span className="font-medium inline-block" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>choose it</span> over anything else
+      </p>
 
       <GridRule />
 
@@ -260,28 +260,13 @@ export default function AetherPage() {
 
         {/* Mobile: phone mockup */}
         <div className="flex sm:hidden justify-center py-10 px-10">
-          <div style={{ width: "100%", maxWidth: 200 }}>
-            {/* Phone shell */}
-            <div className="overflow-hidden border border-[rgb(var(--line))]" style={{ borderRadius: 24, padding: 5 }}>
-              {/* Notch bar */}
-              <div className="relative flex justify-center items-end" style={{ height: 14, background: "rgb(var(--bg))" }}>
-                <div style={{ width: 56, height: 8, background: "rgb(var(--line))", borderRadius: 4, opacity: 0.4 }} />
-              </div>
-              {/* Screen — natural aspect ratio */}
-              <div className="overflow-hidden" style={{ borderRadius: 16 }}>
-                <img
-                  src="/allurephone.png"
-                  alt="Allure New York on mobile, built on Aether"
-                  className="w-full block"
-                  style={{ aspectRatio: "394 / 687", objectFit: "cover", objectPosition: "top" }}
-                  draggable={false}
-                />
-              </div>
-              {/* Home bar */}
-              <div className="flex justify-center items-start" style={{ height: 14, background: "rgb(var(--bg))" }}>
-                <div style={{ width: 48, height: 4, background: "rgb(var(--line))", borderRadius: 2, opacity: 0.35, marginTop: 5 }} />
-              </div>
-            </div>
+          <div className="overflow-hidden" style={{ width: "100%", maxWidth: 220, borderRadius: 36, border: "6px solid rgb(var(--line))" }}>
+            <img
+              src="/allurephone.png"
+              alt="Allure New York on mobile, built on Aether"
+              className="w-full block"
+              draggable={false}
+            />
           </div>
         </div>
 
@@ -316,11 +301,9 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label -- fit quiz */}
-      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-6 sm:py-8 px-6 sm:px-8 rise">
-        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">Is Aether</span>
-        <span className="text-[22px] sm:text-[28px] font-medium tracking-tight" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>the right fit?</span>
-        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">Four questions.</span>
-      </div>
+      <p className="text-[clamp(1.1rem,5vw,1.75rem)] tracking-tight text-center text-[rgb(var(--muted))] py-6 sm:py-8 px-6 sm:px-8 rise leading-snug">
+        Is Aether <span className="font-medium inline-block" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>the right fit?</span> Four questions.
+      </p>
 
       <GridRule />
 
@@ -330,10 +313,9 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label -- pricing */}
-      <div id="pricing" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 py-6 sm:py-8 px-6 sm:px-8 rise scroll-mt-16">
-        <span className="text-[22px] sm:text-[28px] tracking-tight text-[rgb(var(--muted))]">$85 for a year.</span>
-        <span className="text-[22px] sm:text-[28px] font-medium tracking-tight" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>$105 to own it.</span>
-      </div>
+      <p id="pricing" className="text-[clamp(1.1rem,5vw,1.75rem)] tracking-tight text-center text-[rgb(var(--muted))] py-6 sm:py-8 px-6 sm:px-8 rise leading-snug scroll-mt-16">
+        $85 for a year. <span className="font-medium inline-block" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", padding: "0 10px 2px", borderRadius: "4px" }}>$105 to own it.</span>
+      </p>
 
       <GridRule />
 
