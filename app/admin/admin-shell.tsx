@@ -12,6 +12,8 @@ type Client = {
   name: string | null;
   company: string | null;
   created_at: string;
+  last_sign_in_at: string | null;
+  confirmed_at: string | null;
   projects: Project[];
   in_clients_table: boolean;
   banned: boolean;
@@ -28,6 +30,7 @@ type Overview = {
     clients: number | null;
     activeProjects: number | null;
   };
+  monthlyRevenue: { month: string; amount: number }[];
 };
 
 function fmt$(cents: number) {
@@ -77,6 +80,36 @@ function StatCard({ label, value, sub, accent, change }: { label: string; value:
   );
 }
 
+function RevenueChart({ data }: { data: { month: string; amount: number }[] }) {
+  const max = Math.max(...data.map(d => d.amount), 1);
+  return (
+    <div className="flex flex-col gap-4">
+      <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">Revenue collected</span>
+      <div className="flex items-end gap-2 h-28">
+        {data.map((d, i) => {
+          const pct = d.amount / max;
+          const isLast = i === data.length - 1;
+          return (
+            <div key={d.month} className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+              <div className="w-full flex flex-col justify-end" style={{ height: "88px" }}>
+                <div
+                  className="w-full transition-all duration-300"
+                  style={{
+                    height: `${Math.max(pct * 100, d.amount > 0 ? 4 : 1)}%`,
+                    background: isLast ? "rgb(var(--fg))" : "rgb(var(--line))",
+                    opacity: isLast ? 1 : 0.6,
+                  }}
+                />
+              </div>
+              <span className="text-[10px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate w-full text-center">{d.month}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function OverviewDashboard({ overview, clients }: { overview: Overview; clients: Client[] }) {
   const suspended = clients.filter(c => c.banned).length;
 
@@ -110,6 +143,11 @@ function OverviewDashboard({ overview, clients }: { overview: Overview; clients:
           sub="vs. last 30 days"
         />
       </div>
+
+      {/* Revenue chart */}
+      {overview.monthlyRevenue.some(d => d.amount > 0) && (
+        <RevenueChart data={overview.monthlyRevenue} />
+      )}
 
       {/* Recent activity */}
       {overview.recentActivity.length > 0 && (
@@ -286,6 +324,11 @@ export function AdminShell({ clients, overview }: { clients: Client[]; overview:
                           {c.banned && (
                             <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-red-400/30 text-red-400 opacity-80">
                               suspended
+                            </span>
+                          )}
+                          {!c.confirmed_at && !c.banned && (
+                            <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] opacity-70">
+                              invite pending
                             </span>
                           )}
                           {!c.in_clients_table && (

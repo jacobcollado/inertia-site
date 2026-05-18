@@ -14,14 +14,15 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   const admin = createAdminClient();
 
-  const [{ data: clientRow }, { data: projects }, { data: invoices }, { data: files }, { data: { user: authUser } }, { data: messages }] =
+  const [{ data: clientRow }, { data: projects }, { data: invoices }, { data: files }, { data: { user: authUser } }, { data: messages }, { data: adminLog }] =
     await Promise.all([
       admin.from("clients").select("id, email, name, company").eq("id", id).single(),
       admin.from("projects").select("id, title, status, phase, last_update, notes, created_at").eq("client_id", id).order("created_at", { ascending: false }),
-      admin.from("invoices").select("id, label, amount, status, due_date, created_at").eq("client_id", id).order("created_at", { ascending: false }),
+      admin.from("invoices").select("id, label, amount, status, due_date, paid_at, created_at").eq("client_id", id).order("created_at", { ascending: false }),
       admin.from("files").select("id, label, url, uploaded_at").eq("client_id", id).order("uploaded_at", { ascending: false }),
       admin.auth.admin.getUserById(id),
       admin.from("messages").select("id, client_id, sender, body, read_at, created_at").eq("client_id", id).order("created_at", { ascending: true }),
+      admin.from("admin_log").select("id, action, detail, created_at").eq("client_id", id).order("created_at", { ascending: false }).limit(50),
     ]);
 
   if (!clientRow && !authUser) notFound();
@@ -36,6 +37,8 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       company: null,
     }),
     banned: isBanned,
+    last_sign_in_at: authUser?.last_sign_in_at ?? null,
+    confirmed_at: authUser?.confirmed_at ?? null,
   };
 
   return (
@@ -45,6 +48,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       invoices={invoices ?? []}
       files={files ?? []}
       messages={messages ?? []}
+      adminLog={adminLog ?? []}
     />
   );
 }

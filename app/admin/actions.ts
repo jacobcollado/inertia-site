@@ -109,7 +109,10 @@ export async function createInvoice(clientId: string, formData: FormData) {
 
 export async function updateInvoiceStatus(invoiceId: string, clientId: string, status: string) {
   const admin = createAdminClient();
-  await admin.from("invoices").update({ status }).eq("id", invoiceId);
+  const update: Record<string, unknown> = { status };
+  if (status === "paid") update.paid_at = new Date().toISOString();
+  else update.paid_at = null;
+  await admin.from("invoices").update(update).eq("id", invoiceId);
   revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
 }
@@ -121,12 +124,20 @@ export async function deleteInvoice(invoiceId: string, clientId: string) {
   return { success: true };
 }
 
+/* ── Audit log ────────────────────────────────────────────────────── */
+
+async function logAction(clientId: string, action: string, detail?: string) {
+  const admin = createAdminClient();
+  await admin.from("admin_log").insert({ client_id: clientId, action, detail: detail ?? null });
+}
+
 /* ── Account management ───────────────────────────────────────────── */
 
 export async function suspendAccount(clientId: string) {
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.updateUserById(clientId, { ban_duration: "876600h" });
   if (error) return { error: error.message };
+  await logAction(clientId, "suspend");
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath("/admin");
   return { success: true };
@@ -136,6 +147,7 @@ export async function unsuspendAccount(clientId: string) {
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.updateUserById(clientId, { ban_duration: "none" });
   if (error) return { error: error.message };
+  await logAction(clientId, "unsuspend");
   revalidatePath(`/admin/clients/${clientId}`);
   revalidatePath("/admin");
   return { success: true };
@@ -154,6 +166,7 @@ export async function updateAccountEmail(clientId: string, email: string) {
   const { error } = await admin.auth.admin.updateUserById(clientId, { email });
   if (error) return { error: error.message };
   await admin.from("clients").update({ email }).eq("id", clientId);
+  await logAction(clientId, "email_change", email);
   revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
 }
@@ -162,14 +175,27 @@ export async function updateAccountPassword(clientId: string, password: string) 
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.updateUserById(clientId, { password });
   if (error) return { error: error.message };
+  await logAction(clientId, "password_change");
   return { success: true };
 }
 
-export async function resendInvite(email: string) {
+export async function resendInvite(clientId: string, email: string) {
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.inviteUserByEmail(email);
   if (error) return { error: error.message };
+  await logAction(clientId, "invite_sent", email);
   return { success: true };
+}
+
+export async function getAdminLog(clientId: string) {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("admin_log")
+    .select("id, action, detail, created_at")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  return data ?? [];
 }
 
 /* ── Messages ─────────────────────────────────────────────────────── */

@@ -40,6 +40,8 @@ export default async function AdminPage() {
         name: (row?.name as string | null) ?? metaName,
         company: (row?.company as string | null) ?? null,
         created_at: u.created_at,
+        last_sign_in_at: u.last_sign_in_at ?? null,
+        confirmed_at: u.confirmed_at ?? null,
         projects: (row?.projects as { id: string; status: string }[]) ?? [],
         in_clients_table: !!row,
         banned: !!u.banned_until && new Date(u.banned_until) > new Date(),
@@ -122,6 +124,25 @@ export default async function AdminPage() {
     activeProjects: pctChange(projCurrent, projPrev),
   };
 
+  // Monthly revenue for the last 6 months
+  const monthlyRevenue = (() => {
+    const months: { month: string; amount: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = d.toLocaleDateString("en-US", { month: "short" });
+      const start = new Date(d.getFullYear(), d.getMonth(), 1);
+      const end   = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      const amount = paidInvoices
+        .filter((inv: Record<string, unknown>) => {
+          const pd = inv.due_date ? new Date(inv.due_date as string) : null;
+          return pd && pd >= start && pd < end;
+        })
+        .reduce((s: number, inv: Record<string, unknown>) => s + (inv.amount as number), 0);
+      months.push({ month: label, amount });
+    }
+    return months;
+  })();
+
   const clientNameMap = new Map(clients.map(c => [c.id, c.company ?? c.name ?? c.email]));
 
   const fmtDate = (iso: string) =>
@@ -164,6 +185,7 @@ export default async function AdminPage() {
     totalClients: clients.length,
     recentActivity,
     change,
+    monthlyRevenue,
   };
 
   return <AdminShell clients={clients} overview={overview} />;

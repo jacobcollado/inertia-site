@@ -66,6 +66,16 @@ textarea,
   -ms-user-select: text;
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 9999px rgb(var(--bg)) inset !important;
+  -webkit-text-fill-color: rgb(var(--fg)) !important;
+  caret-color: rgb(var(--fg));
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 html.lenis,
 html.lenis body {
   height: auto;

@@ -5,6 +5,35 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+function OAuthButtons({ onOAuth, loading }: { onOAuth: (p: "google" | "apple") => void; loading: boolean }) {
+  const btnClass =
+    "flex items-center justify-center gap-2.5 w-full border border-[rgb(var(--line))] py-3 text-[14px] tracking-tight text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.4] hover:bg-[rgb(var(--line))/0.3] transition-colors disabled:opacity-30 disabled:cursor-not-allowed";
+  return (
+    <div className="flex flex-col gap-3">
+      <button type="button" disabled={loading} onClick={() => onOAuth("google")} className={btnClass}>
+        <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <button type="button" disabled={loading} onClick={() => onOAuth("apple")} className={btnClass}>
+        <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="currentColor" aria-hidden="true">
+          <path d="M16.05 1c-1.27.08-2.76.9-3.63 1.96-.79.96-1.44 2.4-1.19 3.8 1.39.04 2.82-.8 3.66-1.87.79-.99 1.37-2.42 1.16-3.89zM20.95 17.9c-.6 1.32-1.3 2.52-2.33 3.59-.76.8-1.55 1.52-2.69 1.54-1.1.02-1.47-.67-2.74-.67-1.27 0-1.68.65-2.73.69-1.1.04-1.95-.78-2.72-1.58C5.5 19.07 4.1 15.9 4.1 12.85c0-3.5 2.26-5.35 4.48-5.38 1.1-.02 2.14.74 2.82.74.67 0 1.93-.91 3.26-.78.56.02 2.12.22 3.12 1.69-.08.05-1.86 1.1-1.84 3.27.02 2.6 2.26 3.46 2.28 3.47-.02.07-.35 1.24-1.27 2.04z"/>
+        </svg>
+        Continue with Apple
+      </button>
+      <div className="flex items-center gap-3 pt-1">
+        <div className="flex-1 h-px bg-[rgb(var(--line))]" />
+        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40">or</span>
+        <div className="flex-1 h-px bg-[rgb(var(--line))]" />
+      </div>
+    </div>
+  );
+}
+
 export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const router = useRouter();
   const [tab, setTab] = useState<"signin" | "signup">(initialTab);
@@ -69,6 +98,16 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     setLoading(false);
     if (error) { setError(error.message); return; }
     setResetSent(true);
+  };
+
+  const onOAuth = async (provider: "google" | "apple") => {
+    setLoading(true);
+    setError("");
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
   };
 
   const inputClass =
@@ -175,6 +214,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                       Your project is waiting.
                     </p>
                   </div>
+                  <OAuthButtons onOAuth={onOAuth} loading={loading} />
                   <form onSubmit={onSignIn} className="flex flex-col gap-8" noValidate>
                     <div className="flex flex-col gap-5">
                       <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
@@ -231,6 +271,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                   Already working with us? Create your account and we'll confirm access once your project is set up.
                 </p>
               </div>
+              <OAuthButtons onOAuth={onOAuth} loading={loading} />
               <form onSubmit={onSignUp} className="flex flex-col gap-8" noValidate>
                 <div className="flex flex-col gap-5">
                   <input type="text" value={name} onChange={(e) => setName(e.target.value)}

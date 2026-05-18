@@ -11,16 +11,18 @@ import {
   suspendAccount, unsuspendAccount, deleteAccount,
   updateAccountEmail, updateAccountPassword, resendInvite,
   addFileFromUrl, getSignedFileUrl, sendAdminMessage, markMessagesRead,
+  getAdminLog,
 } from "../../actions";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
-type Client  = { id: string; email: string; name: string | null; company: string | null; banned?: boolean };
+type Client  = { id: string; email: string; name: string | null; company: string | null; banned?: boolean; last_sign_in_at?: string | null; confirmed_at?: string | null };
 type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null };
-type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null };
+type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null };
 type DFile   = { id: string; label: string; url: string; uploaded_at: string };
 type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
-type Tab     = "projects" | "invoices" | "files" | "messages" | "account";
+type AuditEntry = { id: string; action: string; detail: string | null; created_at: string };
+type Tab     = "projects" | "invoices" | "files" | "messages" | "account" | "history";
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
@@ -285,7 +287,12 @@ function InvoicesTab({ clientId, invoices }: { clientId: string; invoices: Invoi
               <div className="flex items-center justify-between gap-4 py-5 group">
                 <div className="flex flex-col gap-1 min-w-0">
                   <span className="text-[16px] tracking-tight text-[rgb(var(--fg))] truncate">{inv.label}</span>
-                  {inv.due_date && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">Due {fmtDate(inv.due_date)}</span>}
+                  {inv.paid_at
+                    ? <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">Paid {fmtDate(inv.paid_at)}</span>
+                    : inv.due_date
+                      ? <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">Due {fmtDate(inv.due_date)}</span>
+                      : null
+                  }
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-[16px] font-medium tabular-nums text-[rgb(var(--fg))]">{fmt$(inv.amount)}</span>
@@ -660,7 +667,7 @@ function AccountTab({ client }: { client: Client }) {
             <p className="text-[15px] tracking-tight text-[rgb(var(--fg))]">Resend invite</p>
             <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-0.5">Send a new magic link to their email.</p>
           </div>
-          <button disabled={pending} onClick={() => run(() => resendInvite(client.email), "Invite sent.")}
+          <button disabled={pending} onClick={() => run(() => resendInvite(client.id, client.email), "Invite sent.")}
             className="px-5 py-2 rounded-full text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors disabled:opacity-30">
             Send
           </button>
@@ -726,6 +733,65 @@ function AccountTab({ client }: { client: Client }) {
   );
 }
 
+/* ── Audit log tab ────────────────────────────────────────────────── */
+
+const ACTION_LABEL: Record<string, string> = {
+  suspend:         "Account suspended",
+  unsuspend:       "Account reinstated",
+  email_change:    "Email updated",
+  password_change: "Password changed",
+  invite_sent:     "Invite sent",
+};
+
+function AuditTab({ clientId, initial }: { clientId: string; initial: AuditEntry[] }) {
+  const [log, setLog] = useState<AuditEntry[]>(initial);
+  const [loading, setLoading] = useState(false);
+
+  const refresh = async () => {
+    setLoading(true);
+    const fresh = await getAdminLog(clientId);
+    setLog(fresh);
+    setLoading(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">History</h2>
+        <button onClick={refresh} disabled={loading}
+          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-30">
+          {loading ? "Refreshing..." : "Refresh"}
+        </button>
+      </div>
+      <GridRule />
+      {log.length === 0 ? (
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No history yet.</p>
+      ) : (
+        <div className="flex flex-col">
+          {log.map((entry, i) => (
+            <div key={entry.id}>
+              <div className="flex items-center justify-between gap-4 py-4">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[15px] tracking-tight text-[rgb(var(--fg))]">
+                    {ACTION_LABEL[entry.action] ?? entry.action}
+                  </span>
+                  {entry.detail && (
+                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{entry.detail}</span>
+                  )}
+                </div>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">
+                  {fmtDate(entry.created_at)}
+                </span>
+              </div>
+              {i < log.length - 1 && <GridRule />}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Client header ────────────────────────────────────────────────── */
 
 function ClientHeader({ client }: { client: Client }) {
@@ -761,13 +827,31 @@ function ClientHeader({ client }: { client: Client }) {
     );
   }
 
+  const neverSignedIn = !client.confirmed_at;
+  const lastSeen = client.last_sign_in_at
+    ? new Date(client.last_sign_in_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : null;
+
   return (
     <div className="flex items-start justify-between gap-4">
-      <div>
-        <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">
-          {displayName}
-        </h1>
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-1">{client.email}</p>
+      <div className="flex flex-col gap-2">
+        <div>
+          <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">
+            {displayName}
+          </h1>
+          <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-1">{client.email}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {neverSignedIn ? (
+            <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))]">
+              Invite pending
+            </span>
+          ) : lastSeen ? (
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">
+              Last seen {lastSeen}
+            </span>
+          ) : null}
+        </div>
       </div>
       <button onClick={() => setEditing(true)}
         className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors shrink-0 mt-1">
@@ -779,12 +863,13 @@ function ClientHeader({ client }: { client: Client }) {
 
 /* ── Shell ────────────────────────────────────────────────────────── */
 
-export function ClientDetailShell({ client, projects, invoices, files, messages }: {
+export function ClientDetailShell({ client, projects, invoices, files, messages, adminLog }: {
   client: Client;
   projects: Project[];
   invoices: Invoice[];
   files: DFile[];
   messages: Message[];
+  adminLog: AuditEntry[];
 }) {
   const [tab, setTab] = useState<Tab>("projects");
   const displayName = client.company ?? client.name ?? client.email;
@@ -796,6 +881,7 @@ export function ClientDetailShell({ client, projects, invoices, files, messages 
     { id: "files",    label: "Files"    },
     { id: "messages", label: "Messages", badge: unreadCount },
     { id: "account",  label: "Account"  },
+    { id: "history",  label: "History"  },
   ];
 
   return (
@@ -850,6 +936,7 @@ export function ClientDetailShell({ client, projects, invoices, files, messages 
         {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
         {tab === "messages" && <MessagesTab clientId={client.id} initial={messages} />}
         {tab === "account"  && <AccountTab  client={client} />}
+        {tab === "history"  && <AuditTab    clientId={client.id} initial={adminLog} />}
       </main>
     </div>
   );
