@@ -196,11 +196,11 @@ export function AdminShell({ clients, overview }: { clients: Client[]; overview:
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 sm:px-10 h-14 border-b border-[rgb(var(--line))]">
         <div className="flex items-center gap-4">
-          <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
+          <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
           <div className="flex items-center gap-1 border border-[rgb(var(--line))] rounded-full p-0.5">
             {(["overview", "clients"] as const).map(v => (
               <button key={v} onClick={() => setView(v)}
-                className="px-3 py-1 rounded-full text-[13px] tracking-tight capitalize transition-colors"
+                className="px-3 py-1 rounded-full text-[13px] sm:text-[15px] tracking-tight capitalize transition-colors"
                 style={{
                   background: view === v ? "rgb(var(--fg))" : "transparent",
                   color: view === v ? "rgb(var(--bg))" : "rgb(var(--muted))",
@@ -210,9 +210,9 @@ export function AdminShell({ clients, overview }: { clients: Client[]; overview:
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-5">
-          <Link href="/" className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-            Site
+        <div className="flex items-center gap-1">
+          <Link href="/" className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-100 transition-opacity font-medium">
+            byinertia.com
           </Link>
           <ThemeToggle />
         </div>

@@ -172,6 +172,27 @@ export async function resendInvite(email: string) {
   return { success: true };
 }
 
+/* ── Messages ─────────────────────────────────────────────────────── */
+
+export async function sendAdminMessage(clientId: string, body: string) {
+  const admin = createAdminClient();
+  await ensureClientRow(clientId);
+  const { error } = await admin.from("messages").insert({ client_id: clientId, sender: "admin", body });
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function markMessagesRead(clientId: string) {
+  const admin = createAdminClient();
+  await admin.from("messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("client_id", clientId)
+    .eq("sender", "client")
+    .is("read_at", null);
+  return { success: true };
+}
+
 /* ── Files ────────────────────────────────────────────────────────── */
 
 export async function addFile(clientId: string, formData: FormData) {

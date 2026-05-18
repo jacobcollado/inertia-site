@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/app/theme-toggle";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import {
   createProject, updateProject, deleteProject,
   createInvoice, updateInvoiceStatus, deleteInvoice,
   addFile, deleteFile, updateClient,
   suspendAccount, unsuspendAccount, deleteAccount,
   updateAccountEmail, updateAccountPassword, resendInvite,
-  addFileFromUrl, getSignedFileUrl,
+  addFileFromUrl, getSignedFileUrl, sendAdminMessage, markMessagesRead,
 } from "../../actions";
 
 /* ── Types ────────────────────────────────────────────────────────── */
@@ -18,7 +19,8 @@ type Client  = { id: string; email: string; name: string | null; company: string
 type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null };
 type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null };
 type DFile   = { id: string; label: string; url: string; uploaded_at: string };
-type Tab     = "projects" | "invoices" | "files" | "account";
+type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
+type Tab     = "projects" | "invoices" | "files" | "messages" | "account";
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
@@ -453,6 +455,140 @@ function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
   );
 }
 
+/* ── Messages tab ─────────────────────────────────────────────────── */
+
+function MessagesTab({ clientId, initial }: { clientId: string; initial: Message[] }) {
+  const [messages, setMessages] = useState<Message[]>(initial);
+  const [body, setBody] = useState("");
+  const [pending, startTransition] = useTransition();
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    markMessagesRead(clientId);
+  }, [clientId]);
+
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    const channel = supabase
+      .channel(`messages:${clientId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `client_id=eq.${clientId}`,
+      }, (payload) => {
+        const incoming = payload.new as Message;
+        setMessages(prev => {
+          // Replace a matching optimistic message, or append if none found
+          const idx = prev.findIndex(m =>
+            m.id.startsWith("optimistic-") &&
+            m.sender === incoming.sender &&
+            m.body === incoming.body
+          );
+          if (idx !== -1) {
+            const next = [...prev];
+            next[idx] = incoming;
+            return next;
+          }
+          return [...prev, incoming];
+        });
+        if (incoming.sender === "client") markMessagesRead(clientId);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [clientId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const onSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!body.trim()) return;
+    const text = body.trim();
+    setBody("");
+    const optimistic: Message = {
+      id: `optimistic-${Date.now()}`,
+      client_id: clientId,
+      sender: "admin",
+      body: text,
+      created_at: new Date().toISOString(),
+      read_at: null,
+    };
+    setMessages(prev => [...prev, optimistic]);
+    startTransition(async () => {
+      await sendAdminMessage(clientId, text);
+    });
+  };
+
+  const fmtTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const fmtDay = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  let lastDay = "";
+
+  return (
+    <div className="flex flex-col gap-0" style={{ height: "calc(100vh - 280px)", minHeight: 360 }}>
+      <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] mb-6">Messages</h2>
+
+      {/* Thread */}
+      <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 pb-4">
+        {messages.length === 0 && (
+          <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No messages yet.</p>
+        )}
+        {messages.map((m) => {
+          const day = fmtDay(m.created_at);
+          const showDay = day !== lastDay;
+          lastDay = day;
+          const isAdmin = m.sender === "admin";
+          return (
+            <div key={m.id}>
+              {showDay && (
+                <div className="flex items-center justify-center py-3">
+                  <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{day}</span>
+                </div>
+              )}
+              <div className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[75%] flex flex-col gap-1 ${isAdmin ? "items-end" : "items-start"}`}>
+                  <div className={`px-4 py-2.5 text-[15px] tracking-tight leading-relaxed ${
+                    isAdmin
+                      ? "bg-[rgb(var(--fg))] text-[rgb(var(--bg))]"
+                      : "bg-[rgb(var(--line))] text-[rgb(var(--fg))]"
+                  }`} style={{ borderRadius: isAdmin ? "16px 16px 4px 16px" : "16px 16px 16px 4px" }}>
+                    {m.body}
+                  </div>
+                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 px-1">
+                    {fmtTime(m.created_at)}
+                    {isAdmin && m.read_at && " · Read"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <form onSubmit={onSend} className="flex items-end gap-3 pt-4 border-t border-[rgb(var(--line))]">
+        <textarea
+          value={body}
+          onChange={e => setBody(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(e as unknown as React.FormEvent); } }}
+          placeholder="Send a message…"
+          rows={2}
+          className="flex-1 bg-transparent resize-none text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none leading-relaxed"
+        />
+        <button type="submit" disabled={pending || !body.trim()}
+          className="px-4 py-2 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-20 shrink-0">
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}
+
 /* ── Account tab ──────────────────────────────────────────────────── */
 
 function AccountTab({ client }: { client: Client }) {
@@ -632,19 +768,22 @@ function ClientHeader({ client }: { client: Client }) {
 
 /* ── Shell ────────────────────────────────────────────────────────── */
 
-export function ClientDetailShell({ client, projects, invoices, files }: {
+export function ClientDetailShell({ client, projects, invoices, files, messages }: {
   client: Client;
   projects: Project[];
   invoices: Invoice[];
   files: DFile[];
+  messages: Message[];
 }) {
   const [tab, setTab] = useState<Tab>("projects");
   const displayName = client.company ?? client.name ?? client.email;
+  const unreadCount = messages.filter(m => m.sender === "client" && !m.read_at).length;
 
-  const TABS: { id: Tab; label: string }[] = [
+  const TABS: { id: Tab; label: string; badge?: number }[] = [
     { id: "projects", label: "Projects" },
     { id: "invoices", label: "Invoices" },
     { id: "files",    label: "Files"    },
+    { id: "messages", label: "Messages", badge: unreadCount },
     { id: "account",  label: "Account"  },
   ];
 
@@ -677,11 +816,16 @@ export function ClientDetailShell({ client, projects, invoices, files }: {
 
         {/* Tab nav */}
         <div className="flex items-center gap-1 border-b border-[rgb(var(--line))]">
-          {TABS.map(({ id, label }) => (
+          {TABS.map(({ id, label, badge }) => (
             <button key={id} onClick={() => setTab(id)}
-              className="px-4 py-3 text-[15px] tracking-tight transition-colors relative"
+              className="px-4 py-3 text-[15px] tracking-tight transition-colors relative inline-flex items-center gap-1.5"
               style={{ color: tab === id ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: tab === id ? 1 : 0.5 }}>
               {label}
+              {badge ? (
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+                  {badge}
+                </span>
+              ) : null}
               {tab === id && (
                 <span className="absolute bottom-0 left-0 right-0 h-px bg-[rgb(var(--fg))]" />
               )}
@@ -693,6 +837,7 @@ export function ClientDetailShell({ client, projects, invoices, files }: {
         {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} />}
         {tab === "invoices" && <InvoicesTab clientId={client.id} invoices={invoices} />}
         {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
+        {tab === "messages" && <MessagesTab clientId={client.id} initial={messages} />}
         {tab === "account"  && <AccountTab  client={client} />}
       </main>
     </div>

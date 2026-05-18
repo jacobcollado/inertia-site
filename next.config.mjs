@@ -5,5 +5,6 @@ const nextConfig = {
   turbopack: {
     root: path.resolve("."),
   },
+  productionBrowserSourceMaps: false,
 };
 export default nextConfig;

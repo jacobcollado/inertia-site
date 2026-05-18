@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/app/theme-toggle";
-import { signOut, getSignedFileUrl } from "./actions";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
+import { signOut, getSignedFileUrl, sendClientMessage, markAdminMessagesRead } from "./actions";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
@@ -11,7 +12,8 @@ type Client  = { id: string; email: string; name: string | null; company: string
 type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null };
 type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null };
 type DFile   = { id: string; label: string; url: string; uploaded_at: string };
-type Tab     = "overview" | "projects" | "invoices" | "files" | "support";
+type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
+type Tab     = "overview" | "projects" | "invoices" | "files" | "messages" | "support";
 
 /* ── Fake data ────────────────────────────────────────────────────── */
 
@@ -295,6 +297,12 @@ const icons: Record<Tab, React.ReactNode> = {
       <line x1="7" y1="13" x2="11" y2="13" />
     </svg>
   ),
+  messages: (
+    /* speech bubble */
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+      <path d="M2 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6l-4 4V4z" />
+    </svg>
+  ),
   support: (
     /* speech bubble with dot */
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
@@ -308,21 +316,23 @@ const icons: Record<Tab, React.ReactNode> = {
 
 /* ── Sidebar ──────────────────────────────────────────────────────── */
 
-function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
+function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages }: {
   client: Client | null;
   tab: Tab;
   setTab: (t: Tab) => void;
   mobileOpen: boolean;
   setMobileOpen: (v: boolean) => void;
+  unreadMessages: number;
 }) {
   const [pending, startTransition] = useTransition();
 
-  const NAV: { id: Tab; label: string }[] = [
-    { id: "overview", label: "Overview" },
-    { id: "projects", label: "Projects" },
-    { id: "invoices", label: "Invoices" },
-    { id: "files",    label: "Files"    },
-    { id: "support",  label: "Support"  },
+  const NAV: { id: Tab; label: string; badge?: number }[] = [
+    { id: "overview",  label: "Overview"  },
+    { id: "projects",  label: "Projects"  },
+    { id: "invoices",  label: "Invoices"  },
+    { id: "files",     label: "Files"     },
+    { id: "messages",  label: "Messages", badge: unreadMessages },
+    { id: "support",   label: "Support"   },
   ];
 
   const inner = (
@@ -355,7 +365,7 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-        {NAV.map(({ id, label }) => {
+        {NAV.map(({ id, label, badge }) => {
           const active = tab === id;
           return (
             <button
@@ -368,7 +378,13 @@ function Sidebar({ client, tab, setTab, mobileOpen, setMobileOpen }: {
               }}
             >
               <span style={{ opacity: active ? 1 : 0.5 }} className="w-5 h-5 flex items-center justify-center">{icons[id]}</span>
-              <span className="text-[15px] tracking-tight">{label}</span>
+              <span className="text-[15px] tracking-tight flex-1">{label}</span>
+              {!!badge && badge > 0 && (
+                <span className="min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-medium flex items-center justify-center"
+                  style={{ background: "rgb(var(--blue))", color: "white" }}>
+                  {badge > 9 ? "9+" : badge}
+                </span>
+              )}
             </button>
           );
         })}
@@ -646,6 +662,157 @@ function FilesTab({ files }: { files: DFile[] }) {
   );
 }
 
+function MessagesTab({ clientId, initialMessages }: { clientId: string; initialMessages: Message[] }) {
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    markAdminMessagesRead(clientId);
+
+    const channel = supabase
+      .channel(`messages:${clientId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `client_id=eq.${clientId}`,
+      }, (payload) => {
+        const incoming = payload.new as Message;
+        setMessages(prev => {
+          const idx = prev.findIndex(m =>
+            m.id.startsWith("optimistic-") &&
+            m.sender === incoming.sender &&
+            m.body === incoming.body
+          );
+          if (idx !== -1) {
+            const next = [...prev];
+            next[idx] = incoming;
+            return next;
+          }
+          return [...prev, incoming];
+        });
+        if (incoming.sender === "admin") markAdminMessagesRead(clientId);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [clientId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const send = async () => {
+    const body = draft.trim();
+    if (!body || sending) return;
+    setSending(true);
+    setDraft("");
+    const optimistic: Message = {
+      id: `optimistic-${Date.now()}`,
+      client_id: clientId,
+      sender: "client",
+      body,
+      created_at: new Date().toISOString(),
+      read_at: null,
+    };
+    setMessages(prev => [...prev, optimistic]);
+    await sendClientMessage(body);
+    setSending(false);
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  };
+
+  let lastDay = "";
+
+  return (
+    <div className="flex flex-col gap-0" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+      <div className="mb-8">
+        <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Messages</h1>
+        <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-2">Direct line to your project team.</p>
+      </div>
+
+      {/* Message thread */}
+      <div className="flex flex-col gap-2 min-h-[240px] mb-6">
+        {messages.length === 0 && (
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-8">No messages yet. Send one below.</p>
+        )}
+        {messages.map((msg) => {
+          const day = new Date(msg.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+          const showDay = day !== lastDay;
+          lastDay = day;
+          const isClient = msg.sender === "client";
+          return (
+            <div key={msg.id}>
+              {showDay && (
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px bg-[rgb(var(--line))]" />
+                  <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">{day}</span>
+                  <div className="flex-1 h-px bg-[rgb(var(--line))]" />
+                </div>
+              )}
+              <div className={`flex ${isClient ? "justify-end" : "justify-start"}`}>
+                <div className="flex flex-col max-w-[72%]" style={{ alignItems: isClient ? "flex-end" : "flex-start" }}>
+                  <div
+                    className="px-4 py-3 text-[15px] tracking-tight leading-relaxed"
+                    style={{
+                      background: isClient ? "rgb(var(--fg))" : "rgb(var(--line))",
+                      color: isClient ? "rgb(var(--bg))" : "rgb(var(--fg))",
+                      borderRadius: isClient ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                    }}
+                  >
+                    {msg.body}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1 px-1">
+                    <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40">
+                      {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                    </span>
+                    {isClient && msg.read_at && (
+                      <span className="text-[11px] tracking-tight opacity-40" style={{ color: "rgb(var(--blue))" }}>Read</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border border-[rgb(var(--line))] rounded-xl overflow-hidden">
+        <textarea
+          rows={3}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder="Type a message... (Enter to send)"
+          className="w-full bg-transparent px-4 pt-4 pb-2 text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none resize-none"
+        />
+        <div className="flex items-center justify-end px-3 pb-3">
+          <button
+            onClick={send}
+            disabled={!draft.trim() || sending}
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-all disabled:opacity-30"
+            style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+          >
+            {sending ? "Sending..." : "Send"}
+            {!sending && (
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+                <line x1="4" y1="10" x2="16" y2="10" /><polyline points="11 5 16 10 11 15" />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SupportTab({ client }: { client: Client | null }) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -735,8 +902,8 @@ function SupportTab({ client }: { client: Client | null }) {
 
 /* ── Shell ────────────────────────────────────────────────────────── */
 
-export function DashboardShell({ client, projects: rp, invoices: ri, files: rf }: {
-  client: Client | null; projects: Project[]; invoices: Invoice[]; files: DFile[];
+export function DashboardShell({ client, projects: rp, invoices: ri, files: rf, messages: rm }: {
+  client: Client | null; projects: Project[]; invoices: Invoice[]; files: DFile[]; messages: Message[];
 }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -744,10 +911,11 @@ export function DashboardShell({ client, projects: rp, invoices: ri, files: rf }
   const projects = rp;
   const invoices = ri;
   const files    = rf;
+  const unread   = rm.filter(m => m.sender === "admin" && !m.read_at).length;
 
   return (
     <div className="flex min-h-screen bg-[rgb(var(--bg))]">
-      <Sidebar client={client} tab={tab} setTab={setTab} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+      <Sidebar client={client} tab={tab} setTab={setTab} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} unreadMessages={unread} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile topbar */}
@@ -763,11 +931,12 @@ export function DashboardShell({ client, projects: rp, invoices: ri, files: rf }
         </div>
 
         <main className="flex-1 px-6 sm:px-12 py-10 sm:py-14 max-w-3xl w-full">
-          {tab === "overview" && <OverviewTab client={client} projects={projects} invoices={invoices} files={files} setTab={setTab} />}
-          {tab === "projects" && <ProjectsTab projects={projects} />}
-          {tab === "invoices" && <InvoicesTab invoices={invoices} />}
-          {tab === "files"    && <FilesTab    files={files} />}
-          {tab === "support"  && <SupportTab  client={client} />}
+          {tab === "overview"  && <OverviewTab client={client} projects={projects} invoices={invoices} files={files} setTab={setTab} />}
+          {tab === "projects"  && <ProjectsTab projects={projects} />}
+          {tab === "invoices"  && <InvoicesTab invoices={invoices} />}
+          {tab === "files"     && <FilesTab    files={files} />}
+          {tab === "messages"  && <MessagesTab clientId={client?.id ?? ""} initialMessages={rm} />}
+          {tab === "support"   && <SupportTab  client={client} />}
         </main>
       </div>
     </div>

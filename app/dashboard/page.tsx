@@ -8,12 +8,13 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }] =
+  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }, { data: messages }] =
     await Promise.all([
       supabase.from("clients").select("*").eq("id", user.id).single(),
       supabase.from("projects").select("*").eq("client_id", user.id).order("created_at", { ascending: false }),
       supabase.from("invoices").select("*").eq("client_id", user.id).order("created_at", { ascending: false }),
       supabase.from("files").select("*").eq("client_id", user.id).order("uploaded_at", { ascending: false }),
+      supabase.from("messages").select("*").eq("client_id", user.id).order("created_at", { ascending: true }),
     ]);
 
   return (
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
       projects={projects ?? []}
       invoices={invoices ?? []}
       files={files ?? []}
+      messages={messages ?? []}
     />
   );
 }

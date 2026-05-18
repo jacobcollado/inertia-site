@@ -64,6 +64,8 @@ export function ContourCanvas() {
 
     const isDark = () => document.documentElement.classList.contains("dark");
 
+    const getBlue = (alpha: number) => `rgba(37,99,235,${alpha})`;
+
     const setPoint = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect();
       mouseRef.current = { x: clientX - rect.left, y: clientY - rect.top };
@@ -136,58 +138,32 @@ export function ContourCanvas() {
       const maxVal = 1.1 + MOUSE_STRENGTH;
       const step = (maxVal - minVal) / (LEVELS + 1);
 
-      // Accent is a blue line cycling through levels — matches Aether brand color
-      const accentLi = Math.floor((now * 0.00008) % LEVELS);
+      const accentIndices = new Set([2, 6, 11]);
+      const majorIndices = new Set([0, 4, 9, 13]);
 
-      for (let li = 0; li < LEVELS; li++) {
+      const drawLevel = (li: number) => {
         const level = minVal + step * (li + 1);
-        const isAccent = li === accentLi;
-        const isMajor = li === 2 || li === 6 || li === 11;
-
-        if (isAccent) {
-          ctx.strokeStyle = dark ? `rgba(56,108,255,0.8)` : `rgba(14,78,255,0.5)`;
-          ctx.lineWidth = 1.6;
-        } else if (isMajor) {
-          const majorAlpha = dark ? 0.44 : 0.34;
-          ctx.strokeStyle = dark
-            ? `rgba(237,237,237,${majorAlpha})`
-            : `rgba(14,14,14,${majorAlpha})`;
-          ctx.lineWidth = 1.4;
-        } else {
-          const baseAlpha = dark ? 0.22 : 0.16;
-          ctx.strokeStyle = dark
-            ? `rgba(237,237,237,${baseAlpha})`
-            : `rgba(14,14,14,${baseAlpha})`;
-          ctx.lineWidth = 0.75;
-        }
-
         ctx.beginPath();
-
         for (let r = 0; r < rows - 1; r++) {
           for (let c = 0; c < cols - 1; c++) {
             const x0 = c * CELL;
             const y0 = r * CELL;
             const x1 = x0 + CELL;
             const y1 = y0 + CELL;
-
             const v00 = field[r * cols + c];
             const v10 = field[r * cols + c + 1];
             const v01 = field[(r + 1) * cols + c];
             const v11 = field[(r + 1) * cols + c + 1];
-
             const idx =
               (v00 > level ? 8 : 0) |
               (v10 > level ? 4 : 0) |
               (v11 > level ? 2 : 0) |
               (v01 > level ? 1 : 0);
-
             if (idx === 0 || idx === 15) continue;
-
             const top    = { x: x0 + interp(v00, v10, level) * CELL, y: y0 };
             const right  = { x: x1, y: y0 + interp(v10, v11, level) * CELL };
             const bottom = { x: x0 + interp(v01, v11, level) * CELL, y: y1 };
             const left   = { x: x0, y: y0 + interp(v00, v01, level) * CELL };
-
             switch (idx) {
               case 1:  case 14: ctx.moveTo(left.x, left.y);     ctx.lineTo(bottom.x, bottom.y); break;
               case 2:  case 13: ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(right.x, right.y);   break;
@@ -206,8 +182,40 @@ export function ContourCanvas() {
             }
           }
         }
-
         ctx.stroke();
+      };
+
+      for (let li = 0; li < LEVELS; li++) {
+        const isAccent = accentIndices.has(li);
+        const isMajor = majorIndices.has(li);
+
+        if (isAccent) {
+          // Glow pass
+          ctx.save();
+          ctx.filter = "blur(4px)";
+          ctx.strokeStyle = getBlue(0.35);
+          ctx.lineWidth = 5;
+          drawLevel(li);
+          ctx.filter = "none";
+          ctx.restore();
+          // Sharp pass
+          ctx.strokeStyle = getBlue(0.9);
+          ctx.lineWidth = 1.8;
+        } else if (isMajor) {
+          const majorAlpha = dark ? 0.44 : 0.34;
+          ctx.strokeStyle = dark
+            ? `rgba(237,237,237,${majorAlpha})`
+            : `rgba(14,14,14,${majorAlpha})`;
+          ctx.lineWidth = 1.4;
+        } else {
+          const baseAlpha = dark ? 0.18 : 0.13;
+          ctx.strokeStyle = dark
+            ? `rgba(237,237,237,${baseAlpha})`
+            : `rgba(14,14,14,${baseAlpha})`;
+          ctx.lineWidth = 0.65;
+        }
+
+        drawLevel(li);
       }
 
       ctx.restore();
