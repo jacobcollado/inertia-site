@@ -15,26 +15,6 @@ type DFile   = { id: string; label: string; url: string; uploaded_at: string };
 type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
 type Tab     = "overview" | "projects" | "invoices" | "files" | "messages" | "support";
 
-/* ── Fake data ────────────────────────────────────────────────────── */
-
-const FAKE_PROJECTS: Project[] = [
-  { id: "f1", title: "Aether Storefront Build", status: "active",    phase: "Design review",  last_update: "Updated May 1",  notes: "Homepage and PDP layouts are ready for feedback. Collection page in progress." },
-  { id: "f2", title: "Brand Identity",          status: "completed", phase: "Delivered",      last_update: "Apr 18",         notes: null },
-  { id: "f3", title: "Email Sequence",          status: "paused",    phase: "Awaiting copy",  last_update: "Mar 30",         notes: "Holding until copy brief is returned." },
-];
-
-const FAKE_INVOICES: Invoice[] = [
-  { id: "i1", label: "Project deposit — Aether build", amount: 350000, status: "paid",    due_date: "2026-03-01" },
-  { id: "i2", label: "Milestone 2 — Design complete",  amount: 350000, status: "pending", due_date: "2026-05-15" },
-  { id: "i3", label: "Final delivery",                 amount: 300000, status: "pending", due_date: "2026-06-01" },
-];
-
-const FAKE_FILES: DFile[] = [
-  { id: "fl1", label: "Brand guidelines v2.pdf",  url: "#", uploaded_at: "2026-04-10T00:00:00Z" },
-  { id: "fl2", label: "Homepage mockup — final",  url: "#", uploaded_at: "2026-04-28T00:00:00Z" },
-  { id: "fl3", label: "Aether theme license.txt", url: "#", uploaded_at: "2026-05-01T00:00:00Z" },
-];
-
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
 const STATUS_COLOR: Record<string, string> = {
@@ -46,13 +26,11 @@ const STATUS_COLOR: Record<string, string> = {
   overdue:   "#ef4444",
 };
 
-function fmt$(cents: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(cents / 100);
-}
-function fmtDate(iso: string | null) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
+const currencyFmt = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+const dateFmt     = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+function fmt$(cents: number) { return currencyFmt.format(cents / 100); }
+function fmtDate(iso: string | null) { return iso ? dateFmt.format(new Date(iso)) : null; }
 
 function GridRule() {
   return <div className="grid-rule" aria-hidden="true" />;
@@ -449,7 +427,7 @@ function OverviewTab({ client, projects, invoices, files, setTab }: {
   const totalOwed = unpaid.reduce((s, i) => s + i.amount, 0);
 
   return (
-    <div className="flex flex-col gap-10" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+    <div className="flex flex-col gap-10">
 
       {/* Hero greeting */}
       <div className="flex items-start justify-between gap-6">
@@ -533,7 +511,7 @@ function OverviewTab({ client, projects, invoices, files, setTab }: {
 
 function ProjectsTab({ projects }: { projects: Project[] }) {
   return (
-    <div className="flex flex-col gap-10" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+    <div className="flex flex-col gap-10">
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Projects</h1>
@@ -576,7 +554,7 @@ function InvoicesTab({ invoices }: { invoices: Invoice[] }) {
   const totalOwed = invoices.filter(i => i.status !== "paid").reduce((s, i) => s + i.amount, 0);
   const totalPaid = invoices.filter(i => i.status === "paid").reduce((s, i) => s + i.amount, 0);
   return (
-    <div className="flex flex-col gap-10" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+    <div className="flex flex-col gap-10">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Billing</h1>
@@ -625,7 +603,7 @@ function InvoicesTab({ invoices }: { invoices: Invoice[] }) {
 
 function FilesTab({ files }: { files: DFile[] }) {
   return (
-    <div className="flex flex-col gap-10" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+    <div className="flex flex-col gap-10">
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Files</h1>
@@ -669,11 +647,12 @@ function MessagesTab({ clientId, initialMessages }: { clientId: string; initialM
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!clientId) return;
     const supabase = createBrowserClient();
     markAdminMessagesRead(clientId);
 
     const channel = supabase
-      .channel(`messages:${clientId}`)
+      .channel(`client-messages:${clientId}`)
       .on("postgres_changes", {
         event: "INSERT",
         schema: "public",
@@ -695,6 +674,15 @@ function MessagesTab({ clientId, initialMessages }: { clientId: string; initialM
           return [...prev, incoming];
         });
         if (incoming.sender === "admin") markAdminMessagesRead(clientId);
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "messages",
+        filter: `client_id=eq.${clientId}`,
+      }, (payload) => {
+        const updated = payload.new as Message;
+        setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
       })
       .subscribe();
 
@@ -727,10 +715,21 @@ function MessagesTab({ clientId, initialMessages }: { clientId: string; initialM
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
+  const fmtDay = (iso: string) => {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+    const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+    if (sameDay(d, today)) return "Today";
+    if (sameDay(d, yesterday)) return "Yesterday";
+    const sameYear = d.getFullYear() === today.getFullYear();
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", ...(!sameYear && { year: "numeric" }) });
+  };
+
   let lastDay = "";
 
   return (
-    <div className="flex flex-col gap-0" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+    <div className="flex flex-col gap-0">
       <div className="mb-8">
         <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Messages</h1>
         <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-2">Direct line to your project team.</p>
@@ -742,16 +741,16 @@ function MessagesTab({ clientId, initialMessages }: { clientId: string; initialM
           <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-8">No messages yet. Send one below.</p>
         )}
         {messages.map((msg) => {
-          const day = new Date(msg.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+          const day = fmtDay(msg.created_at);
           const showDay = day !== lastDay;
           lastDay = day;
           const isClient = msg.sender === "client";
           return (
             <div key={msg.id}>
               {showDay && (
-                <div className="flex items-center gap-3 my-4">
+                <div className="flex items-center gap-3 my-3">
                   <div className="flex-1 h-px bg-[rgb(var(--line))]" />
-                  <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">{day}</span>
+                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">{day}</span>
                   <div className="flex-1 h-px bg-[rgb(var(--line))]" />
                 </div>
               )}
@@ -843,7 +842,7 @@ function SupportTab({ client }: { client: Client | null }) {
   const inputBase = "w-full bg-transparent border-0 border-b border-[rgb(var(--line))] py-4 text-[17px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200";
 
   return (
-    <div className="flex flex-col gap-10" style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+    <div className="flex flex-col gap-10">
       <div className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Get in touch</h1>
@@ -930,13 +929,25 @@ export function DashboardShell({ client, projects: rp, invoices: ri, files: rf, 
           <ThemeToggle />
         </div>
 
-        <main className="flex-1 px-6 sm:px-12 py-10 sm:py-14 max-w-3xl w-full">
-          {tab === "overview"  && <OverviewTab client={client} projects={projects} invoices={invoices} files={files} setTab={setTab} />}
-          {tab === "projects"  && <ProjectsTab projects={projects} />}
-          {tab === "invoices"  && <InvoicesTab invoices={invoices} />}
-          {tab === "files"     && <FilesTab    files={files} />}
-          {tab === "messages"  && <MessagesTab clientId={client?.id ?? ""} initialMessages={rm} />}
-          {tab === "support"   && <SupportTab  client={client} />}
+        <main className="flex-1 px-6 sm:px-12 py-10 sm:py-14 max-w-3xl w-full" style={{ animation: "rise-in 240ms cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div style={{ display: tab === "overview" ? undefined : "none" }}>
+            <OverviewTab client={client} projects={projects} invoices={invoices} files={files} setTab={setTab} />
+          </div>
+          <div style={{ display: tab === "projects" ? undefined : "none" }}>
+            <ProjectsTab projects={projects} />
+          </div>
+          <div style={{ display: tab === "invoices" ? undefined : "none" }}>
+            <InvoicesTab invoices={invoices} />
+          </div>
+          <div style={{ display: tab === "files" ? undefined : "none" }}>
+            <FilesTab files={files} />
+          </div>
+          <div style={{ display: tab === "messages" ? undefined : "none" }}>
+            <MessagesTab clientId={client?.id ?? ""} initialMessages={rm} key={client?.id} />
+          </div>
+          <div style={{ display: tab === "support" ? undefined : "none" }}>
+            <SupportTab client={client} />
+          </div>
         </main>
       </div>
     </div>

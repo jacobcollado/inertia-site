@@ -6,5 +6,8 @@ const nextConfig = {
     root: path.resolve("."),
   },
   productionBrowserSourceMaps: false,
+  experimental: {
+    optimizePackageImports: ["@supabase/supabase-js", "@supabase/ssr"],
+  },
 };
 export default nextConfig;

@@ -523,8 +523,17 @@ function MessagesTab({ clientId, initial }: { clientId: string; initial: Message
 
   const fmtTime = (iso: string) =>
     new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  const fmtDay = (iso: string) =>
-    new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  const fmtDay = (iso: string) => {
+    const d = new Date(iso);
+    const today = new Date();
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+    const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+    if (sameDay(d, today)) return "Today";
+    if (sameDay(d, yesterday)) return "Yesterday";
+    const sameYear = d.getFullYear() === today.getFullYear();
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", ...(!sameYear && { year: "numeric" }) });
+  };
 
   let lastDay = "";
 
@@ -545,8 +554,10 @@ function MessagesTab({ clientId, initial }: { clientId: string; initial: Message
           return (
             <div key={m.id}>
               {showDay && (
-                <div className="flex items-center justify-center py-3">
-                  <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{day}</span>
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px bg-[rgb(var(--line))]" />
+                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">{day}</span>
+                  <div className="flex-1 h-px bg-[rgb(var(--line))]" />
                 </div>
               )}
               <div className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
