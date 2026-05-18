@@ -64,7 +64,7 @@ export function ContourCanvas() {
 
     const isDark = () => document.documentElement.classList.contains("dark");
 
-    const getBlue = (alpha: number) => `rgba(37,99,235,${alpha})`;
+    const getBlue = (alpha: number) => isDark() ? `rgba(80,140,255,${alpha})` : `rgba(37,99,235,${alpha})`;
 
     const setPoint = (clientX: number, clientY: number) => {
       const rect = canvas.getBoundingClientRect();

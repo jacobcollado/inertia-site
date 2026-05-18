@@ -145,82 +145,82 @@ export function SoundwaveHero() {
       const step = (maxVal - minVal) / (LEVELS + 1);
 
       // Accent line: the middle contour level, slowly cycles through levels over time
-      const accentLi = Math.floor((now * 0.00008) % LEVELS);
-
       for (let li = 0; li < LEVELS; li++) {
         const level = minVal + step * (li + 1);
-        const isAccent = li === accentLi;
+        const isAccent = li === 2 || li === 6 || li === 11;
+        const isMajor = li === 0 || li === 4 || li === 9 || li === 13;
 
-        // Occasional heavier lines: primes-ish offsets so it never feels periodic
-        const isMajor = li === 2 || li === 6 || li === 11;
+        const buildPath = () => {
+          ctx.beginPath();
+          for (let r = 0; r < rows - 1; r++) {
+            for (let c = 0; c < cols - 1; c++) {
+              const x0 = c * CELL;
+              const y0 = r * CELL;
+              const x1 = x0 + CELL;
+              const y1 = y0 + CELL;
+              const v00 = field[r * cols + c];
+              const v10 = field[r * cols + c + 1];
+              const v01 = field[(r + 1) * cols + c];
+              const v11 = field[(r + 1) * cols + c + 1];
+              const idx =
+                (v00 > level ? 8 : 0) |
+                (v10 > level ? 4 : 0) |
+                (v11 > level ? 2 : 0) |
+                (v01 > level ? 1 : 0);
+              if (idx === 0 || idx === 15) continue;
+              const top    = { x: x0 + interp(v00, v10, level) * CELL, y: y0 };
+              const right  = { x: x1, y: y0 + interp(v10, v11, level) * CELL };
+              const bottom = { x: x0 + interp(v01, v11, level) * CELL, y: y1 };
+              const left   = { x: x0, y: y0 + interp(v00, v01, level) * CELL };
+              switch (idx) {
+                case 1:  case 14: ctx.moveTo(left.x, left.y);     ctx.lineTo(bottom.x, bottom.y); break;
+                case 2:  case 13: ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(right.x, right.y);   break;
+                case 3:  case 12: ctx.moveTo(left.x, left.y);     ctx.lineTo(right.x, right.y);   break;
+                case 4:  case 11: ctx.moveTo(top.x, top.y);       ctx.lineTo(right.x, right.y);   break;
+                case 6:  case 9:  ctx.moveTo(top.x, top.y);       ctx.lineTo(bottom.x, bottom.y); break;
+                case 7:  case 8:  ctx.moveTo(left.x, left.y);     ctx.lineTo(top.x, top.y);       break;
+                case 5:
+                  ctx.moveTo(left.x, left.y);     ctx.lineTo(top.x, top.y);
+                  ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(right.x, right.y);
+                  break;
+                case 10:
+                  ctx.moveTo(top.x, top.y);       ctx.lineTo(right.x, right.y);
+                  ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(left.x, left.y);
+                  break;
+              }
+            }
+          }
+        };
 
         if (isAccent) {
-          ctx.strokeStyle = dark ? `rgba(100,160,255,0.7)` : `rgba(60,100,255,0.45)`;
-          ctx.lineWidth = 1.6;
+          // Glow pass
+          ctx.save();
+          ctx.filter = "blur(4px)";
+          ctx.strokeStyle = dark ? `rgba(37,99,235,0.35)` : `rgba(37,99,235,0.35)`;
+          ctx.lineWidth = 5;
+          buildPath(); ctx.stroke();
+          ctx.filter = "none";
+          ctx.restore();
+          // Sharp pass
+          ctx.strokeStyle = dark ? `rgba(37,99,235,0.9)` : `rgba(37,99,235,0.9)`;
+          ctx.lineWidth = 1.8;
+          buildPath(); ctx.stroke();
         } else if (isMajor) {
           const majorAlpha = dark ? 0.44 : 0.34;
           ctx.strokeStyle = dark
             ? `rgba(237,237,237,${majorAlpha})`
             : `rgba(14,14,14,${majorAlpha})`;
           ctx.lineWidth = 1.4;
+          buildPath(); ctx.stroke();
         } else {
           const baseAlpha = dark ? 0.22 : 0.16;
           ctx.strokeStyle = dark
             ? `rgba(237,237,237,${baseAlpha})`
             : `rgba(14,14,14,${baseAlpha})`;
           ctx.lineWidth = 0.75;
+          buildPath(); ctx.stroke();
         }
 
-        ctx.beginPath();
-
-        // Marching squares
-        for (let r = 0; r < rows - 1; r++) {
-          for (let c = 0; c < cols - 1; c++) {
-            const x0 = c * CELL;
-            const y0 = r * CELL;
-            const x1 = x0 + CELL;
-            const y1 = y0 + CELL;
-
-            const v00 = field[r * cols + c];
-            const v10 = field[r * cols + c + 1];
-            const v01 = field[(r + 1) * cols + c];
-            const v11 = field[(r + 1) * cols + c + 1];
-
-            const idx =
-              (v00 > level ? 8 : 0) |
-              (v10 > level ? 4 : 0) |
-              (v11 > level ? 2 : 0) |
-              (v01 > level ? 1 : 0);
-
-            if (idx === 0 || idx === 15) continue;
-
-            // Edge midpoints
-            const top    = { x: x0 + interp(v00, v10, level) * CELL, y: y0 };
-            const right  = { x: x1, y: y0 + interp(v10, v11, level) * CELL };
-            const bottom = { x: x0 + interp(v01, v11, level) * CELL, y: y1 };
-            const left   = { x: x0, y: y0 + interp(v00, v01, level) * CELL };
-
-            switch (idx) {
-              case 1:  case 14: ctx.moveTo(left.x, left.y);   ctx.lineTo(bottom.x, bottom.y); break;
-              case 2:  case 13: ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(right.x, right.y);  break;
-              case 3:  case 12: ctx.moveTo(left.x, left.y);   ctx.lineTo(right.x, right.y);   break;
-              case 4:  case 11: ctx.moveTo(top.x, top.y);     ctx.lineTo(right.x, right.y);   break;
-              case 6:  case 9:  ctx.moveTo(top.x, top.y);     ctx.lineTo(bottom.x, bottom.y); break;
-              case 7:  case 8:  ctx.moveTo(left.x, left.y);   ctx.lineTo(top.x, top.y);       break;
-              // Saddle cases
-              case 5:
-                ctx.moveTo(left.x, left.y);   ctx.lineTo(top.x, top.y);
-                ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(right.x, right.y);
-                break;
-              case 10:
-                ctx.moveTo(top.x, top.y);     ctx.lineTo(right.x, right.y);
-                ctx.moveTo(bottom.x, bottom.y); ctx.lineTo(left.x, left.y);
-                break;
-            }
-          }
-        }
-
-        ctx.stroke();
       }
 
       ctx.restore();

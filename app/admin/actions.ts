@@ -61,6 +61,8 @@ export async function createProject(clientId: string, formData: FormData) {
     phase: formData.get("phase") as string || null,
     last_update: formData.get("last_update") as string || null,
     notes: formData.get("notes") as string || null,
+    start_date: formData.get("start_date") as string || null,
+    target_date: formData.get("target_date") as string || null,
   });
   if (error) return { error: error.message };
   revalidatePath(`/admin/clients/${clientId}`);
@@ -75,6 +77,8 @@ export async function updateProject(projectId: string, clientId: string, formDat
     phase: formData.get("phase") as string || null,
     last_update: formData.get("last_update") as string || null,
     notes: formData.get("notes") as string || null,
+    start_date: formData.get("start_date") as string || null,
+    target_date: formData.get("target_date") as string || null,
   }).eq("id", projectId);
   revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
@@ -101,6 +105,7 @@ export async function createInvoice(clientId: string, formData: FormData) {
     amount: Math.round(parseFloat(amountRaw) * 100),
     status: formData.get("status") as string || "pending",
     due_date: formData.get("due_date") as string || null,
+    payment_url: formData.get("payment_url") as string || null,
   });
   if (error) return { error: error.message };
   revalidatePath(`/admin/clients/${clientId}`);

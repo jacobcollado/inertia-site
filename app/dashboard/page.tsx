@@ -31,11 +31,28 @@ export default async function DashboardPage() {
         .eq("client_id", id).order("created_at", { ascending: true }),
     ]);
 
+  // Fetch optional columns added in migration 003 separately so a missing
+  // column doesn't break the whole query before the migration is applied.
+  const [{ data: projectDates }, { data: invoicePayment }] = await Promise.all([
+    supabase.from("projects")
+      .select("id, start_date, target_date")
+      .eq("client_id", id),
+    supabase.from("invoices")
+      .select("id, payment_url")
+      .eq("client_id", id),
+  ]);
+
+  const projectDateMap = Object.fromEntries((projectDates ?? []).map(p => [p.id, { start_date: p.start_date ?? null, target_date: p.target_date ?? null }]));
+  const invoicePaymentMap = Object.fromEntries((invoicePayment ?? []).map(i => [i.id, { payment_url: i.payment_url ?? null }]));
+
+  const enrichedProjects = (projects ?? []).map(p => ({ ...p, ...( projectDateMap[p.id] ?? { start_date: null, target_date: null }) }));
+  const enrichedInvoices = (invoices ?? []).map(i => ({ ...i, ...( invoicePaymentMap[i.id] ?? { payment_url: null }) }));
+
   return (
     <DashboardShell
       client={client}
-      projects={projects ?? []}
-      invoices={invoices ?? []}
+      projects={enrichedProjects}
+      invoices={enrichedInvoices}
       files={files ?? []}
       messages={messages ?? []}
     />

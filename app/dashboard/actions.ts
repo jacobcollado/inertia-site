@@ -31,6 +31,17 @@ export async function markAdminMessagesRead(clientId: string) {
   return { success: true };
 }
 
+export async function updateClientProfile(name: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  const { error } = await supabase.from("clients").update({ name }).eq("id", user.id);
+  if (error) return { error: error.message };
+  await supabase.auth.updateUser({ data: { name } });
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
 export async function getSignedFileUrl(storagePath: string) {
   const isStoragePath = !storagePath.startsWith("http");
   if (!isStoragePath) return { url: storagePath };

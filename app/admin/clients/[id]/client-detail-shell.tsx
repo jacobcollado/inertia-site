@@ -17,8 +17,8 @@ import {
 /* ── Types ────────────────────────────────────────────────────────── */
 
 type Client  = { id: string; email: string; name: string | null; company: string | null; banned?: boolean; last_sign_in_at?: string | null; confirmed_at?: string | null };
-type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null };
-type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null };
+type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null; start_date: string | null; target_date: string | null };
+type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null; payment_url: string | null };
 type DFile   = { id: string; label: string; url: string; uploaded_at: string };
 type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
 type AuditEntry = { id: string; action: string; detail: string | null; created_at: string };
@@ -122,6 +122,16 @@ function ProjectsTab({ clientId, projects }: { clientId: string; projects: Proje
           </select>
           <input name="phase" placeholder="Phase (e.g. Design review)" className={inputClass} />
           <input name="last_update" placeholder="Last update label (e.g. Updated May 1)" className={inputClass} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Start date</label>
+              <input name="start_date" type="date" className={inputClass} />
+            </div>
+            <div>
+              <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Target date</label>
+              <input name="target_date" type="date" className={inputClass} />
+            </div>
+          </div>
           <textarea name="notes" rows={3} placeholder="Notes visible to client" className={`${inputClass} resize-none`} />
           <div className="flex items-center gap-3 pt-1">
             <button type="submit" disabled={pending}
@@ -155,6 +165,16 @@ function ProjectsTab({ clientId, projects }: { clientId: string; projects: Proje
                   </select>
                   <input name="phase" defaultValue={p.phase ?? ""} placeholder="Phase" className={inputClass} />
                   <input name="last_update" defaultValue={p.last_update ?? ""} placeholder="Last update label" className={inputClass} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Start date</label>
+                      <input name="start_date" type="date" defaultValue={p.start_date ?? ""} className={inputClass} />
+                    </div>
+                    <div>
+                      <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Target date</label>
+                      <input name="target_date" type="date" defaultValue={p.target_date ?? ""} className={inputClass} />
+                    </div>
+                  </div>
                   <textarea name="notes" rows={3} defaultValue={p.notes ?? ""} placeholder="Notes" className={`${inputClass} resize-none`} />
                   <div className="flex items-center gap-3">
                     <button type="submit" disabled={pending}
@@ -262,6 +282,7 @@ function InvoicesTab({ clientId, invoices }: { clientId: string; invoices: Invoi
             <option value="overdue">Overdue</option>
           </select>
           <input name="due_date" type="date" className={inputClass} />
+          <input name="payment_url" type="url" placeholder="Payment link (optional)" className={inputClass} />
           {error && <p className="text-[13px] tracking-tight text-red-400">{error}</p>}
           <div className="flex items-center gap-3 pt-1">
             <button type="submit" disabled={pending}
