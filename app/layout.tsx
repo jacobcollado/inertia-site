@@ -18,7 +18,7 @@ const BASE_URL = "https://byinertia.com";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Inertia",
+    default: "Inertia: We Build It All",
     template: "%s - Inertia",
   },
   description: "Inertia builds custom Shopify storefronts and digital products for brands that treat the web as the product.",

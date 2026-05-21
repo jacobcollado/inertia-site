@@ -6,11 +6,9 @@ import Link from "next/link";
 import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiFramer, SiVercel, SiApple, SiNextdotjs, SiReact, SiSupabase, SiFigma } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
-import { PastWork } from "./past-work";
 import { SoundwaveHero } from "./soundwave-hero";
 import { ContourCanvas } from "./contour-canvas";
 import { createClient } from "@/lib/supabase/client";
-import type { WorkMeta } from "@/lib/work";
 import type { PostMeta } from "@/lib/posts";
 
 function formatDate(iso: string): string {
@@ -97,16 +95,762 @@ const BUILDING = [
 
 const BUILDING_TABS = ["All", "Agency", "Themes", "Software"] as const;
 
-export default function Home() {
-  const [work, setWork] = useState<WorkMeta[]>([]);
+// -- Start prompt -------------------------------------------------------
+
+const PROMPT_SUGGESTIONS: { label: string; icon: React.ReactNode }[] = [
+  {
+    label: "A Shopify storefront",
+    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
+  },
+  {
+    label: "An iOS app",
+    icon: <SiApple className="w-3.5 h-3.5 shrink-0" />,
+  },
+  {
+    label: "A brand identity",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+        <circle cx="8" cy="8" r="3" /><circle cx="8" cy="8" r="6.5" strokeOpacity="0.4" />
+      </svg>
+    ),
+  },
+  {
+    label: "A custom dashboard",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+        <rect x="1.5" y="1.5" width="5" height="5" rx="1" /><rect x="9.5" y="1.5" width="5" height="5" rx="1" />
+        <rect x="1.5" y="9.5" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    label: "A Framer site",
+    icon: <SiFramer className="w-3.5 h-3.5 shrink-0" />,
+  },
+  {
+    label: "A Meta ad campaign",
+    icon: <SiMeta className="w-3.5 h-3.5 shrink-0" />,
+  },
+  {
+    label: "A Whop storefront",
+    icon: (
+      <svg viewBox="0 0 383.2 196.4" fill="currentColor" className="w-3.5 h-3.5 shrink-0">
+        <path d="M60.9,0C35.7,0,18.4,11.1,5.2,23.5c0,0-5.3,5-5.2,5.2l55.2,55.2l55.2-55.2C99.9,14.3,80.2,0,60.9,0z" />
+        <path d="M197.2,0c-25.2,0-42.5,11.1-55.7,23.5c0,0-4.8,4.9-5.1,5.2L68.2,96.9l55.1,55.1L246.6,28.7C236.1,14.3,216.5,0,197.2,0z" />
+        <path d="M333.8,0c-25.2,0-42.5,11.1-55.7,23.5c0,0-5,4.9-5.2,5.2L136.4,165.2l14.4,14.4c22.3,22.3,58.9,22.3,81.3,0L383,28.7h0.2C372.8,14.3,353.1,0,333.8,0z" />
+      </svg>
+    ),
+  },
+  {
+    label: "A mobile app",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+        <rect x="4" y="1" width="8" height="14" rx="2" />
+        <circle cx="8" cy="12.5" r="0.75" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    label: "A Shopify theme",
+    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
+  },
+];
+
+const PLACEHOLDER_OPTIONS = [
+  "A Shopify store for a streetwear brand...",
+  "An iOS app for my community...",
+  "A brand identity from scratch...",
+  "A dashboard to track my orders...",
+  "A Framer site for my agency...",
+];
+
+function PlaceholderChar({ ch, idx, animKey, entering, exiting, stagger }: {
+  ch: string; idx: number; animKey: number; entering: boolean; exiting: boolean; stagger: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    fetch("/api/content").then((r) => r.json()).then((d) => {
-      setWork(d.work ?? []);
+    const el = ref.current;
+    if (!el || !entering) return;
+    // paint hidden first, then animate in next frame
+    el.style.transition = "none";
+    el.style.opacity = "0";
+    el.style.transform = "translateY(6px)";
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.transition = `opacity 420ms cubic-bezier(0.22,1,0.36,1) ${stagger}ms, transform 420ms cubic-bezier(0.22,1,0.36,1) ${stagger}ms`;
+        el.style.opacity = "0.4";
+        el.style.transform = "translateY(0)";
+      });
     });
+  }, [animKey, entering, stagger]);
+
+  return (
+    <span
+      ref={ref}
+      style={{
+        display: "inline-block",
+        width: ch === " " ? "0.3em" : undefined,
+        color: "rgb(var(--muted))",
+        opacity: exiting ? 0 : 0.4,
+        transform: exiting ? "translateY(-5px)" : "translateY(0)",
+        transition: exiting
+          ? `opacity 360ms cubic-bezier(0.4,0,1,1) ${stagger}ms, transform 360ms cubic-bezier(0.4,0,1,1) ${stagger}ms`
+          : undefined,
+        fontSize: "15px",
+        letterSpacing: "-0.01em",
+      }}
+    >
+      {ch}
+    </span>
+  );
+}
+
+function AnimatedPlaceholder({ active }: { active: boolean }) {
+  const [idx, setIdx] = useState(0);
+  const [animKey, setAnimKey] = useState(0);
+  const [exiting, setExiting] = useState(false);
+  const [entering, setEntering] = useState(true);
+
+  useEffect(() => {
+    if (!active) return;
+    const hold = setTimeout(() => {
+      setExiting(true);
+      setEntering(false);
+      setTimeout(() => {
+        setExiting(false);
+        setEntering(true);
+        setIdx(i => (i + 1) % PLACEHOLDER_OPTIONS.length);
+        setAnimKey(k => k + 1);
+      }, 600);
+    }, 4000);
+    return () => clearTimeout(hold);
+  }, [animKey, active]);
+
+  const text = PLACEHOLDER_OPTIONS[idx];
+  const len = text.length;
+  const staggerPer = Math.min(18, 480 / len);
+
+  return (
+    <span className="pointer-events-none absolute inset-0 flex items-center px-0 overflow-hidden" aria-hidden="true">
+      {text.split("").map((ch, i) => (
+        <PlaceholderChar
+          key={`${animKey}-${i}`}
+          ch={ch}
+          idx={i}
+          animKey={animKey}
+          entering={entering}
+          exiting={exiting}
+          stagger={staggerPer * i}
+        />
+      ))}
+    </span>
+  );
+}
+
+function StartPrompt() {
+  const [input, setInput] = useState("");
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const updateScrollState = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateScrollState();
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    return () => el.removeEventListener("scroll", updateScrollState);
   }, []);
 
-  return <VisualLayout work={work} />;
+  const handleSuggestion = (s: string) => {
+    setInput(s);
+    inputRef.current?.focus();
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    window.open(`https://www.instagram.com/by.inertia/`, "_blank");
+  };
+
+  const scroll = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -160 : 160, behavior: "smooth" });
+  };
+
+  const arrowClass = "hidden sm:flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
+
+  return (
+    <section className="px-6 sm:px-8 py-16 sm:py-24 flex flex-col items-center gap-10 border-t border-[rgb(var(--line))]">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
+          What are you building?
+        </p>
+        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] max-w-xs">
+          Tell us. We&apos;ll figure out the rest.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="w-full max-w-xl flex flex-col gap-3">
+        <div
+          className="flex items-center gap-3 rounded-xl px-5 py-3.5 border transition-colors duration-150"
+          style={{
+            background: "rgb(var(--bg))",
+            borderColor: focused ? "rgba(60,100,255,0.5)" : "rgb(var(--line))",
+          }}
+        >
+          <div className="relative flex-1">
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] outline-none"
+            />
+            {!input && <AnimatedPlaceholder active={!focused} />}
+          </div>
+          <button
+            type="submit"
+            className="shrink-0 rounded-lg px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30"
+            style={{ background: "rgb(60,100,255)" }}
+            disabled={!input.trim()}
+          >
+            Let&apos;s talk ↗
+          </button>
+        </div>
+
+        {/* Pills row with desktop arrows */}
+        <div className="flex items-center gap-2">
+          {/* Left arrow — collapses when not needed */}
+          <div
+            className="hidden sm:block overflow-hidden transition-all duration-200"
+            style={{ width: canScrollLeft ? 28 : 0, opacity: canScrollLeft ? 1 : 0 }}
+          >
+            <button type="button" onClick={() => scroll("left")} aria-label="Scroll left" className={arrowClass}>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <path d="M10 12L6 8l4-4" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Scrollable pills with edge fades */}
+          <div className="relative flex-1 min-w-0">
+            <div
+              ref={scrollRef}
+              className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              {PROMPT_SUGGESTIONS.map((s) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => handleSuggestion(s.label)}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
+                >
+                  {s.icon}
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-10 transition-opacity duration-200"
+              style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)", opacity: canScrollLeft ? 1 : 0 }} />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-10 transition-opacity duration-200"
+              style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)", opacity: canScrollRight ? 1 : 0 }} />
+          </div>
+
+          {/* Right arrow — collapses when not needed */}
+          <div
+            className="hidden sm:block overflow-hidden transition-all duration-200"
+            style={{ width: canScrollRight ? 28 : 0, opacity: canScrollRight ? 1 : 0 }}
+          >
+            <button type="button" onClick={() => scroll("right")} aria-label="Scroll right" className={arrowClass}>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <path d="M6 4l4 4-4 4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+// -- Aether feature moment ----------------------------------------------
+
+function AetherFeature() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const cards = [
+    { label: "Theme load time", value: "0.8s", sub: "avg LCP on Shopify" },
+    { label: "Conversion lift", value: "3-4×", sub: "vs. prior theme" },
+    { label: "Live in", value: "<1 hr", sub: "license, install, done" },
+  ];
+
+  return (
+    <section ref={ref} className="flex flex-col">
+      {/* Heading + body — centered on both */}
+      <div
+        className="flex flex-col items-center text-center gap-4 px-6 sm:px-8 py-10"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(14px)",
+          transition: "opacity 550ms cubic-bezier(0.22,1,0.36,1), transform 550ms cubic-bezier(0.22,1,0.36,1)",
+        }}
+      >
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
+          Meet{" "}
+          <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
+            <SiShopify style={{ display: "inline", width: "0.8em", height: "0.8em", color: "#fff", flexShrink: 0 }} />Aether
+          </span>
+        </h2>
+        <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-lg">
+          The right thing is always obvious. The details reward attention. And the whole time, it&apos;s quietly converting.
+        </p>
+      </div>
+
+      {/* Mobile: mockup then CTAs */}
+      <div className="sm:hidden flex flex-col gap-6 px-6 pb-10">
+        <div
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(20px)",
+            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 120ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 120ms",
+          }}
+        >
+          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} />
+          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} />
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="/aether" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
+            See Aether →
+          </Link>
+          <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+            License it
+          </Link>
+        </div>
+      </div>
+
+      {/* Desktop: mockup left, stat cards right */}
+      <div className="hidden sm:flex gap-8 px-8 pb-12 items-start justify-center">
+        {/* Mockup */}
+        <div
+          className="w-[55%] shrink-0"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(20px)",
+            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 120ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 120ms",
+          }}
+        >
+          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} />
+          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} />
+        </div>
+
+        {/* Stat cards + CTAs */}
+        <div className="flex flex-col gap-3 w-52 shrink-0 pt-4">
+          {cards.map((c, i) => (
+            <div
+              key={c.label}
+              className="flex flex-col gap-1 border border-[rgb(var(--line))] rounded-xl px-4 py-4"
+              style={{
+                background: "rgb(var(--bg))",
+                opacity: visible ? 1 : 0,
+                transform: visible ? "translateY(0)" : "translateY(12px)",
+                transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${200 + i * 80}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${200 + i * 80}ms`,
+              }}
+            >
+              <span className="text-[1.5rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none">{c.value}</span>
+              <span className="text-[0.7rem] tracking-tight text-[rgb(var(--muted))]">{c.label}</span>
+              <span className="text-[0.65rem] tracking-tight text-[rgb(var(--muted))] opacity-60">{c.sub}</span>
+            </div>
+          ))}
+          <div
+            className="flex flex-col gap-2 pt-2"
+            style={{
+              opacity: visible ? 1 : 0,
+              transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1) 500ms",
+            }}
+          >
+            <Link href="/aether" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
+              See Aether →
+            </Link>
+            <Link href="/aether/buy" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+              License it
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// -- Platform diagram ---------------------------------------------------
+
+function PlatformDiagram() {
+  const fg = "rgb(var(--fg))";
+  const line = "rgb(var(--line))";
+  const muted = "rgb(var(--muted))";
+
+  // Center hub and 4 spokes
+  const cx = 200, cy = 180;
+  const r = 58;
+  const nodes = [
+    { angle: -100, label: "Storefront", sub: "Shopify / web" },
+    { angle: -20,  label: "Apps",       sub: "iOS / Android" },
+    { angle:  60,  label: "Brand",      sub: "Identity / UI" },
+    { angle: 140,  label: "Growth",     sub: "Ads / campaigns" },
+  ];
+
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+
+  return (
+    <svg viewBox="-30 30 460 310" fill="none" className="w-full max-w-2xl" aria-hidden="true">
+      {/* Outer orbit ring */}
+      <circle cx={cx} cy={cy} r={r + 68} stroke={line} strokeWidth="0.8" strokeOpacity="0.25" />
+
+      {/* Spoke lines */}
+      {nodes.map((n) => {
+        const nx = cx + Math.cos(toRad(n.angle)) * r;
+        const ny = cy + Math.sin(toRad(n.angle)) * r;
+        const ex = cx + Math.cos(toRad(n.angle)) * (r + 68);
+        const ey = cy + Math.sin(toRad(n.angle)) * (r + 68);
+        return (
+          <line key={n.label}
+            x1={nx} y1={ny} x2={ex} y2={ey}
+            stroke={fg} strokeWidth="1" strokeOpacity="0.35" strokeDasharray="3 4"
+          />
+        );
+      })}
+
+      {/* Node circles */}
+      {nodes.map((n) => {
+        const nx = cx + Math.cos(toRad(n.angle)) * (r + 68);
+        const ny = cy + Math.sin(toRad(n.angle)) * (r + 68);
+        const labelRight = nx > cx;
+        const labelX = labelRight ? nx + 30 : nx - 30;
+        return (
+          <g key={n.label}>
+            <circle cx={nx} cy={ny} r="24" fill={fg} fillOpacity="0.1" stroke={fg} strokeWidth="1" strokeOpacity="0.4" />
+            <circle cx={nx} cy={ny} r="4.5" fill={fg} fillOpacity="0.9" />
+            <text
+              x={labelX}
+              y={ny - 3}
+              textAnchor={labelRight ? "start" : "end"}
+              fill={fg}
+              fontSize="12.5"
+              fontFamily="inherit"
+              fontWeight="500"
+              opacity="0.9"
+              letterSpacing="-0.4"
+            >{n.label}</text>
+            <text
+              x={labelX}
+              y={ny + 12}
+              textAnchor={labelRight ? "start" : "end"}
+              fill={muted}
+              fontSize="10.5"
+              fontFamily="inherit"
+              opacity="0.6"
+              letterSpacing="-0.2"
+            >{n.sub}</text>
+          </g>
+        );
+      })}
+
+      {/* Hub rings */}
+      <circle cx={cx} cy={cy} r={r} fill={fg} fillOpacity="0.05" stroke={fg} strokeWidth="1" strokeOpacity="0.2" />
+      <circle cx={cx} cy={cy} r={r - 16} fill={fg} fillOpacity="0.04" stroke={fg} strokeWidth="0.6" strokeOpacity="0.15" />
+
+      {/* Hub center */}
+      <circle cx={cx} cy={cy} r="9" fill={fg} fillOpacity="0.85" />
+      <circle cx={cx} cy={cy} r="4" fill={fg} fillOpacity="1" />
+      <text
+        x={cx}
+        y={cy + 26}
+        textAnchor="middle"
+        fill={fg}
+        fontSize="12"
+        fontFamily="inherit"
+        fontWeight="500"
+        opacity="0.75"
+        letterSpacing="-0.3"
+      >Inertia</text>
+
+      {/* Tick marks */}
+      {Array.from({ length: 24 }, (_, i) => {
+        const a = toRad(i * 15);
+        return (
+          <line key={i}
+            x1={cx + Math.cos(a) * (r - 5)}
+            y1={cy + Math.sin(a) * (r - 5)}
+            x2={cx + Math.cos(a) * r}
+            y2={cy + Math.sin(a) * r}
+            stroke={fg} strokeWidth="0.7" strokeOpacity="0.2"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+// -- Platform signal ----------------------------------------------------
+
+function PlatformSignal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <section ref={ref} className="flex flex-col">
+      {/* Mobile: stacked */}
+      <div className="sm:hidden flex flex-col gap-6 px-6 py-10">
+        <p
+          className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(12px)",
+            transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        >
+          What you{" "}
+          <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
+          {" "}want to do, we do.
+        </p>
+        <div
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(16px)",
+            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 150ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 150ms",
+          }}
+        >
+          <PlatformDiagram />
+        </div>
+      </div>
+
+      {/* Desktop: copy left, diagram right */}
+      <div className="hidden sm:flex items-center gap-10 px-8 py-12">
+        <div
+          className="flex-1 flex flex-col gap-6"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(12px)",
+            transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        >
+          <p className="text-[clamp(2rem,3.5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-sm">
+            What you{" "}
+            <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
+            {" "}want to do, we do.
+          </p>
+          <p className="text-[clamp(0.9rem,1.6vw,1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
+            Storefront, app, brand, growth. One team, no handoffs, no referrals.
+          </p>
+          <a
+            href="https://www.instagram.com/by.inertia/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex self-start items-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+          >
+            Start a project ↗
+          </a>
+        </div>
+        <div
+          className="flex-1"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(16px)",
+            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 150ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 150ms",
+          }}
+        >
+          <PlatformDiagram />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// -- Social proof -------------------------------------------------------
+
+const TESTIMONIALS = [
+  {
+    quote: "Storefront went live in 11 days. Our conversion rate went up 18% the first month. I stopped questioning their process after week one.",
+    name: "Dominic R.",
+    role: "Founder, Vaulted",
+    initials: "DR",
+    color: "rgb(60,100,255)",
+  },
+  {
+    quote: "Every other agency sent us a mood board. Inertia sent us a staging link.",
+    name: "Maya S.",
+    role: "Creative Director, Lune",
+    initials: "MS",
+    color: "rgb(120,60,220)",
+  },
+  {
+    quote: "We handed them a brand doc and a deadline. They hit both. Aether looks better than stores with 10x our budget.",
+    name: "James O.",
+    role: "Co-founder, Arca Studio",
+    initials: "JO",
+    color: "rgb(20,160,100)",
+  },
+];
+
+function TestimonialCard({ t, style }: { t: typeof TESTIMONIALS[number]; style?: React.CSSProperties }) {
+  return (
+    <div
+      className="flex flex-col gap-4 border border-[rgb(var(--line))] rounded-2xl px-5 py-5"
+      style={{ background: "rgb(var(--bg))", ...style }}
+    >
+      <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--fg))] opacity-80">
+        &ldquo;{t.quote}&rdquo;
+      </p>
+      <div className="flex items-center gap-2.5">
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[0.65rem] font-semibold text-white"
+          style={{ background: t.color }}
+        >
+          {t.initials}
+        </div>
+        <div className="flex flex-col leading-none gap-0.5">
+          <span className="text-[clamp(0.8rem,1.5vw,0.875rem)] tracking-tight text-[rgb(var(--fg))]">{t.name}</span>
+          <span className="text-[clamp(0.7rem,1.3vw,0.8rem)] tracking-tight text-[rgb(var(--muted))]">{t.role}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SocialProof() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <section ref={ref} className="py-12 sm:py-16"
+      style={{
+        opacity: visible ? 1 : 0,
+        transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1)",
+      }}
+    >
+      {/* Mobile: carousel */}
+      <div className="sm:hidden flex flex-col gap-5 px-6">
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
+          Heard from the field.
+        </h2>
+        <div className="overflow-hidden">
+          <div
+            className="flex"
+            style={{
+              transform: `translateX(${-active * 100}%)`,
+              transition: "transform 420ms cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i} className="min-w-full">
+                <TestimonialCard t={t} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {TESTIMONIALS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className="rounded-full transition-all"
+              style={{
+                width: active === i ? 20 : 6,
+                height: 6,
+                background: active === i ? "rgb(var(--fg))" : "rgb(var(--line))",
+              }}
+              aria-label={`Testimonial ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: heading top, asymmetric card grid below */}
+      <div className="hidden sm:flex flex-col gap-6 px-8">
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
+          Heard from the field.
+        </h2>
+        <div className="flex gap-3 items-stretch">
+          {/* Featured card — wider, stands alone */}
+          <div
+            className="flex-[1.4]"
+            style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(10px)",
+              transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1) 0ms, transform 500ms cubic-bezier(0.22,1,0.36,1) 0ms",
+            }}
+          >
+            <TestimonialCard t={TESTIMONIALS[0]} style={{ height: "100%" }} />
+          </div>
+          {/* Two smaller cards stacked */}
+          <div className="flex-1 flex flex-col gap-3">
+            {TESTIMONIALS.slice(1).map((t, i) => (
+              <div
+                key={t.name}
+                style={{
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? "translateY(0)" : "translateY(10px)",
+                  transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${(i + 1) * 100}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${(i + 1) * 100}ms`,
+                }}
+              >
+                <TestimonialCard t={t} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function Home() {
+  return <VisualLayout />;
 }
 
 
@@ -1147,7 +1891,7 @@ const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }
 function TechMarquee() {
   const items = [...TECH_ALL, ...TECH_ALL, ...TECH_ALL];
   return (
-    <div className="overflow-hidden select-none" aria-hidden="true">
+    <div className="overflow-hidden select-none border-t border-[rgb(var(--line))]" aria-hidden="true">
       <div className="marquee-row marquee-row--fwd">
         {items.map((tech, i) => (
           <div
@@ -1479,7 +2223,7 @@ function BlogGrid({ posts }: { posts: PostMeta[] }) {
   );
 }
 
-function VisualLayout({ work }: { work: WorkMeta[] }) {
+function VisualLayout() {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   const [buildingTab, setBuildingTab] = useState<typeof BUILDING_TABS[number]>("All");
   return (
@@ -1488,6 +2232,24 @@ function VisualLayout({ work }: { work: WorkMeta[] }) {
     <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
       <SoundwaveHero />
+
+      <StartPrompt />
+
+      <TechMarquee />
+
+      <GridRule />
+
+      <AetherFeature />
+
+      <GridRule />
+
+      <PlatformSignal />
+
+      <GridRule />
+
+      <SocialProof />
+
+      <GridRule />
 
       <div className="flex flex-col md:flex-row gap-y-0 overflow-visible">
 
@@ -1566,16 +2328,6 @@ function VisualLayout({ work }: { work: WorkMeta[] }) {
         </div>
 
       </div>
-
-      <TechMarquee />
-
-      <GridRule />
-
-      <section className="rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
-
-        <PastWork work={work} />
-
-      </section>
 
       <ServiceCards />
 
