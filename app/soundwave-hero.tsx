@@ -19,119 +19,72 @@ export function SoundwaveHero() {
 
       const isDark = document.documentElement.classList.contains("dark");
       const [fr, fg, fb] = isDark ? [160, 185, 255] : [15, 35, 150];
-      const a = (alpha: number) => `rgba(${fr},${fg},${fb},${isDark ? alpha : alpha * 2.2})`;
+      const a = (alpha: number) => `rgba(${fr},${fg},${fb},${isDark ? alpha : alpha * 2.0})`;
 
       ctx.save();
       ctx.scale(devicePixelRatio, devicePixelRatio);
       ctx.clearRect(0, 0, W, H);
 
-      const cx = W / 2;
-      const cy = H / 2;
+      // Clear zone — text lives here, nothing draws inside
+      const clearW = Math.min(W * 0.62, 520);
+      const clearH = 200;
+      const clearX = (W - clearW) / 2;
+      const clearY = (H - clearH) / 2;
 
-      // -- Main crosshair lines --
-      ctx.strokeStyle = a(isDark ? 0.22 : 0.18);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(0, cy); ctx.lineTo(W, cy);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
-      ctx.stroke();
+      // Memory map parameters
+      const CELL_W = 38;
+      const CELL_H = 14;
+      const GAP_X = 3;
+      const GAP_Y = 3;
+      const COLS = Math.ceil(W / (CELL_W + GAP_X)) + 1;
+      const ROWS = Math.ceil(H / (CELL_H + GAP_Y)) + 1;
 
-      // -- Diagonal lines --
-      ctx.strokeStyle = a(isDark ? 0.09 : 0.07);
-      ctx.lineWidth = 0.6;
-      ctx.setLineDash([4, 8]);
-      ctx.beginPath();
-      ctx.moveTo(0, 0); ctx.lineTo(W, H);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(W, 0); ctx.lineTo(0, H);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      // Seeded random for stable hex values
+      let seed = 7;
+      const rand = () => {
+        seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+        return (seed >>> 0) / 0xffffffff;
+      };
+      const hex = () => Math.floor(rand() * 0x100).toString(16).toUpperCase().padStart(2, "0");
 
-      // -- Tick marks along horizontal axis --
-      const MAJOR_TICK = 80;
-      const MINOR_TICK = 20;
-      const MAJOR_H = 12;
-      const MINOR_H = 6;
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const x = col * (CELL_W + GAP_X);
+          const y = row * (CELL_H + GAP_Y);
 
-      ctx.lineWidth = 0.8;
-      for (let x = 0; x <= W; x += MINOR_TICK) {
-        const isMajor = x % MAJOR_TICK === 0;
-        const tickH = isMajor ? MAJOR_H : MINOR_H;
-        const alpha = isMajor ? (isDark ? 0.28 : 0.22) : (isDark ? 0.13 : 0.1);
-        ctx.strokeStyle = a(alpha);
-        ctx.beginPath();
-        ctx.moveTo(x, cy - tickH / 2);
-        ctx.lineTo(x, cy + tickH / 2);
-        ctx.stroke();
+          // Skip cells that overlap the clear zone (with padding)
+          const pad = 18;
+          const overlapX = x + CELL_W > clearX - pad && x < clearX + clearW + pad;
+          const overlapY = y + CELL_H > clearY - pad && y < clearY + clearH + pad;
+          if (overlapX && overlapY) continue;
+
+          // Fade alpha based on distance from clear zone edges
+          const distX = Math.max(0, overlapY ? (x < clearX ? clearX - pad - x - CELL_W : x - (clearX + clearW + pad)) : 0);
+          const distY = Math.max(0, overlapX ? (y < clearY ? clearY - pad - y - CELL_H : y - (clearY + clearH + pad)) : 0);
+          const dist = Math.sqrt(distX * distX + distY * distY);
+          const fade = Math.min(1, dist / 60);
+
+          // Also fade toward canvas edges
+          const edgeFadeX = Math.min(x / 40, (W - x - CELL_W) / 40, 1);
+          const edgeFadeY = Math.min(y / 40, (H - y - CELL_H) / 40, 1);
+          const edgeFade = Math.min(edgeFadeX, edgeFadeY, 1);
+
+          const alpha = fade * edgeFade * (isDark ? 0.22 : 0.18);
+          if (alpha < 0.02) continue;
+
+          // Hex cell: address-like value
+          const value = `${hex()} ${hex()}`;
+
+          // Occasionally show a "highlighted" cell (like an active address)
+          const isActive = rand() > 0.94;
+
+          ctx.font = `${isActive ? "500" : "400"} 9px monospace`;
+          ctx.fillStyle = a(isActive ? alpha * 1.8 : alpha);
+          ctx.textAlign = "left";
+          ctx.textBaseline = "top";
+          ctx.fillText(value, x, y);
+        }
       }
-
-      // -- Tick marks along vertical axis --
-      for (let y = 0; y <= H; y += MINOR_TICK) {
-        const isMajor = y % MAJOR_TICK === 0;
-        const tickH = isMajor ? MAJOR_H : MINOR_H;
-        const alpha = isMajor ? (isDark ? 0.28 : 0.22) : (isDark ? 0.13 : 0.1);
-        ctx.strokeStyle = a(alpha);
-        ctx.beginPath();
-        ctx.moveTo(cx - tickH / 2, y);
-        ctx.lineTo(cx + tickH / 2, y);
-        ctx.stroke();
-      }
-
-      // -- Concentric reference circles --
-      const radii = [60, 140, 240, 360];
-      for (const rad of radii) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
-        ctx.strokeStyle = a(isDark ? 0.1 : 0.08);
-        ctx.lineWidth = 0.7;
-        ctx.stroke();
-      }
-
-      // -- Corner bracket marks --
-      const bSize = 28;
-      const bOffset = 28;
-      const corners: [number, number, number, number][] = [
-        [bOffset, bOffset, 1, 1],
-        [W - bOffset, bOffset, -1, 1],
-        [bOffset, H - bOffset, 1, -1],
-        [W - bOffset, H - bOffset, -1, -1],
-      ];
-      ctx.strokeStyle = a(isDark ? 0.28 : 0.24);
-      ctx.lineWidth = 1;
-      for (const [x, y, sx, sy] of corners) {
-        ctx.beginPath();
-        ctx.moveTo(x + sx * bSize, y);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x, y + sy * bSize);
-        ctx.stroke();
-      }
-
-      // -- Center reticle --
-      const reticleR = 16;
-      ctx.beginPath();
-      ctx.arc(cx, cy, reticleR, 0, Math.PI * 2);
-      ctx.strokeStyle = a(isDark ? 0.15 : 0.12);
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
-
-      // Inner dot
-      ctx.beginPath();
-      ctx.arc(cx, cy, 2, 0, Math.PI * 2);
-      ctx.fillStyle = a(isDark ? 0.22 : 0.18);
-      ctx.fill();
-
-      // Gap lines through reticle
-      ctx.strokeStyle = a(isDark ? 0.15 : 0.12);
-      ctx.lineWidth = 0.8;
-      const gap = reticleR + 6;
-      const ext = 32;
-      ctx.beginPath(); ctx.moveTo(cx - gap - ext, cy); ctx.lineTo(cx - gap, cy); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx + gap, cy); ctx.lineTo(cx + gap + ext, cy); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx, cy - gap - ext); ctx.lineTo(cx, cy - gap); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(cx, cy + gap); ctx.lineTo(cx, cy + gap + ext); ctx.stroke();
 
       ctx.restore();
     };
@@ -151,13 +104,13 @@ export function SoundwaveHero() {
       style={{ width: "100%", height: "520px", zIndex: 1 }}
     >
       <div className="pointer-events-none absolute inset-x-0 bottom-0"
-        style={{ height: "50%", background: "linear-gradient(to bottom, transparent, rgb(var(--bg)))", zIndex: 2 }} />
+        style={{ height: "30%", background: "linear-gradient(to bottom, transparent, rgb(var(--bg)))", zIndex: 2 }} />
       <div className="pointer-events-none absolute inset-x-0 top-0"
-        style={{ height: "15%", background: "linear-gradient(to top, transparent, rgb(var(--bg)))", zIndex: 2 }} />
+        style={{ height: "12%", background: "linear-gradient(to top, transparent, rgb(var(--bg)))", zIndex: 2 }} />
       <div className="pointer-events-none absolute inset-y-0 left-0"
-        style={{ width: "8%", background: "linear-gradient(to right, rgb(var(--bg)), transparent)", zIndex: 2 }} />
+        style={{ width: "6%", background: "linear-gradient(to right, rgb(var(--bg)), transparent)", zIndex: 2 }} />
       <div className="pointer-events-none absolute inset-y-0 right-0"
-        style={{ width: "8%", background: "linear-gradient(to left, rgb(var(--bg)), transparent)", zIndex: 2 }} />
+        style={{ width: "6%", background: "linear-gradient(to left, rgb(var(--bg)), transparent)", zIndex: 2 }} />
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
