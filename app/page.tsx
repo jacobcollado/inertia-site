@@ -291,19 +291,19 @@ function StartPrompt() {
   const arrowClass = "hidden sm:flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
 
   return (
-    <section className="px-6 sm:px-8 py-16 sm:py-24 flex flex-col items-center gap-10 border-t border-[rgb(var(--line))]">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
+    <section className="px-6 sm:px-8 py-12 sm:py-24 flex flex-col items-center gap-8 sm:gap-10 border-t border-[rgb(var(--line))]">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <p className="text-[clamp(1.6rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
           What are you building?
         </p>
-        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] max-w-xs">
+        <p className="text-[clamp(0.8rem,1.5vw,0.9rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
           Tell us. We&apos;ll figure out the rest.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-xl flex flex-col gap-3">
         <div
-          className="flex items-center gap-3 rounded-xl px-5 py-3.5 border transition-colors duration-150"
+          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border transition-colors duration-150"
           style={{
             background: "rgb(var(--bg))",
             borderColor: focused ? "rgba(60,100,255,0.5)" : "rgb(var(--line))",
@@ -322,7 +322,7 @@ function StartPrompt() {
           </div>
           <button
             type="submit"
-            className="shrink-0 rounded-lg px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30"
+            className="shrink-0 rounded-lg px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center"
             style={{ background: "rgb(60,100,255)" }}
             disabled={!input.trim()}
           >
@@ -755,6 +755,7 @@ function SocialProof() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [active, setActive] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -766,6 +767,9 @@ function SocialProof() {
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
+
+  const prev = () => setActive(a => Math.max(0, a - 1));
+  const next = () => setActive(a => Math.min(TESTIMONIALS.length - 1, a + 1));
 
   return (
     <section ref={ref} className="py-12 sm:py-16"
@@ -779,7 +783,17 @@ function SocialProof() {
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
           Heard from the field.
         </h2>
-        <div className="overflow-hidden">
+        <div
+          className="overflow-hidden"
+          onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchEnd={e => {
+            if (touchStartX.current === null) return;
+            const dx = e.changedTouches[0].clientX - touchStartX.current;
+            if (dx < -40) next();
+            else if (dx > 40) prev();
+            touchStartX.current = null;
+          }}
+        >
           <div
             className="flex"
             style={{
@@ -794,20 +808,44 @@ function SocialProof() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {TESTIMONIALS.map((_, i) => (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {TESTIMONIALS.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                className="rounded-full transition-all"
+                style={{
+                  width: active === i ? 20 : 6,
+                  height: 6,
+                  background: active === i ? "rgb(var(--fg))" : "rgb(var(--line))",
+                }}
+                aria-label={`Testimonial ${i + 1}`}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
             <button
-              key={i}
-              onClick={() => setActive(i)}
-              className="rounded-full transition-all"
-              style={{
-                width: active === i ? 20 : 6,
-                height: 6,
-                background: active === i ? "rgb(var(--fg))" : "rgb(var(--line))",
-              }}
-              aria-label={`Testimonial ${i + 1}`}
-            />
-          ))}
+              onClick={prev}
+              disabled={active === 0}
+              className="w-8 h-8 rounded-full border border-[rgb(var(--line))] flex items-center justify-center text-[rgb(var(--muted))] transition-opacity disabled:opacity-25"
+              aria-label="Previous"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                <path d="M10 12L6 8l4-4" />
+              </svg>
+            </button>
+            <button
+              onClick={next}
+              disabled={active === TESTIMONIALS.length - 1}
+              className="w-8 h-8 rounded-full border border-[rgb(var(--line))] flex items-center justify-center text-[rgb(var(--muted))] transition-opacity disabled:opacity-25"
+              aria-label="Next"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                <path d="M6 4l4 4-4 4" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
