@@ -526,6 +526,26 @@ h1:hover .redact > span.redact-inner,
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes orbit-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes hub-pulse {
+  0%, 100% { opacity: 0.85; r: 9; }
+  50%       { opacity: 0.5;  r: 11; }
+}
+
+@keyframes node-breathe {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.7; }
+}
+
+@keyframes mockup-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
 @keyframes hero-canvas {
   0%   { opacity: 0; }
   100% { opacity: 1; }

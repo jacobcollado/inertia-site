@@ -288,12 +288,12 @@ function StartPrompt() {
     el.scrollBy({ left: dir === "left" ? -160 : 160, behavior: "smooth" });
   };
 
-  const arrowClass = "hidden sm:flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
+  const arrowClass = "flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
 
   return (
     <section className="px-6 sm:px-8 py-12 sm:py-24 flex flex-col items-center gap-8 sm:gap-10 border-t border-[rgb(var(--line))]">
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className="text-[clamp(1.6rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
+        <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
           What are you building?
         </p>
         <p className="text-[clamp(0.8rem,1.5vw,0.9rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
@@ -334,7 +334,7 @@ function StartPrompt() {
         <div className="flex items-center gap-2">
           {/* Left arrow — collapses when not needed */}
           <div
-            className="hidden sm:block overflow-hidden transition-all duration-200"
+            className="block overflow-hidden transition-all duration-200"
             style={{ width: canScrollLeft ? 28 : 0, opacity: canScrollLeft ? 1 : 0 }}
           >
             <button type="button" onClick={() => scroll("left")} aria-label="Scroll left" className={arrowClass}>
@@ -370,7 +370,7 @@ function StartPrompt() {
 
           {/* Right arrow — collapses when not needed */}
           <div
-            className="hidden sm:block overflow-hidden transition-all duration-200"
+            className="block overflow-hidden transition-all duration-200"
             style={{ width: canScrollRight ? 28 : 0, opacity: canScrollRight ? 1 : 0 }}
           >
             <button type="button" onClick={() => scroll("right")} aria-label="Scroll right" className={arrowClass}>
@@ -439,10 +439,10 @@ function AetherFeature() {
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 120ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 120ms",
           }}
         >
-          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} />
-          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} />
+          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
+          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <Link href="/aether" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
             See Aether →
           </Link>
@@ -463,8 +463,8 @@ function AetherFeature() {
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 120ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 120ms",
           }}
         >
-          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} />
-          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} />
+          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
+          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
         </div>
 
         {/* Stat cards + CTAs */}
@@ -526,8 +526,10 @@ function PlatformDiagram() {
 
   return (
     <svg viewBox="-30 30 460 310" fill="none" className="w-full max-w-2xl" aria-hidden="true">
-      {/* Outer orbit ring */}
-      <circle cx={cx} cy={cy} r={r + 68} stroke={line} strokeWidth="0.8" strokeOpacity="0.25" />
+      {/* Outer orbit ring — slow spin */}
+      <circle cx={cx} cy={cy} r={r + 68} stroke={fg} strokeWidth="1.2" strokeOpacity="0.45" strokeDasharray="4 6"
+        style={{ transformOrigin: `${cx}px ${cy}px`, animation: "orbit-spin 24s linear infinite" }}
+      />
 
       {/* Spoke lines */}
       {nodes.map((n) => {
@@ -544,14 +546,16 @@ function PlatformDiagram() {
       })}
 
       {/* Node circles */}
-      {nodes.map((n) => {
+      {nodes.map((n, ni) => {
         const nx = cx + Math.cos(toRad(n.angle)) * (r + 68);
         const ny = cy + Math.sin(toRad(n.angle)) * (r + 68);
         const labelRight = nx > cx;
         const labelX = labelRight ? nx + 30 : nx - 30;
         return (
           <g key={n.label}>
-            <circle cx={nx} cy={ny} r="24" fill={fg} fillOpacity="0.1" stroke={fg} strokeWidth="1" strokeOpacity="0.4" />
+            <circle cx={nx} cy={ny} r="24" fill={fg} fillOpacity="0.1" stroke={fg} strokeWidth="1" strokeOpacity="0.4"
+              style={{ animation: `node-breathe ${3.5 + ni * 0.7}s ease-in-out infinite`, animationDelay: `${ni * 0.4}s` }}
+            />
             <circle cx={nx} cy={ny} r="4.5" fill={fg} fillOpacity="0.9" />
             <text
               x={labelX}
@@ -583,7 +587,9 @@ function PlatformDiagram() {
       <circle cx={cx} cy={cy} r={r - 16} fill={fg} fillOpacity="0.04" stroke={fg} strokeWidth="0.6" strokeOpacity="0.15" />
 
       {/* Hub center */}
-      <circle cx={cx} cy={cy} r="9" fill={fg} fillOpacity="0.85" />
+      <circle cx={cx} cy={cy} r="9" fill={fg} fillOpacity="0.85"
+        style={{ transformOrigin: `${cx}px ${cy}px`, animation: "hub-pulse 3s ease-in-out infinite" }}
+      />
       <circle cx={cx} cy={cy} r="4" fill={fg} fillOpacity="1" />
       <text
         x={cx}
@@ -636,7 +642,7 @@ function PlatformSignal() {
       {/* Mobile: stacked */}
       <div className="sm:hidden flex flex-col gap-6 px-6 py-10">
         <p
-          className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug"
+          className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug text-center"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(12px)",
@@ -780,7 +786,7 @@ function SocialProof() {
     >
       {/* Mobile: carousel */}
       <div className="sm:hidden flex flex-col gap-5 px-6">
-        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight text-center">
           Heard from the field.
         </h2>
         <div
@@ -1359,7 +1365,7 @@ function PulseGrid() {
 
 
 
-const MISSION_WORDS = ["Your", "name", "is", "on", "it.", "So", "is", "ours."];
+const MISSION_WORDS = ["We", "work", "like", "it's", "ours."];
 
 function MissionPhrase() {
   const ref = useRef<HTMLParagraphElement>(null);
@@ -1379,11 +1385,11 @@ function MissionPhrase() {
   return (
     <p
       ref={ref}
-      className="text-[clamp(1.7rem,3.5vw,2.3rem)] font-[400] tracking-tight leading-snug pr-4 sm:pr-12"
+      className="text-[clamp(2rem,5vw,3rem)] font-normal tracking-tight leading-snug text-center sm:text-left pr-4 sm:pr-12"
       style={{ paddingTop: "6px", paddingBottom: "12px", color: "rgb(var(--fg))" }}
     >
       {MISSION_WORDS.map((word, i) => {
-        const isHighlight = word === "infrastructure";
+        const isHighlight = word === "ours.";
         return (
           <span
             key={i}
@@ -1486,10 +1492,12 @@ function StackDiagram() {
     <div className="flex flex-col sm:flex-row border-t border-b border-[rgb(var(--line))]" style={{ overflow: "visible" }}>
       {/* Left: copy */}
       <div className="relative flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 border-b border-[rgb(var(--line))] sm:border-b-0 sm:border-r border-[rgb(var(--line))] overflow-hidden">
-        <ContourCanvas />
-        <div className="relative z-10 flex flex-col gap-3 pointer-events-none">
+        <div className="relative z-10 flex flex-col items-center sm:items-start gap-3 pointer-events-none">
           <MissionPhrase />
-          <Link href="/blog" className="self-start pointer-events-auto inline-flex items-center gap-2 mt-1 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity hover:opacity-80" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
+          <p className="text-[clamp(0.85rem,1.6vw,1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left">
+            We don&apos;t outsource the hard parts. Design to deployment, one team, one stack, no handoffs.
+          </p>
+          <Link href="/blog" className="pointer-events-auto inline-flex items-center gap-2 mt-1 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity hover:opacity-80" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
             Read the blog →
           </Link>
         </div>
@@ -2289,6 +2297,10 @@ function VisualLayout() {
 
       <GridRule />
 
+      <StackDiagram />
+
+      <GridRule />
+
       <div className="flex flex-col md:flex-row gap-y-0 overflow-visible">
 
         <div className="w-full rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
@@ -2361,13 +2373,37 @@ function VisualLayout() {
             })}
           </div>
 
-          <StackDiagram />
-
         </div>
 
       </div>
 
-      <ServiceCards />
+      <GridRule />
+
+      <section className="flex flex-col items-center text-center gap-6 px-6 sm:px-8 py-16 sm:py-24">
+        <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
+          Ready to build something worth shipping?
+        </p>
+        <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm">
+          Tell us what you&apos;re working on. We&apos;ll take it from there.
+        </p>
+        <div className="flex items-center gap-3 flex-wrap justify-center">
+          <a
+            href="https://www.instagram.com/by.inertia/"
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full px-6 py-3 text-[0.9rem] tracking-tight font-medium text-white hover:opacity-80 transition-opacity"
+            style={{ background: "rgb(60,100,255)" }}
+          >
+            Start a project ↗
+          </a>
+          <Link
+            href="/aether"
+            className="rounded-full px-6 py-3 text-[0.9rem] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          >
+            Explore Aether →
+          </Link>
+        </div>
+      </section>
 
       <GridRule />
 
