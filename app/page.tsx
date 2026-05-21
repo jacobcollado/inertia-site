@@ -1489,7 +1489,7 @@ function StackDiagram() {
   }, []);
 
   return (
-    <div className="flex flex-col sm:flex-row border-t border-b border-[rgb(var(--line))]" style={{ overflow: "visible" }}>
+    <div className="flex flex-col sm:flex-row" style={{ overflow: "visible" }}>
       {/* Left: copy */}
       <div className="relative flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 border-b border-[rgb(var(--line))] sm:border-b-0 sm:border-r border-[rgb(var(--line))] overflow-hidden">
         <div className="relative z-10 flex flex-col items-center sm:items-start gap-3 pointer-events-none">

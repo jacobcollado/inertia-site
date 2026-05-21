@@ -4,7 +4,7 @@ import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Get in touch for work, collaborations, or a simple hello.",
+  description: "Start a project with Inertia. Tell us what you're building.",
 };
 
 export default function ContactPage() {
@@ -33,14 +33,8 @@ export default function ContactPage() {
 
       <div className="grid-rule" aria-hidden="true" />
 
-      <footer className="px-8 py-8 flex items-center justify-between gap-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">
+      <footer className="px-8 py-8 flex items-center text-[13px] tracking-tight text-[rgb(var(--muted))]">
         <Link href="/" className="hover:text-[rgb(var(--fg))] transition-colors">Inertia</Link>
-        <div className="flex items-center gap-1.5 text-[11px] tracking-tight">
-          <svg viewBox="0 0 8 8" className="w-2 h-2 shrink-0" aria-hidden="true">
-            <circle cx="4" cy="4" r="3" fill="rgb(var(--green))" />
-          </svg>
-          All systems operational
-        </div>
       </footer>
 
     </main>
