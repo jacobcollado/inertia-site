@@ -443,10 +443,10 @@ function AetherFeature() {
           <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
         </div>
         <div className="flex items-center justify-center gap-3">
-          <Link href="/aether" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
+          <Link href="/aether" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
             See Aether →
           </Link>
-          <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+          <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
             License it
           </Link>
         </div>
@@ -492,10 +492,10 @@ function AetherFeature() {
               transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1) 500ms",
             }}
           >
-            <Link href="/aether" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
+            <Link href="/aether" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
               See Aether →
             </Link>
-            <Link href="/aether/buy" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+            <Link href="/aether/buy" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
               License it
             </Link>
           </div>
@@ -686,7 +686,7 @@ function PlatformSignal() {
             href="https://www.instagram.com/by.inertia/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex self-start items-center gap-1.5 rounded-full px-4 py-2 text-[0.875rem] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+            className="inline-flex self-start items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
           >
             Start a project ↗
           </a>
@@ -1026,7 +1026,7 @@ function RotatingPanel() {
 
   const current = ALL_PHRASES[phraseIdx];
   const isExternal = current.cta.href.startsWith("http");
-  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity";
+  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity";
 
   return (
     <div
@@ -2391,14 +2391,14 @@ function VisualLayout() {
             href="https://www.instagram.com/by.inertia/"
             target="_blank"
             rel="noreferrer"
-            className="rounded-full px-6 py-3 text-[0.9rem] tracking-tight font-medium text-white hover:opacity-80 transition-opacity"
+            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[14px] sm:text-[15px] tracking-tight font-medium text-white hover:opacity-80 transition-opacity"
             style={{ background: "rgb(60,100,255)" }}
           >
             Start a project ↗
           </a>
           <Link
             href="/aether"
-            className="rounded-full px-6 py-3 text-[0.9rem] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[14px] sm:text-[15px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
           >
             Explore Aether →
           </Link>

@@ -140,12 +140,12 @@ export function SoundwaveHero() {
 
         <div className="pointer-events-auto flex items-center gap-3 flex-wrap justify-center" style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 600ms forwards" }}>
           <a href="https://www.instagram.com/by.inertia/" target="_blank" rel="noreferrer"
-            className="rounded-full px-5 py-2.5 text-[15px] font-medium tracking-tight transition-opacity hover:opacity-75"
+            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[14px] sm:text-[15px] font-medium tracking-tight transition-opacity hover:opacity-75"
             style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
             Start a project ↗
           </a>
           <a href="/aether"
-            className="rounded-full px-5 py-2.5 text-[15px] font-medium tracking-tight transition-opacity hover:opacity-75"
+            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[14px] sm:text-[15px] font-medium tracking-tight transition-opacity hover:opacity-75"
             style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
             See Aether →
           </a>
