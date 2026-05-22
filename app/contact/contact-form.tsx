@@ -122,6 +122,7 @@ export function ContactForm() {
 
   const goBack = () => {
     if (stepIndex === 0 || isSubmitting) return;
+    haptic(6);
     transition(() => setStepIndex((s) => s - 1));
   };
 
