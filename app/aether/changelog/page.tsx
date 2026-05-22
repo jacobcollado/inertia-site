@@ -81,16 +81,16 @@ const GUIDE: { title: string; body: string }[] = [
 ];
 
 const TYPE_META: Record<NoteType, { label: string; color: string; bg: string }> = {
-  added:    { label: "Added",    color: "#6a9ab0", bg: "rgba(50,68,80,0.18)"  },
-  improved: { label: "Improved", color: "#8080b8", bg: "rgba(62,62,90,0.18)"  },
-  fixed:    { label: "Fixed",    color: "#5a8a8a", bg: "rgba(52,70,82,0.18)"  },
-  removed:  { label: "Removed",  color: "#a07080", bg: "rgba(80,55,65,0.18)"  },
+  added:    { label: "Added",    color: "#fff", bg: "rgb(60,100,255)"   },
+  improved: { label: "Improved", color: "#fff", bg: "rgb(var(--purple))" },
+  fixed:    { label: "Fixed",    color: "#fff", bg: "rgb(var(--green))"  },
+  removed:  { label: "Removed",  color: "#fff", bg: "rgb(var(--muted))"  },
 };
 
-const LABEL_META: Record<ReleaseLabel, { color: string; bg: string }> = {
-  major: { color: "#9090c8", bg: "rgba(62,62,90,0.22)"  },
-  minor: { color: "#6a9ab0", bg: "rgba(50,68,80,0.15)"  },
-  patch: { color: "#909090", bg: "rgba(80,80,80,0.12)"  },
+const LABEL_META: Record<ReleaseLabel, { label: string; color: string; bg: string }> = {
+  major: { label: "Major", color: "#fff", bg: "rgb(60,100,255)"   },
+  minor: { label: "Minor", color: "#fff", bg: "rgb(var(--purple))" },
+  patch: { label: "Patch", color: "rgb(var(--fg))", bg: "rgb(var(--line))" },
 };
 
 const ALL_TYPES: NoteType[]     = ["added", "improved", "fixed", "removed"];
@@ -104,7 +104,7 @@ function TypeBadge({ type }: { type: NoteType }) {
   const m = TYPE_META[type];
   return (
     <span
-      className="inline-flex items-center text-[10px] tracking-wide uppercase font-medium px-2 py-0.5 rounded-sm shrink-0"
+      className="inline-flex items-center text-[11px] font-medium tracking-tight px-2.5 py-0.5 rounded-full shrink-0"
       style={{ background: m.bg, color: m.color }}
     >
       {m.label}
@@ -116,10 +116,10 @@ function LabelBadge({ label }: { label: ReleaseLabel }) {
   const m = LABEL_META[label];
   return (
     <span
-      className="inline-flex items-center text-[10px] tracking-wide uppercase font-medium px-2 py-0.5 rounded-sm"
+      className="inline-flex items-center text-[11px] font-medium tracking-tight px-2.5 py-0.5 rounded-full"
       style={{ background: m.bg, color: m.color }}
     >
-      {label}
+      {m.label}
     </span>
   );
 }
@@ -143,8 +143,8 @@ function SidebarContent({
 
       {/* Filter by type */}
       <div>
-        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Type</p>
-        <div className="flex flex-col gap-0.5">
+        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mb-3">Type</p>
+        <div className="flex flex-col gap-1">
           {ALL_TYPES.map((t) => {
             const active = activeTypes.has(t);
             const m = TYPE_META[t];
@@ -152,16 +152,26 @@ function SidebarContent({
               <button
                 key={t}
                 onClick={() => toggleType(t)}
-                className="flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded text-[13px] tracking-tight transition-colors text-left"
-                style={active ? { color: m.color } : {}}
+                className="flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-xl tracking-tight transition-all text-left [-webkit-tap-highlight-color:transparent]"
+                style={active ? { background: m.bg } : {}}
               >
                 <span
-                  className="h-1.5 w-1.5 rounded-full shrink-0 transition-opacity"
-                  style={{ background: m.color, opacity: active ? 1 : 0.25 }}
-                />
-                <span className={active ? "" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"}>
+                  className="inline-flex items-center text-[12px] font-medium tracking-tight px-2.5 py-1 rounded-full shrink-0"
+                  style={active
+                    ? { background: m.bg, color: m.color, outline: `1.5px solid ${m.color}`, outlineOffset: 1 }
+                    : { background: "rgb(var(--line))", color: "rgb(var(--muted))" }
+                  }
+                >
                   {m.label}
                 </span>
+                <span className={`text-[14px] ${active ? "text-[rgb(var(--fg))] font-medium" : "text-[rgb(var(--muted))]"}`}>
+                  {m.label}
+                </span>
+                {active && (
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-auto h-3.5 w-3.5" style={{ color: m.color }}>
+                    <polyline points="3 8 6 11 13 4" />
+                  </svg>
+                )}
               </button>
             );
           })}
@@ -172,8 +182,8 @@ function SidebarContent({
 
       {/* Filter by release */}
       <div>
-        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Release</p>
-        <div className="flex flex-col gap-0.5">
+        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mb-3">Release</p>
+        <div className="flex flex-col gap-1">
           {ALL_LABELS.map((l) => {
             const active = activeLabels.has(l);
             const m = LABEL_META[l];
@@ -181,16 +191,26 @@ function SidebarContent({
               <button
                 key={l}
                 onClick={() => toggleLabel(l)}
-                className="flex items-center gap-2.5 py-1.5 px-2 -mx-2 rounded text-[13px] tracking-tight capitalize transition-colors text-left"
-                style={active ? { color: m.color } : {}}
+                className="flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-xl tracking-tight transition-all text-left [-webkit-tap-highlight-color:transparent]"
+                style={active ? { background: m.bg } : {}}
               >
                 <span
-                  className="h-1.5 w-1.5 rounded-full shrink-0 transition-opacity"
-                  style={{ background: m.color, opacity: active ? 1 : 0.25 }}
-                />
-                <span className={active ? "" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"}>
-                  {l}
+                  className="inline-flex items-center text-[12px] font-medium tracking-tight px-2.5 py-1 rounded-full shrink-0"
+                  style={active
+                    ? { background: m.bg, color: m.color, outline: `1.5px solid ${m.color}`, outlineOffset: 1 }
+                    : { background: "rgb(var(--line))", color: "rgb(var(--muted))" }
+                  }
+                >
+                  {m.label}
                 </span>
+                <span className={`text-[14px] ${active ? "text-[rgb(var(--fg))] font-medium" : "text-[rgb(var(--muted))]"}`}>
+                  {m.label}
+                </span>
+                {active && (
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-auto h-3.5 w-3.5" style={{ color: m.color }}>
+                    <polyline points="3 8 6 11 13 4" />
+                  </svg>
+                )}
               </button>
             );
           })}
@@ -209,16 +229,16 @@ function SidebarContent({
 
       {/* Version index */}
       <div>
-        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Versions</p>
+        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mb-3">Versions</p>
         <ul className="flex flex-col gap-0.5">
           {CHANGELOG.map((entry) => (
             <li key={entry.version}>
               <a
                 href={`#v${entry.version}`}
                 onClick={onNav}
-                className="flex items-center justify-between py-1.5 px-2 -mx-2 rounded text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors tabular-nums"
+                className="flex items-center justify-between py-3 px-3 -mx-3 rounded-xl text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors tabular-nums [-webkit-tap-highlight-color:transparent]"
               >
-                <span>v{entry.version}</span>
+                <span className="text-[rgb(var(--fg))]">v{entry.version}</span>
                 <LabelBadge label={entry.label} />
               </a>
             </li>
@@ -230,15 +250,15 @@ function SidebarContent({
 
       {/* Guide */}
       <div>
-        <p className="text-[10px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40 mb-3">Guide</p>
+        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mb-3">Guide</p>
         <ul className="flex flex-col">
           {GUIDE.map((g, i) => (
             <li key={i} className="border-b border-[rgb(var(--line))] last:border-0">
               <button
                 onClick={() => setGuideOpen(guideOpen === i ? null : i)}
-                className="w-full flex items-center justify-between gap-3 py-2.5 text-left"
+                className="w-full flex items-center justify-between gap-3 py-3.5 text-left [-webkit-tap-highlight-color:transparent]"
               >
-                <span className={`text-[13px] tracking-tight transition-colors ${guideOpen === i ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"}`}>
+                <span className={`text-[15px] tracking-tight transition-colors ${guideOpen === i ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))]"}`}>
                   {g.title}
                 </span>
                 <svg
@@ -328,9 +348,14 @@ export default function AetherChangelog() {
 
       {/* Title */}
       <div className="px-8 py-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-        <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none mb-2">Changelog</h1>
+        <div className="flex items-center gap-3 mb-3">
+          <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none">Changelog</h1>
+          <span className="inline-flex items-center text-[11px] font-medium tracking-tight px-2.5 py-0.5 rounded-full" style={{ background: "rgb(60,100,255)", color: "#fff" }}>
+            {CHANGELOG[0].version}
+          </span>
+        </div>
         <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm">
-          Every change documented. What shipped, why, and how it works.
+          Every change documented. Use the filters on the left to find what you need, or scroll to browse.
         </p>
       </div>
 
@@ -358,16 +383,21 @@ export default function AetherChangelog() {
             </div>
           ) : (
             <div className="flex flex-col divide-y divide-[rgb(var(--line))]">
-              {filtered.map((entry) => (
+              {filtered.map((entry, ei) => (
                 <article key={entry.version} id={`v${entry.version}`} className="scroll-mt-16">
 
                   {/* Version header */}
                   <div className="px-8 pt-8 pb-6">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2 mb-3">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
                       <h2 className="text-2xl font-medium tracking-tighter tabular-nums text-[rgb(var(--fg))]">
                         v{entry.version}
                       </h2>
                       <LabelBadge label={entry.label} />
+                      {ei === 0 && (
+                        <span className="inline-flex items-center text-[11px] font-medium tracking-tight px-2.5 py-0.5 rounded-full" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
+                          Latest
+                        </span>
+                      )}
                       <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums ml-auto opacity-60">
                         {formatDate(entry.date)}
                       </span>
@@ -420,29 +450,30 @@ export default function AetherChangelog() {
       {/* Mobile sticky bottom bar */}
       <button
         onClick={() => setSheetOpen(true)}
-        className="lg:hidden fixed bottom-0 inset-x-0 z-40 w-full flex items-center gap-3 px-5 [-webkit-tap-highlight-color:transparent]"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-40 w-full flex items-center gap-4 px-6 [-webkit-tap-highlight-color:transparent]"
         style={{
-          height: 56,
+          height: 68,
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
           background: "rgb(var(--bg))",
           borderTop: "1px solid rgb(var(--line))",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
-          <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="20" y2="12" /><line x1="12" y1="18" x2="20" y2="18" />
-        </svg>
         <div className="flex-1 min-w-0 text-left">
-          <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] leading-none mb-0.5 opacity-50">
-            {CHANGELOG.length} releases
+          <p className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none mb-1">
+            {hasFilters
+              ? `${activeTypes.size + activeLabels.size} filter${activeTypes.size + activeLabels.size > 1 ? "s" : ""} active`
+              : "Filters & versions"}
           </p>
-          <p className="text-[13px] tracking-tight text-[rgb(var(--fg))] leading-snug">
-            {hasFilters ? `${activeTypes.size + activeLabels.size} filter${activeTypes.size + activeLabels.size > 1 ? "s" : ""} active` : "Filters & guide"}
+          <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 leading-none">
+            {CHANGELOG.length} releases · tap to browse
           </p>
         </div>
-        <div className="flex items-center gap-1 text-[12px] tracking-tight text-[rgb(var(--muted))] shrink-0">
-          <span>Contents</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
-            <polyline points="6 9 12 15 18 9" />
+        <div
+          className="shrink-0 flex items-center justify-center w-9 h-9 rounded-full"
+          style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <polyline points="6 15 12 9 18 15" />
           </svg>
         </div>
       </button>
@@ -456,34 +487,39 @@ export default function AetherChangelog() {
           className="absolute inset-0"
           onClick={() => setSheetOpen(false)}
           style={{
-            background: "rgba(0,0,0,0.35)",
+            background: "rgba(0,0,0,0.4)",
             opacity: sheetOpen ? 1 : 0,
             transition: "opacity 260ms cubic-bezier(0.22,1,0.36,1)",
           }}
         />
         <div
-          className="relative z-10 rounded-t-2xl border-t border-[rgb(var(--line))] flex flex-col"
+          className="relative z-10 rounded-t-3xl flex flex-col"
           style={{
-            background: "rgb(var(--bg))",
-            maxHeight: "78vh",
+            background: "color-mix(in srgb, rgb(var(--bg)) 92%, rgb(var(--fg)) 8%)",
+            maxHeight: "82vh",
             transform: sheetOpen ? "translateY(0)" : "translateY(105%)",
-            transition: "transform 360ms cubic-bezier(0.32,0.72,0,1)",
+            transition: "transform 380ms cubic-bezier(0.32,0.72,0,1)",
           }}
         >
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] shrink-0">
-            <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">Filters &amp; guide</p>
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="w-10 h-1 rounded-full" style={{ background: "rgb(var(--line))" }} />
+          </div>
+          {/* Sheet header */}
+          <div className="flex items-center justify-between px-6 pt-3 pb-4 shrink-0">
+            <p className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Filters &amp; versions</p>
             <button
               onClick={() => setSheetOpen(false)}
-              className="h-7 w-7 flex items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors"
-              style={{ background: "rgba(128,128,128,0.08)" }}
+              className="h-9 w-9 flex items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors [-webkit-tap-highlight-color:transparent]"
+              style={{ background: "rgb(var(--line) / 0.5)" }}
               aria-label="Close"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
           </div>
-          <div className="overflow-y-auto flex-1 px-5" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
+          <div className="overflow-y-auto flex-1 px-6" style={{ paddingBottom: "env(safe-area-inset-bottom, 32px)" }}>
             <SidebarContent {...sidebarProps} onNav={() => setSheetOpen(false)} />
           </div>
         </div>

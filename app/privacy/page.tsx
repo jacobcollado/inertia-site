@@ -31,7 +31,7 @@ function HexBanner() {
       const COLS = Math.ceil(W / (CELL_W + GAP_X)) + 1;
       const ROWS = Math.ceil(H / (CELL_H + GAP_Y)) + 1;
 
-      let seed = 13;
+      let seed = 31;
       const rand = () => { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return (seed >>> 0) / 0xffffffff; };
       const hex = () => Math.floor(rand() * 0x100).toString(16).toUpperCase().padStart(2, "0");
 
@@ -74,54 +74,48 @@ const SECTIONS = [
   {
     id: "overview",
     num: "01",
-    title: "Before we start",
-    body: "This covers how Inertia operates: what you own, what we retain, how payment works, and what happens when things go sideways. Most projects run without ever needing to reference this. But clear terms protect both sides, and ambiguity tends to create problems that goodwill alone can't fix. By engaging Inertia for paid work, you agree to the terms below.",
+    title: "We collect as little as possible",
+    body: "Inertia is a small studio. We don't run advertising networks, track you across sites, or share your information with third parties. This page explains what we do collect, why, and how long we keep it.",
   },
   {
-    id: "ip",
+    id: "what-we-collect",
     num: "02",
-    title: "You own what we build",
-    body: "When you pay in full, the final deliverable is yours. Code, design files, copy, everything produced specifically for your project. Use it, modify it, build on it however you like. We retain ownership of what existed before your project started: base themes, component libraries, internal frameworks. If we use those as a foundation, you get a perpetual licence to use them within your project. You can't sell the underlying code separately, but you'll never be restricted from using what we built for you.",
+    title: "What we actually have on you",
+    body: "If you fill out the contact form, we get your name, email, and message. We use it to respond to you. If you buy the Aether theme, Stripe handles the transaction and we receive your email and order details, not your card number. We collect anonymised page-view data to understand what's useful on the site. Our hosting logs IP addresses and browser info for a rolling 30-day window, for debugging and security only.",
   },
   {
-    id: "payment",
+    id: "what-we-dont",
     num: "03",
-    title: "50/50, no surprises",
-    body: "Half is due before we start. The other half is due before the site goes live or final files are delivered. Work does not begin until the deposit clears. Invoices are payable within 7 days. After 14 days, a 1.5% monthly late fee applies. If an invoice goes unpaid past 30 days, we can pause work or terminate the project. Deposits are non-refundable once we've started.",
+    title: "What we don't do",
+    body: "We don't sell your data. We don't use it for ads or retargeting. We don't share your contact details with anyone outside Inertia. We don't store card data. We don't use third-party tracking cookies or fingerprinting. That's not a policy. That's just how we operate.",
   },
   {
-    id: "revisions",
+    id: "cookies",
     num: "04",
-    title: "Two rounds, scope is scope",
-    body: "Every project includes two revision rounds against the original brief. A revision means changing something we built, not adding features or rebuilding sections from scratch. Additional rounds are billed at our hourly rate. Scope changes require a new written estimate before we proceed. If a project goes quiet for more than 30 days without a scheduled pause, we treat it as stalled, invoice for completed work, and close it out.",
+    title: "One cookie, your theme preference",
+    body: "We set a single first-party session cookie to remember whether you prefer light or dark mode. It contains no personal data and expires when you close your browser. No analytics cookies, no ad pixels. Block everything if you want, the site still works.",
   },
   {
-    id: "post-launch",
+    id: "retention",
     num: "05",
-    title: "14 days to catch real bugs",
-    body: "After handover, we offer a 14-day correction window. If something we built doesn't work the way it was supposed to, we fix it at no charge. This covers genuine bugs, not new requests, Shopify platform updates, or changes made by your team after handover. Ongoing support is a separate retainer.",
+    title: "We don't keep things longer than we need to",
+    body: "Contact messages are kept while the conversation is active plus 12 months, then deleted. If you want them removed sooner, email us and we'll do it within 7 days. Purchase records are kept for 7 years for tax and accounting. Server logs purge automatically after 30 days.",
   },
   {
-    id: "confidentiality",
+    id: "your-rights",
     num: "06",
-    title: "What you share stays with us",
-    body: "Business plans, roadmaps, financials, customer data, unreleased work. None of it leaves the project. We don't store client credentials beyond what's needed and access is revoked on handover. If you need a formal NDA, send it over. We sign reasonable ones without issue.",
+    title: "You can ask us to show, fix, or delete your data",
+    body: "Email hello@byinertia.com with the subject \"Privacy request\" and we'll respond within 14 days. If you're in the EU or UK, you also have the right to lodge a complaint with your local supervisory authority. We'd rather hear from you first.",
   },
   {
-    id: "liability",
+    id: "changes",
     num: "07",
-    title: "Our liability is capped at what you paid",
-    body: "We build carefully and stand behind our work. But our total liability for any claim is capped at the total amount you paid us for that project. We're not liable for lost revenue, missed launches, or downstream business impact. We're also not liable for issues caused by Shopify platform changes, third-party providers, or modifications your team makes to code we delivered.",
-  },
-  {
-    id: "disputes",
-    num: "08",
-    title: "Message us first",
-    body: "Most issues resolve in a single conversation. We're a small studio and we have a genuine interest in making things right. If a dispute can't be resolved directly, both parties agree to attempt mediation before legal action. Formal proceedings are governed by the laws of Illinois, United States. We've never had a dispute reach that stage.",
+    title: "If something changes, this page changes too",
+    body: `Material changes get a new effective date at the top. The version you're reading is effective ${EFFECTIVE}.`,
   },
 ];
 
-export default function LegalPage() {
+export default function PrivacyPage() {
   return (
     <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
@@ -136,8 +130,8 @@ export default function LegalPage() {
           </svg>
           Home
         </Link>
-        <Link href="/privacy" className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-80 transition-opacity">
-          Privacy policy
+        <Link href="/legal" className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-80 transition-opacity">
+          Terms of engagement
         </Link>
       </div>
 
@@ -147,10 +141,10 @@ export default function LegalPage() {
         <HexBanner />
         <div className="px-6 sm:px-8 pb-14 flex flex-col items-center text-center">
           <h1 className="text-[clamp(2.4rem,6vw,4.5rem)] font-normal tracking-[-0.04em] leading-[1.0] text-[rgb(var(--fg))] mb-5">
-            Terms of engagement
+            Privacy policy
           </h1>
           <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md">
-            Written to be read, not skimmed by lawyers.
+            Short version: we collect as little as possible and don&apos;t do anything shady with it.
           </p>
           <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 tabular-nums mt-5">
             Effective {EFFECTIVE}
@@ -182,9 +176,9 @@ export default function LegalPage() {
       <div className="px-6 sm:px-8 py-8 flex items-center justify-between gap-6">
         <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">
           Questions?{" "}
-          <Link href="/contact" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
-            Get in touch.
-          </Link>
+          <a href="mailto:hello@byinertia.com" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+            hello@byinertia.com
+          </a>
         </p>
         <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-30 tabular-nums shrink-0">
           &copy; {new Date().getFullYear()} Inertia

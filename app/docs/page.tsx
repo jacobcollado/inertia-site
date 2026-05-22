@@ -851,7 +851,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         }
         if (block.type === "h3") {
           return (
-            <h3 key={i} className="text-[13px] font-medium tracking-tight mt-2" style={{ color: rgba(accent, 0.88) }}>
+            <h3 key={i} className="text-[13px] font-medium tracking-tight mt-2 text-[rgb(var(--fg))]">
               {block.text}
             </h3>
           );
@@ -972,7 +972,7 @@ function SidebarNav({
 }
 
 function Divider() {
-  return <div className="h-px bg-[rgb(var(--line))]" />;
+  return <div className="grid-rule" aria-hidden="true" />;
 }
 
 export default function DocsPage() {
@@ -1026,18 +1026,20 @@ export default function DocsPage() {
   return (
     <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
-      <header className="px-6 sm:px-8 pt-6 sm:pt-8 pb-10 sm:pb-12 rise">
+      <div className="px-6 sm:px-8 py-5 rise">
         <Link href="/" className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] tracking-tight transition-opacity hover:opacity-70" style={{ border: "1px solid rgb(var(--fg) / 0.25)", color: "rgb(var(--fg))" }}>
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
           Home
         </Link>
-      </header>
+      </div>
 
       <Divider />
 
-      <div className="px-6 sm:px-8 py-8 sm:py-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-        <h1 className="text-3xl sm:text-4xl font-medium tracking-tighter leading-none mb-3">Docs</h1>
-        <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+      <div className="flex flex-col items-center text-center px-6 sm:px-8 pt-14 pb-12 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
+        <h1 className="text-[clamp(2.4rem,7vw,5rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-5">
+          Docs
+        </h1>
+        <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] max-w-sm">
           Everything you need to set up, configure, and get the most out of Inertia products.
         </p>
       </div>
@@ -1061,7 +1063,7 @@ export default function DocsPage() {
                 id={article.id}
                 className="scroll-mt-8 px-6 sm:px-10 py-10 sm:py-12 border-b border-[rgb(var(--line))]"
               >
-                <h2 className="text-[1.4rem] sm:text-2xl font-medium tracking-tighter leading-tight text-[rgb(var(--fg))] mb-7">
+                <h2 className="text-[clamp(1.4rem,3vw,1.9rem)] font-normal tracking-tight leading-tight text-[rgb(var(--fg))] mb-7">
                   {article.title}
                 </h2>
                 <ArticleBody body={article.body} accent={product.accent} />
@@ -1075,41 +1077,31 @@ export default function DocsPage() {
       {(() => {
         const activeArticle = allArticles.find((a) => a.id === activeArticleId);
         const articleIndex = allArticles.findIndex((a) => a.id === activeArticleId);
-        const progress = allArticles.length > 1 ? (articleIndex + 1) / allArticles.length : 1;
         return (
           <button
             onClick={() => setSheetOpen(true)}
             className="lg:hidden fixed bottom-0 inset-x-0 z-40 w-full flex items-center gap-3 px-5 [-webkit-tap-highlight-color:transparent]"
             style={{
-              height: 56,
+              height: 68,
               background: "rgb(var(--bg))",
               borderTop: "1px solid rgb(var(--line))",
               paddingBottom: "env(safe-area-inset-bottom, 0px)",
             }}
           >
-            {/* Progress ring / dot */}
-            <svg width="20" height="20" viewBox="0 0 20 20" className="shrink-0" aria-hidden="true">
-              <circle cx="10" cy="10" r="8" fill="none" stroke={rgba(product.accent, 0.12)} strokeWidth="1.5" />
-              <circle cx="10" cy="10" r="8" fill="none"
-                stroke={rgba(product.accent, 0.75)} strokeWidth="1.5"
-                strokeDasharray={`${2 * Math.PI * 8}`}
-                strokeDashoffset={`${2 * Math.PI * 8 * (1 - progress)}`}
-                strokeLinecap="round"
-                style={{ transform: "rotate(-90deg)", transformOrigin: "10px 10px" }}
-              />
-              <circle cx="10" cy="10" r="2.5" fill={rgba(product.accent, 0.7)} />
-            </svg>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] leading-none mb-0.5" style={{ opacity: 0.5 }}>
-                {articleIndex + 1} of {allArticles.length}
+              <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] leading-none mb-1" style={{ opacity: 0.45 }}>
+                {product.name} docs · {articleIndex + 1} of {allArticles.length}
               </p>
-              <p className="text-[13px] tracking-tight text-[rgb(var(--fg))] truncate leading-snug">
+              <p className="text-[14px] tracking-tight text-[rgb(var(--fg))] truncate leading-snug">
                 {activeArticle?.title ?? "Contents"}
               </p>
             </div>
-            <div className="flex items-center gap-1 text-[12px] tracking-tight shrink-0" style={{ color: rgba(product.accent, 0.7) }}>
-              <span>Contents</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+            <div
+              className="flex items-center justify-center shrink-0 rounded-full"
+              style={{ width: 28, height: 28, background: "rgb(var(--fg))" }}
+              aria-hidden="true"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="rgb(var(--bg))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </div>
@@ -1117,116 +1109,110 @@ export default function DocsPage() {
         );
       })()}
 
-      {/* Mobile sheet -" always mounted, transitions in/out */}
+      {/* Mobile sheet */}
       <div
         className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end"
-        style={{
-          pointerEvents: sheetOpen ? "auto" : "none",
-        }}
+        style={{ pointerEvents: sheetOpen ? "auto" : "none" }}
       >
-        {/* Backdrop */}
         <div
           className="absolute inset-0"
           onClick={() => setSheetOpen(false)}
           style={{
-            background: "rgba(0,0,0,0.35)",
+            background: "rgba(0,0,0,0.4)",
             opacity: sheetOpen ? 1 : 0,
             transition: "opacity 260ms cubic-bezier(0.22,1,0.36,1)",
           }}
         />
-        {/* Sheet */}
         <div
-          className="relative z-10 rounded-t-2xl border-t border-[rgb(var(--line))] flex flex-col"
+          className="relative z-10 rounded-t-3xl flex flex-col"
           style={{
-            background: "rgb(var(--bg))",
-            maxHeight: "78vh",
+            background: "color-mix(in srgb, rgb(var(--bg)) 92%, rgb(var(--fg)) 8%)",
+            maxHeight: "80vh",
             transform: sheetOpen ? "translateY(0)" : "translateY(105%)",
             transition: "transform 360ms cubic-bezier(0.32,0.72,0,1)",
           }}
         >
+          {/* Drag handle */}
+          <div className="flex justify-center pt-3 pb-1 shrink-0">
+            <div className="w-9 h-1 rounded-full" style={{ background: "rgb(var(--fg) / 0.15)" }} />
+          </div>
+
           {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] shrink-0">
-            <div className="flex items-center gap-2.5">
-              <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(product.accent, 0.8) }} />
-              <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">{product.name} docs</p>
-            </div>
+          <div className="flex items-center justify-between px-5 pt-2 pb-3.5 shrink-0">
+            <p className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Contents</p>
             <button
               onClick={() => setSheetOpen(false)}
-              className="h-7 w-7 flex items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors"
-              style={{ background: "rgba(128,128,128,0.08)" }}
+              className="h-7 w-7 flex items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent]"
+              style={{ background: "rgb(var(--fg) / 0.08)" }}
               aria-label="Close"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[9px] w-[9px] text-[rgb(var(--fg))]">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
           </div>
 
-          {/* Scrollable body */}
-          <div className="overflow-y-auto flex-1" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
-            {/* Product switcher */}
-            <div className="px-5 pt-4 pb-3 border-b border-[rgb(var(--line))] flex gap-2">
-              {PRODUCTS.map((p) => {
-                const active = p.id === activeProductId;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => handleSelectProduct(p.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] tracking-tight transition-colors [-webkit-tap-highlight-color:transparent]"
-                    style={{
-                      background: active ? rgba(p.accent, 0.1) : "rgba(128,128,128,0.06)",
-                      color: active ? rgba(p.accent, 0.9) : "rgb(var(--muted))",
-                      border: `1px solid ${active ? rgba(p.accent, 0.25) : "rgb(var(--line))"}`,
-                    }}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(p.accent, active ? 0.9 : 0.3) }} />
-                    {p.name}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Product switcher */}
+          <div className="px-5 pb-3 flex gap-2 shrink-0">
+            {PRODUCTS.map((p) => {
+              const active = p.id === activeProductId;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => handleSelectProduct(p.id)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] tracking-tight [-webkit-tap-highlight-color:transparent]"
+                  style={{
+                    background: active ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.07)",
+                    color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
+                    transition: "background 150ms ease, color 150ms ease",
+                  }}
+                >
+                  {p.name}
+                  <span className="text-[11px] opacity-50">{p.description}</span>
+                </button>
+              );
+            })}
+          </div>
 
-            {/* Sections + articles */}
-            <div className="px-4 py-4 flex flex-col gap-4">
-              {product.sections.map((section) => (
-                <div key={section.id}>
-                  <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] mb-1.5 px-2" style={{ opacity: 0.45 }}>
-                    {section.title}
-                  </p>
-                  <div className="flex flex-col gap-0.5">
-                    {section.articles.map((article) => {
-                      const active = activeArticleId === article.id;
-                      return (
-                        <a
-                          key={article.id}
-                          href={`#${article.id}`}
-                          onClick={() => setSheetOpen(false)}
-                          className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent]"
-                          style={{
-                            background: active ? rgba(product.accent, 0.08) : undefined,
-                            color: active ? rgba(product.accent, 0.9) : "rgb(var(--muted))",
-                            transition: "background 150ms ease, color 150ms ease",
-                          }}
-                        >
-                          <span
-                            className="h-1.5 w-1.5 rounded-full shrink-0"
-                            style={{ background: active ? rgba(product.accent, 0.8) : "transparent" }}
-                          />
-                          {article.title}
-                        </a>
-                      );
-                    })}
-                  </div>
+          <div className="h-px mx-5" style={{ background: "rgb(var(--fg) / 0.08)" }} />
+
+          {/* Scrollable articles */}
+          <div className="overflow-y-auto flex-1 px-4 py-3" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
+            {product.sections.map((section) => (
+              <div key={section.id} className="mb-4">
+                <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] px-3 mb-1" style={{ opacity: 0.4 }}>
+                  {section.title}
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {section.articles.map((article) => {
+                    const active = activeArticleId === article.id;
+                    return (
+                      <a
+                        key={article.id}
+                        href={`#${article.id}`}
+                        onClick={() => setSheetOpen(false)}
+                        className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent]"
+                        style={{
+                          background: active ? "rgb(var(--fg) / 0.08)" : undefined,
+                          color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                          transition: "background 150ms ease, color 150ms ease",
+                        }}
+                      >
+                        {article.title}
+                        {active && (
+                          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0 opacity-50">
+                            <polyline points="3 8 6 11 13 4" />
+                          </svg>
+                        )}
+                      </a>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
-      `}</style>
     </div>
   );
 }
