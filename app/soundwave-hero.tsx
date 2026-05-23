@@ -1,6 +1,157 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+// Lengths: right(6), fast(5), properly(9), yours(6), clean(6), built(6) — reordered so no two adjacent share length
+// fast(5) -> right(6) -> properly(9) -> clean(6) -> built(5) -> yours(6)
+const ROTATE_WORDS = ["fast.", "right.", "properly.", "clean.", "built.", "yours."];
+const HOLD_MS = 2400;
+const CHAR_STAGGER = 42;
+const FILL_MS = 800;
+const FILL_DELAY = 300; // delay after word finishes entering before gradient sweeps
+
+function RotatingWord() {
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
+  const [fillKey, setFillKey] = useState(0);
+  // containerWidth drives the outer span width — animates to next word during exit
+  const [containerWidth, setContainerWidth] = useState<number | undefined>(undefined);
+  const wordSizerRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  const word = ROTATE_WORDS[index];
+  const nextIndex = (index + 1) % ROTATE_WORDS.length;
+  const enterDuration = word.length * CHAR_STAGGER + 120;
+  const exitDuration  = word.length * CHAR_STAGGER + 80;
+
+  // On mount, set container to current word width
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const el = wordSizerRefs.current[0];
+      if (el) setContainerWidth(el.offsetWidth);
+    }, 32);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // When exit starts, animate container width to next word's width
+  // so the whole line recenters before the new word enters
+  useEffect(() => {
+    if (phase !== "exit") return;
+    const t = setTimeout(() => {
+      const el = wordSizerRefs.current[nextIndex];
+      if (el) setContainerWidth(el.offsetWidth);
+    }, 16);
+    return () => clearTimeout(t);
+  }, [phase, nextIndex]);
+
+  // After new word index is set, confirm container width matches
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const el = wordSizerRefs.current[index];
+      if (el) setContainerWidth(el.offsetWidth);
+    }, 16);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    if (phase === "enter") {
+      t = setTimeout(() => setPhase("hold"), enterDuration);
+    } else if (phase === "hold") {
+      t = setTimeout(() => setPhase("exit"), HOLD_MS);
+    } else {
+      t = setTimeout(() => {
+        setIndex((i) => (i + 1) % ROTATE_WORDS.length);
+        setFillKey((k) => k + 1);
+        setPhase("enter");
+      }, exitDuration);
+    }
+    return () => clearTimeout(t);
+  }, [phase, enterDuration, exitDuration]);
+
+  const RESIZE_EASE = "cubic-bezier(0.22,1,0.36,1)";
+
+  return (
+    <span style={{
+      display: "inline-block",
+      position: "relative",
+      verticalAlign: "baseline",
+      width: containerWidth,
+      transition: containerWidth ? `width ${exitDuration * 0.75}ms ${RESIZE_EASE}` : "none",
+    }}>
+      {/* One hidden sizer per word — all absolute, no layout impact */}
+      {ROTATE_WORDS.map((w, wi) => (
+        <span
+          key={wi}
+          ref={(el) => { wordSizerRefs.current[wi] = el; }}
+          aria-hidden="true"
+          style={{ position: "absolute", visibility: "hidden", whiteSpace: "nowrap", pointerEvents: "none" }}
+        >{w}</span>
+      ))}
+
+      {/* Letters in normal flow, centered */}
+      <span
+        aria-live="polite"
+        style={{ display: "flex", justifyContent: "center", whiteSpace: "nowrap" }}
+      >
+        {word.split("").map((ch, i) => {
+          const exitDelay = (word.length - 1 - i) * CHAR_STAGGER;
+          return phase === "exit" ? (
+            <span
+              key={`${index}-${i}-exit`}
+              aria-hidden="true"
+              style={{
+                display: "inline-block",
+                width: ch === " " ? "0.28em" : undefined,
+                opacity: 0,
+                transform: "translateY(-10px)",
+                transition: `opacity 80ms linear ${exitDelay}ms, transform 100ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms`,
+              }}
+            >{ch}</span>
+          ) : (
+            <span
+              key={`${index}-${i}-enter`}
+              aria-hidden="true"
+              style={{
+                display: "inline-block",
+                width: ch === " " ? "0.28em" : undefined,
+                opacity: 0,
+                transform: "translateY(10px)",
+                animation: `char-in 160ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
+              }}
+            >{ch}</span>
+          );
+        })}
+      </span>
+
+      {/* Underline — width matches container, centered */}
+      <span style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: "-0.14em",
+        height: "3px",
+        borderRadius: "2px",
+        background: "rgb(var(--fg) / 0.13)",
+        overflow: "hidden",
+        display: "block",
+      }}>
+        <span
+          key={fillKey}
+          style={{
+            display: "block",
+            position: "absolute",
+            inset: 0,
+            borderRadius: "2px",
+            opacity: 0,
+            background: "linear-gradient(to right, transparent, rgb(var(--accent)), rgb(88,200,255), transparent)",
+            animation: `underline-fill ${FILL_MS * 2}ms linear ${enterDuration + FILL_DELAY}ms`,
+          }}
+        />
+      </span>
+    </span>
+  );
+}
 
 export function SoundwaveHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -11,91 +162,129 @@ export function SoundwaveHero() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const draw = () => {
+    let rafId: number;
+    let W = 0, H = 0;
+
+    // Wave origins — multiple sources moving slowly across the canvas
+    type WaveOrigin = { x: number; y: number; vx: number; vy: number; phase: number; speed: number };
+    const origins: WaveOrigin[] = Array.from({ length: 3 }, (_, i) => ({
+      x: Math.random() * 1000,
+      y: Math.random() * 600,
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: (Math.random() - 0.5) * 0.12,
+      phase: (i / 3) * Math.PI * 2,
+      speed: 0.55 + Math.random() * 0.35,
+    }));
+
+    const SPACING = 24; // dot grid spacing px
+    let cols = 0, rows = 0;
+
+    const resize = () => {
       const r = canvas.getBoundingClientRect();
-      const W = r.width, H = r.height;
+      W = r.width; H = r.height;
       canvas.width = Math.round(W * devicePixelRatio);
       canvas.height = Math.round(H * devicePixelRatio);
+      cols = Math.ceil(W / SPACING) + 1;
+      rows = Math.ceil(H / SPACING) + 1;
+    };
 
+    const draw = (t: number) => {
+      const ts = t * 0.001;
       const isDark = document.documentElement.classList.contains("dark");
-      const [fr, fg, fb] = isDark ? [160, 185, 255] : [15, 35, 150];
-      const a = (alpha: number) => `rgba(${fr},${fg},${fb},${isDark ? alpha : alpha * 2.0})`;
+      const [fr, fg, fb] = isDark ? [170, 195, 255] : [34, 62, 200];
+
+      // Move wave origins
+      for (const o of origins) {
+        o.x += o.vx;
+        o.y += o.vy;
+        if (o.x < -200) o.x = W + 200;
+        if (o.x > W + 200) o.x = -200;
+        if (o.y < -200) o.y = H + 200;
+        if (o.y > H + 200) o.y = -200;
+      }
+
+      // Clear zone for text
+      const clearW = Math.min(W * 0.58, 480);
+      const clearH = 180;
+      const clearX = (W - clearW) / 2;
+      const clearY = (H - clearH) / 2;
+      const clearPad = 32;
 
       ctx.save();
       ctx.scale(devicePixelRatio, devicePixelRatio);
       ctx.clearRect(0, 0, W, H);
 
-      // Clear zone — text lives here, nothing draws inside
-      const clearW = Math.min(W * 0.62, 520);
-      const clearH = 200;
-      const clearX = (W - clearW) / 2;
-      const clearY = (H - clearH) / 2;
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const bx = col * SPACING;
+          const by = row * SPACING;
 
-      // Memory map parameters
-      const CELL_W = 38;
-      const CELL_H = 14;
-      const GAP_X = 3;
-      const GAP_Y = 3;
-      const COLS = Math.ceil(W / (CELL_W + GAP_X)) + 1;
-      const ROWS = Math.ceil(H / (CELL_H + GAP_Y)) + 1;
+          // Sum displacement from all wave origins
+          let dx = 0, dy = 0;
+          for (const o of origins) {
+            const ddx = bx - o.x;
+            const ddy = by - o.y;
+            const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+            const wave = Math.sin(dist * 0.045 - ts * o.speed + o.phase);
+            const falloff = Math.max(0, 1 - dist / (W * 0.7));
+            dx += wave * falloff * 5.5;
+            dy += wave * falloff * 5.5;
+          }
 
-      // Seeded random for stable hex values
-      let seed = 7;
-      const rand = () => {
-        seed = (seed * 1664525 + 1013904223) & 0xffffffff;
-        return (seed >>> 0) / 0xffffffff;
-      };
-      const hex = () => Math.floor(rand() * 0x100).toString(16).toUpperCase().padStart(2, "0");
+          const x = bx + dx;
+          const y = by + dy;
 
-      for (let row = 0; row < ROWS; row++) {
-        for (let col = 0; col < COLS; col++) {
-          const x = col * (CELL_W + GAP_X);
-          const y = row * (CELL_H + GAP_Y);
+          // Skip dots inside text clear zone
+          const inClearX = x > clearX - clearPad && x < clearX + clearW + clearPad;
+          const inClearY = y > clearY - clearPad && y < clearY + clearH + clearPad;
+          if (inClearX && inClearY) continue;
 
-          // Skip cells that overlap the clear zone (with padding)
-          const pad = 18;
-          const overlapX = x + CELL_W > clearX - pad && x < clearX + clearW + pad;
-          const overlapY = y + CELL_H > clearY - pad && y < clearY + clearH + pad;
-          if (overlapX && overlapY) continue;
+          // Fade near clear zone edges
+          const distToClearX = inClearY ? Math.min(Math.abs(x - clearX + clearPad), Math.abs(x - clearX - clearW - clearPad)) : Infinity;
+          const distToClearY = inClearX ? Math.min(Math.abs(y - clearY + clearPad), Math.abs(y - clearY - clearH - clearPad)) : Infinity;
+          const distToClear = Math.min(distToClearX, distToClearY);
+          const clearFade = Math.min(1, distToClear / 48);
 
-          // Fade alpha based on distance from clear zone edges
-          const distX = Math.max(0, overlapY ? (x < clearX ? clearX - pad - x - CELL_W : x - (clearX + clearW + pad)) : 0);
-          const distY = Math.max(0, overlapX ? (y < clearY ? clearY - pad - y - CELL_H : y - (clearY + clearH + pad)) : 0);
-          const dist = Math.sqrt(distX * distX + distY * distY);
-          const fade = Math.min(1, dist / 60);
-
-          // Also fade toward canvas edges
-          const edgeFadeX = Math.min(x / 40, (W - x - CELL_W) / 40, 1);
-          const edgeFadeY = Math.min(y / 40, (H - y - CELL_H) / 40, 1);
+          // Fade canvas edges — tighter so dots stay visible near bottom on mobile
+          const edgeFadeX = Math.min(x / 20, (W - x) / 20, 1);
+          const edgeFadeY = Math.min(y / 16, (H - y) / 16, 1);
           const edgeFade = Math.min(edgeFadeX, edgeFadeY, 1);
 
-          const alpha = fade * edgeFade * (isDark ? 0.22 : 0.18);
+          // Dot brightness driven by wave displacement magnitude
+          const mag = Math.sqrt(dx * dx + dy * dy) / 5.5;
+          const baseAlpha = isDark ? 0.32 : 0.38;
+          // Bottom-half boost: lower dots get extra visibility on mobile
+          const bottomBoost = 1 + Math.max(0, (by / H - 0.5) * 0.7);
+          const alpha = baseAlpha * (0.45 + 0.55 * mag) * clearFade * edgeFade * bottomBoost;
           if (alpha < 0.02) continue;
 
-          // Hex cell: address-like value
-          const value = `${hex()} ${hex()}`;
+          // Dot radius: slightly larger when displaced
+          const radius = 1.2 + mag * 1.0;
 
-          // Occasionally show a "highlighted" cell (like an active address)
-          const isActive = rand() > 0.94;
-
-          ctx.font = `${isActive ? "500" : "400"} 9px monospace`;
-          ctx.fillStyle = a(isActive ? alpha * 1.8 : alpha);
-          ctx.textAlign = "left";
-          ctx.textBaseline = "top";
-          ctx.fillText(value, x, y);
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${fr},${fg},${fb},${Math.min(1, alpha)})`;
+          ctx.fill();
         }
       }
 
       ctx.restore();
+      rafId = requestAnimationFrame(draw);
     };
 
-    const ro = new ResizeObserver(draw);
+    resize();
+    rafId = requestAnimationFrame(draw);
+
+    const ro = new ResizeObserver(resize);
     ro.observe(canvas);
-    const mo = new MutationObserver(draw);
+    const mo = new MutationObserver(resize);
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
-    draw();
-    return () => { ro.disconnect(); mo.disconnect(); };
+    return () => {
+      cancelAnimationFrame(rafId);
+      ro.disconnect();
+      mo.disconnect();
+    };
   }, []);
 
   return (
@@ -127,13 +316,14 @@ export function SoundwaveHero() {
           className="text-[clamp(2.4rem,5vw,4rem)] font-[400] tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] text-center pointer-events-none relative w-[86%] sm:w-auto mx-auto"
           aria-label="Your digital presence, done right."
         >
-          {["Your digital presence,", "done right."].map((line, li) =>
-            <span key={li} style={{ display: "block" }}>
+          {["Your digital presence,", "done "].map((line, li) =>
+            <span key={li} style={{ display: "flex", justifyContent: "center", alignItems: "baseline" }}>
               {line.split("").map((ch, i) => (
                 <span key={i} aria-hidden="true" style={{ display: "inline-block", width: ch === " " ? "0.28em" : undefined, opacity: 0, animation: `char-in 80ms linear ${160 + li * 80 + i * 22}ms forwards` }}>
                   {ch}
                 </span>
               ))}
+              {li === 1 && <RotatingWord />}
             </span>
           )}
         </h1>

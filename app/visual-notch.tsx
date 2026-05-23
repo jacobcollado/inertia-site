@@ -85,62 +85,59 @@ const NAV: NavItem[] = [
 
 /* ── Desktop mega menu ───────────────────────────────────────────── */
 
-function MegaMenu({
+function DropdownItem({ child, onClose }: { child: Child; onClose: () => void }) {
+  const inner = (
+    <>
+      <span className="site-header__dropdown-icon">{child.icon}</span>
+      <span className="site-header__dropdown-text">
+        <span className="site-header__dropdown-label">
+          {child.label}
+          {child.disabled && <span className="site-header__soon">soon</span>}
+        </span>
+        <span className="site-header__dropdown-desc">{child.description}</span>
+      </span>
+    </>
+  );
+
+  if (child.disabled) return (
+    <span className="site-header__dropdown-item site-header__dropdown-item--disabled">{inner}</span>
+  );
+  if (child.external) return (
+    <a href={child.href} target="_blank" rel="noreferrer" className="site-header__dropdown-item">{inner}</a>
+  );
+  return (
+    <Link href={child.href!} className="site-header__dropdown-item" onClick={onClose}>{inner}</Link>
+  );
+}
+
+function NavTrigger({
   item,
   index,
   openIndex,
-  prevIndex,
   onEnter,
   onLeave,
-  onClose,
+  triggerRef,
 }: {
   item: NavItem;
   index: number;
   openIndex: number | null;
-  prevIndex: number | null;
   onEnter: (i: number) => void;
   onLeave: () => void;
-  onClose: () => void;
+  triggerRef: (el: HTMLDivElement | null) => void;
 }) {
   const open = openIndex === index;
-
-  // Slide direction: positive = sliding in from right, negative = from left
-  const direction = prevIndex !== null && openIndex !== null
-    ? (openIndex > prevIndex ? 1 : -1)
-    : 0;
-
-  const DropdownItem = ({ child }: { child: Child }) => {
-    const inner = (
-      <>
-        <span className="site-header__dropdown-icon">{child.icon}</span>
-        <span className="site-header__dropdown-text">
-          <span className="site-header__dropdown-label">
-            {child.label}
-            {child.disabled && <span className="site-header__soon">soon</span>}
-          </span>
-          <span className="site-header__dropdown-desc">{child.description}</span>
-        </span>
-      </>
-    );
-
-    if (child.disabled) return (
-      <span className="site-header__dropdown-item site-header__dropdown-item--disabled">{inner}</span>
-    );
-    if (child.external) return (
-      <a href={child.href} target="_blank" rel="noreferrer" className="site-header__dropdown-item">{inner}</a>
-    );
-    return (
-      <Link href={child.href!} className="site-header__dropdown-item" onClick={onClose}>{inner}</Link>
-    );
-  };
-
   return (
     <div
       className="site-header__menu-root"
       onMouseEnter={() => onEnter(index)}
       onMouseLeave={onLeave}
+      ref={triggerRef}
     >
-      <button className={`site-header__link${item.label === "Pricing" ? " site-header__link--pricing" : ""}`} aria-expanded={open} aria-haspopup="true">
+      <button
+        className={`site-header__link${item.label === "Pricing" ? " site-header__link--pricing" : ""}`}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
         {item.label}
         <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
           className="site-header__chevron" aria-hidden="true"
@@ -148,19 +145,114 @@ function MegaMenu({
           <polyline points="2 4 6 8 10 4" />
         </svg>
       </button>
+    </div>
+  );
+}
 
-      <div className="site-header__dropdown" data-open={open} aria-hidden={!open}>
-        <div
-          style={{
-            transform: open ? "translateX(0)" : `translateX(${direction * 12}px)`,
-            opacity: open ? 1 : 0,
-            transition: open
-              ? "transform 240ms cubic-bezier(0.22,1,0.36,1), opacity 180ms ease"
-              : "transform 160ms cubic-bezier(0.4,0,1,1), opacity 120ms ease",
-          }}
-        >
-          {item.children.map((child) => <DropdownItem key={child.label} child={child} />)}
-        </div>
+function SharedDropdown({
+  openIndex,
+  triggerEls,
+  navRef,
+  onLeave,
+  onClose,
+}: {
+  openIndex: number | null;
+  triggerEls: (HTMLDivElement | null)[];
+  navRef: React.RefObject<HTMLElement | null>;
+  onLeave: () => void;
+  onClose: () => void;
+}) {
+  const isOpen = openIndex !== null;
+  const item = openIndex !== null ? NAV[openIndex] : null;
+  const prevItemRef = useRef<NavItem | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const prevOpenIndex = useRef<number | null>(null);
+
+  // Keep rendering last item while closing so content doesn't vanish mid-fade
+  const displayItem = item ?? prevItemRef.current;
+  if (item) prevItemRef.current = item;
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    if (openIndex === null) {
+      // Reset size imperatively so next open starts from 0
+      panel.style.width = "0px";
+      panel.style.height = "0px";
+      prevOpenIndex.current = null;
+      return;
+    }
+
+    const trigger = triggerEls[openIndex];
+    const nav = navRef.current;
+    if (!trigger || !nav) return;
+
+    const navRect = nav.getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    const newLeft = triggerRect.left - navRect.left;
+    const isSliding = prevOpenIndex.current !== null && prevOpenIndex.current !== openIndex;
+
+    prevOpenIndex.current = openIndex;
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+    if (isSliding) {
+      // Already open — just slide and resize with transitions on
+      panel.style.transition = "left 220ms cubic-bezier(0.22,1,0.36,1), width 220ms cubic-bezier(0.22,1,0.36,1), height 220ms cubic-bezier(0.22,1,0.36,1), opacity 180ms cubic-bezier(0.22,1,0.36,1), transform 220ms cubic-bezier(0.22,1,0.36,1)";
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = requestAnimationFrame(() => {
+          if (!measureRef.current || !panelRef.current) return;
+          const { offsetWidth: w, offsetHeight: h } = measureRef.current;
+          panelRef.current.style.left = `${newLeft}px`;
+          panelRef.current.style.width = `${w}px`;
+          panelRef.current.style.height = `${h}px`;
+        });
+      });
+    } else {
+      // First open — snap position, then animate size from 0
+      panel.style.transition = "none";
+      panel.style.left = `${newLeft}px`;
+      panel.style.width = "0px";
+      panel.style.height = "0px";
+
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = requestAnimationFrame(() => {
+          if (!measureRef.current || !panelRef.current) return;
+          const { offsetWidth: w, offsetHeight: h } = measureRef.current;
+          panelRef.current.style.transition = "width 220ms cubic-bezier(0.22,1,0.36,1), height 220ms cubic-bezier(0.22,1,0.36,1), opacity 180ms cubic-bezier(0.22,1,0.36,1), transform 220ms cubic-bezier(0.22,1,0.36,1)";
+          panelRef.current.style.width = `${w}px`;
+          panelRef.current.style.height = `${h}px`;
+        });
+      });
+    }
+  }, [openIndex, triggerEls, navRef]);
+
+  return (
+    <div
+      ref={panelRef}
+      className="site-header__dropdown"
+      data-open={isOpen}
+      aria-hidden={!isOpen}
+      onMouseLeave={onLeave}
+    >
+      {/* Hidden sizer — always reflects current item's natural size */}
+      <div
+        ref={measureRef}
+        style={{ position: "absolute", visibility: "hidden", pointerEvents: "none", top: 0, left: 0, minWidth: 280 }}
+      >
+        {displayItem?.children.map((child) => (
+          <DropdownItem key={child.label} child={child} onClose={onClose} />
+        ))}
+      </div>
+
+      {/* Visible content */}
+      <div style={{ position: "relative", width: "100%" }}>
+        {displayItem?.children.map((child) => (
+          <DropdownItem key={child.label} child={child} onClose={onClose} />
+        ))}
       </div>
     </div>
   );
@@ -343,9 +435,10 @@ function InertiaLogo() {
 export function VisualNotch() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+  const triggerEls = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -368,23 +461,14 @@ export function VisualNotch() {
 
   const handleEnter = useCallback((i: number) => {
     if (leaveTimer.current) clearTimeout(leaveTimer.current);
-    setOpenIndex((prev) => {
-      if (prev !== null && prev !== i) setPrevIndex(prev);
-      return i;
-    });
+    setOpenIndex(i);
   }, []);
 
   const handleLeave = useCallback(() => {
-    leaveTimer.current = setTimeout(() => {
-      setPrevIndex(null);
-      setOpenIndex(null);
-    }, 80);
+    leaveTimer.current = setTimeout(() => setOpenIndex(null), 80);
   }, []);
 
-  const handleClose = useCallback(() => {
-    setPrevIndex(null);
-    setOpenIndex(null);
-  }, []);
+  const handleClose = useCallback(() => setOpenIndex(null), []);
 
   return (
     <>
@@ -396,19 +480,25 @@ export function VisualNotch() {
           </span>
 
           {/* Desktop nav */}
-          <nav className="site-header__nav" aria-label="Main navigation">
+          <nav className="site-header__nav" aria-label="Main navigation" ref={navRef}>
             {NAV.map((item, i) => (
-              <MegaMenu
+              <NavTrigger
                 key={item.label}
                 item={item}
                 index={i}
                 openIndex={openIndex}
-                prevIndex={prevIndex}
                 onEnter={handleEnter}
                 onLeave={handleLeave}
-                onClose={handleClose}
+                triggerRef={(el) => { triggerEls.current[i] = el; }}
               />
             ))}
+            <SharedDropdown
+              openIndex={openIndex}
+              triggerEls={triggerEls.current}
+              navRef={navRef}
+              onLeave={handleLeave}
+              onClose={handleClose}
+            />
           </nav>
 
           {/* Right side */}

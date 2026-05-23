@@ -253,8 +253,19 @@ function StartPrompt() {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<SVGRectElement>(null);
+  const [perimeter, setPerimeter] = useState(0);
+  const [everFocused, setEverFocused] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // Measure actual perimeter once mounted — no transition fires here
+  useEffect(() => {
+    const el = rectRef.current;
+    if (!el) return;
+    const len = el.getTotalLength();
+    if (len > 0) setPerimeter(len);
+  }, []);
 
   const updateScrollState = () => {
     const el = scrollRef.current;
@@ -302,35 +313,63 @@ function StartPrompt() {
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-xl flex flex-col gap-3">
-        <div
-          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border transition-colors duration-150"
-          style={{
-            background: "rgb(var(--bg))",
-            borderColor: focused ? "rgba(60,100,255,0.5)" : "rgb(var(--line))",
-          }}
-        >
-          <div className="relative flex-1">
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] outline-none"
-            />
-            {!input && <AnimatedPlaceholder active={!focused} />}
-          </div>
-          <button
-            type="submit"
-            className="shrink-0 rounded-lg px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center"
-            style={{ background: "rgb(60,100,255)" }}
-            disabled={!input.trim()}
+        {/* Input box with border trace + ambient glow */}
+        <div className="relative">
+          {/* SVG border trace — draws itself on focus */}
+          <svg
+            className="pointer-events-none absolute inset-0 w-full h-full"
+            style={{ overflow: "visible", zIndex: 1, visibility: everFocused ? "visible" : "hidden" }}
+            aria-hidden="true"
+            preserveAspectRatio="none"
           >
-            Let&apos;s talk ↗
-          </button>
+            <rect
+              ref={rectRef}
+              x="1" y="1"
+              width="calc(100% - 2px)" height="calc(100% - 2px)"
+              rx="11" ry="11"
+              fill="none"
+              stroke="rgba(60,100,255,0.75)"
+              strokeWidth="1.5"
+              strokeDasharray={perimeter}
+              strokeDashoffset={focused ? 0 : perimeter}
+              style={{ transition: everFocused ? "stroke-dashoffset 550ms cubic-bezier(0.22,1,0.36,1)" : "none" }}
+            />
+          </svg>
+
+          <div
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border"
+            style={{
+              background: "rgb(var(--bg))",
+              borderColor: focused ? "rgba(60,100,255,0.35)" : "rgb(var(--line))",
+              boxShadow: focused
+                ? "0 0 0 3px rgba(60,100,255,0.08), 0 0 24px rgba(60,100,255,0.12)"
+                : "none",
+              transition: "border-color 250ms ease, box-shadow 350ms ease",
+            }}
+          >
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onFocus={() => { setFocused(true); setEverFocused(true); }}
+                onBlur={() => setFocused(false)}
+                className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] outline-none"
+              />
+              {!input && <AnimatedPlaceholder active={!focused} />}
+            </div>
+            <button
+              type="submit"
+              className="shrink-0 rounded-lg px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center"
+              style={{ background: "rgb(60,100,255)" }}
+              disabled={!input.trim()}
+            >
+              Let&apos;s talk ↗
+            </button>
+          </div>
         </div>
 
-        {/* Pills row with desktop arrows */}
+        {/* Pills row with desktop arrows — chips stagger in on focus */}
         <div className="flex items-center gap-2">
           {/* Left arrow — collapses when not needed */}
           <div
@@ -350,12 +389,17 @@ function StartPrompt() {
               ref={scrollRef}
               className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
-              {PROMPT_SUGGESTIONS.map((s) => (
+              {PROMPT_SUGGESTIONS.map((s, i) => (
                 <button
                   key={s.label}
                   type="button"
                   onClick={() => handleSuggestion(s.label)}
                   className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
+                  style={{
+                    opacity: focused ? 1 : 0.6,
+                    transform: focused ? "translateY(0)" : "translateY(4px)",
+                    transition: `opacity 300ms cubic-bezier(0.22,1,0.36,1) ${i * 40}ms, transform 300ms cubic-bezier(0.22,1,0.36,1) ${i * 40}ms`,
+                  }}
                 >
                   {s.icon}
                   {s.label}
