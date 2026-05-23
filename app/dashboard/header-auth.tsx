@@ -36,62 +36,96 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
   if (mobile) {
     if (user) {
       return (
-        <>
-          <Link href={portalHref} className="mobile-nav__item">
-            <span className="mobile-nav__item-icon">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }} aria-hidden="true">
-                <path d="M3 8.5L10 3l7 5.5V17H13v-4H7v4H3V8.5z" />
-              </svg>
-            </span>
-            <span className="mobile-nav__item-text">
-              <span className="mobile-nav__item-label">{portalLabel}</span>
-              <span className="mobile-nav__item-desc">{portalDesc}</span>
-            </span>
-          </Link>
+        <div style={{ display: "flex", gap: "10px", padding: "20px" }}>
           <button
             onClick={() => startTransition(() => signOut())}
             disabled={pending}
-            className="mobile-nav__item w-full text-left disabled:opacity-40"
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "44px",
+              borderRadius: "100px",
+              border: "1px solid rgb(var(--line))",
+              background: "transparent",
+              fontSize: "15px",
+              fontWeight: 500,
+              letterSpacing: "-0.03em",
+              color: "rgb(var(--fg))",
+              cursor: "pointer",
+              transition: "background 140ms ease",
+              opacity: pending ? 0.4 : 1,
+            }}
           >
-            <span className="mobile-nav__item-icon">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }} aria-hidden="true">
-                <path d="M13 15l3-5-3-5M16 10H7M7 3H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h3" />
-              </svg>
-            </span>
-            <span className="mobile-nav__item-text">
-              <span className="mobile-nav__item-label">{pending ? "Signing out…" : "Sign out"}</span>
-              <span className="mobile-nav__item-desc">End your current session.</span>
-            </span>
+            {pending ? "Signing out…" : "Sign out"}
           </button>
-        </>
+          <Link
+            href={portalHref}
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "44px",
+              borderRadius: "100px",
+              background: "rgb(var(--fg))",
+              fontSize: "15px",
+              fontWeight: 500,
+              letterSpacing: "-0.03em",
+              color: "rgb(var(--bg))",
+              textDecoration: "none",
+              transition: "opacity 140ms ease",
+            }}
+          >
+            {portalLabel}
+          </Link>
+        </div>
       );
     }
     return (
-      <>
-        <Link href="/login" className="mobile-nav__item">
-          <span className="mobile-nav__item-icon">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }} aria-hidden="true">
-              <path d="M10 3H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h5M13 7l4 3-4 3M7 10h10" />
-            </svg>
-          </span>
-          <span className="mobile-nav__item-text">
-            <span className="mobile-nav__item-label">Sign in</span>
-            <span className="mobile-nav__item-desc">Access your client portal.</span>
-          </span>
+      <div style={{ display: "flex", gap: "10px", padding: "20px" }}>
+        <Link
+          href="/login"
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "44px",
+            borderRadius: "100px",
+            border: "1px solid rgb(var(--line))",
+            fontSize: "15px",
+            fontWeight: 500,
+            letterSpacing: "-0.03em",
+            color: "rgb(var(--fg))",
+            textDecoration: "none",
+            transition: "background 140ms ease",
+          }}
+        >
+          Sign in
         </Link>
-        <Link href="/login?tab=signup" className="mobile-nav__item">
-          <span className="mobile-nav__item-icon">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 14 }} aria-hidden="true">
-              <path d="M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 17a7 7 0 0 1 11.95-4.95" />
-              <path d="M16 13v6M13 16h6" />
-            </svg>
-          </span>
-          <span className="mobile-nav__item-text">
-            <span className="mobile-nav__item-label">Request access</span>
-            <span className="mobile-nav__item-desc">Already a client? Get set up here.</span>
-          </span>
+        <Link
+          href="/login?tab=signup"
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "44px",
+            borderRadius: "100px",
+            background: "rgb(var(--fg))",
+            fontSize: "15px",
+            fontWeight: 500,
+            letterSpacing: "-0.03em",
+            color: "rgb(var(--bg))",
+            textDecoration: "none",
+            transition: "opacity 140ms ease",
+          }}
+        >
+          Request access
         </Link>
-      </>
+      </div>
     );
   }
 

@@ -754,24 +754,24 @@ function PlatformSignal() {
 
 const TESTIMONIALS = [
   {
-    quote: "Storefront went live in 11 days. Our conversion rate went up 18% the first month. I stopped questioning their process after week one.",
-    name: "Dominic R.",
-    role: "Founder, Vaulted",
-    initials: "DR",
+    quote: "We'd been burned by two agencies before. Inertia was the first team that actually read our brief. Storefront launched in 9 days and we saw a 22% lift in checkout completions within the first three weeks.",
+    name: "Priya M.",
+    role: "Head of eCommerce, Foliage Supply Co.",
+    initials: "PM",
     color: "rgb(60,100,255)",
   },
   {
-    quote: "Every other agency sent us a mood board. Inertia sent us a staging link.",
-    name: "Maya S.",
-    role: "Creative Director, Lune",
-    initials: "MS",
+    quote: "Handed them a Figma file on a Tuesday. Had a staging link by Thursday. I've worked with much bigger shops that couldn't pull that off in a month.",
+    name: "Tom H.",
+    role: "Co-founder, Kettlebrook Goods",
+    initials: "TH",
     color: "rgb(120,60,220)",
   },
   {
-    quote: "We handed them a brand doc and a deadline. They hit both. Aether looks better than stores with 10x our budget.",
-    name: "James O.",
-    role: "Co-founder, Arca Studio",
-    initials: "JO",
+    quote: "Our old theme was a mess of app conflicts and slow load times. Aether fixed both without us asking. The site feels like a different brand now.",
+    name: "Dana K.",
+    role: "Operations Lead, Sable & Rowe",
+    initials: "DK",
     color: "rgb(20,160,100)",
   },
 ];

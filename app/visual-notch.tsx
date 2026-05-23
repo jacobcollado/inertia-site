@@ -314,9 +314,28 @@ function MobileAccordion({ item, onNavigate, drawerOpen }: { item: NavItem; onNa
 
 function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   useEffect(() => {
-    if (open) document.body.style.overflow = "hidden";
-    else document.body.style.overflow = "";
-    return () => { document.body.style.overflow = ""; };
+    if (open) {
+      const y = window.scrollY;
+      document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${y}px`;
+      document.body.style.width = "100%";
+    } else {
+      const y = Math.abs(parseInt(document.body.style.top || "0", 10));
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, y);
+    }
+    return () => {
+      const y = Math.abs(parseInt(document.body.style.top || "0", 10));
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      if (y) window.scrollTo(0, y);
+    };
   }, [open]);
 
   return (
@@ -332,7 +351,9 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
           {NAV.map((item) => (
             <MobileAccordion key={item.label} item={item} onNavigate={onClose} drawerOpen={open} />
           ))}
-          <HeaderAuth mobile />
+          <div style={{ marginTop: "auto", borderTop: "1px solid rgb(var(--line))" }}>
+            <HeaderAuth mobile />
+          </div>
         </div>
       </div>
     </>

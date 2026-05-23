@@ -257,11 +257,11 @@ export function SoundwaveHero() {
           {["Your digital presence,", "done "].map((line, li) =>
             <span key={li} style={{ display: "flex", justifyContent: "center", alignItems: "baseline" }}>
               {line.split("").map((ch, i) => (
-                <span key={i} aria-hidden="true" style={{ display: "inline-block", width: ch === " " ? "0.28em" : undefined, opacity: 0, animation: `char-in 80ms linear ${160 + li * 80 + i * 22}ms forwards` }}>
+                <span key={i} aria-hidden="true" style={{ display: "inline-block", width: ch === " " ? "0.28em" : undefined, opacity: 0, animation: `char-in-no-blur 80ms linear ${160 + li * 80 + i * 22}ms forwards`, willChange: "opacity", transform: "translateZ(0)" }}>
                   {ch}
                 </span>
               ))}
-              {li === 1 && <><RotatingWord /><span style={{ display: "inline-block" }}>.</span></>}
+              {li === 1 && <><RotatingWord /><span style={{ display: "inline-block", transform: "translateZ(0)" }}>.</span></>}
             </span>
           )}
         </h1>
