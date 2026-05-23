@@ -75,6 +75,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "url": "https://byinertia.com",
           })}}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Inertia",
+            "alternateName": "Inertia Studio",
+            "url": "https://byinertia.com",
+            "logo": "https://byinertia.com/og.png",
+          })}}
+        />
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider>
