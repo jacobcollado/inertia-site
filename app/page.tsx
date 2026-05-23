@@ -248,7 +248,7 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   );
 }
 
-function StartPrompt() {
+function StartPrompt({ closing }: { closing?: boolean }) {
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -305,10 +305,10 @@ function StartPrompt() {
     <section className="px-6 sm:px-8 py-12 sm:py-24 flex flex-col items-center gap-8 sm:gap-10 border-t border-[rgb(var(--line))]">
       <div className="flex flex-col items-center gap-3 text-center">
         <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
-          What are you building?
+          {closing ? "Ready to build something worth shipping?" : "What are you building?"}
         </p>
         <p className="text-[clamp(0.8rem,1.5vw,0.9rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
-          Tell us. We&apos;ll figure out the rest.
+          {closing ? "Tell us what you’re working on. We’ll take it from there." : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
 
@@ -2423,31 +2423,7 @@ function VisualLayout() {
 
       <GridRule />
 
-      <section className="flex flex-col items-center text-center gap-6 px-6 sm:px-8 py-16 sm:py-24">
-        <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
-          Ready to build something worth shipping?
-        </p>
-        <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm">
-          Tell us what you&apos;re working on. We&apos;ll take it from there.
-        </p>
-        <div className="flex items-center gap-3 flex-wrap justify-center">
-          <a
-            href="https://www.instagram.com/by.inertia/"
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[14px] sm:text-[15px] tracking-tight font-medium text-white hover:opacity-80 transition-opacity"
-            style={{ background: "rgb(60,100,255)" }}
-          >
-            Start a project ↗
-          </a>
-          <Link
-            href="/aether"
-            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[14px] sm:text-[15px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-          >
-            Explore Aether →
-          </Link>
-        </div>
-      </section>
+      <StartPrompt closing />
 
       <GridRule />
 
