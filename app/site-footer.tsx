@@ -72,27 +72,7 @@ export function SiteFooter() {
       <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 gap-y-8 mb-12 px-6 sm:px-8">
 
         <div className="flex flex-col gap-2.5 min-w-[120px]">
-          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Get started</p>
-          <Link href="/aether/changelog" className="inline-flex items-center gap-2 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-            Changelog
-            <span className="text-[11px] tabular-nums opacity-40">May 2026</span>
-          </Link>
-          <Link href="/aether" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Shopify themes</Link>
-          <Link href="/contact" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Work with us</Link>
-        </div>
-
-        <div className="flex flex-col gap-2.5 min-w-[100px]">
-          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Learn</p>
-          <Link href="/blog" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Blog</Link>
-          <Link href="/aether/changelog" className="inline-flex items-center gap-2 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-            Changelog
-            <span className="text-[11px] tabular-nums opacity-40">May 2026</span>
-          </Link>
-          <Link href="/docs" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Docs</Link>
-        </div>
-
-        <div className="flex flex-col gap-2.5 min-w-[110px]">
-          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Pricing</p>
+          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Products</p>
           <Link href="/aether" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Aether theme</Link>
           <Link href="/aether/enterprise" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Enterprise</Link>
           <span className="inline-flex items-center gap-2">
@@ -101,18 +81,34 @@ export function SiteFooter() {
           </span>
         </div>
 
+        <div className="flex flex-col gap-2.5 min-w-[130px]">
+          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Work</p>
+          <Link href="/contact" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Work with us</Link>
+          <Link href="/work" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Shipped using Inertia</Link>
+          <Link href="/aether#pricing" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Pricing</Link>
+        </div>
+
+        <div className="flex flex-col gap-2.5 min-w-[100px]">
+          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Resources</p>
+          <Link href="/blog" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Blog</Link>
+          <Link href="/docs" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Docs</Link>
+          <Link href="/aether/changelog" className="inline-flex items-center gap-2 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+            Changelog
+            <span className="text-[11px] tabular-nums opacity-40">May 2026</span>
+          </Link>
+        </div>
+
         <div className="flex flex-col gap-2.5 min-w-[100px]">
           <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Company</p>
           <Link href="/about" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">About</Link>
+          <Link href="/roadmap" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Roadmap</Link>
           <Link href="/careers" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Careers</Link>
           <Link href="/contact" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Help</Link>
-          <Link href="/legal" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Terms</Link>
-          <Link href="/privacy" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Privacy</Link>
+          <Link href="/legal" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Legal</Link>
         </div>
 
-        <div className="flex flex-col gap-2.5 min-w-[130px]">
-          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Community</p>
-          <Link href="/work" className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Shipped using Inertia</Link>
+        <div className="flex flex-col gap-2.5 min-w-[100px]">
+          <p className="text-[12px] sm:text-[13px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Follow</p>
           <a href="https://www.instagram.com/by.inertia/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
               <rect x="3" y="3" width="18" height="18" rx="5" />

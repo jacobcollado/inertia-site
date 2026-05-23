@@ -7,7 +7,6 @@ import { HeaderAuth } from "./dashboard/header-auth";
 import { SiShopify } from "react-icons/si";
 import {
   HiOutlineSparkles,
-  HiOutlineDocumentText,
   HiOutlineChatBubbleLeftRight,
   HiOutlineNewspaper,
   HiOutlineBookOpen,
@@ -19,8 +18,6 @@ import {
   HiOutlineBriefcase,
   HiOutlineQuestionMarkCircle,
   HiOutlineShieldCheck,
-  HiOutlinePhoto,
-  HiOutlineGlobeAlt,
   HiOutlineMapPin,
 } from "react-icons/hi2";
 
@@ -40,27 +37,27 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   {
-    label: "Get started",
+    label: "Products",
     children: [
-      { label: "Shopify themes", description: "Production-ready themes built for conversion.", href: "/aether", icon: <SiShopify /> },
-      { label: "Changelog", description: "Every update, documented.", href: "/aether/changelog", icon: <HiOutlineClipboardDocumentList /> },
-      { label: "Work with us", description: "Custom builds, shipped on time.", href: "/contact", icon: <HiOutlineChatBubbleLeftRight /> },
+      { label: "Aether theme", description: "One-time purchase, lifetime updates.", href: "/aether", icon: <SiShopify /> },
+      { label: "Enterprise", description: "Custom licensing for larger teams.", href: "/aether/enterprise", icon: <HiOutlineBuildingOffice /> },
+      { label: "Add-ons", description: "Extend your theme with optional modules.", disabled: true, icon: <HiOutlinePuzzlePiece /> },
     ],
   },
   {
-    label: "Learn",
+    label: "Work",
+    children: [
+      { label: "Work with us", description: "Custom builds, shipped on time.", href: "/contact", icon: <HiOutlineChatBubbleLeftRight /> },
+      { label: "Shipped using Inertia", description: "Real stores built on our themes.", href: "/work", icon: <HiOutlineSparkles /> },
+      { label: "Pricing", description: "Straightforward, no surprises.", href: "/aether#pricing", icon: <HiOutlineCreditCard /> },
+    ],
+  },
+  {
+    label: "Resources",
     children: [
       { label: "Blog", description: "Thoughts on building things that work.", href: "/blog", icon: <HiOutlineNewspaper /> },
       { label: "Docs", description: "Guides, references, and how-tos.", href: "/docs", icon: <HiOutlineBookOpen /> },
-      { label: "Changelog", description: "What shipped and when.", href: "/aether/changelog", icon: <HiOutlineDocumentText /> },
-    ],
-  },
-  {
-    label: "Pricing",
-    children: [
-      { label: "Aether theme", description: "One-time purchase, lifetime updates.", href: "/aether", icon: <HiOutlineCreditCard /> },
-      { label: "Enterprise", description: "Custom licensing for larger teams.", href: "/aether/enterprise", icon: <HiOutlineBuildingOffice /> },
-      { label: "Add-ons", description: "Extend your theme with optional modules.", disabled: true, icon: <HiOutlinePuzzlePiece /> },
+      { label: "Changelog", description: "Every update, documented.", href: "/aether/changelog", icon: <HiOutlineClipboardDocumentList /> },
     ],
   },
   {
@@ -71,14 +68,6 @@ const NAV: NavItem[] = [
       { label: "Careers", description: "Join us when the time is right.", href: "/careers", icon: <HiOutlineBriefcase /> },
       { label: "Help", description: "Get support for anything we've shipped.", href: "/contact", icon: <HiOutlineQuestionMarkCircle /> },
       { label: "Legal", description: "Terms, licenses, and policies.", href: "/legal", icon: <HiOutlineShieldCheck /> },
-    ],
-  },
-  {
-    label: "Community",
-    children: [
-      { label: "Shipped using Inertia", description: "Real stores built on our themes.", href: "/work", icon: <HiOutlineSparkles /> },
-      { label: "Instagram", description: "Behind the build, process shots.", href: "https://www.instagram.com/by.inertia/", external: true, icon: <HiOutlinePhoto /> },
-      { label: "X (Twitter)", description: "Updates and hot takes.", href: "https://x.com/inertia_dev", external: true, icon: <HiOutlineGlobeAlt /> },
     ],
   },
 ];
@@ -465,7 +454,7 @@ export function VisualNotch() {
   }, []);
 
   const handleLeave = useCallback(() => {
-    leaveTimer.current = setTimeout(() => setOpenIndex(null), 80);
+    leaveTimer.current = setTimeout(() => setOpenIndex(null), 300);
   }, []);
 
   const handleClose = useCallback(() => setOpenIndex(null), []);
@@ -480,7 +469,7 @@ export function VisualNotch() {
           </span>
 
           {/* Desktop nav */}
-          <nav className="site-header__nav" aria-label="Main navigation" ref={navRef}>
+          <nav className="site-header__nav" aria-label="Main navigation" ref={navRef} onMouseLeave={handleLeave}>
             {NAV.map((item, i) => (
               <NavTrigger
                 key={item.label}
@@ -488,7 +477,7 @@ export function VisualNotch() {
                 index={i}
                 openIndex={openIndex}
                 onEnter={handleEnter}
-                onLeave={handleLeave}
+                onLeave={() => {}}
                 triggerRef={(el) => { triggerEls.current[i] = el; }}
               />
             ))}
@@ -496,7 +485,7 @@ export function VisualNotch() {
               openIndex={openIndex}
               triggerEls={triggerEls.current}
               navRef={navRef}
-              onLeave={handleLeave}
+              onLeave={() => {}}
               onClose={handleClose}
             />
           </nav>

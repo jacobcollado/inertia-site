@@ -307,7 +307,7 @@ function StartPrompt({ closing }: { closing?: boolean }) {
         <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
           {closing ? "Ready to build something worth shipping?" : "What are you building?"}
         </p>
-        <p className="text-[clamp(0.8rem,1.5vw,0.9rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
+        <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
           {closing ? "Tell us what you’re working on. We’ll take it from there." : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
@@ -469,7 +469,7 @@ function AetherFeature() {
             <SiShopify style={{ display: "inline", width: "0.8em", height: "0.8em", color: "#fff", flexShrink: 0 }} />Aether
           </span>
         </h2>
-        <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-lg">
+        <p className="text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-lg">
           The right thing is always obvious. The details reward attention. And the whole time, it&apos;s quietly converting.
         </p>
       </div>
@@ -723,7 +723,7 @@ function PlatformSignal() {
             <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
             {" "}want to do, we do.
           </p>
-          <p className="text-[clamp(0.9rem,1.6vw,1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
+          <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
             Storefront, app, brand, growth. One team, no handoffs, no referrals.
           </p>
           <a
@@ -831,7 +831,7 @@ function SocialProof() {
       {/* Mobile: carousel */}
       <div className="sm:hidden flex flex-col gap-5 px-6">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight text-center">
-          Heard from the field.
+          From the people we built for.
         </h2>
         <div
           className="overflow-hidden"
@@ -902,7 +902,7 @@ function SocialProof() {
       {/* Desktop: heading top, asymmetric card grid below */}
       <div className="hidden sm:flex flex-col gap-6 px-8">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
-          Heard from the field.
+          From the people we built for.
         </h2>
         <div className="flex gap-3 items-stretch">
           {/* Featured card — wider, stands alone */}
@@ -1538,7 +1538,7 @@ function StackDiagram() {
       <div className="relative flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 border-b border-[rgb(var(--line))] sm:border-b-0 sm:border-r border-[rgb(var(--line))] overflow-hidden">
         <div className="relative z-10 flex flex-col items-center sm:items-start gap-3 pointer-events-none">
           <MissionPhrase />
-          <p className="text-[clamp(0.85rem,1.6vw,1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left">
+          <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left">
             We don&apos;t outsource the hard parts. Design to deployment, one team, one stack, no handoffs.
           </p>
           <Link href="/blog" className="pointer-events-auto inline-flex items-center gap-2 mt-1 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity hover:opacity-80" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
@@ -2329,19 +2329,35 @@ function VisualLayout() {
 
       <GridRule />
 
+      <div className="py-8 sm:py-12" />
+
       <AetherFeature />
 
+      <div className="py-8 sm:py-12" />
+
       <GridRule />
+
+      <div className="py-8 sm:py-12" />
 
       <PlatformSignal />
 
+      <div className="py-8 sm:py-12" />
+
       <GridRule />
+
+      <div className="py-8 sm:py-12" />
 
       <SocialProof />
 
+      <div className="py-8 sm:py-12" />
+
       <GridRule />
 
+      <div className="py-8 sm:py-12" />
+
       <StackDiagram />
+
+      <div className="py-8 sm:py-12" />
 
       <GridRule />
 
@@ -2350,7 +2366,7 @@ function VisualLayout() {
         <div className="w-full rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
 
           {/* Tab bar */}
-          <div className="flex border-t border-b border-[rgb(var(--line))]">
+          <div className="flex border-b border-[rgb(var(--line))]">
             <span className="ml-auto self-center px-5 py-3 text-[11px] tracking-tight shrink-0 order-last hidden sm:block" style={{ borderLeft: "1px solid rgb(var(--line))" }}>
               <span className="text-[rgb(var(--muted))] opacity-40">
                 {buildingTab === "All" ? `${BUILDING.length} products` : `${BUILDING.filter(b => b.type === buildingTab).length} ${buildingTab.toLowerCase()}`}
@@ -2394,7 +2410,7 @@ function VisualLayout() {
                 <>
                   <div className="flex flex-col gap-1.5 mb-4">
                     <span className="text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
-                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
+                    <span className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
                   </div>
                   <span className="inline-flex self-start items-center gap-2 rounded-full px-3 py-1.5 mb-6 transition-opacity group-hover:opacity-80 text-[13px] tracking-tight" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
                     {item.cta}<span aria-hidden="true">→</span>
@@ -2421,9 +2437,15 @@ function VisualLayout() {
 
       </div>
 
+      <div className="py-8 sm:py-12" />
+
       <GridRule />
 
+      <div className="py-8 sm:py-12" />
+
       <StartPrompt closing />
+
+      <div className="py-8 sm:py-12" />
 
       <GridRule />
 
