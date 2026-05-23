@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from "react";
 // Lengths: right(6), fast(5), properly(9), yours(6), clean(6), built(6) — reordered so no two adjacent share length
 // fast(5) -> right(6) -> properly(9) -> clean(6) -> built(5) -> yours(6)
 const ROTATE_WORDS = ["fast", "right", "properly", "clean", "built", "yours"];
-const HOLD_MS = 2400;
-const CHAR_STAGGER = 42;
+const HOLD_MS = 2600;
+const CHAR_STAGGER = 32;
 const FILL_MS = 800;
-const FILL_DELAY = 300; // delay after word finishes entering before gradient sweeps
+const FILL_DELAY = 200;
 
 function RotatingWord() {
   const [index, setIndex] = useState(0);
@@ -95,7 +95,7 @@ function RotatingWord() {
         style={{ display: "flex", justifyContent: "center", whiteSpace: "nowrap" }}
       >
         {word.split("").map((ch, i) => {
-          const exitDelay = (word.length - 1 - i) * CHAR_STAGGER;
+          const exitDelay = (word.length - 1 - i) * CHAR_STAGGER * 0.85;
           return phase === "exit" ? (
             <span
               key={`${index}-${i}-exit`}
@@ -104,8 +104,9 @@ function RotatingWord() {
                 display: "inline-block",
                 width: ch === " " ? "0.28em" : undefined,
                 opacity: 0,
-                transform: "translateY(-10px)",
-                transition: `opacity 80ms linear ${exitDelay}ms, transform 100ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms`,
+                transform: "translateY(-8px) scale(0.95)",
+                filter: "blur(5px)",
+                transition: `opacity 220ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms, transform 240ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms, filter 220ms ease ${exitDelay}ms`,
               }}
             >{ch}</span>
           ) : (
@@ -116,8 +117,9 @@ function RotatingWord() {
                 display: "inline-block",
                 width: ch === " " ? "0.28em" : undefined,
                 opacity: 0,
-                transform: "translateY(10px)",
-                animation: `char-in 160ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
+                transform: "translateY(8px) scale(0.97)",
+                filter: "blur(4px)",
+                animation: `char-in 280ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
               }}
             >{ch}</span>
           );
@@ -231,7 +233,7 @@ export function SoundwaveHero() {
   return (
     <section
       className="relative overflow-hidden"
-      style={{ width: "100%", height: "480px", zIndex: 1 }}
+      style={{ width: "100%", height: "clamp(360px, 60vh, 480px)", zIndex: 1 }}
     >
       <div className="pointer-events-none absolute inset-x-0 bottom-0"
         style={{ height: "30%", background: "linear-gradient(to bottom, transparent, rgb(var(--bg)))", zIndex: 2 }} />
@@ -264,12 +266,9 @@ export function SoundwaveHero() {
           )}
         </h1>
 
-        <div className="flex items-center gap-2" style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 400ms forwards" }}>
-          <span className="relative flex items-center justify-center w-2 h-2">
-            <span className="absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: "rgb(74,222,128)", animation: "ping 1.4s cubic-bezier(0,0,0.2,1) infinite" }} />
-            <span className="relative inline-flex rounded-full w-2 h-2" style={{ background: "rgb(74,222,128)" }} />
-          </span>
-          <span className="text-[17px] tracking-tight" style={{ color: "rgb(var(--fg) / 0.5)" }}>Slots open. Come build with us.</span>
+        <div className="flex flex-col items-center gap-1" style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 400ms forwards" }}>
+          <span className="text-[17px] tracking-tight" style={{ color: "rgb(var(--fg) / 0.8)" }}>Your competitors hired us first.</span>
+          <span className="text-[15px] tracking-tight" style={{ color: "rgb(var(--fg) / 0.4)" }}>Every touchpoint, handled.</span>
         </div>
 
         <div className="pointer-events-auto flex items-center gap-3 flex-wrap justify-center" style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 600ms forwards" }}>
