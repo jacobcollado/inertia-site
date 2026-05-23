@@ -228,7 +228,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   };
 
   const inputClass =
-    "w-full bg-transparent border border-[rgb(var(--line))] rounded-full px-4 py-3 text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-35 focus:outline-none focus:border-[rgb(var(--fg)/0.5)] transition-colors duration-200";
+    "w-full bg-transparent border border-[rgb(var(--line))] rounded-full px-4 py-3 text-[16px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-35 focus:outline-none focus:border-[rgb(var(--fg)/0.5)] transition-colors duration-200";
 
   if (redirecting) {
     return (
@@ -337,7 +337,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                   </div>
                   <OAuthButtons onOAuth={onOAuth} loading={loading} oauthProvider={oauthProvider} />
                   <form onSubmit={onSignIn} className="flex flex-col gap-4" noValidate>
-                    <input autoFocus type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                    <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                       placeholder="Email" autoComplete="email" className={inputClass} />
                     <div className="flex flex-col gap-1.5">
                       <div className="relative">
@@ -395,7 +395,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                   tabIndex={-1} autoComplete="off" aria-hidden="true"
                   style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
                 />
-                <input autoFocus type="text" value={name} onChange={(e) => setName(e.target.value)}
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)}
                   placeholder="Your name" autoComplete="name" className={inputClass} />
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email" autoComplete="email" className={inputClass} />
