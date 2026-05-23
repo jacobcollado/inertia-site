@@ -32,6 +32,7 @@ export function MobilePricing({
     (r: PricingRow) => r.enterprise,
   ];
   const getVal = vals[active];
+  const isLifetime = active === 1;
 
   return (
     <div className="flex flex-col sm:hidden">
@@ -55,22 +56,22 @@ export function MobilePricing({
       </div>
 
       {/* Tier header */}
-      <div className="px-6 py-6 flex flex-col gap-1 border-b border-[rgb(var(--line))]">
+      <div className="px-6 py-6 flex flex-col gap-1.5 border-b border-[rgb(var(--line))]" style={{ background: isLifetime ? "rgb(var(--fg) / 0.025)" : undefined }}>
         <div className="flex items-center gap-2">
           <span className="text-[13px] tracking-tight font-medium text-[rgb(var(--fg))]">{tier.name}</span>
           {tier.badge && (
             <span
-              className="text-[10px] tracking-tight font-medium px-1.5 py-0.5 text-[rgb(var(--bg))]"
-              style={{ background: "rgb(var(--fg))", borderRadius: 3 }}
+              className="text-[10px] tracking-tight font-medium px-2 py-0.5 rounded-full"
+              style={{ background: "rgb(60,100,255)", color: "#fff" }}
             >
               {tier.badge}
             </span>
           )}
         </div>
-        <span className="text-[2.2rem] font-[400] tracking-[-0.04em] leading-none tabular-nums text-[rgb(var(--fg))]">
+        <span className="text-[2rem] font-[350] tracking-[-0.04em] leading-none tabular-nums text-[rgb(var(--fg))]">
           {tier.price}
         </span>
-        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>
+        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>
           {tier.term}
         </span>
       </div>
@@ -83,19 +84,20 @@ export function MobilePricing({
             <div
               key={r.label}
               className="flex items-center justify-between px-6 py-3.5 border-b border-[rgb(var(--line))]"
+              style={{ background: isLifetime ? "rgb(var(--fg) / 0.025)" : undefined }}
             >
               <span className="text-[12.5px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.65 }}>
                 {r.label}
               </span>
               <span className="shrink-0 ml-4">
                 {val === true ? (
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]" style={{ opacity: 0.55 }} aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="rgb(60,100,255)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" style={{ opacity: 0.7 }} aria-hidden="true">
                     <polyline points="2 8 6 12 14 4" />
                   </svg>
                 ) : val === false ? (
                   <span className="block w-3 h-px" style={{ background: "rgb(var(--line))" }} />
                 ) : (
-                  <span className="text-[12px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.7 }}>
+                  <span className="text-[12px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.65 }}>
                     {val}
                   </span>
                 )}
@@ -106,13 +108,16 @@ export function MobilePricing({
       </div>
 
       {/* CTA */}
-      <div className="px-6 py-6">
+      <div className="px-6 py-6" style={{ background: isLifetime ? "rgb(var(--fg) / 0.025)" : undefined }}>
         <Link
           href={tier.name === "Enterprise" ? "/aether/enterprise" : `/aether/buy?tier=${tier.name.toLowerCase()}`}
-          className="flex items-center justify-center gap-1.5 py-3 w-full text-[13px] tracking-tight font-medium border border-[rgb(var(--fg))] text-[rgb(var(--fg))] hover:opacity-60 transition-opacity"
+          className="flex items-center justify-center gap-1.5 rounded-full py-3 w-full text-[13px] tracking-tight font-medium transition-opacity hover:opacity-80"
+          style={isLifetime
+            ? { background: "rgb(60,100,255)", color: "#fff" }
+            : { border: "1px solid rgb(var(--line))", color: "rgb(var(--fg))" }
+          }
         >
           {tier.name === "Enterprise" ? "Learn more" : "Get Aether"}
-          <span aria-hidden="true">&#8594;</span>
         </Link>
       </div>
     </div>

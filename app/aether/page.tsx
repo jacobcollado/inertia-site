@@ -189,7 +189,7 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label */}
-      <p className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-normal tracking-tight text-center text-[rgb(var(--muted))] py-6 sm:py-8 px-6 sm:px-8 rise leading-snug">
+      <p className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-normal tracking-tight text-center text-[rgb(var(--muted))] py-10 sm:py-14 px-6 sm:px-8 rise leading-snug">
         Why brands <span className="inline-block" style={{ background: "rgb(60,100,255)", color: "#fff", padding: "0.05em 0.25em 0.1em", borderRadius: "6px" }}>choose it</span> over anything else
       </p>
 
@@ -200,7 +200,7 @@ export default function AetherPage() {
         {FEATURES.map((f, i) => (
           <div
             key={f.title}
-            className="flex-1 flex flex-col gap-4 px-6 sm:px-8 pt-6 pb-6 sm:pt-8 sm:pb-8 rise"
+            className="flex-1 flex flex-col gap-5 px-6 sm:px-8 pt-8 pb-8 sm:pt-12 sm:pb-12 rise"
             style={{
               borderLeft: i > 0 ? "1px solid rgb(var(--line))" : undefined,
               borderTop: i > 0 ? "1px solid rgb(var(--line))" : undefined,
@@ -213,10 +213,10 @@ export default function AetherPage() {
               {i === 2 && <SketchConversion />}
             </div>
             <div className="flex flex-col gap-2">
-              <h3 className="text-[clamp(1rem,2vw,1.2rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
+              <h3 className="text-[clamp(1.1rem,2vw,1.25rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
                 {f.title}
               </h3>
-              <p className="text-[clamp(0.8rem,1.5vw,0.9rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+              <p className="text-[clamp(0.9rem,1.5vw,1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
                 {f.body}
               </p>
             </div>
@@ -279,7 +279,7 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label -- fit quiz */}
-      <p className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-normal tracking-tight text-center text-[rgb(var(--muted))] py-6 sm:py-8 px-6 sm:px-8 rise leading-snug">
+      <p className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-normal tracking-tight text-center text-[rgb(var(--muted))] py-10 sm:py-14 px-6 sm:px-8 rise leading-snug">
         Is Aether <span className="inline-block" style={{ background: "rgb(60,100,255)", color: "#fff", padding: "0.05em 0.25em 0.1em", borderRadius: "6px" }}>the right fit?</span> Four questions.
       </p>
 
@@ -291,7 +291,7 @@ export default function AetherPage() {
       <GridRule />
 
       {/* Section label -- pricing */}
-      <p id="pricing" className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-normal tracking-tight text-center text-[rgb(var(--muted))] py-6 sm:py-8 px-6 sm:px-8 rise leading-snug scroll-mt-16">
+      <p id="pricing" className="text-[clamp(1.6rem,3.5vw,2.2rem)] font-normal tracking-tight text-center text-[rgb(var(--muted))] py-10 sm:py-14 px-6 sm:px-8 rise leading-snug scroll-mt-16">
         $85 for a year. <span className="inline-block" style={{ background: "rgb(60,100,255)", color: "#fff", padding: "0.05em 0.25em 0.1em", borderRadius: "6px" }}>$105 to own it.</span>
       </p>
 
