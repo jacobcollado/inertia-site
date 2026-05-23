@@ -852,7 +852,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         }
         if (block.type === "h3") {
           return (
-            <h3 key={i} className="text-[14px] font-semibold tracking-tight text-[rgb(var(--fg))] pt-2 pb-2 border-b border-[rgb(var(--line))]">
+            <h3 key={i} className="text-[14px] font-semibold tracking-tight text-[rgb(var(--fg))] pt-2 pb-2">
               {block.text}
             </h3>
           );
