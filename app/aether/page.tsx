@@ -6,9 +6,9 @@ import { AetherContour } from "./aether-contour";
 import { MobilePricing } from "./mobile-pricing";
 
 export const metadata: Metadata = {
-  title: "Aether",
+  title: "Aether Shopify Theme",
   description:
-    "A high-end Shopify theme built for conversion, flow, and presence.",
+    "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu. From $85.",
 };
 
 const FEATURES = [
