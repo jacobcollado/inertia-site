@@ -878,7 +878,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         if (block.type === "note") {
           const na = block.accent ?? accent;
           return (
-            <div key={i} className="rounded-xl px-4 py-4 flex gap-3" style={{ background: rgba(na, 0.07), borderLeft: `2px solid ${rgba(na, 0.5)}` }}>
+            <div key={i} className="rounded-xl px-4 py-4 flex gap-3" style={{ background: rgba(na, 0.07) }}>
               <svg viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 mt-[3px]" style={{ stroke: rgba(na, 0.8) }} strokeWidth="1.5" aria-hidden="true">
                 <circle cx="8" cy="8" r="6" />
                 <line x1="8" y1="7" x2="8" y2="11" />
@@ -1008,7 +1008,14 @@ export default function DocsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const scrollElRef = useRef<HTMLDivElement>(null);
   useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 300);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -1086,7 +1093,7 @@ export default function DocsPage() {
       {/* Docs header — desktop hidden, mobile only */}
       <header className="lg:hidden flex items-center justify-between px-5 shrink-0" style={{ height: 52, background: "rgb(var(--bg))" }}>
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Inertia" className="h-3.5 w-auto dark:invert invert-0" />
+          <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
         </Link>
         <Link href="/aether/buy" className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight font-medium transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
           Get Aether
@@ -1188,7 +1195,7 @@ export default function DocsPage() {
         </aside>
 
         {/* Content — centered with max-width */}
-        <div className="flex-1 min-w-0 pb-32 lg:pb-24 overflow-y-auto">
+        <div ref={scrollElRef} className="docs-scroll flex-1 min-w-0 pb-32 lg:pb-24 overflow-y-auto">
           <div className="mx-auto max-w-4xl px-6 sm:px-10">
 
           {/* Introduction */}
@@ -1271,6 +1278,28 @@ export default function DocsPage() {
     </div>
 
     {mounted && createPortal(<>
+      {/* Back to top */}
+      {scrolled && !sheetOpen && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="fixed z-40 flex items-center justify-center [-webkit-tap-highlight-color:transparent] transition-opacity hover:opacity-70"
+          style={{
+            bottom: 24,
+            right: 24,
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            background: "rgb(var(--fg) / 0.08)",
+            border: "1px solid rgb(var(--line))",
+          }}
+          aria-label="Back to top"
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--fg))]">
+            <polyline points="3 10 8 5 13 10" />
+          </svg>
+        </button>
+      )}
+
       {/* Fixed mobile menu button */}
       {!sheetOpen && (
         <button
