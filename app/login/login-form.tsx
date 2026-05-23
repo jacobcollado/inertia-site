@@ -244,8 +244,8 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 sm:px-12 h-14 border-b border-[rgb(var(--line))] shrink-0">
-        <Link href="/" className="text-[13px] tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 transition-opacity">
-          ← Inertia
+        <Link href="/" className="opacity-80 hover:opacity-100 transition-opacity">
+          <img src="/logo.png" alt="Inertia" className="h-4 w-auto dark:invert invert-0" />
         </Link>
         <div className="flex items-center gap-1 border border-[rgb(var(--line))] rounded-full p-[3px]">
           {(["signin", "signup"] as const).map((t) => (
@@ -276,10 +276,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
                 We sent a link to <span className="text-[rgb(var(--fg))]">{email}</span>. Click it to activate your account.
               </p>
-              <button onClick={() => switchTab("signin")}
-                className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start">
-                Back to sign in →
-              </button>
             </div>
 
           ) : tab === "signin" ? (
@@ -293,10 +289,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                     <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
                       We sent a password reset link to <span className="text-[rgb(var(--fg))]">{email}</span>.
                     </p>
-                    <button onClick={() => { setForgotMode(false); setResetSent(false); setEmail(""); }}
-                      className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start">
-                      Back to sign in
-                    </button>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-10">

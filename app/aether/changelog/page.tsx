@@ -437,8 +437,8 @@ export default function AetherChangelog() {
           {/* Footer */}
           <div className="grid-rule" aria-hidden="true" />
           <div className="px-8 py-6 flex items-center justify-between">
-            <Link href="/aether" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-              Back to Aether
+            <Link href="/aether" className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-80 transition-opacity">
+              Aether →
             </Link>
             <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] tabular-nums opacity-40">
               {CHANGELOG.length} releases

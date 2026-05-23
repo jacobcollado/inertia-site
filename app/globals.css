@@ -188,13 +188,13 @@ html {
 }
 
 @keyframes route-enter {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
 
 .route-enter {
-  animation: route-enter 200ms ease both;
-  will-change: opacity;
+  animation: route-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1253,27 +1253,6 @@ h1:hover .redact > span.redact-inner,
 
 .page-container {
   position: relative;
-}
-
-/* Vertical lines â€” absolute within the container, left/right edges */
-.page-container::before,
-.page-container::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgb(var(--line));
-  pointer-events: none;
-  z-index: 10;
-}
-
-.page-container::before {
-  left: 0;
-}
-
-.page-container::after {
-  right: 0;
 }
 
 /* â”€â”€ Section divider â€” full width, touching both grid lines â”€â”€â”€â”€â”€â”€â”€ */

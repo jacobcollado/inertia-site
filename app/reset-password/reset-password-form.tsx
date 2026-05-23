@@ -51,8 +51,8 @@ export function ResetPasswordForm() {
   return (
     <div className="w-full min-h-screen flex flex-col">
       <div className="flex items-center justify-between px-6 sm:px-12 h-14 border-b border-[rgb(var(--line))] shrink-0">
-        <Link href="/login" className="text-[13px] tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 transition-opacity">
-          ← Inertia
+        <Link href="/" className="opacity-80 hover:opacity-100 transition-opacity">
+          <img src="/logo.png" alt="Inertia" className="h-4 w-auto dark:invert invert-0" />
         </Link>
       </div>
 

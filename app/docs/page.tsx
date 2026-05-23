@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 
@@ -835,41 +836,41 @@ const PRODUCTS: Product[] = [
 
 function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, number, number] }) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {body.map((block, i) => {
         if (block.type === "sketch") {
           const Sketch = SKETCH_MAP[block.name];
           if (!Sketch) return null;
           return (
-            <div key={i} className="w-full rounded-lg overflow-hidden border border-[rgb(var(--line))] py-6 px-4 mb-1" style={{ background: rgba(accent, 0.022) }}>
+            <div key={i} className="w-full rounded-xl overflow-hidden border border-[rgb(var(--line))] py-8 px-6" style={{ background: "rgb(var(--fg) / 0.02)" }}>
               <Sketch accent={block.accent} />
             </div>
           );
         }
         if (block.type === "p") {
-          return <p key={i} className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">{block.text}</p>;
+          return <p key={i} className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.85 }}>{block.text}</p>;
         }
         if (block.type === "h3") {
           return (
-            <h3 key={i} className="text-[13px] font-medium tracking-tight mt-2 text-[rgb(var(--fg))]">
+            <h3 key={i} className="text-[14px] font-semibold tracking-tight text-[rgb(var(--fg))] pt-2 pb-2 border-b border-[rgb(var(--line))]">
               {block.text}
             </h3>
           );
         }
         if (block.type === "ol") {
           return (
-            <ol key={i} className="flex flex-col gap-2.5 pl-5">
+            <ol key={i} className="flex flex-col gap-3 pl-4">
               {block.items.map((item, j) => (
-                <li key={j} className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] list-decimal">{item}</li>
+                <li key={j} className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))] list-decimal pl-1" style={{ opacity: 0.85 }}>{item}</li>
               ))}
             </ol>
           );
         }
         if (block.type === "ul") {
           return (
-            <ul key={i} className="flex flex-col gap-2.5 pl-5">
+            <ul key={i} className="flex flex-col gap-3 pl-4">
               {block.items.map((item, j) => (
-                <li key={j} className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] list-disc">{item}</li>
+                <li key={j} className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))] list-disc pl-1" style={{ opacity: 0.85 }}>{item}</li>
               ))}
             </ul>
           );
@@ -877,19 +878,19 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         if (block.type === "note") {
           const na = block.accent ?? accent;
           return (
-            <div key={i} className="rounded-lg px-4 py-3.5 flex gap-3" style={{ background: rgba(na, 0.06), border: `1px solid ${rgba(na, 0.18)}` }}>
-              <svg viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 mt-[1px]" style={{ stroke: rgba(na, 0.7) }} strokeWidth="1.5" aria-hidden="true">
+            <div key={i} className="rounded-xl px-4 py-4 flex gap-3" style={{ background: rgba(na, 0.07), borderLeft: `2px solid ${rgba(na, 0.5)}` }}>
+              <svg viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 mt-[3px]" style={{ stroke: rgba(na, 0.8) }} strokeWidth="1.5" aria-hidden="true">
                 <circle cx="8" cy="8" r="6" />
                 <line x1="8" y1="7" x2="8" y2="11" />
                 <circle cx="8" cy="5" r="0.5" fill="currentColor" stroke="none" />
               </svg>
-              <p className="text-[13px] leading-relaxed tracking-tight" style={{ color: rgba(na, 0.78) }}>{block.text}</p>
+              <p className="text-[14px] leading-relaxed tracking-tight" style={{ color: rgba(na, 0.85) }}>{block.text}</p>
             </div>
           );
         }
         if (block.type === "code") {
           return (
-            <pre key={i} className="text-[12px] leading-relaxed tracking-tight rounded-lg border border-[rgb(var(--line))] px-4 py-4 overflow-x-auto whitespace-pre-wrap text-[rgb(var(--muted))]" style={{ background: rgba(accent, 0.022) }}>
+            <pre key={i} className="text-[13px] leading-relaxed font-mono rounded-xl border border-[rgb(var(--line))] px-5 py-4 overflow-x-auto whitespace-pre text-[rgb(var(--muted))]" style={{ background: "rgb(var(--fg) / 0.03)" }}>
               <code>{block.text}</code>
             </pre>
           );
@@ -971,29 +972,84 @@ function SidebarNav({
   );
 }
 
-function Divider() {
-  return <div className="grid-rule" aria-hidden="true" />;
+const INTRO_ID = "__intro__";
+
+type SearchResult = { productId: string; productName: string; sectionTitle: string; articleId: string; articleTitle: string; excerpt: string };
+
+function buildSearchIndex(): SearchResult[] {
+  const results: SearchResult[] = [];
+  for (const product of PRODUCTS) {
+    for (const section of product.sections) {
+      for (const article of section.articles) {
+        const textBlocks = article.body
+          .filter((b): b is { type: "p"; text: string } => b.type === "p")
+          .map((b) => b.text)
+          .join(" ");
+        results.push({
+          productId: product.id,
+          productName: product.name,
+          sectionTitle: section.title,
+          articleId: article.id,
+          articleTitle: article.title,
+          excerpt: textBlocks.slice(0, 120),
+        });
+      }
+    }
+  }
+  return results;
 }
+
+const SEARCH_INDEX = buildSearchIndex();
 
 export default function DocsPage() {
   const [activeProductId, setActiveProductId] = useState(PRODUCTS[0].id);
-  const [activeArticleId, setActiveArticleId] = useState(PRODUCTS[0].sections[0].articles[0].id);
+  const [activeArticleId, setActiveArticleId] = useState<string>(INTRO_ID);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const searchResults = searchQuery.trim().length > 0
+    ? SEARCH_INDEX.filter((r) => {
+        const q = searchQuery.toLowerCase();
+        return r.articleTitle.toLowerCase().includes(q) || r.excerpt.toLowerCase().includes(q) || r.sectionTitle.toLowerCase().includes(q);
+      }).slice(0, 8)
+    : [];
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   const product = PRODUCTS.find((p) => p.id === activeProductId)!;
   const allArticles = product.sections.flatMap((s) => s.articles);
 
   const handleSelectProduct = (id: string) => {
     setActiveProductId(id);
-    const p = PRODUCTS.find((x) => x.id === id)!;
-    setActiveArticleId(p.sections[0].articles[0].id);
+    setActiveArticleId(INTRO_ID);
     const lenis = (window as any).__lenis;
-    if (lenis) {
-      lenis.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo({ top: 0, behavior: "auto" });
-    }
+    if (lenis) lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo({ top: 0, behavior: "auto" });
   };
 
   useEffect(() => {
@@ -1007,8 +1063,10 @@ export default function DocsPage() {
           }
         }
       },
-      { rootMargin: "-15% 0px -70% 0px", threshold: 0 }
+      { rootMargin: "-10% 0px -75% 0px", threshold: 0 }
     );
+    const introEl = document.getElementById(INTRO_ID);
+    if (introEl) observerRef.current.observe(introEl);
     allArticles.forEach((a) => {
       const el = document.getElementById(a.id);
       if (el) observerRef.current?.observe(el);
@@ -1017,203 +1075,440 @@ export default function DocsPage() {
   }, [activeProductId]);
 
   useEffect(() => {
-    document.body.style.overflow = sheetOpen ? "hidden" : "";
+    document.body.style.overflow = sheetOpen || searchOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
-  }, [sheetOpen]);
-
-  const sidebarProps = { products: PRODUCTS, activeProductId, activeArticleId, onSelectProduct: handleSelectProduct };
+  }, [sheetOpen, searchOpen]);
 
   return (
-    <div className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
+    <>
+    <div className="min-h-screen flex flex-col" style={{ background: "rgb(var(--bg))" }}>
 
-      <div className="px-6 sm:px-8 py-5 rise">
-        <Link href="/" className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] tracking-tight transition-opacity hover:opacity-70" style={{ border: "1px solid rgb(var(--fg) / 0.25)", color: "rgb(var(--fg))" }}>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
-          Home
+      {/* Docs header — desktop hidden, mobile only */}
+      <header className="lg:hidden flex items-center justify-between px-5 shrink-0" style={{ height: 52, background: "rgb(var(--bg))" }}>
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/logo.png" alt="Inertia" className="h-3.5 w-auto dark:invert invert-0" />
         </Link>
-      </div>
+        <Link href="/aether/buy" className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight font-medium transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
+          Get Aether
+        </Link>
+      </header>
 
-      <Divider />
+      <div className="flex flex-1 min-h-0">
 
-      <div className="flex flex-col items-center text-center px-6 sm:px-8 pt-14 pb-12 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-        <h1 className="text-[clamp(2.4rem,7vw,5rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-5">
-          Docs
-        </h1>
-        <p className="text-[1rem] leading-[1.7] tracking-tight text-[rgb(var(--muted))] max-w-sm">
-          Everything you need to set up, configure, and get the most out of Inertia products.
-        </p>
-      </div>
+        {/* Sidebar */}
+        <aside className="hidden lg:flex flex-col w-56 xl:w-64 shrink-0 border-r border-[rgb(var(--line))]" style={{ background: "rgb(var(--fg) / 0.015)" }}>
+          <div className="sticky top-0 max-h-screen overflow-y-auto px-3 py-4 flex flex-col gap-4">
 
-      <Divider />
+            {/* Logo */}
+            <div className="flex items-center justify-between px-3 py-2 mb-1">
+              <Link href="/">
+                <img src="/logo.png" alt="Inertia" className="h-3.5 w-auto dark:invert invert-0" />
+              </Link>
+              <Link href="/aether/buy" className="text-[11px] tracking-tight font-medium transition-opacity hover:opacity-70" style={{ color: "rgb(var(--muted))", opacity: 0.5 }}>
+                Get Aether
+              </Link>
+            </div>
 
+            {/* Search trigger */}
+            <button
+              onClick={() => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] w-full transition-colors hover:border-[rgb(var(--fg)/0.3)]"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0" aria-hidden="true">
+                <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
+              </svg>
+              <span className="flex-1 text-left">Search</span>
+              <span className="px-1.5 py-0.5 rounded text-[10px] border border-[rgb(var(--line))]">⌘K</span>
+            </button>
 
-      <div className="rise flex flex-1" style={{ ["--rise-delay" as any]: "80ms" }}>
+            <div className="h-px" style={{ background: "rgb(var(--line))" }} />
 
-        <aside className="hidden lg:block w-52 xl:w-60 shrink-0 border-r border-[rgb(var(--line))]">
-          <div className="sticky top-0 px-6 max-h-screen overflow-y-auto">
-            <SidebarNav {...sidebarProps} />
+            {/* Product switcher */}
+            <div className="flex flex-col gap-0.5">
+              {PRODUCTS.map((p) => {
+                const active = p.id === activeProductId;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectProduct(p.id)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors w-full"
+                    style={{ background: active ? rgba(p.accent, 0.1) : "transparent" }}
+                  >
+                    <span className="text-[13px] font-medium tracking-tight" style={{ color: active ? rgba(p.accent, 1) : "rgb(var(--muted))" }}>{p.name}</span>
+                    <span className="text-[11px] tracking-tight" style={{ color: "rgb(var(--muted))", opacity: 0.4 }}>{p.description}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="h-px" style={{ background: "rgb(var(--line))" }} />
+
+            {/* Intro link */}
+            <div className="flex flex-col gap-0.5">
+              <a
+                href={`#${INTRO_ID}`}
+                className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-colors"
+                style={{
+                  color: activeArticleId === INTRO_ID ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                  background: activeArticleId === INTRO_ID ? "rgb(var(--fg) / 0.06)" : "transparent",
+                  fontWeight: activeArticleId === INTRO_ID ? 500 : 400,
+                }}
+              >
+                Introduction
+              </a>
+            </div>
+
+            {/* Nav sections */}
+            {product.sections.map((section) => (
+              <div key={section.id} className="flex flex-col gap-0.5">
+                <p className="text-[13px] font-semibold tracking-tight px-3 mb-1 mt-2" style={{ color: "rgb(var(--fg))" }}>
+                  {section.title}
+                </p>
+                {section.articles.map((article) => {
+                  const active = activeArticleId === article.id;
+                  return (
+                    <a
+                      key={article.id}
+                      href={`#${article.id}`}
+                      className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-colors"
+                      style={{
+                        color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                        background: active ? "rgb(var(--fg) / 0.07)" : "transparent",
+                        fontWeight: active ? 500 : 400,
+                        opacity: active ? 1 : 0.75,
+                      }}
+                    >
+                      {article.title}
+                    </a>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </aside>
 
-        <div className="flex-1 min-w-0 pb-32 lg:pb-0">
+        {/* Content — centered with max-width */}
+        <div className="flex-1 min-w-0 pb-32 lg:pb-24 overflow-y-auto">
+          <div className="mx-auto max-w-4xl px-6 sm:px-10">
+
+          {/* Introduction */}
+          <article id={INTRO_ID} className="scroll-mt-4 py-12 sm:py-16 border-b border-[rgb(var(--line))]">
+              <p className="text-[13px] tracking-tight mb-4" style={{ color: rgba(product.accent, 0.7) }}>
+                {product.name}
+              </p>
+              <h1 className="text-[2rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-4">
+                {product.id === "aether" ? "Aether documentation" : "Inertia documentation"}
+              </h1>
+              <p className="text-[16px] leading-[1.8] tracking-tight mb-8" style={{ color: "rgb(var(--muted))", opacity: 0.85 }}>
+                {product.id === "aether"
+                  ? "Aether is a Shopify theme built for conversion. This documentation covers everything from installation to advanced customization. Whether you're setting it up for the first time or modifying theme files, start here."
+                  : "Inertia is a small design and development studio. This documentation covers our services, how we work, and what to expect when working with us."}
+              </p>
+
+              {/* Quick start cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+                {product.sections.slice(0, 4).map((section) => {
+                  const first = section.articles[0];
+                  return (
+                    <a
+                      key={section.id}
+                      href={`#${first.id}`}
+                      className="group flex flex-col gap-1.5 p-4 rounded-xl border border-[rgb(var(--line))] transition-colors hover:border-[rgb(var(--fg)/0.2)]"
+                      style={{ background: "rgb(var(--fg) / 0.02)" }}
+                    >
+                      <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">{section.title}</span>
+                      <span className="text-[12px] tracking-tight leading-snug" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>
+                        {section.articles.length} {section.articles.length === 1 ? "article" : "articles"}
+                      </span>
+                      <span className="text-[12px] tracking-tight mt-1 transition-colors" style={{ color: rgba(product.accent, 0.7) }}>
+                        Start with {first.title} →
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+
+              {product.id === "aether" && (
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: rgba(product.accent, 0.12), color: rgba(product.accent, 1) }}>
+                    Buy a license
+                  </Link>
+                  <Link href="/aether/changelog" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
+                    Changelog
+                  </Link>
+                  <Link href="/contact" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
+                    Get support
+                  </Link>
+                </div>
+              )}
+          </article>
+
+          {/* Articles */}
           {product.sections.map((section) =>
             section.articles.map((article) => (
               <article
                 key={article.id}
                 id={article.id}
-                className="scroll-mt-8 px-6 sm:px-10 py-10 sm:py-12 border-b border-[rgb(var(--line))]"
+                className="scroll-mt-4 py-10 sm:py-14 border-b border-[rgb(var(--line))]"
               >
-                <h2 className="text-[clamp(1.4rem,3vw,1.9rem)] font-normal tracking-tight leading-tight text-[rgb(var(--fg))] mb-7">
-                  {article.title}
-                </h2>
-                <ArticleBody body={article.body} accent={product.accent} />
+                <div>
+                  <p className="text-[13px] tracking-tight mb-3" style={{ color: rgba(product.accent, 0.7) }}>
+                    {section.title}
+                  </p>
+                  <h2 className="text-[1.5rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-8">
+                    {article.title}
+                  </h2>
+                  <ArticleBody body={article.body} accent={product.accent} />
+                </div>
               </article>
             ))
           )}
+          </div>
         </div>
       </div>
 
-      {/* Mobile sticky TOC bar */}
-      {(() => {
-        const activeArticle = allArticles.find((a) => a.id === activeArticleId);
-        const articleIndex = allArticles.findIndex((a) => a.id === activeArticleId);
-        return (
-          <button
-            onClick={() => setSheetOpen(true)}
-            className="lg:hidden fixed bottom-0 inset-x-0 z-40 w-full flex items-center gap-3 px-5 [-webkit-tap-highlight-color:transparent]"
+
+    </div>
+
+    {mounted && createPortal(<>
+      {/* Fixed mobile menu button */}
+      {!sheetOpen && (
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="lg:hidden fixed z-40 flex flex-col gap-[5px] items-center justify-center [-webkit-tap-highlight-color:transparent]"
+          style={{
+            top: 10,
+            right: 16,
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            background: "rgb(var(--fg) / 0.08)",
+          }}
+          aria-label="Open navigation"
+        >
+          <span className="block h-px" style={{ width: 16, background: "rgb(var(--fg))" }} />
+          <span className="block h-px" style={{ width: 16, background: "rgb(var(--fg))" }} />
+        </button>
+      )}
+
+      {/* Search modal */}
+      {searchOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-start justify-center"
+          style={{ background: "rgba(0,0,0,0.6)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setSearchOpen(false); }}
+        >
+          <div
+            ref={searchRef}
+            className="w-full max-w-2xl mx-4 mt-[10vh] rounded-xl overflow-hidden flex flex-col"
             style={{
-              height: 68,
-              background: "rgb(var(--bg))",
-              borderTop: "1px solid rgb(var(--line))",
-              paddingBottom: "env(safe-area-inset-bottom, 0px)",
+              background: "rgba(18,18,20,0.88)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.6)",
+              maxHeight: "72vh",
             }}
           >
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] leading-none mb-1" style={{ opacity: 0.45 }}>
-                {product.name} docs · {articleIndex + 1} of {allArticles.length}
-              </p>
-              <p className="text-[14px] tracking-tight text-[rgb(var(--fg))] truncate leading-snug">
-                {activeArticle?.title ?? "Contents"}
-              </p>
-            </div>
-            <div
-              className="flex items-center justify-center shrink-0 rounded-full"
-              style={{ width: 28, height: 28, background: "rgb(var(--fg))" }}
-              aria-hidden="true"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="rgb(var(--bg))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-                <polyline points="6 9 12 15 18 9" />
+            {/* Search input */}
+            <div className="flex items-center gap-3 px-5 py-4">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0" style={{ color: "rgba(255,255,255,0.3)" }} aria-hidden="true">
+                <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
               </svg>
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search documentation..."
+                className="flex-1 bg-transparent text-[15px] tracking-tight outline-none"
+                style={{ color: "rgba(255,255,255,0.75)", caretColor: "white" }}
+              />
+              {searchQuery ? (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  style={{ color: "rgba(255,255,255,0.3)" }}
+                  className="hover:text-white transition-colors"
+                  aria-label="Clear"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5">
+                    <line x1="12" y1="4" x2="4" y2="12" /><line x1="4" y1="4" x2="12" y2="12" />
+                  </svg>
+                </button>
+              ) : (
+                <span
+                  className="text-[11px] tracking-tight px-1.5 py-0.5 rounded"
+                  style={{ color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.12)" }}
+                >
+                  Esc
+                </span>
+              )}
             </div>
-          </button>
-        );
-      })()}
 
-      {/* Mobile sheet */}
-      <div
-        className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end"
-        style={{ pointerEvents: sheetOpen ? "auto" : "none" }}
-      >
-        <div
-          className="absolute inset-0"
-          onClick={() => setSheetOpen(false)}
-          style={{
-            background: "rgba(0,0,0,0.4)",
-            opacity: sheetOpen ? 1 : 0,
-            transition: "opacity 260ms cubic-bezier(0.22,1,0.36,1)",
-          }}
-        />
-        <div
-          className="relative z-10 rounded-t-3xl flex flex-col"
-          style={{
-            background: "color-mix(in srgb, rgb(var(--bg)) 92%, rgb(var(--fg)) 8%)",
-            maxHeight: "80vh",
-            transform: sheetOpen ? "translateY(0)" : "translateY(105%)",
-            transition: "transform 360ms cubic-bezier(0.32,0.72,0,1)",
-          }}
-        >
-          {/* Drag handle */}
-          <div className="flex justify-center pt-3 pb-1 shrink-0">
-            <div className="w-9 h-1 rounded-full" style={{ background: "rgb(var(--fg) / 0.15)" }} />
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
+
+            {/* Results list */}
+            <div className="overflow-y-auto flex-1 py-3">
+              {searchQuery.trim().length === 0 ? (
+                PRODUCTS.map((p) => (
+                  <div key={p.id} className="mb-2">
+                    <p
+                      className="text-[11px] tracking-tight font-medium px-5 py-2"
+                      style={{ color: "rgba(255,255,255,0.35)" }}
+                    >
+                      {p.name}
+                    </p>
+                    {p.sections.flatMap((s) => s.articles).slice(0, 4).map((a) => (
+                      <button
+                        key={a.id}
+                        onClick={() => {
+                          setSearchOpen(false);
+                          setSearchQuery("");
+                          setActiveProductId(p.id);
+                          setTimeout(() => document.getElementById(a.id)?.scrollIntoView({ behavior: "smooth" }), 80);
+                        }}
+                        className="flex items-center gap-3 w-full text-left px-5 py-2.5 transition-colors"
+                        style={{ color: "rgba(255,255,255,0.75)" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                      >
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.25)" }} aria-hidden="true">
+                          <rect x="3" y="2" width="10" height="12" rx="1.5" />
+                          <line x1="5.5" y1="6" x2="10.5" y2="6" />
+                          <line x1="5.5" y1="9" x2="9" y2="9" />
+                        </svg>
+                        <span className="text-[13.5px] tracking-tight">{a.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                ))
+              ) : searchResults.length === 0 ? (
+                <p className="px-5 py-8 text-[13px] tracking-tight text-center" style={{ color: "rgba(255,255,255,0.3)" }}>
+                  No results for &ldquo;{searchQuery}&rdquo;
+                </p>
+              ) : (
+                searchResults.map((r) => {
+                  const p = PRODUCTS.find((p) => p.id === r.productId)!;
+                  return (
+                    <button
+                      key={r.articleId}
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchQuery("");
+                        setActiveProductId(r.productId);
+                        setTimeout(() => document.getElementById(r.articleId)?.scrollIntoView({ behavior: "smooth" }), 80);
+                      }}
+                      className="flex items-start gap-3 w-full text-left px-5 py-3 transition-colors"
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 mt-[3px]" style={{ color: "rgba(255,255,255,0.25)" }} aria-hidden="true">
+                        <rect x="3" y="2" width="10" height="12" rx="1.5" />
+                        <line x1="5.5" y1="6" x2="10.5" y2="6" />
+                        <line x1="5.5" y1="9" x2="9" y2="9" />
+                      </svg>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[13.5px] tracking-tight" style={{ color: "rgba(255,255,255,0.72)" }}>{r.articleTitle}</span>
+                        <span className="text-[11.5px] tracking-tight" style={{ color: "rgba(255,255,255,0.28)" }}>{r.productName} / {r.sectionTitle}</span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 pt-2 pb-3.5 shrink-0">
-            <p className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Contents</p>
+      {/* Mobile full-screen nav */}
+      <div
+        className="fixed inset-0 z-50 lg:hidden flex flex-col"
+        style={{
+          background: "rgb(var(--bg))",
+          display: sheetOpen ? "flex" : "none",
+        }}
+      >
+        {/* Fixed header */}
+        <div className="shrink-0">
+          <div className="flex items-center justify-between px-5" style={{ height: 52 }}>
+            <div className="flex items-center gap-2">
+              {PRODUCTS.map((p) => {
+                const active = p.id === activeProductId;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectProduct(p.id)}
+                    className="px-3 py-1.5 rounded-full text-[13px] tracking-tight [-webkit-tap-highlight-color:transparent]"
+                    style={{
+                      background: active ? rgba(p.accent, 0.1) : "rgb(var(--fg) / 0.06)",
+                      color: active ? rgba(p.accent, 1) : "rgb(var(--muted))",
+                    }}
+                  >
+                    {p.name}
+                  </button>
+                );
+              })}
+            </div>
             <button
               onClick={() => setSheetOpen(false)}
-              className="h-7 w-7 flex items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent]"
-              style={{ background: "rgb(var(--fg) / 0.08)" }}
+              className="h-8 w-8 flex items-center justify-center [-webkit-tap-highlight-color:transparent]"
               aria-label="Close"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[9px] w-[9px] text-[rgb(var(--fg))]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" style={{ color: "rgb(var(--muted))" }}>
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
           </div>
 
-          {/* Product switcher */}
-          <div className="px-5 pb-3 flex gap-2 shrink-0">
-            {PRODUCTS.map((p) => {
-              const active = p.id === activeProductId;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => handleSelectProduct(p.id)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] tracking-tight [-webkit-tap-highlight-color:transparent]"
-                  style={{
-                    background: active ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.07)",
-                    color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
-                    transition: "background 150ms ease, color 150ms ease",
-                  }}
-                >
-                  {p.name}
-                  <span className="text-[11px] opacity-50">{p.description}</span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Search trigger */}
+          <button
+            onClick={() => { setSheetOpen(false); setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
+            className="flex items-center gap-2.5 mx-5 mb-4 px-3 py-2.5 rounded-lg border border-[rgb(var(--line))] w-[calc(100%-2.5rem)] text-left [-webkit-tap-highlight-color:transparent]"
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
+              <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
+            </svg>
+            <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>Search...</span>
+          </button>
+        </div>
 
-          <div className="h-px mx-5" style={{ background: "rgb(var(--fg) / 0.08)" }} />
+        {/* Scrollable nav */}
+        <div className="overflow-y-auto flex-1 px-5 py-5 flex flex-col gap-5" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 32px)" }}>
+          <a
+            href={`#${INTRO_ID}`}
+            onClick={() => setSheetOpen(false)}
+            className="text-[15px] tracking-tight [-webkit-tap-highlight-color:transparent]"
+            style={{ color: activeArticleId === INTRO_ID ? "rgb(var(--fg))" : "rgb(var(--muted))", fontWeight: activeArticleId === INTRO_ID ? 500 : 400 }}
+          >
+            Introduction
+          </a>
 
-          {/* Scrollable articles */}
-          <div className="overflow-y-auto flex-1 px-4 py-3" style={{ paddingBottom: "env(safe-area-inset-bottom, 24px)" }}>
-            {product.sections.map((section) => (
-              <div key={section.id} className="mb-4">
-                <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] px-3 mb-1" style={{ opacity: 0.4 }}>
-                  {section.title}
-                </p>
-                <div className="flex flex-col gap-0.5">
-                  {section.articles.map((article) => {
-                    const active = activeArticleId === article.id;
-                    return (
-                      <a
-                        key={article.id}
-                        href={`#${article.id}`}
-                        onClick={() => setSheetOpen(false)}
-                        className="flex items-center justify-between px-3 py-2.5 rounded-xl text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent]"
-                        style={{
-                          background: active ? "rgb(var(--fg) / 0.08)" : undefined,
-                          color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                          transition: "background 150ms ease, color 150ms ease",
-                        }}
-                      >
-                        {article.title}
-                        {active && (
-                          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0 opacity-50">
-                            <polyline points="3 8 6 11 13 4" />
-                          </svg>
-                        )}
-                      </a>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+          <div className="h-px" style={{ background: "rgb(var(--line))" }} />
+
+          {product.sections.map((section) => (
+            <div key={section.id} className="flex flex-col gap-1">
+              <p className="text-[12px] tracking-tight font-semibold mb-1.5" style={{ color: "rgb(var(--fg))" }}>
+                {section.title}
+              </p>
+              {section.articles.map((article) => {
+                const active = activeArticleId === article.id;
+                return (
+                  <a
+                    key={article.id}
+                    href={`#${article.id}`}
+                    onClick={() => setSheetOpen(false)}
+                    className="py-2 text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent] border-b border-[rgb(var(--line))]"
+                    style={{ color: active ? "rgb(var(--fg))" : "rgb(var(--muted))", fontWeight: active ? 500 : 400 }}
+                  >
+                    {article.title}
+                  </a>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
-    </div>
+    </>, document.body)}
+    </>
   );
 }
 

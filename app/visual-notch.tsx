@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { HeaderAuth } from "./dashboard/header-auth";
@@ -442,6 +443,8 @@ function InertiaLogo() {
 
 /* ── Root ────────────────────────────────────────────────────────── */
 
+let headerHasAnimated = false;
+
 export function VisualNotch() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -450,7 +453,12 @@ export function VisualNotch() {
   const navRef = useRef<HTMLElement | null>(null);
   const triggerEls = useRef<(HTMLDivElement | null)[]>([]);
 
+  const pathname = usePathname();
+
   useEffect(() => {
+    if (headerHasAnimated) return;
+    if (pathname !== "/") return;
+    headerHasAnimated = true;
     const el = headerRef.current;
     if (!el) return;
     el.style.opacity = "0";
@@ -467,7 +475,7 @@ export function VisualNotch() {
       el.addEventListener("transitionend", onEnd, { once: true });
     });
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [pathname]);
 
   const handleEnter = useCallback((i: number) => {
     if (leaveTimer.current) clearTimeout(leaveTimer.current);
@@ -485,9 +493,9 @@ export function VisualNotch() {
       <div className="site-header" ref={headerRef}>
         <div className="site-header__inner">
           {/* Brand */}
-          <span className="site-header__brand">
+          <Link href="/" className="site-header__brand">
             <InertiaLogo />
-          </span>
+          </Link>
 
           {/* Desktop nav */}
           <nav className="site-header__nav" aria-label="Main navigation" ref={navRef} onMouseLeave={handleLeave}>
