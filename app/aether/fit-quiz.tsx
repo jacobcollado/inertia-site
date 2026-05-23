@@ -177,17 +177,17 @@ export function FitQuiz() {
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <button
                   onClick={() => pick("yes")}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-[15px] tracking-tight font-medium transition-all hover:opacity-80 [-webkit-tap-highlight-color:transparent]"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-[13px] tracking-tight font-medium transition-all hover:opacity-80 [-webkit-tap-highlight-color:transparent]"
                   style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
                 >
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
                     <polyline points="2 8 6 12 14 4" />
                   </svg>
                   That's me
                 </button>
                 <button
                   onClick={() => pick("no")}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-7 py-3.5 rounded-full text-[15px] tracking-tight transition-all hover:opacity-80 [-webkit-tap-highlight-color:transparent]"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-[13px] tracking-tight transition-all hover:opacity-80 [-webkit-tap-highlight-color:transparent]"
                   style={{ border: "1px solid rgb(var(--line))", color: "rgb(var(--muted))" }}
                 >
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
@@ -229,14 +229,14 @@ export function FitQuiz() {
               <div className="flex items-center gap-3">
                 <Link
                   href={verdict.cta.href}
-                  className="flex items-center justify-center gap-1.5 px-7 py-3.5 rounded-full text-[15px] tracking-tight font-medium transition-opacity hover:opacity-80"
+                  className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full text-[13px] tracking-tight font-medium transition-opacity hover:opacity-80"
                   style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
                 >
                   {verdict.cta.label}
                 </Link>
                 <button
                   onClick={reset}
-                  className="flex items-center justify-center gap-1.5 px-6 py-3.5 rounded-full text-[14px] tracking-tight transition-opacity hover:opacity-60 [-webkit-tap-highlight-color:transparent]"
+                  className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full text-[13px] tracking-tight transition-opacity hover:opacity-60 [-webkit-tap-highlight-color:transparent]"
                   style={{ border: "1px solid rgb(var(--line))", color: "rgb(var(--muted))" }}
                 >
                   Retake
