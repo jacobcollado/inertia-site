@@ -344,11 +344,11 @@ function OverviewTab({ client, projects, invoices, files, messages, projectUpdat
       </div>
 
       {/* Stat cards */}
-      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible sm:pb-0 -mx-6 sm:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem", scrollPaddingLeft: "1.5rem" }}>
+      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 md:grid md:grid-cols-2 lg:grid-cols-4 md:overflow-visible md:pb-0 -mx-6 md:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" style={{ paddingLeft: "1.5rem", paddingRight: "1.5rem", scrollPaddingLeft: "1.5rem" }}>
 
         {/* Projects — stacked bar by status */}
         <button onClick={() => setTab("projects")}
-          className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start sm:w-auto" style={{ width: "calc(100% - 3rem)" }}>
+          className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start md:w-auto" style={{ width: "calc(100% - 3rem)" }}>
           <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">Projects</p>
           <p className="text-[1.4rem] font-medium tracking-tight leading-none text-[rgb(var(--fg))]">{projects.length}</p>
           {projects.length > 0 ? (
@@ -378,7 +378,7 @@ function OverviewTab({ client, projects, invoices, files, messages, projectUpdat
           const color = totalOwed > 0 ? "rgb(var(--amber))" : "rgb(var(--green))";
           return (
             <button onClick={() => setTab("invoices")}
-              className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start sm:w-auto" style={{ width: "calc(100% - 3rem)" }}>
+              className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start md:w-auto" style={{ width: "calc(100% - 3rem)" }}>
               <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">Outstanding</p>
               <div className="flex items-center gap-3">
                 <p className="text-[1.4rem] font-medium tracking-tight leading-none" style={{ color }}>
@@ -402,7 +402,7 @@ function OverviewTab({ client, projects, invoices, files, messages, projectUpdat
 
         {/* Files — recency dots */}
         <button onClick={() => setTab("files")}
-          className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start sm:w-auto" style={{ width: "calc(100% - 3rem)" }}>
+          className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start md:w-auto" style={{ width: "calc(100% - 3rem)" }}>
           <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">Files</p>
           <p className="text-[1.4rem] font-medium tracking-tight leading-none text-[rgb(var(--fg))]">{files.length}</p>
           {files.length > 0 ? (
@@ -430,7 +430,7 @@ function OverviewTab({ client, projects, invoices, files, messages, projectUpdat
           const unread = unreadFromAdmin.length;
           return (
             <button onClick={() => setTab("messages")}
-              className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start sm:w-auto" style={{ width: "calc(100% - 3rem)" }}>
+              className="text-left p-4 border border-[rgb(var(--line))] rounded-xl hover:border-[rgb(var(--fg))/0.2] hover:bg-[rgb(var(--line))/0.1] transition-all flex flex-col gap-3 shrink-0 snap-start md:w-auto" style={{ width: "calc(100% - 3rem)" }}>
               <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">Messages</p>
               <p className="text-[1.4rem] font-medium tracking-tight leading-none" style={{ color: unread > 0 ? "rgb(var(--blue))" : "rgb(var(--fg))" }}>
                 {unread > 0 ? `${unread} new` : messages.length > 0 ? "Up to date" : "No messages"}
@@ -839,7 +839,10 @@ function FilesTab({ files }: { files: DFile[] }) {
 function MessagesTab({ clientId, messages, setMessages }: { clientId: string; messages: Message[]; setMessages: React.Dispatch<React.SetStateAction<Message[]>> }) {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const [adminTyping, setAdminTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const markRead = () => {
     setMessages(prev => prev.map(m => m.sender === "admin" && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m));
@@ -868,14 +871,30 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
           const updated = payload.new as Message;
           setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
         })
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender === "admin") {
+          setAdminTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setAdminTyping(false), 3000);
+        }
+      })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    channelRef.current = channel;
+    return () => {
+      supabase.removeChannel(channel);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
   }, [clientId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, adminTyping]);
+
+  const onDraftChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDraft(e.target.value);
+    channelRef.current?.send({ type: "broadcast", event: "typing", payload: { sender: "client" } });
+  };
 
   const send = async () => {
     const body = draft.trim();
@@ -967,29 +986,41 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
             </div>
           );
         })}
+
+        {/* Typing indicator */}
+        {adminTyping && (
+          <div className="flex justify-start">
+            <div className="px-4 py-3 rounded-[16px_16px_16px_4px] flex items-center gap-1" style={{ background: "rgb(var(--line))" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-40 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-40 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-40 animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
       {/* Input */}
       <form onSubmit={e => { e.preventDefault(); send(); }}
-        className="shrink-0 mt-4 flex items-end gap-2 px-3 py-2.5 rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--line))/0.15] focus-within:border-[rgb(var(--fg))/0.2] transition-colors">
+        className="shrink-0 mt-4 flex flex-col gap-2 p-3 rounded-2xl border border-[rgb(var(--line))] focus-within:border-[rgb(var(--fg))/0.2] transition-colors"
+        style={{ background: "rgb(var(--line)/0.08)" }}>
         <textarea
           rows={1}
           value={draft}
-          onChange={e => setDraft(e.target.value)}
+          onChange={onDraftChange}
           onKeyDown={onKeyDown}
           placeholder="Type a message..."
-          className="flex-1 bg-transparent resize-none text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none leading-relaxed"
-          style={{ maxHeight: 120, overflowY: "auto" }}
+          className="w-full resize-none tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-35 focus:outline-none leading-relaxed bg-transparent"
+          style={{ maxHeight: 160, overflowY: "auto", fontSize: 16 }}
         />
-        <button type="submit" disabled={!draft.trim() || sending}
-          className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-20"
-          style={{ background: "rgb(var(--fg))" }}>
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ color: "rgb(var(--bg))", transform: "rotate(-45deg) translate(1px,-1px)" }} aria-hidden="true">
-            <line x1="10" y1="10" x2="10" y2="3" />
-            <polyline points="6 7 10 3 14 7" />
-          </svg>
-        </button>
+        <div className="flex justify-end">
+          <button type="submit" disabled={!draft.trim() || sending}
+            className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium transition-all disabled:opacity-25"
+            style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
+            {sending ? "Sending..." : "Send"}
+          </button>
+        </div>
       </form>
     </div>
   );
@@ -1162,7 +1193,7 @@ export function DashboardShell({ client, projects, invoices, files, messages: in
           </div>
         </div>
 
-        <main className="flex-1 px-6 sm:px-12 py-10 sm:py-14 max-w-3xl w-full" style={{ animation: "rise-in 240ms cubic-bezier(0.22,1,0.36,1) both" }}>
+        <main className="flex-1 px-6 sm:px-10 lg:px-16 py-10 sm:py-14 max-w-5xl w-full" style={{ animation: "rise-in 240ms cubic-bezier(0.22,1,0.36,1) both" }}>
           <div style={{ display: tab === "overview"  ? undefined : "none" }}>
             <OverviewTab client={client} projects={projects} invoices={invoices} files={files} messages={messages} projectUpdates={projectUpdates} setTab={setTab} />
           </div>

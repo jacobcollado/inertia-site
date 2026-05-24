@@ -544,7 +544,10 @@ function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
 function MessagesTab({ clientId, messages, setMessages }: { clientId: string; messages: Message[]; setMessages: React.Dispatch<React.SetStateAction<Message[]>> }) {
   const [body, setBody] = useState("");
   const [pending, startTransition] = useTransition();
+  const [clientTyping, setClientTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     markMessagesRead(clientId);
@@ -554,7 +557,7 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
   useEffect(() => {
     const supabase = createBrowserClient();
     const channel = supabase
-      .channel(`admin-messages:${clientId}`)
+      .channel(`client-messages:${clientId}`)
       .on("postgres_changes", {
         event: "INSERT",
         schema: "public",
@@ -589,13 +592,30 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
         const updated = payload.new as Message;
         setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
       })
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.sender === "client") {
+          setClientTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setClientTyping(false), 3000);
+        }
+      })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    channelRef.current = channel;
+    return () => {
+      supabase.removeChannel(channel);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
   }, [clientId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, clientTyping]);
+
+  const onBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setBody(e.target.value);
+    channelRef.current?.send({ type: "broadcast", event: "typing", payload: { sender: "admin" } });
+  };
 
   const onSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -672,22 +692,39 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
             </div>
           );
         })}
+        {/* Typing indicator */}
+        {clientTyping && (
+          <div className="flex justify-start">
+            <div className="px-4 py-3 rounded-[16px_16px_16px_4px] flex items-center gap-1" style={{ background: "rgb(var(--line))" }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-40 animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-40 animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--muted))] opacity-40 animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={onSend} className="flex items-end gap-3 pt-4 border-t border-[rgb(var(--line))]">
+      <form onSubmit={onSend}
+        className="flex flex-col gap-2 p-3 rounded-2xl border border-[rgb(var(--line))] focus-within:border-[rgb(var(--fg))/0.2] transition-colors"
+        style={{ background: "rgb(var(--line)/0.08)" }}>
         <textarea
           value={body}
-          onChange={e => setBody(e.target.value)}
+          onChange={onBodyChange}
           onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(e as unknown as React.FormEvent); } }}
           placeholder="Send a message..."
-          rows={2}
-          className="flex-1 bg-transparent resize-none text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none leading-relaxed"
+          rows={1}
+          className="w-full resize-none tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-35 focus:outline-none leading-relaxed bg-transparent"
+          style={{ maxHeight: 160, overflowY: "auto", fontSize: 16 }}
         />
-        <button type="submit" disabled={pending || !body.trim()}
-          className="px-4 py-2 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-20 shrink-0">
-          Send
-        </button>
+        <div className="flex justify-end">
+          <button type="submit" disabled={pending || !body.trim()}
+            className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium transition-all disabled:opacity-25"
+            style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
+            {pending ? "Sending..." : "Send"}
+          </button>
+        </div>
       </form>
     </div>
   );
