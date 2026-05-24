@@ -541,20 +541,20 @@ function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
 
 /* ── Messages tab ─────────────────────────────────────────────────── */
 
-function MessagesTab({ clientId, initial }: { clientId: string; initial: Message[] }) {
-  const [messages, setMessages] = useState<Message[]>(initial);
+function MessagesTab({ clientId, messages, setMessages }: { clientId: string; messages: Message[]; setMessages: React.Dispatch<React.SetStateAction<Message[]>> }) {
   const [body, setBody] = useState("");
   const [pending, startTransition] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     markMessagesRead(clientId);
+    setMessages(prev => prev.map(m => m.sender === "client" && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m));
   }, [clientId]);
 
   useEffect(() => {
     const supabase = createBrowserClient();
     const channel = supabase
-      .channel(`messages:${clientId}`)
+      .channel(`admin-messages:${clientId}`)
       .on("postgres_changes", {
         event: "INSERT",
         schema: "public",
@@ -575,7 +575,19 @@ function MessagesTab({ clientId, initial }: { clientId: string; initial: Message
           }
           return [...prev, incoming];
         });
-        if (incoming.sender === "client") markMessagesRead(clientId);
+        if (incoming.sender === "client") {
+          markMessagesRead(clientId);
+          setMessages(prev => prev.map(m => m.sender === "client" && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m));
+        }
+      })
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "messages",
+        filter: `client_id=eq.${clientId}`,
+      }, (payload) => {
+        const updated = payload.new as Message;
+        setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -947,7 +959,7 @@ function ClientHeader({ client }: { client: Client }) {
 
 /* ── Shell ────────────────────────────────────────────────────────── */
 
-export function ClientDetailShell({ client, projects, invoices, files, messages, adminLog, projectUpdates }: {
+export function ClientDetailShell({ client, projects, invoices, files, messages: initialMessages, adminLog, projectUpdates }: {
   client: Client;
   projects: Project[];
   invoices: Invoice[];
@@ -958,6 +970,7 @@ export function ClientDetailShell({ client, projects, invoices, files, messages,
 }) {
   const [tab, setTab] = useState<Tab>("projects");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const displayName = client.company ?? client.name ?? client.email;
   const unreadCount = messages.filter(m => m.sender === "client" && !m.read_at).length;
 
@@ -1095,7 +1108,7 @@ export function ClientDetailShell({ client, projects, invoices, files, messages,
           {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} projectUpdates={projectUpdates} />}
           {tab === "invoices" && <InvoicesTab clientId={client.id} invoices={invoices} />}
           {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
-          {tab === "messages" && <MessagesTab clientId={client.id} initial={messages} />}
+          {tab === "messages" && <MessagesTab clientId={client.id} messages={messages} setMessages={setMessages} />}
           {tab === "account"  && <AccountTab  client={client} />}
           {tab === "history"  && <AuditTab    clientId={client.id} initial={adminLog} />}
         </main>

@@ -1150,14 +1150,16 @@ export function DashboardShell({ client, projects, invoices, files, messages: in
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile topbar */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[rgb(var(--line))] md:hidden">
-          <button onClick={() => setMobileOpen(true)}
-            className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" aria-label="Open menu">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-5 h-5" aria-hidden="true">
-              <line x1="2" y1="5" x2="18" y2="5" /><line x1="2" y1="10" x2="18" y2="10" /><line x1="2" y1="15" x2="18" y2="15" />
-            </svg>
-          </button>
           <InertiaLogo className="h-5 w-auto opacity-90" />
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button onClick={() => setMobileOpen(true)}
+              className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" aria-label="Open menu">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-5 h-5" aria-hidden="true">
+                <line x1="2" y1="5" x2="18" y2="5" /><line x1="2" y1="10" x2="18" y2="10" /><line x1="2" y1="15" x2="18" y2="15" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <main className="flex-1 px-6 sm:px-12 py-10 sm:py-14 max-w-3xl w-full" style={{ animation: "rise-in 240ms cubic-bezier(0.22,1,0.36,1) both" }}>
