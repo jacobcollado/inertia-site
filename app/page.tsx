@@ -172,7 +172,6 @@ function PlaceholderChar({ ch, idx, animKey, entering, exiting, stagger }: {
   useEffect(() => {
     const el = ref.current;
     if (!el || !entering) return;
-    // paint hidden first, then animate in next frame
     el.style.transition = "none";
     el.style.opacity = "0";
     el.style.transform = "translateY(6px)";
@@ -211,12 +210,25 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   const [animKey, setAnimKey] = useState(0);
   const [exiting, setExiting] = useState(false);
   const [entering, setEntering] = useState(true);
+  const [shimmer, setShimmer] = useState(false);
+
+  const text = PLACEHOLDER_OPTIONS[idx];
+  const len = text.length;
+  const staggerPer = Math.min(18, 480 / len);
+
+  // start shimmer once enter animation settles
+  useEffect(() => {
+    setShimmer(false);
+    const t = setTimeout(() => setShimmer(true), staggerPer * len + 500);
+    return () => clearTimeout(t);
+  }, [animKey, staggerPer, len]);
 
   useEffect(() => {
     if (!active) return;
     const hold = setTimeout(() => {
       setExiting(true);
       setEntering(false);
+      setShimmer(false);
       setTimeout(() => {
         setExiting(false);
         setEntering(true);
@@ -226,10 +238,6 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
     }, 4000);
     return () => clearTimeout(hold);
   }, [animKey, active]);
-
-  const text = PLACEHOLDER_OPTIONS[idx];
-  const len = text.length;
-  const staggerPer = Math.min(18, 480 / len);
 
   return (
     <span className="pointer-events-none absolute inset-0 flex items-center px-0 overflow-hidden" aria-hidden="true">
@@ -244,6 +252,20 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
           stagger={staggerPer * i}
         />
       ))}
+      {/* shimmer overlay — fades in over the text once settled */}
+      <span
+        className="absolute inset-0 flex items-center overflow-hidden"
+        style={{
+          opacity: shimmer ? 1 : 0,
+          transition: "opacity 400ms ease",
+          pointerEvents: "none",
+          fontSize: "15px",
+          letterSpacing: "-0.01em",
+          whiteSpace: "pre",
+        }}
+      >
+        <span className="placeholder-shimmer">{text}</span>
+      </span>
     </span>
   );
 }

@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   const id = user.id;
 
-  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }, { data: messages }] =
+  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }, { data: messages }, { data: projectUpdates }] =
     await Promise.all([
       supabase.from("clients")
         .select("id, email, name, company")
@@ -29,6 +29,9 @@ export default async function DashboardPage() {
       supabase.from("messages")
         .select("id, client_id, sender, body, read_at, created_at")
         .eq("client_id", id).order("created_at", { ascending: true }),
+      supabase.from("project_updates")
+        .select("id, project_id, status, note, created_at")
+        .eq("client_id", id).order("created_at", { ascending: false }),
     ]);
 
   // Fetch optional columns added in migration 003 separately so a missing
@@ -55,6 +58,7 @@ export default async function DashboardPage() {
       invoices={enrichedInvoices}
       files={files ?? []}
       messages={messages ?? []}
+      projectUpdates={projectUpdates ?? []}
     />
   );
 }

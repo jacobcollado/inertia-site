@@ -2,10 +2,11 @@
 
 import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/app/theme-toggle";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import {
-  createProject, updateProject, deleteProject,
+  createProject, updateProject, deleteProject, addProjectUpdate,
   createInvoice, updateInvoiceStatus, deleteInvoice,
   addFile, deleteFile, updateClient,
   suspendAccount, unsuspendAccount, deleteAccount,
@@ -18,6 +19,7 @@ import {
 
 type Client  = { id: string; email: string; name: string | null; company: string | null; banned?: boolean; last_sign_in_at?: string | null; confirmed_at?: string | null };
 type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null; start_date: string | null; target_date: string | null };
+type ProjectUpdate = { id: string; project_id: string; status: string; note: string | null; created_at: string };
 type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null; payment_url: string | null };
 type DFile   = { id: string; label: string; url: string; uploaded_at: string };
 type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
@@ -67,9 +69,129 @@ const selectClass = "w-full bg-[rgb(var(--bg))] border-b border-[rgb(var(--line)
 
 /* ── Projects tab ─────────────────────────────────────────────────── */
 
-function ProjectsTab({ clientId, projects }: { clientId: string; projects: Project[] }) {
+function ProjectTimeline({ project, updates, clientId }: { project: Project; updates: ProjectUpdate[]; clientId: string }) {
+  const [open, setOpen] = useState(false);
+  const [addingUpdate, setAddingUpdate] = useState(false);
+  const [status, setStatus] = useState(project.status);
+  const [note, setNote] = useState("");
+  const [localUpdates, setLocalUpdates] = useState(updates);
+  const [pending, startTransition] = useTransition();
+
+  const onPostUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!status) return;
+    const newEntry: ProjectUpdate = {
+      id: `optimistic-${Date.now()}`,
+      project_id: project.id,
+      status,
+      note: note || null,
+      created_at: new Date().toISOString(),
+    };
+    setLocalUpdates(prev => [newEntry, ...prev]);
+    const s = status, n = note;
+    setNote("");
+    setAddingUpdate(false);
+    startTransition(async () => {
+      await addProjectUpdate(project.id, clientId, s, n || null);
+    });
+  };
+
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  return (
+    <div className="flex flex-col">
+      {/* Project header */}
+      <div className="flex items-start justify-between gap-4 py-5 group">
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <button onClick={() => setOpen(o => !o)} className="text-left">
+            <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] hover:opacity-70 transition-opacity">{project.title}</span>
+          </button>
+          {project.phase && <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">{project.phase}</span>}
+          {project.notes && <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 leading-relaxed max-w-md">{project.notes}</p>}
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <StatusPill status={localUpdates[0]?.status ?? project.status} />
+          <button
+            onClick={() => { setOpen(true); setAddingUpdate(true); }}
+            className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity"
+          >
+            Update
+          </button>
+        </div>
+      </div>
+
+      {/* Timeline — shown when expanded */}
+      {open && (
+        <div className="pb-6 flex flex-col gap-4 pl-4 border-l border-[rgb(var(--line))] ml-1 mb-2">
+
+          {/* Post update form */}
+          {addingUpdate ? (
+            <form onSubmit={onPostUpdate} className="flex flex-col gap-3 pt-1">
+              <select
+                value={status}
+                onChange={e => setStatus(e.target.value)}
+                className="bg-[rgb(var(--bg))] border border-[rgb(var(--line))] rounded-full px-4 py-2 text-[13px] tracking-tight text-[rgb(var(--fg))] focus:outline-none w-fit"
+              >
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="on_hold">On hold</option>
+                <option value="completed">Completed</option>
+              </select>
+              <textarea
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                placeholder="Note (optional)"
+                rows={2}
+                className="bg-transparent border border-[rgb(var(--line))] rounded-xl px-4 py-3 text-[14px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-35 focus:outline-none resize-none transition-colors"
+              />
+              <div className="flex items-center gap-3">
+                <button type="submit" disabled={pending}
+                  className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
+                  {pending ? "Posting..." : "Post update"}
+                </button>
+                <button type="button" onClick={() => setAddingUpdate(false)}
+                  className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button
+              onClick={() => setAddingUpdate(true)}
+              className="self-start text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-80 transition-opacity flex items-center gap-1.5 pt-1"
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
+                <line x1="8" y1="3" x2="8" y2="13" /><line x1="3" y1="8" x2="13" y2="8" />
+              </svg>
+              Add update
+            </button>
+          )}
+
+          {/* Timeline entries */}
+          {localUpdates.length === 0 ? (
+            <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-30">No updates yet.</p>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {localUpdates.map(u => (
+                <div key={u.id} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <StatusPill status={u.status} />
+                    <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{fmtDate(u.created_at)}</span>
+                  </div>
+                  {u.note && <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-70 leading-relaxed ml-1">{u.note}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ProjectsTab({ clientId, projects, projectUpdates }: { clientId: string; projects: Project[]; projectUpdates: ProjectUpdate[] }) {
   const [adding, setAdding] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const onAdd = (e: React.FormEvent<HTMLFormElement>) => {
@@ -78,21 +200,6 @@ function ProjectsTab({ clientId, projects }: { clientId: string; projects: Proje
     startTransition(async () => {
       await createProject(clientId, fd);
       setAdding(false);
-    });
-  };
-
-  const onUpdate = (projectId: string) => (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const fd = new FormData(e.currentTarget);
-    startTransition(async () => {
-      await updateProject(projectId, clientId, fd);
-      setEditId(null);
-    });
-  };
-
-  const onDelete = (projectId: string) => {
-    startTransition(async () => {
-      await deleteProject(projectId, clientId);
     });
   };
 
@@ -112,7 +219,7 @@ function ProjectsTab({ clientId, projects }: { clientId: string; projects: Proje
       </div>
 
       {adding && (
-        <form onSubmit={onAdd} className="border border-[rgb(var(--line))] p-5 flex flex-col gap-4">
+        <form onSubmit={onAdd} className="border border-[rgb(var(--line))] rounded-2xl p-5 flex flex-col gap-4">
           <input name="title" required placeholder="Project title" className={inputClass} />
           <select name="status" defaultValue="active" className={selectClass}>
             <option value="active">Active</option>
@@ -121,7 +228,6 @@ function ProjectsTab({ clientId, projects }: { clientId: string; projects: Proje
             <option value="completed">Completed</option>
           </select>
           <input name="phase" placeholder="Phase (e.g. Design review)" className={inputClass} />
-          <input name="last_update" placeholder="Last update label (e.g. Updated May 1)" className={inputClass} />
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Start date</label>
@@ -151,63 +257,14 @@ function ProjectsTab({ clientId, projects }: { clientId: string; projects: Proje
       {projects.length === 0 && !adding ? (
         <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No projects yet.</p>
       ) : (
-        <div className="flex flex-col gap-0">
+        <div className="flex flex-col">
           {projects.map((p, i) => (
             <div key={p.id}>
-              {editId === p.id ? (
-                <form onSubmit={onUpdate(p.id)} className="py-5 flex flex-col gap-4">
-                  <input name="title" required defaultValue={p.title} className={inputClass} />
-                  <select name="status" defaultValue={p.status} className={selectClass}>
-                    <option value="active">Active</option>
-                    <option value="paused">Paused</option>
-                    <option value="on_hold">On hold</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                  <input name="phase" defaultValue={p.phase ?? ""} placeholder="Phase" className={inputClass} />
-                  <input name="last_update" defaultValue={p.last_update ?? ""} placeholder="Last update label" className={inputClass} />
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Start date</label>
-                      <input name="start_date" type="date" defaultValue={p.start_date ?? ""} className={inputClass} />
-                    </div>
-                    <div>
-                      <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Target date</label>
-                      <input name="target_date" type="date" defaultValue={p.target_date ?? ""} className={inputClass} />
-                    </div>
-                  </div>
-                  <textarea name="notes" rows={3} defaultValue={p.notes ?? ""} placeholder="Notes" className={`${inputClass} resize-none`} />
-                  <div className="flex items-center gap-3">
-                    <button type="submit" disabled={pending}
-                      className="px-5 py-2 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
-                      {pending ? "Saving..." : "Save"}
-                    </button>
-                    <button type="button" onClick={() => setEditId(null)}
-                      className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="flex items-start justify-between gap-4 py-5 group">
-                  <div className="flex flex-col gap-1.5 min-w-0">
-                    <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">{p.title}</span>
-                    {p.phase && <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]">{p.phase}</span>}
-                    {p.notes && <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 leading-relaxed max-w-md">{p.notes}</p>}
-                    {p.last_update && <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{p.last_update}</span>}
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <StatusPill status={p.status} />
-                    <button onClick={() => setEditId(p.id)}
-                      className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity">
-                      Edit
-                    </button>
-                    <button onClick={() => onDelete(p.id)} disabled={pending}
-                      className="text-[13px] tracking-tight text-red-400 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity disabled:opacity-20">
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              )}
+              <ProjectTimeline
+                project={p}
+                updates={projectUpdates.filter(u => u.project_id === p.id)}
+                clientId={clientId}
+              />
               {i < projects.length - 1 && <GridRule />}
             </div>
           ))}
@@ -272,7 +329,7 @@ function InvoicesTab({ clientId, invoices }: { clientId: string; invoices: Invoi
       </div>
 
       {adding && (
-        <form onSubmit={onAdd} className="border border-[rgb(var(--line))] p-5 flex flex-col gap-4">
+        <form onSubmit={onAdd} className="border border-[rgb(var(--line))] rounded-2xl p-5 flex flex-col gap-4">
           <input name="label" required placeholder="Invoice label" className={inputClass} />
           <input name="amount" required type="number" step="0.01" min="0" placeholder="Amount (USD)" className={inputClass} />
           <select name="status" defaultValue="pending" className={selectClass}>
@@ -416,12 +473,12 @@ function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
       </div>
 
       {adding && (
-        <form onSubmit={onSubmit} className="border border-[rgb(var(--line))] p-5 flex flex-col gap-4">
+        <form onSubmit={onSubmit} className="border border-[rgb(var(--line))] rounded-2xl p-5 flex flex-col gap-4">
           <label
             onDragOver={e => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
-            className="flex flex-col items-center justify-center gap-2 border border-dashed rounded px-6 py-8 cursor-pointer transition-colors"
+            className="flex flex-col items-center justify-center gap-2 border border-dashed rounded-xl px-6 py-8 cursor-pointer transition-colors"
             style={{ borderColor: dragOver ? "rgb(var(--fg))" : "rgb(var(--line))", background: dragOver ? "rgb(var(--line)/0.15)" : "transparent" }}>
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 opacity-30" aria-hidden="true">
               <path d="M10 3v10M6 7l4-4 4 4M3 15v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2" />
@@ -627,6 +684,7 @@ function MessagesTab({ clientId, initial }: { clientId: string; initial: Message
 /* ── Account tab ──────────────────────────────────────────────────── */
 
 function AccountTab({ client }: { client: Client }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [email, setEmail] = useState(client.email);
   const [password, setPassword] = useState("");
@@ -640,6 +698,14 @@ function AccountTab({ client }: { client: Client }) {
       const res = await fn();
       if (res.error) setError(res.error);
       else setMsg(successMsg);
+    });
+  };
+
+  const onDelete = () => {
+    startTransition(async () => {
+      const res = await deleteAccount(client.id);
+      if (res.error) { setError(res.error); return; }
+      router.push("/admin?deleted=1");
     });
   };
 
@@ -729,9 +795,9 @@ function AccountTab({ client }: { client: Client }) {
             </p>
             <div className="flex items-center gap-3">
               <button disabled={pending}
-                onClick={() => run(() => deleteAccount(client.id), "Account deleted.")}
+                onClick={onDelete}
                 className="px-4 py-1.5 rounded-full text-[13px] tracking-tight bg-red-500 text-white hover:opacity-80 transition-opacity disabled:opacity-30">
-                Confirm delete
+                {pending ? "Deleting..." : "Confirm delete"}
               </button>
               <button onClick={() => setConfirmDelete(false)}
                 className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
@@ -861,7 +927,7 @@ function ClientHeader({ client }: { client: Client }) {
           )}
           {neverSignedIn && !client.banned && (
             <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))]">
-              Invite pending
+              Invite Pending
             </span>
           )}
           {lastSeen && !neverSignedIn && (
@@ -881,13 +947,14 @@ function ClientHeader({ client }: { client: Client }) {
 
 /* ── Shell ────────────────────────────────────────────────────────── */
 
-export function ClientDetailShell({ client, projects, invoices, files, messages, adminLog }: {
+export function ClientDetailShell({ client, projects, invoices, files, messages, adminLog, projectUpdates }: {
   client: Client;
   projects: Project[];
   invoices: Invoice[];
   files: DFile[];
   messages: Message[];
   adminLog: AuditEntry[];
+  projectUpdates: ProjectUpdate[];
 }) {
   const [tab, setTab] = useState<Tab>("projects");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -903,99 +970,103 @@ export function ClientDetailShell({ client, projects, invoices, files, messages,
     { id: "history",  label: "History"  },
   ];
 
+  const sidebarInner = (
+    <>
+      {/* Sidebar top */}
+      <div className="flex items-center justify-between px-6 h-14 border-b border-[rgb(var(--line))] shrink-0">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">Admin</span>
+        </div>
+        {mobileOpen && (
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity lg:hidden"
+            aria-label="Close menu"
+          >
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+              <line x1="4" y1="4" x2="16" y2="16" /><line x1="16" y1="4" x2="4" y2="16" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Back to clients */}
+      <div className="px-3 pt-4 pb-2">
+        <Link
+          href="/admin"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 hover:opacity-100 hover:bg-[rgb(var(--line)/0.4)] transition-all group"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true">
+            <polyline points="12 4 6 10 12 16" />
+          </svg>
+          All clients
+        </Link>
+      </div>
+
+      {/* Client name in sidebar */}
+      <div className="px-6 py-3 border-b border-[rgb(var(--line))]">
+        <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{displayName}</p>
+        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate mt-0.5">{client.email}</p>
+      </div>
+
+      {/* Tab nav in sidebar */}
+      <nav className="flex flex-col gap-0.5 px-3 pt-3 flex-1">
+        {TABS.map(({ id, label, badge }) => {
+          const active = tab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => { setTab(id); setMobileOpen(false); }}
+              className="flex items-center justify-between px-3 py-2.5 text-[14px] tracking-tight transition-colors text-left w-full rounded-lg"
+              style={{
+                color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                background: active ? "rgb(var(--line))" : "transparent",
+                opacity: active ? 1 : 0.6,
+              }}
+            >
+              {label}
+              {badge ? (
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+                  {badge}
+                </span>
+              ) : null}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Bottom */}
+      <div className="px-3 pb-4 pt-3 border-t border-[rgb(var(--line))] flex items-center gap-1 shrink-0">
+        <Link
+          href="/"
+          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--line)/0.4)] transition-all opacity-60 hover:opacity-100"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+            <path d="M3 10.5L10 4l7 6.5V17h-4v-4H7v4H3v-6.5z" />
+          </svg>
+          Back to site
+        </Link>
+        <ThemeToggle />
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-[rgb(var(--bg))] flex">
 
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-[rgb(var(--bg))]/60 backdrop-blur-sm lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-[220px] border-r border-[rgb(var(--line))] bg-[rgb(var(--bg))] z-30">
+        {sidebarInner}
+      </aside>
 
-      {/* Sidebar */}
+      {/* Mobile full-screen drawer */}
       <aside
-        className={[
-          "fixed top-0 left-0 h-full z-30 w-[220px] border-r border-[rgb(var(--line))] bg-[rgb(var(--bg))] transition-transform duration-200 ease-in-out flex flex-col",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        ].join(" ")}
+        className="fixed inset-0 z-30 bg-[rgb(var(--bg))] flex flex-col lg:hidden transition-transform duration-200 ease-in-out"
+        style={{ transform: mobileOpen ? "translateX(0)" : "translateX(-100%)" }}
       >
-        {/* Sidebar top */}
-        <div className="flex items-center justify-between px-6 h-14 border-b border-[rgb(var(--line))] shrink-0">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">Admin</span>
-          </div>
-          {mobileOpen && (
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity lg:hidden"
-              aria-label="Close menu"
-            >
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-                <line x1="4" y1="4" x2="16" y2="16" /><line x1="16" y1="4" x2="4" y2="16" />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        {/* Back to clients */}
-        <div className="px-3 pt-4 pb-2">
-          <Link
-            href="/admin"
-            onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity group"
-          >
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true">
-              <polyline points="12 4 6 10 12 16" />
-            </svg>
-            All clients
-          </Link>
-        </div>
-
-        {/* Client name in sidebar */}
-        <div className="px-6 py-3 border-b border-[rgb(var(--line))]">
-          <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{displayName}</p>
-          <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate mt-0.5">{client.email}</p>
-        </div>
-
-        {/* Tab nav in sidebar */}
-        <nav className="flex flex-col gap-0.5 px-3 pt-3 flex-1">
-          {TABS.map(({ id, label, badge }) => {
-            const active = tab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => { setTab(id); setMobileOpen(false); }}
-                className="flex items-center justify-between px-3 py-2.5 text-[14px] tracking-tight transition-colors text-left w-full"
-                style={{
-                  color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                  background: active ? "rgb(var(--line))" : "transparent",
-                  opacity: active ? 1 : 0.6,
-                }}
-              >
-                {label}
-                {badge ? (
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
-                    {badge}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Bottom */}
-        <div className="px-3 pb-5 pt-3 border-t border-[rgb(var(--line))] flex items-center justify-between shrink-0">
-          <Link
-            href="/"
-            className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-100 transition-opacity font-medium"
-          >
-            byinertia.com
-          </Link>
-          <ThemeToggle />
-        </div>
+        {sidebarInner}
       </aside>
 
       {/* Desktop sidebar spacer */}
@@ -1018,10 +1089,10 @@ export function ClientDetailShell({ client, projects, invoices, files, messages,
           <ThemeToggle />
         </div>
 
-        <main className="flex-1 px-6 sm:px-10 lg:px-14 py-12 sm:py-14 max-w-4xl w-full flex flex-col gap-10">
+        <main className="flex-1 px-6 sm:px-10 lg:px-14 py-12 sm:py-14 max-w-6xl w-full mx-auto flex flex-col gap-10">
           <ClientHeader client={client} />
 
-          {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} />}
+          {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} projectUpdates={projectUpdates} />}
           {tab === "invoices" && <InvoicesTab clientId={client.id} invoices={invoices} />}
           {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
           {tab === "messages" && <MessagesTab clientId={client.id} initial={messages} />}

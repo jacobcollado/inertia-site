@@ -14,7 +14,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   const admin = createAdminClient();
 
-  const [{ data: clientRow }, { data: projects }, { data: invoices }, { data: files }, { data: { user: authUser } }, { data: messages }, { data: adminLog }] =
+  const [{ data: clientRow }, { data: projects }, { data: invoices }, { data: files }, { data: { user: authUser } }, { data: messages }, { data: adminLog }, { data: projectUpdates }] =
     await Promise.all([
       admin.from("clients").select("id, email, name, company").eq("id", id).single(),
       admin.from("projects").select("id, title, status, phase, last_update, notes, created_at, start_date, target_date").eq("client_id", id).order("created_at", { ascending: false }),
@@ -23,6 +23,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       admin.auth.admin.getUserById(id),
       admin.from("messages").select("id, client_id, sender, body, read_at, created_at").eq("client_id", id).order("created_at", { ascending: true }),
       admin.from("admin_log").select("id, action, detail, created_at").eq("client_id", id).order("created_at", { ascending: false }).limit(50),
+      admin.from("project_updates").select("id, project_id, status, note, created_at").eq("client_id", id).order("created_at", { ascending: false }),
     ]);
 
   if (!clientRow && !authUser) notFound();
@@ -49,6 +50,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       files={files ?? []}
       messages={messages ?? []}
       adminLog={adminLog ?? []}
+      projectUpdates={projectUpdates ?? []}
     />
   );
 }

@@ -1456,3 +1456,25 @@ h1:hover .redact > span.redact-inner,
 .blog-card {
   border: 1px solid rgb(var(--line));
 }
+
+@keyframes placeholder-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+.placeholder-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(var(--muted), 0.4) 0%,
+    rgba(var(--muted), 0.4) 30%,
+    rgba(var(--fg), 0.6) 50%,
+    rgba(var(--muted), 0.4) 70%,
+    rgba(var(--muted), 0.4) 100%
+  );
+  background-size: 250% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: placeholder-shimmer 3s linear infinite;
+}

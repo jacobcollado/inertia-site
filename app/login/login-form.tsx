@@ -232,9 +232,12 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
   if (redirecting) {
     return (
-      <div className="w-full min-h-screen flex flex-col items-center justify-center gap-4">
-        <Spinner />
-        <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Signing you in…</p>
+      <div className="w-full min-h-screen flex flex-col items-center justify-center gap-6">
+        <svg viewBox="0 0 16 16" className="w-8 h-8 animate-spin" aria-hidden="true" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" strokeOpacity="0.15" />
+          <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-60">Signing you in…</p>
       </div>
     );
   }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@/app/theme-toggle";
-import { inviteClient, addTool, deleteTool } from "./actions";
+import { inviteClient, addTool, deleteTool, deleteAccount } from "./actions";
 
 type Tool = { id: string; name: string; url: string | null; category: string | null; note: string | null; created_at: string };
 
@@ -60,94 +61,217 @@ function ChangeBadge({ pct }: { pct: number | null }) {
   );
 }
 
-function StatCard({ label, value, sub, accent, change }: { label: string; value: string; sub?: string; accent?: string; change?: number | null }) {
+// Inline sparkline for a stat card
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const w = 80, h = 32;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - (v / max) * (h - 4) - 2;
+    return `${x},${y}`;
+  }).join(" ");
   return (
-    <div className="flex flex-col gap-3 p-5 border border-[rgb(var(--line))]">
-      <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">{label}</span>
-      <span className="text-[2.25rem] font-medium tracking-[-0.03em] leading-none" style={accent ? { color: accent } : { color: "rgb(var(--fg))" }}>
-        {value}
-      </span>
-      <div className="flex items-center gap-2 min-h-[18px]">
-        {change !== undefined && change !== null
-          ? <ChangeBadge pct={change} />
-          : sub
-            ? <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{sub}</span>
-            : null
-        }
-        {change !== undefined && change !== null && sub && (
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">{sub}</span>
-        )}
-      </div>
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-20 h-8" aria-hidden="true" style={{ overflow: "visible" }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
+    </svg>
+  );
+}
+
+// Donut ring for a ratio
+function DonutRing({ value, total, color }: { value: number; total: number; color: string }) {
+  const r = 20, cx = 24, cy = 24, stroke = 4;
+  const circ = 2 * Math.PI * r;
+  const pct = total > 0 ? Math.min(value / total, 1) : 0;
+  return (
+    <svg viewBox="0 0 48 48" className="w-12 h-12" aria-hidden="true">
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgb(var(--line))" strokeWidth={stroke} />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={stroke}
+        strokeDasharray={`${pct * circ} ${circ}`}
+        strokeDashoffset={circ / 4}
+        strokeLinecap="round"
+        style={{ transition: "stroke-dasharray 600ms cubic-bezier(0.22,1,0.36,1)" }}
+      />
+    </svg>
+  );
+}
+
+// Mini bar chart for a stat card
+function MiniBarChart({ data, color }: { data: { label: string; value: number }[]; color: string }) {
+  const max = Math.max(...data.map(d => d.value), 1);
+  return (
+    <div className="flex items-end gap-0.5 h-8">
+      {data.map((d, i) => {
+        const pct = Math.max(d.value / max, d.value > 0 ? 0.05 : 0.02);
+        const isLast = i === data.length - 1;
+        return (
+          <div key={d.label} className="flex-1 rounded-sm transition-all duration-300"
+            style={{ height: `${pct * 100}%`, background: color, opacity: isLast ? 1 : 0.3 + (i / data.length) * 0.4 }} />
+        );
+      })}
     </div>
   );
 }
 
-function RevenueChart({ data }: { data: { month: string; amount: number }[] }) {
-  const max = Math.max(...data.map(d => d.amount), 1);
-  return (
-    <div className="flex flex-col gap-4">
-      <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">Revenue collected</span>
-      <div className="flex items-end gap-2 h-28">
-        {data.map((d, i) => {
-          const pct = d.amount / max;
-          const isLast = i === data.length - 1;
-          return (
-            <div key={d.month} className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-              <div className="w-full flex flex-col justify-end" style={{ height: "88px" }}>
-                <div
-                  className="w-full transition-all duration-300"
-                  style={{
-                    height: `${Math.max(pct * 100, d.amount > 0 ? 4 : 1)}%`,
-                    background: isLast ? "rgb(var(--fg))" : "rgb(var(--line))",
-                    opacity: isLast ? 1 : 0.6,
-                  }}
-                />
-              </div>
-              <span className="text-[10px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate w-full text-center">{d.month}</span>
-            </div>
-          );
-        })}
+function MetricCards({ overview, clients }: { overview: Overview; clients: Client[] }) {
+  const suspended = clients.filter(c => c.banned).length;
+  const totalProjects = clients.reduce((s, c) => s + c.projects.length, 0);
+  const revenueSparkData = overview.monthlyRevenue.map(d => d.amount);
+
+  const cards = [
+    /* Revenue */
+    <div key="revenue" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Revenue collected</span>
+          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">{fmt$(overview.totalRevenue)}</span>
+        </div>
+        <ChangeBadge pct={overview.change.revenue} />
       </div>
-    </div>
+      {overview.monthlyRevenue.some(d => d.amount > 0) && (
+        <div className="flex flex-col gap-1 mt-2">
+          <MiniBarChart data={overview.monthlyRevenue.map(d => ({ label: d.month, value: d.amount }))} color="rgb(var(--fg))" />
+          <div className="flex justify-between">
+            {overview.monthlyRevenue.map(d => (
+              <span key={d.month} className="text-[9px] tracking-tight text-[rgb(var(--muted))] opacity-30 flex-1 text-center">{d.month}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>,
+
+    /* Outstanding */
+    <div key="outstanding" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Outstanding</span>
+          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none" style={{ color: overview.outstanding > 0 ? "rgb(var(--amber))" : "rgb(var(--fg))" }}>
+            {fmt$(overview.outstanding)}
+          </span>
+        </div>
+        <ChangeBadge pct={overview.change.outstanding} />
+      </div>
+      <div className="flex items-center gap-4 mt-1">
+        <DonutRing value={overview.outstanding} total={overview.totalRevenue + overview.outstanding} color={overview.outstanding > 0 ? "rgb(var(--amber))" : "rgb(var(--green))"} />
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "rgb(var(--green))" }} />
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">Collected {fmt$(overview.totalRevenue)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: overview.outstanding > 0 ? "rgb(var(--amber))" : "rgb(var(--line))" }} />
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">Owed {fmt$(overview.outstanding)}</span>
+          </div>
+        </div>
+      </div>
+    </div>,
+
+    /* Clients */
+    <div key="clients" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Total clients</span>
+          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">{overview.totalClients}</span>
+        </div>
+        <ChangeBadge pct={overview.change.clients} />
+      </div>
+      <div className="flex items-center justify-between mt-1">
+        <div className="flex flex-col gap-0.5">
+          {suspended > 0 && <span className="text-[12px] tracking-tight" style={{ color: "#ef4444", opacity: 0.7 }}>{suspended} suspended</span>}
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{overview.totalClients - suspended} active</span>
+        </div>
+        <Sparkline data={revenueSparkData} color="rgb(var(--fg))" />
+      </div>
+    </div>,
+
+    /* Active projects */
+    <div key="projects" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Active projects</span>
+          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">{overview.activeProjects}</span>
+        </div>
+        <ChangeBadge pct={overview.change.activeProjects} />
+      </div>
+      <div className="flex flex-col gap-2 mt-1">
+        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgb(var(--line))" }}>
+          <div className="h-full rounded-full transition-all duration-500"
+            style={{ width: totalProjects > 0 ? `${(overview.activeProjects / totalProjects) * 100}%` : "0%", background: "rgb(var(--green))" }} />
+        </div>
+        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{overview.activeProjects} of {totalProjects} total</span>
+      </div>
+    </div>,
+  ];
+
+  return <MetricCarousel cards={cards} />;
+}
+
+function MetricCarousel({ cards }: { cards: React.ReactNode[] }) {
+  const [active, setActive] = useState(0);
+  const touchStart = useRef<number | null>(null);
+  const touchDelta = useRef(0);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = e.touches[0].clientX;
+    touchDelta.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStart.current === null) return;
+    touchDelta.current = e.touches[0].clientX - touchStart.current;
+  };
+  const onTouchEnd = () => {
+    if (Math.abs(touchDelta.current) > 40) {
+      if (touchDelta.current < 0) setActive(a => Math.min(a + 1, cards.length - 1));
+      else setActive(a => Math.max(a - 1, 0));
+    }
+    touchStart.current = null;
+    touchDelta.current = 0;
+  };
+
+  return (
+    <>
+      {/* Mobile: carousel */}
+      <div className="sm:hidden flex flex-col gap-3">
+        <div className="overflow-hidden" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+          <div
+            className="flex transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{ transform: `translateX(-${active * 100}%)` }}
+          >
+            {cards.map((card, i) => (
+              <div key={i} className="w-full shrink-0">{card}</div>
+            ))}
+          </div>
+        </div>
+        {/* Dot indicators */}
+        <div className="flex items-center justify-center gap-1.5">
+          {cards.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className="transition-all duration-200 rounded-full [-webkit-tap-highlight-color:transparent]"
+              style={{
+                width: i === active ? 20 : 6,
+                height: 6,
+                background: "rgb(var(--fg))",
+                opacity: i === active ? 1 : 0.15,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: 2-col grid */}
+      <div className="hidden sm:grid sm:grid-cols-2 gap-3">
+        {cards}
+      </div>
+    </>
   );
 }
 
 function OverviewDashboard({ overview, clients }: { overview: Overview; clients: Client[] }) {
-  const suspended = clients.filter(c => c.banned).length;
-
   return (
     <div className="flex flex-col gap-10">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard
-          label="Total clients"
-          value={String(overview.totalClients)}
-          change={overview.change.clients}
-          sub={suspended > 0 ? `${suspended} suspended` : "vs. last 30 days"}
-        />
-        <StatCard
-          label="Active projects"
-          value={String(overview.activeProjects)}
-          change={overview.change.activeProjects}
-          sub="vs. last 30 days"
-        />
-        <StatCard
-          label="Revenue collected"
-          value={fmt$(overview.totalRevenue)}
-          change={overview.change.revenue}
-          sub="vs. last 30 days"
-        />
-        <StatCard
-          label="Outstanding"
-          value={fmt$(overview.outstanding)}
-          change={overview.change.outstanding}
-          accent={overview.outstanding > 0 ? "rgb(var(--amber))" : undefined}
-          sub="vs. last 30 days"
-        />
-      </div>
-
-      {overview.monthlyRevenue.some(d => d.amount > 0) && (
-        <RevenueChart data={overview.monthlyRevenue} />
-      )}
+      <MetricCards overview={overview} clients={clients} />
 
       {overview.recentActivity.length > 0 && (
         <div className="flex flex-col gap-5">
@@ -158,7 +282,15 @@ function OverviewDashboard({ overview, clients }: { overview: Overview; clients:
                 <Link href={`/admin/clients/${item.clientId}`}
                   className="flex items-center justify-between gap-4 py-4 group hover:opacity-70 transition-opacity">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-[13px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-60 shrink-0 capitalize">{item.type}</span>
+                    <span className="text-[13px] tracking-tight px-2.5 py-1 rounded-full shrink-0 capitalize"
+                      style={
+                        item.type === "invoice"
+                          ? { background: "rgb(60 100 255 / 0.12)", color: "rgb(60,100,255)" }
+                          : item.type === "project"
+                          ? { background: "rgb(var(--green) / 0.12)", color: "rgb(var(--green))" }
+                          : { background: "rgb(var(--line))", color: "rgb(var(--muted))" }
+                      }
+                    >{item.type}</span>
                     <span className="text-[16px] tracking-tight text-[rgb(var(--fg))] truncate">{item.label}</span>
                     <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate hidden sm:block">{item.clientName}</span>
                   </div>
@@ -285,7 +417,7 @@ function ToolsView({ initialTools }: { initialTools: Tool[] }) {
       </div>
 
       {adding && (
-        <div className="border border-[rgb(var(--line))] p-6">
+        <div className="border border-[rgb(var(--line))] rounded-2xl p-6">
           <h2 className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] mb-6">Add a tool</h2>
           <form onSubmit={onAdd} className="flex flex-col gap-5">
             <input name="name" required placeholder="Name" className={inputClass} />
@@ -360,6 +492,89 @@ function ToolsView({ initialTools }: { initialTools: Tool[] }) {
   );
 }
 
+function ClientList({ clients }: { clients: Client[] }) {
+  const [list, setList] = useState(clients);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const onDelete = (id: string) => {
+    startTransition(async () => {
+      await deleteAccount(id);
+      setList(prev => prev.filter(c => c.id !== id));
+      setConfirmId(null);
+    });
+  };
+
+  if (list.length === 0) return (
+    <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-10">No clients yet.</p>
+  );
+
+  return (
+    <div className="flex flex-col">
+      {list.map((c, i) => {
+        const active = c.projects?.filter(p => p.status === "active") ?? [];
+        const displayName = c.company ?? c.name ?? c.email;
+        const confirming = confirmId === c.id;
+        return (
+          <div key={c.id}>
+            <div className="flex items-center justify-between gap-4 py-5 group">
+              <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-6 min-w-0 flex-1 hover:opacity-70 transition-opacity">
+                <div className="flex flex-col gap-1.5 min-w-0">
+                  <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{displayName}</span>
+                  <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50 truncate">{c.email}</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  {c.banned && (
+                    <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-red-400/30 text-red-400 opacity-80">Suspended</span>
+                  )}
+                  {!c.confirmed_at && !c.banned && (
+                    <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] opacity-70">Invite pending</span>
+                  )}
+                  {!c.in_clients_table && (
+                    <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] opacity-70">No profile</span>
+                  )}
+                  {active.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <StatusDot status="active" />
+                      <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{active.length} active</span>
+                    </div>
+                  )}
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-[rgb(var(--muted))] opacity-40 group-hover:opacity-80 transition-opacity" aria-hidden="true">
+                    <line x1="4" y1="10" x2="16" y2="10" /><polyline points="10 4 16 10 10 16" />
+                  </svg>
+                </div>
+              </Link>
+              <div className="shrink-0">
+                {confirming ? (
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => onDelete(c.id)} disabled={pending}
+                      className="text-[12px] tracking-tight text-red-400 hover:opacity-80 transition-opacity disabled:opacity-30">
+                      {pending ? "Deleting..." : "Confirm"}
+                    </button>
+                    <button onClick={() => setConfirmId(null)}
+                      className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity">
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => setConfirmId(c.id)}
+                    className="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity text-red-400"
+                    aria-label="Delete account">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+                      <polyline points="3 6 17 6" /><path d="M8 6V4h4v2" /><path d="M5 6l1 11h8l1-11" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+            {i < list.length - 1 && <GridRule />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 type View = "overview" | "clients" | "tools";
 
 const NAV_ITEMS: { id: View; label: string }[] = [
@@ -406,7 +621,7 @@ function Sidebar({
             <button
               key={id}
               onClick={() => { setView(id); onClose?.(); }}
-              className="flex items-center gap-3 px-3 py-2.5 text-[14px] tracking-tight transition-colors text-left w-full"
+              className="flex items-center gap-3 px-3 py-2.5 text-[14px] tracking-tight transition-colors text-left w-full rounded-lg"
               style={{
                 color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
                 background: active ? "rgb(var(--line))" : "transparent",
@@ -420,12 +635,15 @@ function Sidebar({
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 pb-5 pt-3 border-t border-[rgb(var(--line))] flex items-center justify-between shrink-0">
+      <div className="px-3 pb-4 pt-3 border-t border-[rgb(var(--line))] flex items-center gap-1 shrink-0">
         <Link
           href="/"
-          className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-100 transition-opacity font-medium"
+          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--line)/0.4)] transition-all opacity-60 hover:opacity-100"
         >
-          byinertia.com
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
+            <path d="M3 10.5L10 4l7 6.5V17h-4v-4H7v4H3v-6.5z" />
+          </svg>
+          Back to site
         </Link>
         <ThemeToggle />
       </div>
@@ -437,9 +655,25 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
   const [inviting, setInviting] = useState(false);
   const [view, setView] = useState<View>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [toast, setToast] = useState("");
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("deleted") === "1") {
+      setToast("Account deleted.");
+      const t = setTimeout(() => setToast(""), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-[rgb(var(--bg))] flex">
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] shadow-lg" style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}>
+          {toast}
+        </div>
+      )}
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -479,7 +713,7 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
           <ThemeToggle />
         </div>
 
-        <main className="flex-1 px-6 sm:px-10 lg:px-14 py-12 sm:py-14 max-w-4xl w-full">
+        <main className="flex-1 px-6 sm:px-10 lg:px-14 py-12 sm:py-14 max-w-6xl w-full mx-auto">
 
           {view === "overview" && (
             <div className="flex flex-col gap-10">
@@ -518,63 +752,14 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
               </div>
 
               {inviting && (
-                <div className="border border-[rgb(var(--line))] p-6">
+                <div className="border border-[rgb(var(--line))] rounded-2xl p-6">
                   <h2 className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] mb-6">Invite a client</h2>
                   <InviteForm onDone={() => setInviting(false)} />
                 </div>
               )}
 
               <GridRule />
-              {clients.length === 0 ? (
-                <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-10">No clients yet.</p>
-              ) : (
-                <div className="flex flex-col">
-                  {clients.map((c, i) => {
-                    const active = c.projects?.filter(p => p.status === "active") ?? [];
-                    const displayName = c.company ?? c.name ?? c.email;
-                    return (
-                      <div key={c.id}>
-                        <Link href={`/admin/clients/${c.id}`}
-                          className="flex items-center justify-between gap-6 py-5 group hover:opacity-70 transition-opacity">
-                          <div className="flex flex-col gap-1.5 min-w-0">
-                            <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{displayName}</span>
-                            <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50 truncate">{c.email}</span>
-                          </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            {c.banned && (
-                              <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-red-400/30 text-red-400 opacity-80">
-                                suspended
-                              </span>
-                            )}
-                            {!c.confirmed_at && !c.banned && (
-                              <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] opacity-70">
-                                invite pending
-                              </span>
-                            )}
-                            {!c.in_clients_table && (
-                              <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] opacity-70">
-                                no profile
-                              </span>
-                            )}
-                            {active.length > 0 && (
-                              <div className="flex items-center gap-2">
-                                <StatusDot status="active" />
-                                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">
-                                  {active.length} active
-                                </span>
-                              </div>
-                            )}
-                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-[rgb(var(--muted))] opacity-40 group-hover:opacity-80 transition-opacity" aria-hidden="true">
-                              <line x1="4" y1="10" x2="16" y2="10" /><polyline points="10 4 16 10 10 16" />
-                            </svg>
-                          </div>
-                        </Link>
-                        {i < clients.length - 1 && <GridRule />}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <ClientList clients={clients} />
               <GridRule />
             </div>
           )}

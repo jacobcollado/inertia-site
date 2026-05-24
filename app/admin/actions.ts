@@ -91,6 +91,30 @@ export async function deleteProject(projectId: string, clientId: string) {
   return { success: true };
 }
 
+export async function addProjectUpdate(projectId: string, clientId: string, status: string, note: string | null) {
+  const admin = createAdminClient();
+  const { error } = await admin.from("project_updates").insert({
+    project_id: projectId,
+    client_id: clientId,
+    status,
+    note: note || null,
+  });
+  if (error) return { error: error.message };
+  await admin.from("projects").update({ status }).eq("id", projectId);
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function getProjectUpdates(projectId: string) {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("project_updates")
+    .select("id, status, note, created_at")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false });
+  return data ?? [];
+}
+
 /* ── Invoices ─────────────────────────────────────────────────────── */
 
 export async function createInvoice(clientId: string, formData: FormData) {
