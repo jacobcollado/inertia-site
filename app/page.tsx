@@ -487,7 +487,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           <div
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border"
             style={{
-              background: "rgb(var(--bg))",
+              background: "rgb(var(--surface))",
               borderColor: focused ? "rgba(60,100,255,0.35)" : "rgb(var(--line))",
               boxShadow: focused
                 ? "0 0 0 3px rgba(60,100,255,0.08), 0 0 24px rgba(60,100,255,0.12)"
@@ -508,7 +508,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
             </div>
             <button
               type="submit"
-              className="shrink-0 rounded-lg px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center"
+              className="shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center"
               style={{ background: "rgb(60,100,255)" }}
               disabled={!input.trim()}
             >
@@ -532,10 +532,10 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           </div>
 
           {/* Scrollable pills with edge fades */}
-          <div className="relative flex-1 min-w-0">
+          <div className="relative flex-1 min-w-0 overflow-hidden">
             <div
               ref={scrollRef}
-              className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              className="flex gap-2 overflow-x-auto overflow-y-hidden touch-pan-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
               {PROMPT_SUGGESTIONS.map((s, i) => (
                 <button
@@ -2461,7 +2461,6 @@ function BlogGrid({ posts }: { posts: PostMeta[] }) {
 
 function VisualLayout() {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
-  const [buildingTab, setBuildingTab] = useState<typeof BUILDING_TABS[number]>("All");
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
@@ -2489,80 +2488,60 @@ function VisualLayout() {
 
       <div className="py-8 sm:py-12" />
 
-      <div className="flex flex-col md:flex-row gap-y-0 overflow-visible">
-
-        <div className="w-full rise flex flex-col" style={{ ["--rise-delay" as any]: "0ms" }}>
-
-          {/* Tab bar */}
-          <div className="flex border-b border-[rgb(var(--line))]">
-            <span className="ml-auto self-center px-5 py-3 text-[11px] tracking-tight shrink-0 order-last hidden sm:block" style={{ borderLeft: "1px solid rgb(var(--line))" }}>
-              <span className="text-[rgb(var(--muted))] opacity-40">
-                {buildingTab === "All" ? `${BUILDING.length} products` : `${BUILDING.filter(b => b.type === buildingTab).length} ${buildingTab.toLowerCase()}`}
-              </span>
-            </span>
-            {BUILDING_TABS.map((tab, i) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setBuildingTab(tab)}
-                className={`relative py-3 text-[12px] tracking-tight transition-colors duration-150 ${tab === "Themes" ? "sm:px-5" : "px-5"}`}
-                style={{
-                  color: buildingTab === tab ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                  borderRight: i < BUILDING_TABS.length - 1 ? "1px solid rgb(var(--line))" : undefined,
-                  ...(tab === "Themes" ? { paddingLeft: "12.8px", paddingRight: "12.8px" } : {}),
-                }}
-              >
-                {tab}
-                {buildingTab === tab && (
-                  <span className="absolute inset-x-0 bottom-0 h-px bg-[rgb(var(--fg))]" style={{ opacity: 0.36 }} />
-                )}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3">
-            {BUILDING.filter((item) => buildingTab === "All" || item.type === buildingTab).map((item, i) => {
-              const isDashboard = item.name === "Inertia Dashboard";
-              const external = !isDashboard && item.href.startsWith("http");
-              const borderClass = [
-                i === 0 ? "border-r border-[rgb(var(--line))]" : "",
-                i < 2 ? "sm:border-r sm:border-[rgb(var(--line))]" : "",
-                i < 2 ? "border-b border-[rgb(var(--line))] sm:border-b-0" : "",
-                i === 2 ? "col-span-2 sm:col-span-1" : "",
-              ].filter(Boolean).join(" ");
-              const heightClass = i === 2 ? "min-h-[160px] sm:min-h-0" : "";
-              const sharedClass = `group flex flex-col px-6 pt-5 pb-0 overflow-hidden transition-colors hover:bg-[rgb(var(--line))/0.12] text-left rise max-h-[340px] sm:max-h-[320px] ${borderClass} ${heightClass}`;
-              const riseDelay = { ["--rise-delay" as any]: `${i * 60}ms` };
-              const sketchClass = i < 2 ? "mt-auto w-full overflow-hidden [&_svg]:h-36 [&_svg]:w-full sm:[&_svg]:h-auto" : "mt-auto w-full overflow-hidden";
-              const inner = (
-                <>
-                  <div className="flex flex-col gap-1.5 mb-4">
-                    <span className="text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
-                    <span className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-snug">{item.description}</span>
-                  </div>
-                  <span className="inline-flex self-start items-center gap-2 rounded-full px-3 py-1.5 mb-6 transition-opacity group-hover:opacity-80 text-[13px] tracking-tight" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
-                    {item.cta}<span aria-hidden="true">→</span>
-                  </span>
-                  <div className={`${sketchClass} relative`}>
-                    {item.sketch}
-                    <div className="absolute inset-x-0 bottom-0 h-16 pointer-events-none" style={{ background: "linear-gradient(to top, rgb(var(--bg)) 0%, transparent 100%)" }} />
-                  </div>
-                </>
-              );
-              if (isDashboard) return (
-                <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={sharedClass} style={riseDelay}>{inner}</button>
-              );
-              if (external) return (
-                <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={sharedClass} style={riseDelay}>{inner}</a>
-              );
-              return (
-                <Link key={item.name} href={item.href} className={sharedClass} style={riseDelay}>{inner}</Link>
-              );
-            })}
-          </div>
-
+      {/* Mobile: carousel */}
+      <div className="sm:hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollSnapType: "x mandatory" }}>
+        <div className="flex gap-4 px-4 pb-2">
+          {BUILDING.map((item) => {
+            const isDashboard = item.name === "Inertia Dashboard";
+            const external = !isDashboard && item.href.startsWith("http");
+            const inner = (
+              <>
+                <div className="w-full overflow-hidden rounded-lg mb-4 flex-1" style={{ minHeight: 160 }}>
+                  {item.sketch}
+                </div>
+                <div className="flex flex-col gap-1 mb-3">
+                  <span className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug opacity-70">{item.description}</span>
+                </div>
+                <span className="inline-flex self-start items-center gap-2 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity group-hover:opacity-70" style={{ color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.3)" }}>
+                  {item.cta} →
+                </span>
+              </>
+            );
+            const cardClass = "group shrink-0 w-[78vw] flex flex-col rounded-2xl p-5 text-left" ;
+            const cardStyle = { scrollSnapAlign: "start" as const, background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))" };
+            if (isDashboard) return <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={cardClass} style={cardStyle}>{inner}</button>;
+            if (external) return <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={cardClass} style={cardStyle}>{inner}</a>;
+            return <Link key={item.name} href={item.href} className={cardClass} style={cardStyle}>{inner}</Link>;
+          })}
         </div>
+      </div>
 
+      {/* Desktop: 3 cards in a row */}
+      <div className="hidden sm:flex gap-5 px-0">
+        {BUILDING.map((item, i) => {
+          const isDashboard = item.name === "Inertia Dashboard";
+          const external = !isDashboard && item.href.startsWith("http");
+          const inner = (
+            <>
+              <div className="w-full overflow-hidden rounded-lg mb-5 flex-1" style={{ minHeight: 200 }}>
+                {item.sketch}
+              </div>
+              <div className="flex flex-col gap-1.5 mb-4">
+                <span className="text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
+                <span className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-snug opacity-70">{item.description}</span>
+              </div>
+              <span className="inline-flex self-start items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] tracking-tight transition-opacity group-hover:opacity-70" style={{ color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.3)" }}>
+                {item.cta} →
+              </span>
+            </>
+          );
+          const cardClass = "group flex-1 flex flex-col rounded-2xl p-6 text-left";
+          const cardStyle = { background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))" };
+          if (isDashboard) return <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={cardClass} style={cardStyle}>{inner}</button>;
+          if (external) return <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={cardClass} style={cardStyle}>{inner}</a>;
+          return <Link key={item.name} href={item.href} className={cardClass} style={cardStyle}>{inner}</Link>;
+        })}
       </div>
 
       <div className="py-8 sm:py-12" />

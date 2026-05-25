@@ -5,7 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "./actions";
 
-export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
+export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: boolean; mobileInline?: boolean }) {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -32,6 +32,18 @@ export function HeaderAuth({ mobile = false }: { mobile?: boolean }) {
   const portalHref = role === "admin" ? "/admin" : "/dashboard";
   const portalLabel = role === "admin" ? "Admin" : "Dashboard";
   const portalDesc = role === "admin" ? "Manage clients, projects, and invoices." : "View your project, invoices, and files.";
+
+  if (mobileInline) {
+    if (!ready || user) return null;
+    return (
+      <Link
+        href="/login"
+        className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.25)] px-3.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 transition-all"
+      >
+        Sign in
+      </Link>
+    );
+  }
 
   if (mobile) {
     if (user) {

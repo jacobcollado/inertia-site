@@ -355,8 +355,15 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
           {NAV.map((item) => (
             <MobileAccordion key={item.label} item={item} onNavigate={onClose} drawerOpen={open} />
           ))}
-          <div style={{ marginTop: "auto", borderTop: "1px solid rgb(var(--line))" }}>
-            <HeaderAuth mobile />
+          <div style={{ marginTop: "auto", borderTop: "1px solid rgb(var(--line))", display: "flex", alignItems: "center" }}>
+            <div style={{ flex: 1 }}>
+              <HeaderAuth mobile />
+            </div>
+            <div style={{ paddingRight: "20px", flexShrink: 0 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "100px", border: "1px solid rgb(var(--fg) / 0.2)", padding: "6px 12px" }}>
+                <ThemeToggle />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -544,7 +551,12 @@ export function VisualNotch() {
             <div className="hidden sm:contents">
               <HeaderAuth />
             </div>
-            <ThemeToggle />
+            <div className="sm:hidden">
+              <HeaderAuth mobileInline />
+            </div>
+            <div className="hidden sm:contents">
+              <ThemeToggle />
+            </div>
             {/* Hamburger — mobile only */}
             <button
               className="site-header__hamburger"
