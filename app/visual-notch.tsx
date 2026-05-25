@@ -500,7 +500,7 @@ export function VisualNotch() {
       const blur = progress * 20;
       const alpha = 1 - progress * 0.55;
       el.style.backdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
-      el.style.webkitBackdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
+      (el.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
       el.style.background = `rgb(var(--bg) / ${alpha})`;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
