@@ -699,116 +699,53 @@ function AetherFeature() {
 
 // -- Platform diagram ---------------------------------------------------
 
+const PLATFORM_GROUPS = [
+  { label: "Storefront", sub: "Shopify / web", icon: SiShopify },
+  { label: "Apps", sub: "iOS / Android", icon: SiSwift },
+  { label: "Brand", sub: "Identity / UI", icon: SiFigma },
+  { label: "Growth", sub: "Ads / campaigns", icon: SiMeta },
+];
+
 function PlatformDiagram() {
-  const fg = "rgb(var(--fg))";
-  const line = "rgb(var(--line))";
-  const muted = "rgb(var(--muted))";
+  const mobileCard = (g: typeof PLATFORM_GROUPS[number]) => (
+    <div
+      key={g.label}
+      className="flex items-center gap-5 rounded-2xl p-5 w-full"
+      style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))" }}
+    >
+      <g.icon className="w-12 h-12 shrink-0" style={{ color: "rgb(var(--fg))", opacity: 0.5 }} />
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[16px] tracking-tight text-[rgb(var(--fg))]">{g.label}</span>
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{g.sub}</span>
+      </div>
+    </div>
+  );
 
-  // Center hub and 4 spokes
-  const cx = 200, cy = 180;
-  const r = 58;
-  const nodes = [
-    { angle: -100, label: "Storefront", sub: "Shopify / web" },
-    { angle: -20,  label: "Apps",       sub: "iOS / Android" },
-    { angle:  60,  label: "Brand",      sub: "Identity / UI" },
-    { angle: 140,  label: "Growth",     sub: "Ads / campaigns" },
-  ];
-
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const desktopCard = (g: typeof PLATFORM_GROUPS[number]) => (
+    <div
+      key={g.label}
+      className="flex flex-col justify-between rounded-2xl p-5 flex-1"
+      style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 160 }}
+    >
+      <g.icon className="w-10 h-10" style={{ color: "rgb(var(--fg))", opacity: 0.5 }} />
+      <div className="flex flex-col gap-0.5 mt-4">
+        <span className="text-[15px] tracking-tight text-[rgb(var(--fg))]">{g.label}</span>
+        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">{g.sub}</span>
+      </div>
+    </div>
+  );
 
   return (
-    <svg viewBox="-30 30 460 310" fill="none" className="w-full max-w-2xl" aria-hidden="true">
-      {/* Outer orbit ring — slow spin */}
-      <circle cx={cx} cy={cy} r={r + 68} stroke={fg} strokeWidth="1.2" strokeOpacity="0.45" strokeDasharray="4 6"
-        style={{ transformOrigin: `${cx}px ${cy}px`, animation: "orbit-spin 24s linear infinite" }}
-      />
-
-      {/* Spoke lines */}
-      {nodes.map((n) => {
-        const nx = cx + Math.cos(toRad(n.angle)) * r;
-        const ny = cy + Math.sin(toRad(n.angle)) * r;
-        const ex = cx + Math.cos(toRad(n.angle)) * (r + 68);
-        const ey = cy + Math.sin(toRad(n.angle)) * (r + 68);
-        return (
-          <line key={n.label}
-            x1={nx} y1={ny} x2={ex} y2={ey}
-            stroke={fg} strokeWidth="1" strokeOpacity="0.35" strokeDasharray="3 4"
-          />
-        );
-      })}
-
-      {/* Node circles */}
-      {nodes.map((n, ni) => {
-        const nx = cx + Math.cos(toRad(n.angle)) * (r + 68);
-        const ny = cy + Math.sin(toRad(n.angle)) * (r + 68);
-        const labelRight = nx > cx;
-        const labelX = labelRight ? nx + 30 : nx - 30;
-        return (
-          <g key={n.label}>
-            <circle cx={nx} cy={ny} r="24" fill={fg} fillOpacity="0.1" stroke={fg} strokeWidth="1" strokeOpacity="0.4"
-              style={{ animation: `node-breathe ${3.5 + ni * 0.7}s ease-in-out infinite`, animationDelay: `${ni * 0.4}s` }}
-            />
-            <circle cx={nx} cy={ny} r="4.5" fill={fg} fillOpacity="0.9" />
-            <text
-              x={labelX}
-              y={ny - 3}
-              textAnchor={labelRight ? "start" : "end"}
-              fill={fg}
-              fontSize="12.5"
-              fontFamily="inherit"
-              fontWeight="500"
-              opacity="0.9"
-              letterSpacing="-0.4"
-            >{n.label}</text>
-            <text
-              x={labelX}
-              y={ny + 12}
-              textAnchor={labelRight ? "start" : "end"}
-              fill={muted}
-              fontSize="10.5"
-              fontFamily="inherit"
-              opacity="0.6"
-              letterSpacing="-0.2"
-            >{n.sub}</text>
-          </g>
-        );
-      })}
-
-      {/* Hub rings */}
-      <circle cx={cx} cy={cy} r={r} fill={fg} fillOpacity="0.05" stroke={fg} strokeWidth="1" strokeOpacity="0.2" />
-      <circle cx={cx} cy={cy} r={r - 16} fill={fg} fillOpacity="0.04" stroke={fg} strokeWidth="0.6" strokeOpacity="0.15" />
-
-      {/* Hub center */}
-      <circle cx={cx} cy={cy} r="9" fill={fg} fillOpacity="0.85"
-        style={{ transformOrigin: `${cx}px ${cy}px`, animation: "hub-pulse 3s ease-in-out infinite" }}
-      />
-      <circle cx={cx} cy={cy} r="4" fill={fg} fillOpacity="1" />
-      <text
-        x={cx}
-        y={cy + 26}
-        textAnchor="middle"
-        fill={fg}
-        fontSize="12"
-        fontFamily="inherit"
-        fontWeight="500"
-        opacity="0.75"
-        letterSpacing="-0.3"
-      >Inertia</text>
-
-      {/* Tick marks */}
-      {Array.from({ length: 24 }, (_, i) => {
-        const a = toRad(i * 15);
-        return (
-          <line key={i}
-            x1={cx + Math.cos(a) * (r - 5)}
-            y1={cy + Math.sin(a) * (r - 5)}
-            x2={cx + Math.cos(a) * r}
-            y2={cy + Math.sin(a) * r}
-            stroke={fg} strokeWidth="0.7" strokeOpacity="0.2"
-          />
-        );
-      })}
-    </svg>
+    <>
+      {/* Mobile: stacked */}
+      <div className="sm:hidden flex flex-col gap-3">
+        {PLATFORM_GROUPS.map((g) => mobileCard(g))}
+      </div>
+      {/* Desktop: row */}
+      <div className="hidden sm:flex gap-3 w-full">
+        {PLATFORM_GROUPS.map((g) => desktopCard(g))}
+      </div>
+    </>
   );
 }
 
