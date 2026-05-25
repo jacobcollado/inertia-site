@@ -144,12 +144,14 @@ function SharedDropdown({
   triggerEls,
   navRef,
   onLeave,
+  onEnter,
   onClose,
 }: {
   openIndex: number | null;
   triggerEls: (HTMLDivElement | null)[];
   navRef: React.RefObject<HTMLElement | null>;
   onLeave: () => void;
+  onEnter: () => void;
   onClose: () => void;
 }) {
   const isOpen = openIndex !== null;
@@ -226,6 +228,7 @@ function SharedDropdown({
       className="site-header__dropdown"
       data-open={isOpen}
       aria-hidden={!isOpen}
+      onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
       {/* Hidden sizer — always reflects current item's natural size */}
@@ -488,6 +491,22 @@ export function VisualNotch() {
 
   const handleClose = useCallback(() => setOpenIndex(null), []);
 
+  useEffect(() => {
+    const onScroll = () => {
+      const el = headerRef.current;
+      if (!el) return;
+      const y = window.scrollY;
+      const progress = Math.min(y / 120, 1);
+      const blur = progress * 20;
+      const alpha = 1 - progress * 0.55;
+      el.style.backdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
+      el.style.webkitBackdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
+      el.style.background = `rgb(var(--bg) / ${alpha})`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <>
       <div className="site-header" ref={headerRef}>
@@ -514,7 +533,8 @@ export function VisualNotch() {
               openIndex={openIndex}
               triggerEls={triggerEls.current}
               navRef={navRef}
-              onLeave={() => {}}
+              onLeave={handleLeave}
+              onEnter={() => { if (leaveTimer.current) clearTimeout(leaveTimer.current); }}
               onClose={handleClose}
             />
           </nav>

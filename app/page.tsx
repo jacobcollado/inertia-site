@@ -6,7 +6,6 @@ import Link from "next/link";
 import { SiShopify, SiTypescript, SiTailwindcss, SiSwift, SiMeta, SiFramer, SiVercel, SiApple, SiNextdotjs, SiReact, SiSupabase, SiFigma } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
-import { SoundwaveHero } from "./soundwave-hero";
 import { ContourCanvas } from "./contour-canvas";
 import { createClient } from "@/lib/supabase/client";
 import type { PostMeta } from "@/lib/posts";
@@ -270,7 +269,134 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   );
 }
 
-function StartPrompt({ closing }: { closing?: boolean }) {
+const ROTATING_WORDS = ["shipping", "keeping", "loving", "sharing", "showing", "remembering", "launching", "noticing"];
+const HOLD_MS = 2600;
+const CHAR_STAGGER = 32;
+const FILL_MS = 800;
+const FILL_DELAY = 200;
+
+function RotatingWord() {
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
+  const [fillKey, setFillKey] = useState(0);
+  const [containerWidth, setContainerWidth] = useState<number | undefined>(undefined);
+  const wordSizerRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  const word = ROTATING_WORDS[index];
+  const nextIndex = (index + 1) % ROTATING_WORDS.length;
+  const enterDuration = word.length * CHAR_STAGGER + 120;
+  const exitDuration  = word.length * CHAR_STAGGER + 80;
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const el = wordSizerRefs.current[0];
+      if (el) setContainerWidth(el.offsetWidth);
+    }, 32);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "exit") return;
+    const t = setTimeout(() => {
+      const el = wordSizerRefs.current[nextIndex];
+      if (el) setContainerWidth(el.offsetWidth);
+    }, 16);
+    return () => clearTimeout(t);
+  }, [phase, nextIndex]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const el = wordSizerRefs.current[index];
+      if (el) setContainerWidth(el.offsetWidth);
+    }, 16);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    if (phase === "enter") {
+      t = setTimeout(() => setPhase("hold"), enterDuration);
+    } else if (phase === "hold") {
+      t = setTimeout(() => setPhase("exit"), HOLD_MS);
+    } else {
+      t = setTimeout(() => {
+        setIndex((i) => (i + 1) % ROTATING_WORDS.length);
+        setFillKey((k) => k + 1);
+        setPhase("enter");
+      }, exitDuration);
+    }
+    return () => clearTimeout(t);
+  }, [phase, enterDuration, exitDuration]);
+
+  const RESIZE_EASE = "cubic-bezier(0.22,1,0.36,1)";
+
+  return (
+    <span style={{
+      display: "inline-block",
+      position: "relative",
+      verticalAlign: "baseline",
+      width: containerWidth,
+      transition: containerWidth ? `width ${exitDuration * 0.75}ms ${RESIZE_EASE}` : "none",
+    }}>
+      {ROTATING_WORDS.map((w, wi) => (
+        <span
+          key={wi}
+          ref={(el) => { wordSizerRefs.current[wi] = el; }}
+          aria-hidden="true"
+          style={{ position: "absolute", visibility: "hidden", whiteSpace: "nowrap", pointerEvents: "none" }}
+        >{w}</span>
+      ))}
+      <span aria-live="polite" style={{ display: "flex", justifyContent: "center", whiteSpace: "nowrap" }}>
+        {word.split("").map((ch, i) => {
+          const exitDelay = (word.length - 1 - i) * CHAR_STAGGER * 0.85;
+          return phase === "exit" ? (
+            <span key={`${index}-${i}-exit`} aria-hidden="true" style={{
+              display: "inline-block",
+              width: ch === " " ? "0.28em" : undefined,
+              opacity: 0,
+              transform: "translateY(-8px) scale(0.95)",
+              filter: "blur(5px)",
+              transition: `opacity 220ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms, transform 240ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms, filter 220ms ease ${exitDelay}ms`,
+            }}>{ch}</span>
+          ) : (
+            <span key={`${index}-${i}-enter`} aria-hidden="true" style={{
+              display: "inline-block",
+              width: ch === " " ? "0.28em" : undefined,
+              opacity: 0,
+              transform: "translateY(8px) scale(0.97)",
+              filter: "blur(4px)",
+              animation: `char-in 280ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
+            }}>{ch}</span>
+          );
+        })}
+      </span>
+      <span style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: "-0.14em",
+        height: "3px",
+        borderRadius: "2px",
+        background: "rgb(var(--fg) / 0.13)",
+        overflow: "hidden",
+        display: "block",
+      }}>
+        <span key={fillKey} style={{
+          display: "block",
+          position: "absolute",
+          inset: 0,
+          borderRadius: "2px",
+          opacity: 0,
+          background: "linear-gradient(to right, transparent, rgb(var(--accent)), rgb(88,200,255), transparent)",
+          animation: `underline-fill ${FILL_MS * 2}ms linear ${enterDuration + FILL_DELAY}ms`,
+        }} />
+      </span>
+    </span>
+  );
+}
+
+function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -324,13 +450,13 @@ function StartPrompt({ closing }: { closing?: boolean }) {
   const arrowClass = "flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
 
   return (
-    <section className="px-6 sm:px-8 py-12 sm:py-24 flex flex-col items-center gap-8 sm:gap-10 border-t border-[rgb(var(--line))]">
+    <section className={`px-6 sm:px-8 flex flex-col items-center gap-8 sm:gap-10 ${hero ? "pt-10 sm:pt-20 pb-16 sm:pb-24" : "py-12 sm:py-24"}`}>
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
-          {closing ? "Ready to build something worth shipping?" : "What are you building?"}
+        <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-snug ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
+          {closing ? "Ready to build something worth shipping?" : hero ? <>Build something worth <RotatingWord />.</> : "What are you building?"}
         </p>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
-          {closing ? "Tell us what you’re working on. We’ll take it from there." : "Tell us. We’ll figure out the rest."}
+          {closing ? "Tell us what you’re working on. We’ll take it from there." : hero ? "Tell us what you need. We’ll handle the rest." : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
 
@@ -2003,19 +2129,17 @@ const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }
 function TechMarquee() {
   const items = [...TECH_ALL, ...TECH_ALL, ...TECH_ALL];
   return (
-    <div className="overflow-hidden select-none border-t border-[rgb(var(--line))]" aria-hidden="true">
+    <div className="relative overflow-hidden select-none py-6" aria-hidden="true">
       <div className="marquee-row marquee-row--fwd">
         {items.map((tech, i) => (
-          <div
-            key={i}
-            className="marquee-item"
-            style={{ "--tech-color": tech.color } as React.CSSProperties}
-          >
-            <tech.icon className="marquee-item-icon w-5 h-5 shrink-0" />
-            <span>{tech.name}</span>
+          <div key={i} className="flex items-center gap-2 px-6 text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
+            <tech.icon className="w-6 h-6 shrink-0" />
+            <span className="text-[16px] tracking-tight whitespace-nowrap">{tech.name}</span>
           </div>
         ))}
       </div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-24" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-24" style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
     </div>
   );
 }
@@ -2343,13 +2467,9 @@ function VisualLayout() {
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
 
-      <SoundwaveHero />
-
-      <StartPrompt />
+      <StartPrompt hero />
 
       <TechMarquee />
-
-      <GridRule />
 
       <div className="py-8 sm:py-12" />
 
@@ -2357,15 +2477,7 @@ function VisualLayout() {
 
       <div className="py-8 sm:py-12" />
 
-      <GridRule />
-
-      <div className="py-8 sm:py-12" />
-
       <PlatformSignal />
-
-      <div className="py-8 sm:py-12" />
-
-      <GridRule />
 
       <div className="py-8 sm:py-12" />
 
@@ -2373,15 +2485,9 @@ function VisualLayout() {
 
       <div className="py-8 sm:py-12" />
 
-      <GridRule />
-
-      <div className="py-8 sm:py-12" />
-
       <StackDiagram />
 
       <div className="py-8 sm:py-12" />
-
-      <GridRule />
 
       <div className="flex flex-col md:flex-row gap-y-0 overflow-visible">
 
@@ -2461,15 +2567,9 @@ function VisualLayout() {
 
       <div className="py-8 sm:py-12" />
 
-      <GridRule />
-
-      <div className="py-8 sm:py-12" />
-
       <StartPrompt closing />
 
       <div className="py-8 sm:py-12" />
-
-      <GridRule />
 
     </main>
     </>

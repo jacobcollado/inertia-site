@@ -10,6 +10,7 @@
 
 :root {
   --bg: 250 249 247;
+  --surface: 242 241 239;
   --fg: 14 14 14;
   --muted: 100 100 100;
   --line: 200 200 200;
@@ -24,6 +25,7 @@
 
 .dark {
   --bg: 0 0 0;
+  --surface: 18 18 18;
   --fg: 237 237 237;
   --map-filter: invert(1);
   --muted: 140 140 140;
@@ -739,37 +741,16 @@ h1:hover .redact > span.redact-inner,
   z-index: 50;
   width: 100%;
   background: rgb(var(--bg));
-  border-bottom: 1px solid rgb(var(--line));
+  -webkit-mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.95) 65%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 92%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.95) 65%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 92%, transparent 100%);
 }
 
-/* Extend grid lines through the header using pseudo-elements that mirror
-   page-container::before/after â€” clamped to max-w-5xl (64rem) */
-.site-header::before,
-.site-header::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgb(var(--line));
-  pointer-events: none;
-  left: max(12px, calc(50% - 36rem));
-}
-
-.site-header::after {
-  left: auto;
-  right: max(12px, calc(50% - 36rem));
-}
-
-/* Inner constrained to max-w-5xl â€” left/right edges align with page-container lines */
 .site-header__inner {
   display: flex;
   align-items: center;
   margin: 0 12px;
-  max-width: 72rem;
-  height: 48px;
-  border-left: 1px solid rgb(var(--line));
-  border-right: 1px solid rgb(var(--line));
+  max-width: 80rem;
+  height: 72px;
 }
 
 @media (min-width: 640px) {
@@ -784,8 +765,7 @@ h1:hover .redact > span.redact-inner,
   font-weight: 500;
   letter-spacing: -0.03em;
   color: rgb(var(--fg));
-  padding: 0 1.5rem;
-  border-right: 1px solid rgb(var(--line));
+  padding: 0 1.5rem 0 0.75rem;
   height: 100%;
   display: flex;
   align-items: center;
@@ -808,7 +788,7 @@ h1:hover .redact > span.redact-inner,
 }
 
 .site-header__link {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 450;
   letter-spacing: -0.025em;
   color: rgb(var(--fg));
@@ -822,7 +802,6 @@ h1:hover .redact > span.redact-inner,
   border: none;
   background: transparent;
   cursor: pointer;
-  border-right: 1px solid rgb(var(--line));
   transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
   white-space: nowrap;
 }
@@ -848,10 +827,10 @@ h1:hover .redact > span.redact-inner,
 /* Dropdown panel — single shared panel, slides between nav items */
 .site-header__dropdown {
   position: absolute;
-  top: calc(100% + 1px);
-  background: rgb(var(--bg));
+  top: calc(100% + 8px);
+  background: rgb(var(--surface));
   border: 1px solid rgb(var(--line));
-  border-top: none;
+  border-radius: 12px;
   display: block;
   pointer-events: none;
   opacity: 0;
@@ -871,13 +850,9 @@ h1:hover .redact > span.redact-inner,
   gap: 14px;
   text-decoration: none;
   padding: 14px 18px;
-  border-bottom: 1px solid rgb(var(--line));
   transition: background 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.site-header__dropdown-item:last-child {
-  border-bottom: none;
-}
 
 .site-header__dropdown-item:hover {
   background: rgb(var(--line) / 0.07);
@@ -894,7 +869,6 @@ h1:hover .redact > span.redact-inner,
   flex-shrink: 0;
   width: 36px;
   height: 36px;
-  border: 1px solid rgb(var(--line));
   color: rgb(var(--fg));
   font-size: 20px;
   margin-top: 1px;
@@ -937,7 +911,6 @@ h1:hover .redact > span.redact-inner,
 .site-header__soon {
   font-size: 9px;
   letter-spacing: 0;
-  border: 1px solid rgb(var(--line));
   padding: 1px 5px 2px;
   border-radius: 999px;
   opacity: 0.8;
@@ -951,7 +924,6 @@ h1:hover .redact > span.redact-inner,
   gap: 4px;
   height: 100%;
   padding: 0 1rem;
-  border-left: 1px solid rgb(var(--line));
 }
 
 /* Hamburger â€” hidden on desktop */
@@ -1019,7 +991,7 @@ h1:hover .redact > span.redact-inner,
 
 .mobile-nav__drawer {
   position: fixed;
-  top: 49px;
+  top: 72px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -1061,7 +1033,7 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 16px 24px;
   font-size: 16px;
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -1090,7 +1062,7 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 20px;
+  padding: 12px 24px;
   text-decoration: none;
   border-top: 1px solid rgb(var(--line));
   transition: background 140ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -1253,6 +1225,7 @@ h1:hover .redact > span.redact-inner,
 
 .page-container {
   position: relative;
+  overflow-x: hidden;
 }
 
 /* â”€â”€ Section divider â€” full width, touching both grid lines â”€â”€â”€â”€â”€â”€â”€ */
