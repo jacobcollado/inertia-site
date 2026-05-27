@@ -727,7 +727,7 @@ function PlatformDiagram() {
   const [rotation, setRotation] = useState(0);
   const cx = 220;
   const cy = 220;
-  const r = 110;
+  const r = 95;
   const total = PLATFORM_SPOKES.length;
   const SPEED = 0.004;
 
@@ -755,7 +755,7 @@ function PlatformDiagram() {
         </defs>
 
         {/* Outer ring */}
-        <circle cx={cx} cy={cy} r={r + 52} stroke="rgb(var(--fg))" strokeWidth="1" strokeDasharray="3 6" opacity="0.18" />
+        <circle cx={cx} cy={cy} r={r + 44} stroke="rgb(var(--fg))" strokeWidth="1" strokeDasharray="3 6" opacity="0.18" />
         {/* Mid ring */}
         <circle cx={cx} cy={cy} r={r} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.12" />
         {/* Inner ring */}
@@ -782,8 +782,8 @@ function PlatformDiagram() {
         {/* Fixed labels */}
         {PLATFORM_SPOKES.map((spoke, i) => {
           const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
-          const lx = cx + Math.cos(angle) * (r + 52);
-          const ly = cy + Math.sin(angle) * (r + 52);
+          const lx = cx + Math.cos(angle) * (r + 44);
+          const ly = cy + Math.sin(angle) * (r + 44);
           const isHov = hovered === i;
           return (
             <foreignObject
@@ -879,6 +879,7 @@ function PlatformSignal() {
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(16px)",
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 150ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 150ms",
+            padding: "0 8px",
           }}
         >
           <PlatformDiagram />

@@ -45,7 +45,6 @@ html {
   background: rgb(var(--bg));
   color: rgb(var(--fg));
   -webkit-font-smoothing: antialiased;
-  overscroll-behavior: none;
   font-size: 15px;
 }
 
