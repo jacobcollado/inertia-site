@@ -725,9 +725,9 @@ function PlatformDiagram() {
   const rotationRef = useRef(0);
   const rafRef = useRef<number>(0);
   const [rotation, setRotation] = useState(0);
-  const cx = 200;
-  const cy = 200;
-  const r = 118;
+  const cx = 220;
+  const cy = 220;
+  const r = 110;
   const total = PLATFORM_SPOKES.length;
   const SPEED = 0.004;
 
@@ -746,7 +746,7 @@ function PlatformDiagram() {
 
   return (
     <div className="relative w-full select-none" style={{ maxWidth: 440, margin: "0 auto" }}>
-      <svg viewBox="0 0 400 400" fill="none" className="w-full" aria-hidden="true">
+      <svg viewBox="0 0 440 440" fill="none" className="w-full" aria-hidden="true">
         <defs>
           <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="rgb(60,100,255)" stopOpacity="0.18" />
@@ -829,7 +829,6 @@ function PlatformDiagram() {
       {/* Hub label — centered absolutely over SVG */}
       <div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
-        style={{ paddingBottom: "0" }}
       >
         <span className="text-[13px] tracking-tight font-medium text-white">Inertia</span>
       </div>
@@ -857,19 +856,24 @@ function PlatformSignal() {
   return (
     <section ref={ref} className="flex flex-col">
       {/* Mobile: stacked */}
-      <div className="sm:hidden flex flex-col gap-12 px-6 py-10">
-        <p
-          className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug text-center"
+      <div className="sm:hidden flex flex-col gap-10 px-6 py-10">
+        <div
+          className="flex flex-col gap-3 text-center"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(12px)",
             transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
-          What you{" "}
-          <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
-          {" "}want to do, we do.
-        </p>
+          <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
+            End to end, or we{" "}
+            <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
+            {" "}take it on.
+          </p>
+          <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+            We own the outcome, not just the output.
+          </p>
+        </div>
         <div
           style={{
             opacity: visible ? 1 : 0,
@@ -892,12 +896,12 @@ function PlatformSignal() {
           }}
         >
           <p className="text-[clamp(2rem,3.5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-sm">
-            What you{" "}
+            End to end, or we{" "}
             <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
-            {" "}want to do, we do.
+            {" "}take it on.
           </p>
           <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
-            One team across every surface. No handoffs, no gaps, no excuses.
+            We own the outcome, not just the output.
           </p>
           <a
             href="https://www.instagram.com/by.inertia/"
