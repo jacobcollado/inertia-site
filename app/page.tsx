@@ -725,8 +725,21 @@ function PlatformDiagramSVG({ cx, cy, r, labelR, rotation, hovered, setHovered, 
   hovered: number | null; setHovered: (i: number | null) => void; vb: number;
 }) {
   const total = PLATFORM_SPOKES.length;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(([entry]) => {
+      setScale(entry.contentRect.width / vb);
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [vb]);
+
   return (
-    <div className="relative w-full select-none">
+    <div ref={containerRef} className="relative w-full select-none">
       <svg viewBox={`0 0 ${vb} ${vb}`} fill="none" className="w-full" aria-hidden="true">
         <defs>
           <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
@@ -753,33 +766,20 @@ function PlatformDiagramSVG({ cx, cy, r, labelR, rotation, hovered, setHovered, 
           );
         })}
 
-        {/* Fixed labels — pure SVG text, scales correctly */}
-        {PLATFORM_SPOKES.map((spoke, i) => {
+        {/* Hit areas for hover */}
+        {PLATFORM_SPOKES.map((_, i) => {
           const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
           const lx = cx + Math.cos(angle) * labelR;
           const ly = cy + Math.sin(angle) * labelR;
-          const isHov = hovered === i;
           return (
-            <g
-              key={`label-${spoke.label}`}
+            <circle
+              key={`hit-${i}`}
+              cx={lx} cy={ly} r={24}
+              fill="transparent"
               style={{ cursor: "default" }}
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
-              opacity={isHov ? 1 : 0.6}
-            >
-              <circle cx={lx} cy={ly} r={22} fill="transparent" />
-              <text
-                x={lx} y={ly + 4}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={vb * 0.026}
-                fontFamily="inherit"
-                letterSpacing="-0.3"
-                fill="rgb(var(--fg))"
-              >
-                {spoke.label}
-              </text>
-            </g>
+            />
           );
         })}
 
@@ -791,6 +791,48 @@ function PlatformDiagramSVG({ cx, cy, r, labelR, rotation, hovered, setHovered, 
           Inertia
         </text>
       </svg>
+
+      {/* HTML icon + label overlay — positioned using scale from ResizeObserver */}
+      <div className="absolute inset-0 pointer-events-none">
+        {PLATFORM_SPOKES.map((spoke, i) => {
+          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
+          const lx = cx + Math.cos(angle) * labelR;
+          const ly = cy + Math.sin(angle) * labelR;
+          const px = lx * scale;
+          const py = ly * scale;
+          const isHov = hovered === i;
+          return (
+            <div
+              key={`icon-${spoke.label}`}
+              style={{
+                position: "absolute",
+                left: px,
+                top: py,
+                transform: "translate(-50%, -50%)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "3px",
+                opacity: isHov ? 1 : 0.6,
+                transition: "opacity 200ms ease",
+                color: "rgb(var(--fg))",
+                pointerEvents: "none",
+              }}
+            >
+              <spoke.icon style={{ width: 14, height: 14, flexShrink: 0 }} />
+              <span style={{
+                fontSize: Math.max(9, vb * 0.026 * scale),
+                letterSpacing: "-0.3px",
+                lineHeight: 1.2,
+                textAlign: "center",
+                whiteSpace: "nowrap",
+              }}>
+                {spoke.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
