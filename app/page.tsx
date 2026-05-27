@@ -453,10 +453,10 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
     <section className={`px-6 sm:px-8 flex flex-col items-center gap-8 sm:gap-10 ${hero ? "pt-10 sm:pt-20 pb-16 sm:pb-24" : "py-12 sm:py-24"}`}>
       <div className="flex flex-col items-center gap-3 text-center">
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-snug ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
-          {closing ? "Ready to build something worth shipping?" : hero ? <>Build something worth <RotatingWord />.</> : "What are you building?"}
+          {closing ? "Ready to make your first impression count?" : hero ? "The web remembers first impressions." : "What are you building?"}
         </p>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
-          {closing ? "Tell us what you’re working on. We’ll take it from there." : hero ? "Tell us what you need. We’ll handle the rest." : "Tell us. We’ll figure out the rest."}
+          {closing ? "Tell us what you’re building. We’ll make sure it lands." : hero ? "Tell us what you’re building. We’ll make sure it lands." : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
 
@@ -809,7 +809,7 @@ function PlatformSignal() {
             {" "}want to do, we do.
           </p>
           <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
-            Storefront, app, brand, growth. One team, no handoffs, no referrals.
+            One team across every surface. No handoffs, no gaps, no excuses.
           </p>
           <a
             href="https://www.instagram.com/by.inertia/"
