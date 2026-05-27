@@ -740,12 +740,21 @@ h1:hover .redact > span.redact-inner,
   top: 0;
   z-index: 50;
   width: 100%;
+}
+
+.site-header__bg {
+  position: absolute;
+  inset: 0;
   background: rgb(var(--bg));
   -webkit-mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.95) 65%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 92%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.95) 65%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 92%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .site-header__inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   margin: 0 12px;

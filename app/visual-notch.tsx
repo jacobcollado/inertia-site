@@ -500,15 +500,15 @@ export function VisualNotch() {
 
   useEffect(() => {
     const onScroll = () => {
-      const el = headerRef.current;
-      if (!el) return;
+      const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
+      if (!bg) return;
       const y = window.scrollY;
       const progress = Math.min(y / 120, 1);
       const blur = progress * 20;
       const alpha = 1 - progress * 0.55;
-      el.style.backdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
-      (el.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
-      el.style.background = `rgb(var(--bg) / ${alpha})`;
+      bg.style.backdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
+      (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
+      bg.style.background = `rgb(var(--bg) / ${alpha})`;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -517,6 +517,7 @@ export function VisualNotch() {
   return (
     <>
       <div className="site-header" ref={headerRef}>
+        <div className="site-header__bg" aria-hidden="true" />
         <div className="site-header__inner">
           {/* Brand */}
           <Link href="/" className="site-header__brand">
