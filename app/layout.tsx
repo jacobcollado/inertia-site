@@ -18,33 +18,36 @@ const BASE_URL = "https://byinertia.com";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Inertia — Shopify Themes & Web Studio",
-    template: "%s — Inertia",
+    default: "Inertia - Shopify Themes & Web Studio for Independent Brands",
+    template: "%s - Inertia",
   },
-  description: "Inertia builds Shopify storefronts and brand identities for independent brands. Try Aether, our conversion-focused Shopify theme, from $85.",
-  keywords: ["Shopify theme", "Aether Shopify theme", "Shopify store design", "custom Shopify storefront", "Inertia studio", "Shopify agency"],
+  description: "Inertia builds Shopify storefronts, brand identities, and digital products for independent brands. Try Aether, our conversion-focused Shopify theme, from $85.",
+  keywords: ["Shopify theme", "Aether Shopify theme", "Shopify store design", "custom Shopify storefront", "Inertia studio", "Shopify agency", "Shopify development", "ecommerce design"],
   authors: [{ name: "Inertia" }],
   creator: "Inertia",
   openGraph: {
     type: "website",
     url: BASE_URL,
     siteName: "Inertia",
-    title: "Inertia — Shopify Themes & Web Studio",
-    description: "Inertia builds Shopify storefronts and brand identities for independent brands. Try Aether, our conversion-focused Shopify theme, from $85.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Inertia" }],
+    title: "Inertia - Shopify Themes & Web Studio for Independent Brands",
+    description: "Inertia builds Shopify storefronts, brand identities, and digital products for independent brands. Try Aether, our conversion-focused Shopify theme, from $85.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Inertia - Shopify Themes & Web Studio" }],
   },
   twitter: {
     card: "summary_large_image",
     site: "@inertia_dev",
     creator: "@inertia_dev",
-    title: "Inertia — Shopify Themes & Web Studio",
-    description: "Inertia builds Shopify storefronts and brand identities for independent brands. Try Aether, our conversion-focused Shopify theme, from $85.",
+    title: "Inertia - Shopify Themes & Web Studio for Independent Brands",
+    description: "Inertia builds Shopify storefronts, brand identities, and digital products for independent brands. Try Aether, our conversion-focused Shopify theme, from $85.",
     images: ["/og.png"],
+  },
+  alternates: {
+    canonical: BASE_URL,
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true },
+    googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large", "max-video-preview": -1 },
   },
   icons: {
     icon: "/favicon.ico",
@@ -73,6 +76,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "name": "Inertia",
             "alternateName": "Inertia Studio",
             "url": "https://byinertia.com",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": { "@type": "EntryPoint", "urlTemplate": "https://byinertia.com/blog?q={search_term_string}" },
+              "query-input": "required name=search_term_string",
+            },
           })}}
         />
         <script
@@ -83,7 +91,43 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "name": "Inertia",
             "alternateName": "Inertia Studio",
             "url": "https://byinertia.com",
-            "logo": "https://byinertia.com/og.png",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://byinertia.com/logo.png",
+              "width": 200,
+              "height": 200,
+            },
+            "sameAs": [
+              "https://www.instagram.com/by.inertia/",
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "url": "https://byinertia.com/contact",
+            },
+          })}}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Aether Shopify Theme",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Shopify",
+            "url": "https://byinertia.com/aether",
+            "description": "A premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu.",
+            "offers": {
+              "@type": "Offer",
+              "price": "85",
+              "priceCurrency": "USD",
+              "url": "https://byinertia.com/aether/buy",
+            },
+            "provider": {
+              "@type": "Organization",
+              "name": "Inertia",
+              "url": "https://byinertia.com",
+            },
           })}}
         />
       </head>

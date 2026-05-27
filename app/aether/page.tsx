@@ -6,9 +6,22 @@ import { AetherContour } from "./aether-contour";
 import { MobilePricing } from "./mobile-pricing";
 
 export const metadata: Metadata = {
-  title: "Aether Shopify Theme",
-  description:
-    "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu. From $85.",
+  title: "Aether - Premium Shopify Theme for Independent Brands",
+  description: "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+  alternates: { canonical: "https://byinertia.com/aether" },
+  openGraph: {
+    type: "website",
+    url: "https://byinertia.com/aether",
+    title: "Aether - Premium Shopify Theme for Independent Brands",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Aether Shopify Theme" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Aether - Premium Shopify Theme for Independent Brands",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+    images: ["/og.png"],
+  },
 };
 
 const FEATURES = [

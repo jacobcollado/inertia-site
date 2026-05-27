@@ -15,13 +15,21 @@ export async function generateMetadata({
   const { slug } = await params;
   const piece = getWork(slug);
   if (!piece) return { title: "Not found" };
-  const title = `${piece.client} - Inertia`;
-  const description = piece.summary || `Work by Inertia: ${piece.client}.`;
+  const title = `${piece.client} - Inertia Work`;
+  const description = piece.summary || `A project built by Inertia for ${piece.client}.`;
+  const canonical = `https://byinertia.com/work/${slug}`;
   return {
     title,
     description,
-    openGraph: { title, description, type: "article" },
-    twitter: { card: "summary", title, description },
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: canonical,
+      images: [{ url: "/og.png", width: 1200, height: 630, alt: `${piece.client} - Inertia` }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
   };
 }
 

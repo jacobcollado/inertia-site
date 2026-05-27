@@ -300,11 +300,20 @@ export async function generateMetadata({
   if (!post) return { title: "Not found" };
   const title = `${post.title} - Inertia`;
   const description = post.summary || post.subtitle || `Published ${formatDate(post.date)}.`;
+  const canonical = `https://byinertia.com/blog/${slug}`;
   return {
     title,
     description,
-    openGraph: { title, description, type: "article" },
-    twitter: { card: "summary", title, description },
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: canonical,
+      publishedTime: post.date,
+      images: [{ url: "/og.png", width: 1200, height: 630, alt: post.title }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
   };
 }
 
