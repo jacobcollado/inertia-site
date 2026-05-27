@@ -450,7 +450,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
   const arrowClass = "flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
 
   return (
-    <section className={`px-6 sm:px-8 flex flex-col items-center gap-3 ${hero ? "pt-10 sm:pt-20 pb-16 sm:pb-24" : "py-12 sm:py-24"}`}>
+    <section className={`px-6 sm:px-8 flex flex-col items-center gap-3 ${hero ? "min-h-[calc(100svh-140px)] justify-center pt-6 pb-16" : "py-12 sm:py-24"}`}>
       <div className="flex flex-col items-center gap-3 text-center">
         {hero && (
           <Link
@@ -466,7 +466,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
           {closing ? "Ready to make your first impression count?" : hero ? <>The web remembers first <RotatingWord />.</> : "What are you building?"}
         </p>
-        <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
+        <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs mt-6">
           {closing ? "Tell us what you’re building. We’ll make sure it lands." : hero ? "Tell us what you’re building. We’ll make sure it lands." : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
@@ -513,10 +513,19 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
                 onChange={e => setInput(e.target.value)}
                 onFocus={() => { setFocused(true); setEverFocused(true); }}
                 onBlur={() => setFocused(false)}
-                className="w-full bg-transparent tracking-tight text-[rgb(var(--fg))] outline-none"
+                className="w-full bg-transparent tracking-tight text-[rgb(var(--fg))] outline-none pr-8"
                 style={{ fontSize: "max(16px, 15px)" }}
               />
               {!input && <AnimatedPlaceholder active={!focused} />}
+              <span
+                className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[11px] tracking-tight border border-[rgb(var(--line))] rounded px-1 py-0.5 text-[rgb(var(--muted))]"
+                style={{
+                  opacity: input.trim() ? 1 : 0,
+                  transition: "opacity 200ms ease",
+                }}
+              >
+                ↵
+              </span>
             </div>
             <button
               type="submit"
@@ -585,6 +594,9 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           </div>
         </div>
       </form>
+      <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">
+        No commitment. We usually reply within 24h.
+      </p>
     </section>
   );
 }
@@ -819,9 +831,9 @@ function PlatformDiagramSVG({ cx, cy, r, labelR, rotation, hovered, setHovered, 
                 pointerEvents: "none",
               }}
             >
-              <spoke.icon style={{ width: 14, height: 14, flexShrink: 0 }} />
+              <spoke.icon style={{ width: 22, height: 22, flexShrink: 0 }} />
               <span style={{
-                fontSize: Math.max(9, vb * 0.026 * scale),
+                fontSize: Math.max(10, vb * 0.032 * scale),
                 letterSpacing: "-0.3px",
                 lineHeight: 1.2,
                 textAlign: "center",
@@ -865,7 +877,7 @@ function PlatformDiagram() {
       </div>
       {/* Desktop */}
       <div className="hidden sm:block">
-        <PlatformDiagramSVG cx={220} cy={220} r={120} labelR={168} rotation={rotation} hovered={hovered} setHovered={setHovered} vb={440} />
+        <PlatformDiagramSVG cx={280} cy={280} r={155} labelR={215} rotation={rotation} hovered={hovered} setHovered={setHovered} vb={560} />
       </div>
     </>
   );
@@ -949,7 +961,7 @@ function PlatformSignal() {
           </a>
         </div>
         <div
-          className="w-[420px] shrink-0"
+          className="flex-[1.6] min-w-0"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -1620,7 +1632,7 @@ function StackDiagram() {
   return (
     <div className="flex flex-col sm:flex-row" style={{ overflow: "visible" }}>
       {/* Left: copy */}
-      <div className="relative flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 sm:border-r border-[rgb(var(--line))] overflow-hidden">
+      <div className="relative flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 overflow-hidden">
         <div className="relative z-10 flex flex-col items-center sm:items-start gap-3 pointer-events-none">
           <MissionPhrase />
           <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left">
@@ -2066,17 +2078,17 @@ const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }
 function TechMarquee() {
   const items = [...TECH_ALL, ...TECH_ALL, ...TECH_ALL];
   return (
-    <div className="relative overflow-hidden select-none py-6" aria-hidden="true">
+    <div className="relative overflow-hidden select-none pt-2 pb-6 -mt-4" aria-hidden="true">
       <div className="marquee-row marquee-row--fwd">
         {items.map((tech, i) => (
-          <div key={i} className="flex items-center gap-2 px-6 text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
-            <tech.icon className="w-6 h-6 shrink-0" />
-            <span className="text-[16px] tracking-tight whitespace-nowrap">{tech.name}</span>
+          <div key={i} className="flex items-center gap-2 sm:gap-3 px-6 sm:px-8 text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
+            <tech.icon className="w-6 h-6 sm:w-8 sm:h-8 shrink-0" />
+            <span className="text-[17px] sm:text-[20px] tracking-tight whitespace-nowrap">{tech.name}</span>
           </div>
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-24" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-24" style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-32" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-32" style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
     </div>
   );
 }
@@ -2401,11 +2413,13 @@ function VisualLayout() {
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
-    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex flex-col">
 
       <StartPrompt hero />
 
-      <TechMarquee />
+      <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-[80rem]">
+        <TechMarquee />
+      </div>
 
       <div className="py-8 sm:py-12" />
 
