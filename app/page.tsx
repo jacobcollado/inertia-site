@@ -491,7 +491,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
               strokeWidth="1.5"
               strokeDasharray={perimeter}
               strokeDashoffset={focused ? 0 : perimeter}
-              style={{ transition: everFocused ? "stroke-dashoffset 550ms cubic-bezier(0.22,1,0.36,1)" : "none" }}
+              style={{ transition: everFocused ? "stroke-dashoffset 1100ms cubic-bezier(0.22,1,0.36,1)" : "none" }}
             />
           </svg>
 
@@ -502,7 +502,8 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
               borderColor: focused ? "rgba(60,100,255,0.35)" : "rgb(var(--line))",
               boxShadow: focused
                 ? "0 0 0 3px rgba(60,100,255,0.08), 0 0 24px rgba(60,100,255,0.12)"
-                : "none",
+                : undefined,
+              animation: focused ? "none" : "input-halo 3s ease-in-out infinite",
               transition: "border-color 250ms ease, box-shadow 350ms ease",
             }}
           >
@@ -975,76 +976,126 @@ function PlatformSignal() {
   );
 }
 
-// -- Social proof -------------------------------------------------------
+// -- News carousel -------------------------------------------------------
 
-const TESTIMONIALS = [
+const NEWS_ITEMS: { title: string; tag: string; date: string; href: string; image?: string }[] = [
   {
-    quote: "We'd been burned by two agencies before. Inertia was the first team that actually read our brief. Storefront launched in 9 days and we saw a 22% lift in checkout completions within the first three weeks.",
-    name: "Priya M.",
-    role: "Head of eCommerce, Foliage Supply Co.",
-    initials: "PM",
-    color: "rgb(60,100,255)",
+    title: "Why your Shopify theme is costing you conversions",
+    tag: "Storefronts",
+    date: "May 2025",
+    href: "/blog",
+    image: "/blog/shopify-theme-conversions.png",
   },
   {
-    quote: "Handed them a Figma file on a Tuesday. Had a staging link by Thursday. I've worked with much bigger shops that couldn't pull that off in a month.",
-    name: "Tom H.",
-    role: "Co-founder, Kettlebrook Goods",
-    initials: "TH",
-    color: "rgb(120,60,220)",
+    title: "Aether: a theme built for brands that take design seriously",
+    tag: "Product",
+    date: "Apr 2025",
+    href: "/aether",
+    image: "/blog/aether-theme.png",
   },
   {
-    quote: "Our old theme was a mess of app conflicts and slow load times. Aether fixed both without us asking. The site feels like a different brand now.",
-    name: "Dana K.",
-    role: "Operations Lead, Sable & Rowe",
-    initials: "DK",
-    color: "rgb(20,160,100)",
+    title: "The case for owning your stack end to end",
+    tag: "Studio",
+    date: "Mar 2025",
+    href: "/blog",
+    image: "/blog/owning-your-stack.png",
   },
 ];
 
-function SocialProof() {
+function NewsCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    const el = trackRef.current;
+    if (!el) return;
+    isDragging.current = true;
+    startX.current = e.pageX - el.offsetLeft;
+    scrollLeft.current = el.scrollLeft;
+    el.style.cursor = "grabbing";
+    el.style.userSelect = "none";
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current || !trackRef.current) return;
+    const x = e.pageX - trackRef.current.offsetLeft;
+    trackRef.current.scrollLeft = scrollLeft.current - (x - startX.current);
+  };
+
+  const onMouseUp = () => {
+    isDragging.current = false;
+    if (trackRef.current) {
+      trackRef.current.style.cursor = "grab";
+      trackRef.current.style.userSelect = "";
+    }
+  };
+
   return (
-    <section className="py-12 sm:py-16 overflow-hidden">
-      <div className="px-6 sm:px-8 mb-8">
+    <section className="py-12 sm:py-16">
+      <div className="px-6 sm:px-8 mb-8 flex items-end justify-between">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
-          From the people we built for.
+          Writing & news
         </h2>
+        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors hidden sm:block">
+          All posts →
+        </Link>
       </div>
 
-      {/* Marquee strip */}
       <div className="relative">
-        {/* Edge fades */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 z-10" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 z-10" style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
-
-        <div className="flex" style={{ animation: "marquee 32s linear infinite" }}>
-          {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-            <div
+        <div
+          ref={trackRef}
+          className="flex gap-4 px-6 sm:px-8 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab"
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+        >
+          {NEWS_ITEMS.map((item, i) => (
+            <Link
               key={i}
-              className="flex-shrink-0 flex flex-col gap-4 rounded-2xl px-6 py-5 mx-3"
-              style={{
-                width: 340,
-                background: "rgb(var(--surface))",
-                border: "1px solid rgb(var(--line))",
-              }}
+              href={item.href}
+              draggable={false}
+              className="group flex-shrink-0 flex flex-col gap-3"
+              style={{ width: "clamp(260px, 38vw, 420px)" }}
+              onClick={e => { if (isDragging.current) e.preventDefault(); }}
             >
-              <p className="text-[14px] leading-[1.7] tracking-tight text-[rgb(var(--fg))] opacity-75">
-                {t.quote}
-              </p>
-              <div className="flex items-center gap-3 mt-auto">
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[0.6rem] font-semibold text-white"
-                  style={{ background: t.color }}
-                >
-                  {t.initials}
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]">{t.name}</span>
-                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-60">{t.role}</span>
-                </div>
+              {/* Image area */}
+              <div
+                className="w-full shrink-0 rounded-2xl overflow-hidden border border-[rgb(var(--line))] group-hover:border-[rgb(var(--fg)/0.2)] transition-colors"
+                style={{
+                  aspectRatio: "1200/630",
+                  background: "rgb(var(--surface))",
+                }}
+              >
+                {item.image ? (
+                  <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" draggable={false} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">1200 × 630</span>
+                  </div>
+                )}
               </div>
-            </div>
+              {/* Text */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{item.tag}</span>
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">{item.date}</span>
+                </div>
+                <p className="text-[18px] tracking-tight text-[rgb(var(--fg))] leading-snug font-normal group-hover:opacity-70 transition-opacity">
+                  {item.title}
+                </p>
+              </div>
+            </Link>
           ))}
         </div>
+      </div>
+
+      <div className="px-6 sm:px-8 mt-6 sm:hidden">
+        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+          All posts →
+        </Link>
       </div>
     </section>
   );
@@ -2431,7 +2482,7 @@ function VisualLayout() {
 
       <div className="py-8 sm:py-12" />
 
-      <SocialProof />
+      <NewsCarousel />
 
       <div className="py-8 sm:py-12" />
 
