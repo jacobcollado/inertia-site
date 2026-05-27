@@ -13,6 +13,8 @@ export type PostMeta = {
   date: string;
   summary?: string;
   pinned?: boolean;
+  image?: string;
+  tag?: string;
 };
 
 export type Post = PostMeta & { content: string };
@@ -31,6 +33,8 @@ export function getAllPosts(): PostMeta[] {
       date: data.date ?? "",
       summary: data.summary,
       pinned: data.pinned === true,
+      image: data.image,
+      tag: data.tag,
     } as PostMeta;
   });
   return posts.sort((a, b) => {
@@ -52,6 +56,8 @@ export function getPost(slug: string): Post | null {
         subtitle: data.subtitle,
         date: data.date ?? "",
         summary: data.summary,
+        image: data.image,
+        tag: data.tag,
         content,
       };
     }
