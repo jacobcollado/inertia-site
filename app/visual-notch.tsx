@@ -41,6 +41,7 @@ const NAV: NavItem[] = [
     label: "Products",
     children: [
       { label: "Aether theme", description: "One-time purchase, lifetime updates.", href: "/aether", icon: <SiShopify /> },
+      { label: "Live demo", description: "See Aether running on a real store.", href: "https://aether-starter.myshopify.com", icon: <HiOutlineSparkles />, external: true },
       { label: "Enterprise", description: "Custom licensing for larger teams.", href: "/aether/enterprise", icon: <HiOutlineBuildingOffice /> },
       { label: "Add-ons", description: "Extend your theme with optional modules.", disabled: true, icon: <HiOutlinePuzzlePiece /> },
     ],
@@ -77,16 +78,13 @@ const NAV: NavItem[] = [
 
 function DropdownItem({ child, onClose }: { child: Child; onClose: () => void }) {
   const inner = (
-    <>
-      <span className="site-header__dropdown-icon">{child.icon}</span>
-      <span className="site-header__dropdown-text">
-        <span className="site-header__dropdown-label">
-          {child.label}
-          {child.disabled && <span className="site-header__soon">soon</span>}
-        </span>
-        <span className="site-header__dropdown-desc">{child.description}</span>
+    <span className="site-header__dropdown-text">
+      <span className="site-header__dropdown-label">
+        {child.label}
+        {child.disabled && <span className="site-header__soon">soon</span>}
+        {child.external && <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 10, height: 10, opacity: 0.4, flexShrink: 0 }}><path d="M4 12L12 4M7 4h5v5"/></svg>}
       </span>
-    </>
+    </span>
   );
 
   if (child.disabled) return (
@@ -139,6 +137,44 @@ function NavTrigger({
   );
 }
 
+function DropdownContent({ phase, enterX, style, item, onClose }: {
+  phase: "idle" | "exit" | "enter";
+  enterX: number;
+  style: React.CSSProperties;
+  item: NavItem | null;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (phase !== "enter") return;
+    const el = ref.current;
+    if (!el) return;
+    // Snap to offset with no transition, then let the style transition take over
+    el.style.transition = "none";
+    el.style.opacity = "0";
+    el.style.transform = `translateX(${enterX}px) translateY(3px)`;
+    el.style.filter = "blur(4px)";
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.transition = "";
+        el.style.opacity = "";
+        el.style.transform = "";
+        el.style.filter = "";
+      });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: "relative", width: "100%", ...style }}>
+      {item?.children.map((child) => (
+        <DropdownItem key={child.label} child={child} onClose={onClose} />
+      ))}
+    </div>
+  );
+}
+
 function SharedDropdown({
   openIndex,
   triggerEls,
@@ -162,16 +198,64 @@ function SharedDropdown({
   const rafRef = useRef<number | null>(null);
   const prevOpenIndex = useRef<number | null>(null);
 
+  // Keyed content for exit/enter animation
+  const [contentKey, setContentKey] = useState(0);
+  const [visibleItem, setVisibleItem] = useState<NavItem | null>(null);
+  const [contentPhase, setContentPhase] = useState<"idle" | "exit" | "enter">("idle");
+  const [direction, setDirection] = useState<1 | -1>(1); // 1 = moving right, -1 = moving left
+  const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const visibleIndexRef = useRef<number | null>(null);
+
   // Keep rendering last item while closing so content doesn't vanish mid-fade
   const displayItem = item ?? prevItemRef.current;
   if (item) prevItemRef.current = item;
+
+  // Drive content exit → swap → enter when sliding between items
+  useEffect(() => {
+    if (openIndex === null) {
+      setContentPhase("idle");
+      return;
+    }
+    const incoming = NAV[openIndex];
+    if (visibleItem === null) {
+      // First open — no exit needed
+      setVisibleItem(incoming);
+      visibleIndexRef.current = openIndex;
+      setContentPhase("enter");
+      setContentKey(k => k + 1);
+      return;
+    }
+    if (visibleItem === incoming) return;
+
+    const dir = visibleIndexRef.current !== null && openIndex > visibleIndexRef.current ? 1 : -1;
+    setDirection(dir);
+
+    if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current);
+    setContentPhase("exit");
+    phaseTimerRef.current = setTimeout(() => {
+      setVisibleItem(incoming);
+      visibleIndexRef.current = openIndex;
+      setContentKey(k => k + 1);
+      setContentPhase("enter");
+    }, 200);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openIndex]);
+
+  // Clear visibleItem when panel fully closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current);
+      setContentPhase("idle");
+      setVisibleItem(null);
+      visibleIndexRef.current = null;
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const panel = panelRef.current;
     if (!panel) return;
 
     if (openIndex === null) {
-      // Reset size imperatively so next open starts from 0
       panel.style.width = "0px";
       panel.style.height = "0px";
       prevOpenIndex.current = null;
@@ -192,8 +276,7 @@ function SharedDropdown({
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
     if (isSliding) {
-      // Already open — just slide and resize with transitions on
-      panel.style.transition = "left 220ms cubic-bezier(0.22,1,0.36,1), width 220ms cubic-bezier(0.22,1,0.36,1), height 220ms cubic-bezier(0.22,1,0.36,1), opacity 180ms cubic-bezier(0.22,1,0.36,1), transform 220ms cubic-bezier(0.22,1,0.36,1)";
+      panel.style.transition = "left 380ms cubic-bezier(0.22,1,0.36,1), width 380ms cubic-bezier(0.22,1,0.36,1), height 380ms cubic-bezier(0.22,1,0.36,1), opacity 280ms cubic-bezier(0.22,1,0.36,1), transform 380ms cubic-bezier(0.22,1,0.36,1)";
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = requestAnimationFrame(() => {
           if (!measureRef.current || !panelRef.current) return;
@@ -204,7 +287,6 @@ function SharedDropdown({
         });
       });
     } else {
-      // First open — snap position, then animate size from 0
       panel.style.transition = "none";
       panel.style.left = `${newLeft}px`;
       panel.style.width = "0px";
@@ -222,6 +304,28 @@ function SharedDropdown({
     }
   }, [openIndex, triggerEls, navRef]);
 
+  const exitX = direction * 10;
+  const enterX = direction * -6;
+  const contentStyle: React.CSSProperties = contentPhase === "exit"
+    ? {
+        opacity: 0,
+        transform: `translateX(${exitX}px) translateY(2px)`,
+        filter: "blur(3px)",
+        transition: "opacity 180ms cubic-bezier(0.4,0,1,1), transform 180ms cubic-bezier(0.4,0,1,1), filter 180ms cubic-bezier(0.4,0,1,1)",
+      }
+    : contentPhase === "enter"
+    ? {
+        opacity: 1,
+        transform: "translateX(0) translateY(0)",
+        filter: "blur(0px)",
+        transition: "opacity 200ms cubic-bezier(0.22,1,0.36,1) 30ms, transform 200ms cubic-bezier(0.22,1,0.36,1) 30ms, filter 200ms cubic-bezier(0.22,1,0.36,1) 30ms",
+      }
+    : {
+        opacity: 1,
+        transform: "translateX(0) translateY(0)",
+        filter: "blur(0px)",
+      };
+
   return (
     <div
       ref={panelRef}
@@ -231,7 +335,7 @@ function SharedDropdown({
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
-      {/* Hidden sizer — always reflects current item's natural size */}
+      {/* Hidden sizer — always reflects incoming item's natural size */}
       <div
         ref={measureRef}
         style={{ position: "absolute", visibility: "hidden", pointerEvents: "none", top: 0, left: 0, minWidth: 280 }}
@@ -241,19 +345,22 @@ function SharedDropdown({
         ))}
       </div>
 
-      {/* Visible content */}
-      <div style={{ position: "relative", width: "100%" }}>
-        {displayItem?.children.map((child) => (
-          <DropdownItem key={child.label} child={child} onClose={onClose} />
-        ))}
-      </div>
+      {/* Visible content — fades out then in on item change */}
+      <DropdownContent
+        key={contentKey}
+        phase={contentPhase}
+        enterX={enterX}
+        style={contentStyle}
+        item={visibleItem}
+        onClose={onClose}
+      />
     </div>
   );
 }
 
 /* ── Mobile drawer ───────────────────────────────────────────────── */
 
-function MobileAccordion({ item, onNavigate, drawerOpen }: { item: NavItem; onNavigate: () => void; drawerOpen: boolean }) {
+function MobileAccordion({ item, onNavigate, drawerOpen, showDesc }: { item: NavItem; onNavigate: () => void; drawerOpen: boolean; showDesc?: boolean }) {
   const [open, setOpen] = useState(false);
   const [height, setHeight] = useState(0);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -288,17 +395,22 @@ function MobileAccordion({ item, onNavigate, drawerOpen }: { item: NavItem; onNa
         style={{ height }}
       >
         {item.children.map((child) => {
-          const inner = (
-            <>
-              <span className="mobile-nav__item-icon">{child.icon}</span>
-              <span className="mobile-nav__item-text">
-                <span className="mobile-nav__item-label">
-                  {child.label}
-                  {child.disabled && <span className="site-header__soon">soon</span>}
-                </span>
-                <span className="mobile-nav__item-desc">{child.description}</span>
+          const externalArrow = child.external ? <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 10, height: 10, opacity: 0.4, flexShrink: 0 }}><path d="M4 12L12 4M7 4h5v5"/></svg> : null;
+          const inner = showDesc ? (
+            <span className="mobile-nav__item-text">
+              <span className="mobile-nav__item-label">
+                {child.label}
+                {child.disabled && <span className="site-header__soon">soon</span>}
+                {externalArrow}
               </span>
-            </>
+              <span className="mobile-nav__item-desc">{child.description}</span>
+            </span>
+          ) : (
+            <span className="mobile-nav__item-label">
+              {child.label}
+              {child.disabled && <span className="site-header__soon">soon</span>}
+              {externalArrow}
+            </span>
           );
 
           if (child.disabled) return (
@@ -318,28 +430,8 @@ function MobileAccordion({ item, onNavigate, drawerOpen }: { item: NavItem; onNa
 
 function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   useEffect(() => {
-    if (open) {
-      const y = window.scrollY;
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${y}px`;
-      document.body.style.width = "100%";
-    } else {
-      const y = Math.abs(parseInt(document.body.style.top || "0", 10));
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      window.scrollTo(0, y);
-    }
-    return () => {
-      const y = Math.abs(parseInt(document.body.style.top || "0", 10));
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      if (y) window.scrollTo(0, y);
-    };
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   return (
@@ -353,7 +445,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
       <div className="mobile-nav__drawer" data-open={open} aria-label="Mobile navigation">
         <div className="mobile-nav__drawer-inner">
           {NAV.map((item) => (
-            <MobileAccordion key={item.label} item={item} onNavigate={onClose} drawerOpen={open} />
+            <MobileAccordion key={item.label} item={item} onNavigate={onClose} drawerOpen={open} showDesc={item.label === "Products"} />
           ))}
           <div style={{ marginTop: "auto", borderTop: "1px solid rgb(var(--line))", display: "flex", alignItems: "center" }}>
             <div style={{ flex: 1 }}>
@@ -499,20 +591,38 @@ export function VisualNotch() {
   const handleClose = useCallback(() => setOpenIndex(null), []);
 
   useEffect(() => {
+    const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
+    if (!bg) return;
+    if (mobileOpen) {
+      bg.style.transition = "background 200ms ease, backdrop-filter 200ms ease";
+      bg.style.backdropFilter = "none";
+      (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "none";
+      bg.style.background = `rgb(var(--bg))`;
+      bg.style.webkitMaskImage = "none";
+      bg.style.maskImage = "none";
+    } else {
+      bg.style.webkitMaskImage = "";
+      bg.style.maskImage = "";
+    }
+  }, [mobileOpen]);
+
+  useEffect(() => {
     const onScroll = () => {
+      if (mobileOpen) return;
       const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
       if (!bg) return;
       const y = window.scrollY;
       const progress = Math.min(y / 120, 1);
       const blur = progress * 20;
       const alpha = 1 - progress * 0.55;
+      bg.style.transition = "";
       bg.style.backdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
       (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
       bg.style.background = `rgb(var(--bg) / ${alpha})`;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [mobileOpen]);
 
   return (
     <>

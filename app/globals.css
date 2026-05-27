@@ -11,6 +11,7 @@
 :root {
   --bg: 250 249 247;
   --surface: 242 241 239;
+  --surface-elevated: 255 255 255;
   --fg: 14 14 14;
   --muted: 100 100 100;
   --line: 200 200 200;
@@ -26,6 +27,7 @@
 .dark {
   --bg: 0 0 0;
   --surface: 18 18 18;
+  --surface-elevated: 24 24 24;
   --fg: 237 237 237;
   --map-filter: invert(1);
   --muted: 140 140 140;
@@ -573,6 +575,11 @@ h1:hover .redact > span.redact-inner,
   50%       { opacity: 0.7; }
 }
 
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 @keyframes mockup-float {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-6px); }
@@ -836,9 +843,10 @@ h1:hover .redact > span.redact-inner,
 /* Dropdown panel — single shared panel, slides between nav items */
 .site-header__dropdown {
   position: absolute;
-  top: calc(100% + 8px);
-  background: rgb(var(--surface));
+  top: calc(100% + 4px);
+  background: rgb(var(--surface-elevated));
   border: 1px solid rgb(var(--line));
+  box-shadow: 0 4px 24px rgb(0 0 0 / 0.08);
   border-radius: 12px;
   display: block;
   pointer-events: none;
@@ -858,13 +866,13 @@ h1:hover .redact > span.redact-inner,
   align-items: flex-start;
   gap: 14px;
   text-decoration: none;
-  padding: 14px 18px;
+  padding: 8px 18px;
   transition: background 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 
 .site-header__dropdown-item:hover {
-  background: rgb(var(--line) / 0.07);
+  background: rgb(var(--fg) / 0.06);
 }
 
 .site-header__dropdown-item:hover .site-header__dropdown-label {
@@ -895,7 +903,7 @@ h1:hover .redact > span.redact-inner,
   align-items: center;
   gap: 6px;
   font-size: 13.5px;
-  font-weight: 400;
+  font-weight: 450;
   letter-spacing: -0.025em;
   color: rgb(var(--fg));
   opacity: 0.7;
@@ -1006,7 +1014,6 @@ h1:hover .redact > span.redact-inner,
   bottom: 0;
   z-index: 45;
   background: rgb(var(--bg));
-  border-top: 1px solid rgb(var(--line));
   transform: translateY(-12px);
   opacity: 0;
   pointer-events: none;
@@ -1030,11 +1037,20 @@ h1:hover .redact > span.redact-inner,
 
 /* Accordion section */
 .mobile-nav__section {
-  border-bottom: 1px solid rgb(var(--line));
+  position: relative;
 }
 
-.mobile-nav__section:last-child {
-  border-bottom: none;
+.mobile-nav__section::after {
+  content: "";
+  display: block;
+  height: 1px;
+  background: rgb(var(--line));
+  margin: 0 24px;
+}
+
+.mobile-nav__section:last-child::after,
+.mobile-nav__section:nth-last-child(2)::after {
+  display: none;
 }
 
 .mobile-nav__section-trigger {
@@ -1064,6 +1080,7 @@ h1:hover .redact > span.redact-inner,
 .mobile-nav__section-body {
   overflow: hidden;
   transition: height 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  padding-bottom: 8px;
 }
 
 /* Items inside accordion */
@@ -1071,14 +1088,13 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 24px;
+  padding: 8px 24px;
   text-decoration: none;
-  border-top: 1px solid rgb(var(--line));
   transition: background 140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .mobile-nav__item:hover {
-  background: rgb(var(--line) / 0.07);
+  background: rgb(var(--fg) / 0.06);
 }
 
 .mobile-nav__item:hover .mobile-nav__item-label {
@@ -1107,6 +1123,11 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.mobile-nav__item:has(.mobile-nav__item-text) {
+  padding-top: 11px;
+  padding-bottom: 11px;
 }
 
 .mobile-nav__item-label {

@@ -269,7 +269,7 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   );
 }
 
-const ROTATING_WORDS = ["shipping", "keeping", "loving", "sharing", "showing", "remembering", "launching", "noticing"];
+const ROTATING_WORDS = ["impressions", "interactions", "experiences", "encounters", "moments", "details", "movements", "reactions"];
 const HOLD_MS = 2600;
 const CHAR_STAGGER = 32;
 const FILL_MS = 800;
@@ -450,10 +450,21 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
   const arrowClass = "flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
 
   return (
-    <section className={`px-6 sm:px-8 flex flex-col items-center gap-8 sm:gap-10 ${hero ? "pt-10 sm:pt-20 pb-16 sm:pb-24" : "py-12 sm:py-24"}`}>
+    <section className={`px-6 sm:px-8 flex flex-col items-center gap-3 ${hero ? "pt-10 sm:pt-20 pb-16 sm:pb-24" : "py-12 sm:py-24"}`}>
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-snug ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
-          {closing ? "Ready to make your first impression count?" : hero ? "The web remembers first impressions." : "What are you building?"}
+        {hero && (
+          <Link
+            href="/aether"
+            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] bg-[rgb(var(--surface-elevated))] px-3 py-1 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.2)] transition-colors"
+            style={{ boxShadow: "0 2px 12px rgb(0 0 0 / 0.07)" }}
+          >
+            <span className="inline-flex items-center rounded-full bg-[rgb(60,100,255)] px-1.5 py-0.5 text-[10px] tracking-tight text-white leading-none">New</span>
+            Aether theme for Shopify
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50"><path d="M6 4l4 4-4 4"/></svg>
+          </Link>
+        )}
+        <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
+          {closing ? "Ready to make your first impression count?" : hero ? <>The web remembers first <RotatingWord />.</> : "What are you building?"}
         </p>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs">
           {closing ? "Tell us what you’re building. We’ll make sure it lands." : hero ? "Tell us what you’re building. We’ll make sure it lands." : "Tell us. We’ll figure out the rest."}
@@ -502,7 +513,8 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
                 onChange={e => setInput(e.target.value)}
                 onFocus={() => { setFocused(true); setEverFocused(true); }}
                 onBlur={() => setFocused(false)}
-                className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] outline-none"
+                className="w-full bg-transparent tracking-tight text-[rgb(var(--fg))] outline-none"
+                style={{ fontSize: "max(16px, 15px)" }}
               />
               {!input && <AnimatedPlaceholder active={!focused} />}
             </div>
@@ -699,53 +711,129 @@ function AetherFeature() {
 
 // -- Platform diagram ---------------------------------------------------
 
-const PLATFORM_GROUPS = [
-  { label: "Storefront", sub: "Shopify / web", icon: SiShopify },
-  { label: "Apps", sub: "iOS / Android", icon: SiSwift },
-  { label: "Brand", sub: "Identity / UI", icon: SiFigma },
-  { label: "Growth", sub: "Ads / campaigns", icon: SiMeta },
+const PLATFORM_SPOKES = [
+  { label: "Storefront", sub: "Shopify", icon: SiShopify },
+  { label: "iOS & Android", sub: "Swift", icon: SiSwift },
+  { label: "Brand identity", sub: "Figma", icon: SiFigma },
+  { label: "Ad campaigns", sub: "Meta", icon: SiMeta },
+  { label: "Frontend", sub: "Next.js", icon: SiNextdotjs },
+  { label: "Backend", sub: "Supabase", icon: SiSupabase },
 ];
 
 function PlatformDiagram() {
-  const mobileCard = (g: typeof PLATFORM_GROUPS[number]) => (
-    <div
-      key={g.label}
-      className="flex items-center gap-5 rounded-2xl p-5 w-full"
-      style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))" }}
-    >
-      <g.icon className="w-12 h-12 shrink-0" style={{ color: "rgb(var(--fg))", opacity: 0.5 }} />
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[16px] tracking-tight text-[rgb(var(--fg))]">{g.label}</span>
-        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{g.sub}</span>
-      </div>
-    </div>
-  );
+  const [hovered, setHovered] = useState<number | null>(null);
+  const rotationRef = useRef(0);
+  const rafRef = useRef<number>(0);
+  const [rotation, setRotation] = useState(0);
+  const cx = 200;
+  const cy = 200;
+  const r = 118;
+  const total = PLATFORM_SPOKES.length;
+  const SPEED = 0.004;
 
-  const desktopCard = (g: typeof PLATFORM_GROUPS[number]) => (
-    <div
-      key={g.label}
-      className="flex flex-col justify-between rounded-2xl p-5 flex-1"
-      style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 160 }}
-    >
-      <g.icon className="w-10 h-10" style={{ color: "rgb(var(--fg))", opacity: 0.5 }} />
-      <div className="flex flex-col gap-0.5 mt-4">
-        <span className="text-[15px] tracking-tight text-[rgb(var(--fg))]">{g.label}</span>
-        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">{g.sub}</span>
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    let last = performance.now();
+    const tick = (now: number) => {
+      const dt = now - last;
+      last = now;
+      rotationRef.current += SPEED * (dt / 16.67);
+      setRotation(rotationRef.current);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
 
   return (
-    <>
-      {/* Mobile: stacked */}
-      <div className="sm:hidden flex flex-col gap-3">
-        {PLATFORM_GROUPS.map((g) => mobileCard(g))}
+    <div className="relative w-full select-none" style={{ maxWidth: 440, margin: "0 auto" }}>
+      <svg viewBox="0 0 400 400" fill="none" className="w-full" aria-hidden="true">
+        <defs>
+          <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgb(60,100,255)" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="rgb(60,100,255)" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Outer ring */}
+        <circle cx={cx} cy={cy} r={r + 52} stroke="rgb(var(--fg))" strokeWidth="1" strokeDasharray="3 6" opacity="0.18" />
+        {/* Mid ring */}
+        <circle cx={cx} cy={cy} r={r} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.12" />
+        {/* Inner ring */}
+        <circle cx={cx} cy={cy} r={r - 18} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.08" />
+
+        {/* Orbiting spokes + nodes */}
+        {PLATFORM_SPOKES.map((_, i) => {
+          const angle = (i / total) * 2 * Math.PI - Math.PI / 2 + rotation;
+          const x2 = cx + Math.cos(angle) * r;
+          const y2 = cy + Math.sin(angle) * r;
+          return (
+            <g key={`orbit-${i}`}>
+              <line
+                x1={cx} y1={cy} x2={x2} y2={y2}
+                stroke="rgb(var(--fg))"
+                strokeWidth="0.8"
+                opacity="0.15"
+              />
+              <circle cx={x2} cy={y2} r={3.5} fill="rgb(60,100,255)" opacity={0.75} />
+            </g>
+          );
+        })}
+
+        {/* Fixed labels */}
+        {PLATFORM_SPOKES.map((spoke, i) => {
+          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
+          const lx = cx + Math.cos(angle) * (r + 52);
+          const ly = cy + Math.sin(angle) * (r + 52);
+          const isHov = hovered === i;
+          return (
+            <foreignObject
+              key={`label-${spoke.label}`}
+              x={lx - 36} y={ly - 28} width={72} height={56}
+              style={{ cursor: "default", overflow: "visible" }}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "3px",
+                opacity: isHov ? 1 : 0.55,
+                transition: "opacity 200ms ease",
+                color: "rgb(var(--fg))",
+              }}>
+                <spoke.icon style={{ width: 16, height: 16, flexShrink: 0 }} />
+                <span style={{
+                  fontSize: "11px",
+                  letterSpacing: "-0.3px",
+                  lineHeight: 1.2,
+                  textAlign: "center",
+                  whiteSpace: "nowrap",
+                  fontFamily: "inherit",
+                }}>
+                  {spoke.label}
+                </span>
+              </div>
+            </foreignObject>
+          );
+        })}
+
+        {/* Hub glow */}
+        <circle cx={cx} cy={cy} r={60} fill="url(#hub-glow)" />
+        {/* Hub solid fill */}
+        <circle cx={cx} cy={cy} r={36} fill="rgb(60,100,255)" />
+        {/* Hub ring */}
+        <circle cx={cx} cy={cy} r={36} stroke="rgb(60,100,255)" strokeWidth="1.5" opacity="0.8" />
+      </svg>
+
+      {/* Hub label — centered absolutely over SVG */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{ paddingBottom: "0" }}
+      >
+        <span className="text-[13px] tracking-tight font-medium text-white">Inertia</span>
       </div>
-      {/* Desktop: row */}
-      <div className="hidden sm:flex gap-3 w-full">
-        {PLATFORM_GROUPS.map((g) => desktopCard(g))}
-      </div>
-    </>
+    </div>
   );
 }
 
@@ -769,7 +857,7 @@ function PlatformSignal() {
   return (
     <section ref={ref} className="flex flex-col">
       {/* Mobile: stacked */}
-      <div className="sm:hidden flex flex-col gap-6 px-6 py-10">
+      <div className="sm:hidden flex flex-col gap-12 px-6 py-10">
         <p
           className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug text-center"
           style={{
@@ -821,7 +909,7 @@ function PlatformSignal() {
           </a>
         </div>
         <div
-          className="flex-1"
+          className="w-[420px] shrink-0"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -861,161 +949,49 @@ const TESTIMONIALS = [
   },
 ];
 
-function TestimonialCard({ t, style }: { t: typeof TESTIMONIALS[number]; style?: React.CSSProperties }) {
-  return (
-    <div
-      className="flex flex-col gap-4 border border-[rgb(var(--line))] rounded-2xl px-5 py-5"
-      style={{ background: "rgb(var(--bg))", ...style }}
-    >
-      <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--fg))] opacity-80">
-        &ldquo;{t.quote}&rdquo;
-      </p>
-      <div className="flex items-center gap-2.5">
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[0.65rem] font-semibold text-white"
-          style={{ background: t.color }}
-        >
-          {t.initials}
-        </div>
-        <div className="flex flex-col leading-none gap-0.5">
-          <span className="text-[clamp(0.8rem,1.5vw,0.875rem)] tracking-tight text-[rgb(var(--fg))]">{t.name}</span>
-          <span className="text-[clamp(0.7rem,1.3vw,0.8rem)] tracking-tight text-[rgb(var(--muted))]">{t.role}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function SocialProof() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  const [active, setActive] = useState(0);
-  const touchStartX = useRef<number | null>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  const prev = () => setActive(a => Math.max(0, a - 1));
-  const next = () => setActive(a => Math.min(TESTIMONIALS.length - 1, a + 1));
-
   return (
-    <section ref={ref} className="py-12 sm:py-16"
-      style={{
-        opacity: visible ? 1 : 0,
-        transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1)",
-      }}
-    >
-      {/* Mobile: carousel */}
-      <div className="sm:hidden flex flex-col gap-5 px-6">
-        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight text-center">
-          From the people we built for.
-        </h2>
-        <div
-          className="overflow-hidden"
-          onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
-          onTouchEnd={e => {
-            if (touchStartX.current === null) return;
-            const dx = e.changedTouches[0].clientX - touchStartX.current;
-            if (dx < -40) next();
-            else if (dx > 40) prev();
-            touchStartX.current = null;
-          }}
-        >
-          <div
-            className="flex"
-            style={{
-              transform: `translateX(${-active * 100}%)`,
-              transition: "transform 420ms cubic-bezier(0.22,1,0.36,1)",
-            }}
-          >
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="min-w-full">
-                <TestimonialCard t={t} />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {TESTIMONIALS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActive(i)}
-                className="rounded-full transition-all"
-                style={{
-                  width: active === i ? 20 : 6,
-                  height: 6,
-                  background: active === i ? "rgb(var(--fg))" : "rgb(var(--line))",
-                }}
-                aria-label={`Testimonial ${i + 1}`}
-              />
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={prev}
-              disabled={active === 0}
-              className="w-8 h-8 rounded-full border border-[rgb(var(--line))] flex items-center justify-center text-[rgb(var(--muted))] transition-opacity disabled:opacity-25"
-              aria-label="Previous"
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <path d="M10 12L6 8l4-4" />
-              </svg>
-            </button>
-            <button
-              onClick={next}
-              disabled={active === TESTIMONIALS.length - 1}
-              className="w-8 h-8 rounded-full border border-[rgb(var(--line))] flex items-center justify-center text-[rgb(var(--muted))] transition-opacity disabled:opacity-25"
-              aria-label="Next"
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <path d="M6 4l4 4-4 4" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop: heading top, asymmetric card grid below */}
-      <div className="hidden sm:flex flex-col gap-6 px-8">
+    <section className="py-12 sm:py-16 overflow-hidden">
+      <div className="px-6 sm:px-8 mb-8">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
           From the people we built for.
         </h2>
-        <div className="flex gap-3 items-stretch">
-          {/* Featured card — wider, stands alone */}
-          <div
-            className="flex-[1.4]"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(10px)",
-              transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1) 0ms, transform 500ms cubic-bezier(0.22,1,0.36,1) 0ms",
-            }}
-          >
-            <TestimonialCard t={TESTIMONIALS[0]} style={{ height: "100%" }} />
-          </div>
-          {/* Two smaller cards stacked */}
-          <div className="flex-1 flex flex-col gap-3">
-            {TESTIMONIALS.slice(1).map((t, i) => (
-              <div
-                key={t.name}
-                style={{
-                  opacity: visible ? 1 : 0,
-                  transform: visible ? "translateY(0)" : "translateY(10px)",
-                  transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${(i + 1) * 100}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${(i + 1) * 100}ms`,
-                }}
-              >
-                <TestimonialCard t={t} />
+      </div>
+
+      {/* Marquee strip */}
+      <div className="relative">
+        {/* Edge fades */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 z-10" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-16 z-10" style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
+
+        <div className="flex" style={{ animation: "marquee 32s linear infinite" }}>
+          {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 flex flex-col gap-4 rounded-2xl px-6 py-5 mx-3"
+              style={{
+                width: 340,
+                background: "rgb(var(--surface))",
+                border: "1px solid rgb(var(--line))",
+              }}
+            >
+              <p className="text-[14px] leading-[1.7] tracking-tight text-[rgb(var(--fg))] opacity-75">
+                {t.quote}
+              </p>
+              <div className="flex items-center gap-3 mt-auto">
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[0.6rem] font-semibold text-white"
+                  style={{ background: t.color }}
+                >
+                  {t.initials}
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]">{t.name}</span>
+                  <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-60">{t.role}</span>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -1494,8 +1470,6 @@ function PulseGrid() {
 
 
 
-const MISSION_WORDS = ["We", "work", "like", "it's", "ours."];
-
 function MissionPhrase() {
   const ref = useRef<HTMLParagraphElement>(null);
   const [visible, setVisible] = useState(false);
@@ -1514,34 +1488,20 @@ function MissionPhrase() {
   return (
     <p
       ref={ref}
-      className="text-[clamp(2rem,5vw,3rem)] font-normal tracking-tight leading-snug text-center sm:text-left pr-4 sm:pr-12"
-      style={{ paddingTop: "6px", paddingBottom: "12px", color: "rgb(var(--fg))" }}
+      className="text-[clamp(2rem,5vw,3rem)] font-normal tracking-tight leading-[1.35] text-center sm:text-left pr-4 sm:pr-12"
+      style={{
+        paddingTop: "6px",
+        paddingBottom: "12px",
+        color: "rgb(var(--fg))",
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(12px)",
+        transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
+      }}
     >
-      {MISSION_WORDS.map((word, i) => {
-        const isHighlight = word === "ours.";
-        return (
-          <span
-            key={i}
-            style={{
-              display: "inline-block",
-              whiteSpace: "nowrap",
-              marginRight: "0.28em",
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(10px)",
-              transition: visible ? `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${i * 55}ms` : "none",
-              ...(isHighlight ? {
-                background: "#2563eb",
-                borderRadius: "6px",
-                padding: "0 0.35em 0.05em",
-                margin: "0 0.1em",
-                color: "rgb(var(--fg))",
-              } : {}),
-            }}
-          >
-            {word}
-          </span>
-        );
-      })}
+      We treat your work like it&apos;s{" "}
+      <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>
+        ours.
+      </span>
     </p>
   );
 }
