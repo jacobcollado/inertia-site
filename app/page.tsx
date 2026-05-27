@@ -720,15 +720,86 @@ const PLATFORM_SPOKES = [
   { label: "Backend", sub: "Supabase", icon: SiSupabase },
 ];
 
+function PlatformDiagramSVG({ cx, cy, r, labelR, rotation, hovered, setHovered, vb }: {
+  cx: number; cy: number; r: number; labelR: number; rotation: number;
+  hovered: number | null; setHovered: (i: number | null) => void; vb: number;
+}) {
+  const total = PLATFORM_SPOKES.length;
+  return (
+    <div className="relative w-full select-none">
+      <svg viewBox={`0 0 ${vb} ${vb}`} fill="none" className="w-full" aria-hidden="true">
+        <defs>
+          <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgb(60,100,255)" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="rgb(60,100,255)" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Rings */}
+        <circle cx={cx} cy={cy} r={labelR} stroke="rgb(var(--fg))" strokeWidth="1" strokeDasharray="3 6" opacity="0.18" />
+        <circle cx={cx} cy={cy} r={r} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.12" />
+        <circle cx={cx} cy={cy} r={r - 16} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.08" />
+
+        {/* Orbiting spokes + nodes */}
+        {PLATFORM_SPOKES.map((_, i) => {
+          const angle = (i / total) * 2 * Math.PI - Math.PI / 2 + rotation;
+          const x2 = cx + Math.cos(angle) * r;
+          const y2 = cy + Math.sin(angle) * r;
+          return (
+            <g key={`orbit-${i}`}>
+              <line x1={cx} y1={cy} x2={x2} y2={y2} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.15" />
+              <circle cx={x2} cy={y2} r={3.5} fill="rgb(60,100,255)" opacity={0.75} />
+            </g>
+          );
+        })}
+
+        {/* Fixed labels — pure SVG text, scales correctly */}
+        {PLATFORM_SPOKES.map((spoke, i) => {
+          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
+          const lx = cx + Math.cos(angle) * labelR;
+          const ly = cy + Math.sin(angle) * labelR;
+          const isHov = hovered === i;
+          return (
+            <g
+              key={`label-${spoke.label}`}
+              style={{ cursor: "default" }}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              opacity={isHov ? 1 : 0.6}
+            >
+              <circle cx={lx} cy={ly} r={22} fill="transparent" />
+              <text
+                x={lx} y={ly + 4}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize={vb * 0.026}
+                fontFamily="inherit"
+                letterSpacing="-0.3"
+                fill="rgb(var(--fg))"
+              >
+                {spoke.label}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Hub */}
+        <circle cx={cx} cy={cy} r={r * 0.42} fill="url(#hub-glow)" />
+        <circle cx={cx} cy={cy} r={r * 0.32} fill="rgb(60,100,255)" />
+        <circle cx={cx} cy={cy} r={r * 0.32} stroke="rgb(60,100,255)" strokeWidth="1.5" opacity="0.8" />
+        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize={vb * 0.03} fontFamily="inherit" fontWeight="500" fill="#fff">
+          Inertia
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 function PlatformDiagram() {
   const [hovered, setHovered] = useState<number | null>(null);
   const rotationRef = useRef(0);
   const rafRef = useRef<number>(0);
   const [rotation, setRotation] = useState(0);
-  const cx = 220;
-  const cy = 220;
-  const r = 95;
-  const total = PLATFORM_SPOKES.length;
   const SPEED = 0.004;
 
   useEffect(() => {
@@ -745,94 +816,16 @@ function PlatformDiagram() {
   }, []);
 
   return (
-    <div className="relative w-full select-none" style={{ maxWidth: 440, margin: "0 auto" }}>
-      <svg viewBox="0 0 440 440" fill="none" className="w-full" aria-hidden="true">
-        <defs>
-          <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgb(60,100,255)" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="rgb(60,100,255)" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-
-        {/* Outer ring */}
-        <circle cx={cx} cy={cy} r={r + 44} stroke="rgb(var(--fg))" strokeWidth="1" strokeDasharray="3 6" opacity="0.18" />
-        {/* Mid ring */}
-        <circle cx={cx} cy={cy} r={r} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.12" />
-        {/* Inner ring */}
-        <circle cx={cx} cy={cy} r={r - 18} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.08" />
-
-        {/* Orbiting spokes + nodes */}
-        {PLATFORM_SPOKES.map((_, i) => {
-          const angle = (i / total) * 2 * Math.PI - Math.PI / 2 + rotation;
-          const x2 = cx + Math.cos(angle) * r;
-          const y2 = cy + Math.sin(angle) * r;
-          return (
-            <g key={`orbit-${i}`}>
-              <line
-                x1={cx} y1={cy} x2={x2} y2={y2}
-                stroke="rgb(var(--fg))"
-                strokeWidth="0.8"
-                opacity="0.15"
-              />
-              <circle cx={x2} cy={y2} r={3.5} fill="rgb(60,100,255)" opacity={0.75} />
-            </g>
-          );
-        })}
-
-        {/* Fixed labels */}
-        {PLATFORM_SPOKES.map((spoke, i) => {
-          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
-          const lx = cx + Math.cos(angle) * (r + 44);
-          const ly = cy + Math.sin(angle) * (r + 44);
-          const isHov = hovered === i;
-          return (
-            <foreignObject
-              key={`label-${spoke.label}`}
-              x={lx - 36} y={ly - 28} width={72} height={56}
-              style={{ cursor: "default", overflow: "visible" }}
-              onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <div style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "3px",
-                opacity: isHov ? 1 : 0.55,
-                transition: "opacity 200ms ease",
-                color: "rgb(var(--fg))",
-              }}>
-                <spoke.icon style={{ width: 16, height: 16, flexShrink: 0 }} />
-                <span style={{
-                  fontSize: "11px",
-                  letterSpacing: "-0.3px",
-                  lineHeight: 1.2,
-                  textAlign: "center",
-                  whiteSpace: "nowrap",
-                  fontFamily: "inherit",
-                }}>
-                  {spoke.label}
-                </span>
-              </div>
-            </foreignObject>
-          );
-        })}
-
-        {/* Hub glow */}
-        <circle cx={cx} cy={cy} r={60} fill="url(#hub-glow)" />
-        {/* Hub solid fill */}
-        <circle cx={cx} cy={cy} r={36} fill="rgb(60,100,255)" />
-        {/* Hub ring */}
-        <circle cx={cx} cy={cy} r={36} stroke="rgb(60,100,255)" strokeWidth="1.5" opacity="0.8" />
-      </svg>
-
-      {/* Hub label — centered absolutely over SVG */}
-      <div
-        className="absolute inset-0 flex items-center justify-center pointer-events-none"
-      >
-        <span className="text-[13px] tracking-tight font-medium text-white">Inertia</span>
+    <>
+      {/* Mobile */}
+      <div className="sm:hidden">
+        <PlatformDiagramSVG cx={180} cy={180} r={100} labelR={140} rotation={rotation} hovered={hovered} setHovered={setHovered} vb={360} />
       </div>
-    </div>
+      {/* Desktop */}
+      <div className="hidden sm:block">
+        <PlatformDiagramSVG cx={220} cy={220} r={120} labelR={168} rotation={rotation} hovered={hovered} setHovered={setHovered} vb={440} />
+      </div>
+    </>
   );
 }
 
