@@ -99,6 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             },
             "sameAs": [
               "https://www.instagram.com/by.inertia/",
+              "https://x.com/inertia_dev",
             ],
             "contactPoint": {
               "@type": "ContactPoint",
