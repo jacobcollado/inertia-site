@@ -6,6 +6,7 @@ import { RouteFade } from "./route-fade";
 import { LenisProvider } from "./lenis-provider";
 import { ViewModeProvider } from "./view-mode-context";
 import { SiteShell } from "./site-shell";
+import { CookieBanner } from "./cookie-banner";
 import { ScrollReveal } from "./scroll-reveal";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -144,6 +145,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </SiteShell>
           </ViewModeProvider>
         </ThemeProvider>
+        <CookieBanner />
         <Analytics />
       </body>
     </html>
