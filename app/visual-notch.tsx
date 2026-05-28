@@ -406,7 +406,7 @@ function MobileAccordion({ item, onNavigate, drawerOpen, showDesc }: { item: Nav
         className="mobile-nav__section-body"
         style={{ height }}
       >
-        {item.children.map((child) => {
+        {item.children?.map((child) => {
           const externalArrow = child.external ? <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 10, height: 10, opacity: 0.4, flexShrink: 0 }}><path d="M4 12L12 4M7 4h5v5"/></svg> : null;
           const inner = showDesc ? (
             <span className="mobile-nav__item-text">
