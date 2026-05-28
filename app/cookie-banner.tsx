@@ -48,8 +48,7 @@ export function CookieBanner() {
           </button>
           <button
             onClick={accept}
-            className="rounded-full px-4 py-2 text-[12px] tracking-tight font-medium text-white hover:opacity-85 transition-opacity"
-            style={{ background: "var(--accent-gradient)" }}
+            className="rounded-full px-4 py-2 text-[12px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
           >
             Accept
           </button>
