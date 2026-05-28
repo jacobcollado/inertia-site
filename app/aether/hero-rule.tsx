@@ -23,17 +23,6 @@ export function HeroRule() {
   return (
     <>
       <div ref={sentinelRef} style={{ height: "1px", background: "rgb(var(--line))" }} />
-      {stuck && (
-        <div style={{
-          position: "fixed",
-          top: 72,
-          left: 0,
-          right: 0,
-          height: "1px",
-          background: "rgb(var(--line))",
-          zIndex: 49,
-        }} />
-      )}
     </>
   );
 }

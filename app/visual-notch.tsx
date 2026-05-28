@@ -33,7 +33,8 @@ type Child = {
 
 type NavItem = {
   label: string;
-  children: Child[];
+  children?: Child[];
+  href?: string;
 };
 
 const NAV: NavItem[] = [
@@ -51,7 +52,6 @@ const NAV: NavItem[] = [
     children: [
       { label: "Work with us", description: "Custom builds, shipped on time.", href: "/contact", icon: <HiOutlineChatBubbleLeftRight /> },
       { label: "Shipped using Inertia", description: "Real stores built on our themes.", href: "/work", icon: <HiOutlineSparkles /> },
-      { label: "Pricing", description: "Straightforward, no surprises.", href: "/aether#pricing", icon: <HiOutlineCreditCard /> },
     ],
   },
   {
@@ -72,6 +72,7 @@ const NAV: NavItem[] = [
       { label: "Policies", description: "Terms, licenses, and policies.", href: "/policies", icon: <HiOutlineShieldCheck /> },
     ],
   },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 /* ── Desktop mega menu ───────────────────────────────────────────── */
@@ -114,6 +115,17 @@ function NavTrigger({
   triggerRef: (el: HTMLDivElement | null) => void;
 }) {
   const open = openIndex === index;
+
+  if (item.href) {
+    return (
+      <div className="site-header__menu-root" ref={triggerRef}>
+        <Link href={item.href} className="site-header__link site-header__link--pricing">
+          {item.label}
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div
       className="site-header__menu-root"
@@ -122,7 +134,7 @@ function NavTrigger({
       ref={triggerRef}
     >
       <button
-        className={`site-header__link${item.label === "Pricing" ? " site-header__link--pricing" : ""}`}
+        className="site-header__link"
         aria-expanded={open}
         aria-haspopup="true"
       >
@@ -168,7 +180,7 @@ function DropdownContent({ phase, enterX, style, item, onClose }: {
 
   return (
     <div ref={ref} style={{ position: "relative", width: "100%", ...style }}>
-      {item?.children.map((child) => (
+      {item?.children?.map((child) => (
         <DropdownItem key={child.label} child={child} onClose={onClose} />
       ))}
     </div>
@@ -340,7 +352,7 @@ function SharedDropdown({
         ref={measureRef}
         style={{ position: "absolute", visibility: "hidden", pointerEvents: "none", top: 0, left: 0, minWidth: 280 }}
       >
-        {displayItem?.children.map((child) => (
+        {displayItem?.children?.map((child) => (
           <DropdownItem key={child.label} child={child} onClose={onClose} />
         ))}
       </div>
@@ -445,7 +457,15 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
       <div className="mobile-nav__drawer" data-open={open} aria-label="Mobile navigation">
         <div className="mobile-nav__drawer-inner">
           {NAV.map((item) => (
-            <MobileAccordion key={item.label} item={item} onNavigate={onClose} drawerOpen={open} showDesc={item.label === "Products"} />
+            item.href ? (
+              <div key={item.label} className="mobile-nav__section">
+                <Link href={item.href} onClick={onClose} className="mobile-nav__section-trigger" style={{ textDecoration: "none" }}>
+                  {item.label}
+                </Link>
+              </div>
+            ) : (
+              <MobileAccordion key={item.label} item={item as NavItem & { children: Child[] }} onNavigate={onClose} drawerOpen={open} showDesc={item.label === "Products"} />
+            )
           ))}
           <div style={{ marginTop: "auto", borderTop: "1px solid rgb(var(--line))", display: "flex", alignItems: "center" }}>
             <div style={{ flex: 1 }}>

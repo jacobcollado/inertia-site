@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = {
@@ -15,11 +14,6 @@ export default function ContactPage() {
         <ContactForm />
       </div>
 
-      <div className="grid-rule" aria-hidden="true" />
-
-      <footer className="px-8 py-8 flex items-center text-[13px] tracking-tight text-[rgb(var(--muted))]">
-        <Link href="/" className="hover:text-[rgb(var(--fg))] transition-colors">Inertia</Link>
-      </footer>
 
     </main>
   );

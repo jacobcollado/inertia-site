@@ -20,48 +20,48 @@ interface Step {
 const STEPS: Step[] = [
   {
     key: "type",
-    question: () => "What are you looking to build?",
+    question: () => "What brings you here?",
     type: "choice",
-    options: ["Custom Shopify store", "Theme purchase / support", "Brand + web project", "Not sure yet"],
+    options: ["I want a custom Shopify store", "I bought Aether and need help", "I have a brand or web project", "I'm not sure yet"],
   },
   {
     key: "name",
-    question: () => "Your name",
-    hint: "How should we address you?",
+    question: () => "What's your name?",
     type: "text",
-    placeholder: "Full name",
+    placeholder: "Your name",
     autoComplete: "name",
   },
   {
     key: "email",
-    question: () => "Your email address",
-    hint: "We'll use this to follow up with you.",
+    question: () => "Best email to reach you?",
+    hint: "We'll reply here, usually within one business day.",
     type: "email",
-    placeholder: "you@company.com",
+    placeholder: "you@example.com",
     autoComplete: "email",
   },
   {
     key: "budget",
-    question: () => "Approximate budget",
+    question: () => "What's your rough budget?",
+    hint: "No commitment — just helps us understand the scope.",
     type: "choice",
     options: ["Under $2k", "$2k – $5k", "$5k – $15k", "$15k+", "Not decided yet"],
-    showIf: (a) => a.type === "Custom Shopify store" || a.type === "Brand + web project",
+    showIf: (a) => a.type === "I want a custom Shopify store" || a.type === "I have a brand or web project",
   },
   {
     key: "timeline",
-    question: () => "When do you need to launch?",
+    question: () => "When are you hoping to launch?",
     type: "choice",
-    options: ["As soon as possible", "1 – 2 months", "3 – 6 months", "No hard deadline"],
-    showIf: (a) => a.type === "Custom Shopify store" || a.type === "Brand + web project",
+    options: ["As soon as possible", "Within 1 – 2 months", "Within 3 – 6 months", "No fixed deadline"],
+    showIf: (a) => a.type === "I want a custom Shopify store" || a.type === "I have a brand or web project",
   },
   {
     key: "message",
     question: (a) => {
-      if (a.type === "Theme purchase / support") return "What do you need help with?";
-      if (a.type === "Not sure yet") return "Tell us what you have in mind.";
-      return "Describe the project";
+      if (a.type === "I bought Aether and need help") return "What do you need help with?";
+      if (a.type === "I'm not sure yet") return "Tell us what's on your mind";
+      return "Tell us about the project";
     },
-    hint: "Share details about the brand, the goals, or the problem you're solving.",
+    hint: "Share as much or as little as you like — brand, goals, problems you're trying to solve.",
     type: "textarea",
     placeholder: "The more context the better.",
   },
