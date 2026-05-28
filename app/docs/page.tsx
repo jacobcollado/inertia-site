@@ -1091,8 +1091,8 @@ export default function DocsPage() {
     <div className="min-h-screen flex flex-col" style={{ background: "rgb(var(--bg))" }}>
 
       {/* Docs header — desktop hidden, mobile only */}
-      <header className="lg:hidden flex items-center justify-between px-5 shrink-0" style={{ height: 52, background: "rgb(var(--bg))" }}>
-        <Link href="/" className="flex items-center gap-2">
+      <header className="lg:hidden flex items-center justify-between px-3 shrink-0" style={{ height: 72, background: "rgb(var(--bg))" }}>
+        <Link href="/" className="flex items-center gap-2 pl-3">
           <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
         </Link>
         <Link href="/aether/buy" className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight font-medium transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>

@@ -69,7 +69,7 @@ export function SiteFooter() {
     <footer className="pt-12 pb-8">
 
       {/* Menu columns */}
-      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 gap-y-8 mb-12 px-6 sm:px-8">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 gap-y-8 mb-12 px-3 sm:px-8">
 
         <div className="flex flex-col gap-2.5 min-w-[120px]">
           <p className="text-[14px] sm:text-[15px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Products</p>
@@ -128,7 +128,7 @@ export function SiteFooter() {
       </div>
 
       {/* Bottom bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6 pt-5 px-6 sm:px-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6 pt-5 px-3 sm:px-8">
         <div className="flex items-center gap-4">
           <EasterEgg />
           <span className="inline-flex items-center gap-1.5 text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--muted))] opacity-30">

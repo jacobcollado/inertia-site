@@ -146,7 +146,7 @@ function RotatingWord() {
             inset: 0,
             borderRadius: "2px",
             opacity: 0,
-            background: "linear-gradient(to right, transparent, rgb(var(--accent)), rgb(88,200,255), transparent)",
+            background: "linear-gradient(to right, transparent, rgb(var(--accent)), rgb(100,180,200), transparent)",
             animation: `underline-fill ${FILL_MS * 2}ms linear ${enterDuration + FILL_DELAY}ms`,
           }}
         />

@@ -349,24 +349,24 @@ function RotatingWord() {
       ))}
       <span aria-live="polite" style={{ display: "flex", justifyContent: "center", whiteSpace: "nowrap" }}>
         {word.split("").map((ch, i) => {
-          const exitDelay = (word.length - 1 - i) * CHAR_STAGGER * 0.85;
+          const exitDelay = i * CHAR_STAGGER * 0.55;
           return phase === "exit" ? (
             <span key={`${index}-${i}-exit`} aria-hidden="true" style={{
               display: "inline-block",
               width: ch === " " ? "0.28em" : undefined,
               opacity: 0,
-              transform: "translateY(-8px) scale(0.95)",
-              filter: "blur(5px)",
-              transition: `opacity 220ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms, transform 240ms cubic-bezier(0.4,0,1,1) ${exitDelay}ms, filter 220ms ease ${exitDelay}ms`,
+              transform: "translateY(10px) scale(0.96)",
+              filter: "blur(4px)",
+              transition: `opacity 200ms cubic-bezier(0.4,0,0.8,1) ${exitDelay}ms, transform 220ms cubic-bezier(0.4,0,0.8,1) ${exitDelay}ms, filter 200ms ease ${exitDelay}ms`,
             }}>{ch}</span>
           ) : (
             <span key={`${index}-${i}-enter`} aria-hidden="true" style={{
               display: "inline-block",
               width: ch === " " ? "0.28em" : undefined,
               opacity: 0,
-              transform: "translateY(8px) scale(0.97)",
+              transform: "translateY(-10px) scale(0.97)",
               filter: "blur(4px)",
-              animation: `char-in 280ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
+              animation: `char-in-from-top 280ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
             }}>{ch}</span>
           );
         })}
@@ -388,7 +388,7 @@ function RotatingWord() {
           inset: 0,
           borderRadius: "2px",
           opacity: 0,
-          background: "linear-gradient(to right, transparent, rgb(var(--accent)), rgb(88,200,255), transparent)",
+          background: "linear-gradient(to right, transparent, rgb(var(--accent)), rgb(100,180,200), transparent)",
           animation: `underline-fill ${FILL_MS * 2}ms linear ${enterDuration + FILL_DELAY}ms`,
         }} />
       </span>
@@ -455,10 +455,9 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
         {hero && (
           <Link
             href="/aether"
-            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] bg-[rgb(var(--surface-elevated))] px-3 py-1 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.2)] transition-colors"
-            style={{ boxShadow: "0 2px 12px rgb(0 0 0 / 0.07)" }}
+            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] px-3 py-1 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.2)] transition-colors"
           >
-            <span className="inline-flex items-center rounded-full bg-[rgb(60,100,255)] px-1.5 py-0.5 text-[10px] tracking-tight text-white leading-none">New</span>
+            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] tracking-tight leading-none text-white" style={{ background: "var(--accent-gradient)" }}>New</span>
             Aether theme for Shopify
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50"><path d="M6 4l4 4-4 4"/></svg>
           </Link>
@@ -487,7 +486,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
               width="calc(100% - 2px)" height="calc(100% - 2px)"
               rx="11" ry="11"
               fill="none"
-              stroke="rgba(60,100,255,0.75)"
+              stroke="rgb(var(--accent))"
               strokeWidth="1.5"
               strokeDasharray={perimeter}
               strokeDashoffset={focused ? 0 : perimeter}
@@ -499,11 +498,11 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border"
             style={{
               background: "rgb(var(--surface))",
-              borderColor: focused ? "rgba(60,100,255,0.35)" : "rgb(var(--line))",
+              borderColor: focused ? "rgba(60,170,160,0.55)" : "rgb(var(--fg) / 0.18)",
               boxShadow: focused
-                ? "0 0 0 3px rgba(60,100,255,0.08), 0 0 24px rgba(60,100,255,0.12)"
-                : undefined,
-              animation: focused ? "none" : "input-halo 3s ease-in-out infinite",
+                ? "0 0 0 3px rgba(50,100,240,0.07), 0 0 28px 4px rgba(60,170,160,0.13)"
+                : "0 0 18px 4px rgba(50,100,240,0.07), 0 0 32px 8px rgba(60,170,160,0.06)",
+              animation: "none",
               transition: "border-color 250ms ease, box-shadow 350ms ease",
             }}
           >
@@ -514,27 +513,19 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
                 onChange={e => setInput(e.target.value)}
                 onFocus={() => { setFocused(true); setEverFocused(true); }}
                 onBlur={() => setFocused(false)}
-                className="w-full bg-transparent tracking-tight text-[rgb(var(--fg))] outline-none pr-8"
+                className="w-full bg-transparent tracking-tight text-[rgb(var(--fg))] outline-none"
                 style={{ fontSize: "max(16px, 15px)" }}
               />
               {!input && <AnimatedPlaceholder active={!focused} />}
-              <span
-                className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[11px] tracking-tight border border-[rgb(var(--line))] rounded px-1 py-0.5 text-[rgb(var(--muted))]"
-                style={{
-                  opacity: input.trim() ? 1 : 0,
-                  transition: "opacity 200ms ease",
-                }}
-              >
-                ↵
-              </span>
             </div>
             <button
               type="submit"
-              className="shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center"
-              style={{ background: "rgb(60,100,255)" }}
+              className="group shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-90 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center gap-1.5"
+              style={{ background: "var(--accent-gradient)" }}
               disabled={!input.trim()}
             >
-              Let&apos;s talk ↗
+              Begin
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
           </div>
         </div>
@@ -638,7 +629,7 @@ function AetherFeature() {
       >
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
           Meet{" "}
-          <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
+          <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
             <SiShopify style={{ display: "inline", width: "0.8em", height: "0.8em", color: "#fff", flexShrink: 0 }} />Aether
           </span>
         </h2>
@@ -798,8 +789,8 @@ function PlatformDiagramSVG({ cx, cy, r, labelR, rotation, hovered, setHovered, 
 
         {/* Hub */}
         <circle cx={cx} cy={cy} r={r * 0.42} fill="url(#hub-glow)" />
-        <circle cx={cx} cy={cy} r={r * 0.32} fill="rgb(60,100,255)" />
-        <circle cx={cx} cy={cy} r={r * 0.32} stroke="rgb(60,100,255)" strokeWidth="1.5" opacity="0.8" />
+        <circle cx={cx} cy={cy} r={r * 0.32} fill="rgb(var(--accent))" />
+        <circle cx={cx} cy={cy} r={r * 0.32} stroke="rgb(var(--accent))" strokeWidth="1.5" opacity="0.8" />
         <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize={vb * 0.03} fontFamily="inherit" fontWeight="500" fill="#fff">
           Inertia
         </text>
@@ -915,7 +906,7 @@ function PlatformSignal() {
         >
           <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
             End to end, or we{" "}
-            <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
+            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
             {" "}take it on.
           </p>
           <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
@@ -946,7 +937,7 @@ function PlatformSignal() {
         >
           <p className="text-[clamp(2rem,3.5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-sm">
             End to end, or we{" "}
-            <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
+            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
             {" "}take it on.
           </p>
           <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
@@ -1602,7 +1593,7 @@ function MissionPhrase() {
       }}
     >
       We treat your work like it&apos;s{" "}
-      <span style={{ background: "rgb(60,100,255)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>
+      <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>
         ours.
       </span>
     </p>
@@ -2306,7 +2297,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
                   type="submit"
                   disabled={loading || !email}
                   className="w-full flex items-center justify-center gap-2 rounded-full py-3 text-[15px] tracking-tight font-medium transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed mt-1"
-                  style={{ background: accent, color: "white" }}
+                  style={{ background: "var(--accent-gradient)", color: "white" }}
                 >
                   {loading ? "Sending..." : plan === "free" ? "Get early access" : "Start the conversation"}
                   {!loading && (
