@@ -1058,7 +1058,7 @@ function NewsCarousel() {
               href={item.href}
               draggable={false}
               className="group flex-shrink-0 flex flex-col gap-3"
-              style={{ width: "clamp(260px, 38vw, 420px)" }}
+              style={{ width: "clamp(300px, 72vw, 420px)" }}
               onClick={e => { if (isDragging.current) e.preventDefault(); }}
             >
               {/* Image area */}

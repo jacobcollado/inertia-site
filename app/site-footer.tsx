@@ -104,7 +104,7 @@ export function SiteFooter() {
           <Link href="/roadmap" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Roadmap</Link>
           <Link href="/careers" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Careers</Link>
           <Link href="/contact" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Help</Link>
-          <Link href="/legal" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Legal</Link>
+          <Link href="/policies" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Policies</Link>
         </div>
 
         <div className="flex flex-col gap-2.5 min-w-[100px]">

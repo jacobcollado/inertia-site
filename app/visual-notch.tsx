@@ -69,7 +69,7 @@ const NAV: NavItem[] = [
       { label: "Roadmap", description: "What we've shipped and what's coming.", href: "/roadmap", icon: <HiOutlineMapPin /> },
       { label: "Careers", description: "Join us when the time is right.", href: "/careers", icon: <HiOutlineBriefcase /> },
       { label: "Help", description: "Get support for anything we've shipped.", href: "/contact", icon: <HiOutlineQuestionMarkCircle /> },
-      { label: "Legal", description: "Terms, licenses, and policies.", href: "/legal", icon: <HiOutlineShieldCheck /> },
+      { label: "Policies", description: "Terms, licenses, and policies.", href: "/policies", icon: <HiOutlineShieldCheck /> },
     ],
   },
 ];

@@ -23,7 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/docs`,              lastModified: new Date("2025-03-01"),  changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE}/contact`,           lastModified: new Date("2025-01-01"),  changeFrequency: "yearly",  priority: 0.5 },
     { url: `${BASE}/careers`,           lastModified: new Date("2025-03-01"),  changeFrequency: "monthly", priority: 0.5 },
-    { url: `${BASE}/legal`,             lastModified: new Date("2025-01-01"),  changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE}/policies`,                      lastModified: new Date("2026-05-01"),  changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE}/policies/terms-of-service`,     lastModified: new Date("2026-05-01"),  changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE}/policies/privacy-policy`,       lastModified: new Date("2026-05-01"),  changeFrequency: "yearly",  priority: 0.3 },
   ];
 
   const postRoutes: MetadataRoute.Sitemap = posts.map((p) => ({

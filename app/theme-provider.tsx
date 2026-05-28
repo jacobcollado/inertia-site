@@ -19,6 +19,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem("theme", theme);
+    localStorage.setItem("theme_ts", String(Date.now()));
   }, [theme]);
 
   const toggle = () => {

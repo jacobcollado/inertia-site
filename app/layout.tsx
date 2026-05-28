@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   },
 };
 
-const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var t=s||'dark';if(t==='dark')document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
+const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var ts=parseInt(localStorage.getItem('theme_ts')||'0',10);var age=Date.now()-ts;var TTL=4*60*60*1000;var t=(s&&age<TTL)?s:'dark';if(t==='dark')document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
