@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { HeaderAuth } from "./dashboard/header-auth";
-import { hapticTap } from "@/lib/haptics";
+import { useWebHaptics } from "web-haptics/react";
 import { SiShopify } from "react-icons/si";
 import {
   HiOutlineSparkles,
@@ -569,6 +569,7 @@ function InertiaLogo() {
 let headerHasAnimated = false;
 
 export function VisualNotch() {
+  const { trigger } = useWebHaptics();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -693,7 +694,7 @@ export function VisualNotch() {
             <button
               className="site-header__hamburger"
               onClick={() => {
-                hapticTap();
+                trigger("medium");
                 setMobileOpen((v) => !v);
               }}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
