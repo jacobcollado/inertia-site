@@ -905,12 +905,8 @@ function PlatformSignal() {
           }}
         >
           <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
-            End to end, or we{" "}
-            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
-            {" "}take it on.
-          </p>
-          <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-            We own the outcome, not just the output.
+            We own the outcome, not just the{" "}
+            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>output.</span>
           </p>
         </div>
         <div
@@ -936,9 +932,8 @@ function PlatformSignal() {
           }}
         >
           <p className="text-[clamp(2rem,3.5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-sm">
-            End to end, or we{" "}
-            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>don&apos;t</span>
-            {" "}take it on.
+            We own the outcome, not just the{" "}
+            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>output.</span>
           </p>
           <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
             We own the outcome, not just the output.
@@ -1592,9 +1587,9 @@ function MissionPhrase() {
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
       }}
     >
-      We treat your work like it&apos;s{" "}
+      Obsessive{" "}
       <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>
-        ours.
+        by default.
       </span>
     </p>
   );
