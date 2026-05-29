@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { HeaderAuth } from "./dashboard/header-auth";
+import { hapticTap } from "@/lib/haptics";
 import { SiShopify } from "react-icons/si";
 import {
   HiOutlineSparkles,
@@ -692,9 +693,7 @@ export function VisualNotch() {
             <button
               className="site-header__hamburger"
               onClick={() => {
-                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-                  navigator.vibrate(10);
-                }
+                hapticTap();
                 setMobileOpen((v) => !v);
               }}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
