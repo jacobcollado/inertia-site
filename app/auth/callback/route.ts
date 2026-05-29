@@ -15,6 +15,17 @@ export async function GET(request: NextRequest) {
         .select("role")
         .eq("id", data.user.id)
         .single();
+
+      // Sync Google name into clients table on first sign-in
+      const googleName = data.user.user_metadata?.full_name as string | undefined;
+      if (googleName) {
+        await supabase
+          .from("clients")
+          .update({ name: googleName })
+          .eq("id", data.user.id)
+          .is("name", null);
+      }
+
       const dest = profile?.role === "admin" ? "/admin" : "/dashboard";
       return NextResponse.redirect(`${origin}${dest}`);
     }

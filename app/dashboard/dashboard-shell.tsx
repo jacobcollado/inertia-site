@@ -95,12 +95,8 @@ function StatusPill({ status }: { status: string }) {
 
 function Empty({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-3 opacity-40">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-[rgb(var(--muted))]" aria-hidden="true">
-        <rect x="3" y="3" width="18" height="18" rx="3" />
-        <line x1="9" y1="12" x2="15" y2="12" />
-      </svg>
-      <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{label}</p>
+    <div className="py-12 opacity-40">
+      <p className="text-[14px] tracking-tight text-[rgb(var(--muted))]">{label}</p>
     </div>
   );
 }
@@ -204,10 +200,10 @@ function TopNav({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages
   return (
     <header className="sticky top-0 z-30 bg-[rgb(var(--bg))] border-b border-[rgb(var(--line))] md:border-b md:border-[rgb(var(--line))]">
       <div className="w-full pl-6 sm:max-w-[80rem] sm:mx-auto sm:px-6 flex items-center" style={{ height: 72 }}>
-        {/* Logo */}
-        <Link href="/">
+        {/* Logo — goes to overview */}
+        <button onClick={() => { trigger("selection"); setTab("overview"); }}>
           <InertiaLogo className="h-[18px] w-auto" />
-        </Link>
+        </button>
 
         {/* Desktop pill tabs */}
         <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
@@ -238,6 +234,9 @@ function TopNav({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages
         {/* Right: avatar + sign out + mobile toggle */}
         <div className="flex items-center gap-1 ml-auto shrink-0 h-full px-4">
           <div className="hidden md:flex items-center gap-3">
+            <Link href="/" className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity">
+              ← Site
+            </Link>
             <ThemeToggle />
           </div>
           <div className="hidden md:flex items-center gap-2">
@@ -251,15 +250,20 @@ function TopNav({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages
               {pending ? "..." : "Sign out"}
             </button>
           </div>
-          <button
-            className="md:hidden flex flex-col justify-center items-center gap-[6px] shrink-0"
-            onClick={() => { trigger("medium"); setMobileOpen(!mobileOpen); }}
-            aria-label="Toggle menu">
-            <span className="block rounded-sm transition-all duration-300"
-              style={{ width: 22, height: 1.5, background: "rgb(var(--fg))", transform: mobileOpen ? "translateY(3.75px) rotate(45deg)" : "none" }} />
-            <span className="block rounded-sm transition-all duration-300"
-              style={{ width: 22, height: 1.5, background: "rgb(var(--fg))", transform: mobileOpen ? "translateY(-3.75px) rotate(-45deg)" : "none" }} />
-          </button>
+          <div className="md:hidden flex items-center gap-4">
+            <Link href="/" className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity">
+              ← Site
+            </Link>
+            <button
+              className="flex flex-col justify-center items-center gap-[6px] shrink-0"
+              onClick={() => { trigger("medium"); setMobileOpen(!mobileOpen); }}
+              aria-label="Toggle menu">
+              <span className="block rounded-sm transition-all duration-300"
+                style={{ width: 22, height: 1.5, background: "rgb(var(--fg))", transform: mobileOpen ? "translateY(3.75px) rotate(45deg)" : "none" }} />
+              <span className="block rounded-sm transition-all duration-300"
+                style={{ width: 22, height: 1.5, background: "rgb(var(--fg))", transform: mobileOpen ? "translateY(-3.75px) rotate(-45deg)" : "none" }} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -270,7 +274,7 @@ function TopNav({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages
             const active = tab === id;
             return (
               <button key={id} onClick={() => { trigger("selection"); setTab(id); setMobileOpen(false); }}
-                className="text-left px-6 py-4 text-[16px] font-medium tracking-[-0.03em] transition-colors flex items-center justify-between w-full"
+                className="text-left px-6 py-3 text-[16px] font-medium tracking-[-0.03em] transition-colors flex items-center justify-between w-full"
                 style={{
                   color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
                   opacity: active ? 1 : 0.5,
@@ -284,7 +288,7 @@ function TopNav({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages
               </button>
             );
           })}
-          <div className="flex items-center gap-3 px-6 py-4 border-t border-[rgb(var(--line))]">
+          <div className="flex items-center gap-3 px-6 py-3 border-t border-[rgb(var(--line))]">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-medium tracking-tight text-[rgb(var(--muted))]"
               style={{ background: "rgb(var(--line))" }}>
               {initials}
@@ -1284,8 +1288,22 @@ export function DashboardShell({ client, projects, invoices, files, messages: in
     return () => { document.title = base; };
   }, [unread]);
 
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
   return (
     <div className="min-h-screen bg-[rgb(var(--bg))]">
+      {!bannerDismissed && (
+        <div className="w-full flex items-center justify-between gap-4 px-6 py-2 border-b border-[rgb(var(--line))]">
+          <p className="flex-1 text-center text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-70">
+            This portal is in early access. You may encounter rough edges as we continue to improve things.
+          </p>
+          <button onClick={() => setBannerDismissed(true)} className="shrink-0 opacity-30 hover:opacity-70 transition-opacity text-[rgb(var(--muted))]" aria-label="Dismiss">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3 h-3" aria-hidden="true">
+              <line x1="3" y1="3" x2="13" y2="13" /><line x1="13" y1="3" x2="3" y2="13" />
+            </svg>
+          </button>
+        </div>
+      )}
       <TopNav client={client} tab={tab} setTab={setTab} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} unreadMessages={unread} />
 
       <main className="w-full px-6 sm:max-w-[80rem] sm:mx-auto py-10" style={{ animation: "rise-in 240ms cubic-bezier(0.22,1,0.36,1) both" }}>

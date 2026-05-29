@@ -5,6 +5,25 @@ import { useEffect, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "./actions";
 
+function PortalLink({ href, label }: { href: string; label: string }) {
+  const [loading, setLoading] = useState(false);
+  return (
+    <Link
+      href={href}
+      onClick={() => setLoading(true)}
+      className="inline-flex items-center gap-1.5 text-[13.5px] tracking-tight text-[rgb(var(--fg))] opacity-60 hover:opacity-100 transition-opacity"
+    >
+      {loading && (
+        <svg className="animate-spin w-3 h-3 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
+          <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      )}
+      {label}
+    </Link>
+  );
+}
+
 export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: boolean; mobileInline?: boolean }) {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -158,12 +177,7 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
   if (user) {
     return (
       <div className="flex items-center gap-3" style={fadeStyle}>
-        <Link
-          href={portalHref}
-          className="text-[13.5px] tracking-tight text-[rgb(var(--fg))] opacity-60 hover:opacity-100 transition-opacity"
-        >
-          {portalLabel}
-        </Link>
+        <PortalLink href={portalHref} label={portalLabel} />
         <button
           onClick={() => startTransition(() => signOut())}
           disabled={pending}
