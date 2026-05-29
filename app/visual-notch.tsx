@@ -691,7 +691,12 @@ export function VisualNotch() {
             {/* Hamburger — mobile only */}
             <button
               className="site-header__hamburger"
-              onClick={() => setMobileOpen((v) => !v)}
+              onClick={() => {
+                if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                  navigator.vibrate(10);
+                }
+                setMobileOpen((v) => !v);
+              }}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
             >
