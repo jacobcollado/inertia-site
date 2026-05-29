@@ -26,9 +26,10 @@ export const metadata: Metadata = {
 const KEY_FEATURES = [
   {
     title: "Upsell",
-    desc: "Surface related products, bundles, and add-ons at the right moment — without interrupting the buy.",
+    desc: "Surface related products, bundles, and add-ons at the right moment, without interrupting the buy.",
     points: ["Post-purchase upsell block", "Bundle builder section", "Frequently bought together"],
     visual: "upsell",
+    image: "/aether/upsell.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
   },
@@ -37,6 +38,7 @@ const KEY_FEATURES = [
     desc: "Low stock counters, countdown timers, and sold indicators. Built to create urgency without feeling cheap.",
     points: ["Live inventory counter", "Countdown timer block", "Sold-out state styling"],
     visual: "scarcity",
+    image: "/aether/scarcity.png",
     flip: true,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
   },
@@ -45,6 +47,7 @@ const KEY_FEATURES = [
     desc: "Every section pulls the customer forward. No dead ends. No dropped carts.",
     points: ["Sticky add-to-cart bar", "Progress indicators", "Cart drawer with upsells"],
     visual: "guided",
+    image: "/aether/guided.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path d="M3 3h18v4H3z"/><path d="M3 10h11v4H3z"/><path d="M3 17h7v4H3z"/></svg>,
   },
