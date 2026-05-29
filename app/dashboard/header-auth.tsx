@@ -36,12 +36,21 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
   if (mobileInline) {
     if (!ready || user) return null;
     return (
-      <Link
-        href="/login"
-        className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.25)] px-3.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 transition-all"
-      >
-        Sign in
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link
+          href="/login"
+          className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.25)] px-3.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 transition-all"
+        >
+          Sign in
+        </Link>
+        <Link
+          href="/login?tab=signup"
+          className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[13px] tracking-tight text-white hover:opacity-85 transition-opacity"
+          style={{ background: "var(--accent-gradient)" }}
+        >
+          Create account
+        </Link>
+      </div>
     );
   }
 
@@ -176,7 +185,8 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
       </Link>
       <Link
         href="/login?tab=signup"
-        className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.25)] px-3.5 py-1.5 text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 hover:border-[rgb(var(--fg)/0.5)] transition-all"
+        className="inline-flex items-center rounded-full px-4 py-2 text-[13.5px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
+        style={{ background: "var(--accent-gradient)" }}
       >
         Create account
       </Link>
