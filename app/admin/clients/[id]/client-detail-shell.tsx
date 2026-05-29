@@ -925,6 +925,7 @@ function ClientHeader({ client }: { client: Client }) {
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
   const displayName = client.company ?? client.name ?? client.email;
+  const initials = (client.name ?? client.email).slice(0, 2).toUpperCase();
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -960,34 +961,33 @@ function ClientHeader({ client }: { client: Client }) {
     : null;
 
   return (
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex flex-col gap-2">
-        <div>
-          <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">
+    <div className="flex items-center gap-5">
+      {/* Avatar */}
+      <div className="w-14 h-14 rounded-2xl shrink-0 flex items-center justify-center text-[16px] font-medium tracking-tight text-[rgb(var(--muted))]"
+        style={{ background: "rgb(var(--line))" }}>
+        {initials}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">
             {displayName}
           </h1>
-          <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-1">{client.email}</p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
           {client.banned && (
-            <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-red-400/30 text-red-400">
-              Suspended
-            </span>
+            <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full" style={{ background: "rgb(239 68 68 / 0.1)", color: "#ef4444" }}>Suspended</span>
           )}
           {neverSignedIn && !client.banned && (
-            <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))]">
-              Invite Pending
-            </span>
+            <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full" style={{ background: "rgb(var(--amber) / 0.1)", color: "rgb(var(--amber))" }}>Invite pending</span>
           )}
+        </div>
+        <div className="flex items-center gap-3 mt-0.5">
+          <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">{client.email}</span>
           {lastSeen && !neverSignedIn && (
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">
-              Last seen {lastSeen}
-            </span>
+            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">· Last seen {lastSeen}</span>
           )}
         </div>
       </div>
       <button onClick={() => setEditing(true)}
-        className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors shrink-0 mt-1">
+        className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 hover:text-[rgb(var(--fg))] transition-all shrink-0 border border-[rgb(var(--line))] px-3 py-1.5 rounded-full">
         Edit
       </button>
     </div>
@@ -1020,136 +1020,106 @@ export function ClientDetailShell({ client, projects, invoices, files, messages:
     { id: "history",  label: "History"  },
   ];
 
-  const sidebarInner = (
-    <>
-      {/* Sidebar top */}
-      <div className="flex items-center justify-between px-6 h-14 border-b border-[rgb(var(--line))] shrink-0">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">Admin</span>
-        </div>
-        {mobileOpen && (
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity lg:hidden"
-            aria-label="Close menu"
-          >
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-              <line x1="4" y1="4" x2="16" y2="16" /><line x1="16" y1="4" x2="4" y2="16" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      {/* Back to clients */}
-      <div className="px-3 pt-4 pb-2">
-        <Link
-          href="/admin"
-          onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 hover:opacity-100 hover:bg-[rgb(var(--line)/0.4)] transition-all group"
-        >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true">
-            <polyline points="12 4 6 10 12 16" />
-          </svg>
-          All clients
-        </Link>
-      </div>
-
-      {/* Client name in sidebar */}
-      <div className="px-6 py-3 border-b border-[rgb(var(--line))]">
-        <p className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{displayName}</p>
-        <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate mt-0.5">{client.email}</p>
-      </div>
-
-      {/* Tab nav in sidebar */}
-      <nav className="flex flex-col gap-0.5 px-3 pt-3 flex-1">
-        {TABS.map(({ id, label, badge }) => {
-          const active = tab === id;
-          return (
-            <button
-              key={id}
-              onClick={() => { setTab(id); setMobileOpen(false); }}
-              className="flex items-center justify-between px-3 py-2.5 text-[14px] tracking-tight transition-colors text-left w-full rounded-lg"
-              style={{
-                color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                background: active ? "rgb(var(--line))" : "transparent",
-                opacity: active ? 1 : 0.6,
-              }}
-            >
-              {label}
-              {badge ? (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
-                  {badge}
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom */}
-      <div className="px-3 pb-4 pt-3 border-t border-[rgb(var(--line))] flex items-center gap-1 shrink-0">
-        <Link
-          href="/"
-          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--line)/0.4)] transition-all opacity-60 hover:opacity-100"
-        >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
-            <path d="M3 10.5L10 4l7 6.5V17h-4v-4H7v4H3v-6.5z" />
-          </svg>
-          Back to site
-        </Link>
-        <ThemeToggle />
-      </div>
-    </>
-  );
-
   return (
-    <div className="min-h-screen bg-[rgb(var(--bg))] flex">
+    <div className="min-h-screen bg-[rgb(var(--bg))]">
 
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-[220px] border-r border-[rgb(var(--line))] bg-[rgb(var(--bg))] z-30">
-        {sidebarInner}
-      </aside>
-
-      {/* Mobile full-screen drawer */}
-      <aside
-        className="fixed inset-0 z-30 bg-[rgb(var(--bg))] flex flex-col lg:hidden transition-transform duration-200 ease-in-out"
-        style={{ transform: mobileOpen ? "translateX(0)" : "translateX(-100%)" }}
-      >
-        {sidebarInner}
-      </aside>
-
-      {/* Desktop sidebar spacer */}
-      <div className="hidden lg:block w-[220px] shrink-0" />
-
-      {/* Main */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile top bar */}
-        <div className="flex items-center justify-between px-5 h-14 border-b border-[rgb(var(--line))] lg:hidden">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="text-[rgb(var(--muted))] opacity-60 hover:opacity-100 transition-opacity"
-            aria-label="Open menu"
-          >
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-              <line x1="3" y1="6" x2="17" y2="6" /><line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="14" x2="17" y2="14" />
+      {/* Top nav */}
+      <header className="sticky top-0 z-30 bg-[rgb(var(--bg))] border-b border-[rgb(var(--line))]">
+        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center gap-4">
+          {/* Back */}
+          <Link href="/admin" className="flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 hover:opacity-100 transition-opacity shrink-0 group">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" aria-hidden="true">
+              <polyline points="12 4 6 10 12 16" />
             </svg>
-          </button>
-          <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate max-w-[200px]">{displayName}</span>
-          <ThemeToggle />
+            Clients
+          </Link>
+
+          <span className="text-[rgb(var(--line))] opacity-60 select-none">/</span>
+
+          {/* Client name */}
+          <span className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] truncate flex-1">{displayName}</span>
+
+          {/* Tab pills — desktop */}
+          <nav className="hidden sm:flex items-center gap-1 bg-[rgb(var(--line)/0.4)] rounded-full p-1 shrink-0">
+            {TABS.map(({ id, label, badge }) => {
+              const active = tab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className="relative px-3.5 py-1.5 rounded-full text-[13px] font-medium tracking-tight transition-all duration-150 flex items-center gap-1.5"
+                  style={{
+                    background: active ? "rgb(var(--bg))" : "transparent",
+                    color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                    opacity: active ? 1 : 0.6,
+                    boxShadow: active ? "0 1px 3px rgb(0 0 0 / 0.12)" : "none",
+                  }}
+                >
+                  {label}
+                  {badge ? (
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+                      {badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <ThemeToggle />
+            {/* Mobile menu toggle */}
+            <button
+              className="sm:hidden text-[rgb(var(--muted))] opacity-60 hover:opacity-100 transition-opacity"
+              onClick={() => setMobileOpen(v => !v)}
+              aria-label="Toggle menu"
+            >
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+                <line x1="3" y1="6" x2="17" y2="6" /><line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="14" x2="17" y2="14" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <main className="flex-1 px-6 sm:px-10 lg:px-14 py-12 sm:py-14 max-w-6xl w-full mx-auto flex flex-col gap-10">
-          <ClientHeader client={client} />
+        {/* Mobile tab dropdown */}
+        {mobileOpen && (
+          <div className="sm:hidden border-t border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-4 py-3 flex flex-col gap-1">
+            {TABS.map(({ id, label, badge }) => {
+              const active = tab === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => { setTab(id); setMobileOpen(false); }}
+                  className="text-left px-3 py-2.5 rounded-lg text-[14px] tracking-tight transition-colors flex items-center justify-between"
+                  style={{
+                    color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                    background: active ? "rgb(var(--line))" : "transparent",
+                    opacity: active ? 1 : 0.7,
+                  }}
+                >
+                  {label}
+                  {badge ? (
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+                      {badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </header>
 
-          {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} projectUpdates={projectUpdates} />}
-          {tab === "invoices" && <InvoicesTab clientId={client.id} invoices={invoices} />}
-          {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
-          {tab === "messages" && <MessagesTab clientId={client.id} messages={messages} setMessages={setMessages} />}
-          {tab === "account"  && <AccountTab  client={client} />}
-          {tab === "history"  && <AuditTab    clientId={client.id} initial={adminLog} />}
-        </main>
-      </div>
+      <main className="max-w-5xl mx-auto px-6 py-10 flex flex-col gap-10">
+        <ClientHeader client={client} />
+
+        {tab === "projects" && <ProjectsTab clientId={client.id} projects={projects} projectUpdates={projectUpdates} />}
+        {tab === "invoices" && <InvoicesTab clientId={client.id} invoices={invoices} />}
+        {tab === "files"    && <FilesTab    clientId={client.id} files={files} />}
+        {tab === "messages" && <MessagesTab clientId={client.id} messages={messages} setMessages={setMessages} />}
+        {tab === "account"  && <AccountTab  client={client} />}
+        {tab === "history"  && <AuditTab    clientId={client.id} initial={adminLog} />}
+      </main>
     </div>
   );
 }

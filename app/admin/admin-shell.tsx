@@ -117,88 +117,86 @@ function MetricCards({ overview, clients }: { overview: Overview; clients: Clien
   const suspended = clients.filter(c => c.banned).length;
   const totalProjects = clients.reduce((s, c) => s + c.projects.length, 0);
   const revenueSparkData = overview.monthlyRevenue.map(d => d.amount);
+  const hasRevChart = overview.monthlyRevenue.some(d => d.amount > 0);
+  const outstandingColor = overview.outstanding > 0 ? "rgb(var(--amber))" : "rgb(var(--green))";
 
   const cards = [
     /* Revenue */
-    <div key="revenue" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Revenue collected</span>
-          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">{fmt$(overview.totalRevenue)}</span>
-        </div>
+    <div key="revenue" className="flex flex-col gap-4 p-6 rounded-2xl h-full" style={{ background: "rgb(var(--line) / 0.4)", border: "1px solid rgb(var(--line))" }}>
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Revenue collected</span>
         <ChangeBadge pct={overview.change.revenue} />
       </div>
-      {overview.monthlyRevenue.some(d => d.amount > 0) && (
-        <div className="flex flex-col gap-1 mt-2">
+      <span className="text-[3.25rem] font-semibold tracking-[-0.05em] leading-none text-[rgb(var(--fg))]">{fmt$(overview.totalRevenue)}</span>
+      {hasRevChart ? (
+        <div className="flex flex-col gap-1.5 mt-auto">
           <MiniBarChart data={overview.monthlyRevenue.map(d => ({ label: d.month, value: d.amount }))} color="rgb(var(--fg))" />
           <div className="flex justify-between">
             {overview.monthlyRevenue.map(d => (
-              <span key={d.month} className="text-[9px] tracking-tight text-[rgb(var(--muted))] opacity-30 flex-1 text-center">{d.month}</span>
+              <span key={d.month} className="text-[9px] tracking-tight text-[rgb(var(--muted))] opacity-40 flex-1 text-center">{d.month}</span>
             ))}
           </div>
         </div>
+      ) : (
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 mt-auto">No revenue yet</span>
       )}
     </div>,
 
     /* Outstanding */
-    <div key="outstanding" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Outstanding</span>
-          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none" style={{ color: overview.outstanding > 0 ? "rgb(var(--amber))" : "rgb(var(--fg))" }}>
-            {fmt$(overview.outstanding)}
-          </span>
-        </div>
+    <div key="outstanding" className="flex flex-col gap-4 p-6 rounded-2xl h-full" style={{ background: "rgb(var(--line) / 0.4)", border: "1px solid rgb(var(--line))" }}>
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Outstanding</span>
         <ChangeBadge pct={overview.change.outstanding} />
       </div>
-      <div className="flex items-center gap-4 mt-1">
-        <DonutRing value={overview.outstanding} total={overview.totalRevenue + overview.outstanding} color={overview.outstanding > 0 ? "rgb(var(--amber))" : "rgb(var(--green))"} />
+      <span className="text-[3.25rem] font-semibold tracking-[-0.05em] leading-none" style={{ color: outstandingColor }}>
+        {fmt$(overview.outstanding)}
+      </span>
+      <div className="flex items-center gap-4 mt-auto">
+        <DonutRing value={overview.outstanding} total={overview.totalRevenue + overview.outstanding} color={outstandingColor} />
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: "rgb(var(--green))" }} />
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">Collected {fmt$(overview.totalRevenue)}</span>
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "rgb(var(--green))" }} />
+            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{fmt$(overview.totalRevenue)} collected</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: overview.outstanding > 0 ? "rgb(var(--amber))" : "rgb(var(--line))" }} />
-            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60">Owed {fmt$(overview.outstanding)}</span>
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: outstandingColor }} />
+            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{fmt$(overview.outstanding)} owed</span>
           </div>
         </div>
       </div>
     </div>,
 
     /* Clients */
-    <div key="clients" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Total clients</span>
-          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">{overview.totalClients}</span>
-        </div>
+    <div key="clients" className="flex flex-col gap-4 p-6 rounded-2xl h-full" style={{ background: "rgb(var(--line) / 0.4)", border: "1px solid rgb(var(--line))" }}>
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Clients</span>
         <ChangeBadge pct={overview.change.clients} />
       </div>
-      <div className="flex items-center justify-between mt-1">
-        <div className="flex flex-col gap-0.5">
-          {suspended > 0 && <span className="text-[12px] tracking-tight" style={{ color: "#ef4444", opacity: 0.7 }}>{suspended} suspended</span>}
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{overview.totalClients - suspended} active</span>
+      <span className="text-[3.25rem] font-semibold tracking-[-0.05em] leading-none text-[rgb(var(--fg))]">{overview.totalClients}</span>
+      <div className="flex items-center justify-between mt-auto">
+        <div className="flex flex-col gap-1">
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{overview.totalClients - suspended} active</span>
+          {suspended > 0 && (
+            <span className="text-[13px] tracking-tight" style={{ color: "#ef4444" }}>{suspended} suspended</span>
+          )}
         </div>
         <Sparkline data={revenueSparkData} color="rgb(var(--fg))" />
       </div>
     </div>,
 
     /* Active projects */
-    <div key="projects" className="flex flex-col gap-4 p-5 border border-[rgb(var(--line))] rounded-2xl h-full">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Active projects</span>
-          <span className="text-[2rem] font-medium tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">{overview.activeProjects}</span>
-        </div>
+    <div key="projects" className="flex flex-col gap-4 p-6 rounded-2xl h-full" style={{ background: "rgb(var(--line) / 0.4)", border: "1px solid rgb(var(--line))" }}>
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">Active projects</span>
         <ChangeBadge pct={overview.change.activeProjects} />
       </div>
-      <div className="flex flex-col gap-2 mt-1">
+      <span className="text-[3.25rem] font-semibold tracking-[-0.05em] leading-none text-[rgb(var(--fg))]">{overview.activeProjects}</span>
+      <div className="flex flex-col gap-2 mt-auto">
         <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgb(var(--line))" }}>
-          <div className="h-full rounded-full transition-all duration-500"
+          <div className="h-full rounded-full transition-all duration-700"
             style={{ width: totalProjects > 0 ? `${(overview.activeProjects / totalProjects) * 100}%` : "0%", background: "rgb(var(--green))" }} />
         </div>
-        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{overview.activeProjects} of {totalProjects} total</span>
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{overview.activeProjects} of {totalProjects} total</span>
       </div>
     </div>,
   ];
@@ -260,8 +258,8 @@ function MetricCarousel({ cards }: { cards: React.ReactNode[] }) {
         </div>
       </div>
 
-      {/* Desktop: 2-col grid */}
-      <div className="hidden sm:grid sm:grid-cols-2 gap-3">
+      {/* Desktop: 4-col grid */}
+      <div className="hidden sm:grid sm:grid-cols-4 gap-3">
         {cards}
       </div>
     </>
@@ -512,34 +510,39 @@ function ClientList({ clients }: { clients: Client[] }) {
   return (
     <div className="flex flex-col">
       {list.map((c, i) => {
-        const active = c.projects?.filter(p => p.status === "active") ?? [];
+        const activeProjects = c.projects?.filter(p => p.status === "active") ?? [];
         const displayName = c.company ?? c.name ?? c.email;
+        const initials = (c.name ?? c.email).slice(0, 2).toUpperCase();
         const confirming = confirmId === c.id;
         return (
           <div key={c.id}>
-            <div className="flex items-center justify-between gap-4 py-5 group">
-              <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-6 min-w-0 flex-1 hover:opacity-70 transition-opacity">
-                <div className="flex flex-col gap-1.5 min-w-0">
-                  <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{displayName}</span>
-                  <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-50 truncate">{c.email}</span>
+            <div className="flex items-center justify-between gap-4 py-3.5 group">
+              <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-4 min-w-0 flex-1 hover:opacity-75 transition-opacity">
+                {/* Avatar */}
+                <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-[12px] font-medium tracking-tight text-[rgb(var(--muted))]"
+                  style={{ background: "rgb(var(--line))" }}>
+                  {initials}
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
+                {/* Name + email */}
+                <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                  <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] truncate leading-snug">{displayName}</span>
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 truncate">{c.email}</span>
+                </div>
+                {/* Status badges + active projects */}
+                <div className="flex items-center gap-2 shrink-0">
                   {c.banned && (
-                    <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-red-400/30 text-red-400 opacity-80">Suspended</span>
+                    <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full" style={{ background: "rgb(239 68 68 / 0.1)", color: "#ef4444" }}>Suspended</span>
                   )}
                   {!c.confirmed_at && !c.banned && (
-                    <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] opacity-70">Invite pending</span>
+                    <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full" style={{ background: "rgb(var(--amber) / 0.1)", color: "rgb(var(--amber))" }}>Pending</span>
                   )}
-                  {!c.in_clients_table && (
-                    <span className="text-[12px] tracking-tight px-2.5 py-1 rounded-full border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] opacity-70">No profile</span>
+                  {activeProjects.length > 0 && (
+                    <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full hidden sm:inline-flex items-center gap-1.5" style={{ background: "rgb(var(--green) / 0.1)", color: "rgb(var(--green))" }}>
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "rgb(var(--green))" }} />
+                      {activeProjects.length} active
+                    </span>
                   )}
-                  {active.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <StatusDot status="active" />
-                      <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">{active.length} active</span>
-                    </div>
-                  )}
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-[rgb(var(--muted))] opacity-40 group-hover:opacity-80 transition-opacity" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-30 group-hover:opacity-70 transition-opacity" aria-hidden="true">
                     <line x1="4" y1="10" x2="16" y2="10" /><polyline points="10 4 16 10 10 16" />
                   </svg>
                 </div>
@@ -583,71 +586,101 @@ const NAV_ITEMS: { id: View; label: string }[] = [
   { id: "tools", label: "Tools" },
 ];
 
-function Sidebar({
+function TopNav({
   view,
   setView,
-  onClose,
+  mobileOpen,
+  setMobileOpen,
 }: {
   view: View;
   setView: (v: View) => void;
-  onClose?: () => void;
+  mobileOpen: boolean;
+  setMobileOpen: (v: boolean) => void;
 }) {
   return (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="flex items-center justify-between px-6 h-14 border-b border-[rgb(var(--line))] shrink-0">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">Admin</span>
+    <header className="sticky top-0 z-30 bg-[rgb(var(--bg))] border-b border-[rgb(var(--line))]">
+      <div className="max-w-5xl mx-auto px-6 h-14 flex items-center gap-6">
+        {/* Logo */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
+          <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-40 border border-[rgb(var(--line))] rounded px-1.5 py-0.5">Admin</span>
         </div>
-        {onClose && (
+
+        {/* Desktop nav — pill tabs */}
+        <nav className="hidden sm:flex items-center gap-1 flex-1 justify-center">
+          <div className="flex items-center gap-1 bg-[rgb(var(--line)/0.4)] rounded-full p-1">
+            {NAV_ITEMS.map(({ id, label }) => {
+              const active = view === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setView(id)}
+                  className="px-4 py-1.5 rounded-full text-[13px] font-medium tracking-tight transition-all duration-150"
+                  style={{
+                    background: active ? "rgb(var(--bg))" : "transparent",
+                    color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                    opacity: active ? 1 : 0.6,
+                    boxShadow: active ? "0 1px 3px rgb(0 0 0 / 0.12)" : "none",
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Right actions */}
+        <div className="flex items-center gap-3 ml-auto shrink-0">
+          <Link
+            href="/"
+            className="hidden sm:flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+              <path d="M3 10.5L10 4l7 6.5V17h-4v-4H7v4H3v-6.5z" />
+            </svg>
+            Site
+          </Link>
+          <ThemeToggle />
+          {/* Mobile hamburger */}
           <button
-            onClick={onClose}
-            className="text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity lg:hidden"
-            aria-label="Close menu"
+            className="sm:hidden text-[rgb(var(--muted))] opacity-60 hover:opacity-100 transition-opacity"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
           >
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-              <line x1="4" y1="4" x2="16" y2="16" /><line x1="16" y1="4" x2="4" y2="16" />
+              <line x1="3" y1="6" x2="17" y2="6" /><line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="14" x2="17" y2="14" />
             </svg>
           </button>
-        )}
+        </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex flex-col gap-0.5 px-3 pt-4 flex-1">
-        {NAV_ITEMS.map(({ id, label }) => {
-          const active = view === id;
-          return (
-            <button
-              key={id}
-              onClick={() => { setView(id); onClose?.(); }}
-              className="flex items-center gap-3 px-3 py-2.5 text-[14px] tracking-tight transition-colors text-left w-full rounded-lg"
-              style={{
-                color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                background: active ? "rgb(var(--line))" : "transparent",
-                opacity: active ? 1 : 0.6,
-              }}
-            >
-              {label}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom */}
-      <div className="px-3 pb-4 pt-3 border-t border-[rgb(var(--line))] flex items-center gap-1 shrink-0">
-        <Link
-          href="/"
-          className="flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--line)/0.4)] transition-all opacity-60 hover:opacity-100"
-        >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
-            <path d="M3 10.5L10 4l7 6.5V17h-4v-4H7v4H3v-6.5z" />
-          </svg>
-          Back to site
-        </Link>
-        <ThemeToggle />
-      </div>
-    </div>
+      {/* Mobile nav dropdown */}
+      {mobileOpen && (
+        <div className="sm:hidden border-t border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-4 py-3 flex flex-col gap-1">
+          {NAV_ITEMS.map(({ id, label }) => {
+            const active = view === id;
+            return (
+              <button
+                key={id}
+                onClick={() => { setView(id); setMobileOpen(false); }}
+                className="text-left px-3 py-2.5 rounded-lg text-[14px] tracking-tight transition-colors"
+                style={{
+                  color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                  background: active ? "rgb(var(--line))" : "transparent",
+                  opacity: active ? 1 : 0.7,
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+          <Link href="/" className="px-3 py-2.5 text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">
+            Back to site
+          </Link>
+        </div>
+      )}
+    </header>
   );
 }
 
@@ -667,7 +700,7 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-[rgb(var(--bg))] flex">
+    <div className="min-h-screen bg-[rgb(var(--bg))]">
 
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] shadow-lg" style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}>
@@ -675,99 +708,52 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
         </div>
       )}
 
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-20 bg-[rgb(var(--bg))]/60 backdrop-blur-sm lg:hidden"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      <TopNav view={view} setView={setView} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-      {/* Sidebar - desktop fixed, mobile slide-in */}
-      <aside
-        className={[
-          "fixed top-0 left-0 h-full z-30 w-[220px] border-r border-[rgb(var(--line))] bg-[rgb(var(--bg))] transition-transform duration-200 ease-in-out",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-        ].join(" ")}
-      >
-        <Sidebar view={view} setView={setView} onClose={() => setMobileOpen(false)} />
-      </aside>
+      <main className="max-w-5xl mx-auto px-6 py-10">
 
-      {/* Desktop sidebar spacer */}
-      <div className="hidden lg:block w-[220px] shrink-0" />
+        {view === "overview" && (
+          <div className="flex flex-col gap-8">
+            <OverviewDashboard overview={overview} clients={clients} />
+          </div>
+        )}
 
-      {/* Main */}
-      <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile top bar */}
-        <div className="flex items-center justify-between px-5 h-14 border-b border-[rgb(var(--line))] lg:hidden">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="text-[rgb(var(--muted))] opacity-60 hover:opacity-100 transition-opacity"
-            aria-label="Open menu"
-          >
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
-              <line x1="3" y1="6" x2="17" y2="6" /><line x1="3" y1="10" x2="17" y2="10" /><line x1="3" y1="14" x2="17" y2="14" />
-            </svg>
-          </button>
-          <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">Inertia</span>
-          <ThemeToggle />
-        </div>
-
-        <main className="flex-1 px-6 sm:px-10 lg:px-14 py-12 sm:py-14 max-w-6xl w-full mx-auto">
-
-          {view === "overview" && (
-            <div className="flex flex-col gap-10">
+        {view === "clients" && (
+          <div className="flex flex-col gap-8">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">
-                  Overview
-                </h1>
-                <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-1">
-                  Your current standings at a glance.
+                <h1 className="text-[1.75rem] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Clients</h1>
+                <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mt-0.5">
+                  {clients.length} {clients.length === 1 ? "client" : "clients"}
                 </p>
               </div>
-              <OverviewDashboard overview={overview} clients={clients} />
-            </div>
-          )}
-
-          {view === "clients" && (
-            <div className="flex flex-col gap-10">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">
-                    Clients
-                  </h1>
-                  <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-1">
-                    {clients.length} {clients.length === 1 ? "client" : "clients"}
-                  </p>
-                </div>
-                {!inviting && (
-                  <button onClick={() => setInviting(true)}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[14px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.4] transition-colors shrink-0">
-                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-                      <line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" />
-                    </svg>
-                    Invite client
-                  </button>
-                )}
-              </div>
-
-              {inviting && (
-                <div className="border border-[rgb(var(--line))] rounded-2xl p-6">
-                  <h2 className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] mb-6">Invite a client</h2>
-                  <InviteForm onDone={() => setInviting(false)} />
-                </div>
+              {!inviting && (
+                <button onClick={() => setInviting(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.4)] transition-colors shrink-0">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+                    <line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" />
+                  </svg>
+                  Invite client
+                </button>
               )}
-
-              <GridRule />
-              <ClientList clients={clients} />
-              <GridRule />
             </div>
-          )}
 
-          {view === "tools" && <ToolsView initialTools={tools} />}
+            {inviting && (
+              <div className="border border-[rgb(var(--line))] rounded-2xl p-6">
+                <h2 className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] mb-5">Invite a client</h2>
+                <InviteForm onDone={() => setInviting(false)} />
+              </div>
+            )}
 
-        </main>
-      </div>
+            <GridRule />
+            <ClientList clients={clients} />
+            <GridRule />
+          </div>
+        )}
+
+        {view === "tools" && <ToolsView initialTools={tools} />}
+
+      </main>
     </div>
   );
 }
