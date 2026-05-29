@@ -11,13 +11,14 @@ import {
   addFile, deleteFile, updateClient,
   suspendAccount, unsuspendAccount, deleteAccount,
   updateAccountEmail, updateAccountPassword, resendInvite,
+  forceSignOut, generateMagicLink, updateClientNotes,
   addFileFromUrl, getSignedFileUrl, sendAdminMessage, markMessagesRead,
   getAdminLog,
 } from "../../actions";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
-type Client  = { id: string; email: string; name: string | null; company: string | null; banned?: boolean; last_sign_in_at?: string | null; confirmed_at?: string | null };
+type Client  = { id: string; email: string; name: string | null; company: string | null; notes?: string | null; banned?: boolean; last_sign_in_at?: string | null; confirmed_at?: string | null };
 type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null; start_date: string | null; target_date: string | null };
 type ProjectUpdate = { id: string; project_id: string; status: string; note: string | null; created_at: string };
 type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null; payment_url: string | null };
@@ -102,12 +103,12 @@ function ProjectTimeline({ project, updates, clientId }: { project: Project; upd
   return (
     <div className="flex flex-col">
       {/* Project header */}
-      <div className="flex items-start justify-between gap-4 py-5 group">
-        <div className="flex flex-col gap-1.5 min-w-0">
+      <div className="flex items-start justify-between gap-4 px-5 py-4 group">
+        <div className="flex flex-col gap-1 min-w-0">
           <button onClick={() => setOpen(o => !o)} className="text-left">
-            <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] hover:opacity-70 transition-opacity">{project.title}</span>
+            <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] hover:opacity-70 transition-opacity">{project.title}</span>
           </button>
-          {project.phase && <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">{project.phase}</span>}
+          {project.phase && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{project.phase}</span>}
           {project.notes && <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 leading-relaxed max-w-md">{project.notes}</p>}
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -123,7 +124,7 @@ function ProjectTimeline({ project, updates, clientId }: { project: Project; upd
 
       {/* Timeline — shown when expanded */}
       {open && (
-        <div className="pb-6 flex flex-col gap-4 pl-4 border-l border-[rgb(var(--line))] ml-1 mb-2">
+        <div className="px-5 pb-5 flex flex-col gap-4 border-t border-[rgb(var(--line))] pt-4">
 
           {/* Post update form */}
           {addingUpdate ? (
@@ -203,69 +204,71 @@ function ProjectsTab({ clientId, projects, projectUpdates }: { clientId: string;
     });
   };
 
+  const cardStyle = { border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" };
+  const btnClass = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-30";
+  const btnPrimary = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30";
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Projects</h2>
+        <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Projects</h2>
         {!adding && (
-          <button onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-1.5 text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors border border-[rgb(var(--line))] px-4 py-2 rounded-full">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-              <line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" />
-            </svg>
-            Add project
+          <button onClick={() => setAdding(true)} className={btnClass}>
+            + Add project
           </button>
         )}
       </div>
 
       {adding && (
-        <form onSubmit={onAdd} className="border border-[rgb(var(--line))] rounded-2xl p-5 flex flex-col gap-4">
-          <input name="title" required placeholder="Project title" className={inputClass} />
-          <select name="status" defaultValue="active" className={selectClass}>
-            <option value="active">Active</option>
-            <option value="paused">Paused</option>
-            <option value="on_hold">On hold</option>
-            <option value="completed">Completed</option>
-          </select>
-          <input name="phase" placeholder="Phase (e.g. Design review)" className={inputClass} />
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Start date</label>
-              <input name="start_date" type="date" className={inputClass} />
+        <div className="rounded-2xl overflow-hidden" style={cardStyle}>
+          <form onSubmit={onAdd} className="flex flex-col">
+            {[
+              { name: "title", placeholder: "Project title", required: true },
+              { name: "phase", placeholder: "Phase (e.g. Design review)" },
+            ].map(f => (
+              <div key={f.name} className="px-5 py-4 border-b border-[rgb(var(--line))]">
+                <input name={f.name} required={f.required} placeholder={f.placeholder}
+                  className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none" />
+              </div>
+            ))}
+            <div className="px-5 py-4 border-b border-[rgb(var(--line))]">
+              <select name="status" defaultValue="active"
+                className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] focus:outline-none appearance-none">
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="on_hold">On hold</option>
+                <option value="completed">Completed</option>
+              </select>
             </div>
-            <div>
-              <label className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1">Target date</label>
-              <input name="target_date" type="date" className={inputClass} />
+            <div className="grid grid-cols-2 border-b border-[rgb(var(--line))]">
+              <div className="px-5 py-4 border-r border-[rgb(var(--line))]">
+                <label className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1.5">Start date</label>
+                <input name="start_date" type="date" className="w-full bg-transparent text-[14px] tracking-tight text-[rgb(var(--fg))] focus:outline-none" />
+              </div>
+              <div className="px-5 py-4">
+                <label className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-50 block mb-1.5">Target date</label>
+                <input name="target_date" type="date" className="w-full bg-transparent text-[14px] tracking-tight text-[rgb(var(--fg))] focus:outline-none" />
+              </div>
             </div>
-          </div>
-          <textarea name="notes" rows={3} placeholder="Notes visible to client" className={`${inputClass} resize-none`} />
-          <div className="flex items-center gap-3 pt-1">
-            <button type="submit" disabled={pending}
-              className="px-5 py-2 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
-              {pending ? "Saving..." : "Save"}
-            </button>
-            <button type="button" onClick={() => setAdding(false)}
-              className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-              Cancel
-            </button>
-          </div>
-        </form>
+            <div className="px-5 py-4 border-b border-[rgb(var(--line))]">
+              <textarea name="notes" rows={2} placeholder="Notes visible to client"
+                className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none resize-none" />
+            </div>
+            <div className="flex items-center gap-3 px-5 py-4">
+              <button type="submit" disabled={pending} className={btnPrimary}>{pending ? "Saving..." : "Save"}</button>
+              <button type="button" onClick={() => setAdding(false)} className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Cancel</button>
+            </div>
+          </form>
+        </div>
       )}
 
-      <GridRule />
-
       {projects.length === 0 && !adding ? (
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No projects yet.</p>
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-4">No projects yet.</p>
       ) : (
-        <div className="flex flex-col">
-          {projects.map((p, i) => (
-            <div key={p.id}>
-              <ProjectTimeline
-                project={p}
-                updates={projectUpdates.filter(u => u.project_id === p.id)}
-                clientId={clientId}
-              />
-              {i < projects.length - 1 && <GridRule />}
+        <div className="flex flex-col gap-3">
+          {projects.map((p) => (
+            <div key={p.id} className="rounded-2xl overflow-hidden" style={cardStyle}>
+              <ProjectTimeline project={p} updates={projectUpdates.filter(u => u.project_id === p.id)} clientId={clientId} />
             </div>
           ))}
         </div>
@@ -306,78 +309,79 @@ function InvoicesTab({ clientId, invoices }: { clientId: string; invoices: Invoi
 
   const totalOwed = invoices.filter(i => i.status !== "paid").reduce((s, i) => s + i.amount, 0);
 
+  const cardStyle = { border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" };
+  const btnClass = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-30";
+  const btnPrimary = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30";
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Invoices</h2>
-          {totalOwed > 0 && (
-            <p className="text-[13px] tracking-tight mt-0.5" style={{ color: "rgb(var(--amber))" }}>
-              {fmt$(totalOwed)} outstanding
-            </p>
-          )}
+          <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Invoices</h2>
+          {totalOwed > 0 && <p className="text-[13px] tracking-tight mt-0.5" style={{ color: "rgb(var(--amber))" }}>{fmt$(totalOwed)} outstanding</p>}
         </div>
-        {!adding && (
-          <button onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-1.5 text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors border border-[rgb(var(--line))] px-4 py-2 rounded-full">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-              <line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" />
-            </svg>
-            Add invoice
-          </button>
-        )}
+        {!adding && <button onClick={() => setAdding(true)} className={btnClass}>+ Add invoice</button>}
       </div>
 
       {adding && (
-        <form onSubmit={onAdd} className="border border-[rgb(var(--line))] rounded-2xl p-5 flex flex-col gap-4">
-          <input name="label" required placeholder="Invoice label" className={inputClass} />
-          <input name="amount" required type="number" step="0.01" min="0" placeholder="Amount (USD)" className={inputClass} />
-          <select name="status" defaultValue="pending" className={selectClass}>
-            <option value="draft">Draft</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="overdue">Overdue</option>
-          </select>
-          <input name="due_date" type="date" className={inputClass} />
-          <input name="payment_url" type="url" placeholder="Payment link (optional)" className={inputClass} />
-          {error && <p className="text-[13px] tracking-tight text-red-400">{error}</p>}
-          <div className="flex items-center gap-3 pt-1">
-            <button type="submit" disabled={pending}
-              className="px-5 py-2 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
-              {pending ? "Saving..." : "Save"}
-            </button>
-            <button type="button" onClick={() => setAdding(false)}
-              className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-              Cancel
-            </button>
-          </div>
-        </form>
+        <div className="rounded-2xl overflow-hidden" style={cardStyle}>
+          <form onSubmit={onAdd} className="flex flex-col">
+            {[
+              { name: "label", placeholder: "Invoice label", required: true, type: "text" },
+              { name: "amount", placeholder: "Amount (USD)", required: true, type: "number" },
+              { name: "due_date", placeholder: "Due date", type: "date" },
+              { name: "payment_url", placeholder: "Payment link (optional)", type: "url" },
+            ].map(f => (
+              <div key={f.name} className="px-5 py-4 border-b border-[rgb(var(--line))]">
+                {f.name === "due_date" && <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-1.5">Due date</p>}
+                <input name={f.name} type={f.type} required={f.required} placeholder={f.placeholder}
+                  className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none" />
+              </div>
+            ))}
+            <div className="px-5 py-4 border-b border-[rgb(var(--line))]">
+              <select name="status" defaultValue="pending"
+                className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] focus:outline-none appearance-none">
+                <option value="draft">Draft</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+              </select>
+            </div>
+            {error && <p className="px-5 pt-2 text-[13px] text-red-400 tracking-tight">{error}</p>}
+            <div className="flex items-center gap-3 px-5 py-4">
+              <button type="submit" disabled={pending} className={btnPrimary}>{pending ? "Saving..." : "Save"}</button>
+              <button type="button" onClick={() => setAdding(false)} className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Cancel</button>
+            </div>
+          </form>
+        </div>
       )}
 
-      <GridRule />
-
       {invoices.length === 0 && !adding ? (
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No invoices yet.</p>
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-4">No invoices yet.</p>
       ) : (
-        <div className="flex flex-col">
-          {invoices.map((inv, i) => (
-            <div key={inv.id}>
-              <div className="flex items-center justify-between gap-4 py-5 group">
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[16px] tracking-tight text-[rgb(var(--fg))] truncate">{inv.label}</span>
-                  {inv.paid_at
-                    ? <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">Paid {fmtDate(inv.paid_at)}</span>
-                    : inv.due_date
-                      ? <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">Due {fmtDate(inv.due_date)}</span>
-                      : null
-                  }
+        <div className="flex flex-col gap-3">
+          {invoices.map((inv) => {
+            const overdue = inv.status === "overdue";
+            return (
+              <div key={inv.id} className="rounded-2xl overflow-hidden group"
+                style={{ border: `1px solid ${overdue ? "rgb(239 68 68 / 0.3)" : "rgb(var(--line))"}`, background: overdue ? "rgb(239 68 68 / 0.03)" : "rgb(var(--line) / 0.2)" }}>
+                <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-4">
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{inv.label}</span>
+                    {inv.paid_at
+                      ? <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Paid {fmtDate(inv.paid_at)}</span>
+                      : inv.due_date
+                        ? <span className="text-[13px] tracking-tight" style={{ color: overdue ? "#ef4444" : "rgb(var(--muted))", opacity: overdue ? 0.9 : 0.6 }}>
+                            {overdue ? "Overdue " : "Due "}{fmtDate(inv.due_date)}
+                          </span>
+                        : null
+                    }
+                  </div>
+                  <span className="text-[1.4rem] font-semibold tabular-nums tracking-tight text-[rgb(var(--fg))] shrink-0">{fmt$(inv.amount)}</span>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-[16px] font-medium tabular-nums text-[rgb(var(--fg))]">{fmt$(inv.amount)}</span>
-                  <select
-                    value={inv.status}
-                    onChange={e => onStatusChange(inv.id, e.target.value)}
-                    className="bg-transparent text-[13px] tracking-tight border border-[rgb(var(--line))] rounded-full px-3.5 py-1.5 text-[rgb(var(--muted))] focus:outline-none cursor-pointer">
+                <div className="flex items-center justify-between gap-3 px-5 py-3 border-t" style={{ borderColor: overdue ? "rgb(239 68 68 / 0.15)" : "rgb(var(--line))" }}>
+                  <select value={inv.status} onChange={e => onStatusChange(inv.id, e.target.value)}
+                    className="bg-transparent text-[13px] tracking-tight text-[rgb(var(--muted))] focus:outline-none cursor-pointer appearance-none">
                     <option value="draft">Draft</option>
                     <option value="pending">Pending</option>
                     <option value="paid">Paid</option>
@@ -389,9 +393,8 @@ function InvoicesTab({ clientId, invoices }: { clientId: string; invoices: Invoi
                   </button>
                 </div>
               </div>
-              {i < invoices.length - 1 && <GridRule />}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -457,80 +460,70 @@ function FilesTab({ clientId, files }: { clientId: string; files: DFile[] }) {
     });
   };
 
+  const cardStyle = { border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" };
+  const btnClass = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-30";
+  const btnPrimary = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30";
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Files</h2>
-        {!adding && (
-          <button onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-1.5 text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors border border-[rgb(var(--line))] px-4 py-2 rounded-full">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-              <line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" />
-            </svg>
-            Upload file
-          </button>
-        )}
+        <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Files</h2>
+        {!adding && <button onClick={() => setAdding(true)} className={btnClass}>+ Upload file</button>}
       </div>
 
       {adding && (
-        <form onSubmit={onSubmit} className="border border-[rgb(var(--line))] rounded-2xl p-5 flex flex-col gap-4">
-          <label
-            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={onDrop}
-            className="flex flex-col items-center justify-center gap-2 border border-dashed rounded-xl px-6 py-8 cursor-pointer transition-colors"
-            style={{ borderColor: dragOver ? "rgb(var(--fg))" : "rgb(var(--line))", background: dragOver ? "rgb(var(--line)/0.15)" : "transparent" }}>
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 opacity-30" aria-hidden="true">
-              <path d="M10 3v10M6 7l4-4 4 4M3 15v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2" />
-            </svg>
-            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">
-              {uploading ? "Uploading..." : "Drop a file or click to browse"}
-            </span>
-            <input type="file" className="hidden" disabled={uploading}
-              onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }} />
-          </label>
-          <input name="label" placeholder="Custom label (optional, defaults to filename)" className={inputClass} />
-          {error && <p className="text-[13px] tracking-tight text-red-400">{error}</p>}
-          <div className="flex items-center gap-3 pt-1">
-            <button type="submit" disabled={uploading}
-              className="px-5 py-2 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
-              {uploading ? "Uploading..." : "Upload"}
-            </button>
-            <button type="button" onClick={() => { setAdding(false); setError(""); }}
-              className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-              Cancel
-            </button>
-          </div>
-        </form>
+        <div className="rounded-2xl overflow-hidden" style={cardStyle}>
+          <form onSubmit={onSubmit} className="flex flex-col">
+            <label
+              onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={onDrop}
+              className="flex flex-col items-center justify-center gap-2 mx-5 my-4 border border-dashed rounded-xl px-6 py-8 cursor-pointer transition-colors"
+              style={{ borderColor: dragOver ? "rgb(var(--fg))" : "rgb(var(--line))", background: dragOver ? "rgb(var(--line)/0.15)" : "transparent" }}>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 opacity-30" aria-hidden="true">
+                <path d="M10 3v10M6 7l4-4 4 4M3 15v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2" />
+              </svg>
+              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">
+                {uploading ? "Uploading..." : "Drop a file or click to browse"}
+              </span>
+              <input type="file" className="hidden" disabled={uploading}
+                onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f); }} />
+            </label>
+            <div className="px-5 py-4 border-t border-[rgb(var(--line))]">
+              <input name="label" placeholder="Custom label (optional)" className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none" />
+            </div>
+            {error && <p className="px-5 text-[13px] text-red-400 tracking-tight">{error}</p>}
+            <div className="flex items-center gap-3 px-5 py-4 border-t border-[rgb(var(--line))]">
+              <button type="submit" disabled={uploading} className={btnPrimary}>{uploading ? "Uploading..." : "Upload"}</button>
+              <button type="button" onClick={() => { setAdding(false); setError(""); }} className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Cancel</button>
+            </div>
+          </form>
+        </div>
       )}
 
-      <GridRule />
-
       {files.length === 0 && !adding ? (
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No files yet.</p>
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-4">No files yet.</p>
       ) : (
-        <div className="flex flex-col">
-          {files.map((f, i) => (
-            <div key={f.id}>
-              <div className="flex items-center justify-between gap-4 py-5 group">
-                <div className="flex items-center gap-3 min-w-0">
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0 opacity-30" aria-hidden="true">
-                    <path d="M11 2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" /><polyline points="11 2 11 7 16 7" />
-                  </svg>
-                  <div className="min-w-0">
-                    <span className="text-[14px] tracking-tight text-[rgb(var(--fg))] truncate block">{f.label}</span>
-                    <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">{fmtDate(f.uploaded_at)}</span>
-                  </div>
+        <div className="flex flex-col gap-2">
+          {files.map((f) => (
+            <div key={f.id} className="flex items-center justify-between gap-4 px-4 py-4 rounded-2xl group" style={cardStyle}>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[10px] font-bold tracking-wider"
+                  style={{ background: "rgb(var(--line))", color: "rgb(var(--muted))" }}>
+                  {(f.label.match(/\.([a-zA-Z0-9]+)$/) ?? ["",""])[1].toUpperCase().slice(0,4) || "FILE"}
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <OpenFileButton url={f.url} />
-                  <button onClick={() => onDelete(f.id)} disabled={pending}
-                    className="text-[13px] tracking-tight text-red-400 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity disabled:opacity-20">
-                    Delete
-                  </button>
+                <div className="min-w-0">
+                  <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] truncate block">{f.label}</span>
+                  <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">{fmtDate(f.uploaded_at)}</span>
                 </div>
               </div>
-              {i < files.length - 1 && <GridRule />}
+              <div className="flex items-center gap-3 shrink-0">
+                <OpenFileButton url={f.url} />
+                <button onClick={() => onDelete(f.id)} disabled={pending}
+                  className="text-[13px] tracking-tight text-red-400 opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity disabled:opacity-20">
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -732,11 +725,38 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
 
 /* ── Account tab ──────────────────────────────────────────────────── */
 
+function AccountRow({ label, hint, children, last = false }: { label: string; hint?: string; children: React.ReactNode; last?: boolean }) {
+  return (
+    <div className={`flex items-center justify-between gap-4 px-5 py-4 ${!last ? "border-b border-[rgb(var(--line))]" : ""}`}>
+      <div className="min-w-0">
+        <p className="text-[15px] tracking-tight text-[rgb(var(--fg))]">{label}</p>
+        {hint && <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-0.5">{hint}</p>}
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  );
+}
+
+function AccountSection({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50 px-1">{label}</p>
+      <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function AccountTab({ client }: { client: Client }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [email, setEmail] = useState(client.email);
   const [password, setPassword] = useState("");
+  const [notes, setNotes] = useState(client.notes ?? "");
+  const [notesSaved, setNotesSaved] = useState(false);
+  const [magicLink, setMagicLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -758,104 +778,159 @@ function AccountTab({ client }: { client: Client }) {
     });
   };
 
+  const onCopyPortalLink = () => {
+    const url = `${window.location.origin}/dashboard`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const onGenerateMagicLink = () => {
+    startTransition(async () => {
+      const res = await generateMagicLink(client.id, client.email);
+      if (res.error) { setError(res.error); return; }
+      if (res.url) {
+        setMagicLink(res.url);
+        navigator.clipboard.writeText(res.url);
+      }
+    });
+  };
+
+  const onSaveNotes = () => {
+    setNotesSaved(false);
+    startTransition(async () => {
+      const res = await updateClientNotes(client.id, notes);
+      if (res.error) setError(res.error);
+      else setNotesSaved(true);
+    });
+  };
+
+  const lastSeen = client.last_sign_in_at
+    ? new Date(client.last_sign_in_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
+    : "Never";
+
+  const btn = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors disabled:opacity-30";
+  const btnPrimary = "px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-20";
+
   return (
-    <div className="flex flex-col gap-10">
-      <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">Account</h2>
+    <div className="flex flex-col gap-6">
 
       {(msg || error) && (
-        <p className={`text-[14px] tracking-tight ${error ? "text-red-400" : "text-[rgb(var(--green))]"}`}>
+        <p className={`text-[13px] tracking-tight px-1 ${error ? "text-red-400" : "text-[rgb(var(--green))]"}`}>
           {error || msg}
         </p>
       )}
 
-      <div className="flex flex-col gap-4">
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Status</p>
-        <div className="flex items-center justify-between gap-4 py-4 border-b border-[rgb(var(--line))]">
-          <div>
-            <p className="text-[15px] tracking-tight text-[rgb(var(--fg))]">
-              {client.banned ? "Account suspended" : "Account active"}
-            </p>
-            <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-0.5">
-              {client.banned ? "Client cannot sign in." : "Client can sign in normally."}
-            </p>
-          </div>
+      {/* Status */}
+      <AccountSection label="Status">
+        <AccountRow label={client.banned ? "Account suspended" : "Account active"} hint={client.banned ? "Client cannot sign in." : "Client can sign in normally."}>
           {client.banned ? (
             <button disabled={pending} onClick={() => run(() => unsuspendAccount(client.id), "Account reinstated.")}
-              className="px-5 py-2 rounded-full text-[14px] tracking-tight border border-[rgb(var(--green))/0.4] text-[rgb(var(--green))] hover:bg-[rgb(var(--green))/0.08] transition-colors disabled:opacity-30">
+              className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border text-[rgb(var(--green))] hover:opacity-80 transition-opacity disabled:opacity-30"
+              style={{ borderColor: "rgb(var(--green) / 0.4)" }}>
               Reinstate
             </button>
           ) : (
             <button disabled={pending} onClick={() => run(() => suspendAccount(client.id), "Account suspended.")}
-              className="px-5 py-2 rounded-full text-[14px] tracking-tight border border-[rgb(var(--amber))/0.4] text-[rgb(var(--amber))] hover:bg-[rgb(var(--amber))/0.08] transition-colors disabled:opacity-30">
+              className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border text-[rgb(var(--amber))] hover:opacity-80 transition-opacity disabled:opacity-30"
+              style={{ borderColor: "rgb(var(--amber) / 0.4)" }}>
               Suspend
             </button>
           )}
-        </div>
+        </AccountRow>
+        <AccountRow label="Last seen" hint={lastSeen} last>
+          <button disabled={pending} onClick={() => run(() => forceSignOut(client.id), "Sessions invalidated.")}
+            className={btn}>
+            Force sign out
+          </button>
+        </AccountRow>
+      </AccountSection>
 
-        <div className="flex items-center justify-between gap-4 py-4 border-b border-[rgb(var(--line))]">
-          <div>
-            <p className="text-[15px] tracking-tight text-[rgb(var(--fg))]">Resend invite</p>
-            <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 mt-0.5">Send a new magic link to their email.</p>
-          </div>
-          <button disabled={pending} onClick={() => run(() => resendInvite(client.id, client.email), "Invite sent.")}
-            className="px-5 py-2 rounded-full text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.3] transition-colors disabled:opacity-30">
+      {/* Access */}
+      <AccountSection label="Access">
+        <AccountRow label="Resend invite" hint="Send a new magic link to their email.">
+          <button disabled={pending} onClick={() => run(() => resendInvite(client.id, client.email), "Invite sent.")} className={btn}>
             Send
           </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Update email</p>
-        <div className="flex items-end gap-3">
-          <input value={email} onChange={e => setEmail(e.target.value)} type="email"
-            className={`${inputClass} flex-1`} />
-          <button disabled={pending || email === client.email}
-            onClick={() => run(() => updateAccountEmail(client.id, email), "Email updated.")}
-            className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-20 shrink-0">
-            Save
+        </AccountRow>
+        <AccountRow label="View as client" hint="Generate a sign-in link and open the portal as this client.">
+          <button disabled={pending} onClick={onGenerateMagicLink} className={btn}>
+            {pending ? "Generating..." : magicLink ? "Copied" : "Generate"}
           </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Set new password</p>
-        <div className="flex items-end gap-3">
-          <input value={password} onChange={e => setPassword(e.target.value)} type="password"
-            placeholder="New password" className={`${inputClass} flex-1`} />
-          <button disabled={pending || password.length < 6}
-            onClick={() => { run(() => updateAccountPassword(client.id, password), "Password updated."); setPassword(""); }}
-            className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-20 shrink-0">
-            Save
+        </AccountRow>
+        <AccountRow label="Portal link" hint="Copy the client's direct dashboard URL." last>
+          <button onClick={onCopyPortalLink} className={btn}>
+            {copied ? "Copied" : "Copy link"}
           </button>
-        </div>
-      </div>
+        </AccountRow>
+      </AccountSection>
 
-      <div className="flex flex-col gap-4 pt-4 border-t border-[rgb(var(--line))]">
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Danger zone</p>
-        {!confirmDelete ? (
-          <button onClick={() => setConfirmDelete(true)}
-            className="self-start px-4 py-1.5 rounded-full text-[13px] tracking-tight border border-red-400/30 text-red-400 hover:bg-red-400/08 transition-colors">
-            Delete account
-          </button>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <p className="text-[15px] tracking-tight text-[rgb(var(--fg))]">
-              This permanently deletes the account and all associated data. Cannot be undone.
-            </p>
-            <div className="flex items-center gap-3">
-              <button disabled={pending}
-                onClick={onDelete}
-                className="px-4 py-1.5 rounded-full text-[13px] tracking-tight bg-red-500 text-white hover:opacity-80 transition-opacity disabled:opacity-30">
-                {pending ? "Deleting..." : "Confirm delete"}
-              </button>
-              <button onClick={() => setConfirmDelete(false)}
-                className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-                Cancel
-              </button>
-            </div>
+      {magicLink && (
+        <div className="px-4 py-3 rounded-xl text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-60 break-all" style={{ background: "rgb(var(--line) / 0.3)", border: "1px solid rgb(var(--line))" }}>
+          {magicLink}
+        </div>
+      )}
+
+      {/* Credentials */}
+      <AccountSection label="Credentials">
+        <div className="px-5 py-4 border-b border-[rgb(var(--line))]">
+          <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">Email</p>
+          <div className="flex items-center gap-3">
+            <input value={email} onChange={e => setEmail(e.target.value)} type="email" className="flex-1 bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] focus:outline-none" />
+            <button disabled={pending || email === client.email} onClick={() => run(() => updateAccountEmail(client.id, email), "Email updated.")} className={btnPrimary}>Save</button>
           </div>
-        )}
-      </div>
+        </div>
+        <div className="px-5 py-4">
+          <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">New password</p>
+          <div className="flex items-center gap-3">
+            <input value={password} onChange={e => setPassword(e.target.value)} type="password" placeholder="Min. 6 characters" className="flex-1 bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-30 focus:outline-none" />
+            <button disabled={pending || password.length < 6} onClick={() => { run(() => updateAccountPassword(client.id, password), "Password updated."); setPassword(""); }} className={btnPrimary}>Save</button>
+          </div>
+        </div>
+      </AccountSection>
+
+      {/* Notes */}
+      <AccountSection label="Internal notes">
+        <div className="px-5 py-4">
+          <textarea
+            value={notes}
+            onChange={e => { setNotes(e.target.value); setNotesSaved(false); }}
+            placeholder="Billing notes, communication preferences, anything relevant..."
+            rows={4}
+            className="w-full bg-transparent text-[14px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-35 focus:outline-none resize-none leading-relaxed"
+          />
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[rgb(var(--line))]">
+            <button disabled={pending} onClick={onSaveNotes} className={btnPrimary}>Save notes</button>
+            {notesSaved && <span className="text-[13px] tracking-tight" style={{ color: "rgb(var(--green))" }}>Saved.</span>}
+          </div>
+        </div>
+      </AccountSection>
+
+      {/* Danger */}
+      <AccountSection label="Danger zone">
+        <div className="px-5 py-4">
+          {!confirmDelete ? (
+            <button onClick={() => setConfirmDelete(true)}
+              className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border border-red-400/30 text-red-400 hover:opacity-80 transition-opacity">
+              Delete account
+            </button>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="text-[14px] tracking-tight text-[rgb(var(--fg))]">This permanently deletes the account and all data. Cannot be undone.</p>
+              <div className="flex items-center gap-3">
+                <button disabled={pending} onClick={onDelete}
+                  className="px-4 py-1.5 rounded-full text-[13px] tracking-tight bg-red-500 text-white hover:opacity-80 transition-opacity disabled:opacity-30">
+                  {pending ? "Deleting..." : "Confirm delete"}
+                </button>
+                <button onClick={() => setConfirmDelete(false)}
+                  className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </AccountSection>
     </div>
   );
 }
@@ -881,36 +956,35 @@ function AuditTab({ clientId, initial }: { clientId: string; initial: AuditEntry
     setLoading(false);
   };
 
+  const cardStyle = { border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" };
+
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-[17px] font-medium tracking-tight text-[rgb(var(--fg))]">History</h2>
+        <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">History</h2>
         <button onClick={refresh} disabled={loading}
-          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-30">
+          className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors disabled:opacity-30">
           {loading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
-      <GridRule />
       {log.length === 0 ? (
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No history yet.</p>
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-4">No history yet.</p>
       ) : (
-        <div className="flex flex-col">
+        <div className="rounded-2xl overflow-hidden" style={cardStyle}>
           {log.map((entry, i) => (
-            <div key={entry.id}>
-              <div className="flex items-center justify-between gap-4 py-4">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[15px] tracking-tight text-[rgb(var(--fg))]">
-                    {ACTION_LABEL[entry.action] ?? entry.action}
-                  </span>
-                  {entry.detail && (
-                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{entry.detail}</span>
-                  )}
-                </div>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">
-                  {fmtDate(entry.created_at)}
+            <div key={entry.id} className="flex items-center justify-between gap-4 px-5 py-4"
+              style={{ borderBottom: i < log.length - 1 ? "1px solid rgb(var(--line))" : "none" }}>
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">
+                  {ACTION_LABEL[entry.action] ?? entry.action}
                 </span>
+                {entry.detail && (
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 truncate">{entry.detail}</span>
+                )}
               </div>
-              {i < log.length - 1 && <GridRule />}
+              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">
+                {fmtDate(entry.created_at)}
+              </span>
             </div>
           ))}
         </div>

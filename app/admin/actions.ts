@@ -216,6 +216,33 @@ export async function resendInvite(clientId: string, email: string) {
   return { success: true };
 }
 
+export async function forceSignOut(clientId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.signOut(clientId, "others");
+  if (error) return { error: error.message };
+  await logAction(clientId, "force_signout");
+  return { success: true };
+}
+
+export async function generateMagicLink(clientId: string, email: string) {
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+    options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/dashboard` },
+  });
+  if (error) return { error: error.message };
+  return { url: data.properties?.action_link ?? null };
+}
+
+export async function updateClientNotes(clientId: string, notes: string) {
+  const admin = createAdminClient();
+  const { error } = await admin.from("clients").update({ notes: notes || null }).eq("id", clientId);
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
 export async function getAdminLog(clientId: string) {
   const admin = createAdminClient();
   const { data } = await admin

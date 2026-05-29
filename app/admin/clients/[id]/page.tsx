@@ -16,7 +16,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
 
   const [{ data: clientRow }, { data: projects }, { data: invoices }, { data: files }, { data: { user: authUser } }, { data: messages }, { data: adminLog }, { data: projectUpdates }] =
     await Promise.all([
-      admin.from("clients").select("id, email, name, company").eq("id", id).single(),
+      admin.from("clients").select("id, email, name, company, notes").eq("id", id).single(),
       admin.from("projects").select("id, title, status, phase, last_update, notes, created_at, start_date, target_date").eq("client_id", id).order("created_at", { ascending: false }),
       admin.from("invoices").select("id, label, amount, status, due_date, paid_at, payment_url, created_at").eq("client_id", id).order("created_at", { ascending: false }),
       admin.from("files").select("id, label, url, uploaded_at").eq("client_id", id).order("uploaded_at", { ascending: false }),

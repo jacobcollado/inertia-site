@@ -267,35 +267,35 @@ function MetricCarousel({ cards }: { cards: React.ReactNode[] }) {
 }
 
 function OverviewDashboard({ overview, clients }: { overview: Overview; clients: Client[] }) {
+  const cardStyle = { border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" };
+
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-8">
       <MetricCards overview={overview} clients={clients} />
 
       {overview.recentActivity.length > 0 && (
-        <div className="flex flex-col gap-5">
-          <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">Recent activity</span>
-          <div className="flex flex-col">
+        <div className="flex flex-col gap-3">
+          <span className="text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50 px-1">Recent activity</span>
+          <div className="rounded-2xl overflow-hidden" style={cardStyle}>
             {overview.recentActivity.map((item, i) => (
-              <div key={i}>
-                <Link href={`/admin/clients/${item.clientId}`}
-                  className="flex items-center justify-between gap-4 py-4 group hover:opacity-70 transition-opacity">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-[13px] tracking-tight px-2.5 py-1 rounded-full shrink-0 capitalize"
-                      style={
-                        item.type === "invoice"
-                          ? { background: "rgb(60 100 255 / 0.12)", color: "rgb(60,100,255)" }
-                          : item.type === "project"
-                          ? { background: "rgb(var(--green) / 0.12)", color: "rgb(var(--green))" }
-                          : { background: "rgb(var(--line))", color: "rgb(var(--muted))" }
-                      }
-                    >{item.type}</span>
-                    <span className="text-[16px] tracking-tight text-[rgb(var(--fg))] truncate">{item.label}</span>
-                    <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate hidden sm:block">{item.clientName}</span>
-                  </div>
-                  <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">{item.date}</span>
-                </Link>
-                {i < overview.recentActivity.length - 1 && <GridRule />}
-              </div>
+              <Link key={i} href={`/admin/clients/${item.clientId}`}
+                className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-[rgb(var(--line)/0.3)] transition-colors"
+                style={{ borderBottom: i < overview.recentActivity.length - 1 ? "1px solid rgb(var(--line))" : "none" }}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full shrink-0 capitalize font-medium"
+                    style={
+                      item.type === "invoice"
+                        ? { background: "rgb(60 100 255 / 0.12)", color: "rgb(60,100,255)" }
+                        : item.type === "project"
+                        ? { background: "rgb(var(--green) / 0.12)", color: "rgb(var(--green))" }
+                        : { background: "rgb(var(--line))", color: "rgb(var(--muted))" }
+                    }
+                  >{item.type}</span>
+                  <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate">{item.label}</span>
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50 truncate hidden sm:block">{item.clientName}</span>
+                </div>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40 shrink-0">{item.date}</span>
+              </Link>
             ))}
           </div>
         </div>
@@ -332,21 +332,27 @@ function InviteForm({ onDone }: { onDone: () => void }) {
     });
   };
 
-  const inputClass = "w-full bg-transparent border-b border-[rgb(var(--line))] py-4 text-[16px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none focus:border-[rgb(var(--fg))] transition-colors";
+  const fieldClass = "w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none";
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5">
-      <input name="email" type="email" required placeholder="Client email" className={inputClass} />
-      <input name="name" type="text" placeholder="Name (optional)" className={inputClass} />
-      <input name="company" type="text" placeholder="Company (optional)" className={inputClass} />
-      {error && <p className="text-[14px] text-red-500 tracking-tight">{error}</p>}
-      <div className="flex items-center gap-4 pt-1">
+    <form onSubmit={onSubmit} className="flex flex-col">
+      {[
+        { name: "email", type: "email", placeholder: "Client email", required: true },
+        { name: "name", type: "text", placeholder: "Name (optional)" },
+        { name: "company", type: "text", placeholder: "Company (optional)" },
+      ].map(f => (
+        <div key={f.name} className="px-5 py-4 border-t border-[rgb(var(--line))]">
+          <input name={f.name} type={f.type} required={f.required} placeholder={f.placeholder} className={fieldClass} />
+        </div>
+      ))}
+      {error && <p className="px-5 pt-2 text-[13px] text-red-400 tracking-tight">{error}</p>}
+      <div className="flex items-center gap-3 px-5 py-4 border-t border-[rgb(var(--line))]">
         <button type="submit" disabled={pending}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
-          {pending ? "Sending invite..." : "Send invite"}
+          className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
+          {pending ? "Sending..." : "Send invite"}
         </button>
         <button type="button" onClick={onDone}
-          className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
           Cancel
         </button>
       </div>
@@ -396,17 +402,19 @@ function ToolsView({ initialTools }: { initialTools: Tool[] }) {
   const uncategorized = tools.filter(t => !t.category || !CATEGORIES.includes(t.category));
   if (uncategorized.length) grouped["Other"] = [...(grouped["Other"] ?? []), ...uncategorized];
 
+  const cardStyle = { border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" };
+
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Tools</h1>
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] mt-1">{tools.length} platforms and URLs</p>
+          <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Tools</h1>
+          <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mt-0.5">{tools.length} platforms and URLs</p>
         </div>
         {!adding && (
           <button onClick={() => setAdding(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[14px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.4] transition-colors shrink-0">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors shrink-0">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
               <line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" />
             </svg>
             Add tool
@@ -415,24 +423,33 @@ function ToolsView({ initialTools }: { initialTools: Tool[] }) {
       </div>
 
       {adding && (
-        <div className="border border-[rgb(var(--line))] rounded-2xl p-6">
-          <h2 className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] mb-6">Add a tool</h2>
-          <form onSubmit={onAdd} className="flex flex-col gap-5">
-            <input name="name" required placeholder="Name" className={inputClass} />
-            <input name="url" type="url" placeholder="URL (optional)" className={inputClass} />
-            <select name="category" className={`${inputClass} appearance-none`} defaultValue="">
-              <option value="">Category (optional)</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <input name="note" placeholder="Note (optional)" className={inputClass} />
-            {error && <p className="text-[14px] text-red-500 tracking-tight">{error}</p>}
-            <div className="flex items-center gap-4 pt-1">
+        <div className="rounded-2xl overflow-hidden" style={cardStyle}>
+          <form onSubmit={onAdd} className="flex flex-col">
+            {[
+              { name: "name", placeholder: "Name", required: true, type: "text" },
+              { name: "url", placeholder: "URL (optional)", type: "url" },
+              { name: "note", placeholder: "Note (optional)", type: "text" },
+            ].map(f => (
+              <div key={f.name} className="px-5 py-4 border-b border-[rgb(var(--line))]">
+                <input name={f.name} type={f.type} required={f.required} placeholder={f.placeholder}
+                  className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none" />
+              </div>
+            ))}
+            <div className="px-5 py-4 border-b border-[rgb(var(--line))]">
+              <select name="category" defaultValue=""
+                className="w-full bg-transparent text-[15px] tracking-tight text-[rgb(var(--fg))] focus:outline-none appearance-none">
+                <option value="">Category (optional)</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            {error && <p className="px-5 pt-3 text-[13px] text-red-400 tracking-tight">{error}</p>}
+            <div className="flex items-center gap-3 px-5 py-4">
               <button type="submit" disabled={pending}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-[14px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
+                className="px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity disabled:opacity-30">
                 {pending ? "Adding..." : "Add tool"}
               </button>
               <button type="button" onClick={() => setAdding(false)}
-                className="text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+                className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
                 Cancel
               </button>
             </div>
@@ -440,45 +457,41 @@ function ToolsView({ initialTools }: { initialTools: Tool[] }) {
         </div>
       )}
 
-      <GridRule />
-
       {tools.length === 0 ? (
-        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-10">No tools added yet.</p>
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No tools added yet.</p>
       ) : (
-        <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-5">
           {Object.entries(grouped).map(([cat, items]) => (
-            <div key={cat} className="flex flex-col gap-4">
-              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{cat}</span>
-              <div className="flex flex-col">
+            <div key={cat} className="flex flex-col gap-2">
+              <span className="text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50 px-1">{cat}</span>
+              <div className="rounded-2xl overflow-hidden" style={cardStyle}>
                 {items.map((t, i) => (
-                  <div key={t.id}>
-                    <div className="flex items-center justify-between gap-6 py-4 group">
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <div className="flex items-center gap-2">
-                          {t.url ? (
-                            <a href={t.url} target="_blank" rel="noopener noreferrer"
-                              className="text-[15px] tracking-tight text-[rgb(var(--fg))] hover:opacity-70 transition-opacity truncate">
-                              {t.name}
-                            </a>
-                          ) : (
-                            <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] truncate">{t.name}</span>
-                          )}
-                          {t.url && (
-                            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate hidden sm:block">
-                              {t.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-                            </span>
-                          )}
-                        </div>
-                        {t.note && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{t.note}</span>}
+                  <div key={t.id} className="flex items-center justify-between gap-6 px-5 py-4 group"
+                    style={{ borderBottom: i < items.length - 1 ? "1px solid rgb(var(--line))" : "none" }}>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <div className="flex items-center gap-2">
+                        {t.url ? (
+                          <a href={t.url} target="_blank" rel="noopener noreferrer"
+                            className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] hover:opacity-70 transition-opacity truncate">
+                            {t.name}
+                          </a>
+                        ) : (
+                          <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] truncate">{t.name}</span>
+                        )}
+                        {t.url && (
+                          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40 truncate hidden sm:block">
+                            {t.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                          </span>
+                        )}
                       </div>
-                      <button onClick={() => onDelete(t.id)} disabled={pending}
-                        className="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity text-[rgb(var(--muted))] hover:text-red-400 shrink-0">
-                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-                          <polyline points="3 6 17 6" /><path d="M8 6V4h4v2" /><path d="M5 6l1 11h8l1-11" />
-                        </svg>
-                      </button>
+                      {t.note && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-50">{t.note}</span>}
                     </div>
-                    {i < items.length - 1 && <GridRule />}
+                    <button onClick={() => onDelete(t.id)} disabled={pending}
+                      className="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity text-[rgb(var(--muted))] hover:text-red-400 shrink-0">
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+                        <polyline points="3 6 17 6" /><path d="M8 6V4h4v2" /><path d="M5 6l1 11h8l1-11" />
+                      </svg>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -504,73 +517,60 @@ function ClientList({ clients }: { clients: Client[] }) {
   };
 
   if (list.length === 0) return (
-    <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-10">No clients yet.</p>
+    <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 py-6">No clients yet.</p>
   );
 
+  const cardStyle = { border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" };
+
   return (
-    <div className="flex flex-col">
+    <div className="rounded-2xl overflow-hidden" style={cardStyle}>
       {list.map((c, i) => {
         const activeProjects = c.projects?.filter(p => p.status === "active") ?? [];
         const displayName = c.company ?? c.name ?? c.email;
         const initials = (c.name ?? c.email).slice(0, 2).toUpperCase();
         const confirming = confirmId === c.id;
         return (
-          <div key={c.id}>
-            <div className="flex items-center justify-between gap-4 py-3.5 group">
-              <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-4 min-w-0 flex-1 hover:opacity-75 transition-opacity">
-                {/* Avatar */}
-                <div className="w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-[12px] font-medium tracking-tight text-[rgb(var(--muted))]"
-                  style={{ background: "rgb(var(--line))" }}>
-                  {initials}
-                </div>
-                {/* Name + email */}
-                <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                  <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] truncate leading-snug">{displayName}</span>
-                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 truncate">{c.email}</span>
-                </div>
-                {/* Status badges + active projects */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {c.banned && (
-                    <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full" style={{ background: "rgb(239 68 68 / 0.1)", color: "#ef4444" }}>Suspended</span>
-                  )}
-                  {!c.confirmed_at && !c.banned && (
-                    <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full" style={{ background: "rgb(var(--amber) / 0.1)", color: "rgb(var(--amber))" }}>Pending</span>
-                  )}
-                  {activeProjects.length > 0 && (
-                    <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full hidden sm:inline-flex items-center gap-1.5" style={{ background: "rgb(var(--green) / 0.1)", color: "rgb(var(--green))" }}>
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "rgb(var(--green))" }} />
-                      {activeProjects.length} active
-                    </span>
-                  )}
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-30 group-hover:opacity-70 transition-opacity" aria-hidden="true">
-                    <line x1="4" y1="10" x2="16" y2="10" /><polyline points="10 4 16 10 10 16" />
-                  </svg>
-                </div>
-              </Link>
-              <div className="shrink-0">
-                {confirming ? (
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => onDelete(c.id)} disabled={pending}
-                      className="text-[12px] tracking-tight text-red-400 hover:opacity-80 transition-opacity disabled:opacity-30">
-                      {pending ? "Deleting..." : "Confirm"}
-                    </button>
-                    <button onClick={() => setConfirmId(null)}
-                      className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity">
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button onClick={() => setConfirmId(c.id)}
-                    className="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity text-red-400"
-                    aria-label="Delete account">
-                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
-                      <polyline points="3 6 17 6" /><path d="M8 6V4h4v2" /><path d="M5 6l1 11h8l1-11" />
-                    </svg>
-                  </button>
-                )}
+          <div key={c.id} className="flex items-center justify-between gap-4 px-5 py-3.5 group"
+            style={{ borderBottom: i < list.length - 1 ? "1px solid rgb(var(--line))" : "none" }}>
+            <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-4 min-w-0 flex-1 hover:opacity-75 transition-opacity">
+              <div className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-[12px] font-medium tracking-tight text-[rgb(var(--muted))]"
+                style={{ background: "rgb(var(--line))" }}>
+                {initials}
               </div>
+              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] truncate leading-snug">{displayName}</span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 truncate">{c.email}</span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {c.banned && <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full font-medium" style={{ background: "rgb(239 68 68 / 0.1)", color: "#ef4444" }}>Suspended</span>}
+                {!c.confirmed_at && !c.banned && <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full font-medium" style={{ background: "rgb(var(--amber) / 0.1)", color: "rgb(var(--amber))" }}>Pending</span>}
+                {activeProjects.length > 0 && (
+                  <span className="text-[11px] tracking-tight px-2 py-0.5 rounded-full hidden sm:inline-flex items-center gap-1.5 font-medium" style={{ background: "rgb(var(--green) / 0.1)", color: "rgb(var(--green))" }}>
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "rgb(var(--green))" }} />
+                    {activeProjects.length} active
+                  </span>
+                )}
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-[rgb(var(--muted))] opacity-30 group-hover:opacity-70 transition-opacity" aria-hidden="true">
+                  <line x1="4" y1="10" x2="16" y2="10" /><polyline points="10 4 16 10 10 16" />
+                </svg>
+              </div>
+            </Link>
+            <div className="shrink-0">
+              {confirming ? (
+                <div className="flex items-center gap-2">
+                  <button onClick={() => onDelete(c.id)} disabled={pending} className="text-[12px] tracking-tight text-red-400 hover:opacity-80 transition-opacity disabled:opacity-30">
+                    {pending ? "Deleting..." : "Confirm"}
+                  </button>
+                  <button onClick={() => setConfirmId(null)} className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50 hover:opacity-100 transition-opacity">Cancel</button>
+                </div>
+              ) : (
+                <button onClick={() => setConfirmId(c.id)} className="opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity text-red-400" aria-label="Delete account">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden="true">
+                    <polyline points="3 6 17 6" /><path d="M8 6V4h4v2" /><path d="M5 6l1 11h8l1-11" />
+                  </svg>
+                </button>
+              )}
             </div>
-            {i < list.length - 1 && <GridRule />}
           </div>
         );
       })}
@@ -719,17 +719,17 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
         )}
 
         {view === "clients" && (
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h1 className="text-[1.75rem] font-medium tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Clients</h1>
+                <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Clients</h1>
                 <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mt-0.5">
                   {clients.length} {clients.length === 1 ? "client" : "clients"}
                 </p>
               </div>
               {!inviting && (
                 <button onClick={() => setInviting(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.4)] transition-colors shrink-0">
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors shrink-0">
                   <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
                     <line x1="10" y1="4" x2="10" y2="16" /><line x1="4" y1="10" x2="16" y2="10" />
                   </svg>
@@ -739,15 +739,13 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
             </div>
 
             {inviting && (
-              <div className="border border-[rgb(var(--line))] rounded-2xl p-6">
-                <h2 className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] mb-5">Invite a client</h2>
+              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" }}>
+                <p className="text-[12px] font-medium tracking-tight text-[rgb(var(--muted))] opacity-50 px-5 pt-4 pb-2">Invite a client</p>
                 <InviteForm onDone={() => setInviting(false)} />
               </div>
             )}
 
-            <GridRule />
             <ClientList clients={clients} />
-            <GridRule />
           </div>
         )}
 
