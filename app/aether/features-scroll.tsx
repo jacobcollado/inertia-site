@@ -185,7 +185,7 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
   }, []);
 
   return (
-    <div className="flex flex-col sm:flex-row px-3 py-16 sm:py-0 sm:pb-24 sm:-mt-[8vh]">
+    <div className="flex flex-col sm:flex-row px-3 py-16 sm:py-0 sm:pb-8 sm:-mt-[8vh]">
       {/* Left: scrolling text */}
       <div className="flex flex-col flex-1 pr-0 sm:pr-16">
         {features.map((f, i) => {
@@ -193,7 +193,7 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
             <div
               key={f.title}
               ref={(el) => { itemRefs.current[i] = el; }}
-              className="flex flex-col gap-5 justify-center min-h-[520px] sm:h-screen sm:min-h-0 py-12 sm:py-0"
+              className="flex flex-col gap-5 justify-center min-h-[520px] sm:h-[85vh] sm:min-h-0 py-12 sm:py-0"
               style={{ opacity: active === i ? 1 : 0.35, transition: "opacity 300ms ease" }}
             >
               <div className="flex items-center gap-3 text-[rgb(var(--muted))]">

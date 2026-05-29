@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
+import { useWebHaptics } from "web-haptics/react";
 
 type Status = "idle" | "submitting" | "sent" | "error";
 type StepType = "choice" | "text" | "email" | "textarea";
@@ -81,6 +82,7 @@ function Spinner() {
 }
 
 export function ContactForm() {
+  const { trigger } = useWebHaptics();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -115,20 +117,20 @@ export function ContactForm() {
 
   const goNext = () => {
     if (!canAdvance || isSubmitting) return;
-    haptic(8);
+    trigger("selection");
     if (isLast) submit();
     else transition(() => setStepIndex((s) => s + 1));
   };
 
   const goBack = () => {
     if (stepIndex === 0 || isSubmitting) return;
-    haptic(6);
+    trigger("light");
     transition(() => setStepIndex((s) => s - 1));
   };
 
   const choose = (opt: string) => {
     if (isSubmitting) return;
-    haptic(8);
+    trigger("selection");
     const updated = { ...answers, [current.key]: opt };
     setAnswers(updated);
     const next = getActiveSteps(updated);
@@ -161,17 +163,11 @@ export function ContactForm() {
         throw new Error(body.error || "Something went wrong");
       }
       setStatus("sent");
-      haptic([40, 60, 40]);
+      trigger("success");
       celebrate();
     } catch (err: any) {
       setStatus("error");
       setError(err?.message || "Something went wrong");
-    }
-  };
-
-  const haptic = (pattern: number | number[]) => {
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate(pattern);
     }
   };
 

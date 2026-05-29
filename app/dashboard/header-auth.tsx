@@ -39,7 +39,7 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.25)] px-3.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 transition-all"
+            className="inline-flex items-center rounded-full border border-[rgb(var(--fg)/0.25)] px-3.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--fg))] opacity-70 hover:opacity-100 transition-all"
         >
           Sign in
         </Link>
@@ -179,13 +179,13 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
     <div className="flex items-center gap-2" style={fadeStyle}>
       <Link
         href="/login"
-        className="text-[13.5px] font-medium tracking-tight text-[rgb(var(--fg))] opacity-60 hover:opacity-100 transition-opacity px-2"
+        className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] opacity-60 hover:opacity-100 transition-opacity px-2"
       >
         Sign in
       </Link>
       <Link
         href="/login?tab=signup"
-        className="inline-flex items-center rounded-full px-4 py-2 text-[13.5px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
+        className="inline-flex items-center rounded-full px-4 py-2 text-[15px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
         style={{ background: "var(--accent-gradient)" }}
       >
         Create account
