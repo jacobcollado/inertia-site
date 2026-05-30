@@ -1,7 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const BLOCKED_EXTENSIONS = /\.(php|asp|aspx|jsp|cgi|pl|sh|bash|env|git|svn|htaccess|htpasswd|bak|sql|tar|gz|log|cfg|conf|pem|key|crt)$/i;
+const BLOCKED_PATHS = /^\/(wp-|xmlrpc|phpmyadmin|cpanel|webmail)/i;
+
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (BLOCKED_EXTENSIONS.test(pathname) || BLOCKED_PATHS.test(pathname)) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -26,14 +35,11 @@ export async function proxy(request: NextRequest) {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-  const { pathname } = request.nextUrl;
 
-  // Unauthenticated: redirect to login for protected routes
   if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Admin route protection: check role from profiles table
   if (user && pathname.startsWith("/admin")) {
     const { data: profile } = await supabase
       .from("profiles")
@@ -46,7 +52,6 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Authenticated users don't need to be on /login
   if (user && pathname === "/login") {
     const { data: profile } = await supabase
       .from("profiles")
@@ -62,5 +67,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/login"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico).*)",
+  ],
 };
