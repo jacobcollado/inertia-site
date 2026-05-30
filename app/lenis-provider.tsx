@@ -1,14 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 
 declare global {
   interface Window { __lenis?: Lenis }
 }
 
+const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password", "/docs"];
+
 export function LenisProvider() {
+  const pathname = usePathname();
+  const bare = BARE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
+
   useEffect(() => {
+    if (bare) return;
     const prefersReduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -43,7 +50,7 @@ export function LenisProvider() {
       window.removeEventListener("lenis:lock",   onLock);
       window.removeEventListener("lenis:unlock", onUnlock);
     };
-  }, []);
+  }, [bare]);
 
   return null;
 }
