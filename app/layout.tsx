@@ -133,7 +133,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           })}}
         />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased overscroll-none">
         <ThemeProvider>
           <ViewModeProvider>
             <LenisProvider />
