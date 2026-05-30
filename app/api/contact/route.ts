@@ -1,6 +1,28 @@
 import { NextResponse } from "next/server";
 
+const hits = new Map<string, { count: number; reset: number }>();
+const LIMIT = 5;
+const WINDOW_MS = 60_000;
+
+function checkRate(ip: string): boolean {
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || now > entry.reset) {
+    hits.set(ip, { count: 1, reset: now + WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
 export async function POST(req: Request) {
+  const ip =
+    (req as Request & { headers: Headers }).headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+
+  if (!checkRate(ip)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
   try {
     const { name, email, message, subject, kind } = await req.json();
 
