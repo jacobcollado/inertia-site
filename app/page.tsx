@@ -557,8 +557,8 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
                   onClick={() => handleSuggestion(s.label)}
                   className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
                   style={{
-                    opacity: focused ? 1 : 0.6,
-                    transform: focused ? "translateY(0)" : "translateY(4px)",
+                    opacity: 1,
+                    transform: "translateY(0)",
                     transition: `opacity 300ms cubic-bezier(0.22,1,0.36,1) ${i * 40}ms, transform 300ms cubic-bezier(0.22,1,0.36,1) ${i * 40}ms`,
                   }}
                 >
