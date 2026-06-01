@@ -153,12 +153,26 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
   const inputBase =
     "w-full bg-transparent border-0 border-b py-3 text-[17px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200 allow-select";
 
-  const handleStripeCheckout = () => {
-    const urls: Record<string, string> = {
-      standard: "https://buy.stripe.com/aFa6oG4YrfdvepI2dvcbC00",
-      lifetime: "https://buy.stripe.com/00wfZg8aD6GZbdwcS9cbC01",
-    };
-    window.location.href = urls[tier] ?? "/contact";
+  const handleStripeCheckout = async () => {
+    if (isSubmitting) return;
+    setStatus("submitting");
+    setError("");
+    try {
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier }),
+      });
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        throw new Error(b.error || "Could not start checkout");
+      }
+      const { url } = await res.json();
+      if (url) window.location.href = url;
+    } catch (err: any) {
+      setStatus("error");
+      setError(err?.message || "Something went wrong");
+    }
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -233,14 +247,21 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
         <div className="flex flex-col gap-4">
           <button
             onClick={handleStripeCheckout}
-            className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-white transition-opacity hover:opacity-85 [-webkit-tap-highlight-color:transparent]"
+            disabled={isSubmitting}
+            className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-white transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
             style={{ background: "var(--accent-gradient)" }}
           >
-            Continue to checkout
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
-              <path d="M3 8h10M9 4l4 4-4 4"/>
-            </svg>
+            {isSubmitting ? <Spinner /> : null}
+            {isSubmitting ? "Redirecting…" : "Continue to checkout"}
+            {!isSubmitting && (
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4"/>
+              </svg>
+            )}
           </button>
+          {status === "error" && (
+            <span className="text-[13px] tracking-tight text-red-500 text-center">{error || "Something went wrong."}</span>
+          )}
 
           <div className="flex items-center justify-center gap-6 py-1 flex-wrap">
             {[

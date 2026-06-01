@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
           .is("name", null);
       }
 
-      const dest = profile?.role === "admin" ? "/admin" : "/dashboard";
+      const defaultDest = profile?.role === "admin" ? "/admin" : "/dashboard";
+      const dest = next.startsWith("/") ? next : defaultDest;
       return NextResponse.redirect(`${origin}${dest}`);
     }
   }
