@@ -17,7 +17,8 @@ type ProjectUpdate = { id: string; project_id: string; status: string; note: str
 type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; payment_url: string | null };
 type DFile   = { id: string; label: string; url: string; uploaded_at: string };
 type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
-type Tab     = "overview" | "projects" | "invoices" | "files" | "messages" | "settings";
+type License = { id: string; key: string; email: string; domain: string | null; tier: string; status: string; created_at: string };
+type Tab     = "overview" | "projects" | "invoices" | "files" | "messages" | "licenses" | "settings";
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
 
@@ -162,6 +163,13 @@ const icons: Record<Tab, React.ReactNode> = {
       <path d="M17 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h2v3l4-3h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z" />
     </svg>
   ),
+  licenses: (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
+      <rect x="2" y="5" width="16" height="11" rx="1.5" />
+      <path d="M6 9h4M6 12h2" />
+      <circle cx="14" cy="10.5" r="2" />
+    </svg>
+  ),
   settings: (
     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true">
       <line x1="3" y1="6" x2="17" y2="6" />
@@ -191,6 +199,7 @@ function TopNav({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages
     { id: "invoices",  label: "Invoices"  },
     { id: "files",     label: "Files"     },
     { id: "messages",  label: "Messages", badge: unreadMessages },
+    { id: "licenses",  label: "Licenses"  },
     { id: "settings",  label: "Settings"  },
   ];
 
@@ -1128,6 +1137,86 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
   );
 }
 
+/* ── Licenses ─────────────────────────────────────────────────────── */
+
+const LICENSE_STATUS: Record<string, { bg: string; text: string }> = {
+  active:  { bg: "rgb(var(--green) / 0.12)", text: "rgb(var(--green))" },
+  expired: { bg: "rgb(var(--amber) / 0.12)", text: "rgb(var(--amber))" },
+  revoked: { bg: "rgb(239 68 68 / 0.1)",     text: "rgb(220 38 38)"    },
+};
+
+function LicensesTab({ licenses }: { licenses: License[] }) {
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const copy = (key: string) => {
+    navigator.clipboard.writeText(key);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1800);
+  };
+
+  return (
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">Licenses</h1>
+        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] mt-1.5 opacity-60">{licenses.length} {licenses.length === 1 ? "license" : "licenses"}</p>
+      </div>
+
+      {licenses.length === 0 ? <Empty label="No licenses yet." /> : (
+        <div className="flex flex-col gap-3">
+          {licenses.map((l) => {
+            const s = LICENSE_STATUS[l.status] ?? LICENSE_STATUS.active;
+            const tierLabel = l.tier === "lifetime" ? "Lifetime" : "Standard";
+            return (
+              <div key={l.id} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" }}>
+                <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-4 flex-wrap">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">Aether {tierLabel}</span>
+                      <span className="inline-block text-[11px] font-medium tracking-tight px-2 py-0.5 rounded-full capitalize"
+                        style={{ background: s.bg, color: s.text }}>
+                        {l.status}
+                      </span>
+                    </div>
+                    <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">
+                      Purchased {fmtDate(l.created_at)}
+                    </span>
+                  </div>
+                </div>
+                <div className="px-5 py-4 border-t border-[rgb(var(--line))] flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40">License key</span>
+                    <div className="flex items-center gap-2">
+                      <code className="font-mono text-[14px] tracking-wide text-[rgb(var(--fg))] select-all">{l.key}</code>
+                      <button onClick={() => copy(l.key)}
+                        className="shrink-0 transition-colors"
+                        style={{ color: copied === l.key ? "rgb(var(--green))" : "rgb(var(--muted))", opacity: copied === l.key ? 1 : 0.5 }}
+                        title="Copy">
+                        {copied === l.key ? (
+                          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><polyline points="2 8 6 12 14 4" /></svg>
+                        ) : (
+                          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><rect x="5" y="5" width="9" height="9" rx="1.5" /><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" /></svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[11px] tracking-widest uppercase text-[rgb(var(--muted))] opacity-40">Store domain</span>
+                    {l.domain ? (
+                      <span className="font-mono text-[14px] tracking-tight text-[rgb(var(--fg))]">{l.domain}</span>
+                    ) : (
+                      <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">Not assigned yet — activates when you install the theme</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Settings ─────────────────────────────────────────────────────── */
 
 function SettingsSection({ label, children }: { label: string; children: React.ReactNode }) {
@@ -1269,13 +1358,14 @@ function SettingsTab({ client, setTab }: { client: Client | null; setTab: (t: Ta
 
 /* ── Shell ────────────────────────────────────────────────────────── */
 
-export function DashboardShell({ client, projects, invoices, files, messages: initialMessages, projectUpdates }: {
+export function DashboardShell({ client, projects, invoices, files, messages: initialMessages, projectUpdates, licenses }: {
   client: Client | null;
   projects: Project[];
   invoices: Invoice[];
   files: DFile[];
   messages: Message[];
   projectUpdates: ProjectUpdate[];
+  licenses: License[];
 }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -1321,6 +1411,9 @@ export function DashboardShell({ client, projects, invoices, files, messages: in
         </div>
         <div style={{ display: tab === "messages"  ? undefined : "none" }}>
           <MessagesTab clientId={client?.id ?? ""} messages={messages} setMessages={setMessages} key={client?.id} />
+        </div>
+        <div style={{ display: tab === "licenses"  ? undefined : "none" }}>
+          <LicensesTab licenses={licenses} />
         </div>
         <div style={{ display: tab === "settings"  ? undefined : "none" }}>
           <SettingsTab client={client} setTab={setTab} />
