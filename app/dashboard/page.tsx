@@ -33,7 +33,7 @@ export default async function DashboardPage() {
         .select("id, project_id, status, note, created_at")
         .eq("client_id", id).order("created_at", { ascending: false }),
       supabase.from("licenses")
-        .select("id, key, email, domain, tier, status, created_at")
+        .select("id, key, email, domain, tier, status, created_at, theme_file_path")
         .eq("email", user.email!)
         .order("created_at", { ascending: false }),
     ]);

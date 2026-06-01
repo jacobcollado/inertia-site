@@ -124,6 +124,7 @@ export async function POST(req: Request) {
     tier,
     status: "active",
     stripe_session_id: session.id,
+    theme_file_path: "theme/aether-v1.5.zip",
   });
 
   if (error) {

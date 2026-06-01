@@ -17,7 +17,7 @@ type ProjectUpdate = { id: string; project_id: string; status: string; note: str
 type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; payment_url: string | null };
 type DFile   = { id: string; label: string; url: string; uploaded_at: string };
 type Message = { id: string; client_id: string; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
-type License = { id: string; key: string; email: string; domain: string | null; tier: string; status: string; created_at: string };
+type License = { id: string; key: string; email: string; domain: string | null; tier: string; status: string; created_at: string; theme_file_path: string | null };
 type Tab     = "overview" | "projects" | "invoices" | "files" | "messages" | "licenses" | "settings";
 
 /* ── Helpers ──────────────────────────────────────────────────────── */
@@ -1137,6 +1137,46 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
   );
 }
 
+/* ── Theme download button ────────────────────────────────────────── */
+
+function ThemeDownloadButton({ path }: { path: string }) {
+  const [loading, setLoading] = useState(false);
+
+  const onClick = async () => {
+    setLoading(true);
+    try {
+      const { url, error } = await getSignedFileUrl(path);
+      if (error || !url) return;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "aether-theme.zip";
+      a.click();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] tracking-tight font-medium border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors disabled:opacity-30 shrink-0"
+    >
+      {loading ? (
+        <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeOpacity="0.2"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+        </svg>
+      ) : (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+          <path d="M8 3v7M5 7l3 3 3-3"/><path d="M3 13h10"/>
+        </svg>
+      )}
+      {loading ? "Preparing…" : "Download"}
+    </button>
+  );
+}
+
 /* ── Licenses ─────────────────────────────────────────────────────── */
 
 const LICENSE_STATUS: Record<string, { bg: string; text: string }> = {
@@ -1208,6 +1248,13 @@ function LicensesTab({ licenses }: { licenses: License[] }) {
                     )}
                   </div>
                 </div>
+
+                {l.theme_file_path && (
+                  <div className="px-5 py-3 border-t border-[rgb(var(--line))] flex items-center justify-between gap-4">
+                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Aether v1.5 — theme zip</span>
+                    <ThemeDownloadButton path={l.theme_file_path} />
+                  </div>
+                )}
               </div>
             );
           })}
