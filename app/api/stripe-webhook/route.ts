@@ -77,18 +77,12 @@ export async function POST(req: Request) {
   const email = session.customer_details?.email ?? "";
   const tier  = (session.metadata?.tier ?? "standard") as string;
 
-  const domainField = session.custom_fields?.find(
-    (f) => f.key === "shopify_domain",
-  );
-  const domain = domainField?.text?.value?.trim() || null;
-
   const key = generateLicenseKey();
   const supabase = supabaseAdmin();
 
   const { error } = await supabase.from("licenses").insert({
     key,
     email,
-    domain,
     tier,
     status: "active",
     stripe_session_id: session.id,
