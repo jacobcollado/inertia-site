@@ -28,6 +28,55 @@ async function sendLicenseEmail(email: string, key: string, tier: string) {
   }
 
   const tierLabel = tier === "lifetime" ? "Lifetime" : "Standard";
+  const logoUrl = "https://REDACTED_SUPABASE_PROJECT_REF.supabase.co/storage/v1/object/public/assets/inertia-logo.png";
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:48px 0;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;">
+
+        <!-- Logo -->
+        <tr><td align="center" style="padding-bottom:32px;">
+          <img src="${logoUrl}" alt="Inertia" width="48" height="48" style="border-radius:12px;display:block;">
+        </td></tr>
+
+        <!-- Card -->
+        <tr><td style="background:#111;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:40px 36px;">
+
+          <p style="margin:0 0 6px;font-size:13px;font-weight:400;letter-spacing:-0.01em;color:rgba(255,255,255,0.4);">Aether ${tierLabel}</p>
+          <h1 style="margin:0 0 24px;font-size:24px;font-weight:400;letter-spacing:-0.04em;line-height:1.2;color:#fff;">Your license key</h1>
+
+          <!-- Key box -->
+          <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px 20px;margin-bottom:28px;">
+            <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.3);">License key</p>
+            <p style="margin:0;font-family:'Courier New',monospace;font-size:17px;font-weight:500;letter-spacing:0.04em;color:#fff;">${key}</p>
+          </div>
+
+          <!-- Steps -->
+          <p style="margin:0 0 12px;font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;letter-spacing:-0.01em;">To activate, install Aether on your Shopify store and enter this key in <strong style="color:rgba(255,255,255,0.7);">Theme Settings → License Key</strong>. Your store domain will be assigned automatically on first activation.</p>
+
+          <!-- CTA -->
+          <table cellpadding="0" cellspacing="0" style="margin-top:28px;">
+            <tr><td style="border-radius:50px;background:#fff;">
+              <a href="https://byinertia.com/dashboard" style="display:inline-block;padding:11px 24px;font-size:13px;font-weight:500;letter-spacing:-0.01em;color:#000;text-decoration:none;">View my licenses</a>
+            </td></tr>
+          </table>
+
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td align="center" style="padding-top:28px;">
+          <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.2);letter-spacing:-0.01em;">Reply to this email if you need help. &mdash; Inertia</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
 
   await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -39,19 +88,8 @@ async function sendLicenseEmail(email: string, key: string, tier: string) {
       from: "Inertia <hello@byinertia.com>",
       to: [email],
       subject: "Your Aether license key",
-      text: [
-        `Thanks for purchasing Aether ${tierLabel}.`,
-        "",
-        `Your license key: ${key}`,
-        "",
-        "You can view and manage your license at https://byinertia.com/portal/licenses",
-        "",
-        "To activate your license, install the Aether theme on your Shopify store, then enter the key in the theme settings.",
-        "",
-        "Reply to this email if you need any help.",
-        "",
-        "— Inertia",
-      ].join("\n"),
+      html,
+      text: `Thanks for purchasing Aether ${tierLabel}.\n\nYour license key: ${key}\n\nInstall Aether on your Shopify store and enter this key in Theme Settings → License Key.\n\nView your licenses at https://byinertia.com/dashboard\n\n— Inertia`,
     }),
   });
 }
