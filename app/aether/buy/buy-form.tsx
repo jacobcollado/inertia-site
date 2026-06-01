@@ -155,8 +155,8 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
 
   const handleStripeCheckout = () => {
     const urls: Record<string, string> = {
-      standard: "/contact",
-      lifetime: "https://buy.stripe.com/test_aFa6oG4YrfdvepI2dvcbC00",
+      standard: "https://buy.stripe.com/aFa6oG4YrfdvepI2dvcbC00",
+      lifetime: "https://buy.stripe.com/00wfZg8aD6GZbdwcS9cbC01",
     };
     window.location.href = urls[tier] ?? "/contact";
   };
