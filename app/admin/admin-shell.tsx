@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ThemeToggle } from "@/app/theme-toggle";
 import { inviteClient, addTool, deleteTool, deleteAccount } from "./actions";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
 type Tool = { id: string; name: string; url: string | null; category: string | null; note: string | null; created_at: string };
 
@@ -578,12 +579,148 @@ function ClientList({ clients }: { clients: Client[] }) {
   );
 }
 
-type View = "overview" | "clients" | "tools";
+/* ── Logs ─────────────────────────────────────────────────────────── */
+
+type ApiLog = {
+  id: string;
+  route: string;
+  method: string;
+  status: number;
+  key: string | null;
+  domain: string | null;
+  ip: string | null;
+  error: string | null;
+  created_at: string;
+};
+
+const ROUTE_LABELS: Record<string, string> = {
+  "/api/validate-license": "validate",
+  "/api/activate-license": "activate",
+};
+
+function LogsView() {
+  const [logs, setLogs] = useState<ApiLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [route, setRoute] = useState<string>("all");
+
+  useEffect(() => {
+    setLoading(true);
+    const supabase = createBrowserClient();
+    supabase
+      .from("api_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200)
+      .then(({ data }) => {
+        setLogs(data ?? []);
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = route === "all" ? logs : logs.filter(l => l.route === route);
+  const routes = Array.from(new Set(logs.map(l => l.route)));
+
+  const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-[rgb(var(--fg))]">API Logs</h1>
+          <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mt-0.5">{filtered.length} entries</p>
+        </div>
+        <div className="flex items-center gap-1 bg-[rgb(var(--line)/0.4)] rounded-full p-1">
+          {(["all", ...routes] as string[]).map(r => (
+            <button
+              key={r}
+              onClick={() => setRoute(r)}
+              className="px-3.5 py-1.5 rounded-full text-[12px] font-medium tracking-tight transition-all duration-150"
+              style={{
+                background: route === r ? "rgb(var(--bg))" : "transparent",
+                color: route === r ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                opacity: route === r ? 1 : 0.6,
+                boxShadow: route === r ? "0 1px 3px rgb(0 0 0 / 0.12)" : "none",
+              }}
+            >
+              {r === "all" ? "All" : (ROUTE_LABELS[r] ?? r)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="py-16 text-center text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40">Loading...</div>
+      ) : filtered.length === 0 ? (
+        <div className="py-16 text-center text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40">No logs yet.</div>
+      ) : (
+        <div className="rounded-2xl overflow-hidden border border-[rgb(var(--line))]">
+          <table className="w-full text-[13px] tracking-tight">
+            <thead>
+              <tr className="border-b border-[rgb(var(--line))]" style={{ background: "rgb(var(--line) / 0.3)" }}>
+                {["Time", "Route", "Key", "Domain", "IP", "Result"].map(h => (
+                  <th key={h} className="text-left px-4 py-2.5 font-medium text-[rgb(var(--muted))] opacity-50 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((log, i) => {
+                const ok = !log.error;
+                return (
+                  <tr
+                    key={log.id}
+                    className="border-b border-[rgb(var(--line))] last:border-0 transition-colors hover:bg-[rgb(var(--line)/0.2)]"
+                    style={{ background: i % 2 === 0 ? "transparent" : "rgb(var(--line) / 0.08)" }}
+                  >
+                    <td className="px-4 py-2.5 text-[rgb(var(--muted))] opacity-50 whitespace-nowrap">
+                      {dateFmt.format(new Date(log.created_at))}
+                    </td>
+                    <td className="px-4 py-2.5 whitespace-nowrap">
+                      <span className="font-mono text-[11px] px-2 py-0.5 rounded-full"
+                        style={{ background: "rgb(var(--line) / 0.4)", color: "rgb(var(--fg))" }}>
+                        {ROUTE_LABELS[log.route] ?? log.route}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 font-mono text-[12px] text-[rgb(var(--muted))]">
+                      {log.key ?? <span className="opacity-25">—</span>}
+                    </td>
+                    <td className="px-4 py-2.5 font-mono text-[12px] text-[rgb(var(--muted))] max-w-[180px] truncate">
+                      {log.domain ?? <span className="opacity-25">—</span>}
+                    </td>
+                    <td className="px-4 py-2.5 font-mono text-[12px] text-[rgb(var(--muted))] opacity-40 whitespace-nowrap">
+                      {log.ip ?? "—"}
+                    </td>
+                    <td className="px-4 py-2.5 whitespace-nowrap">
+                      {ok ? (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+                          style={{ background: "rgb(var(--green) / 0.12)", color: "rgb(var(--green))" }}>
+                          ok
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full max-w-[140px] truncate inline-block"
+                          style={{ background: "rgb(239 68 68 / 0.1)", color: "rgb(220 38 38)" }}
+                          title={log.error ?? ""}>
+                          {log.error}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+type View = "overview" | "clients" | "tools" | "logs";
 
 const NAV_ITEMS: { id: View; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "clients", label: "Clients" },
   { id: "tools", label: "Tools" },
+  { id: "logs", label: "Logs" },
 ];
 
 function TopNav({
@@ -750,6 +887,8 @@ export function AdminShell({ clients, overview, tools }: { clients: Client[]; ov
         )}
 
         {view === "tools" && <ToolsView initialTools={tools} />}
+
+        {view === "logs" && <LogsView />}
 
       </main>
     </div>
