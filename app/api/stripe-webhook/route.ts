@@ -34,9 +34,9 @@ async function sendLicenseEmail(email: string, key: string, tier: string) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:48px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:48px 24px;">
     <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;margin:0 auto;">
 
         <!-- Logo -->
         <tr><td align="center" style="padding-bottom:32px;">
