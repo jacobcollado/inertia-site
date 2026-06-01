@@ -10,6 +10,21 @@ type Entry = { version: string; date: string; label: ReleaseLabel; summary: stri
 
 const CHANGELOG: Entry[] = [
   {
+    version: "1.4.0",
+    date: "2026-06-01",
+    label: "minor",
+    summary: "Music player, SMS capture widget, signup notification card, custom cursor support, and a CRT effect toggle.",
+    notes: [
+      { type: "added",    title: "Music player section",                      detail: "Merchants can now add ambient audio to any page via a dedicated music player section. Accepts any direct audio URL. Playback is user-initiated to respect autoplay policies, and the player UI is minimal by design — a small fixed control that stays out of the way." },
+      { type: "added",    title: "SMS overlay widget",                        detail: "A corner-anchored SMS signup widget with a configurable position (top-left, middle-right, etc.), heading, body copy, and signup URL. Dismisses on click-outside and remembers the dismissed state for the session." },
+      { type: "added",    title: "Signup notification card",                  detail: "A non-intrusive slide-in card that prompts email or SMS signups after a configurable delay. Supports a discount code reveal on success, suppress-for-N-days logic, and full color customisation without touching code." },
+      { type: "added",    title: "Custom cursor support",                     detail: "Theme settings now include a cursor image picker. When set, the custom cursor replaces the default pointer across the entire storefront including links and buttons. Unset to revert to the system cursor." },
+      { type: "added",    title: "CRT scanline effect",                       detail: "An optional full-page CRT overlay effect toggled via a single checkbox in theme settings. Off by default." },
+      { type: "improved", title: "Announcement bar now supports multiple messages with rotation", detail: "The announcement bar accepts multiple message blocks and rotates through them on a configurable interval. Each message supports an optional link. The rotate interval is set in seconds from the theme editor." },
+      { type: "improved", title: "Product grid 2 with breadcrumbs and collection tabs", detail: "The second product grid variant now supports breadcrumb navigation, collection tab switching, and independent padding controls for desktop and mobile. Letter spacing, font weight, and color are all exposed as theme settings." },
+    ],
+  },
+  {
     version: "1.3.0",
     date: "2026-05-01",
     label: "minor",

@@ -7,19 +7,19 @@ import { ProcessSteps } from "./process-steps";
 
 export const metadata: Metadata = {
   title: "Aether - Premium Shopify Theme for Independent Brands",
-  description: "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+  description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
   alternates: { canonical: "https://byinertia.com/aether" },
   openGraph: {
     type: "website",
     url: "https://byinertia.com/aether",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Aether Shopify Theme" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
     images: ["/og.png"],
   },
 };
@@ -55,7 +55,7 @@ const KEY_FEATURES = [
 ];
 
 const SECONDARY_FEATURES = [
-  { name: "35 sections", desc: "Everything you need, nothing you don't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="7" width="9" height="3" rx="1"/><rect x="1" y="12" width="6" height="3" rx="1"/></svg> },
+  { name: "41 sections", desc: "Everything you need, nothing you don't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="7" width="9" height="3" rx="1"/><rect x="1" y="12" width="6" height="3" rx="1"/></svg> },
   { name: "Dark mode", desc: "Looks as good at midnight as midday", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/></svg> },
   { name: "Mega menu", desc: "Navigation that handles large catalogues", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="1" width="14" height="2.5" rx="0.5"/><rect x="1" y="5.5" width="6.5" height="9" rx="0.5"/><rect x="8.5" y="5.5" width="6.5" height="9" rx="0.5"/></svg> },
   { name: "Sticky cart", desc: "Add to cart stays in reach at all times", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M1 1h2l1.5 7.5h7L13 4H4"/><circle cx="6.5" cy="13" r="1"/><circle cx="11" cy="13" r="1"/></svg> },
@@ -63,9 +63,9 @@ const SECONDARY_FEATURES = [
   { name: "Quick buy", desc: "Purchase without leaving the page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle cx="8" cy="8" r="7"/><polyline points="5 8 7 10 11 6"/></svg> },
   { name: "Video hero", desc: "Autoplay video in the first section", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="2" width="14" height="12" rx="1.5"/><polygon points="6 5.5 11 8 6 10.5" fill="currentColor" opacity="0.5"/></svg> },
   { name: "Lookbook", desc: "Editorial layouts for campaign content", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="1" width="6.5" height="14" rx="1"/><rect x="8.5" y="1" width="6.5" height="8" rx="1"/><rect x="8.5" y="10" width="6.5" height="5" rx="1"/></svg> },
-  { name: "Testimonials", desc: "Social proof that converts", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M14 10a2 2 0 0 1-2 2H4l-3 3V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v6z"/></svg> },
-  { name: "Newsletter popup", desc: "Capture emails without disrupting flow", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="3" width="14" height="10" rx="1.5"/><polyline points="1 3 8 9 15 3"/></svg> },
-  { name: "Size guide", desc: "Built-in modal for sizing info", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="5" width="14" height="6" rx="1"/><line x1="4" y1="5" x2="4" y2="11"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="12" y1="5" x2="12" y2="11"/></svg> },
+  { name: "SMS + email capture", desc: "Corner widget and popup, both built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect x="1" y="3" width="14" height="10" rx="1.5"/><polyline points="1 3 8 9 15 3"/></svg> },
+  { name: "Music player", desc: "Ambient audio to set the brand mood", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle cx="5" cy="13" r="2"/><circle cx="12" cy="11" r="2"/><path d="M7 13V4l7-2v9"/></svg> },
+  { name: "Custom fonts", desc: "Upload any font directly in the editor", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M2 13L6 3l4 10M3.5 9.5h5"/><path d="M11 5v8M11 5c0-1.1.9-2 2-2s2 .9 2 2"/></svg> },
   { name: "FAQs", desc: "Accordion answers on any page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle cx="8" cy="8" r="7"/><path d="M6 6a2 2 0 1 1 2 2v1"/><circle cx="8" cy="12" r="0.5" fill="currentColor"/></svg> },
 ];
 
@@ -77,7 +77,7 @@ const TIERS = [
 
 const PRICING_ROWS: { label: string; standard: boolean | string; lifetime: boolean | string; enterprise: boolean | string }[] = [
   { label: "Full Aether theme",          standard: true,        lifetime: true,       enterprise: true          },
-  { label: "All 35 sections",            standard: true,        lifetime: true,       enterprise: true          },
+  { label: "All 41 sections",            standard: true,        lifetime: true,       enterprise: true          },
   { label: "Updates",                    standard: "1 year",    lifetime: "Forever",  enterprise: "Forever"     },
   { label: "Store license",              standard: "Single",    lifetime: "Single",   enterprise: "Multi-store" },
   { label: "Support via client portal",  standard: true,        lifetime: true,       enterprise: true          },
@@ -135,7 +135,7 @@ export default function AetherPage() {
       {/* Secondary features */}
       <div className="px-3 pb-16 sm:pb-24 rise">
         <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3">And everything else</p>
-        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">Every section you need, ready the moment you install</p>
+        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">41 sections, ready the moment you install</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
           {SECONDARY_FEATURES.map((f) => (
             <div key={f.name} className="flex items-start gap-3 py-4">

@@ -13,7 +13,7 @@ const TIERS = [
     term: "per year, single store",
     tagline: "Everything you need to launch. Renews when you're ready.",
     includes: [
-      "Full Aether theme, all 35 sections",
+      "Full Aether theme, all 41 sections",
       "1 year of updates",
       "Single store license",
       "Support via client portal",
@@ -28,7 +28,7 @@ const TIERS = [
     tagline: "Pay once, own it forever. Every update we ever ship, included.",
     badge: "Best value",
     includes: [
-      "Full Aether theme, all 35 sections",
+      "Full Aether theme, all 41 sections",
       "Lifetime updates, no renewals",
       "Single store license",
       "Priority support",
