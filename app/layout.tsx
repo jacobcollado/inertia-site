@@ -8,11 +8,8 @@ import { ViewModeProvider } from "./view-mode-context";
 import { SiteShell } from "./site-shell";
 import { CookieBanner } from "./cookie-banner";
 import { ScrollReveal } from "./scroll-reveal";
-import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 import Script from "next/script";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const BASE_URL = "https://byinertia.com";
 
@@ -60,7 +57,7 @@ const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("dark", "font-sans", geist.variable)} suppressHydrationWarning>
+    <html lang="en" className={cn("dark", "font-sans")} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
         <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />
@@ -118,7 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Shopify",
             "url": "https://byinertia.com/aether",
-            "description": "A premium Shopify theme built for conversion and brand presence. 35 sections, dark mode, sticky cart, mega menu.",
+            "description": "A premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu.",
             "offers": {
               "@type": "Offer",
               "price": "85",
