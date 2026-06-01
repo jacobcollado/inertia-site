@@ -1022,7 +1022,7 @@ function NewsCarousel() {
     <section className="py-12 sm:py-16">
       <div className="px-6 sm:px-8 mb-8 flex items-end justify-between">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
-          Writing & news
+          Recent news
         </h2>
         <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors hidden sm:block">
           All posts →

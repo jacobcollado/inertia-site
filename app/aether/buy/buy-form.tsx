@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { ShieldCheck, MailCheck, PackageCheck } from "lucide-react";
 
 type Status = "idle" | "submitting" | "sent" | "error";
 
@@ -9,25 +10,125 @@ const TIERS = [
     id: "standard",
     label: "Standard",
     price: "$85",
-    term: "1 year · single store",
-    includes: ["Full Aether theme", "1 year of updates", "Single store licence", "Support via client portal"],
+    term: "per year, single store",
+    tagline: "Everything you need to launch. Renews when you're ready.",
+    includes: [
+      "Full Aether theme, all 35 sections",
+      "1 year of updates",
+      "Single store license",
+      "Support via client portal",
+    ],
+    stripe: true,
   },
   {
     id: "lifetime",
     label: "Lifetime",
     price: "$105",
-    term: "Forever · single store",
-    includes: ["Full Aether theme", "Lifetime updates", "Single store licence", "Priority support"],
-    badge: "Most popular",
+    term: "one-time, single store",
+    tagline: "Pay once, own it forever. Every update we ever ship, included.",
+    badge: "Best value",
+    includes: [
+      "Full Aether theme, all 35 sections",
+      "Lifetime updates, no renewals",
+      "Single store license",
+      "Priority support",
+    ],
+    stripe: true,
   },
   {
     id: "custom",
     label: "Custom",
     price: "On request",
-    term: "Foundation + bespoke build",
-    includes: ["Custom design on Aether", "Direct access throughout", "Handoff included", "Post-launch support"],
+    term: "bespoke build on Aether",
+    tagline: "Your brand, your vision. We build it on the Aether foundation.",
+    includes: [
+      "Custom design on Aether",
+      "Direct access throughout",
+      "Handoff included",
+      "Post-launch support",
+    ],
+    stripe: false,
   },
 ];
+
+function TierCard({ tier }: { tier: string }) {
+  const [displayed, setDisplayed] = useState(() => TIERS.find((t) => t.id === tier)!);
+  const [phase, setPhase] = useState<"idle" | "out" | "in">("in");
+  const prevTier = useRef(tier);
+  useEffect(() => {
+    if (tier === prevTier.current) return;
+    prevTier.current = tier;
+
+    // Step 1: trigger exit styles
+    setPhase("out");
+
+    // Step 2: after exit, swap content and reset to pre-enter position (no transition)
+    const swapTimer = setTimeout(() => {
+      setDisplayed(TIERS.find((t) => t.id === tier)!);
+      setPhase("idle"); // no transition — snap to start position
+      // Step 3: one rAF later, trigger enter transition
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setPhase("in");
+        });
+      });
+    }, 130);
+
+    return () => clearTimeout(swapTimer);
+  }, [tier]);
+
+  const ease = "cubic-bezier(0.22,1,0.36,1)";
+
+  const row = (i: number, baseOpacity = 1): React.CSSProperties => {
+    if (phase === "idle") return { opacity: 0, transform: "translateY(6px)", transition: "none" };
+    if (phase === "out") return { opacity: 0, transform: "translateY(6px)", transition: `opacity 110ms ease ${i * 12}ms, transform 110ms ease ${i * 12}ms` };
+    return { opacity: baseOpacity, transform: "translateY(0)", transition: `opacity 300ms ${ease} ${i * 40}ms, transform 300ms ${ease} ${i * 40}ms` };
+  };
+
+  return (
+    <div
+      className="rounded-2xl border border-[rgb(var(--line))] p-6 flex flex-col gap-5"
+      style={{ background: "rgb(var(--surface))" }}
+    >
+      {/* header */}
+      <div className="flex items-start justify-between gap-4" style={row(0)}>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{displayed.label}</span>
+            {displayed.badge && (
+              <span className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+                {displayed.badge}
+              </span>
+            )}
+          </div>
+          <span className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.65 }}>
+            {displayed.tagline}
+          </span>
+        </div>
+        <div className="flex flex-col items-end shrink-0">
+          <span className="text-[2.2rem] font-normal tabular-nums tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
+            {displayed.price}
+          </span>
+          <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.35 }}>
+            {displayed.term}
+          </span>
+        </div>
+      </div>
+
+      {/* includes */}
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 border-t border-[rgb(var(--line))] pt-4">
+        {displayed.includes.map((item, i) => (
+          <li key={item} className="flex items-center gap-2 text-[13px] tracking-tight text-[rgb(var(--muted))]" style={row(i + 1, 0.7)}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0 text-[rgb(var(--fg))]" style={{ opacity: 0.5 }} aria-hidden="true">
+              <polyline points="2 8 6 12 14 4" />
+            </svg>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 function Spinner() {
   return (
@@ -38,40 +139,33 @@ function Spinner() {
   );
 }
 
-function Check() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0" aria-hidden="true">
-      <polyline points="2 8 6 12 14 4" />
-    </svg>
-  );
-}
-
 export function BuyForm({ initialTier }: { initialTier?: string }) {
   const [tier, setTier] = useState(initialTier || "lifetime");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [store, setStore] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
 
-  const selected = TIERS.find((t) => t.id === tier) ?? TIERS[1];
   const isCustom = tier === "custom";
   const isSubmitting = status === "submitting";
+
+  const inputBase =
+    "w-full bg-transparent border-0 border-b py-3 text-[17px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200 allow-select";
+
+  const handleStripeCheckout = () => {
+    const urls: Record<string, string> = {
+      standard: "/contact",
+      lifetime: "https://buy.stripe.com/test_aFa6oG4YrfdvepI2dvcbC00",
+    };
+    window.location.href = urls[tier] ?? "/contact";
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
     setStatus("submitting");
     setError("");
-    const body = [
-      `Tier: ${selected.label} (${selected.price})`,
-      store ? `Store: ${store}` : "",
-      "",
-      message || "(no additional notes)",
-    ]
-      .filter(Boolean)
-      .join("\n");
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -79,9 +173,9 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
         body: JSON.stringify({
           name,
           email,
-          message: body,
-          subject: `Aether ${selected.label}, ${name}`,
-          kind: `aether:${tier}`,
+          message: message || "(no additional notes)",
+          subject: `Aether Custom, ${name}`,
+          kind: "aether:custom",
         }),
       });
       if (!res.ok) {
@@ -95,121 +189,77 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
     }
   };
 
-  const inputBase =
-    "w-full bg-transparent border-0 border-b py-3 text-[17px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-40 focus:outline-none transition-colors duration-200";
-
   if (status === "sent") {
     return (
-      <div className="w-full max-w-lg mx-auto px-6 sm:px-0 py-20 sm:py-28 flex flex-col gap-5" style={{ animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both" }}>
-        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-          Submitted
-        </span>
-        <p className="text-[clamp(2rem,5vw,3rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
+      <div className="flex flex-col gap-4">
+        <p className="text-[clamp(1.8rem,4vw,2.8rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
           {name ? `Got it, ${name}.` : "Got it."}
         </p>
-        <p className="text-[15px] tracking-tight leading-relaxed text-[rgb(var(--muted))] max-w-sm">
-          {email
-            ? `I'll send an invoice to ${email} shortly. Usually within a day.`
-            : "I'll be in touch soon."}
+        <p className="text-[15px] tracking-tight leading-relaxed text-[rgb(var(--muted))]" style={{ opacity: 0.7 }}>
+          We'll be in touch shortly to talk through the build.
         </p>
-      </div>
-    );
-  }
-
-  if (isSubmitting) {
-    return (
-      <div className="w-full max-w-lg mx-auto px-6 sm:px-0 py-20 sm:py-28 flex flex-col gap-5" style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}>
-        <Spinner />
-        <p className="text-[clamp(2rem,5vw,3rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
-          Sending.
-        </p>
-        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]">Just a moment.</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto px-6 sm:px-0 py-12 sm:py-16 flex flex-col gap-10">
+    <div className="flex flex-col gap-6">
 
-      {/* Order summary */}
-      <div
-        key={`summary-${tier}`}
-        className="rounded-2xl border px-6 py-5 flex items-start justify-between gap-4"
-        style={{
-          borderColor: "rgb(var(--line))",
-          animation: "rise-in 260ms cubic-bezier(0.22,1,0.36,1) both",
-        }}
-      >
-        <div className="flex flex-col gap-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">
-              Aether — {selected.label}
-            </span>
-            {"badge" in selected && selected.badge && (
-              <span
-                className="text-[10px] tracking-tight font-medium px-2 py-0.5 rounded-full"
-                style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
-              >
-                {selected.badge}
-              </span>
-            )}
-          </div>
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-            {selected.term}
-          </span>
-          <ul className="mt-3 flex flex-col gap-1.5">
-            {selected.includes.map((item) => (
-              <li key={item} className="flex items-center gap-2 text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.7 }}>
-                <Check />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <span className="text-[1.6rem] font-normal tracking-[-0.04em] leading-none tabular-nums text-[rgb(var(--fg))] shrink-0">
-          {selected.price}
-        </span>
+      {/* Tier pill tabs */}
+      <div className="inline-flex items-center self-center rounded-full border border-[rgb(var(--line))] p-1 gap-1">
+        {TIERS.map((t) => {
+          const active = tier === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setTier(t.id)}
+              className="rounded-full px-4 py-1.5 text-[13px] font-medium tracking-tight transition-all duration-200 [-webkit-tap-highlight-color:transparent]"
+              style={{
+                background: active ? "rgb(var(--fg))" : "transparent",
+                color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
+              }}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
-      <form onSubmit={onSubmit} className="flex flex-col gap-8" noValidate style={{ animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}>
+      {/* Selected tier card — stable container, content fades */}
+      <TierCard tier={tier} />
 
-        {/* Tier selector */}
-        <fieldset>
-          <legend className="sr-only">License tier</legend>
-          <div className="flex items-center gap-2 flex-wrap">
-            {TIERS.map((t) => {
-              const active = tier === t.id;
-              return (
-                <label key={t.id} className="cursor-pointer [-webkit-tap-highlight-color:transparent]">
-                  <input
-                    type="radio"
-                    name="tier"
-                    value={t.id}
-                    checked={active}
-                    onChange={() => setTier(t.id)}
-                    className="sr-only"
-                  />
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full border px-4 py-2 sm:py-1.5 text-[14px] sm:text-[13px] font-medium tracking-tight transition-all duration-200 select-none"
-                    style={{
-                      borderColor: active ? "rgb(var(--fg))" : "rgb(var(--line))",
-                      color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
-                      background: active ? "rgb(var(--fg))" : "transparent",
-                    }}
-                  >
-                    {t.label}
-                    <span className="tabular-nums text-[12px]" style={{ opacity: active ? 0.6 : 0.4 }}>
-                      {t.price}
-                    </span>
-                  </span>
-                </label>
-              );
-            })}
+      {/* Stripe checkout */}
+      {!isCustom && (
+        <div className="flex flex-col gap-4">
+          <button
+            onClick={handleStripeCheckout}
+            className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-white transition-opacity hover:opacity-85 [-webkit-tap-highlight-color:transparent]"
+            style={{ background: "var(--accent-gradient)" }}
+          >
+            Continue to checkout
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </button>
+
+          <div className="flex items-center justify-center gap-6 py-1 flex-wrap">
+            {[
+              { Icon: ShieldCheck,  text: "Secure Stripe checkout" },
+              { Icon: MailCheck,    text: "License by email instantly" },
+              { Icon: PackageCheck, text: "No subscriptions on Lifetime" },
+            ].map(({ Icon, text }) => (
+              <div key={text} className="flex items-center gap-1.5">
+                <Icon size={14} strokeWidth={1.75} className="shrink-0 text-[rgb(var(--muted))]" style={{ opacity: 0.5 }} aria-hidden="true" />
+                <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{text}</span>
+              </div>
+            ))}
           </div>
-        </fieldset>
+        </div>
+      )}
 
-        {/* Fields */}
-        <div className="flex flex-col gap-6">
+      {/* Custom contact form */}
+      {isCustom && (
+        <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <input
               type="text"
@@ -236,54 +286,33 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
               onBlur={(e) => { e.target.style.borderColor = email ? "rgb(var(--fg))" : "rgb(var(--line))"; }}
             />
           </div>
-          {!isCustom && (
-            <input
-              type="text"
-              value={store}
-              onChange={(e) => setStore(e.target.value)}
-              placeholder="Store URL (optional)"
-              className={inputBase}
-              style={{ borderColor: store ? "rgb(var(--fg))" : "rgb(var(--line))" }}
-              onFocus={(e) => { e.target.style.borderColor = "rgb(var(--fg))"; }}
-              onBlur={(e) => { e.target.style.borderColor = store ? "rgb(var(--fg))" : "rgb(var(--line))"; }}
-            />
-          )}
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder={
-              isCustom
-                ? "Tell me about the brand and what you want built."
-                : "Anything you'd like me to know (optional)."
-            }
-            rows={3}
-            required={isCustom}
+            placeholder="Tell us about the brand and what you want built."
+            rows={4}
+            required
             className={`${inputBase} resize-none`}
             style={{ borderColor: message ? "rgb(var(--fg))" : "rgb(var(--line))" }}
             onFocus={(e) => { e.target.style.borderColor = "rgb(var(--fg))"; }}
             onBlur={(e) => { e.target.style.borderColor = message ? "rgb(var(--fg))" : "rgb(var(--line))"; }}
           />
-        </div>
+          <div className="flex items-center gap-4">
+            <button
+              type="submit"
+              disabled={!name || !email || !message || isSubmitting}
+              className="inline-flex items-center gap-2.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2.5 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80 disabled:opacity-25 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+            >
+              {isSubmitting ? <Spinner /> : null}
+              Get a quote
+            </button>
+            {status === "error" && (
+              <span className="text-[13px] tracking-tight text-red-500">{error || "Something went wrong."}</span>
+            )}
+          </div>
+        </form>
+      )}
 
-        {/* Submit */}
-        <div className="flex items-center gap-4">
-          <button
-            type="submit"
-            disabled={!name || !email || isSubmitting}
-            className="group inline-flex items-center gap-2.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2.5 text-[13px] tracking-tight font-medium transition-opacity duration-200 hover:opacity-80 disabled:opacity-25 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
-          >
-            {isCustom ? "Request a quote" : "Request invoice"}
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
-              <path d="M3 8h10M9 4l4 4-4 4"/>
-            </svg>
-          </button>
-
-          {status === "error" && (
-            <span className="text-[13px] tracking-tight text-red-500">{error || "Something went wrong."}</span>
-          )}
-        </div>
-
-      </form>
     </div>
   );
 }

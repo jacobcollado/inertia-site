@@ -3,6 +3,7 @@ import Link from "next/link";
 import { DemoButton } from "./demo-button";
 import { HeroRule } from "./hero-rule";
 import { FeaturesScroll } from "./features-scroll";
+import { ProcessSteps } from "./process-steps";
 
 export const metadata: Metadata = {
   title: "Aether - Premium Shopify Theme for Independent Brands",
@@ -108,8 +109,7 @@ export default function AetherPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 w-full px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
             href="/aether/buy"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
-            style={{ background: "var(--accent-gradient)" }}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
           >
             Buy a license
           </Link>
@@ -152,39 +152,7 @@ export default function AetherPage() {
       <div className="grid-rule" aria-hidden="true" />
 
       {/* Process steps */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-0 px-3 py-14 sm:py-20 rise">
-        {[
-          { step: "Buy", desc: "One-time or annual license" },
-          { step: "Install", desc: "Live in under an hour" },
-          { step: "Sell", desc: "Built to convert from day one" },
-        ].map((s, i) => (
-          <div key={s.step} className="contents">
-            <div className="flex flex-col items-center gap-3 text-center">
-              <span className="text-[clamp(2.4rem,5vw,3.5rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">{s.step}</span>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{s.desc}</span>
-              {i === 2 && (
-                <Link
-                  href="/aether/buy"
-                  className="mt-2 inline-flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
-                  style={{ background: "var(--accent-gradient)" }}
-                >
-                  Get Aether
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </Link>
-              )}
-            </div>
-            {i < 2 && (
-              <div className="flex flex-col sm:flex-row items-center gap-1 sm:mx-10">
-                <div className="w-px sm:w-12 h-12 sm:h-px bg-[rgb(var(--line))]" />
-                <div className="flex items-center justify-center w-6 h-6 rounded-full border border-[rgb(var(--line))] shrink-0">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--muted))] rotate-90 sm:rotate-0"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </div>
-                <div className="w-px sm:w-12 h-12 sm:h-px bg-[rgb(var(--line))]" />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      <ProcessSteps />
 
       <div className="grid-rule" aria-hidden="true" />
 
@@ -233,8 +201,7 @@ export default function AetherPage() {
         <div className="flex justify-center mt-10">
           <Link
             href="/aether/buy"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
-            style={{ background: "var(--accent-gradient)" }}
+            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
           >
             Get Aether
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>

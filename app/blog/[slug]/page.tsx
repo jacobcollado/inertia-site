@@ -195,34 +195,32 @@ export default async function BlogPost({
 
         {/* Header */}
         <header className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-          {/* Tag + date */}
-          <div className="flex items-center gap-2 mb-6">
-            {post.tag && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{post.tag}</span>}
-            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">{formatDate(post.date)}</span>
-            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">{stats.minutes} min read</span>
-          </div>
-
-          <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+          <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] mb-5" style={{ fontFamily: "'Satoshi', sans-serif" }}>
             {post.title}
           </h1>
 
           {post.subtitle && (
-            <p className="mt-5 text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+            <p className="text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mb-8" style={{ fontFamily: "'Satoshi', sans-serif" }}>
               {post.subtitle}
             </p>
           )}
 
-          {/* Byline */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-[rgb(var(--line))]">
+          <div className="flex items-center justify-between pt-5 border-t border-[rgb(var(--line))]">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-full bg-[rgb(var(--surface))] border border-[rgb(var(--line))] flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-[rgb(var(--muted))]" aria-hidden="true">
                   <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
                 </svg>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontFamily: "'Satoshi', sans-serif" }}>Jacob Collado</span>
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-50" style={{ fontFamily: "'Satoshi', sans-serif" }}>Founder, Inertia</span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]">Jacob Collado</span>
+                <div className="flex items-center gap-1.5 text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>
+                  <span>Founder, Inertia</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{formatDate(post.date)}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{stats.minutes} min read</span>
+                </div>
               </div>
             </div>
             <CopyURL />
