@@ -613,26 +613,29 @@ export function VisualNotch() {
   useEffect(() => {
     const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
     if (!bg) return;
+
     if (mobileOpen) {
       bg.style.backdropFilter = "none";
       (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "none";
       bg.style.background = "transparent";
       bg.style.opacity = "0";
+      bg.style.backdropFilter = "none";
       bg.style.webkitMaskImage = "none";
       bg.style.maskImage = "none";
+
     } else {
       bg.style.background = "";
       bg.style.opacity = "";
       bg.style.webkitMaskImage = "";
       bg.style.maskImage = "";
+
     }
 
-    // Blur + push down page content behind the menu
+    // Blur page content
     const main = document.querySelector<HTMLElement>("main, .page-container");
     if (main) {
       main.style.transition = "filter 500ms cubic-bezier(0.22,1,0.36,1)";
       main.style.filter = mobileOpen ? "blur(6px)" : "none";
-      main.style.transform = "";
     }
   }, [mobileOpen]);
 
