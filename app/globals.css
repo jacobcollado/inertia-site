@@ -759,14 +759,16 @@ h1:hover .redact > span.redact-inner,
   top: 0;
   z-index: 50;
   width: 100%;
-  transition: margin 380ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: margin 500ms cubic-bezier(0.22, 1, 0.36, 1), width 500ms cubic-bezier(0.22, 1, 0.36, 1), border-radius 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (max-width: 767px) {
   .site-header--open {
     margin-left: 10px;
     margin-right: 10px;
+    margin-top: 10px;
     width: calc(100% - 20px);
+    border-radius: 16px 16px 0 0;
   }
 }
 
@@ -1023,14 +1025,14 @@ h1:hover .redact > span.redact-inner,
   right: 10px;
   z-index: 45;
   background: rgb(var(--bg));
-  border-radius: 0 0 20px 20px;
+  border-radius: 16px 16px 20px 20px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
-  transform: translateY(-16px);
+  transform: translateY(calc(-100% + 10px));
   opacity: 0;
   pointer-events: none;
   transition:
-    transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
 }
 
