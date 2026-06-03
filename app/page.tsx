@@ -2045,7 +2045,7 @@ function StackDiagram() {
         </div>
         {/* Mobile bento carousel — 2×2 visible, scroll for more */}
         <MetricsCarousel>
-          <div className="grid gap-3" style={{ display:"grid", gridTemplateColumns:"repeat(4, calc(50vw - 18px))", gridTemplateRows:"auto auto", width:"fit-content" }}>
+          <div className="grid gap-3 pr-3" style={{ display:"grid", gridTemplateColumns:"repeat(4, calc((100vw - 36px) / 2))", gridTemplateRows:"auto auto", width:"fit-content" }}>
             {/* clients — col 1 rows 1-2 */}
             <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:180, gridColumn:"1", gridRow:"1 / 3", scrollSnapAlign:"start" }}>
               <div className="flex flex-col gap-1.5">
