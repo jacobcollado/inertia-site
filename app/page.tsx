@@ -269,11 +269,39 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   );
 }
 
-const ROTATING_WORDS = ["impressions", "interactions", "experiences", "encounters", "moments", "details", "movements", "reactions"];
+const ROTATING_WORDS = ["remembered", "chosen", "trusted", "noticed", "converted", "different"];
 const HOLD_MS = 2600;
 const CHAR_STAGGER = 32;
 const FILL_MS = 800;
 const FILL_DELAY = 200;
+
+function ExitChar({ ch }: { ch: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.opacity = "1";
+    el.style.transform = "translateY(0) scale(1)";
+    el.style.filter = "blur(0px)";
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.transition = "opacity 300ms cubic-bezier(0.4,0,1,1), transform 340ms cubic-bezier(0.4,0,1,1), filter 300ms ease";
+        el.style.opacity = "0";
+        el.style.transform = "translateY(8px) scale(0.93)";
+        el.style.filter = "blur(8px)";
+      });
+    });
+  }, []);
+  return (
+    <span ref={ref} aria-hidden="true" style={{
+      display: "inline-block",
+      width: ch === " " ? "0.28em" : undefined,
+      opacity: 1,
+      transform: "translateY(0) scale(1)",
+      filter: "blur(0px)",
+    }}>{ch}</span>
+  );
+}
 
 function RotatingWord() {
   const [index, setIndex] = useState(0);
@@ -351,14 +379,7 @@ function RotatingWord() {
         {word.split("").map((ch, i) => {
           const exitDelay = i * CHAR_STAGGER * 0.55;
           return phase === "exit" ? (
-            <span key={`${index}-${i}-exit`} aria-hidden="true" style={{
-              display: "inline-block",
-              width: ch === " " ? "0.28em" : undefined,
-              opacity: 0,
-              transform: "translateY(10px) scale(0.96)",
-              filter: "blur(4px)",
-              transition: `opacity 200ms cubic-bezier(0.4,0,0.8,1) ${exitDelay}ms, transform 220ms cubic-bezier(0.4,0,0.8,1) ${exitDelay}ms, filter 200ms ease ${exitDelay}ms`,
-            }}>{ch}</span>
+            <ExitChar key={`${index}-${i}-exit`} ch={ch} />
           ) : (
             <span key={`${index}-${i}-enter`} aria-hidden="true" style={{
               display: "inline-block",
@@ -371,25 +392,24 @@ function RotatingWord() {
           );
         })}
       </span>
+      {/* Underline — neutral base that draws in, gradient fades over it */}
       <span style={{
-        position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: "-0.14em",
-        height: "3px",
-        borderRadius: "2px",
-        background: "rgb(var(--fg) / 0.13)",
-        overflow: "hidden",
-        display: "block",
+        position: "absolute", left: 0, right: 0, bottom: "-0.12em",
+        height: "2px", borderRadius: "2px", display: "block",
+        background: "rgb(var(--fg) / 0.2)",
+        transformOrigin: "left",
+        transform: phase !== "idle" ? "scaleX(1)" : "scaleX(0)",
+        opacity: phase !== "idle" ? 1 : 0,
+        transition: "transform 500ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease",
       }}>
-        <span key={fillKey} style={{
-          display: "block",
-          position: "absolute",
-          inset: 0,
-          borderRadius: "2px",
-          opacity: 0,
-          background: "linear-gradient(to right, transparent, rgb(var(--accent)), rgb(100,180,200), transparent)",
-          animation: `underline-fill ${FILL_MS * 2}ms linear ${enterDuration + FILL_DELAY}ms`,
+        <span style={{
+          position: "absolute", inset: 0, borderRadius: "2px",
+          background: "var(--accent-gradient)",
+          transformOrigin: "left",
+          transform: phase === "hold" ? "scaleX(1)" : "scaleX(0)",
+          transition: phase === "hold"
+            ? "transform 900ms cubic-bezier(0.22,1,0.36,1)"
+            : "transform 300ms cubic-bezier(0.4,0,1,1) 80ms",
         }} />
       </span>
     </span>
@@ -463,7 +483,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           </Link>
         )}
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
-          {closing ? "Ready to make your first impression count?" : hero ? <>The web remembers first <RotatingWord />.</> : "What are you building?"}
+          {closing ? "Ready to make your first impression count?" : hero ? <>Your store deserves to be <RotatingWord />.</> : "What are you building?"}
         </p>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs mt-6">
           {closing ? "Tell us what you’re building. We’ll make sure it lands." : hero ? "Tell us what you’re building. We’ll make sure it lands." : "Tell us. We’ll figure out the rest."}
@@ -876,13 +896,13 @@ const PROCESS_STEPS = [
     visual: (
       <div className="flex flex-col gap-1.5 w-full rounded-lg px-3 py-3" style={{ background: "rgb(var(--bg))", border: "1px solid rgb(var(--line))", fontFamily: "monospace" }}>
         {[
-          { text: "$ git push origin main", color: "rgb(var(--muted))", opacity: 0.45 },
-          { text: "✓ build passed (42s)", color: "rgb(var(--muted))", opacity: 0.45 },
-          { text: "✓ tests passed (128/128)", color: "rgb(var(--muted))", opacity: 0.45 },
-          { text: "✓ deployed to production", color: "#3264f0", opacity: 1 },
+          { prefix: "~", text: "git push origin main", color: "rgb(var(--muted))", opacity: 0.45 },
+          { prefix: "·", text: "build passed  42s", color: "rgb(var(--muted))", opacity: 0.45 },
+          { prefix: "·", text: "tests passed  128/128", color: "rgb(var(--muted))", opacity: 0.45 },
+          { prefix: "▲", text: "deployed to production", color: "#3264f0", opacity: 1 },
         ].map((line, i) => (
           <div key={i} className="flex items-center gap-2">
-            {i === 3 && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#3264f0", flexShrink: 0, boxShadow: "0 0 6px rgba(50,100,240,0.6)" }} />}
+            <span style={{ fontSize: 10, color: i === 3 ? "#3264f0" : "rgb(var(--muted))", opacity: i === 3 ? 0.9 : 0.35, flexShrink: 0, width: 10 }}>{line.prefix}</span>
             <span style={{ fontSize: 11.5, color: line.color, opacity: line.opacity, letterSpacing: "0.01em" }}>{line.text}</span>
           </div>
         ))}
@@ -932,7 +952,7 @@ function PlatformDiagram() {
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setActiveStep(i => (i + 1) % PROCESS_STEPS.length), 2400);
+    const t = setInterval(() => setActiveStep(i => (i + 1) % PROCESS_STEPS.length), 3800);
     return () => clearInterval(t);
   }, []);
 
@@ -1183,7 +1203,7 @@ function NewsCarousel() {
 
   return (
     <section className="py-12 sm:py-16">
-      <div className="px-6 sm:px-8 mb-8 flex items-end justify-between">
+      <div className="px-3 max-w-[80rem] mx-auto w-full mb-8 flex items-end justify-between">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight w-full text-center sm:text-left">
           Recent news
         </h2>
@@ -1221,7 +1241,8 @@ function NewsCarousel() {
       <div className="relative hidden sm:block">
         <div
           ref={trackRef}
-          className="flex gap-4 px-6 sm:px-8 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab"
+          className="flex gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab px-3 max-w-[80rem] mx-auto"
+          style={{ paddingRight: 24 }}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUp}
@@ -1742,6 +1763,38 @@ function PulseGrid() {
 
 
 
+function CountUp({ to, duration = 2200, suffix = "" }: { to: number; duration?: number; suffix?: string }) {
+  const [val, setVal] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setStarted(true); obs.disconnect(); }
+    }, { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started) return;
+    const start = performance.now();
+    const from = Math.round(to * 0.6); // start from 60% so it doesn't crawl from zero
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      // gentler ease: quintic out feels smooth without snapping at the end
+      const ease = 1 - Math.pow(1 - p, 5);
+      setVal(Math.round(from + ease * (to - from)));
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [started, to, duration]);
+
+  return <span ref={ref}>{val.toLocaleString()}{suffix}</span>;
+}
+
 function MissionPhrase() {
   const ref = useRef<HTMLParagraphElement>(null);
   const [visible, setVisible] = useState(false);
@@ -1850,22 +1903,40 @@ function StackDiagram() {
   }, []);
 
   return (
-    <div className="flex flex-col sm:flex-row" style={{ overflow: "visible" }}>
-      {/* Left: copy */}
-      <div className="relative flex flex-col justify-center px-6 sm:px-8 py-8 gap-3 sm:flex-1 overflow-hidden">
-        <div className="relative z-10 flex flex-col items-center sm:items-start gap-3 pointer-events-none">
+    <div className="flex flex-col sm:flex-row max-w-[80rem] mx-auto w-full" style={{ overflow: "visible" }}>
+      {/* Left: heading + stats */}
+      <div className="relative flex flex-col justify-center px-3 sm:px-0 py-10 gap-8 sm:flex-1">
+        <div className="flex flex-col items-center sm:items-start gap-3">
           <MissionPhrase />
-          <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left">
-            We don&apos;t outsource the hard parts. Design to deployment, one team, one stack, no handoffs.
+          <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left" style={{ opacity: 0.7 }}>
+            Four years. Over a thousand clients. The numbers speak for themselves.
           </p>
-          <Link href="/blog" className="pointer-events-auto inline-flex items-center gap-2 mt-1 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity hover:opacity-80" style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
-            Read the blog →
-          </Link>
+        </div>
+        {/* Stats grid — 2x2 with hairline dividers */}
+        <div className="grid grid-cols-2 sm:max-w-[420px]" style={{ borderTop: "1px solid rgb(var(--line))", borderLeft: "1px solid rgb(var(--line))" }}>
+          {[
+            { num: 1100, suffix: "+", unit: "", label: "Clients worked with", sub: "Over 4+ years across every category" },
+            { num: 100, suffix: "%", unit: "", label: "In-house delivery", sub: "No outsourcing, ever" },
+            { num: 5, suffix: "", unit: " days", label: "Average kickoff", sub: "From first message to first delivery" },
+            { num: 24, suffix: "", unit: "h", label: "Support response", sub: "On every request, every time" },
+          ].map((s) => (
+            <div key={s.label} className="flex flex-col gap-1.5 p-5 items-center sm:items-start text-center sm:text-left" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))" }}>
+              {/* Number + unit */}
+              <div className="flex items-baseline gap-0.5 leading-none">
+                <span className="text-[2.2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}>
+                  <CountUp to={s.num} duration={1400} suffix={s.suffix} />
+                </span>
+                {s.unit && <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{s.unit}</span>}
+              </div>
+              <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] leading-snug" style={{ fontWeight: 500 }}>{s.label}</span>
+              <span className="text-[11.5px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.45 }}>{s.sub}</span>
+            </div>
+          ))}
         </div>
       </div>
-      {/* Right: diagram - exact SVG from design file, with animated line overlays */}
-      <div className="flex items-center justify-center overflow-hidden sm:w-[38%] sm:shrink-0 sm:self-stretch py-6">
-        <svg ref={svgRef} viewBox="0 0 2115 1562" fill="none" className="w-full" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: 280 }} aria-hidden="true">
+      {/* Right: diagram */}
+      <div className="flex items-center justify-center overflow-hidden sm:w-[44%] sm:shrink-0 sm:self-stretch py-6">
+        <svg ref={svgRef} viewBox="0 0 2115 1562" fill="none" className="w-full" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: 340 }} aria-hidden="true">
           <defs>
             {/* Inner shadow for center "In" text */}
             <filter id="sd-f0" x="971.476" y="639.5" width="212.103" height="240.5" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
@@ -2641,23 +2712,23 @@ function VisualLayout() {
         <TechMarquee />
       </div>
 
-      <div className="py-8 sm:py-12" />
+      <div className="py-12 sm:py-20" />
 
       <AetherFeature />
 
-      <div className="py-8 sm:py-12" />
+      <div className="py-12 sm:py-20" />
 
       <PlatformSignal />
 
-      <div className="py-8 sm:py-12" />
+      <div className="py-12 sm:py-20" />
 
       <NewsCarousel />
 
-      <div className="py-8 sm:py-12" />
+      <div className="py-12 sm:py-20" />
 
       <StackDiagram />
 
-      <div className="py-8 sm:py-12" />
+      <div className="py-12 sm:py-20" />
 
       {/* Mobile: carousel */}
       <div className="sm:hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollSnapType: "x mandatory" }}>
@@ -2715,11 +2786,11 @@ function VisualLayout() {
         })}
       </div>
 
-      <div className="py-8 sm:py-12" />
+      <div className="py-12 sm:py-20" />
 
       <StartPrompt closing />
 
-      <div className="py-8 sm:py-12" />
+      <div className="py-12 sm:py-20" />
 
     </main>
     </>
