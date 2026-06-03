@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TOC } from "./toc";
-import { ReadingProgress } from "./progress";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
 import {
@@ -174,9 +173,7 @@ export default async function BlogPost({
 
   return (
     <main className="relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] px-3">
-      <ReadingProgress />
-
-      <div className="xl:grid xl:grid-cols-[1fr_minmax(0,48rem)_1fr] xl:gap-8">
+<div className="xl:grid xl:grid-cols-[1fr_minmax(0,48rem)_1fr] xl:gap-8">
         {/* Left gutter — mobile TOC only */}
         <TOC headings={headings} />
 
