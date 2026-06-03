@@ -616,13 +616,13 @@ export function VisualNotch() {
     const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
     if (!bg) return;
     if (mobileOpen) {
-      bg.style.transition = "background 200ms ease, backdrop-filter 200ms ease";
       bg.style.backdropFilter = "none";
       (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "none";
-      bg.style.background = `rgb(var(--bg))`;
+      bg.style.background = "transparent";
       bg.style.webkitMaskImage = "none";
       bg.style.maskImage = "none";
     } else {
+      bg.style.background = "";
       bg.style.webkitMaskImage = "";
       bg.style.maskImage = "";
     }
