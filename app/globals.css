@@ -759,6 +759,17 @@ h1:hover .redact > span.redact-inner,
   top: 0;
   z-index: 50;
   width: 100%;
+  transition: top 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 767px) {
+  .site-header--open {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 767px) {
