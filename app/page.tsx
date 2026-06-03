@@ -470,7 +470,10 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
   const arrowClass = "flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
 
   return (
-    <section className={`px-6 sm:px-8 flex flex-col items-center gap-3 ${hero ? "min-h-[calc(100svh-140px)] justify-center pt-6 pb-16" : "py-12 sm:py-24"}`}>
+    <section className={`px-6 sm:px-8 flex flex-col items-center gap-3 ${hero ? "min-h-[calc(100svh-140px)] justify-center pt-6 pb-16" : "py-16 sm:py-28"}`}>
+      {closing && (
+        <div className="w-px h-12 bg-[rgb(var(--line))] opacity-40 mb-4" />
+      )}
       <div className="flex flex-col items-center gap-3 text-center">
         {hero && (
           <Link
@@ -483,10 +486,10 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           </Link>
         )}
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
-          {closing ? "Ready to make your first impression count?" : hero ? <>Your store deserves to be <RotatingWord />.</> : "What are you building?"}
+          {closing ? <>Your next project starts with a message.</> : hero ? <>Your store deserves to be <RotatingWord />.</> : "What are you building?"}
         </p>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs mt-6">
-          {closing ? "Tell us what you’re building. We’ll make sure it lands." : hero ? "Tell us what you’re building. We’ll make sure it lands." : "Tell us. We’ll figure out the rest."}
+          {closing ? "Drop us a line. We’ll get back to you within 24 hours." : hero ? "Tell us what you’re building. We’ll make sure it lands." : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
 
@@ -949,6 +952,7 @@ const PROCESS_STEPS = [
 
 function PlatformDiagram() {
   const [activeStep, setActiveStep] = useState(0);
+  const [progressKey, setProgressKey] = useState(0);
   const [resetting, setResetting] = useState(false);
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -973,6 +977,7 @@ function PlatformDiagram() {
           setResetting(true);
           setTimeout(() => setResetting(false), 500);
         }
+        setProgressKey(k => k + 1);
         return next;
       });
     }, 3800);
@@ -990,6 +995,26 @@ function PlatformDiagram() {
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
       }}
     >
+      {/* Card header */}
+      <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid rgb(var(--line) / 0.5)" }}>
+        <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.8 }}>
+          How we work
+        </span>
+        <div className="flex items-center gap-1">
+          {PROCESS_STEPS.map((_, si) => (
+            <div
+              key={si}
+              className="rounded-full transition-all duration-500"
+              style={{
+                width: si === activeStep ? 16 : 5,
+                height: 5,
+                background: si === activeStep ? "var(--accent-gradient)" : si < activeStep ? "rgba(50,100,240,0.4)" : "rgb(var(--line))",
+                opacity: si === activeStep ? 1 : 0.5,
+              }}
+            />
+          ))}
+        </div>
+      </div>
       <div className="relative">
         {PROCESS_STEPS.map((step, i) => {
           const isActive = activeStep === i;
@@ -1024,7 +1049,7 @@ function PlatformDiagram() {
                     <span style={{ fontSize: 11, fontWeight: 500, color: isActive ? "#fff" : "rgb(var(--muted))", opacity: isActive ? 1 : 0.5 }}>{step.num}</span>
                   )}
                 </div>
-                {/* Connector — centered in 56px column = left: 27.25 */}
+                {/* Connector */}
                 {!isLast && (
                   <div
                     style={{
@@ -1049,10 +1074,25 @@ function PlatformDiagram() {
                   borderBottom: "none",
                 }}
               >
-                <span
-                  className="block text-[17px] tracking-tight"
-                  style={{ fontWeight: isActive ? 500 : 400, color: isActive ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: resetting && isPast ? 0 : isActive ? 1 : isPast ? 0.45 : 0.6, transition: "color 300ms ease, opacity 400ms ease" }}
-                >{step.label}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span
+                    className="text-[17px] tracking-tight"
+                    style={{ fontWeight: isActive ? 500 : 400, color: isActive ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: resetting && isPast ? 0 : isActive ? 1 : isPast ? 0.45 : 0.6, transition: "color 300ms ease, opacity 400ms ease" }}
+                  >{step.label}</span>
+                  {isActive && !isLast && (
+                    <div style={{ width: 48, height: 3, borderRadius: 3, background: "rgb(var(--line))", overflow: "hidden", opacity: 0.5, flexShrink: 0 }}>
+                      <div
+                        key={progressKey}
+                        style={{
+                          height: "100%",
+                          borderRadius: 3,
+                          background: "var(--accent-gradient)",
+                          animation: "progress-fill 3.8s linear forwards",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
                 <ExpandingContent open={isActive}>
                   <div className="flex flex-col gap-3 pt-2 pb-1">
                     <span className="block text-[14px] tracking-tight leading-relaxed" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>{step.desc}</span>
@@ -1937,34 +1977,51 @@ function StackDiagram() {
           </p>
         </div>
         {/* Stats grid — 4-col on desktop, 2-col on mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ borderTop: "1px solid rgb(var(--line))", borderLeft: "1px solid rgb(var(--line))" }}>
-          {/* 1100+ clients — dot grid */}
-          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
-            <div className="absolute inset-0 opacity-[0.06]" aria-hidden="true" style={{ backgroundImage: "radial-gradient(circle, rgb(var(--fg)) 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
-            <div className="relative z-10 flex flex-col gap-2">
-              <div className="flex items-baseline gap-1 leading-none">
-                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
-              </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* 1100+ clients — growth bars */}
+          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
+            <div className="flex flex-col gap-2">
+              <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing: "-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
               <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Clients worked with</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Over 4+ years</span>
             </div>
-          </div>
-
-          {/* 100% in-house — solid fill bar */}
-          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
-            <div className="absolute bottom-0 inset-x-0 opacity-[0.07]" aria-hidden="true" style={{ height: "100%", background: "var(--accent-gradient)" }} />
-            <div className="relative z-10 flex flex-col gap-2">
-              <div className="flex items-baseline gap-1 leading-none">
-                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight tabular-nums" style={{ letterSpacing: "-0.04em", background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
-              </div>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>In-house delivery</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>No outsourcing, ever</span>
+            {/* Rising bar chart */}
+            <div className="flex items-end gap-1 mt-4" style={{ height: 40 }} aria-hidden="true">
+              {[18, 28, 38, 30, 45, 55, 48, 62, 72, 65, 85, 100].map((h, i) => (
+                <div key={i} className="flex-1 rounded-sm" style={{
+                  height: `${h}%`,
+                  background: i >= 9 ? "var(--accent-gradient)" : `rgb(var(--fg) / ${0.05 + i * 0.03})`,
+                }} />
+              ))}
             </div>
           </div>
 
-          {/* 5 days — timeline dots */}
-          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
-            <div className="relative z-10 flex flex-col gap-2">
+          {/* 100% in-house — donut */}
+          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
+            <div className="flex flex-col gap-2">
+              <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing: "-0.04em", background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>In-house delivery</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>No outsourcing, ever</span>
+            </div>
+            {/* Full donut */}
+            <svg viewBox="0 0 48 48" fill="none" className="mt-4" style={{ width: 40, height: 40 }} aria-hidden="true">
+              <defs>
+                <linearGradient id="donut-grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop stopColor="#3264f0" /><stop offset="1" stopColor="#64b4c8" />
+                </linearGradient>
+              </defs>
+              <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2" />
+              <circle cx="24" cy="24" r="17" stroke="url(#donut-grad)" strokeWidth="5" strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 17}`} strokeDashoffset="0"
+                transform="rotate(-90 24 24)" />
+              <circle cx="24" cy="24" r="8" fill="rgb(var(--accent) / 0.12)" />
+              <polyline points="19,24 23,28 30,20" stroke="url(#donut-grad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </svg>
+          </div>
+
+          {/* 5 days */}
+          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
+            <div className="flex flex-col gap-2">
               <div className="flex items-baseline gap-1 leading-none">
                 <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={5} duration={800} /></span>
                 <span className="text-[1.3rem] text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>days</span>
@@ -1972,20 +2029,20 @@ function StackDiagram() {
               <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Average kickoff</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>First message to delivery</span>
             </div>
-            {/* Timeline strip */}
-            <div className="flex items-center gap-1 mt-4" aria-hidden="true">
+            {/* Horizontal progress bar D1–D5 */}
+            <div className="flex gap-1.5 mt-4" aria-hidden="true">
               {[1,2,3,4,5].map((d) => (
-                <div key={d} className="flex-1 flex flex-col items-center gap-1">
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: d <= 3 ? "var(--accent-gradient)" : "rgb(var(--line))", opacity: d <= 3 ? 1 : 0.35 }} />
-                  <span style={{ fontSize: 9, color: "rgb(var(--muted))", opacity: 0.4 }}>D{d}</span>
+                <div key={d} className="flex-1 flex flex-col gap-1.5">
+                  <div style={{ height: 6, borderRadius: 4, background: d <= 3 ? "var(--accent-gradient)" : "rgb(var(--line))", opacity: d <= 3 ? 1 : 0.25 }} />
+                  <span style={{ fontSize: 9, color: "rgb(var(--muted))", opacity: 0.4, textAlign: "center" }}>D{d}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 24h response — clock arcs */}
-          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
-            <div className="relative z-10 flex flex-col gap-2">
+          {/* 24h response */}
+          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
+            <div className="flex flex-col gap-2">
               <div className="flex items-baseline gap-1 leading-none">
                 <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={24} duration={1000} /></span>
                 <span className="text-[1.3rem] text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>h</span>
@@ -1993,19 +2050,19 @@ function StackDiagram() {
               <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Support response</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Every request, every time</span>
             </div>
-            {/* Clock arc */}
-            <svg viewBox="0 0 48 48" fill="none" className="mt-4" style={{ width: 36, height: 36 }} aria-hidden="true">
-              <circle cx="24" cy="24" r="18" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.3" />
-              <path d="M24 6 A18 18 0 1 1 6 24" stroke="url(#clock-grad)" strokeWidth="2.5" strokeLinecap="round" />
-              <line x1="24" y1="24" x2="24" y2="13" stroke="rgb(var(--fg))" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
-              <line x1="24" y1="24" x2="31" y2="28" stroke="rgb(var(--fg))" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
-              <circle cx="24" cy="24" r="2" fill="rgb(var(--fg))" opacity="0.6" />
+            {/* Clock */}
+            <svg viewBox="0 0 52 52" fill="none" className="mt-4" style={{ width: 40, height: 40 }} aria-hidden="true">
               <defs>
-                <linearGradient id="clock-grad" x1="24" y1="6" x2="6" y2="24" gradientUnits="userSpaceOnUse">
+                <linearGradient id="clock-grad2" x1="0" y1="0" x2="1" y2="1">
                   <stop stopColor="#3264f0" />
                   <stop offset="1" stopColor="#64b4c8" />
                 </linearGradient>
               </defs>
+              <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25" />
+              <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#clock-grad2)" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55" />
+              <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55" />
+              <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7" />
             </svg>
           </div>
         </div>
