@@ -1895,6 +1895,58 @@ function MissionPhrase() {
   );
 }
 
+function MetricsCarousel({ children }: { children: React.ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const pages = 2;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const p = Math.round(el.scrollLeft / el.clientWidth);
+      setPage(Math.min(p, pages - 1));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const goTo = (p: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: p * el.clientWidth, behavior: "smooth" });
+  };
+
+  return (
+    <div className="sm:hidden flex flex-col gap-2.5">
+      <div ref={scrollRef} className="overflow-x-auto -mx-3 px-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollSnapType:"x mandatory" }}>
+        {children}
+      </div>
+      {/* Indicator */}
+      <div className="flex items-center justify-center gap-2">
+        {Array.from({ length: pages }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            className="transition-all duration-400"
+            style={{
+              height: 5,
+              width: page === i ? 24 : 8,
+              borderRadius: 3,
+              background: page === i ? "var(--accent-gradient)" : "rgb(var(--line))",
+              opacity: page === i ? 1 : 0.35,
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+            }}
+            aria-label={`Page ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function StackDiagram() {
   const upperCurve = "M1356 796.5H1419.5C1638.5 779.5 1657 623 1761 623";
   const lowerCurve = "M1356.5 797H1420C1639 814 1657.5 970.5 1761.5 970.5";
@@ -1976,97 +2028,231 @@ function StackDiagram() {
             Four years. Over a thousand clients. The numbers speak for themselves.
           </p>
         </div>
-        {/* Stats grid — 4-col on desktop, 2-col on mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {/* 1100+ clients — growth bars */}
-          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
-            <div className="flex flex-col gap-2">
-              <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing: "-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Clients worked with</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Over 4+ years</span>
+        {/* Mobile bento carousel — 2×2 visible, scroll for more */}
+        <MetricsCarousel>
+          <div className="grid gap-3" style={{ display:"grid", gridTemplateColumns:"repeat(4, calc(50vw - 18px))", gridTemplateRows:"auto auto", width:"fit-content" }}>
+            {/* clients — col 1 rows 1-2 */}
+            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:180, gridColumn:"1", gridRow:"1 / 3", scrollSnapAlign:"start" }}>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Clients worked with</span>
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Over 4+ years</span>
+              </div>
+              <div className="flex-1 relative flex items-end gap-1.5 pt-4" aria-hidden="true">
+                {[28,38,45,55,62,72,85,100].map((h,i)=>(
+                  <div key={i} className="flex-1" style={{ height:`${h}%`, background:i>=6?"var(--accent-gradient)":`rgb(var(--fg) / ${0.12+i*0.05})` }} />
+                ))}
+                <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
+              </div>
             </div>
-            {/* Rising bar chart */}
-            <div className="flex items-end gap-1 mt-4" style={{ height: 40 }} aria-hidden="true">
-              {[18, 28, 38, 30, 45, 55, 48, 62, 72, 65, 85, 100].map((h, i) => (
-                <div key={i} className="flex-1 rounded-sm" style={{
-                  height: `${h}%`,
-                  background: i >= 9 ? "var(--accent-gradient)" : `rgb(var(--fg) / ${0.05 + i * 0.03})`,
-                }} />
+            {/* 100% — col 2 row 1 */}
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"2", gridRow:"1", scrollSnapAlign:"start" }}>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house</span>
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing</span>
+              </div>
+              <svg viewBox="0 0 48 48" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
+                <defs><linearGradient id="dg-mc" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
+                <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
+                <circle cx="24" cy="24" r="17" stroke="url(#dg-mc)" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)"/>
+                <polyline points="19,24 23,28 30,20" stroke="url(#dg-mc)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
+            </div>
+            {/* 24h — col 2 row 2 */}
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"2", gridRow:"2" }}>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-baseline gap-1 leading-none">
+                  <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={24} duration={1000} /></span>
+                  <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>h</span>
+                </div>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Support</span>
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request</span>
+              </div>
+              <svg viewBox="0 0 52 52" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
+                <defs><linearGradient id="cg-mc" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
+                <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
+                <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#cg-mc)" strokeWidth="2.5" strokeLinecap="round"/>
+                <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
+                <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
+                <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
+              </svg>
+            </div>
+            {/* 5 days — col 3 row 1 */}
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"3", gridRow:"1", scrollSnapAlign:"start" }}>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-baseline gap-1 leading-none">
+                  <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={5} duration={800} /></span>
+                  <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>d</span>
+                </div>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Avg kickoff</span>
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>First msg to delivery</span>
+              </div>
+              <div className="flex gap-1 mt-2" aria-hidden="true">
+                {[1,2,3,4,5].map(d=>(
+                  <div key={d} className="flex-1" style={{ height:4, background:d<=3?"var(--accent-gradient)":"rgb(var(--line))", opacity:d<=3?1:0.25 }} />
+                ))}
+              </div>
+            </div>
+            {/* US map — col 3 row 2 / col 4 rows 1-2 */}
+            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"4", gridRow:"1 / 3", scrollSnapAlign:"start" }}>
+              <div className="flex flex-col gap-1.5 relative z-10">
+                <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}>US</span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Based clients</span>
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>& globally</span>
+              </div>
+              <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover dark:invert" style={{ opacity:0.18 }} />
+              <div className="absolute inset-x-0 top-0 h-2/3 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
+            </div>
+            {/* 98% — col 3 row 2 */}
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"3", gridRow:"2" }}>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={98} duration={1200} suffix="%" /></span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction</span>
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Client feedback</span>
+              </div>
+              <div className="mt-2" style={{ height:4, background:"rgb(var(--line))", opacity:0.2, overflow:"hidden" }}>
+                <div style={{ height:"100%", width:"98%", background:"var(--accent-gradient)" }} />
+              </div>
+            </div>
+          </div>
+        </MetricsCarousel>
+
+        {/* Desktop bento grid — 4 cols, varied spans */}
+        <div className="hidden sm:grid gap-3" style={{ gridTemplateColumns:"repeat(4, 1fr)" }}>
+
+          {/* clients — 2 cols × 2 rows */}
+          <div className="flex flex-col p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", gridColumn:"span 2", gridRow:"span 2", minHeight:260 }}>
+            <div className="flex flex-col gap-2">
+              <span className="text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
+              <span className="text-[15px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Clients worked with</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Over 4+ years across every category</span>
+            </div>
+            <div className="flex-1 relative flex items-end gap-1.5 pt-4" aria-hidden="true">
+              {[18,28,38,30,45,55,48,62,72,65,85,100].map((h,i) => (
+                <div key={i} className="flex-1" style={{ height:`${h}%`, background:i>=9?"var(--accent-gradient)":`rgb(var(--fg) / ${0.1+i*0.04})` }} />
               ))}
+              {/* Upward fade */}
+              <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
             </div>
           </div>
 
-          {/* 100% in-house — donut */}
-          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
-            <div className="flex flex-col gap-2">
-              <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing: "-0.04em", background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>In-house delivery</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>No outsourcing, ever</span>
+          <div className="flex flex-col justify-between p-5 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house delivery</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing, ever</span>
             </div>
-            {/* Full donut */}
-            <svg viewBox="0 0 48 48" fill="none" className="mt-4" style={{ width: 40, height: 40 }} aria-hidden="true">
-              <defs>
-                <linearGradient id="donut-grad" x1="0" y1="0" x2="1" y2="1">
-                  <stop stopColor="#3264f0" /><stop offset="1" stopColor="#64b4c8" />
-                </linearGradient>
-              </defs>
-              <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2" />
-              <circle cx="24" cy="24" r="17" stroke="url(#donut-grad)" strokeWidth="5" strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 17}`} strokeDashoffset="0"
-                transform="rotate(-90 24 24)" />
-              <circle cx="24" cy="24" r="8" fill="rgb(var(--accent) / 0.12)" />
-              <polyline points="19,24 23,28 30,20" stroke="url(#donut-grad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            <svg viewBox="0 0 48 48" fill="none" className="mt-3" style={{ width:36, height:36 }} aria-hidden="true">
+              <defs><linearGradient id="dg-d" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
+              <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
+              <circle cx="24" cy="24" r="17" stroke="url(#dg-d)" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)"/>
+              <polyline points="19,24 23,28 30,20" stroke="url(#dg-d)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </svg>
           </div>
 
-          {/* 5 days */}
-          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
-            <div className="flex flex-col gap-2">
+          <div className="flex flex-col justify-between p-5 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
+            <div className="flex flex-col gap-1.5">
               <div className="flex items-baseline gap-1 leading-none">
-                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={5} duration={800} /></span>
-                <span className="text-[1.3rem] text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>days</span>
+                <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={24} duration={1000} /></span>
+                <span className="text-[1.2rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>h</span>
               </div>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Average kickoff</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>First message to delivery</span>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Support response</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request, every time</span>
             </div>
-            {/* Horizontal progress bar D1–D5 */}
-            <div className="flex gap-1.5 mt-4" aria-hidden="true">
-              {[1,2,3,4,5].map((d) => (
-                <div key={d} className="flex-1 flex flex-col gap-1.5">
-                  <div style={{ height: 6, borderRadius: 4, background: d <= 3 ? "var(--accent-gradient)" : "rgb(var(--line))", opacity: d <= 3 ? 1 : 0.25 }} />
-                  <span style={{ fontSize: 9, color: "rgb(var(--muted))", opacity: 0.4, textAlign: "center" }}>D{d}</span>
+            <svg viewBox="0 0 52 52" fill="none" className="mt-3" style={{ width:36, height:36 }} aria-hidden="true">
+              <defs><linearGradient id="cg-d" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
+              <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
+              <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#cg-d)" strokeWidth="2.5" strokeLinecap="round"/>
+              <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
+              <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
+              <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
+            </svg>
+          </div>
+
+          {/* Row 2: 5 days, 41 sections, satisfaction */}
+          <div className="flex flex-col justify-between p-5 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-baseline gap-1 leading-none">
+                <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={5} duration={800} /></span>
+                <span className="text-[1.2rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>days</span>
+              </div>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Average kickoff</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>First message to delivery</span>
+            </div>
+            <div className="flex gap-1.5 mt-3" aria-hidden="true">
+              {[1,2,3,4,5].map(d=>(
+                <div key={d} className="flex-1 flex flex-col gap-1">
+                  <div style={{ height:5, borderRadius:3, background:d<=3?"var(--accent-gradient)":"rgb(var(--line))", opacity:d<=3?1:0.25 }} />
+                  <span style={{ fontSize:8, color:"rgb(var(--muted))", opacity:0.4, textAlign:"center" }}>D{d}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 24h response */}
-          <div className="flex flex-col justify-between p-6 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", minHeight: 200 }}>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-baseline gap-1 leading-none">
-                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={24} duration={1000} /></span>
-                <span className="text-[1.3rem] text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>h</span>
-              </div>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Support response</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Every request, every time</span>
+          <div className="flex flex-col justify-between p-5 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
+            <div className="flex flex-col gap-1.5 relative z-10">
+              <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}>US</span>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Clients across the US</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>& globally</span>
             </div>
-            {/* Clock */}
-            <svg viewBox="0 0 52 52" fill="none" className="mt-4" style={{ width: 40, height: 40 }} aria-hidden="true">
-              <defs>
-                <linearGradient id="clock-grad2" x1="0" y1="0" x2="1" y2="1">
-                  <stop stopColor="#3264f0" />
-                  <stop offset="1" stopColor="#64b4c8" />
-                </linearGradient>
-              </defs>
-              <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25" />
-              <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#clock-grad2)" strokeWidth="2.5" strokeLinecap="round" />
-              <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55" />
-              <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55" />
-              <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7" />
-            </svg>
+            <img
+              src="/us-map.svg"
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover dark:invert"
+              style={{ opacity: 0.15 }}
+            />
+            {/* Upward shadow to blend map into card */}
+            <div className="absolute inset-x-0 top-0 h-2/3 pointer-events-none" style={{ background: "linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
           </div>
+
+          <div className="flex flex-col justify-between p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:160, gridColumn:"span 2" }}>
+            <div className="flex items-end justify-between gap-4">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={98} duration={1200} suffix="%" /></span>
+                <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction rate</span>
+                <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>From client feedback</span>
+              </div>
+              {/* Wider bar showing 98 out of 100 */}
+              <div className="flex-1 flex flex-col gap-1.5 max-w-[180px]">
+                {["Quality","Communication","Speed","Value"].map((label, i) => {
+                  const widths = [99, 97, 96, 98];
+                  return (
+                    <div key={label} className="flex items-center gap-2">
+                      <span style={{ fontSize:10, color:"rgb(var(--muted))", opacity:0.4, width:80, flexShrink:0 }}>{label}</span>
+                      <div className="flex-1" style={{ height:4, borderRadius:0, background:"rgb(var(--line))", opacity:0.2, overflow:"hidden" }}>
+                        <div style={{ height:"100%", width:`${widths[i]}%`, background:"var(--accent-gradient)" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* CTA card — col 4 row 2 */}
+          <a
+            href="https://www.instagram.com/by.inertia/"
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-col justify-between p-7 rounded-2xl hover:opacity-90 transition-opacity"
+            style={{ background:"var(--accent-gradient)", minHeight:160, gridColumn:"4", gridRow:"2" }}
+          >
+            <span className="text-[13px] tracking-tight text-white" style={{ opacity:0.7 }}>Ready to start?</span>
+            <div>
+              <p className="text-[1.4rem] font-medium tracking-tight text-white leading-snug mb-3">Let's build something.</p>
+              <span className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-white" style={{ opacity:0.8 }}>
+                Start a project
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+              </span>
+            </div>
+          </a>
+
         </div>
-        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 pt-2">
+        {/* Mobile CTA remains below */}
+        <div className="flex flex-col sm:hidden items-center gap-4 pt-2">
           <a
             href="https://www.instagram.com/by.inertia/"
             target="_blank"
