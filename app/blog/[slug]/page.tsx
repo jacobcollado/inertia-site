@@ -186,7 +186,7 @@ export default async function BlogPost({
             className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
           >
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M13 8H3"/><path d="M7 4L3 8l4 4"/></svg>
-            Writing & news
+            Recent news
           </Link>
         </div>
 
@@ -241,7 +241,7 @@ export default async function BlogPost({
         <div className="px-0 pt-6 pb-20 flex items-center justify-between border-t border-[rgb(var(--line))]">
           <Link href="/blog" className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M13 8H3"/><path d="M7 4L3 8l4 4"/></svg>
-            Writing & news
+            Recent news
           </Link>
           <a
             href="#"
