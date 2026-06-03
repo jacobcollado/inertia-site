@@ -1015,20 +1015,7 @@ h1:hover .redact > span.redact-inner,
 /* â”€â”€ Mobile nav drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .mobile-nav__backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 44;
-  background: rgba(0,0,0,0.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.mobile-nav__backdrop[data-open="true"] {
-  opacity: 1;
-  pointer-events: auto;
+  display: none;
 }
 
 .mobile-nav__drawer {
@@ -1040,17 +1027,13 @@ h1:hover .redact > span.redact-inner,
   background: rgb(var(--bg));
   border-radius: 18px 18px 22px 22px;
   box-shadow: 0 16px 48px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
-  transform: translateY(calc(-100% + 10px));
   opacity: 0;
   pointer-events: none;
-  transition:
-    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
 }
 
 .mobile-nav__drawer[data-open="true"] {
-  transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
 }
