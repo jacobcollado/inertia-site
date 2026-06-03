@@ -1898,17 +1898,28 @@ function MissionPhrase() {
 function MetricsCarousel({ children }: { children: React.ReactNode }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
-  const pages = 2;
+  const [pages, setPages] = useState(2);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+
+    // Count snap points by finding scrollSnapAlign elements
+    const snapEls = el.querySelectorAll<HTMLElement>('[style*="scrollSnapAlign"]');
+    if (snapEls.length > 0) setPages(snapEls.length);
+
     const onScroll = () => {
-      // Each "page" is half the scroll width since 2 cols are visible at a time
-      const halfScroll = el.scrollWidth / pages;
-      const p = Math.min(Math.round(el.scrollLeft / halfScroll), pages - 1);
-      setPage(p);
+      // Find which snap element is closest to left edge
+      const containerLeft = el.getBoundingClientRect().left;
+      let closest = 0;
+      let minDist = Infinity;
+      snapEls.forEach((snap, i) => {
+        const dist = Math.abs(snap.getBoundingClientRect().left - containerLeft);
+        if (dist < minDist) { minDist = dist; closest = i; }
+      });
+      setPage(closest);
     };
+
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
@@ -1916,8 +1927,10 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
   const goTo = (p: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    const halfScroll = el.scrollWidth / pages;
-    el.scrollTo({ left: p * halfScroll, behavior: "smooth" });
+    const snapEls = el.querySelectorAll<HTMLElement>('[style*="scrollSnapAlign"]');
+    if (snapEls[p]) {
+      snapEls[p].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    }
   };
 
   return (
@@ -1925,7 +1938,6 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
       <div ref={scrollRef} className="overflow-x-auto -mx-3 px-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollSnapType:"x mandatory" }}>
         {children}
       </div>
-      {/* Indicator — more breathing room from grid */}
       <div className="flex items-center justify-center gap-2 mt-4">
         {Array.from({ length: pages }).map((_, i) => (
           <button
