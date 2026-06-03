@@ -56,7 +56,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
   const desktopAside = (
     <nav
       aria-label="Table of contents"
-      className="sticky top-28 self-start flex flex-col items-end"
+      className="hidden xl:flex sticky top-28 self-start flex-col items-end"
       style={{
         opacity: entered ? 1 : 0,
         transform: entered ? "translateX(0)" : "translateX(-8px)",
