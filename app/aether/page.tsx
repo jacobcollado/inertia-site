@@ -118,7 +118,7 @@ export default function AetherPage() {
               <DemoButton href={DEMO_URL} password="aether" />
             </div>
             <Link
-              href="/aether/docs"
+              href="/docs?from=aether"
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-5 py-2 text-[13px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
             >
               Docs

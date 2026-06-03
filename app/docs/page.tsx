@@ -4,6 +4,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 
 // â"€â"€â"€ Types â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
@@ -1158,7 +1159,9 @@ function buildSearchIndex(): SearchResult[] {
 
 const SEARCH_INDEX = buildSearchIndex();
 
-export default function DocsPage() {
+function DocsPageInner() {
+  const searchParams = useSearchParams();
+  const fromAether = searchParams.get("from") === "aether";
   const [activeProductId, setActiveProductId] = useState(PRODUCTS[0].id);
   const [activeArticleId, setActiveArticleId] = useState<string>(INTRO_ID);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -1262,9 +1265,19 @@ export default function DocsPage() {
 
       {/* Docs header — desktop hidden, mobile only */}
       <header className="lg:hidden flex items-center justify-between px-3 shrink-0" style={{ height: 72, background: "rgb(var(--bg))" }}>
-        <Link href="/" className="flex items-center gap-2 pl-3">
-          <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
-        </Link>
+        <div className="flex items-center gap-3 pl-3">
+          <Link href="/">
+            <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
+          </Link>
+          {fromAether && (
+            <Link href="/aether" className="flex items-center gap-1 text-[12px] tracking-tight transition-colors" style={{ color: "rgb(var(--muted))", opacity: 0.6 }}>
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
+                <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
+              </svg>
+              Aether
+            </Link>
+          )}
+        </div>
         <Link href="/aether/buy" className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight font-medium transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
           Get Aether
         </Link>
@@ -1275,6 +1288,16 @@ export default function DocsPage() {
         {/* Sidebar */}
         <aside className="hidden lg:flex flex-col w-56 xl:w-64 shrink-0 p-3">
           <div className="sticky top-3 max-h-[calc(100vh-24px)] overflow-y-auto rounded-2xl border border-[rgb(var(--line))] px-3 py-4 flex flex-col gap-4" style={{ background: "rgb(var(--surface))" }}>
+
+            {/* Back to Aether */}
+            {fromAether && (
+              <Link href="/aether" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] tracking-tight transition-colors hover:bg-[rgb(var(--fg)/0.05)]" style={{ color: "rgb(var(--muted))", opacity: 0.7 }}>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
+                  <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
+                </svg>
+                Back to Aether
+              </Link>
+            )}
 
             {/* Logo */}
             <div className="flex items-center justify-between px-3 py-2 mb-1">
@@ -1772,6 +1795,14 @@ export default function DocsPage() {
       </div>
     </>, document.body)}
     </>
+  );
+}
+
+export default function DocsPage() {
+  return (
+    <React.Suspense>
+      <DocsPageInner />
+    </React.Suspense>
   );
 }
 
