@@ -759,16 +759,22 @@ h1:hover .redact > span.redact-inner,
   top: 0;
   z-index: 50;
   width: 100%;
-  transition: margin 500ms cubic-bezier(0.22, 1, 0.36, 1), width 500ms cubic-bezier(0.22, 1, 0.36, 1), border-radius 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (max-width: 767px) {
-  .site-header--open {
+  .site-header__inner {
+    transition:
+      padding 550ms cubic-bezier(0.22, 1, 0.36, 1),
+      margin-top 550ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-radius 550ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .site-header--open .site-header__inner {
+    margin-top: 12px;
     margin-left: 16px;
     margin-right: 16px;
-    margin-top: 12px;
-    width: calc(100% - 32px);
     border-radius: 18px 18px 0 0;
+    overflow: hidden;
   }
 }
 
@@ -1023,7 +1029,7 @@ h1:hover .redact > span.redact-inner,
   top: 0;
   left: 16px;
   right: 16px;
-  z-index: 45;
+  z-index: 44;
   background: rgb(var(--bg));
   border-radius: 18px 18px 22px 22px;
   box-shadow: 0 16px 48px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
