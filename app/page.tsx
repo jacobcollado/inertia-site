@@ -604,274 +604,424 @@ function AetherFeature() {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 }
+      { threshold: 0.08 }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  const cards = [
-    { label: "Theme load time", value: "0.8s", sub: "avg LCP on Shopify" },
-    { label: "Conversion lift", value: "3-4×", sub: "vs. prior theme" },
-    { label: "Live in", value: "<1 hr", sub: "license, install, done" },
-  ];
+  const cardBase = "rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--surface))] overflow-hidden";
+  const fade = (delay: number) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(16px)",
+    transition: `opacity 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
 
   return (
-    <section ref={ref} className="flex flex-col">
-      {/* Heading + body — centered on both */}
-      <div
-        className="flex flex-col items-center text-center gap-4 px-6 sm:px-8 py-10"
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0)" : "translateY(14px)",
-          transition: "opacity 550ms cubic-bezier(0.22,1,0.36,1), transform 550ms cubic-bezier(0.22,1,0.36,1)",
-        }}
-      >
+    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] pb-10">
+      {/* Section label + heading */}
+      <div className="flex flex-col items-center text-center gap-3 py-10" style={fade(0)}>
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
           Meet{" "}
           <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
             <SiShopify style={{ display: "inline", width: "0.8em", height: "0.8em", color: "#fff", flexShrink: 0 }} />Aether
           </span>
         </h2>
-        <p className="text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-lg">
-          The right thing is always obvious. The details reward attention. And the whole time, it&apos;s quietly converting.
+        <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
+          Your store should feel like a brand. Aether makes that the default.
         </p>
       </div>
 
-      {/* Mobile: mockup then CTAs */}
-      <div className="sm:hidden flex flex-col gap-6 px-6 pb-10">
-        <div
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 120ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 120ms",
-          }}
-        >
-          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
-          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
-        </div>
-        <div className="flex items-center justify-center gap-3">
-          <Link href="/aether" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
-            See Aether →
-          </Link>
-          <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-            License it
-          </Link>
-        </div>
-      </div>
+      {/* Bento grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-      {/* Desktop: mockup left, stat cards right */}
-      <div className="hidden sm:flex gap-8 px-8 pb-12 items-start justify-center">
-        {/* Mockup */}
-        <div
-          className="w-[55%] shrink-0"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 120ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 120ms",
-          }}
-        >
-          <img src="/aether-theme-mockup.svg" alt="Aether Theme preview" className="w-full hidden dark:block" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
-          <img src="/aether-theme-mockup-light.svg" alt="Aether Theme preview" className="w-full block dark:hidden" draggable={false} style={{ animation: "mockup-float 5s ease-in-out infinite" }} />
-        </div>
-
-        {/* Stat cards + CTAs */}
-        <div className="flex flex-col gap-3 w-52 shrink-0 pt-4">
-          {cards.map((c, i) => (
-            <div
-              key={c.label}
-              className="flex flex-col gap-1 border border-[rgb(var(--line))] rounded-xl px-4 py-4"
-              style={{
-                background: "rgb(var(--bg))",
-                opacity: visible ? 1 : 0,
-                transform: visible ? "translateY(0)" : "translateY(12px)",
-                transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${200 + i * 80}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${200 + i * 80}ms`,
-              }}
-            >
-              <span className="text-[1.5rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none">{c.value}</span>
-              <span className="text-[0.7rem] tracking-tight text-[rgb(var(--muted))]">{c.label}</span>
-              <span className="text-[0.65rem] tracking-tight text-[rgb(var(--muted))] opacity-60">{c.sub}</span>
-            </div>
-          ))}
-          <div
-            className="flex flex-col gap-2 pt-2"
-            style={{
-              opacity: visible ? 1 : 0,
-              transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1) 500ms",
-            }}
-          >
-            <Link href="/aether" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
-              See Aether →
+        {/* Hero — tall, spans 1 col on desktop */}
+        <div className={`${cardBase} sm:col-span-1 relative flex flex-col justify-between p-7`} style={{ ...fade(60), minHeight: 360, height: "clamp(360px, 50vw, 520px)" }}>
+          <div className="z-10 flex flex-col gap-2">
+            <p className="text-[1.5rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug">
+              The theme your store deserves.
+            </p>
+            <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed" style={{ opacity: 0.6 }}>
+              Designed for Shopify brands that care about every pixel. Fast to launch, built to convert.
+            </p>
+          </div>
+          <div className="absolute inset-x-0 bottom-0 overflow-hidden rounded-b-2xl" style={{ top: "32%" }}>
+            <img src="/aether/guided.png" alt="" className="w-full h-full object-cover object-top" draggable={false} aria-hidden="true" />
+            <div className="absolute inset-x-0 bottom-0" style={{ height: "55%", background: "linear-gradient(to top, rgb(var(--surface)) 30%, transparent)" }} />
+          </div>
+          <div className="z-10 flex items-center gap-2">
+            <Link href="/aether" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
+              See Aether
             </Link>
-            <Link href="/aether/buy" className="inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-              License it
+            <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+              Buy
             </Link>
           </div>
         </div>
+
+        {/* Right 2 cols — 2×2 grid of feature cards */}
+        <div className="sm:col-span-2 grid grid-cols-2 gap-3">
+
+          {/* 41 sections — bar chart */}
+          <div className={`${cardBase} flex flex-col justify-between p-4 sm:p-6 overflow-hidden relative`} style={{ ...fade(120), minHeight: 220 }}>
+            {/* bar chart — anchored above the label area */}
+            <div className="absolute inset-x-0 flex items-end gap-[3px] px-5" style={{ bottom: 72, height: 80 }} aria-hidden="true">
+              {[14, 18, 22, 27, 31, 36, 41].map((v, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-t-sm"
+                  style={{
+                    height: `${(v / 41) * 100}%`,
+                    background: i === 6
+                      ? "var(--accent-gradient)"
+                      : `rgb(var(--fg) / ${0.07 + i * 0.03})`,
+                  }}
+                />
+              ))}
+            </div>
+            {/* fade so bars don't bleed into label */}
+            <div className="absolute inset-x-0 pointer-events-none" style={{ bottom: 64, height: 32, background: "linear-gradient(to top, rgb(var(--surface)), transparent)" }} />
+            <span className="text-[2.2rem] sm:text-[3rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none tabular-nums z-10">41</span>
+            <div className="z-10">
+              <p className="text-[15px] sm:text-[17px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Sections</p>
+              <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Every layout you need, nothing you don't.</p>
+            </div>
+          </div>
+
+          {/* Dark mode — split panel */}
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative`} style={{ ...fade(160), minHeight: 220 }}>
+            {/* split preview */}
+            <div className="absolute inset-0 flex" aria-hidden="true">
+              {/* light half */}
+              <div className="flex-1 flex flex-col gap-2 p-4" style={{ background: "#f5f5f3" }}>
+                <div className="rounded" style={{ height: 6, width: "55%", background: "#d4d4d0" }} />
+                <div className="rounded" style={{ height: 4, width: "80%", background: "#e2e2de" }} />
+                <div className="rounded" style={{ height: 4, width: "60%", background: "#e2e2de" }} />
+                <div className="mt-auto rounded-md" style={{ height: 28, background: "#1a1a1a" }} />
+              </div>
+              {/* divider */}
+              <div style={{ width: 1, background: "rgb(var(--line) / 0.5)", flexShrink: 0 }} />
+              {/* dark half */}
+              <div className="flex-1 flex flex-col gap-2 p-4" style={{ background: "#111110" }}>
+                <div className="rounded" style={{ height: 6, width: "55%", background: "#333" }} />
+                <div className="rounded" style={{ height: 4, width: "80%", background: "#222" }} />
+                <div className="rounded" style={{ height: 4, width: "60%", background: "#222" }} />
+                <div className="mt-auto rounded-md" style={{ height: 28, background: "#fff" }} />
+              </div>
+            </div>
+            {/* bottom label */}
+            <div className="relative z-10 mt-auto p-3 sm:p-5 pt-0">
+              <div className="rounded-xl p-3 sm:p-4" style={{ background: "rgb(var(--surface) / 0.88)", backdropFilter: "blur(8px)", borderTop: "1px solid rgb(var(--line) / 0.5)" }}>
+                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Dark mode</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>On by default. Looks right either way.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Live in &lt;1hr — step timeline */}
+          <div className={`${cardBase} flex flex-col justify-between p-4 sm:p-6 overflow-hidden relative`} style={{ ...fade(200), minHeight: 220 }}>
+            <span className="text-[2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none tabular-nums z-10">&lt;1hr</span>
+            {/* steps */}
+            <div className="flex flex-col gap-2 z-10" aria-hidden="true">
+              {[
+                { label: "License", done: true },
+                { label: "Install", done: true },
+                { label: "Live", done: true, accent: true },
+              ].map((step, i) => (
+                <div key={i} className="flex items-center gap-2.5">
+                  <div className="flex items-center justify-center rounded-full shrink-0" style={{
+                    width: 20, height: 20,
+                    background: step.accent ? "var(--accent-gradient)" : "rgb(var(--fg) / 0.1)",
+                  }}>
+                    <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
+                      <polyline points="2,5 4.2,7.5 8,3" stroke={step.accent ? "#fff" : "rgb(var(--fg))"} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity={step.accent ? 1 : 0.5} />
+                    </svg>
+                  </div>
+                  <span className="text-[12px] sm:text-[13px] tracking-tight" style={{ color: step.accent ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: step.accent ? 1 : 0.6 }}>{step.label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="z-10">
+              <p className="text-[15px] sm:text-[17px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Live in an hour</p>
+              <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>No dev needed. License, install, ship.</p>
+            </div>
+          </div>
+
+          {/* Built-in upsell — sparkline */}
+          <div className={`${cardBase} flex flex-col justify-between p-4 sm:p-6 overflow-hidden relative`} style={{ ...fade(240), minHeight: 220 }}>
+            {/* sparkline — anchored above the label area */}
+            <svg viewBox="0 0 120 56" fill="none" className="absolute left-0 right-0 w-full" style={{ bottom: 74, height: 72 }} aria-hidden="true" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgb(60,170,160)" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="rgb(60,170,160)" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path d="M0,52 C10,50 15,46 22,40 C30,33 34,36 42,28 C50,20 54,24 62,18 C70,12 76,16 84,10 C92,4 100,8 120,2" stroke="rgb(60,170,160)" strokeWidth="1.5" strokeLinecap="round" />
+              <path d="M0,52 C10,50 15,46 22,40 C30,33 34,36 42,28 C50,20 54,24 62,18 C70,12 76,16 84,10 C92,4 100,8 120,2 L120,56 L0,56 Z" fill="url(#spark-fill)" />
+            </svg>
+            {/* dot pinned to the end of the sparkline — rendered in HTML so it stays round */}
+            <div className="absolute rounded-full" style={{ width: 7, height: 7, background: "rgb(60,170,160)", right: 0, bottom: Math.round(74 + 72 * (1 - 2/56) - 3.5) }} aria-hidden="true" />
+            {/* fade so sparkline doesn't bleed into label */}
+            <div className="absolute inset-x-0 pointer-events-none" style={{ bottom: 68, height: 28, background: "linear-gradient(to top, rgb(var(--surface)), transparent)" }} />
+            <div className="z-10">
+              <p className="text-[1.6rem] sm:text-[2rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-0.5 tabular-nums">+18%</p>
+              <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>avg. order value</p>
+            </div>
+            <div className="z-10">
+              <p className="text-[15px] sm:text-[17px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Built to sell more</p>
+              <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Upsells, bundles, and post-purchase blocks. Out of the box.</p>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </section>
   );
 }
 
-// -- Platform diagram ---------------------------------------------------
+// -- Process timeline ---------------------------------------------------
 
-const PLATFORM_SPOKES = [
-  { label: "Storefront", sub: "Shopify", icon: SiShopify },
-  { label: "iOS & Android", sub: "Swift", icon: SiSwift },
-  { label: "Brand identity", sub: "Figma", icon: SiFigma },
-  { label: "Ad campaigns", sub: "Meta", icon: SiMeta },
-  { label: "Frontend", sub: "Next.js", icon: SiNextdotjs },
-  { label: "Backend", sub: "Supabase", icon: SiSupabase },
-];
-
-function PlatformDiagramSVG({ cx, cy, r, labelR, rotation, hovered, setHovered, vb }: {
-  cx: number; cy: number; r: number; labelR: number; rotation: number;
-  hovered: number | null; setHovered: (i: number | null) => void; vb: number;
-}) {
-  const total = PLATFORM_SPOKES.length;
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+function ExpandingContent({ open, children }: { open: boolean; children: React.ReactNode }) {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
 
   useEffect(() => {
-    const el = containerRef.current;
+    const el = innerRef.current;
     if (!el) return;
-    const obs = new ResizeObserver(([entry]) => {
-      setScale(entry.contentRect.width / vb);
+    const obs = new ResizeObserver(() => {
+      if (open) setHeight(el.scrollHeight);
     });
     obs.observe(el);
+    setHeight(open ? el.scrollHeight : 0);
     return () => obs.disconnect();
-  }, [vb]);
+  }, [open]);
 
   return (
-    <div ref={containerRef} className="relative w-full select-none">
-      <svg viewBox={`0 0 ${vb} ${vb}`} fill="none" className="w-full" aria-hidden="true">
-        <defs>
-          <radialGradient id="hub-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgb(60,100,255)" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="rgb(60,100,255)" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-
-        {/* Rings */}
-        <circle cx={cx} cy={cy} r={labelR} stroke="rgb(var(--fg))" strokeWidth="1" strokeDasharray="3 6" opacity="0.18" />
-        <circle cx={cx} cy={cy} r={r} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.12" />
-        <circle cx={cx} cy={cy} r={r - 16} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.08" />
-
-        {/* Orbiting spokes + nodes */}
-        {PLATFORM_SPOKES.map((_, i) => {
-          const angle = (i / total) * 2 * Math.PI - Math.PI / 2 + rotation;
-          const x2 = cx + Math.cos(angle) * r;
-          const y2 = cy + Math.sin(angle) * r;
-          return (
-            <g key={`orbit-${i}`}>
-              <line x1={cx} y1={cy} x2={x2} y2={y2} stroke="rgb(var(--fg))" strokeWidth="0.8" opacity="0.15" />
-              <circle cx={x2} cy={y2} r={3.5} fill="rgb(60,100,255)" opacity={0.75} />
-            </g>
-          );
-        })}
-
-        {/* Hit areas for hover */}
-        {PLATFORM_SPOKES.map((_, i) => {
-          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
-          const lx = cx + Math.cos(angle) * labelR;
-          const ly = cy + Math.sin(angle) * labelR;
-          return (
-            <circle
-              key={`hit-${i}`}
-              cx={lx} cy={ly} r={24}
-              fill="transparent"
-              style={{ cursor: "default" }}
-              onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered(null)}
-            />
-          );
-        })}
-
-        {/* Hub */}
-        <circle cx={cx} cy={cy} r={r * 0.42} fill="url(#hub-glow)" />
-        <circle cx={cx} cy={cy} r={r * 0.32} fill="rgb(var(--accent))" />
-        <circle cx={cx} cy={cy} r={r * 0.32} stroke="rgb(var(--accent))" strokeWidth="1.5" opacity="0.8" />
-        <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize={vb * 0.03} fontFamily="inherit" fontWeight="500" fill="#fff">
-          Inertia
-        </text>
-      </svg>
-
-      {/* HTML icon + label overlay — positioned using scale from ResizeObserver */}
-      <div className="absolute inset-0 pointer-events-none">
-        {PLATFORM_SPOKES.map((spoke, i) => {
-          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
-          const lx = cx + Math.cos(angle) * labelR;
-          const ly = cy + Math.sin(angle) * labelR;
-          const px = lx * scale;
-          const py = ly * scale;
-          const isHov = hovered === i;
-          return (
-            <div
-              key={`icon-${spoke.label}`}
-              style={{
-                position: "absolute",
-                left: px,
-                top: py,
-                transform: "translate(-50%, -50%)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "3px",
-                opacity: isHov ? 1 : 0.6,
-                transition: "opacity 200ms ease",
-                color: "rgb(var(--fg))",
-                pointerEvents: "none",
-              }}
-            >
-              <spoke.icon style={{ width: 22, height: 22, flexShrink: 0 }} />
-              <span style={{
-                fontSize: Math.max(10, vb * 0.032 * scale),
-                letterSpacing: "-0.3px",
-                lineHeight: 1.2,
-                textAlign: "center",
-                whiteSpace: "nowrap",
-              }}>
-                {spoke.label}
-              </span>
-            </div>
-          );
-        })}
+    <div style={{
+      height: open ? height : 0,
+      overflow: "hidden",
+      transition: "height 500ms cubic-bezier(0.22,1,0.36,1), opacity 400ms cubic-bezier(0.22,1,0.36,1)",
+      opacity: open ? 1 : 0,
+    }}>
+      <div ref={innerRef}>
+        {children}
       </div>
     </div>
   );
 }
 
+const PROCESS_STEPS = [
+  {
+    num: "1", label: "Brief",
+    desc: "We dig into your business, your customers, and what's actually not working. No templates, no assumptions.",
+    visual: (
+      <div className="flex flex-col gap-2">
+        {[
+          { label: "What are you building?", done: true },
+          { label: "Who is it for?", done: true },
+          { label: "What isn't working?", done: true },
+          { label: "What does success look like?", done: false },
+        ].map((q) => (
+          <div key={q.label} className="flex items-center gap-2.5">
+            <div style={{
+              width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
+              background: q.done ? "rgba(50,100,240,0.12)" : "transparent",
+              border: q.done ? "none" : "1.5px solid rgb(var(--line))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              {q.done && (
+                <svg viewBox="0 0 10 10" fill="none" style={{ width: 8, height: 8 }}>
+                  <polyline points="2,5 4.2,7.5 8,3" stroke="#3264f0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <span style={{ fontSize: 11.5, color: "rgb(var(--muted))", opacity: q.done ? 0.5 : 0.8, textDecoration: q.done ? "line-through" : "none" }}>{q.label}</span>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    num: "2", label: "Design",
+    desc: "Every screen is designed with intent. We move fast but never skip the details that make a brand feel premium.",
+    visual: (
+      <div className="flex flex-col gap-2 w-full">
+        {/* Type scale */}
+        <div className="flex items-baseline gap-3">
+          <span style={{ fontSize: 18, fontWeight: 500, color: "rgb(var(--fg))", opacity: 0.9, letterSpacing: "-0.5px" }}>Aa</span>
+          <span style={{ fontSize: 13, color: "rgb(var(--fg))", opacity: 0.5 }}>Aa</span>
+          <span style={{ fontSize: 10, color: "rgb(var(--muted))", opacity: 0.4 }}>Aa</span>
+          <div style={{ flex: 1, height: 1, background: "rgb(var(--line))", opacity: 0.3, marginBottom: 3 }} />
+        </div>
+        {/* Color palette */}
+        <div className="flex gap-1.5 w-full">
+          {[
+            "var(--accent-gradient)",
+            "rgb(var(--fg))",
+            "rgb(var(--fg) / 0.5)",
+            "rgb(var(--fg) / 0.15)",
+            "rgb(var(--surface))",
+          ].map((bg, i) => (
+            <div key={i} style={{ flex: 1, height: 14, borderRadius: 4, background: bg, border: "1px solid rgb(var(--line) / 0.3)" }} />
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    num: "3", label: "Build",
+    desc: "Clean code, real infrastructure, documented and handed over properly. Built to last, not to look good in a demo.",
+    visual: (
+      <div className="flex flex-col gap-1.5 w-full rounded-lg px-3 py-3" style={{ background: "rgb(var(--bg))", border: "1px solid rgb(var(--line))", fontFamily: "monospace" }}>
+        {[
+          { text: "$ git push origin main", color: "rgb(var(--muted))", opacity: 0.45 },
+          { text: "✓ build passed (42s)", color: "rgb(var(--muted))", opacity: 0.45 },
+          { text: "✓ tests passed (128/128)", color: "rgb(var(--muted))", opacity: 0.45 },
+          { text: "✓ deployed to production", color: "#3264f0", opacity: 1 },
+        ].map((line, i) => (
+          <div key={i} className="flex items-center gap-2">
+            {i === 3 && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#3264f0", flexShrink: 0, boxShadow: "0 0 6px rgba(50,100,240,0.6)" }} />}
+            <span style={{ fontSize: 11.5, color: line.color, opacity: line.opacity, letterSpacing: "0.01em" }}>{line.text}</span>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+  {
+    num: "4", label: "Launch",
+    desc: "We stay until it's live, stable, and performing. The engagement doesn't end at delivery.",
+    visual: (
+      <div className="flex flex-col gap-2.5 w-full">
+        {/* Metric rows */}
+        {[
+          { label: "Uptime", value: "99.9%", bar: 0.999 },
+          { label: "Conversion", value: "+24%", bar: 0.72 },
+          { label: "Load time", value: "0.8s", bar: 0.88 },
+        ].map((m) => (
+          <div key={m.label} className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span style={{ fontSize: 11, color: "rgb(var(--muted))", opacity: 0.55 }}>{m.label}</span>
+              <span style={{ fontSize: 11, fontWeight: 500, color: "#3264f0", opacity: 0.9, fontVariantNumeric: "tabular-nums" }}>{m.value}</span>
+            </div>
+            <div style={{ height: 4, borderRadius: 4, background: "rgb(var(--line))", opacity: 0.25, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", inset: 0, right: `${(1 - m.bar) * 100}%`, background: "var(--accent-gradient)", borderRadius: 4, opacity: 0.8 }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+  },
+];
+
 function PlatformDiagram() {
-  const [hovered, setHovered] = useState<number | null>(null);
-  const rotationRef = useRef(0);
-  const rafRef = useRef<number>(0);
-  const [rotation, setRotation] = useState(0);
-  const SPEED = 0.004;
+  const [activeStep, setActiveStep] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let last = performance.now();
-    const tick = (now: number) => {
-      const dt = now - last;
-      last = now;
-      rotationRef.current += SPEED * (dt / 16.67);
-      setRotation(rotationRef.current);
-      rafRef.current = requestAnimationFrame(tick);
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setVisible(true); },
+      { threshold: 0.2 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => setActiveStep(i => (i + 1) % PROCESS_STEPS.length), 2400);
+    return () => clearInterval(t);
   }, []);
 
   return (
-    <>
-      {/* Mobile */}
-      <div className="sm:hidden">
-        <PlatformDiagramSVG cx={180} cy={180} r={100} labelR={140} rotation={rotation} hovered={hovered} setHovered={setHovered} vb={360} />
+    <div
+      ref={ref}
+      className="w-full rounded-2xl border border-[rgb(var(--line))] overflow-hidden"
+      style={{
+        background: "rgb(var(--surface))",
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(16px)",
+        transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
+      }}
+    >
+      <div className="relative">
+        {PROCESS_STEPS.map((step, i) => {
+          const isActive = activeStep === i;
+          const isPast = i < activeStep;
+          const isLast = i === PROCESS_STEPS.length - 1;
+          return (
+            <button
+              key={step.label}
+              onClick={() => setActiveStep(i)}
+              className="relative w-full text-left flex gap-0"
+              style={{ background: "transparent" }}
+            >
+              {/* Spine cell — 56px wide, everything centered */}
+              <div className="flex flex-col items-center shrink-0 relative" style={{ width: 56 }}>
+                {/* Circle */}
+                <div
+                  className="rounded-full flex items-center justify-center shrink-0 transition-all duration-500 relative z-10"
+                  style={{
+                    marginTop: 22,
+                    width: 30, height: 30,
+                    background: isActive ? "var(--accent-gradient)" : isPast ? "rgba(50,100,240,0.12)" : "rgb(var(--surface))",
+                    border: isActive ? "none" : `1.5px solid ${isPast ? "rgba(50,100,240,0.35)" : "rgb(var(--line))"}`,
+                    boxShadow: isActive ? "0 0 14px rgba(50,100,240,0.35)" : "none",
+                  }}
+                >
+                  {isPast ? (
+                    <svg viewBox="0 0 10 10" fill="none" style={{ width: 10, height: 10 }}>
+                      <polyline points="2,5 4.2,7.5 8,3" stroke="#3264f0" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <span style={{ fontSize: 11, fontWeight: 500, color: isActive ? "#fff" : "rgb(var(--muted))", opacity: isActive ? 1 : 0.5 }}>{step.num}</span>
+                  )}
+                </div>
+                {/* Connector — centered in 56px column = left: 27.25 */}
+                {!isLast && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: "calc(50% - 0.75px)",
+                      top: 22 + 30,
+                      bottom: -22,
+                      width: 1.5,
+                      background: isPast ? "rgba(50,100,240,0.35)" : "rgb(var(--line))",
+                      opacity: isPast ? 1 : 0.3,
+                      transition: "background 500ms ease",
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Content cell */}
+              <div
+                className="flex-1 min-w-0 pr-5"
+                style={{
+                  paddingTop: 22, paddingBottom: 22,
+                  borderBottom: "none",
+                }}
+              >
+                <span
+                  className="block text-[15px] tracking-tight transition-all duration-500"
+                  style={{ fontWeight: isActive ? 500 : 400, color: isActive ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: isActive ? 1 : isPast ? 0.45 : 0.6 }}
+                >{step.label}</span>
+                <ExpandingContent open={isActive}>
+                  <div className="flex flex-col gap-3 pt-2 pb-1">
+                    <span className="block text-[12.5px] tracking-tight leading-relaxed" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>{step.desc}</span>
+                    <div style={{ height: 1, background: "rgb(var(--line))", opacity: 0.5 }} />
+                    <div>{step.visual}</div>
+                  </div>
+                </ExpandingContent>
+              </div>
+            </button>
+          );
+        })}
       </div>
-      {/* Desktop */}
-      <div className="hidden sm:block">
-        <PlatformDiagramSVG cx={280} cy={280} r={155} labelR={215} rotation={rotation} hovered={hovered} setHovered={setHovered} vb={560} />
-      </div>
-    </>
+    </div>
   );
 }
 
@@ -895,9 +1045,10 @@ function PlatformSignal() {
   return (
     <section ref={ref} className="flex flex-col">
       {/* Mobile: stacked */}
-      <div className="sm:hidden flex flex-col gap-10 px-6 py-10">
+      <div className="sm:hidden flex flex-col gap-8 py-10">
+        <div className="px-3">
         <div
-          className="flex flex-col gap-3 text-center"
+          className="flex flex-col gap-4 text-center items-center"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(12px)",
@@ -905,16 +1056,28 @@ function PlatformSignal() {
           }}
         >
           <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
-            We own the outcome, not just the{" "}
-            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>output.</span>
+            One team.{" "}
+            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>Every layer.</span>
           </p>
+          <p className="text-[1rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs" style={{ opacity: 0.7 }}>
+            Design, storefront, backend, campaigns. Inertia builds it all, so nothing falls through the gaps.
+          </p>
+          <a
+            href="https://www.instagram.com/by.inertia/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex self-center items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+          >
+            Start a project ↗
+          </a>
+        </div>
         </div>
         <div
+          className="px-3 w-full"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(16px)",
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 150ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 150ms",
-            padding: "0 8px",
           }}
         >
           <PlatformDiagram />
@@ -922,21 +1085,21 @@ function PlatformSignal() {
       </div>
 
       {/* Desktop: copy left, diagram right */}
-      <div className="hidden sm:flex items-center gap-10 px-8 py-12">
+      <div className="hidden sm:flex items-center gap-10 py-12 max-w-[80rem] mx-auto w-full">
         <div
-          className="flex-1 flex flex-col gap-6"
+          className="flex-[1.2] flex flex-col gap-6"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(12px)",
             transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
-          <p className="text-[clamp(2rem,3.5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-sm">
-            We own the outcome, not just the{" "}
-            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>output.</span>
+          <p className="text-[clamp(2rem,3.5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
+            One team.{" "}
+            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>Every layer.</span>
           </p>
-          <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
-            We own the outcome, not just the output.
+          <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm" style={{ opacity: 0.7 }}>
+            Most agencies hand off. We don't. Design, storefront, backend, campaigns. Built and owned by one team, so nothing falls through the gaps.
           </p>
           <a
             href="https://www.instagram.com/by.inertia/"
@@ -948,7 +1111,7 @@ function PlatformSignal() {
           </a>
         </div>
         <div
-          className="flex-[1.6] min-w-0"
+          className="flex-[1.4] min-w-0"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -1021,15 +1184,41 @@ function NewsCarousel() {
   return (
     <section className="py-12 sm:py-16">
       <div className="px-6 sm:px-8 mb-8 flex items-end justify-between">
-        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight">
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight w-full text-center sm:text-left">
           Recent news
         </h2>
-        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors hidden sm:block">
+        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors hidden sm:block shrink-0">
           All posts →
         </Link>
       </div>
 
-      <div className="relative">
+      {/* Mobile: stacked */}
+      <div className="flex flex-col gap-6 px-6 sm:hidden">
+        {NEWS_ITEMS.map((item, i) => (
+          <Link key={i} href={item.href} draggable={false} className="group flex flex-col gap-3">
+            <div className="w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] group-hover:border-[rgb(var(--fg)/0.2)] transition-colors" style={{ aspectRatio: "1200/630", background: "rgb(var(--surface))" }}>
+              {item.image ? (
+                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" draggable={false} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-40">No image</span>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{item.tag}</span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">{item.date}</span>
+              </div>
+              <p className="text-[17px] tracking-tight text-[rgb(var(--fg))] leading-snug font-normal group-hover:opacity-70 transition-opacity">{item.title}</p>
+            </div>
+          </Link>
+        ))}
+        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">All posts →</Link>
+      </div>
+
+      {/* Desktop: horizontal scroll */}
+      <div className="relative hidden sm:block">
         <div
           ref={trackRef}
           className="flex gap-4 px-6 sm:px-8 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab"
@@ -1076,12 +1265,6 @@ function NewsCarousel() {
             </Link>
           ))}
         </div>
-      </div>
-
-      <div className="px-6 sm:px-8 mt-6 sm:hidden">
-        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-          All posts →
-        </Link>
       </div>
     </section>
   );
@@ -1542,7 +1725,7 @@ function PulseGrid() {
 
       <div className="absolute inset-x-0 flex flex-col items-center justify-center px-6 pointer-events-none" style={{ top: 0, height: "52%" }}>
         <p
-          className="pulse-grid-text text-center tracking-tight leading-tight font-medium"
+          className="pulse-grid-text text-center tracking-tight leading-tight font-normal"
           style={{
             fontSize: "clamp(1.75rem, 4.5vw, 2.1rem)",
             maxWidth: 340,
@@ -1969,7 +2152,7 @@ function ServiceCards() {
               const inner = (
                 <div className="group flex flex-col justify-between px-6 pt-7 pb-7 select-none" style={{ height: "100%" }}>
                   <div className="flex flex-col gap-1.5">
-                    <h3 className="text-[24px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{card.headline}</h3>
+                    <h3 className="text-[24px] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug">{card.headline}</h3>
                     <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-snug">{card.description}</p>
                   </div>
                   <div className="flex-1 flex items-center justify-center overflow-hidden py-4 [&>svg]:max-h-52 [&>svg]:w-full [&>img]:max-w-[300px] [&>img]:w-full [&>img]:h-auto [&>img]:max-h-52">{card.illustration}</div>
@@ -1998,7 +2181,7 @@ function ServiceCards() {
                 <div className="w-full flex items-center justify-center [&>svg]:max-h-64 [&>svg]:w-full [&>img]:max-w-[280px] [&>img]:w-3/4 [&>img]:h-auto [&>img]:max-h-64">{card.illustration}</div>
               </div>
               <div className="flex flex-col justify-center px-10 py-8 gap-3 flex-1">
-                <h3 className="text-[32px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{card.headline}</h3>
+                <h3 className="text-[32px] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug">{card.headline}</h3>
                 <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-snug max-w-sm">{card.description}</p>
               </div>
             </div>
@@ -2227,7 +2410,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
                   <polyline points="2 8 6 12 14 4" />
                 </svg>
               </div>
-              <p className="text-[20px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug mb-2">
+              <p className="text-[20px] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug mb-2">
                 {plan === "service" ? "We'll be in touch soon." : "You're on the list."}
               </p>
               <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
@@ -2242,7 +2425,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
           ) : (
             <>
               <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-3">Inertia Dashboard</p>
-              <h2 className="text-[clamp(1.25rem,4vw,1.5rem)] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug mb-2">
+              <h2 className="text-[clamp(1.25rem,4vw,1.5rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug mb-2">
                 Your project, all in one place.
               </h2>
               <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mb-7">
@@ -2374,7 +2557,7 @@ function BlogGrid({ posts }: { posts: PostMeta[] }) {
         <rect x="150" y="102" width="104" height="3.5" rx="1" fill="rgb(var(--fg))" fillOpacity="0.05" />
       </svg>
       <div className="flex flex-col gap-1.5">
-        <span className="text-[20px] sm:text-[24px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">Inertia Writes</span>
+        <span className="text-[20px] sm:text-[24px] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug">Inertia Writes</span>
         <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-60">Honest takes on building, selling, and why most of it gets done wrong.</span>
       </div>
       <div className="flex items-center justify-between">
@@ -2392,7 +2575,7 @@ function BlogGrid({ posts }: { posts: PostMeta[] }) {
         {i === 0 && (
           <span className="inline-flex items-center self-start border border-[rgb(var(--line))] text-[rgb(var(--muted))] px-2 py-0.5 text-[11px] tracking-tight leading-none rounded-sm mb-1">Latest</span>
         )}
-        <span className="text-[18px] sm:text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
+        <span className="text-[18px] sm:text-[22px] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug">{post.title}</span>
         {post.summary && <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed opacity-70 line-clamp-2">{post.summary}</span>}
       </div>
       <div className="flex items-center justify-between">
@@ -2488,7 +2671,7 @@ function VisualLayout() {
                   {item.sketch}
                 </div>
                 <div className="flex flex-col gap-1 mb-3">
-                  <span className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
+                  <span className="text-[18px] font-normal tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
                   <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug opacity-70">{item.description}</span>
                 </div>
                 <span className="inline-flex self-start items-center gap-2 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity group-hover:opacity-70" style={{ color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.3)" }}>
@@ -2516,7 +2699,7 @@ function VisualLayout() {
                 {item.sketch}
               </div>
               <div className="flex flex-col gap-1.5 mb-4">
-                <span className="text-[22px] font-medium tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
+                <span className="text-[22px] font-normal tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
                 <span className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-snug opacity-70">{item.description}</span>
               </div>
               <span className="inline-flex self-start items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] tracking-tight transition-opacity group-hover:opacity-70" style={{ color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.3)" }}>

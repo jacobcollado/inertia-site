@@ -64,7 +64,7 @@ export default function EnterprisePage() {
           Aether for teams
         </p>
         <h1 className="text-[clamp(2.4rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-5 max-w-2xl">
-          Scale faster. Keep more margin.
+          Aether at scale.
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-8 max-w-md">
           A Shopify foundation for agencies and studios that ship stores for a living.
@@ -72,8 +72,7 @@ export default function EnterprisePage() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/contact?ref=enterprise"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
-            style={{ background: "var(--accent-gradient)" }}
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
           >
             Talk to us
           </Link>
@@ -200,11 +199,9 @@ export default function EnterprisePage() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/contact?ref=enterprise-cta"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
-            style={{ background: "var(--accent-gradient)" }}
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
           >
             Talk to us
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" /></svg>
           </Link>
           <Link
             href="/aether"

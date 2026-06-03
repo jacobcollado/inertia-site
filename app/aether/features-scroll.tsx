@@ -62,16 +62,14 @@ function SketchScarcity() {
       {/* countdown timer label */}
       <rect x="24" y="146" width="110" height="8" rx="2" fill={g(0.35)} />
       {/* HH : MM : SS blocks */}
-      <g>
-        <rect x="24" y="166" width="56" height="64" rx="8" fill={g(0.06)} stroke={g(0.12)} strokeWidth="0.8" />
-        <rect x="38" y="190" width="28" height="16" rx="3" fill={g(0.4)} />
-        <text x="92" y="206" fill={g(0.3)} fontSize="20" textAnchor="middle">:</text>
-        <rect x="104" y="166" width="56" height="64" rx="8" fill={g(0.06)} stroke={g(0.12)} strokeWidth="0.8" />
-        <rect x="118" y="190" width="28" height="16" rx="3" fill={g(0.4)} />
-        <text x="172" y="206" fill={g(0.3)} fontSize="20" textAnchor="middle">:</text>
-        <rect x="184" y="166" width="56" height="64" rx="8" fill={acc} fillOpacity="0.1" stroke={acc} strokeOpacity="0.4" strokeWidth="0.9" />
-        <rect x="198" y="190" width="28" height="16" rx="3" fill={acc} fillOpacity="0.6" />
-      </g>
+      <rect x="24" y="166" width="56" height="64" rx="8" fill={g(0.06)} stroke={g(0.12)} strokeWidth="0.8" />
+      <rect x="38" y="190" width="28" height="16" rx="3" fill={g(0.4)} />
+      <text x="92" y="206" fill={g(0.3)} fontSize="20" textAnchor="middle">:</text>
+      <rect x="104" y="166" width="56" height="64" rx="8" fill={g(0.06)} stroke={g(0.12)} strokeWidth="0.8" />
+      <rect x="118" y="190" width="28" height="16" rx="3" fill={g(0.4)} />
+      <text x="172" y="206" fill={g(0.3)} fontSize="20" textAnchor="middle">:</text>
+      <rect x="184" y="166" width="56" height="64" rx="8" fill={acc} fillOpacity="0.1" stroke={acc} strokeOpacity="0.4" strokeWidth="0.9" />
+      <rect x="198" y="190" width="28" height="16" rx="3" fill={acc} fillOpacity="0.6" />
 
       {/* sold-out swatch row — one disabled/crossed-out */}
       <rect x="280" y="166" width="28" height="28" rx="6" fill={g(0.1)} stroke={g(0.14)} strokeWidth="0.8" />
