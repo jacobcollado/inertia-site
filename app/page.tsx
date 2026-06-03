@@ -987,10 +987,9 @@ function PlatformDiagram() {
   return (
     <div
       ref={ref}
-      className="w-full rounded-2xl border border-[rgb(var(--line))] overflow-hidden"
+      className="w-full rounded-2xl border border-[rgb(var(--line))]"
       style={{
         background: "rgb(var(--surface))",
-        height: 500,
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(16px)",
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
@@ -1072,6 +1071,7 @@ function PlatformDiagram() {
                 className="flex-1 min-w-0 pr-5"
                 style={{
                   paddingTop: 22, paddingBottom: 22,
+                  minHeight: isActive ? 0 : 72,
                   borderBottom: "none",
                 }}
               >
