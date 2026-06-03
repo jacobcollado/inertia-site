@@ -1904,8 +1904,10 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
     const el = scrollRef.current;
     if (!el) return;
     const onScroll = () => {
-      const p = Math.round(el.scrollLeft / el.clientWidth);
-      setPage(Math.min(p, pages - 1));
+      // Each "page" is half the scroll width since 2 cols are visible at a time
+      const halfScroll = el.scrollWidth / pages;
+      const p = Math.min(Math.round(el.scrollLeft / halfScroll), pages - 1);
+      setPage(p);
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
@@ -1914,30 +1916,31 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
   const goTo = (p: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTo({ left: p * el.clientWidth, behavior: "smooth" });
+    const halfScroll = el.scrollWidth / pages;
+    el.scrollTo({ left: p * halfScroll, behavior: "smooth" });
   };
 
   return (
-    <div className="sm:hidden flex flex-col gap-2.5">
+    <div className="sm:hidden flex flex-col">
       <div ref={scrollRef} className="overflow-x-auto -mx-3 px-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollSnapType:"x mandatory" }}>
         {children}
       </div>
-      {/* Indicator */}
-      <div className="flex items-center justify-center gap-2">
+      {/* Indicator — more breathing room from grid */}
+      <div className="flex items-center justify-center gap-2 mt-4">
         {Array.from({ length: pages }).map((_, i) => (
           <button
             key={i}
             onClick={() => goTo(i)}
-            className="transition-all duration-400"
             style={{
-              height: 5,
+              height: 4,
               width: page === i ? 24 : 8,
               borderRadius: 3,
               background: page === i ? "var(--accent-gradient)" : "rgb(var(--line))",
-              opacity: page === i ? 1 : 0.35,
+              opacity: page === i ? 1 : 0.3,
               border: "none",
               padding: 0,
               cursor: "pointer",
+              transition: "width 350ms cubic-bezier(0.22,1,0.36,1), opacity 350ms ease",
             }}
             aria-label={`Page ${i + 1}`}
           />
