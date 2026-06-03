@@ -1898,28 +1898,16 @@ function MissionPhrase() {
 function MetricsCarousel({ children }: { children: React.ReactNode }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
-  const [pages, setPages] = useState(2);
+  const pages = 2;
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-
-    // Count snap points by finding scrollSnapAlign elements
-    const snapEls = el.querySelectorAll<HTMLElement>('[style*="scrollSnapAlign"]');
-    if (snapEls.length > 0) setPages(snapEls.length);
-
     const onScroll = () => {
-      // Find which snap element is closest to left edge
-      const containerLeft = el.getBoundingClientRect().left;
-      let closest = 0;
-      let minDist = Infinity;
-      snapEls.forEach((snap, i) => {
-        const dist = Math.abs(snap.getBoundingClientRect().left - containerLeft);
-        if (dist < minDist) { minDist = dist; closest = i; }
-      });
-      setPage(closest);
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      const ratio = maxScroll > 0 ? el.scrollLeft / maxScroll : 0;
+      setPage(ratio > 0.5 ? 1 : 0);
     };
-
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
@@ -1927,10 +1915,8 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
   const goTo = (p: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    const snapEls = el.querySelectorAll<HTMLElement>('[style*="scrollSnapAlign"]');
-    if (snapEls[p]) {
-      snapEls[p].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
-    }
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    el.scrollTo({ left: p === 0 ? 0 : maxScroll, behavior: "smooth" });
   };
 
   return (
@@ -2045,7 +2031,7 @@ function StackDiagram() {
         </div>
         {/* Mobile bento carousel — 2×2 visible, scroll for more */}
         <MetricsCarousel>
-          <div className="grid gap-3 pr-3" style={{ display:"grid", gridTemplateColumns:"repeat(4, calc((100vw - 36px) / 2))", gridTemplateRows:"auto auto", width:"fit-content" }}>
+          <div className="grid gap-3" style={{ display:"grid", gridTemplateColumns:"repeat(4, calc(50vw - 18px))", gridTemplateRows:"auto auto" }}>
             {/* clients — col 1 rows 1-2 */}
             <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:180, gridColumn:"1", gridRow:"1 / 3", scrollSnapAlign:"start" }}>
               <div className="flex flex-col gap-1.5">
