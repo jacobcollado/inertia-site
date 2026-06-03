@@ -774,6 +774,7 @@ h1:hover .redact > span.redact-inner,
   .site-header--open .site-header__inner {
     margin-left: 16px;
     margin-right: 16px;
+    padding-top: 12px;
     border-radius: 0;
     background: transparent;
   }
@@ -1026,7 +1027,15 @@ h1:hover .redact > span.redact-inner,
 /* â”€â”€ Mobile nav drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .mobile-nav__backdrop {
-  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 43;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mobile-nav__backdrop[data-open="true"] {
+  pointer-events: auto;
 }
 
 .mobile-nav__drawer {
