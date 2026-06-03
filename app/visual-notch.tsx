@@ -472,7 +472,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
             <div style={{ flex: 1 }}>
               <HeaderAuth mobile />
             </div>
-            <div style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "100px", border: "1px solid rgb(var(--line))", padding: "6px 12px" }}>
+            <div style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "100px", border: "1px solid rgb(var(--line))", padding: "3px 10px" }}>
               <ThemeToggle />
             </div>
           </div>
