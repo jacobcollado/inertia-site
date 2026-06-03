@@ -110,62 +110,65 @@ export function TOC({ headings }: { headings: Heading[] }) {
     </nav>
   );
 
-  // Mobile inline accordion — sits above the article, xl hidden
-  const mobileAccordion = (
-    <div className="xl:hidden border-b border-[rgb(var(--line))] mb-2">
+  // Mobile floating pill + bottom sheet
+  const mobilePill = (
+    <div className="xl:hidden">
+      {/* Floating pill */}
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-4 py-4 [-webkit-tap-highlight-color:transparent] focus:outline-none"
+        aria-label="Table of contents"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5 rounded-full px-4 py-2.5 [-webkit-tap-highlight-color:transparent] focus:outline-none"
+        style={{
+          background: "rgb(var(--surface))",
+          border: "1px solid rgb(var(--line))",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+          backdropFilter: "blur(12px)",
+        }}
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45, flexShrink: 0 }}>
-            On this page
-          </span>
-          {!open && (
-            <span
-              key={activeHeading?.id}
-              className="text-[13px] tracking-tight text-[rgb(var(--fg))] truncate"
-              style={{ opacity: 0.7 }}
-            >
-              {activeHeading?.text}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-12 h-px rounded-full bg-[rgb(var(--line))] overflow-hidden">
-            <div
-              className="h-full bg-[rgb(var(--fg))] transition-all duration-500"
-              style={{ width: `${progress * 100}%`, opacity: 0.5 }}
-            />
-          </div>
-          <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            className="w-3 h-3 text-[rgb(var(--muted))]"
-            style={{
-              opacity: 0.4,
-              transform: open ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 300ms cubic-bezier(0.22,1,0.36,1)",
-            }}
-            aria-hidden="true"
-          >
-            <polyline points="4 10 8 6 12 10" />
-          </svg>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5 text-[rgb(var(--muted))]" aria-hidden="true">
+          <line x1="2" y1="4" x2="14" y2="4" /><line x1="2" y1="8" x2="10" y2="8" /><line x1="2" y1="12" x2="12" y2="12" />
+        </svg>
+        <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] max-w-[180px] truncate" style={{ opacity: 0.8 }}>
+          {activeHeading?.text ?? "On this page"}
+        </span>
+        <div className="w-8 h-px rounded-full bg-[rgb(var(--line))] overflow-hidden ml-1">
+          <div className="h-full transition-all duration-500" style={{ width: `${progress * 100}%`, background: "var(--accent-gradient)" }} />
         </div>
       </button>
 
+      {/* Backdrop */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30"
+          style={{ backdropFilter: "blur(2px)" }}
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Bottom sheet */}
       <div
+        className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl overflow-hidden"
         style={{
-          height,
-          overflow: "hidden",
-          transition: "height 300ms cubic-bezier(0.22,1,0.36,1)",
+          background: "rgb(var(--surface))",
+          border: "1px solid rgb(var(--line))",
+          transform: open ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 380ms cubic-bezier(0.22,1,0.36,1)",
+          maxHeight: "70vh",
         }}
       >
-        <ul ref={bodyRef} className="pb-3">
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-[rgb(var(--line))]" style={{ opacity: 0.4 }} />
+        </div>
+        <div className="px-5 pb-2 flex items-center justify-between">
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>On this page</span>
+          <button onClick={() => setOpen(false)} className="p-1 text-[rgb(var(--muted))]" style={{ opacity: 0.4 }} aria-label="Close">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="w-4 h-4"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+          </button>
+        </div>
+        <ul ref={bodyRef} className="overflow-y-auto px-5 pb-8" style={{ maxHeight: "calc(70vh - 80px)" }}>
           {headings.map((h) => {
             const active = activeId === h.id;
             return (
@@ -173,17 +176,13 @@ export function TOC({ headings }: { headings: Heading[] }) {
                 <a
                   href={`#${h.id}`}
                   onClick={(e) => handleClick(e, h.id)}
-                  className="flex items-center justify-between py-3 border-t border-[rgb(var(--line)/0.5)] transition-colors duration-150"
-                  style={{ paddingLeft: h.level === 3 ? "12px" : "0" }}
+                  className="flex items-center justify-between py-3.5 border-t border-[rgb(var(--line))] transition-colors duration-150"
+                  style={{ paddingLeft: h.level === 3 ? "12px" : "0", borderColor: "rgb(var(--line) / 0.4)" }}
                 >
-                  <span className={`text-[14px] tracking-tight leading-snug ${
-                    active ? "text-[rgb(var(--fg))] font-medium" : "text-[rgb(var(--muted))]"
-                  }`}>
+                  <span className="text-[15px] tracking-tight leading-snug" style={{ color: active ? "rgb(var(--fg))" : "rgb(var(--muted))", fontWeight: active ? 500 : 400, opacity: active ? 1 : 0.6 }}>
                     {h.text}
                   </span>
-                  {active && (
-                    <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-[rgb(60,100,255)]" />
-                  )}
+                  {active && <span className="shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-gradient)" }} />}
                 </a>
               </li>
             );
@@ -195,8 +194,8 @@ export function TOC({ headings }: { headings: Heading[] }) {
 
   return (
     <>
-      {/* Mobile: inline accordion above article */}
-      {mobileAccordion}
+      {/* Mobile: floating pill + bottom sheet */}
+      {mobilePill}
 
       {/* Desktop: sticky left-column aside */}
       {desktopAside}
