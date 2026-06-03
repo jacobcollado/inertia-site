@@ -2730,64 +2730,6 @@ function VisualLayout() {
 
       <div className="py-12 sm:py-20" />
 
-      {/* Mobile: carousel */}
-      <div className="sm:hidden overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollSnapType: "x mandatory" }}>
-        <div className="flex gap-4 px-4 pb-2">
-          {BUILDING.map((item) => {
-            const isDashboard = item.name === "Inertia Dashboard";
-            const external = !isDashboard && item.href.startsWith("http");
-            const inner = (
-              <>
-                <div className="w-full overflow-hidden rounded-lg mb-4 flex-1" style={{ minHeight: 160 }}>
-                  {item.sketch}
-                </div>
-                <div className="flex flex-col gap-1 mb-3">
-                  <span className="text-[18px] font-normal tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
-                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug opacity-70">{item.description}</span>
-                </div>
-                <span className="inline-flex self-start items-center gap-2 rounded-full px-3 py-1.5 text-[13px] tracking-tight transition-opacity group-hover:opacity-70" style={{ color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.3)" }}>
-                  {item.cta} →
-                </span>
-              </>
-            );
-            const cardClass = "group shrink-0 w-[78vw] flex flex-col rounded-2xl p-5 text-left" ;
-            const cardStyle = { scrollSnapAlign: "start" as const, background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))" };
-            if (isDashboard) return <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={cardClass} style={cardStyle}>{inner}</button>;
-            if (external) return <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={cardClass} style={cardStyle}>{inner}</a>;
-            return <Link key={item.name} href={item.href} className={cardClass} style={cardStyle}>{inner}</Link>;
-          })}
-        </div>
-      </div>
-
-      {/* Desktop: 3 cards in a row */}
-      <div className="hidden sm:flex gap-5 px-0">
-        {BUILDING.map((item, i) => {
-          const isDashboard = item.name === "Inertia Dashboard";
-          const external = !isDashboard && item.href.startsWith("http");
-          const inner = (
-            <>
-              <div className="w-full overflow-hidden rounded-lg mb-5 flex-1" style={{ minHeight: 200 }}>
-                {item.sketch}
-              </div>
-              <div className="flex flex-col gap-1.5 mb-4">
-                <span className="text-[22px] font-normal tracking-tight text-[rgb(var(--fg))] leading-none">{item.name}</span>
-                <span className="text-[15px] tracking-tight text-[rgb(var(--muted))] leading-snug opacity-70">{item.description}</span>
-              </div>
-              <span className="inline-flex self-start items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] tracking-tight transition-opacity group-hover:opacity-70" style={{ color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.3)" }}>
-                {item.cta} →
-              </span>
-            </>
-          );
-          const cardClass = "group flex-1 flex flex-col rounded-2xl p-6 text-left";
-          const cardStyle = { background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))" };
-          if (isDashboard) return <button key={item.name} onClick={() => setDashboardModalOpen(true)} className={cardClass} style={cardStyle}>{inner}</button>;
-          if (external) return <a key={item.name} href={item.href} target="_blank" rel="noreferrer" className={cardClass} style={cardStyle}>{inner}</a>;
-          return <Link key={item.name} href={item.href} className={cardClass} style={cardStyle}>{inner}</Link>;
-        })}
-      </div>
-
-      <div className="py-12 sm:py-20" />
-
       <StartPrompt closing />
 
       <div className="py-12 sm:py-20" />
