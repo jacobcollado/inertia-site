@@ -323,7 +323,7 @@ function SketchLicense({ accent }: { accent: [number, number, number] }) {
 
 // â"€â"€â"€ Inertia sketches â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
-const INERTIA_ACCENT: [number, number, number] = [160, 140, 255];
+const INERTIA_ACCENT: [number, number, number] = [109, 40, 217];
 
 function SketchStudio({ accent }: { accent: [number, number, number] }) {
   // Shows Inertia hub with three service spokes — storefront, brand, web
@@ -1086,7 +1086,7 @@ function SidebarNav({
               style={active ? { background: rgba(p.accent, 0.07) } : {}}
             >
               <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(p.accent, active ? 0.9 : 0.3) }} />
-              <span className="text-[13px] tracking-tight" style={{ color: active ? "rgb(var(--accent))" : "rgb(var(--fg))", opacity: active ? 1 : 0.6 }}>
+              <span className="text-[13px] tracking-tight" style={{ color: active ? rgba(p.accent, 1) : "rgb(var(--fg))", opacity: active ? 1 : 0.6 }}>
                 {p.name}
               </span>
               <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] ml-0.5" style={{ opacity: 0.38 }}>
@@ -1113,9 +1113,9 @@ function SidebarNav({
                   onClick={onNav}
                   className="block py-1.5 text-[13px] tracking-tight transition-colors rounded px-2 -mx-2"
                   style={{
-                    color: active ? "rgb(var(--accent))" : "rgb(var(--fg))",
+                    color: "rgb(var(--fg))",
                     opacity: active ? 1 : 0.55,
-                    background: active ? "rgb(var(--accent) / 0.1)" : undefined,
+                    background: active ? rgba(product.accent, 0.12) : undefined,
                   }}
                 >
                   {article.title}
@@ -1166,10 +1166,23 @@ export default function DocsPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [nearBottom, setNearBottom] = useState(false);
+  const [showNudge, setShowNudge] = useState(false);
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const scrollElRef = useRef<HTMLDivElement>(null);
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 300);
+    const t = setTimeout(() => {
+      if (!nudgeDismissed) setShowNudge(true);
+    }, 15000);
+    return () => clearTimeout(t);
+  }, [nudgeDismissed]);
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 300);
+      const distFromBottom = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+      setNearBottom(distFromBottom < 200);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -1296,7 +1309,7 @@ export default function DocsPage() {
                     key={p.id}
                     onClick={() => handleSelectProduct(p.id)}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors w-full hover:bg-[rgb(var(--fg)/0.05)]"
-                    style={{ background: active ? "rgb(var(--accent) / 0.12)" : "transparent" }}
+                    style={{ background: active ? rgba(p.accent, 0.12) : "transparent" }}
                   >
                     <span className="text-[14px] tracking-tight" style={{ color: "rgb(var(--fg))", fontWeight: active ? 600 : 400, opacity: active ? 1 : 0.5 }}>{p.name}</span>
                     <span className="text-[12px] tracking-tight" style={{ color: "rgb(var(--muted))", opacity: 0.5 }}>{p.description}</span>
@@ -1314,7 +1327,7 @@ export default function DocsPage() {
                 className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-colors hover:bg-[rgb(var(--fg)/0.05)]"
                 style={{
                   color: "rgb(var(--fg))",
-                  background: activeArticleId === INTRO_ID ? "rgb(var(--accent) / 0.12)" : "transparent",
+                  background: activeArticleId === INTRO_ID ? rgba(product.accent, 0.12) : "transparent",
                   fontWeight: activeArticleId === INTRO_ID ? 600 : 400,
                 }}
               >
@@ -1337,7 +1350,7 @@ export default function DocsPage() {
                       className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-all hover:bg-[rgb(var(--fg)/0.05)] hover:opacity-100"
                       style={{
                         color: "rgb(var(--fg))",
-                        background: active ? "rgb(var(--accent) / 0.12)" : "transparent",
+                        background: active ? rgba(product.accent, 0.12) : "transparent",
                         fontWeight: active ? 600 : 400,
                         opacity: active ? 1 : 0.5,
                       }}
@@ -1357,7 +1370,7 @@ export default function DocsPage() {
 
           {/* Introduction */}
           <article id={INTRO_ID} className="scroll-mt-4 py-12 sm:py-16 border-b border-[rgb(var(--line))]">
-              <p className="text-[14px] tracking-tight mb-4 font-medium" style={{ color: "rgb(var(--accent))" }}>
+              <p className="text-[14px] tracking-tight mb-4 font-medium" style={{ color: rgba(product.accent, 1) }}>
                 {product.name}
               </p>
               <h1 className="text-[2.2rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-4">
@@ -1384,7 +1397,7 @@ export default function DocsPage() {
                       <span className="text-[13px] tracking-tight leading-snug" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>
                         {section.articles.length} {section.articles.length === 1 ? "article" : "articles"}
                       </span>
-                      <span className="text-[13px] tracking-tight mt-1 transition-colors" style={{ color: "rgb(var(--accent))" }}>
+                      <span className="text-[13px] tracking-tight mt-1 transition-colors" style={{ color: rgba(product.accent, 0.9) }}>
                         Start with {first.title} →
                       </span>
                     </a>
@@ -1394,7 +1407,7 @@ export default function DocsPage() {
 
               {product.id === "aether" && (
                 <div className="flex flex-wrap gap-2">
-                  <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: "rgb(var(--accent) / 0.12)", color: "rgb(var(--accent))" }}>
+                  <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: rgba(product.accent, 0.12), color: rgba(product.accent, 1) }}>
                     Buy a license
                   </Link>
                   <Link href="/aether/changelog" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
@@ -1416,7 +1429,7 @@ export default function DocsPage() {
                 className="scroll-mt-4 py-10 sm:py-14 border-b border-[rgb(var(--line))]"
               >
                 <div>
-                  <p className="text-[14px] tracking-tight mb-3 font-medium" style={{ color: "rgb(var(--accent))" }}>
+                  <p className="text-[14px] tracking-tight mb-3 font-medium" style={{ color: rgba(product.accent, 1) }}>
                     {section.title}
                   </p>
                   <h2 className="text-[1.75rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-8">
@@ -1427,6 +1440,23 @@ export default function DocsPage() {
               </article>
             ))
           )}
+          {/* End of docs */}
+          <div className="flex flex-col items-center gap-5 py-20 text-center">
+            <div className="w-8 h-px" style={{ background: "rgb(var(--line))" }} />
+            <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+              You've reached the end of the {product.name} docs.
+            </p>
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] tracking-tight transition-all hover:opacity-80"
+              style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--line))", color: "rgb(var(--muted))" }}
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <polyline points="3 10 8 5 13 10" />
+              </svg>
+              Back to top
+            </button>
+          </div>
           </div>
         </div>
       </div>
@@ -1435,8 +1465,8 @@ export default function DocsPage() {
     </div>
 
     {mounted && createPortal(<>
-      {/* Back to top */}
-      {scrolled && !sheetOpen && (
+      {/* Back to top — hide when near bottom where inline button is visible */}
+      {scrolled && !nearBottom && !sheetOpen && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           className="fixed z-40 flex items-center justify-center [-webkit-tap-highlight-color:transparent] transition-opacity hover:opacity-70"
@@ -1456,6 +1486,48 @@ export default function DocsPage() {
           </svg>
         </button>
       )}
+
+      {/* Nudge notification */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 28,
+          left: "50%",
+          transform: `translateX(-50%) translateY(${showNudge && !nudgeDismissed ? "0" : "16px"})`,
+          opacity: showNudge && !nudgeDismissed ? 1 : 0,
+          transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
+          pointerEvents: showNudge && !nudgeDismissed ? "auto" : "none",
+          zIndex: 50,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "10px 14px",
+          borderRadius: 14,
+          background: "rgb(var(--surface))",
+          border: "1px solid rgb(var(--line))",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <Link
+          href="/"
+          className="text-[13px] tracking-tight text-[rgb(var(--fg))]"
+          style={{ opacity: 0.75 }}
+          onClick={() => setNudgeDismissed(true)}
+        >
+          Done reading? Head back to the site →
+        </Link>
+        <button
+          onClick={() => { setShowNudge(false); setNudgeDismissed(true); }}
+          className="flex items-center justify-center shrink-0"
+          style={{ color: "rgb(var(--muted))", opacity: 0.4 }}
+          aria-label="Dismiss"
+        >
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3 h-3">
+            <line x1="2" y1="2" x2="10" y2="10" /><line x1="10" y1="2" x2="2" y2="10" />
+          </svg>
+        </button>
+      </div>
 
       {/* Fixed mobile menu button */}
       {!sheetOpen && (
@@ -1629,8 +1701,8 @@ export default function DocsPage() {
                     onClick={() => handleSelectProduct(p.id)}
                     className="px-3 py-1.5 rounded-full text-[13px] tracking-tight [-webkit-tap-highlight-color:transparent]"
                     style={{
-                      background: active ? "rgb(var(--accent) / 0.1)" : "rgb(var(--fg) / 0.06)",
-                      color: active ? "rgb(var(--accent))" : "rgb(var(--fg))",
+                      background: active ? rgba(p.accent, 0.12) : "rgb(var(--fg) / 0.06)",
+                      color: active ? rgba(p.accent, 1) : "rgb(var(--fg))",
                       opacity: active ? 1 : 0.6,
                     }}
                   >
