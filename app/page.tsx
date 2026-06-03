@@ -990,7 +990,7 @@ function PlatformDiagram() {
       className="w-full rounded-2xl border border-[rgb(var(--line))] overflow-hidden"
       style={{
         background: "rgb(var(--surface))",
-        minHeight: 320,
+        height: 420,
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(16px)",
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
