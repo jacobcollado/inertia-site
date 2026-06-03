@@ -479,7 +479,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           >
             <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] tracking-tight leading-none text-white" style={{ background: "var(--accent-gradient)" }}>New</span>
             Aether theme for Shopify
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50"><path d="M6 4l4 4-4 4"/></svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
           </Link>
         )}
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
@@ -937,6 +937,7 @@ const PROCESS_STEPS = [
 
 function PlatformDiagram() {
   const [activeStep, setActiveStep] = useState(0);
+  const [resetting, setResetting] = useState(false);
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -952,7 +953,17 @@ function PlatformDiagram() {
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setActiveStep(i => (i + 1) % PROCESS_STEPS.length), 3800);
+    const t = setInterval(() => {
+      setActiveStep(i => {
+        const next = (i + 1) % PROCESS_STEPS.length;
+        if (next === 0) {
+          // briefly fade all nodes out before resetting
+          setResetting(true);
+          setTimeout(() => setResetting(false), 500);
+        }
+        return next;
+      });
+    }, 3800);
     return () => clearInterval(t);
   }, []);
 
@@ -987,14 +998,15 @@ function PlatformDiagram() {
                   style={{
                     marginTop: 22,
                     width: 30, height: 30,
-                    background: isActive ? "var(--accent-gradient)" : isPast ? "rgba(50,100,240,0.12)" : "rgb(var(--surface))",
-                    border: isActive ? "none" : `1.5px solid ${isPast ? "rgba(50,100,240,0.35)" : "rgb(var(--line))"}`,
+                    background: isActive ? "var(--accent-gradient)" : isPast ? "#3264f0" : "rgb(var(--surface))",
+                    border: isActive || isPast ? "none" : "1.5px solid rgb(var(--line))",
                     boxShadow: isActive ? "0 0 14px rgba(50,100,240,0.35)" : "none",
+                    opacity: resetting && isPast ? 0 : 1,
                   }}
                 >
                   {isPast ? (
-                    <svg viewBox="0 0 10 10" fill="none" style={{ width: 10, height: 10 }}>
-                      <polyline points="2,5 4.2,7.5 8,3" stroke="#3264f0" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg viewBox="0 0 10 10" fill="none" style={{ width: 11, height: 11 }}>
+                      <polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   ) : (
                     <span style={{ fontSize: 11, fontWeight: 500, color: isActive ? "#fff" : "rgb(var(--muted))", opacity: isActive ? 1 : 0.5 }}>{step.num}</span>
@@ -1010,8 +1022,8 @@ function PlatformDiagram() {
                       bottom: -22,
                       width: 1.5,
                       background: isPast ? "rgba(50,100,240,0.35)" : "rgb(var(--line))",
-                      opacity: isPast ? 1 : 0.3,
-                      transition: "background 500ms ease",
+                      opacity: resetting && isPast ? 0 : isPast ? 1 : 0.3,
+                      transition: "background 500ms ease, opacity 400ms ease",
                     }}
                   />
                 )}
@@ -1026,12 +1038,12 @@ function PlatformDiagram() {
                 }}
               >
                 <span
-                  className="block text-[15px] tracking-tight transition-all duration-500"
-                  style={{ fontWeight: isActive ? 500 : 400, color: isActive ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: isActive ? 1 : isPast ? 0.45 : 0.6 }}
+                  className="block text-[17px] tracking-tight"
+                  style={{ fontWeight: isActive ? 500 : 400, color: isActive ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: resetting && isPast ? 0 : isActive ? 1 : isPast ? 0.45 : 0.6, transition: "color 300ms ease, opacity 400ms ease" }}
                 >{step.label}</span>
                 <ExpandingContent open={isActive}>
                   <div className="flex flex-col gap-3 pt-2 pb-1">
-                    <span className="block text-[12.5px] tracking-tight leading-relaxed" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>{step.desc}</span>
+                    <span className="block text-[14px] tracking-tight leading-relaxed" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>{step.desc}</span>
                     <div style={{ height: 1, background: "rgb(var(--line))", opacity: 0.5 }} />
                     <div>{step.visual}</div>
                   </div>
@@ -1076,8 +1088,8 @@ function PlatformSignal() {
           }}
         >
           <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
-            One team.{" "}
-            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>Every layer.</span>
+            The whole thing.{" "}
+            <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Done right.</span>
           </p>
           <p className="text-[1rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs" style={{ opacity: 0.7 }}>
             Design, storefront, backend, campaigns. Inertia builds it all, so nothing falls through the gaps.
@@ -1114,9 +1126,9 @@ function PlatformSignal() {
             transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
-          <p className="text-[clamp(2rem,3.5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-lg">
-            One team.{" "}
-            <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>Every layer.</span>
+          <p className="text-[clamp(2rem,2.8vw,2.8rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
+            The whole thing.{" "}
+            <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Done right.</span>
           </p>
           <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm" style={{ opacity: 0.7 }}>
             Most agencies hand off. We don't. Design, storefront, backend, campaigns. Built and owned by one team, so nothing falls through the gaps.
@@ -1813,7 +1825,7 @@ function MissionPhrase() {
   return (
     <p
       ref={ref}
-      className="text-[clamp(2rem,5vw,3rem)] font-normal tracking-tight leading-[1.35] text-center sm:text-left pr-4 sm:pr-12"
+      className="text-[clamp(2.4rem,5.5vw,3.6rem)] font-normal tracking-tight leading-[1.15] text-center sm:text-left pr-4 sm:pr-12"
       style={{
         paddingTop: "6px",
         paddingBottom: "12px",
@@ -1824,7 +1836,7 @@ function MissionPhrase() {
       }}
     >
       Obsessive{" "}
-      <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline", verticalAlign: "baseline" }}>
+      <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
         by default.
       </span>
     </p>
@@ -1903,144 +1915,102 @@ function StackDiagram() {
   }, []);
 
   return (
-    <div className="flex flex-col sm:flex-row max-w-[80rem] mx-auto w-full" style={{ overflow: "visible" }}>
-      {/* Left: heading + stats */}
-      <div className="relative flex flex-col justify-center px-3 sm:px-0 py-10 gap-8 sm:flex-1">
+    <div className="max-w-[80rem] mx-auto w-full px-3 sm:px-0">
+      {/* Heading + stats */}
+      <div className="relative flex flex-col justify-center py-10 gap-10">
         <div className="flex flex-col items-center sm:items-start gap-3">
           <MissionPhrase />
           <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left" style={{ opacity: 0.7 }}>
             Four years. Over a thousand clients. The numbers speak for themselves.
           </p>
         </div>
-        {/* Stats grid — 2x2 with hairline dividers */}
-        <div className="grid grid-cols-2 sm:max-w-[420px]" style={{ borderTop: "1px solid rgb(var(--line))", borderLeft: "1px solid rgb(var(--line))" }}>
-          {[
-            { num: 1100, suffix: "+", unit: "", label: "Clients worked with", sub: "Over 4+ years across every category" },
-            { num: 100, suffix: "%", unit: "", label: "In-house delivery", sub: "No outsourcing, ever" },
-            { num: 5, suffix: "", unit: " days", label: "Average kickoff", sub: "From first message to first delivery" },
-            { num: 24, suffix: "", unit: "h", label: "Support response", sub: "On every request, every time" },
-          ].map((s) => (
-            <div key={s.label} className="flex flex-col gap-1.5 p-5 items-center sm:items-start text-center sm:text-left" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))" }}>
-              {/* Number + unit */}
-              <div className="flex items-baseline gap-0.5 leading-none">
-                <span className="text-[2.2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}>
-                  <CountUp to={s.num} duration={1400} suffix={s.suffix} />
-                </span>
-                {s.unit && <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{s.unit}</span>}
+        {/* Stats grid — 4-col on desktop, 2-col on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-4" style={{ borderTop: "1px solid rgb(var(--line))", borderLeft: "1px solid rgb(var(--line))" }}>
+          {/* 1100+ clients — dot grid */}
+          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
+            <div className="absolute inset-0 opacity-[0.06]" aria-hidden="true" style={{ backgroundImage: "radial-gradient(circle, rgb(var(--fg)) 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+            <div className="relative z-10 flex flex-col gap-2">
+              <div className="flex items-baseline gap-1 leading-none">
+                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
               </div>
-              <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] leading-snug" style={{ fontWeight: 500 }}>{s.label}</span>
-              <span className="text-[11.5px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.45 }}>{s.sub}</span>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Clients worked with</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Over 4+ years</span>
             </div>
-          ))}
-        </div>
-      </div>
-      {/* Right: diagram */}
-      <div className="flex items-center justify-center overflow-hidden sm:w-[44%] sm:shrink-0 sm:self-stretch py-6">
-        <svg ref={svgRef} viewBox="0 0 2115 1562" fill="none" className="w-full" preserveAspectRatio="xMidYMid meet" style={{ maxHeight: 340 }} aria-hidden="true">
-          <defs>
-            {/* Inner shadow for center "In" text */}
-            <filter id="sd-f0" x="971.476" y="639.5" width="212.103" height="240.5" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-              <feFlood floodOpacity="0" result="BackgroundImageFix"/>
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-              <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-              <feOffset/><feGaussianBlur stdDeviation="12.6"/>
-              <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
-              <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
-              <feBlend mode="normal" in2="shape" result="effect1_innerShadow_24_147"/>
-            </filter>
-            {/* Next.js N gradients */}
-            <linearGradient id="sd-p0" x1="1960.52" y1="995.439" x2="1993.26" y2="1036.02" gradientUnits="userSpaceOnUse">
-              <stop stopColor="rgb(var(--fg))"/>
-              <stop offset="1" stopColor="rgb(var(--fg))" stopOpacity="0"/>
-            </linearGradient>
-            <linearGradient id="sd-p1" x1="1971.59" y1="937.8" x2="1971.4" y2="986.563" gradientUnits="userSpaceOnUse">
-              <stop stopColor="rgb(var(--fg))"/>
-              <stop offset="1" stopColor="rgb(var(--fg))" stopOpacity="0"/>
-            </linearGradient>
-            {/* Clip paths */}
-            <clipPath id="sd-c0"><rect width="166" height="166" fill="white" transform="translate(1860 888)"/></clipPath>
-            <clipPath id="sd-c1"><rect width="144" height="144" fill="white" transform="translate(103 1004)"/></clipPath>
-            <clipPath id="sd-c2"><rect width="85" height="129" fill="white" transform="translate(1897 1161)"/></clipPath>
-          </defs>
+          </div>
 
-          {/* Left column */}
-          <rect x="4.5" y="4.5" width="341" height="1553" rx="37.5" stroke="rgb(var(--fg))" strokeOpacity="0.2" strokeWidth="9"/>
-          {/* GitHub */}
-          <g opacity="0.4">
-            <path d="M174.063 91.875C131.784 91.875 97.5 127.02 97.5 170.376C97.5 205.06 119.438 234.485 149.858 244.865C153.685 245.592 155.09 243.162 155.09 241.089C155.09 239.217 155.018 233.033 154.986 226.473C133.685 231.222 129.191 217.211 129.191 217.211C125.708 208.138 120.69 205.725 120.69 205.725C113.744 200.853 121.214 200.953 121.214 200.953C128.902 201.507 132.95 209.043 132.95 209.043C139.779 221.044 150.861 217.574 155.23 215.569C155.917 210.494 157.902 207.032 160.091 205.072C143.086 203.086 125.209 196.355 125.209 166.276C125.209 157.706 128.2 150.703 133.098 145.205C132.303 143.228 129.682 135.244 133.839 124.431C133.839 124.431 140.268 122.321 154.899 132.478C161.006 130.738 167.556 129.866 174.063 129.836C180.569 129.866 187.124 130.738 193.243 132.478C207.857 122.321 214.277 124.431 214.277 124.431C218.444 135.244 215.822 143.228 215.027 145.205C219.936 150.703 222.907 157.705 222.907 166.276C222.907 196.426 204.996 203.066 187.947 205.009C190.693 207.445 193.14 212.222 193.14 219.546C193.14 230.049 193.051 238.503 193.051 241.089C193.051 243.178 194.43 245.626 198.311 244.855C228.715 234.463 250.625 205.048 250.625 170.376C250.625 127.02 216.346 91.875 174.063 91.875Z" fill="rgb(var(--fg))"/>
-            <path d="M124.66 209.416C124.513 209.757 123.992 209.859 123.518 209.625C123.034 209.401 122.763 208.935 122.919 208.592C123.063 208.241 123.585 208.143 124.067 208.379C124.551 208.603 124.827 209.073 124.66 209.416ZM127.937 212.432C127.619 212.736 126.998 212.595 126.576 212.115C126.14 211.635 126.059 210.995 126.381 210.686C126.709 210.383 127.312 210.524 127.748 211.004C128.184 211.489 128.269 212.125 127.936 212.433L127.937 212.432ZM130.186 216.292C129.777 216.584 129.109 216.31 128.697 215.699C128.289 215.088 128.289 214.355 128.706 214.061C129.12 213.767 129.777 214.031 130.195 214.638C130.603 215.259 130.603 215.993 130.185 216.292L130.186 216.292ZM133.988 220.762C133.622 221.177 132.845 221.066 132.275 220.499C131.693 219.945 131.531 219.158 131.897 218.743C132.266 218.327 133.049 218.444 133.622 219.006C134.201 219.559 134.377 220.351 133.988 220.762H133.988ZM138.902 222.272C138.741 222.81 137.992 223.054 137.237 222.826C136.484 222.59 135.991 221.959 136.143 221.416C136.299 220.874 137.052 220.619 137.812 220.864C138.565 221.098 139.059 221.724 138.902 222.272H138.902ZM144.495 222.911C144.514 223.479 143.874 223.949 143.082 223.959C142.285 223.977 141.64 223.518 141.632 222.96C141.632 222.388 142.258 221.922 143.054 221.909C143.846 221.893 144.495 222.348 144.495 222.911ZM149.989 222.694C150.084 223.247 149.534 223.815 148.747 223.966C147.974 224.112 147.258 223.771 147.159 223.222C147.063 222.655 147.624 222.088 148.396 221.941C149.184 221.799 149.889 222.132 149.989 222.694Z" fill="rgb(var(--fg))"/>
-          </g>
-          {/* Left Shopify S */}
-          <g opacity="0.4">
-            <path d="M175 707C219.735 707 256 743.265 256 788C256 832.735 219.735 869 175 869C130.265 869 94 832.735 94 788C94 743.265 130.265 707 175 707ZM171.191 739.911C158.743 739.968 152.832 755.487 150.956 763.388C146.124 764.866 142.714 765.945 142.259 766.059C139.587 766.911 139.474 766.968 139.133 769.526C138.849 771.514 131.815 825.965 131.8 826.084L186.767 836.373L216.552 829.949C216.537 829.79 206.097 759.263 206.036 758.727C205.979 758.215 205.525 757.988 205.184 757.931C204.843 757.874 197.396 757.362 197.396 757.362C197.379 757.346 192.223 752.246 191.712 751.678C191.143 751.109 190.063 751.28 189.608 751.394C189.551 751.394 188.471 751.735 186.71 752.303C185.062 747.358 181.991 742.811 176.648 742.811H176.193C174.659 740.821 172.783 739.911 171.191 739.911Z" fill="rgb(var(--fg))"/>
-            <path d="M183.697 753.27C182.333 753.724 180.741 754.179 179.036 754.691V753.667C179.036 750.598 178.581 748.097 177.899 746.164C180.684 746.562 182.56 749.689 183.697 753.27Z" fill="rgb(var(--fg))"/>
-            <path d="M174.545 746.79C175.284 748.722 175.796 751.451 175.796 755.145V755.657C172.783 756.566 169.486 757.59 166.189 758.613C168.065 751.564 171.533 748.097 174.545 746.79Z" fill="rgb(var(--fg))"/>
-            <path d="M170.85 743.322C171.362 743.322 171.93 743.493 172.442 743.834C168.463 745.709 164.2 750.427 162.381 759.863C159.766 760.659 157.152 761.455 154.764 762.194C156.924 755.031 161.926 743.322 170.85 743.322Z" fill="rgb(var(--fg))"/>
-            <path d="M176.648 774.415L172.954 785.328C172.954 785.328 169.714 783.623 165.792 783.623C159.994 783.623 159.709 787.261 159.709 788.17C159.709 793.173 172.726 795.048 172.726 806.758C172.726 815.966 166.872 821.878 159.027 821.878C149.592 821.878 144.76 816.023 144.76 816.023L147.261 807.667C147.261 807.667 152.206 811.93 156.413 811.93C159.141 811.93 160.278 809.77 160.278 808.179C160.278 801.642 149.592 801.358 149.592 790.672C149.592 781.69 156.072 772.937 169.088 772.937C174.204 772.994 176.648 774.415 176.648 774.415Z" fill="rgb(var(--fg))"/>
-          </g>
-          {/* Vercel triangle */}
-          <path fillRule="evenodd" clipRule="evenodd" d="M2019 418L1939.5 281L1860 418H2019Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Upper connector arrowhead only */}
-          <path d="M1765.64 390.881L1771.02 389.741L1768.74 378.98L1763.36 380.119L1764.5 385.5L1765.64 390.881Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Upper connector - static */}
-          <path d={upperConnector} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
-          {/* Right column */}
-          <rect x="1769.5" y="161.5" width="341" height="1241" rx="37.5" stroke="rgb(var(--fg))" strokeOpacity="0.2" strokeWidth="9"/>
-          {/* Upper curve - static */}
-          <path d={upperCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
-          {/* Lower connector arrowhead only */}
-          <path d="M1766.14 1202.62L1771.52 1203.76L1769.24 1214.52L1763.86 1213.38L1765 1208L1766.14 1202.62Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Lower connector - static */}
-          <path d={lowerConnector} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
-          {/* Lower curve - static */}
-          <path d={lowerCurve} fill="none" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" opacity="0.25"/>
-          {/* Next.js circle - masked, N fades to transparent */}
-          <g clipPath="url(#sd-c0)" opacity="0.4">
-            <mask id="sd-mask0" style={{ maskType: "alpha" }} maskUnits="userSpaceOnUse" x="1860" y="888" width="166" height="166">
-              <path d="M1943 1054C1988.84 1054 2026 1016.84 2026 971C2026 925.16 1988.84 888 1943 888C1897.16 888 1860 925.16 1860 971C1860 1016.84 1897.16 1054 1943 1054Z" fill="rgb(var(--fg))"/>
-            </mask>
-            <g mask="url(#sd-mask0)">
-              <path d="M1943 1051.23C1987.31 1051.23 2023.23 1015.31 2023.23 971C2023.23 926.688 1987.31 890.767 1943 890.767C1898.69 890.767 1862.77 926.688 1862.77 971C1862.77 1015.31 1898.69 1051.23 1943 1051.23Z" stroke="rgb(var(--fg))" strokeWidth="15"/>
-              <path d="M1997.88 1033.27L1923.76 937.8H1909.8V1004.17H1920.97V951.987L1989.11 1040.02C1992.18 1037.97 1995.11 1035.71 1997.88 1033.27Z" fill="url(#sd-p0)"/>
-              <path d="M1977.12 937.8H1966.06V1004.2H1977.12V937.8Z" fill="url(#sd-p1)"/>
-            </g>
-          </g>
-          {/* Right Shopify S */}
-          <g opacity="0.4">
-            <path d="M1940 542C1984.74 542 2021 578.265 2021 623C2021 667.735 1984.74 704 1940 704C1895.26 704 1859 667.735 1859 623C1859 578.265 1895.26 542 1940 542ZM1936.19 574.911C1923.74 574.968 1917.83 590.487 1915.96 598.388C1911.12 599.866 1907.71 600.945 1907.26 601.059C1904.59 601.911 1904.47 601.968 1904.13 604.526C1903.85 606.514 1896.82 660.965 1896.8 661.084L1951.77 671.373L1981.55 664.949C1981.54 664.79 1971.1 594.263 1971.04 593.727C1970.98 593.215 1970.52 592.988 1970.18 592.931C1969.84 592.874 1962.4 592.362 1962.4 592.362C1962.38 592.346 1957.22 587.246 1956.71 586.678C1956.14 586.109 1955.06 586.28 1954.61 586.394C1954.55 586.394 1953.47 586.735 1951.71 587.303C1950.06 582.358 1946.99 577.811 1941.65 577.811H1941.19C1939.66 575.821 1937.78 574.911 1936.19 574.911Z" fill="rgb(var(--fg))"/>
-            <path d="M1948.7 588.27C1947.33 588.724 1945.74 589.179 1944.04 589.691V588.667C1944.04 585.598 1943.58 583.097 1942.9 581.164C1945.68 581.562 1947.56 584.689 1948.7 588.27Z" fill="rgb(var(--fg))"/>
-            <path d="M1939.55 581.79C1940.28 583.722 1940.8 586.451 1940.8 590.145V590.657C1937.78 591.566 1934.49 592.59 1931.19 593.613C1933.07 586.564 1936.53 583.097 1939.55 581.79Z" fill="rgb(var(--fg))"/>
-            <path d="M1935.85 578.322C1936.36 578.322 1936.93 578.493 1937.44 578.834C1933.46 580.709 1929.2 585.427 1927.38 594.863C1924.77 595.659 1922.15 596.455 1919.76 597.194C1921.92 590.031 1926.93 578.322 1935.85 578.322Z" fill="rgb(var(--fg))"/>
-            <path d="M1941.65 609.415L1937.95 620.328C1937.95 620.328 1934.71 618.623 1930.79 618.623C1924.99 618.623 1924.71 622.261 1924.71 623.17C1924.71 628.173 1937.73 630.048 1937.73 641.758C1937.73 650.966 1931.87 656.878 1924.03 656.878C1914.59 656.878 1909.76 651.023 1909.76 651.023L1912.26 642.667C1912.26 642.667 1917.21 646.93 1921.41 646.93C1924.14 646.93 1925.28 644.77 1925.28 643.179C1925.28 636.642 1914.59 636.358 1914.59 625.672C1914.59 616.69 1921.07 607.937 1934.09 607.937C1939.2 607.994 1941.65 609.415 1941.65 609.415Z" fill="rgb(var(--fg))"/>
-          </g>
-          {/* TypeScript - solid filled box + TS letterforms */}
-          <g clipPath="url(#sd-c1)" opacity="0.4">
-            <path d="M114.25 1004H235.75C241.963 1004 247 1009.04 247 1015.25V1136.75C247 1142.96 241.963 1148 235.75 1148H114.25C108.037 1148 103 1142.96 103 1136.75V1015.25C103 1009.04 108.037 1004 114.25 1004Z" fill="rgb(var(--fg))"/>
-            <path d="M187.666 1116.77V1132.3C190.193 1133.6 193.182 1134.57 196.632 1135.22C200.081 1135.86 203.717 1136.19 207.54 1136.19C211.265 1136.19 214.804 1135.83 218.157 1135.12C221.509 1134.41 224.449 1133.23 226.976 1131.6C229.502 1129.97 231.503 1127.83 232.977 1125.19C234.451 1122.55 235.188 1119.29 235.188 1115.41C235.188 1112.59 234.766 1110.12 233.924 1108C233.091 1105.9 231.853 1103.98 230.28 1102.35C228.693 1100.7 226.789 1099.22 224.571 1097.91C222.352 1096.59 219.849 1095.36 217.063 1094.19C215.022 1093.35 213.193 1092.53 211.573 1091.74C209.953 1090.95 208.576 1090.14 207.443 1089.31C206.309 1088.49 205.434 1087.61 204.819 1086.69C204.203 1085.77 203.896 1084.72 203.896 1083.56C203.896 1082.49 204.171 1081.53 204.721 1080.67C205.272 1079.81 206.05 1079.08 207.054 1078.46C208.058 1077.85 209.289 1077.37 210.747 1077.03C212.204 1076.69 213.824 1076.52 215.606 1076.52C216.902 1076.52 218.27 1076.62 219.711 1076.81C221.153 1077 222.603 1077.3 224.061 1077.71C225.514 1078.11 226.935 1078.62 228.312 1079.24C229.647 1079.83 230.924 1080.55 232.126 1081.37V1066.86C229.762 1065.95 227.178 1065.28 224.376 1064.84C221.574 1064.41 218.359 1064.19 214.731 1064.19C211.038 1064.19 207.54 1064.58 204.236 1065.38C200.932 1066.17 198.024 1067.41 195.514 1069.09C193.003 1070.77 191.019 1072.92 189.561 1075.52C188.104 1078.13 187.375 1081.24 187.375 1084.87C187.375 1089.5 188.711 1093.45 191.384 1096.72C194.056 1099.98 198.113 1102.75 203.555 1105.02C205.564 1105.84 207.557 1106.69 209.532 1107.59C211.379 1108.43 212.974 1109.31 214.318 1110.21C215.663 1111.12 216.723 1112.11 217.501 1113.17C218.278 1114.24 218.667 1115.46 218.667 1116.82C218.673 1117.79 218.422 1118.76 217.938 1119.61C217.452 1120.47 216.715 1121.21 215.727 1121.84C214.74 1122.47 213.508 1122.97 212.034 1123.32C210.561 1123.68 208.836 1123.86 206.859 1123.86C203.491 1123.86 200.154 1123.27 196.85 1122.08C193.546 1120.9 190.485 1119.13 187.666 1116.77ZM161.771 1078.1H181.75V1065.31H126.062V1078.1H145.944V1135.06H161.771V1078.1Z" fill="rgb(var(--bg))"/>
-          </g>
-          {/* Figma nodes */}
-          <g opacity="0.4">
-            <path d="M150.975 560.562C163.916 560.562 174.419 550.042 174.419 537.078V513.594H150.975C138.034 513.594 127.531 524.115 127.531 537.078C127.531 550.042 138.034 560.562 150.975 560.562Z" fill="rgb(var(--fg))" stroke="rgb(var(--fg))" strokeOpacity="0.15"/>
-            <path d="M127.531 490.109C127.531 477.146 138.034 466.625 150.975 466.625H174.419V513.594H150.975C138.034 513.594 127.531 503.073 127.531 490.109Z" fill="rgb(var(--fg))" stroke="rgb(var(--fg))" strokeOpacity="0.15"/>
-            <path d="M127.531 443.141C127.531 430.177 138.034 419.656 150.975 419.656H174.419V466.625H150.975C138.034 466.625 127.531 456.104 127.531 443.141Z" fill="rgb(var(--fg))" stroke="rgb(var(--fg))" strokeOpacity="0.15"/>
-            <path d="M174.418 419.656H197.862C210.803 419.656 221.306 430.177 221.306 443.141C221.306 456.104 210.803 466.625 197.862 466.625H174.418V419.656Z" fill="rgb(var(--fg))" stroke="rgb(var(--fg))" strokeOpacity="0.15"/>
-            <path d="M221.306 490.109C221.306 503.073 210.803 513.594 197.862 513.594C184.921 513.594 174.418 503.073 174.418 490.109C174.418 477.146 184.921 466.625 197.862 466.625C210.803 466.625 221.306 477.146 221.306 490.109Z" fill="rgb(var(--fg))" stroke="rgb(var(--fg))" strokeOpacity="0.15"/>
-          </g>
-          {/* Swift bird */}
-          <path d="M188.004 1293.73C256.249 1340.14 234.174 1391.32 234.174 1391.32C234.174 1391.32 253.581 1413.24 245.737 1432.4C245.737 1432.4 237.732 1418.98 224.309 1418.98C211.372 1418.98 203.771 1432.4 177.734 1432.4C119.758 1432.4 92.3469 1383.97 92.3469 1383.97C144.582 1418.33 180.241 1393.99 180.241 1393.99C156.711 1380.33 106.659 1314.99 106.659 1314.99C150.242 1352.11 169.082 1361.89 169.082 1361.89C157.843 1352.59 126.308 1307.15 126.308 1307.15C151.536 1332.7 201.669 1368.36 201.669 1368.36C215.9 1328.9 188.004 1293.73 188.004 1293.73Z" fill="rgb(var(--fg))" opacity="0.4"/>
-          {/* Vercel symbol - right column bottom */}
-          <g clipPath="url(#sd-c2)" opacity="0.4">
-            <path d="M1897 1161H1982V1204H1939.5L1897 1161ZM1897 1204H1939.5L1982 1247H1939.5V1290L1897 1247V1204Z" fill="rgb(var(--fg))"/>
-          </g>
-          {/* Left line - scrolling dashes, matches dashboard style */}
-          <circle cx="350" cy="781" r="16" fill="none" stroke="rgb(var(--fg))" strokeWidth="9" opacity="0.2"/>
-          <path d={leftLine} stroke="rgb(var(--fg))" strokeWidth="9" strokeDasharray="12 8" opacity="0.2" style={{ animation: "sd-left-dash 2s linear infinite" }}/>
-          {/* Center node - static rect, only "In" text tracks mouse */}
-          <rect x="798" y="472" width="559" height="546" rx="52" fill="rgb(var(--fg))" fillOpacity="0.06" stroke="rgb(var(--fg))" strokeOpacity="0.2" strokeWidth="3"/>
-          <g ref={nodeRef} filter="url(#sd-f0)" opacity="0.5">
-            <path d="M971.476 880V639.5H1013.4V880H971.476ZM1038.95 880V702.712H1073.4L1076.33 721.562H1078.44C1084.72 714.629 1092.09 709.321 1100.54 705.637C1109.1 701.846 1118.42 699.95 1128.49 699.95C1139.11 699.95 1148.53 702.062 1156.77 706.287C1165.11 710.404 1171.66 717.175 1176.43 726.6C1181.2 736.025 1183.58 748.592 1183.58 764.3V880H1142.3V766.9C1142.3 755.308 1139.87 747.292 1134.99 742.85C1130.22 738.408 1123.72 736.187 1115.49 736.187C1111.59 736.187 1107.47 736.783 1103.14 737.975C1098.81 739.167 1094.64 741.062 1090.63 743.662C1086.73 746.154 1083.32 749.458 1080.39 753.575V880H1038.95Z" fill="rgb(var(--fg))"/>
-          </g>
-        </svg>
+          {/* 100% in-house — solid fill bar */}
+          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
+            <div className="absolute bottom-0 inset-x-0 opacity-[0.07]" aria-hidden="true" style={{ height: "100%", background: "var(--accent-gradient)" }} />
+            <div className="relative z-10 flex flex-col gap-2">
+              <div className="flex items-baseline gap-1 leading-none">
+                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight tabular-nums" style={{ letterSpacing: "-0.04em", background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
+              </div>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>In-house delivery</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>No outsourcing, ever</span>
+            </div>
+          </div>
+
+          {/* 5 days — timeline dots */}
+          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
+            <div className="relative z-10 flex flex-col gap-2">
+              <div className="flex items-baseline gap-1 leading-none">
+                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={5} duration={800} /></span>
+                <span className="text-[1.3rem] text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>days</span>
+              </div>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Average kickoff</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>First message to delivery</span>
+            </div>
+            {/* Timeline strip */}
+            <div className="flex items-center gap-1 mt-4" aria-hidden="true">
+              {[1,2,3,4,5].map((d) => (
+                <div key={d} className="flex-1 flex flex-col items-center gap-1">
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: d <= 3 ? "var(--accent-gradient)" : "rgb(var(--line))", opacity: d <= 3 ? 1 : 0.35 }} />
+                  <span style={{ fontSize: 9, color: "rgb(var(--muted))", opacity: 0.4 }}>D{d}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 24h response — clock arcs */}
+          <div className="flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden" style={{ borderRight: "1px solid rgb(var(--line))", borderBottom: "1px solid rgb(var(--line))", background: "rgb(var(--surface))", minHeight: 200 }}>
+            <div className="relative z-10 flex flex-col gap-2">
+              <div className="flex items-baseline gap-1 leading-none">
+                <span className="text-[2.6rem] sm:text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing: "-0.04em" }}><CountUp to={24} duration={1000} /></span>
+                <span className="text-[1.3rem] text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>h</span>
+              </div>
+              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>Support response</span>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Every request, every time</span>
+            </div>
+            {/* Clock arc */}
+            <svg viewBox="0 0 48 48" fill="none" className="mt-4" style={{ width: 36, height: 36 }} aria-hidden="true">
+              <circle cx="24" cy="24" r="18" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.3" />
+              <path d="M24 6 A18 18 0 1 1 6 24" stroke="url(#clock-grad)" strokeWidth="2.5" strokeLinecap="round" />
+              <line x1="24" y1="24" x2="24" y2="13" stroke="rgb(var(--fg))" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+              <line x1="24" y1="24" x2="31" y2="28" stroke="rgb(var(--fg))" strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
+              <circle cx="24" cy="24" r="2" fill="rgb(var(--fg))" opacity="0.6" />
+              <defs>
+                <linearGradient id="clock-grad" x1="24" y1="6" x2="6" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#3264f0" />
+                  <stop offset="1" stopColor="#64b4c8" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 pt-2">
+          <a
+            href="https://www.instagram.com/by.inertia/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-white hover:opacity-90 transition-opacity"
+            style={{ background: "var(--accent-gradient)" }}
+          >
+            Start a project ↗
+          </a>
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+            No commitment. We usually reply within 24h.
+          </span>
+        </div>
       </div>
     </div>
   );
