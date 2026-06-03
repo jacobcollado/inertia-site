@@ -1896,6 +1896,28 @@ function MissionPhrase() {
   );
 }
 
+function MetricCard({ children, className = "", style = {} }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
+  const [pressed, setPressed] = useState(false);
+  return (
+    <div
+      className={`transition-all duration-200 cursor-default select-none ${className}`}
+      style={{
+        ...style,
+        transform: pressed ? "scale(0.97)" : "scale(1)",
+        filter: pressed ? "brightness(1.05)" : "none",
+      }}
+      onMouseEnter={e => (e.currentTarget.style.filter = "brightness(1.04)")}
+      onMouseLeave={e => { e.currentTarget.style.filter = "none"; setPressed(false); }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+    >
+      {children}
+    </div>
+  );
+}
+
 function MetricsCarousel({ children }: { children: React.ReactNode }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
@@ -2034,7 +2056,7 @@ function StackDiagram() {
           {/* Each page is exactly viewport width, snaps cleanly */}
           {/* Page 1: clients (tall left) + 100% + 24h */}
           <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
-            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
+            <MetricCard className="flex flex-col p-5 relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
               <div className="flex flex-col gap-1.5">
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Clients worked with</span>
@@ -2046,15 +2068,21 @@ function StackDiagram() {
                 ))}
                 <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
               </div>
-            </div>
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+            </MetricCard>
+            <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
               <div className="flex flex-col gap-1">
                 <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing</span>
               </div>
-            </div>
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+              <svg viewBox="0 0 48 48" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
+                <defs><linearGradient id="dg-p1" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
+                <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
+                <circle cx="24" cy="24" r="17" stroke="url(#dg-p1)" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)"/>
+                <polyline points="19,24 23,28 30,20" stroke="url(#dg-p1)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
+            </MetricCard>
+            <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
               <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-1 leading-none">
                   <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={24} duration={1000} /></span>
@@ -2063,12 +2091,20 @@ function StackDiagram() {
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Support</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request</span>
               </div>
-            </div>
+              <svg viewBox="0 0 52 52" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
+                <defs><linearGradient id="cg-p1" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
+                <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
+                <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#cg-p1)" strokeWidth="2.5" strokeLinecap="round"/>
+                <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
+                <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
+                <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
+              </svg>
+            </MetricCard>
           </div>
 
           {/* Page 2: 5 days + 98% + US map */}
           <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+            <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
               <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-1 leading-none">
                   <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={5} duration={800} /></span>
@@ -2082,8 +2118,8 @@ function StackDiagram() {
                   <div key={d} className="flex-1" style={{ height:4, background:d<=3?"var(--accent-gradient)":"rgb(var(--line))", opacity:d<=3?1:0.25 }} />
                 ))}
               </div>
-            </div>
-            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
+            </MetricCard>
+            <MetricCard className="flex flex-col p-5 relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
               <div className="flex flex-col gap-1.5 relative z-10">
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}>US</span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Based clients</span>
@@ -2091,8 +2127,8 @@ function StackDiagram() {
               </div>
               <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover dark:invert" style={{ opacity:0.18 }} />
               <div className="absolute inset-x-0 top-0 h-2/3 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
-            </div>
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+            </MetricCard>
+            <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
               <div className="flex flex-col gap-1">
                 <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={98} duration={1200} suffix="%" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction</span>
@@ -2101,7 +2137,7 @@ function StackDiagram() {
               <div className="mt-2" style={{ height:4, background:"rgb(var(--line))", opacity:0.2, overflow:"hidden" }}>
                 <div style={{ height:"100%", width:"98%", background:"var(--accent-gradient)" }} />
               </div>
-            </div>
+            </MetricCard>
           </div>
         </MetricsCarousel>
 
