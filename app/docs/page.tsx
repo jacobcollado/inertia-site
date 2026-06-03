@@ -1712,67 +1712,82 @@ function DocsPageInner() {
           boxShadow: "0 20px 60px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.12)",
         }}
       >
-        {/* Fixed header */}
-        <div className="shrink-0">
-          <div className="flex items-center justify-between px-5" style={{ height: 52 }}>
-            <div className="flex items-center gap-2">
-              {PRODUCTS.map((p) => {
-                const active = p.id === activeProductId;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => handleSelectProduct(p.id)}
-                    className="px-3 py-1.5 rounded-full text-[13px] tracking-tight [-webkit-tap-highlight-color:transparent]"
-                    style={{
-                      background: active ? rgba(p.accent, 0.12) : "rgb(var(--fg) / 0.06)",
-                      color: active ? rgba(p.accent, 1) : "rgb(var(--fg))",
-                      opacity: active ? 1 : 0.6,
-                    }}
-                  >
-                    {p.name}
-                  </button>
-                );
-              })}
-            </div>
+        {/* Header */}
+        <div className="shrink-0 px-4 pt-4 pb-3 flex flex-col gap-3">
+          {/* Top row: logo + close */}
+          <div className="flex items-center justify-between">
+            <Link href="/" onClick={() => setSheetOpen(false)}>
+              <img src="/logo.png" alt="Inertia" className="h-4 w-auto dark:invert invert-0" style={{ opacity: 0.7 }} />
+            </Link>
             <button
               onClick={() => setSheetOpen(false)}
-              className="h-8 w-8 flex items-center justify-center [-webkit-tap-highlight-color:transparent]"
+              className="h-8 w-8 flex items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent]"
+              style={{ background: "rgb(var(--fg) / 0.06)" }}
               aria-label="Close"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" style={{ color: "rgb(var(--muted))" }}>
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" className="h-3.5 w-3.5 text-[rgb(var(--fg))]">
+                <line x1="2" y1="2" x2="12" y2="12" /><line x1="12" y1="2" x2="2" y2="12" />
               </svg>
             </button>
           </div>
 
-          {/* Search trigger */}
+          {/* Product tabs */}
+          <div className="flex gap-1.5 p-1 rounded-xl" style={{ background: "rgb(var(--fg) / 0.05)" }}>
+            {PRODUCTS.map((p) => {
+              const active = p.id === activeProductId;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => handleSelectProduct(p.id)}
+                  className="flex-1 py-1.5 rounded-lg text-[13px] font-medium tracking-tight transition-all [-webkit-tap-highlight-color:transparent]"
+                  style={{
+                    background: active ? "rgb(var(--surface))" : "transparent",
+                    color: active ? rgba(p.accent, 1) : "rgb(var(--fg))",
+                    opacity: active ? 1 : 0.45,
+                    boxShadow: active ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                  }}
+                >
+                  {p.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search */}
           <button
             onClick={() => { setSheetOpen(false); setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
-            className="flex items-center gap-2.5 mx-5 mb-4 px-3 py-2.5 rounded-lg border border-[rgb(var(--line))] w-[calc(100%-2.5rem)] text-left [-webkit-tap-highlight-color:transparent]"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[rgb(var(--line))] w-full text-left [-webkit-tap-highlight-color:transparent]"
+            style={{ background: "rgb(var(--bg))" }}
           >
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
               <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
             </svg>
-            <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>Search...</span>
+            <span className="text-[13.5px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>Search docs...</span>
+            <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded border border-[rgb(var(--line))] text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>⌘K</span>
           </button>
         </div>
 
+        <div className="h-px mx-4" style={{ background: "rgb(var(--line))" }} />
+
         {/* Scrollable nav */}
-        <div className="overflow-y-auto flex-1 px-5 py-5 flex flex-col gap-5" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 32px)" }}>
+        <div className="overflow-y-auto flex-1 px-4 py-4 flex flex-col gap-1" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 24px)" }}>
           <a
             href={`#${INTRO_ID}`}
             onClick={() => setSheetOpen(false)}
-            className="text-[15px] tracking-tight [-webkit-tap-highlight-color:transparent] px-2 py-1.5 rounded-lg transition-colors hover:bg-[rgb(var(--fg)/0.05)]"
-            style={{ color: "rgb(var(--fg))", fontWeight: activeArticleId === INTRO_ID ? 600 : 400, opacity: activeArticleId === INTRO_ID ? 1 : 0.55 }}
+            className="px-3 py-2 rounded-xl text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent] transition-colors"
+            style={{
+              color: "rgb(var(--fg))",
+              fontWeight: activeArticleId === INTRO_ID ? 600 : 400,
+              opacity: activeArticleId === INTRO_ID ? 1 : 0.5,
+              background: activeArticleId === INTRO_ID ? rgba(product.accent, 0.1) : "transparent",
+            }}
           >
             Introduction
           </a>
 
-          <div className="h-px" style={{ background: "rgb(var(--line))" }} />
-
           {product.sections.map((section) => (
-            <div key={section.id} className="flex flex-col gap-1">
-              <p className="text-[12px] tracking-tight font-semibold mb-1.5" style={{ color: "rgb(var(--fg))" }}>
+            <div key={section.id} className="flex flex-col mt-4">
+              <p className="text-[11px] tracking-tight font-semibold px-3 mb-1" style={{ color: "rgb(var(--fg))", opacity: 0.35 }}>
                 {section.title}
               </p>
               {section.articles.map((article) => {
@@ -1782,8 +1797,13 @@ function DocsPageInner() {
                     key={article.id}
                     href={`#${article.id}`}
                     onClick={() => setSheetOpen(false)}
-                    className="px-2 py-2 rounded-lg text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent] transition-colors hover:bg-[rgb(var(--fg)/0.05)]"
-                    style={{ color: "rgb(var(--fg))", fontWeight: active ? 600 : 400, opacity: active ? 1 : 0.5 }}
+                    className="px-3 py-2 rounded-xl text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent] transition-colors"
+                    style={{
+                      color: "rgb(var(--fg))",
+                      fontWeight: active ? 600 : 400,
+                      opacity: active ? 1 : 0.5,
+                      background: active ? rgba(product.accent, 0.1) : "transparent",
+                    }}
                   >
                     {article.title}
                   </a>
