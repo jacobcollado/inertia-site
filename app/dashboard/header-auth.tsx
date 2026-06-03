@@ -76,7 +76,7 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
   if (mobile) {
     if (user) {
       return (
-        <div style={{ display: "flex", gap: "10px", padding: "20px" }}>
+        <div style={{ display: "flex", gap: "8px" }}>
           <button
             onClick={() => startTransition(() => signOut())}
             disabled={pending}
@@ -85,13 +85,13 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              height: "44px",
+              height: "36px",
               borderRadius: "100px",
               border: "1px solid rgb(var(--line))",
               background: "transparent",
-              fontSize: "15px",
+              fontSize: "13px",
               fontWeight: 500,
-              letterSpacing: "-0.03em",
+              letterSpacing: "-0.02em",
               color: "rgb(var(--fg))",
               cursor: "pointer",
               transition: "background 140ms ease",
@@ -107,12 +107,12 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              height: "44px",
+              height: "36px",
               borderRadius: "100px",
               background: "rgb(var(--fg))",
-              fontSize: "15px",
+              fontSize: "13px",
               fontWeight: 500,
-              letterSpacing: "-0.03em",
+              letterSpacing: "-0.02em",
               color: "rgb(var(--bg))",
               textDecoration: "none",
               transition: "opacity 140ms ease",
@@ -124,7 +124,7 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
       );
     }
     return (
-      <div style={{ display: "flex", gap: "10px", padding: "20px" }}>
+      <div style={{ display: "flex", gap: "8px" }}>
         <Link
           href="/login"
           style={{
@@ -132,12 +132,12 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            height: "44px",
+            height: "36px",
             borderRadius: "100px",
             border: "1px solid rgb(var(--line))",
-            fontSize: "15px",
+            fontSize: "13px",
             fontWeight: 500,
-            letterSpacing: "-0.03em",
+            letterSpacing: "-0.02em",
             color: "rgb(var(--fg))",
             textDecoration: "none",
             transition: "background 140ms ease",
@@ -152,12 +152,12 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            height: "44px",
+            height: "36px",
             borderRadius: "100px",
             background: "rgb(var(--fg))",
-            fontSize: "15px",
+            fontSize: "13px",
             fontWeight: 500,
-            letterSpacing: "-0.03em",
+            letterSpacing: "-0.02em",
             color: "rgb(var(--bg))",
             textDecoration: "none",
             transition: "opacity 140ms ease",
