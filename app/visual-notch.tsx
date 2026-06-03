@@ -616,7 +616,7 @@ export function VisualNotch() {
     if (mobileOpen) {
       bg.style.backdropFilter = "none";
       (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "none";
-      bg.style.background = "transparent";
+      bg.style.background = "rgb(var(--surface))";
       bg.style.webkitMaskImage = "none";
       bg.style.maskImage = "none";
     } else {
