@@ -1030,7 +1030,7 @@ h1:hover .redact > span.redact-inner,
 
 .mobile-nav__drawer {
   position: fixed;
-  top: 0;
+  top: 20px;
   left: 16px;
   right: 16px;
   z-index: 44;
@@ -1051,7 +1051,7 @@ h1:hover .redact > span.redact-inner,
 .mobile-nav__drawer-inner {
   display: flex;
   flex-direction: column;
-  padding-top: 92px; /* clear header + top margin */
+  padding-top: 72px; /* clear the header */
 }
 
 /* Accordion section */
