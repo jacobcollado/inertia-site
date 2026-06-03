@@ -628,7 +628,7 @@ export function VisualNotch() {
     // Blur + push down page content behind the menu
     const main = document.querySelector<HTMLElement>("main, .page-container");
     if (main) {
-      main.style.transition = "filter 400ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)";
+      main.style.transition = "filter 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)";
       main.style.filter = mobileOpen ? "blur(6px)" : "none";
       main.style.transform = mobileOpen ? "translateY(56px)" : "none";
     }

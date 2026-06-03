@@ -764,9 +764,9 @@ h1:hover .redact > span.redact-inner,
 @media (max-width: 767px) {
   .site-header__inner {
     transition:
-      padding 550ms cubic-bezier(0.22, 1, 0.36, 1),
-      margin-top 550ms cubic-bezier(0.22, 1, 0.36, 1),
-      border-radius 550ms cubic-bezier(0.22, 1, 0.36, 1);
+      padding 500ms cubic-bezier(0.22, 1, 0.36, 1),
+      margin 500ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-radius 500ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .site-header--open .site-header__inner {
@@ -1038,13 +1038,18 @@ h1:hover .redact > span.redact-inner,
   border-radius: 18px 18px 22px 22px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.12);
   opacity: 0;
+  transform: scale(0.97) translateY(-8px);
+  transform-origin: top center;
   pointer-events: none;
-  transition: opacity 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    opacity 450ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 450ms cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
 }
 
 .mobile-nav__drawer[data-open="true"] {
   opacity: 1;
+  transform: scale(1) translateY(0);
   pointer-events: auto;
 }
 
