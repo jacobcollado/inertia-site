@@ -616,11 +616,13 @@ export function VisualNotch() {
     if (mobileOpen) {
       bg.style.backdropFilter = "none";
       (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "none";
-      bg.style.background = "rgb(var(--surface))";
+      bg.style.background = "transparent";
+      bg.style.opacity = "0";
       bg.style.webkitMaskImage = "none";
       bg.style.maskImage = "none";
     } else {
       bg.style.background = "";
+      bg.style.opacity = "";
       bg.style.webkitMaskImage = "";
       bg.style.maskImage = "";
     }
