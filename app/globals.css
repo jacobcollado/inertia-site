@@ -759,6 +759,15 @@ h1:hover .redact > span.redact-inner,
   top: 0;
   z-index: 50;
   width: 100%;
+  transition: margin 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 767px) {
+  .site-header--open {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: calc(100% - 20px);
+  }
 }
 
 .site-header__bg {
@@ -1010,18 +1019,17 @@ h1:hover .redact > span.redact-inner,
 .mobile-nav__drawer {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 10px;
+  right: 10px;
   z-index: 45;
   background: rgb(var(--bg));
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  transform: translateY(-12px);
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+  transform: translateY(-16px);
   opacity: 0;
   pointer-events: none;
   transition:
-    transform 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 380ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 280ms cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
 }

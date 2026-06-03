@@ -648,7 +648,7 @@ export function VisualNotch() {
 
   return (
     <>
-      <div className="site-header" ref={headerRef}>
+      <div className={`site-header${mobileOpen ? " site-header--open" : ""}`} ref={headerRef}>
         <div className="site-header__bg" aria-hidden="true" />
         <div className="site-header__inner">
           {/* Brand */}
