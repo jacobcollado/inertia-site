@@ -990,6 +990,7 @@ function PlatformDiagram() {
       className="w-full rounded-2xl border border-[rgb(var(--line))] overflow-hidden"
       style={{
         background: "rgb(var(--surface))",
+        minHeight: 320,
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(16px)",
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
@@ -1920,7 +1921,7 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="sm:hidden flex flex-col">
-      <div ref={scrollRef} className="overflow-x-auto -mx-3 px-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" style={{ scrollSnapType:"x mandatory" }}>
+      <div ref={scrollRef} className="overflow-x-auto -mx-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex" style={{ scrollSnapType:"x mandatory", paddingLeft:12 }}>
         {children}
       </div>
       <div className="flex items-center justify-center gap-2 mt-4">
@@ -2032,7 +2033,7 @@ function StackDiagram() {
         <MetricsCarousel>
           {/* Each page is exactly viewport width, snaps cleanly */}
           {/* Page 1: clients (tall left) + 100% + 24h */}
-          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
+          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
             <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
               <div className="flex flex-col gap-1.5">
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
@@ -2066,7 +2067,7 @@ function StackDiagram() {
           </div>
 
           {/* Page 2: 5 days + 98% + US map */}
-          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
+          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
             <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
               <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-1 leading-none">
