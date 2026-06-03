@@ -39,6 +39,8 @@ type ArticleBlock =
 function rgba([r, g, b]: [number, number, number], a = 1) {
   return `rgba(${r},${g},${b},${a})`;
 }
+// For sketch text labels — uses CSS var so it respects light/dark
+const sketchText = (opacity = 0.4) => ({ fill: `rgb(var(--fg) / ${opacity})` } as React.SVGProps<SVGTextElement>);
 
 // â"€â"€â"€ Aether sketches â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
@@ -104,50 +106,85 @@ function SketchColors({ accent }: { accent: [number, number, number] }) {
 function SketchProductPage({ accent }: { accent: [number, number, number] }) {
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
+      {/* Browser chrome */}
       <rect x="8" y="8" width="264" height="94" rx="4" stroke={rgba([160,160,160], 0.15)} strokeWidth="0.8" />
-      <line x1="8" y1="22" x2="272" y2="22" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.6" />
-      <rect x="16" y="30" width="138" height="64" rx="2" fill={rgba(accent, 0.04)} stroke={rgba([160,160,160], 0.11)} strokeWidth="0.6" />
-      <line x1="16" y1="30" x2="154" y2="94" stroke={rgba([160,160,160], 0.06)} strokeWidth="0.5" />
-      <line x1="154" y1="30" x2="16" y2="94" stroke={rgba([160,160,160], 0.06)} strokeWidth="0.5" />
-      <line x1="164" y1="36" x2="256" y2="36" stroke={rgba(accent, 0.72)} strokeWidth="1.3" />
-      <line x1="164" y1="43" x2="240" y2="43" stroke={rgba(accent, 0.42)} strokeWidth="0.85" />
-      <line x1="164" y1="50" x2="206" y2="50" stroke={rgba([160,160,160], 0.2)} strokeWidth="0.55" />
-      {[0,1,2,3].map(i => (
-        <circle key={i} cx={164 + i * 10} cy={59} r={3.2}
-          fill={i === 0 ? rgba(accent, 0.68) : rgba([160,160,160], 0.11)}
-          stroke={i === 0 ? rgba(accent, 0.45) : rgba([160,160,160], 0.18)} strokeWidth="0.5" />
-      ))}
-      <rect x="164" y="67" width="88" height="10" rx="3" fill={rgba(accent, 0.88)} stroke="none" />
-      {[0,1,2].map(i => (
-        <g key={i}>
-          <rect x={164 + i * 31} y="83" width="27" height="8" rx="1.5" fill={rgba([160,160,160], 0.04)} stroke={rgba([160,160,160], 0.11)} strokeWidth="0.5" />
-          <line x1={168 + i * 31} y1="87" x2={185 + i * 31} y2="87" stroke={rgba([160,160,160], 0.16)} strokeWidth="0.5" />
+      <line x1="8" y1="20" x2="272" y2="20" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.5" />
+      {/* Center product image */}
+      <rect x="86" y="26" width="108" height="56" rx="3" fill={rgba(accent, 0.05)} stroke={rgba([160,160,160], 0.12)} strokeWidth="0.6" />
+      <ellipse cx="140" cy="54" rx="22" ry="22" fill={rgba(accent, 0.08)} stroke={rgba(accent, 0.2)} strokeWidth="0.7" />
+      <ellipse cx="140" cy="54" rx="10" ry="10" fill={rgba(accent, 0.18)} stroke="none" />
+      {/* Left col — product info + tabs */}
+      <line x1="14" y1="30" x2="78" y2="30" stroke={rgba([160,160,160], 0.2)} strokeWidth="0.5" />
+      <line x1="14" y1="36" x2="70" y2="36" stroke={rgba(accent, 0.5)} strokeWidth="0.8" />
+      <line x1="14" y1="42" x2="60" y2="42" stroke={rgba(accent, 0.3)} strokeWidth="0.6" />
+      {/* Tabs */}
+      <line x1="14" y1="52" x2="82" y2="52" stroke={rgba([160,160,160], 0.12)} strokeWidth="0.4" />
+      {["Details","Materials","Shipping"].map((t, i) => (
+        <g key={t}>
+          <line x1={14 + i * 24} y1="58" x2={30 + i * 24} y2="58"
+            stroke={i === 0 ? rgba(accent, 0.6) : rgba([160,160,160], 0.2)}
+            strokeWidth={i === 0 ? "0.8" : "0.5"} />
+          {i === 0 && <line x1="14" y1="60" x2="30" y2="60" stroke={rgba(accent, 0.5)} strokeWidth="1" />}
         </g>
       ))}
+      <line x1="14" y1="66" x2="80" y2="66" stroke={rgba([160,160,160], 0.12)} strokeWidth="0.4" />
+      <line x1="14" y1="72" x2="74" y2="72" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.4" />
+      <line x1="14" y1="78" x2="76" y2="78" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.4" />
+      {/* Right col — price, variants, ATC, urgency */}
+      <line x1="202" y1="30" x2="264" y2="30" stroke={rgba([160,160,160], 0.18)} strokeWidth="0.5" />
+      <line x1="202" y1="36" x2="232" y2="36" stroke={rgba(accent, 0.7)} strokeWidth="1.1" />
+      {/* Variant swatches */}
+      {[0,1,2,3].map(i => (
+        <circle key={i} cx={208 + i * 10} cy={46} r={3.5}
+          fill={i === 0 ? rgba(accent, 0.7) : rgba([160,160,160], 0.1)}
+          stroke={i === 0 ? rgba(accent, 0.5) : rgba([160,160,160], 0.2)} strokeWidth="0.5" />
+      ))}
+      {/* Variant size pills */}
+      {[0,1,2].map(i => (
+        <rect key={i} x={202 + i * 20} y="54" width="16" height="8" rx="2"
+          fill={i === 1 ? rgba(accent, 0.1) : "none"}
+          stroke={i === 1 ? rgba(accent, 0.45) : rgba([160,160,160], 0.18)} strokeWidth="0.5" />
+      ))}
+      {/* ATC button */}
+      <rect x="202" y="67" width="62" height="11" rx="3" fill={rgba(accent, 0.88)} stroke="none" />
+      {/* Urgency */}
+      <line x1="202" y1="84" x2="244" y2="84" stroke={rgba([255,120,60], 0.55)} strokeWidth="0.7" />
+      <line x1="202" y1="90" x2="236" y2="90" stroke={rgba([255,120,60], 0.35)} strokeWidth="0.55" />
     </svg>
   );
 }
 
 function SketchUpdate({ accent }: { accent: [number, number, number] }) {
+  // Shows old zip → upload → new theme ready — a clear update flow
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <line x1="36" y1="56" x2="244" y2="56" stroke={rgba([160,160,160], 0.16)} strokeWidth="0.8" />
-      <circle cx="56" cy="56" r="5.5" fill={rgba([160,160,160], 0.07)} stroke={rgba([160,160,160], 0.26)} strokeWidth="0.8" />
-      <line x1="56" y1="50" x2="56" y2="30" stroke={rgba([160,160,160], 0.16)} strokeWidth="0.6" />
-      <rect x="34" y="18" width="44" height="12" rx="2" fill="none" stroke={rgba([160,160,160], 0.14)} strokeWidth="0.6" />
-      <line x1="40" y1="24" x2="72" y2="24" stroke={rgba([160,160,160], 0.18)} strokeWidth="0.6" />
-      <circle cx="120" cy="56" r="5.5" fill={rgba([160,160,160], 0.07)} stroke={rgba([160,160,160], 0.26)} strokeWidth="0.8" />
-      <line x1="120" y1="62" x2="120" y2="82" stroke={rgba([160,160,160], 0.16)} strokeWidth="0.6" />
-      <rect x="96" y="82" width="48" height="12" rx="2" fill="none" stroke={rgba([160,160,160], 0.14)} strokeWidth="0.6" />
-      <line x1="102" y1="88" x2="138" y2="88" stroke={rgba([160,160,160], 0.18)} strokeWidth="0.6" />
-      <circle cx="200" cy="56" r="7.5" fill={rgba(accent, 0.1)} stroke={rgba(accent, 0.65)} strokeWidth="1.1" />
-      <circle cx="200" cy="56" r="2.5" fill={rgba(accent, 0.6)} stroke="none" />
-      <line x1="200" y1="48" x2="200" y2="26" stroke={rgba(accent, 0.4)} strokeWidth="0.8" />
-      <rect x="172" y="14" width="56" height="14" rx="2" fill={rgba(accent, 0.07)} stroke={rgba(accent, 0.38)} strokeWidth="0.8" />
-      <line x1="178" y1="20" x2="220" y2="20" stroke={rgba(accent, 0.55)} strokeWidth="0.85" />
-      <line x1="178" y1="25" x2="208" y2="25" stroke={rgba(accent, 0.3)} strokeWidth="0.5" />
-      <line x1="200" y1="64" x2="200" y2="78" stroke={rgba(accent, 0.3)} strokeWidth="0.7" strokeDasharray="2 2" />
-      <polyline points="195,74 200,80 205,74" stroke={rgba(accent, 0.48)} strokeWidth="0.9" />
+      {/* Old theme file */}
+      <rect x="14" y="22" width="52" height="66" rx="3" fill={rgba([160,160,160], 0.04)} stroke={rgba([160,160,160], 0.2)} strokeWidth="0.8" />
+      <polyline points="50,22 66,22 66,38" stroke={rgba([160,160,160], 0.2)} strokeWidth="0.8" />
+      <line x1="50" y1="22" x2="66" y2="38" stroke={rgba([160,160,160], 0.14)} strokeWidth="0.6" />
+      <line x1="22" y1="46" x2="58" y2="46" stroke={rgba([160,160,160], 0.16)} strokeWidth="0.55" />
+      <line x1="22" y1="53" x2="52" y2="53" stroke={rgba([160,160,160], 0.12)} strokeWidth="0.5" />
+      <line x1="22" y1="60" x2="56" y2="60" stroke={rgba([160,160,160], 0.12)} strokeWidth="0.5" />
+      <text x="40" y="78" textAnchor="middle" fontSize="7" {...sketchText(0.35)} fontFamily="monospace">v1.3.zip</text>
+      {/* Arrow */}
+      <line x1="78" y1="55" x2="108" y2="55" stroke={rgba(accent, 0.35)} strokeWidth="1" strokeDasharray="3 3" />
+      <polyline points="104,51 109,55 104,59" stroke={rgba(accent, 0.5)} strokeWidth="1" />
+      {/* Upload box */}
+      <rect x="114" y="36" width="52" height="38" rx="3" fill={rgba(accent, 0.05)} stroke={rgba(accent, 0.3)} strokeWidth="0.8" strokeDasharray="3 3" />
+      <line x1="140" y1="61" x2="140" y2="46" stroke={rgba(accent, 0.45)} strokeWidth="1" />
+      <polyline points="135,50 140,45 145,50" stroke={rgba(accent, 0.55)} strokeWidth="1" />
+      <text x="140" y="72" textAnchor="middle" fontSize="7" fill={rgba(accent, 0.45)} fontFamily="monospace">Upload</text>
+      {/* Arrow */}
+      <line x1="178" y1="55" x2="208" y2="55" stroke={rgba(accent, 0.35)} strokeWidth="1" strokeDasharray="3 3" />
+      <polyline points="204,51 209,55 204,59" stroke={rgba(accent, 0.5)} strokeWidth="1" />
+      {/* New theme — accent highlighted */}
+      <rect x="214" y="22" width="52" height="66" rx="3" fill={rgba(accent, 0.06)} stroke={rgba(accent, 0.4)} strokeWidth="0.9" />
+      <polyline points="250,22 266,22 266,38" stroke={rgba(accent, 0.35)} strokeWidth="0.8" />
+      <line x1="250" y1="22" x2="266" y2="38" stroke={rgba(accent, 0.25)} strokeWidth="0.6" />
+      <line x1="222" y1="46" x2="258" y2="46" stroke={rgba(accent, 0.3)} strokeWidth="0.6" />
+      <line x1="222" y1="53" x2="252" y2="53" stroke={rgba(accent, 0.2)} strokeWidth="0.5" />
+      <line x1="222" y1="60" x2="256" y2="60" stroke={rgba(accent, 0.2)} strokeWidth="0.5" />
+      <text x="240" y="78" textAnchor="middle" fontSize="7" fill={rgba(accent, 0.6)} fontFamily="monospace">v1.4.zip</text>
     </svg>
   );
 }
@@ -176,7 +213,7 @@ function SketchHero({ accent }: { accent: [number, number, number] }) {
       <line x1="214" y1="57" x2="252" y2="57" stroke={rgba([160,160,160], 0.18)} strokeWidth="0.55" />
       <rect x="220" y="64" width="34" height="8" rx="2.5" fill={rgba(accent, 0.85)} stroke="none" />
       {["full-bleed", "split", "text"].map((label, i) => (
-        <text key={i} x={45 + i * 95} y="108" textAnchor="middle" fontSize="6.5" fill={rgba([160,160,160], 0.3)} fontFamily="inherit">{label}</text>
+        <text key={i} x={45 + i * 95} y="108" textAnchor="middle" fontSize="6.5" {...sketchText(0.35)} fontFamily="inherit">{label}</text>
       ))}
     </svg>
   );
@@ -185,29 +222,38 @@ function SketchHero({ accent }: { accent: [number, number, number] }) {
 function SketchMegaMenu({ accent }: { accent: [number, number, number] }) {
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <rect x="8" y="8" width="264" height="20" rx="3" fill={rgba([160,160,160], 0.03)} stroke={rgba([160,160,160], 0.13)} strokeWidth="0.7" />
-      <line x1="18" y1="18" x2="46" y2="18" stroke={rgba([160,160,160], 0.28)} strokeWidth="1.0" />
-      {[0,1,2].map(i => (
-        <line key={i} x1={72 + i * 48} y1="18" x2={90 + i * 48} y2="18"
-          stroke={i === 1 ? rgba(accent, 0.7) : rgba([160,160,160], 0.18)}
-          strokeWidth={i === 1 ? "0.85" : "0.55"} />
-      ))}
-      <circle cx={96} cy={18} r={1.4} fill={rgba(accent, 0.5)} stroke="none" />
-      <rect x="58" y="30" width="196" height="72" rx="3" fill={rgba([160,160,160], 0.025)} stroke={rgba([160,160,160], 0.14)} strokeWidth="0.7" />
-      {[0,1,2,3].map(i => (
+      {/* Nav bar */}
+      <rect x="8" y="8" width="264" height="18" rx="3" fill={rgba([160,160,160], 0.03)} stroke={rgba([160,160,160], 0.13)} strokeWidth="0.7" />
+      {/* Logo */}
+      <line x1="16" y1="17" x2="36" y2="17" stroke={rgba([160,160,160], 0.35)} strokeWidth="1.1" />
+      {/* Nav items — second one active */}
+      {["Home","Products","About","Contact"].map((label, i) => (
         <g key={i}>
-          <line x1="70" y1={44 + i * 13} x2="148" y2={44 + i * 13}
-            stroke={i === 0 ? rgba(accent, 0.6) : rgba([160,160,160], 0.18)}
-            strokeWidth={i === 0 ? "0.85" : "0.55"} />
-          <line x1="70" y1={49 + i * 13} x2={106 + i * 5} y2={49 + i * 13} stroke={rgba([160,160,160], 0.11)} strokeWidth="0.45" />
+          <line x1={64 + i * 46} y1="17" x2={82 + i * 46} y2="17"
+            stroke={i === 1 ? rgba(accent, 0.75) : rgba([160,160,160], 0.2)}
+            strokeWidth={i === 1 ? "0.9" : "0.55"} />
+          {i === 1 && <circle cx={72 + i * 46} cy="25" r="1.2" fill={rgba(accent, 0.6)} stroke="none" />}
         </g>
       ))}
-      <line x1="156" y1="36" x2="156" y2="94" stroke={rgba([160,160,160], 0.11)} strokeWidth="0.55" />
-      <rect x="164" y="38" width="78" height="48" rx="2" fill={rgba(accent, 0.05)} stroke={rgba(accent, 0.18)} strokeWidth="0.6" />
-      <line x1="164" y1="38" x2="242" y2="86" stroke={rgba([160,160,160], 0.05)} strokeWidth="0.4" />
-      <line x1="242" y1="38" x2="164" y2="86" stroke={rgba([160,160,160], 0.05)} strokeWidth="0.4" />
-      <line x1="170" y1="74" x2="228" y2="74" stroke={rgba(accent, 0.45)} strokeWidth="0.75" />
-      <line x1="170" y1="80" x2="214" y2="80" stroke={rgba(accent, 0.28)} strokeWidth="0.55" />
+      {/* Dropdown panel */}
+      <rect x="54" y="29" width="172" height="72" rx="3" fill={rgba([160,160,160], 0.02)} stroke={rgba([160,160,160], 0.14)} strokeWidth="0.7" />
+      {/* Left col — nav links */}
+      <line x1="64" y1="38" x2="130" y2="38" stroke={rgba(accent, 0.65)} strokeWidth="0.9" />
+      <line x1="64" y1="43" x2="110" y2="43" stroke={rgba(accent, 0.25)} strokeWidth="0.5" />
+      {[51,64,77].map(y => (
+        <g key={y}>
+          <line x1="64" y1={y} x2="128" y2={y} stroke={rgba([160,160,160], 0.2)} strokeWidth="0.55" />
+          <line x1="64" y1={y + 5} x2={100 + y * 0.1} y2={y + 5} stroke={rgba([160,160,160], 0.1)} strokeWidth="0.4" />
+        </g>
+      ))}
+      {/* Divider */}
+      <line x1="142" y1="34" x2="142" y2="94" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.5" />
+      {/* Right col — featured image */}
+      <rect x="150" y="34" width="68" height="56" rx="2" fill={rgba(accent, 0.05)} stroke={rgba(accent, 0.2)} strokeWidth="0.6" />
+      <rect x="150" y="34" width="68" height="32" rx="2" fill={rgba(accent, 0.08)} stroke="none" />
+      <line x1="158" y1="75" x2="210" y2="75" stroke={rgba(accent, 0.5)} strokeWidth="0.8" />
+      <line x1="158" y1="81" x2="196" y2="81" stroke={rgba(accent, 0.28)} strokeWidth="0.55" />
+      <rect x="158" y="86" width="32" height="6" rx="2" fill={rgba(accent, 0.8)} stroke="none" />
     </svg>
   );
 }
@@ -215,53 +261,62 @@ function SketchMegaMenu({ accent }: { accent: [number, number, number] }) {
 function SketchDarkMode({ accent }: { accent: [number, number, number] }) {
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <rect x="28" y="8" width="88" height="94" rx="7" fill="rgba(248,248,248,0.05)" stroke={rgba([160,160,160], 0.18)} strokeWidth="0.9" />
-      <rect x="28" y="8" width="88" height="22" rx="7" fill={rgba([200,200,200], 0.06)} stroke="none" />
-      <line x1="28" y1="30" x2="116" y2="30" stroke={rgba([160,160,160], 0.09)} strokeWidth="0.5" />
-      <line x1="38" y1="19" x2="64" y2="19" stroke={rgba([160,160,160], 0.28)} strokeWidth="0.75" />
-      <rect x="38" y="38" width="68" height="34" rx="2" fill={rgba([190,190,190], 0.07)} stroke={rgba([160,160,160], 0.11)} strokeWidth="0.5" />
-      <line x1="38" y1="38" x2="106" y2="72" stroke={rgba([160,160,160], 0.04)} strokeWidth="0.4" />
-      <line x1="38" y1="80" x2="98" y2="80" stroke={rgba([160,160,160], 0.22)} strokeWidth="0.65" />
-      <line x1="38" y1="86" x2="84" y2="86" stroke={rgba([160,160,160], 0.16)} strokeWidth="0.5" />
-      <rect x="38" y="93" width="28" height="6" rx="2" fill={rgba(accent, 0.28)} stroke={rgba(accent, 0.45)} strokeWidth="0.55" />
-      <circle cx="100" cy="19" r="4.5" fill={rgba([255,200,60], 0.18)} stroke={rgba([255,200,60], 0.45)} strokeWidth="0.65" />
-      <line x1="120" y1="55" x2="154" y2="55" stroke={rgba([160,160,160], 0.18)} strokeWidth="0.75" strokeDasharray="2 2" />
-      <polyline points="151,52 154,55 151,58" stroke={rgba([160,160,160], 0.28)} strokeWidth="0.75" />
-      <rect x="160" y="8" width="88" height="94" rx="7" fill="rgba(10,10,16,0.45)" stroke={rgba(accent, 0.28)} strokeWidth="0.9" />
-      <rect x="160" y="8" width="88" height="22" rx="7" fill="rgba(6,6,12,0.55)" stroke="none" />
-      <line x1="160" y1="30" x2="248" y2="30" stroke={rgba([255,255,255], 0.05)} strokeWidth="0.5" />
-      <line x1="170" y1="19" x2="196" y2="19" stroke={rgba([255,255,255], 0.18)} strokeWidth="0.75" />
-      <rect x="170" y="38" width="68" height="34" rx="2" fill={rgba(accent, 0.05)} stroke={rgba(accent, 0.16)} strokeWidth="0.5" />
-      <line x1="170" y1="38" x2="238" y2="72" stroke={rgba([255,255,255], 0.025)} strokeWidth="0.4" />
-      <line x1="170" y1="80" x2="230" y2="80" stroke={rgba(accent, 0.48)} strokeWidth="0.75" />
-      <line x1="170" y1="86" x2="216" y2="86" stroke={rgba(accent, 0.28)} strokeWidth="0.5" />
-      <rect x="170" y="93" width="28" height="6" rx="2" fill={rgba(accent, 0.72)} stroke="none" />
-      <path d="M228 13 Q234 18 228 23 Q238 20 238 18 Q238 16 228 13Z" fill={rgba(accent, 0.22)} stroke={rgba(accent, 0.45)} strokeWidth="0.55" />
+      {/* Light mode storefront */}
+      <rect x="12" y="8" width="116" height="94" rx="5" fill="rgba(250,250,248,0.9)" stroke={rgba([160,160,160], 0.2)} strokeWidth="0.8" />
+      <rect x="12" y="8" width="116" height="20" rx="5" fill="rgba(245,245,242,1)" stroke="none" />
+      <line x1="12" y1="28" x2="128" y2="28" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.5" />
+      <line x1="22" y1="18" x2="52" y2="18" stroke={rgba([80,80,80], 0.35)} strokeWidth="0.8" />
+      <rect x="22" y="35" width="96" height="42" rx="2" fill="rgba(238,238,235,0.6)" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.5" />
+      <line x1="22" y1="84" x2="88" y2="84" stroke={rgba([60,60,60], 0.25)} strokeWidth="0.65" />
+      <line x1="22" y1="90" x2="72" y2="90" stroke={rgba([60,60,60], 0.15)} strokeWidth="0.5" />
+      <rect x="22" y="96" width="32" height="4" rx="1.5" fill={rgba([60,60,60], 0.75)} stroke="none" />
+      {/* Sun icon */}
+      <circle cx="116" cy="18" r="4" fill="rgba(255,200,60,0.2)" stroke="rgba(255,200,60,0.5)" strokeWidth="0.7" />
+      {/* Arrow */}
+      <line x1="136" y1="55" x2="150" y2="55" stroke={rgba([160,160,160], 0.2)} strokeWidth="0.8" strokeDasharray="2 2" />
+      <polyline points="147,52 151,55 147,58" stroke={rgba([160,160,160], 0.3)} strokeWidth="0.8" />
+      {/* Dark mode storefront */}
+      <rect x="154" y="8" width="116" height="94" rx="5" fill="rgba(12,12,14,0.95)" stroke={rgba(accent, 0.3)} strokeWidth="0.9" />
+      <rect x="154" y="8" width="116" height="20" rx="5" fill="rgba(8,8,10,0.95)" stroke="none" />
+      <line x1="154" y1="28" x2="270" y2="28" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+      <line x1="164" y1="18" x2="194" y2="18" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8" />
+      <rect x="164" y="35" width="96" height="42" rx="2" fill={rgba(accent, 0.06)} stroke={rgba(accent, 0.14)} strokeWidth="0.5" />
+      <line x1="164" y1="84" x2="230" y2="84" stroke={rgba(accent, 0.45)} strokeWidth="0.7" />
+      <line x1="164" y1="90" x2="214" y2="90" stroke={rgba(accent, 0.25)} strokeWidth="0.5" />
+      <rect x="164" y="96" width="32" height="4" rx="1.5" fill={rgba(accent, 0.8)} stroke="none" />
+      {/* Moon icon */}
+      <path d="M260 13 Q265 18 260 23 Q268 20 268 18 Q268 16 260 13Z" fill={rgba(accent, 0.25)} stroke={rgba(accent, 0.5)} strokeWidth="0.6" />
     </svg>
   );
 }
 
 function SketchLicense({ accent }: { accent: [number, number, number] }) {
+  // Theme settings panel with license key input field
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <rect x="14" y="14" width="108" height="82" rx="4" fill={rgba([160,160,160], 0.035)} stroke={rgba([160,160,160], 0.16)} strokeWidth="0.8" />
-      <line x1="14" y1="34" x2="122" y2="34" stroke={rgba([160,160,160], 0.09)} strokeWidth="0.5" />
-      <line x1="24" y1="24" x2="64" y2="24" stroke={rgba([160,160,160], 0.28)} strokeWidth="0.85" />
-      <line x1="24" y1="46" x2="78" y2="46" stroke={rgba([160,160,160], 0.18)} strokeWidth="0.55" />
-      <line x1="24" y1="54" x2="112" y2="54" stroke={rgba([160,160,160], 0.12)} strokeWidth="0.5" />
-      <line x1="24" y1="61" x2="102" y2="61" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.5" />
-      <line x1="24" y1="68" x2="106" y2="68" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.5" />
-      <rect x="24" y="78" width="70" height="11" rx="3" fill={rgba([160,160,160], 0.07)} stroke={rgba([160,160,160], 0.18)} strokeWidth="0.65" />
-      <line x1="36" y1="83.5" x2="78" y2="83.5" stroke={rgba([160,160,160], 0.22)} strokeWidth="0.55" />
-      <rect x="158" y="14" width="108" height="82" rx="4" fill={rgba(accent, 0.045)} stroke={rgba(accent, 0.38)} strokeWidth="0.95" />
-      <line x1="158" y1="34" x2="266" y2="34" stroke={rgba(accent, 0.11)} strokeWidth="0.5" />
-      <line x1="168" y1="24" x2="220" y2="24" stroke={rgba(accent, 0.6)} strokeWidth="1.0" />
-      <line x1="168" y1="46" x2="226" y2="46" stroke={rgba(accent, 0.38)} strokeWidth="0.65" />
-      <line x1="168" y1="54" x2="252" y2="54" stroke={rgba(accent, 0.18)} strokeWidth="0.5" />
-      <line x1="168" y1="61" x2="242" y2="61" stroke={rgba(accent, 0.16)} strokeWidth="0.5" />
-      <line x1="168" y1="68" x2="246" y2="68" stroke={rgba(accent, 0.16)} strokeWidth="0.5" />
-      <rect x="168" y="78" width="80" height="11" rx="3" fill={rgba(accent, 0.82)} stroke="none" />
-      <path d="M188 24 Q192 20 196 24 Q200 28 204 24 Q208 20 212 24" stroke={rgba(accent, 0.45)} strokeWidth="0.6" fill="none" />
+      {/* Shopify admin chrome */}
+      <rect x="8" y="8" width="264" height="94" rx="4" stroke={rgba([160,160,160], 0.15)} strokeWidth="0.8" />
+      <rect x="8" y="8" width="264" height="20" rx="4" fill={rgba([160,160,160], 0.04)} stroke="none" />
+      <line x1="8" y1="28" x2="272" y2="28" stroke={rgba([160,160,160], 0.1)} strokeWidth="0.5" />
+      <line x1="18" y1="18" x2="60" y2="18" stroke={rgba([160,160,160], 0.22)} strokeWidth="0.75" />
+      {/* Left nav */}
+      <rect x="8" y="28" width="56" height="74" rx="0" fill={rgba([160,160,160], 0.025)} stroke="none" />
+      <line x1="64" y1="28" x2="64" y2="102" stroke={rgba([160,160,160], 0.08)} strokeWidth="0.5" />
+      {[0,1,2,3,4].map(i => (
+        <line key={i} x1="16" y1={38 + i * 11} x2="54" y2={38 + i * 11}
+          stroke={i === 3 ? rgba(accent, 0.45) : rgba([160,160,160], 0.14)}
+          strokeWidth={i === 3 ? "0.8" : "0.5"} />
+      ))}
+      {/* Main content — license key field */}
+      <text x="78" y="42" fontSize="7" {...sketchText(0.45)} fontFamily="monospace">License Key</text>
+      <rect x="76" y="47" width="140" height="14" rx="2" fill={rgba(accent, 0.04)} stroke={rgba(accent, 0.4)} strokeWidth="0.8" />
+      <text x="84" y="57" fontSize="6.5" fill={rgba(accent, 0.6)} fontFamily="monospace">AETH-XXXX-XXXX-XXXX</text>
+      {/* Activate button */}
+      <rect x="76" y="68" width="48" height="12" rx="3" fill={rgba(accent, 0.85)} stroke="none" />
+      <text x="100" y="76.5" textAnchor="middle" fontSize="6.5" fill="rgba(255,255,255,0.9)" fontFamily="inherit">Activate</text>
+      {/* Success badge */}
+      <rect x="134" y="68" width="50" height="12" rx="3" fill={rgba([50,200,100], 0.12)} stroke={rgba([50,200,100], 0.4)} strokeWidth="0.6" />
+      <text x="159" y="76.5" textAnchor="middle" fontSize="6.5" fill={rgba([50,200,100], 0.75)} fontFamily="inherit">✓ Active</text>
     </svg>
   );
 }
@@ -271,24 +326,26 @@ function SketchLicense({ accent }: { accent: [number, number, number] }) {
 const INERTIA_ACCENT: [number, number, number] = [160, 140, 255];
 
 function SketchStudio({ accent }: { accent: [number, number, number] }) {
+  // Shows Inertia hub with three service spokes — storefront, brand, web
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Three service cards side by side */}
+      {/* Center hub */}
+      <circle cx="140" cy="55" r="18" fill={rgba(accent, 0.08)} stroke={rgba(accent, 0.4)} strokeWidth="1" />
+      <circle cx="140" cy="55" r="10" fill={rgba(accent, 0.18)} stroke="none" />
+      <text x="140" y="58.5" textAnchor="middle" fontSize="7" fontWeight="600" fill={rgba(accent, 0.85)} fontFamily="inherit">In</text>
+      {/* Spokes */}
       {[
-        { x: 10, label: "Shopify", accent: [56,180,255] as [number,number,number] },
-        { x: 104, label: "Brand", accent: accent },
-        { x: 198, label: "Web", accent: [0,210,180] as [number,number,number] },
-      ].map(({ x, label, accent: a }) => (
-        <g key={x}>
-          <rect x={x} y="14" width="76" height="82" rx="4" fill={rgba(a, 0.04)} stroke={rgba(a, 0.28)} strokeWidth="0.8" />
-          <rect x={x} y="14" width="76" height="28" rx="4" fill={rgba(a, 0.07)} stroke="none" />
-          <line x1={x} y1="42" x2={x + 76} y2="42" stroke={rgba(a, 0.12)} strokeWidth="0.5" />
-          <circle cx={x + 20} cy={28} r="7" fill={rgba(a, 0.12)} stroke={rgba(a, 0.4)} strokeWidth="0.8" />
-          <line x1={x + 10} y1="54" x2={x + 66} y2="54" stroke={rgba(a, 0.5)} strokeWidth="0.85" />
-          <line x1={x + 10} y1="62" x2={x + 58} y2="62" stroke={rgba(a, 0.28)} strokeWidth="0.55" />
-          <line x1={x + 10} y1="70" x2={x + 62} y2="70" stroke={rgba([160,160,160], 0.16)} strokeWidth="0.5" />
-          <line x1={x + 10} y1="77" x2={x + 54} y2="77" stroke={rgba([160,160,160], 0.12)} strokeWidth="0.5" />
-          <text x={x + 44} y="32" fontSize="6.5" fill={rgba(a, 0.55)} fontFamily="inherit" textAnchor="middle">{label}</text>
+        { x: 34, y: 24, label: "Shopify", color: [56,180,255] as [number,number,number] },
+        { x: 34, y: 86, label: "Brand", color: accent },
+        { x: 246, y: 24, label: "Web", color: [0,200,170] as [number,number,number] },
+        { x: 246, y: 86, label: "iOS", color: [255,100,80] as [number,number,number] },
+      ].map(({ x, y, label, color }) => (
+        <g key={label}>
+          <line x1={x < 140 ? x + 26 : x - 26} y1={y} x2={x < 140 ? 124 : 156} y2={y < 55 ? 43 : 67}
+            stroke={rgba(color, 0.3)} strokeWidth="0.8" strokeDasharray="3 3" />
+          <rect x={x < 140 ? x - 26 : x - 26} y={y - 10} width="52" height="20" rx="4"
+            fill={rgba(color, 0.06)} stroke={rgba(color, 0.3)} strokeWidth="0.7" />
+          <text x={x} y={y + 3.5} textAnchor="middle" fontSize="7" fill={rgba(color, 0.65)} fontFamily="inherit">{label}</text>
         </g>
       ))}
     </svg>
@@ -296,29 +353,37 @@ function SketchStudio({ accent }: { accent: [number, number, number] }) {
 }
 
 function SketchProcess({ accent }: { accent: [number, number, number] }) {
+  // Kanban-style columns showing project phases
+  const cols = [
+    { label: "Brief", cards: ["Discovery call", "Brand audit"], done: true },
+    { label: "Design", cards: ["Concepts", "Revisions"], done: true },
+    { label: "Build", cards: ["Dev", "QA"], active: true },
+    { label: "Ship", cards: ["Launch", "Support"], done: false },
+  ];
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Horizontal process flow */}
-      <line x1="20" y1="55" x2="260" y2="55" stroke={rgba([160,160,160], 0.14)} strokeWidth="0.7" />
-      {[
-        { cx: 44, label: "Brief", done: true },
-        { cx: 104, label: "Design", done: true },
-        { cx: 164, label: "Build", done: false, active: true },
-        { cx: 224, label: "Ship", done: false },
-      ].map(({ cx, label, done, active }) => (
-        <g key={cx}>
-          <circle cx={cx} cy={55} r={active ? 8 : 6}
-            fill={done ? rgba(accent, 0.15) : active ? rgba(accent, 0.12) : rgba([160,160,160], 0.06)}
-            stroke={done || active ? rgba(accent, active ? 0.7 : 0.45) : rgba([160,160,160], 0.22)}
-            strokeWidth={active ? "1.2" : "0.8"} />
-          {done && (
-            <polyline points={`${cx - 3},${55} ${cx - 0.5},${58} ${cx + 4},${51}`}
-              stroke={rgba(accent, 0.7)} strokeWidth="1.1" fill="none" />
-          )}
-          {active && <circle cx={cx} cy={55} r={2.5} fill={rgba(accent, 0.65)} stroke="none" />}
-          <text x={cx} y="72" textAnchor="middle" fontSize="6.5" fill={rgba([160,160,160], done || active ? 0.5 : 0.28)} fontFamily="inherit">{label}</text>
-        </g>
-      ))}
+      {cols.map((col, ci) => {
+        const x = 10 + ci * 68;
+        const isActive = col.active;
+        const isDone = col.done;
+        const c = isDone ? accent : isActive ? accent : [160,160,160] as [number,number,number];
+        return (
+          <g key={ci}>
+            {/* Column header */}
+            <rect x={x} y="8" width="58" height="14" rx="2" fill={rgba(c, isDone || isActive ? 0.1 : 0.03)} stroke={rgba(c, isDone || isActive ? 0.35 : 0.15)} strokeWidth="0.7" />
+            <text x={x + 29} y="18" textAnchor="middle" fontSize="6.5" fill={rgba(c, isDone || isActive ? 0.7 : 0.3)} fontFamily="inherit" fontWeight={isActive ? "600" : "400"}>{col.label}</text>
+            {/* Cards */}
+            {col.cards.map((card, ki) => (
+              <g key={ki}>
+                <rect x={x} y={28 + ki * 22} width="58" height="16" rx="2"
+                  fill={rgba(c, isActive ? 0.07 : isDone ? 0.04 : 0.02)}
+                  stroke={rgba(c, isActive ? 0.25 : isDone ? 0.18 : 0.1)} strokeWidth="0.6" />
+                <line x1={x + 6} y1={36 + ki * 22} x2={x + 52} y2={36 + ki * 22} stroke={rgba(c, isDone || isActive ? 0.3 : 0.12)} strokeWidth="0.55" />
+              </g>
+            ))}
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -410,26 +475,36 @@ function SketchWebProject({ accent }: { accent: [number, number, number] }) {
 }
 
 function SketchTimeline({ accent }: { accent: [number, number, number] }) {
+  // Gantt-style horizontal bar chart showing 5-week project
+  const rows = [
+    { label: "Brief", start: 0, len: 1, done: true },
+    { label: "Design", start: 1, len: 1, done: true },
+    { label: "Build", start: 2, len: 2, done: true },
+    { label: "Launch", start: 4, len: 1, active: true },
+  ];
+  const colW = 42, startX = 60, startY = 18, rowH = 18;
   return (
     <svg viewBox="0 0 280 110" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      {/* Week-by-week project timeline */}
-      <line x1="20" y1="55" x2="260" y2="55" stroke={rgba([160,160,160], 0.14)} strokeWidth="0.7" />
-      {[
-        { x: 40, week: "Wk 1", label: "Brief + discovery" },
-        { x: 100, week: "Wk 2", label: "Concepts" },
-        { x: 160, week: "Wk 3-4", label: "Build" },
-        { x: 230, week: "Wk 5", label: "Launch" },
-      ].map(({ x, week, label }, i) => {
-        const isLast = i === 3;
+      {/* Week headers */}
+      {[1,2,3,4,5].map((w, i) => (
+        <text key={w} x={startX + i * colW + colW / 2} y="13" textAnchor="middle" fontSize="6.5"
+          {...sketchText(0.35)} fontFamily="monospace">Wk {w}</text>
+      ))}
+      {/* Grid lines */}
+      {[0,1,2,3,4,5].map(i => (
+        <line key={i} x1={startX + i * colW} y1="16" x2={startX + i * colW} y2={startY + rows.length * rowH + 4}
+          stroke={rgba([160,160,160], 0.08)} strokeWidth="0.5" />
+      ))}
+      {/* Rows */}
+      {rows.map((row, ri) => {
+        const y = startY + ri * rowH;
+        const c = row.active ? accent : row.done ? accent : [160,160,160] as [number,number,number];
         return (
-          <g key={x}>
-            <circle cx={x} cy={55} r={isLast ? 7 : 5}
-              fill={isLast ? rgba(accent, 0.14) : rgba([160,160,160], 0.06)}
-              stroke={isLast ? rgba(accent, 0.65) : rgba([160,160,160], 0.22)}
-              strokeWidth={isLast ? "1.1" : "0.7"} />
-            {isLast && <circle cx={x} cy={55} r={2.5} fill={rgba(accent, 0.6)} stroke="none" />}
-            <text x={x} y="42" textAnchor="middle" fontSize="6" fill={rgba([160,160,160], 0.35)} fontFamily="inherit">{week}</text>
-            <text x={x} y="72" textAnchor="middle" fontSize="6" fill={rgba([160,160,160], isLast ? 0.5 : 0.28)} fontFamily="inherit">{label}</text>
+          <g key={ri}>
+            <text x="54" y={y + 11} textAnchor="end" fontSize="6.5" {...sketchText(0.5)} fontFamily="inherit">{row.label}</text>
+            <rect x={startX + row.start * colW + 2} y={y + 3} width={row.len * colW - 4} height={rowH - 6} rx="2"
+              fill={rgba(c, row.active ? 0.2 : row.done ? 0.12 : 0.06)}
+              stroke={rgba(c, row.active ? 0.6 : row.done ? 0.35 : 0.2)} strokeWidth="0.7" />
           </g>
         );
       })}
@@ -458,7 +533,7 @@ const SKETCH_MAP: Record<string, (p: { accent: [number, number, number] }) => Re
 
 // â"€â"€â"€ Aether docs â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
-const AETHER_ACCENT: [number, number, number] = [56, 180, 255];
+const AETHER_ACCENT: [number, number, number] = [50, 100, 240];
 
 const AETHER_DOCS: DocSection[] = [
   {
@@ -615,20 +690,6 @@ const AETHER_DOCS: DocSection[] = [
           { type: "note", accent: AETHER_ACCENT, text: "All three are independent sections. You can use one, two, or all three — just be mindful of how they layer for first-time visitors." },
         ],
       },
-      {
-        id: "aether-music-player",
-        title: "Music player",
-        body: [
-          { type: "p", text: "The music player section adds a fixed ambient audio control to the storefront. It accepts any direct audio file URL and stays out of the way until the visitor chooses to interact." },
-          { type: "h3", text: "Setup" },
-          { type: "ol", items: [
-            "Upload your audio file to Shopify Files or use any direct-link CDN URL.",
-            "In the theme editor, open the Music player section and paste the URL.",
-            "Save. The player appears as a small fixed control — position is bottom-right by default.",
-          ]},
-          { type: "note", accent: AETHER_ACCENT, text: "Autoplay is intentionally disabled. Browser policies block autoplay on most devices, and forced audio creates a poor experience. The visitor presses play." },
-        ],
-      },
     ],
   },
   {
@@ -650,21 +711,6 @@ const AETHER_DOCS: DocSection[] = [
           ]},
           { type: "h3", text: "Dark mode" },
           { type: "p", text: "Aether reads prefers-color-scheme and applies the right values on first load with no flash. You can expose a toggle to customers via Theme settings -º Colors. Both modes are fully designed, not just inverted." },
-        ],
-      },
-      {
-        id: "aether-dark-mode",
-        title: "Dark mode",
-        body: [
-          { type: "sketch", name: "darkMode", accent: AETHER_ACCENT },
-          { type: "p", text: "Aether ships with a complete dark mode: every section, every component, every state. It's not an inversion filter. The dark palette was designed separately to feel intentional." },
-          { type: "h3", text: "How it activates" },
-          { type: "ul", items: [
-            "On first load, Aether reads the visitor's OS preference via prefers-color-scheme.",
-            "The correct mode is applied before any content renders. No flash of the wrong colors.",
-            "If you've enabled the manual toggle, the visitor's choice is stored in localStorage.",
-          ]},
-          { type: "note", accent: AETHER_ACCENT, text: "The manual toggle is optional. Most stores leave it off and let the OS preference decide." },
         ],
       },
       {
@@ -902,6 +948,38 @@ const PRODUCTS: Product[] = [
 
 // â"€â"€â"€ Components â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    });
+  };
+  return (
+    <button
+      onClick={copy}
+      className="absolute top-3 right-3 flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] tracking-tight transition-all opacity-0 group-hover:opacity-100"
+      style={{ background: "rgb(var(--surface))", border: "1px solid rgb(var(--line))", color: copied ? "rgb(var(--accent))" : "rgb(var(--muted))" }}
+      aria-label="Copy code"
+    >
+      {copied ? (
+        <>
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="1.5,6 4.5,9 10.5,3" /></svg>
+          Copied
+        </>
+      ) : (
+        <>
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+            <rect x="4" y="4" width="7" height="7" rx="1" /><path d="M8 4V2.5A.5.5 0 0 0 7.5 2h-5a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5H4" />
+          </svg>
+          Copy
+        </>
+      )}
+    </button>
+  );
+}
+
 function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, number, number] }) {
   return (
     <div className="flex flex-col gap-6">
@@ -916,11 +994,11 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
           );
         }
         if (block.type === "p") {
-          return <p key={i} className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.85 }}>{block.text}</p>;
+          return <p key={i} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.75 }}>{block.text}</p>;
         }
         if (block.type === "h3") {
           return (
-            <h3 key={i} className="text-[14px] font-semibold tracking-tight text-[rgb(var(--fg))] pt-2 pb-2">
+            <h3 key={i} className="text-[15px] font-semibold tracking-tight text-[rgb(var(--fg))] pt-2 pb-1">
               {block.text}
             </h3>
           );
@@ -929,7 +1007,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
           return (
             <ol key={i} className="flex flex-col gap-3 pl-4">
               {block.items.map((item, j) => (
-                <li key={j} className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))] list-decimal pl-1" style={{ opacity: 0.85 }}>{item}</li>
+                <li key={j} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))] list-decimal pl-1" style={{ opacity: 0.75 }}>{item}</li>
               ))}
             </ol>
           );
@@ -938,7 +1016,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
           return (
             <ul key={i} className="flex flex-col gap-3 pl-4">
               {block.items.map((item, j) => (
-                <li key={j} className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))] list-disc pl-1" style={{ opacity: 0.85 }}>{item}</li>
+                <li key={j} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))] list-disc pl-1" style={{ opacity: 0.75 }}>{item}</li>
               ))}
             </ul>
           );
@@ -946,21 +1024,31 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         if (block.type === "note") {
           const na = block.accent ?? accent;
           return (
-            <div key={i} className="rounded-xl px-4 py-4 flex gap-3" style={{ background: rgba(na, 0.07) }}>
-              <svg viewBox="0 0 16 16" fill="none" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 mt-[3px]" style={{ stroke: rgba(na, 0.8) }} strokeWidth="1.5" aria-hidden="true">
-                <circle cx="8" cy="8" r="6" />
-                <line x1="8" y1="7" x2="8" y2="11" />
-                <circle cx="8" cy="5" r="0.5" fill="currentColor" stroke="none" />
-              </svg>
-              <p className="text-[14px] leading-relaxed tracking-tight" style={{ color: rgba(na, 0.85) }}>{block.text}</p>
+            <div key={i} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${rgba(na, 0.25)}`, background: rgba(na, 0.05) }}>
+              {/* Label bar */}
+              <div className="flex items-center gap-1.5 px-4 py-2" style={{ borderBottom: `1px solid ${rgba(na, 0.15)}`, background: rgba(na, 0.07) }}>
+                <svg viewBox="0 0 14 14" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ stroke: rgba(na, 0.8) }} strokeWidth="1.5" aria-hidden="true">
+                  <circle cx="7" cy="7" r="5.5" />
+                  <line x1="7" y1="6.5" x2="7" y2="9.5" />
+                  <circle cx="7" cy="4.5" r="0.55" fill={rgba(na, 0.8)} stroke="none" />
+                </svg>
+                <span className="text-[11.5px] font-semibold tracking-tight" style={{ color: rgba(na, 0.85) }}>Note</span>
+              </div>
+              {/* Body */}
+              <div className="px-4 py-3">
+                <p className="text-[14.5px] leading-relaxed tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.8 }}>{block.text}</p>
+              </div>
             </div>
           );
         }
         if (block.type === "code") {
           return (
-            <pre key={i} className="text-[13px] leading-relaxed font-mono rounded-xl border border-[rgb(var(--line))] px-5 py-4 overflow-x-auto whitespace-pre text-[rgb(var(--muted))]" style={{ background: "rgb(var(--fg) / 0.03)" }}>
-              <code>{block.text}</code>
-            </pre>
+            <div key={i} className="relative group">
+              <pre className="text-[14px] leading-relaxed font-mono rounded-xl border border-[rgb(var(--line))] px-5 py-4 overflow-x-auto whitespace-pre text-[rgb(var(--muted))]" style={{ background: "rgb(var(--fg) / 0.03)" }}>
+                <code>{block.text}</code>
+              </pre>
+              <CopyButton text={block.text} />
+            </div>
           );
         }
         return null;
@@ -998,7 +1086,7 @@ function SidebarNav({
               style={active ? { background: rgba(p.accent, 0.07) } : {}}
             >
               <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(p.accent, active ? 0.9 : 0.3) }} />
-              <span className="text-[13px] tracking-tight" style={{ color: active ? rgba(p.accent, 0.9) : "rgb(var(--muted))" }}>
+              <span className="text-[13px] tracking-tight" style={{ color: active ? "rgb(var(--accent))" : "rgb(var(--fg))", opacity: active ? 1 : 0.6 }}>
                 {p.name}
               </span>
               <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] ml-0.5" style={{ opacity: 0.38 }}>
@@ -1025,8 +1113,9 @@ function SidebarNav({
                   onClick={onNav}
                   className="block py-1.5 text-[13px] tracking-tight transition-colors rounded px-2 -mx-2"
                   style={{
-                    color: active ? rgba(product.accent, 0.9) : "rgb(var(--muted))",
-                    background: active ? rgba(product.accent, 0.07) : undefined,
+                    color: active ? "rgb(var(--accent))" : "rgb(var(--fg))",
+                    opacity: active ? 1 : 0.55,
+                    background: active ? "rgb(var(--accent) / 0.1)" : undefined,
                   }}
                 >
                   {article.title}
@@ -1171,13 +1260,13 @@ export default function DocsPage() {
       <div className="flex flex-1 min-h-0">
 
         {/* Sidebar */}
-        <aside className="hidden lg:flex flex-col w-56 xl:w-64 shrink-0 border-r border-[rgb(var(--line))]" style={{ background: "rgb(var(--fg) / 0.015)" }}>
-          <div className="sticky top-0 max-h-screen overflow-y-auto px-3 py-4 flex flex-col gap-4">
+        <aside className="hidden lg:flex flex-col w-56 xl:w-64 shrink-0 p-3">
+          <div className="sticky top-3 max-h-[calc(100vh-24px)] overflow-y-auto rounded-2xl border border-[rgb(var(--line))] px-3 py-4 flex flex-col gap-4" style={{ background: "rgb(var(--surface))" }}>
 
             {/* Logo */}
             <div className="flex items-center justify-between px-3 py-2 mb-1">
               <Link href="/">
-                <img src="/logo.png" alt="Inertia" className="h-3.5 w-auto dark:invert invert-0" />
+                <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
               </Link>
               <Link href="/aether/buy" className="text-[11px] tracking-tight font-medium transition-opacity hover:opacity-70" style={{ color: "rgb(var(--muted))", opacity: 0.5 }}>
                 Get Aether
@@ -1187,7 +1276,7 @@ export default function DocsPage() {
             {/* Search trigger */}
             <button
               onClick={() => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] w-full transition-colors hover:border-[rgb(var(--fg)/0.3)]"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] w-full transition-colors hover:border-[rgb(var(--fg)/0.3)] hover:bg-[rgb(var(--fg)/0.04)] hover:text-[rgb(var(--fg))]"
             >
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0" aria-hidden="true">
                 <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
@@ -1206,11 +1295,11 @@ export default function DocsPage() {
                   <button
                     key={p.id}
                     onClick={() => handleSelectProduct(p.id)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors w-full"
-                    style={{ background: active ? rgba(p.accent, 0.1) : "transparent" }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors w-full hover:bg-[rgb(var(--fg)/0.05)]"
+                    style={{ background: active ? "rgb(var(--accent) / 0.12)" : "transparent" }}
                   >
-                    <span className="text-[13px] font-medium tracking-tight" style={{ color: active ? rgba(p.accent, 1) : "rgb(var(--muted))" }}>{p.name}</span>
-                    <span className="text-[11px] tracking-tight" style={{ color: "rgb(var(--muted))", opacity: 0.4 }}>{p.description}</span>
+                    <span className="text-[14px] tracking-tight" style={{ color: "rgb(var(--fg))", fontWeight: active ? 600 : 400, opacity: active ? 1 : 0.5 }}>{p.name}</span>
+                    <span className="text-[12px] tracking-tight" style={{ color: "rgb(var(--muted))", opacity: 0.5 }}>{p.description}</span>
                   </button>
                 );
               })}
@@ -1222,11 +1311,11 @@ export default function DocsPage() {
             <div className="flex flex-col gap-0.5">
               <a
                 href={`#${INTRO_ID}`}
-                className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-colors"
+                className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-colors hover:bg-[rgb(var(--fg)/0.05)]"
                 style={{
-                  color: activeArticleId === INTRO_ID ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                  background: activeArticleId === INTRO_ID ? "rgb(var(--fg) / 0.06)" : "transparent",
-                  fontWeight: activeArticleId === INTRO_ID ? 500 : 400,
+                  color: "rgb(var(--fg))",
+                  background: activeArticleId === INTRO_ID ? "rgb(var(--accent) / 0.12)" : "transparent",
+                  fontWeight: activeArticleId === INTRO_ID ? 600 : 400,
                 }}
               >
                 Introduction
@@ -1236,7 +1325,7 @@ export default function DocsPage() {
             {/* Nav sections */}
             {product.sections.map((section) => (
               <div key={section.id} className="flex flex-col gap-0.5">
-                <p className="text-[13px] font-semibold tracking-tight px-3 mb-1 mt-2" style={{ color: "rgb(var(--fg))" }}>
+                <p className="text-[12px] font-semibold tracking-tight px-3 mb-1 mt-2" style={{ color: "rgb(var(--fg))", opacity: 0.55 }}>
                   {section.title}
                 </p>
                 {section.articles.map((article) => {
@@ -1245,12 +1334,12 @@ export default function DocsPage() {
                     <a
                       key={article.id}
                       href={`#${article.id}`}
-                      className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-colors"
+                      className="px-3 py-1.5 rounded-lg text-[13.5px] tracking-tight transition-all hover:bg-[rgb(var(--fg)/0.05)] hover:opacity-100"
                       style={{
-                        color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                        background: active ? "rgb(var(--fg) / 0.07)" : "transparent",
-                        fontWeight: active ? 500 : 400,
-                        opacity: active ? 1 : 0.75,
+                        color: "rgb(var(--fg))",
+                        background: active ? "rgb(var(--accent) / 0.12)" : "transparent",
+                        fontWeight: active ? 600 : 400,
+                        opacity: active ? 1 : 0.5,
                       }}
                     >
                       {article.title}
@@ -1268,13 +1357,13 @@ export default function DocsPage() {
 
           {/* Introduction */}
           <article id={INTRO_ID} className="scroll-mt-4 py-12 sm:py-16 border-b border-[rgb(var(--line))]">
-              <p className="text-[13px] tracking-tight mb-4" style={{ color: rgba(product.accent, 0.7) }}>
+              <p className="text-[14px] tracking-tight mb-4 font-medium" style={{ color: "rgb(var(--accent))" }}>
                 {product.name}
               </p>
-              <h1 className="text-[2rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-4">
+              <h1 className="text-[2.2rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-4">
                 {product.id === "aether" ? "Aether documentation" : "Inertia documentation"}
               </h1>
-              <p className="text-[16px] leading-[1.8] tracking-tight mb-8" style={{ color: "rgb(var(--muted))", opacity: 0.85 }}>
+              <p className="text-[17px] leading-[1.85] tracking-tight mb-8 text-[rgb(var(--fg))]" style={{ opacity: 0.7 }}>
                 {product.id === "aether"
                   ? "Aether is a Shopify theme built for conversion. This documentation covers everything from installation to advanced customization. Whether you're setting it up for the first time or modifying theme files, start here."
                   : "Inertia is a small design and development studio. This documentation covers our services, how we work, and what to expect when working with us."}
@@ -1288,14 +1377,14 @@ export default function DocsPage() {
                     <a
                       key={section.id}
                       href={`#${first.id}`}
-                      className="group flex flex-col gap-1.5 p-4 rounded-xl border border-[rgb(var(--line))] transition-colors hover:border-[rgb(var(--fg)/0.2)]"
+                      className="group flex flex-col gap-1.5 p-4 rounded-xl border border-[rgb(var(--line))] transition-all hover:border-[rgb(var(--fg)/0.25)] hover:bg-[rgb(var(--fg)/0.03)] hover:shadow-sm"
                       style={{ background: "rgb(var(--fg) / 0.02)" }}
                     >
-                      <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]">{section.title}</span>
-                      <span className="text-[12px] tracking-tight leading-snug" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>
+                      <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{section.title}</span>
+                      <span className="text-[13px] tracking-tight leading-snug" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>
                         {section.articles.length} {section.articles.length === 1 ? "article" : "articles"}
                       </span>
-                      <span className="text-[12px] tracking-tight mt-1 transition-colors" style={{ color: rgba(product.accent, 0.7) }}>
+                      <span className="text-[13px] tracking-tight mt-1 transition-colors" style={{ color: "rgb(var(--accent))" }}>
                         Start with {first.title} →
                       </span>
                     </a>
@@ -1305,7 +1394,7 @@ export default function DocsPage() {
 
               {product.id === "aether" && (
                 <div className="flex flex-wrap gap-2">
-                  <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: rgba(product.accent, 0.12), color: rgba(product.accent, 1) }}>
+                  <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: "rgb(var(--accent) / 0.12)", color: "rgb(var(--accent))" }}>
                     Buy a license
                   </Link>
                   <Link href="/aether/changelog" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
@@ -1327,10 +1416,10 @@ export default function DocsPage() {
                 className="scroll-mt-4 py-10 sm:py-14 border-b border-[rgb(var(--line))]"
               >
                 <div>
-                  <p className="text-[13px] tracking-tight mb-3" style={{ color: rgba(product.accent, 0.7) }}>
+                  <p className="text-[14px] tracking-tight mb-3 font-medium" style={{ color: "rgb(var(--accent))" }}>
                     {section.title}
                   </p>
-                  <h2 className="text-[1.5rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-8">
+                  <h2 className="text-[1.75rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-8">
                     {article.title}
                   </h2>
                   <ArticleBody body={article.body} accent={product.accent} />
@@ -1516,12 +1605,16 @@ export default function DocsPage() {
         </div>
       )}
 
-      {/* Mobile full-screen nav */}
+      {/* Mobile floating nav */}
       <div
-        className="fixed inset-0 z-50 lg:hidden flex flex-col"
+        className="fixed z-50 lg:hidden flex flex-col"
         style={{
-          background: "rgb(var(--bg))",
+          inset: "12px",
+          background: "rgb(var(--surface))",
+          border: "1px solid rgb(var(--line))",
+          borderRadius: "20px",
           display: sheetOpen ? "flex" : "none",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.12)",
         }}
       >
         {/* Fixed header */}
@@ -1536,8 +1629,9 @@ export default function DocsPage() {
                     onClick={() => handleSelectProduct(p.id)}
                     className="px-3 py-1.5 rounded-full text-[13px] tracking-tight [-webkit-tap-highlight-color:transparent]"
                     style={{
-                      background: active ? rgba(p.accent, 0.1) : "rgb(var(--fg) / 0.06)",
-                      color: active ? rgba(p.accent, 1) : "rgb(var(--muted))",
+                      background: active ? "rgb(var(--accent) / 0.1)" : "rgb(var(--fg) / 0.06)",
+                      color: active ? "rgb(var(--accent))" : "rgb(var(--fg))",
+                      opacity: active ? 1 : 0.6,
                     }}
                   >
                     {p.name}
@@ -1573,8 +1667,8 @@ export default function DocsPage() {
           <a
             href={`#${INTRO_ID}`}
             onClick={() => setSheetOpen(false)}
-            className="text-[15px] tracking-tight [-webkit-tap-highlight-color:transparent]"
-            style={{ color: activeArticleId === INTRO_ID ? "rgb(var(--fg))" : "rgb(var(--muted))", fontWeight: activeArticleId === INTRO_ID ? 500 : 400 }}
+            className="text-[15px] tracking-tight [-webkit-tap-highlight-color:transparent] px-2 py-1.5 rounded-lg transition-colors hover:bg-[rgb(var(--fg)/0.05)]"
+            style={{ color: "rgb(var(--fg))", fontWeight: activeArticleId === INTRO_ID ? 600 : 400, opacity: activeArticleId === INTRO_ID ? 1 : 0.55 }}
           >
             Introduction
           </a>
@@ -1593,8 +1687,8 @@ export default function DocsPage() {
                     key={article.id}
                     href={`#${article.id}`}
                     onClick={() => setSheetOpen(false)}
-                    className="py-2 text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent] border-b border-[rgb(var(--line))]"
-                    style={{ color: active ? "rgb(var(--fg))" : "rgb(var(--muted))", fontWeight: active ? 500 : 400 }}
+                    className="px-2 py-2 rounded-lg text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent] transition-colors hover:bg-[rgb(var(--fg)/0.05)]"
+                    style={{ color: "rgb(var(--fg))", fontWeight: active ? 600 : 400, opacity: active ? 1 : 0.5 }}
                   >
                     {article.title}
                   </a>
