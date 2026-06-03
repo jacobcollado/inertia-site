@@ -797,6 +797,18 @@ function AetherFeature() {
         </div>
 
       </div>
+
+      {/* CTA */}
+      <div className="flex flex-col sm:flex-row sm:justify-end items-center gap-3 pt-6" style={fade(280)}>
+        <Link href="/aether" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-white hover:opacity-90 transition-opacity" style={{ background: "var(--accent-gradient)" }}>
+          Explore Aether
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+        </Link>
+        <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors">
+          Buy now — from $85
+        </Link>
+      </div>
+
     </section>
   );
 }
@@ -2327,14 +2339,29 @@ const THINK_SLUG_SKETCHES: Record<string, React.ReactElement> = {
 // -- Tech Marquee -------------------------------------------------------
 const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }>; color: string }[] = [
   { name: "Shopify",    icon: SiShopify,    color: "#96BF48" },
-  { name: "TypeScript", icon: SiTypescript, color: "#3178C6" },
-  { name: "Tailwind",   icon: SiTailwindcss,color: "#38BDF8" },
   { name: "Photoshop",  icon: IconPhotoshop,color: "#31A8FF" },
   { name: "Swift",      icon: SiSwift,      color: "#F05138" },
   { name: "Whop",       icon: IconWhop,     color: "#E8470A" },
   { name: "Meta",       icon: SiMeta,       color: "#0082FB" },
   { name: "Figma",      icon: SiFigma,      color: "#F24E1E" },
+  { name: "Vercel",     icon: SiVercel,     color: "#000000" },
+  { name: "Supabase",   icon: SiSupabase,   color: "#3ECF8E" },
 ];
+
+function TechItem({ tech }: { tech: typeof TECH_ALL[0] }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      className="flex items-center gap-2 sm:gap-3 px-6 sm:px-8 transition-all duration-300 cursor-default"
+      style={{ opacity: hovered ? 0.8 : 0.4 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <tech.icon className="w-6 h-6 sm:w-8 sm:h-8 shrink-0 transition-colors duration-300" style={{ color: hovered ? tech.color : "rgb(var(--muted))" }} />
+      <span className="text-[17px] sm:text-[20px] tracking-tight whitespace-nowrap text-[rgb(var(--muted))]">{tech.name}</span>
+    </div>
+  );
+}
 
 function TechMarquee() {
   const items = [...TECH_ALL, ...TECH_ALL, ...TECH_ALL];
@@ -2342,10 +2369,7 @@ function TechMarquee() {
     <div className="relative overflow-hidden select-none pt-2 pb-6 -mt-4" aria-hidden="true">
       <div className="marquee-row marquee-row--fwd">
         {items.map((tech, i) => (
-          <div key={i} className="flex items-center gap-2 sm:gap-3 px-6 sm:px-8 text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
-            <tech.icon className="w-6 h-6 sm:w-8 sm:h-8 shrink-0" />
-            <span className="text-[17px] sm:text-[20px] tracking-tight whitespace-nowrap">{tech.name}</span>
-          </div>
+          <TechItem key={i} tech={tech} />
         ))}
       </div>
       <div className="pointer-events-none absolute inset-y-0 left-0 w-32" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
