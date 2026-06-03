@@ -1904,9 +1904,9 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
     const el = scrollRef.current;
     if (!el) return;
     const onScroll = () => {
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      const ratio = maxScroll > 0 ? el.scrollLeft / maxScroll : 0;
-      setPage(ratio > 0.5 ? 1 : 0);
+      const pageWidth = el.clientWidth;
+      const p = Math.min(Math.round(el.scrollLeft / pageWidth), pages - 1);
+      setPage(p);
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
@@ -1915,8 +1915,7 @@ function MetricsCarousel({ children }: { children: React.ReactNode }) {
   const goTo = (p: number) => {
     const el = scrollRef.current;
     if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    el.scrollTo({ left: p === 0 ? 0 : maxScroll, behavior: "smooth" });
+    el.scrollTo({ left: p * el.clientWidth, behavior: "smooth" });
   };
 
   return (
@@ -2031,38 +2030,31 @@ function StackDiagram() {
         </div>
         {/* Mobile bento carousel — 2×2 visible, scroll for more */}
         <MetricsCarousel>
-          <div className="grid gap-3" style={{ display:"grid", gridTemplateColumns:"repeat(4, calc(50vw - 18px))", gridTemplateRows:"auto auto" }}>
-            {/* clients — col 1 rows 1-2 */}
-            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:180, gridColumn:"1", gridRow:"1 / 3", scrollSnapAlign:"start" }}>
+          {/* Each page is exactly viewport width, snaps cleanly */}
+          {/* Page 1: clients (tall left) + 100% + 24h */}
+          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
+            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
               <div className="flex flex-col gap-1.5">
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Clients worked with</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Over 4+ years</span>
               </div>
-              <div className="flex-1 relative flex items-end gap-1.5 pt-4" aria-hidden="true">
+              <div className="flex-1 relative flex items-end gap-1 pt-4" aria-hidden="true">
                 {[28,38,45,55,62,72,85,100].map((h,i)=>(
                   <div key={i} className="flex-1" style={{ height:`${h}%`, background:i>=6?"var(--accent-gradient)":`rgb(var(--fg) / ${0.12+i*0.05})` }} />
                 ))}
                 <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
               </div>
             </div>
-            {/* 100% — col 2 row 1 */}
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"2", gridRow:"1", scrollSnapAlign:"start" }}>
-              <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+              <div className="flex flex-col gap-1">
                 <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing</span>
               </div>
-              <svg viewBox="0 0 48 48" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
-                <defs><linearGradient id="dg-mc" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
-                <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
-                <circle cx="24" cy="24" r="17" stroke="url(#dg-mc)" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)"/>
-                <polyline points="19,24 23,28 30,20" stroke="url(#dg-mc)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              </svg>
             </div>
-            {/* 24h — col 2 row 2 */}
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"2", gridRow:"2" }}>
-              <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+              <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-1 leading-none">
                   <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={24} duration={1000} /></span>
                   <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>h</span>
@@ -2070,18 +2062,13 @@ function StackDiagram() {
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Support</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request</span>
               </div>
-              <svg viewBox="0 0 52 52" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
-                <defs><linearGradient id="cg-mc" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
-                <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
-                <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#cg-mc)" strokeWidth="2.5" strokeLinecap="round"/>
-                <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
-                <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
-                <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
-              </svg>
             </div>
-            {/* 5 days — col 3 row 1 */}
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"3", gridRow:"1", scrollSnapAlign:"start" }}>
-              <div className="flex flex-col gap-1.5">
+          </div>
+
+          {/* Page 2: 5 days + 98% + US map */}
+          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+              <div className="flex flex-col gap-1">
                 <div className="flex items-baseline gap-1 leading-none">
                   <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={5} duration={800} /></span>
                   <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>d</span>
@@ -2095,8 +2082,7 @@ function StackDiagram() {
                 ))}
               </div>
             </div>
-            {/* US map — col 3 row 2 / col 4 rows 1-2 */}
-            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"4", gridRow:"1 / 3", scrollSnapAlign:"start" }}>
+            <div className="flex flex-col p-5 relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
               <div className="flex flex-col gap-1.5 relative z-10">
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none" style={{ letterSpacing:"-0.04em" }}>US</span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Based clients</span>
@@ -2105,9 +2091,8 @@ function StackDiagram() {
               <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover dark:invert" style={{ opacity:0.18 }} />
               <div className="absolute inset-x-0 top-0 h-2/3 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
             </div>
-            {/* 98% — col 3 row 2 */}
-            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:140, gridColumn:"3", gridRow:"2" }}>
-              <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
+              <div className="flex flex-col gap-1">
                 <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={98} duration={1200} suffix="%" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Client feedback</span>
