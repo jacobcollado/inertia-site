@@ -398,8 +398,8 @@ function RotatingWord() {
         height: "2px", borderRadius: "2px", display: "block",
         background: "rgb(var(--fg) / 0.2)",
         transformOrigin: "left",
-        transform: phase !== "idle" ? "scaleX(1)" : "scaleX(0)",
-        opacity: phase !== "idle" ? 1 : 0,
+        transform: "scaleX(1)",
+        opacity: 1,
         transition: "transform 500ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease",
       }}>
         <span style={{
