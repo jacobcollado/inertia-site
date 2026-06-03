@@ -468,14 +468,12 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
               <MobileAccordion key={item.label} item={item as NavItem & { children: Child[] }} onNavigate={onClose} drawerOpen={open} showDesc={item.label === "Products"} />
             )
           ))}
-          <div style={{ marginTop: "auto", borderTop: "1px solid rgb(var(--line))", display: "flex", alignItems: "center" }}>
+          <div style={{ marginTop: "auto", padding: "16px 20px 20px", display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ flex: 1 }}>
               <HeaderAuth mobile />
             </div>
-            <div style={{ paddingRight: "20px", flexShrink: 0 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "100px", border: "1px solid rgb(var(--fg) / 0.2)", padding: "6px 12px" }}>
-                <ThemeToggle />
-              </div>
+            <div style={{ flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "100px", border: "1px solid rgb(var(--line))", padding: "6px 12px" }}>
+              <ThemeToggle />
             </div>
           </div>
         </div>

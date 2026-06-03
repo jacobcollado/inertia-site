@@ -778,7 +778,7 @@ h1:hover .redact > span.redact-inner,
   }
 
   .site-header--open .site-header__brand {
-    padding-left: 8px;
+    padding-left: 24px;
   }
 }
 
