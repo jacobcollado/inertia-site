@@ -618,6 +618,76 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
 
 // -- Aether feature moment ----------------------------------------------
 
+function DarkModeToggleCard() {
+  const [dark, setDark] = useState(true);
+  const inactiveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startInterval = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => setDark(d => !d), 2200);
+  };
+
+  const onActivity = () => {
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (inactiveRef.current) clearTimeout(inactiveRef.current);
+    inactiveRef.current = setTimeout(startInterval, 3000);
+  };
+
+  useEffect(() => {
+    startInterval();
+    window.addEventListener("pointermove", onActivity);
+    window.addEventListener("pointerdown", onActivity);
+    window.addEventListener("keydown", onActivity);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (inactiveRef.current) clearTimeout(inactiveRef.current);
+      window.removeEventListener("pointermove", onActivity);
+      window.removeEventListener("pointerdown", onActivity);
+      window.removeEventListener("keydown", onActivity);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const bg = dark ? "#0e0e0e" : "#f5f5f3";
+  const line1 = dark ? "#2a2a2a" : "#d4d4d0";
+  const line2 = dark ? "#1e1e1e" : "#e2e2de";
+  const imgBg = dark ? "#1a1a1a" : "#e8e8e4";
+  const btn = dark ? "#fff" : "#1a1a1a";
+  const btnText = dark ? "#0e0e0e" : "#fff";
+
+  return (
+    <div className="absolute inset-0 flex flex-col p-4 transition-colors duration-700" style={{ background: bg }} aria-hidden="true">
+      {/* toggle pill — top right */}
+      <div className="flex justify-end mb-3">
+        <div
+          className="flex items-center gap-1 rounded-full px-2 py-1 cursor-pointer transition-colors duration-700"
+          style={{ background: dark ? "#1e1e1e" : "#e2e2de" }}
+          onClick={() => setDark(d => !d)}
+        >
+          <span className="text-[10px] transition-colors duration-700" style={{ color: dark ? "#888" : "#999" }}>
+            {dark ? "☾" : "☀︎"}
+          </span>
+          <div className="rounded-full transition-all duration-500" style={{
+            width: 14, height: 14,
+            background: dark ? "#fff" : "#1a1a1a",
+            boxShadow: dark ? "0 0 6px 1px rgba(255,255,255,0.2)" : "none",
+          }} />
+        </div>
+      </div>
+      {/* mini product card */}
+      <div className="rounded-lg p-3 flex-1 flex flex-col gap-2 transition-colors duration-700" style={{ background: dark ? "#141414" : "#ebebea", border: `1px solid ${dark ? "#222" : "#ddddd8"}` }}>
+        <div className="rounded transition-colors duration-700" style={{ height: 36, background: imgBg }} />
+        <div className="rounded transition-colors duration-700" style={{ height: 5, width: "65%", background: line1 }} />
+        <div className="rounded transition-colors duration-700" style={{ height: 4, width: "45%", background: line2 }} />
+        <div className="mt-auto rounded-md flex items-center justify-center transition-colors duration-700" style={{ height: 22, background: btn }}>
+          <div className="rounded transition-colors duration-700" style={{ height: 3, width: "40%", background: btnText, opacity: 0.6 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AetherFeature() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -633,7 +703,14 @@ function AetherFeature() {
     return () => obs.disconnect();
   }, []);
 
-  const cardBase = "rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--surface))] overflow-hidden";
+  const cardBase = "rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--surface-elevated))] overflow-hidden";
+  const glassLabel = { background: "rgb(var(--surface-elevated) / 0.72)", backdropFilter: "blur(12px)", borderTop: "1px solid rgb(var(--line) / 0.5)" } as const;
+  const GlassLabelAccent = ({ children }: { children: React.ReactNode }) => (
+    <div className="rounded-xl p-3 sm:p-4 relative overflow-hidden" style={glassLabel}>
+      <div className="absolute inset-0 rounded-xl pointer-events-none" aria-hidden="true" style={{ background: "rgba(0,0,0,0.25)" }} />
+      {children}
+    </div>
+  );
   const fade = (delay: number) => ({
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -659,141 +736,154 @@ function AetherFeature() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
         {/* Hero — tall, spans 1 col on desktop */}
-        <div className={`${cardBase} sm:col-span-1 relative flex flex-col justify-between p-7`} style={{ ...fade(60), minHeight: 360, height: "clamp(360px, 50vw, 520px)" }}>
-          <div className="z-10 flex flex-col gap-2">
-            <p className="text-[1.5rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug">
-              The theme your store deserves.
-            </p>
-            <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] leading-relaxed" style={{ opacity: 0.6 }}>
-              Designed for Shopify brands that care about every pixel. Fast to launch, built to convert.
-            </p>
+        <div className={`${cardBase} sm:col-span-1 relative flex flex-col justify-end group`} style={{ ...fade(60), minHeight: 360, height: "clamp(360px, 50vw, 520px)" }}>
+          {/* image fills entire card */}
+          <div className="absolute inset-0 overflow-hidden rounded-2xl">
+            <img src="/aether/guided.png" alt="" className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]" draggable={false} aria-hidden="true" />
+            <div className="absolute inset-x-0 bottom-0" style={{ height: "60%", background: "linear-gradient(to top, rgb(var(--surface-elevated)) 10%, transparent)" }} />
           </div>
-          <div className="absolute inset-x-0 bottom-0 overflow-hidden rounded-b-2xl" style={{ top: "32%" }}>
-            <img src="/aether/guided.png" alt="" className="w-full h-full object-cover object-top" draggable={false} aria-hidden="true" />
-            <div className="absolute inset-x-0 bottom-0" style={{ height: "55%", background: "linear-gradient(to top, rgb(var(--surface)) 30%, transparent)" }} />
-          </div>
-          <div className="z-10 flex items-center gap-2">
-            <Link href="/aether" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity">
-              See Aether
-            </Link>
-            <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-              Buy
-            </Link>
+          {/* glass label at bottom */}
+          <div className="relative z-10 p-3 sm:p-4">
+            <GlassLabelAccent>
+              <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-1">The theme your store deserves.</p>
+              <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug mb-3" style={{ opacity: 0.6 }}>Designed for brands that care about every pixel.</p>
+              <div className="flex items-center gap-2">
+                <Link href="/aether" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] transition-transform duration-200 hover:-translate-y-px active:translate-y-px">
+                  See Aether
+                </Link>
+                <Link href="/aether/buy" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-px" style={{ background: "var(--accent-gradient)" }}>
+                  Buy from $85
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-80"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+                </Link>
+              </div>
+            </GlassLabelAccent>
           </div>
         </div>
 
         {/* Right 2 cols — 2×2 grid of feature cards */}
         <div className="sm:col-span-2 grid grid-cols-2 gap-3">
 
-          {/* 41 sections — bar chart */}
-          <div className={`${cardBase} flex flex-col justify-between p-4 sm:p-6 overflow-hidden relative`} style={{ ...fade(120), minHeight: 220 }}>
-            {/* bar chart — anchored above the label area */}
-            <div className="absolute inset-x-0 flex items-end gap-[3px] px-5" style={{ bottom: 72, height: 80 }} aria-hidden="true">
-              {[14, 18, 22, 27, 31, 36, 41].map((v, i) => (
-                <div
-                  key={i}
-                  className="flex-1 rounded-t-sm"
-                  style={{
-                    height: `${(v / 41) * 100}%`,
-                    background: i === 6
-                      ? "var(--accent-gradient)"
-                      : `rgb(var(--fg) / ${0.07 + i * 0.03})`,
-                  }}
-                />
-              ))}
+          {/* 41 sections — layout blocks */}
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(120), minHeight: 220 }}>
+            {/* big stat — top left */}
+            <span className="absolute top-4 left-4 sm:top-5 sm:left-5 text-[2.2rem] sm:text-[3rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none tabular-nums z-10">41</span>
+            {/* layout block mosaic */}
+            <div className="absolute inset-x-4 flex flex-col gap-1.5" style={{ top: "36%", bottom: 90 }} aria-hidden="true">
+              <div className="flex gap-1.5">
+                <div className="rounded-md flex-1" style={{ height: 28, background: "rgb(var(--fg) / 0.08)" }} />
+              </div>
+              <div className="flex gap-1.5">
+                <div className="rounded-md" style={{ height: 22, width: "40%", background: "rgb(var(--fg) / 0.06)" }} />
+                <div className="rounded-md flex-1" style={{ height: 22, background: "var(--accent-gradient)", opacity: 0.5 }} />
+              </div>
+              <div className="flex gap-1.5">
+                <div className="rounded-md flex-1" style={{ height: 22, background: "rgb(var(--fg) / 0.05)" }} />
+                <div className="rounded-md flex-1" style={{ height: 22, background: "rgb(var(--fg) / 0.07)" }} />
+                <div className="rounded-md flex-1" style={{ height: 22, background: "rgb(var(--fg) / 0.05)" }} />
+              </div>
+              <div className="flex gap-1.5">
+                <div className="rounded-md" style={{ height: 18, width: "60%", background: "rgb(var(--fg) / 0.06)" }} />
+              </div>
             </div>
-            {/* fade so bars don't bleed into label */}
-            <div className="absolute inset-x-0 pointer-events-none" style={{ bottom: 64, height: 32, background: "linear-gradient(to top, rgb(var(--surface)), transparent)" }} />
-            <span className="text-[2.2rem] sm:text-[3rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none tabular-nums z-10">41</span>
-            <div className="z-10">
-              <p className="text-[15px] sm:text-[17px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Sections</p>
-              <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Every layout you need, nothing you don't.</p>
+            {/* fade into label */}
+            <div className="absolute inset-x-0 pointer-events-none" style={{ bottom: 86, height: 28, background: "linear-gradient(to top, rgb(var(--surface-elevated)), transparent)" }} />
+            {/* glass label */}
+            <div className="relative z-10 mt-auto p-3 sm:p-4 pt-0">
+              <GlassLabelAccent>
+                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Sections</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Every layout you need, nothing you don't.</p>
+              </GlassLabelAccent>
             </div>
           </div>
 
-          {/* Dark mode — split panel */}
-          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative`} style={{ ...fade(160), minHeight: 220 }}>
-            {/* split preview */}
-            <div className="absolute inset-0 flex" aria-hidden="true">
-              {/* light half */}
-              <div className="flex-1 flex flex-col gap-2 p-4" style={{ background: "#f5f5f3" }}>
-                <div className="rounded" style={{ height: 6, width: "55%", background: "#d4d4d0" }} />
-                <div className="rounded" style={{ height: 4, width: "80%", background: "#e2e2de" }} />
-                <div className="rounded" style={{ height: 4, width: "60%", background: "#e2e2de" }} />
-                <div className="mt-auto rounded-md" style={{ height: 28, background: "#1a1a1a" }} />
-              </div>
-              {/* divider */}
-              <div style={{ width: 1, background: "rgb(var(--line) / 0.5)", flexShrink: 0 }} />
-              {/* dark half */}
-              <div className="flex-1 flex flex-col gap-2 p-4" style={{ background: "#111110" }}>
-                <div className="rounded" style={{ height: 6, width: "55%", background: "#333" }} />
-                <div className="rounded" style={{ height: 4, width: "80%", background: "#222" }} />
-                <div className="rounded" style={{ height: 4, width: "60%", background: "#222" }} />
-                <div className="mt-auto rounded-md" style={{ height: 28, background: "#fff" }} />
-              </div>
-            </div>
+          {/* Dark mode — animated toggle */}
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(160), minHeight: 220 }}>
+            <DarkModeToggleCard />
             {/* bottom label */}
             <div className="relative z-10 mt-auto p-3 sm:p-5 pt-0">
-              <div className="rounded-xl p-3 sm:p-4" style={{ background: "rgb(var(--surface) / 0.88)", backdropFilter: "blur(8px)", borderTop: "1px solid rgb(var(--line) / 0.5)" }}>
+              <GlassLabelAccent>
                 <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Dark mode</p>
                 <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>On by default. Looks right either way.</p>
-              </div>
+              </GlassLabelAccent>
             </div>
           </div>
 
           {/* Live in &lt;1hr — step timeline */}
-          <div className={`${cardBase} flex flex-col justify-between p-4 sm:p-6 overflow-hidden relative`} style={{ ...fade(200), minHeight: 220 }}>
-            <span className="text-[2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none tabular-nums z-10">&lt;1hr</span>
-            {/* steps */}
-            <div className="flex flex-col gap-2 z-10" aria-hidden="true">
-              {[
-                { label: "License", done: true },
-                { label: "Install", done: true },
-                { label: "Live", done: true, accent: true },
-              ].map((step, i) => (
-                <div key={i} className="flex items-center gap-2.5">
-                  <div className="flex items-center justify-center rounded-full shrink-0" style={{
-                    width: 20, height: 20,
-                    background: step.accent ? "var(--accent-gradient)" : "rgb(var(--fg) / 0.1)",
-                  }}>
-                    <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
-                      <polyline points="2,5 4.2,7.5 8,3" stroke={step.accent ? "#fff" : "rgb(var(--fg))"} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity={step.accent ? 1 : 0.5} />
-                    </svg>
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(200), minHeight: 220 }}>
+            {/* visual area */}
+            <div className="flex-1 flex flex-col justify-center px-5 pt-5 pb-3" aria-hidden="true">
+              <span className="text-[2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-4">Done by lunch.</span>
+              {/* timeline */}
+              <div className="flex flex-col">
+                {([
+                  { label: "License", accent: false },
+                  { label: "Install", accent: false },
+                  { label: "Live",    accent: true  },
+                ] as { label: string; accent: boolean }[]).map((step, i, arr) => (
+                  <div key={i} className="flex items-start gap-3">
+                    {/* dot + connector */}
+                    <div className="flex flex-col items-center" style={{ width: 20 }}>
+                      <div className="flex items-center justify-center rounded-full shrink-0" style={{
+                        width: 18, height: 18,
+                        background: step.accent ? "var(--accent-gradient)" : "rgb(var(--fg) / 0.10)",
+                        boxShadow: step.accent ? "0 0 8px 2px rgba(60,170,160,0.3)" : "none",
+                        flexShrink: 0,
+                      }}>
+                        <svg viewBox="0 0 10 10" fill="none" style={{ width: 9, height: 9 }}>
+                          <polyline points="2,5 4.2,7.5 8,3" stroke={step.accent ? "#fff" : "rgb(var(--fg))"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={step.accent ? 1 : 0.45} />
+                        </svg>
+                      </div>
+                      {i < arr.length - 1 && (
+                        <div style={{ width: 1, height: 14, background: "rgb(var(--fg) / 0.10)", marginTop: 2 }} />
+                      )}
+                    </div>
+                    <span className="text-[12px] sm:text-[13px] tracking-tight leading-none pt-[3px]" style={{ color: step.accent ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: step.accent ? 1 : 0.5, marginBottom: i < arr.length - 1 ? 2 : 0 }}>{step.label}</span>
                   </div>
-                  <span className="text-[12px] sm:text-[13px] tracking-tight" style={{ color: step.accent ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: step.accent ? 1 : 0.6 }}>{step.label}</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-            <div className="z-10">
-              <p className="text-[15px] sm:text-[17px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Live in an hour</p>
-              <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>No dev needed. License, install, ship.</p>
+            {/* glass label */}
+            <div className="p-3 sm:p-4 pt-0">
+              <GlassLabelAccent>
+                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Live in an hour</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>No dev needed. License, install, ship.</p>
+              </GlassLabelAccent>
             </div>
           </div>
 
-          {/* Built-in upsell — sparkline */}
-          <div className={`${cardBase} flex flex-col justify-between p-4 sm:p-6 overflow-hidden relative`} style={{ ...fade(240), minHeight: 220 }}>
-            {/* sparkline — anchored above the label area */}
-            <svg viewBox="0 0 120 56" fill="none" className="absolute left-0 right-0 w-full" style={{ bottom: 74, height: 72 }} aria-hidden="true" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgb(60,170,160)" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="rgb(60,170,160)" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path d="M0,52 C10,50 15,46 22,40 C30,33 34,36 42,28 C50,20 54,24 62,18 C70,12 76,16 84,10 C92,4 100,8 120,2" stroke="rgb(60,170,160)" strokeWidth="1.5" strokeLinecap="round" />
-              <path d="M0,52 C10,50 15,46 22,40 C30,33 34,36 42,28 C50,20 54,24 62,18 C70,12 76,16 84,10 C92,4 100,8 120,2 L120,56 L0,56 Z" fill="url(#spark-fill)" />
-            </svg>
-            {/* dot pinned to the end of the sparkline — rendered in HTML so it stays round */}
-            <div className="absolute rounded-full" style={{ width: 7, height: 7, background: "rgb(60,170,160)", right: 0, bottom: Math.round(74 + 72 * (1 - 2/56) - 3.5) }} aria-hidden="true" />
-            {/* fade so sparkline doesn't bleed into label */}
-            <div className="absolute inset-x-0 pointer-events-none" style={{ bottom: 68, height: 28, background: "linear-gradient(to top, rgb(var(--surface)), transparent)" }} />
-            <div className="z-10">
-              <p className="text-[1.6rem] sm:text-[2rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-0.5 tabular-nums">+18%</p>
-              <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>avg. order value</p>
+          {/* Conversion — funnel */}
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(240), minHeight: 220 }}>
+            {/* stat + funnel in normal flow */}
+            <div className="flex-1 flex flex-col justify-center px-4 pt-4 pb-2 gap-3" aria-hidden="true">
+              <div>
+                <p className="text-[1.6rem] sm:text-[2rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-0.5 tabular-nums">1 in 4</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>visitors converts</p>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {[
+                  { label: "Visitors",   w: 1,    accent: false },
+                  { label: "Browsers",   w: 0.72, accent: false },
+                  { label: "Added cart", w: 0.46, accent: false },
+                  { label: "Purchased",  w: 0.25, accent: true  },
+                ].map((row, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="rounded-sm shrink-0" style={{
+                      width: `${row.w * 55}%`,
+                      height: 9,
+                      background: row.accent ? "var(--accent-gradient)" : `rgb(var(--fg) / ${0.08 + i * 0.04})`,
+                      boxShadow: row.accent ? "0 0 8px 2px rgba(60,170,160,0.25)" : "none",
+                    }} />
+                    <span className="text-[10px] tracking-tight whitespace-nowrap" style={{ color: "rgb(var(--muted))", opacity: row.accent ? 0.8 : 0.4 }}>{row.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="z-10">
-              <p className="text-[15px] sm:text-[17px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Built to sell more</p>
-              <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Upsells, bundles, and post-purchase blocks. Out of the box.</p>
+            {/* glass label */}
+            <div className="p-3 sm:p-4 pt-0">
+              <GlassLabelAccent>
+                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Built to convert</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Upsells, bundles, and post-purchase blocks. Out of the box.</p>
+              </GlassLabelAccent>
             </div>
           </div>
 
@@ -808,7 +898,7 @@ function AetherFeature() {
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
         </Link>
         <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors">
-          Buy now — from $85
+          Buy now, from $85
         </Link>
       </div>
 
@@ -950,161 +1040,259 @@ const PROCESS_STEPS = [
   },
 ];
 
-function PlatformDiagram() {
-  const [activeStep, setActiveStep] = useState(0);
-  const [progressKey, setProgressKey] = useState(0);
-  const [resetting, setResetting] = useState(false);
-  const [visible, setVisible] = useState(false);
+function WordReveal({ text, from }: { text: string; from: string }) {
+  const words = text.split(" ");
+  return (
+    <span>
+      {words.map((word, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-block",
+            opacity: 0,
+            animation: `word-in 480ms cubic-bezier(0.22,1,0.36,1) ${i * 90}ms forwards`,
+            marginRight: i < words.length - 1 ? "0.28em" : 0,
+          }}
+        >
+          {word}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function ChatBubbleWrapper({ from, isLatest, children }: { from: string; isLatest: boolean; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!isLatest || !ref.current) return;
     const el = ref.current;
+    el.style.opacity = "0";
+    el.style.transform = from === "us" ? "translateX(-6px) translateY(4px)" : "translateX(6px) translateY(4px)";
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.transition = "opacity 800ms cubic-bezier(0.22,1,0.36,1) 200ms, transform 800ms cubic-bezier(0.22,1,0.36,1) 200ms";
+        el.style.opacity = "1";
+        el.style.transform = "translateX(0) translateY(0)";
+      });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [isLatest, from]);
+
+  return (
+    <div ref={ref} className="flex flex-col gap-0.5" style={{ opacity: isLatest ? 0 : 1 }}>
+      {children}
+    </div>
+  );
+}
+
+const CHAT_PLACEHOLDERS = [
+  "I need a Shopify store...",
+  "Rebranding from scratch...",
+  "An iOS app for my brand...",
+  "A dashboard for my team...",
+  "A Framer site for my agency...",
+  "A Meta ad campaign...",
+];
+
+function ChatPlaceholder() {
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx(i => (i + 1) % CHAT_PLACEHOLDERS.length);
+        setVisible(true);
+      }, 350);
+    }, 3000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <span
+      className="flex-1 text-[12px] tracking-tight text-[rgb(var(--fg))] truncate"
+      style={{
+        opacity: visible ? 0.4 : 0,
+        transition: "opacity 350ms ease",
+      }}
+    >
+      {CHAT_PLACEHOLDERS[idx]}
+    </span>
+  );
+}
+
+const CHAT_MESSAGES = [
+  { from: "them", text: "Hey, we need a Shopify store. Something that actually feels like a brand." },
+  { from: "us",   text: "Got it. Walk us through what you're building and who it's for." },
+  { from: "them", text: "Streetwear brand. Young audience. Current site looks generic." },
+  { from: "us",   text: "We'll handle design, storefront, and the full build. One team, no handoffs." },
+  { from: "them", text: "How fast can you move?" },
+  { from: "us",   text: "Brief this week. Live in 3." },
+  { from: "them", text: "Let's go." },
+];
+
+function PlatformDiagram() {
+  const [shown, setShown] = useState(0);
+  const [typing, setTyping] = useState(false);
+  const [fading, setFading] = useState(false);
+  const [inView, setInView] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) setVisible(true); },
-      { threshold: 0.2 }
+      ([e]) => setInView(e.isIntersecting),
+      { threshold: 0.1 }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setActiveStep(i => {
-        const next = (i + 1) % PROCESS_STEPS.length;
-        if (next === 0) {
-          // briefly fade all nodes out before resetting
-          setResetting(true);
-          setTimeout(() => setResetting(false), 500);
-        }
-        setProgressKey(k => k + 1);
-        return next;
-      });
-    }, 3800);
-    return () => clearInterval(t);
-  }, []);
+    if (!inView) return;
+    if (shown >= CHAT_MESSAGES.length) {
+      const t = setTimeout(() => {
+        setFading(true);
+        setTimeout(() => { setShown(0); setFading(false); }, 600);
+      }, 3200);
+      return () => clearTimeout(t);
+    }
+    const delay = shown === 0 ? 1400 : 1400;
+    const t = setTimeout(() => {
+      setTyping(true);
+      const typingDuration = CHAT_MESSAGES[shown].from === "us" ? 2200 : 1600;
+      setTimeout(() => {
+        setTyping(false);
+        setShown(s => s + 1);
+      }, typingDuration);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [shown, inView]);
+
+  useEffect(() => {
+    if (!inView) return;
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [shown, typing, inView]);
+
+  const nextFrom = shown < CHAT_MESSAGES.length ? CHAT_MESSAGES[shown].from : null;
 
   return (
-    <div
-      ref={ref}
-      className="w-full rounded-2xl border border-[rgb(var(--line))]"
-      style={{
-        background: "rgb(var(--surface))",
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(16px)",
-        transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
-      }}
-    >
-      {/* Card header */}
-      <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: "1px solid rgb(var(--line) / 0.5)" }}>
-        <span className="text-[13px] font-medium tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.8 }}>
-          How we work
-        </span>
-        <div className="flex items-center gap-1">
-          {PROCESS_STEPS.map((_, si) => (
-            <div
-              key={si}
-              className="rounded-full transition-all duration-500"
-              style={{
-                width: si === activeStep ? 16 : 5,
-                height: 5,
-                background: si === activeStep ? "var(--accent-gradient)" : si < activeStep ? "rgba(50,100,240,0.4)" : "rgb(var(--line))",
-                opacity: si === activeStep ? 1 : 0.5,
-              }}
-            />
-          ))}
+    <div ref={cardRef} className="w-full rounded-2xl border border-[rgb(var(--line))] overflow-hidden flex flex-col" style={{ background: "rgb(var(--surface))", height: 380 }}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgb(var(--line) / 0.5)" }}>
+        <div className="flex items-center gap-2">
+          <div className="rounded-lg shrink-0 flex items-center justify-center" style={{ width: 28, height: 28, background: "var(--accent-gradient)" }}>
+            <svg viewBox="558 591 262 296" fill="none" className="w-4 h-4" aria-hidden="true">
+              <path d="M558.47 887V591H610.07V887H558.47ZM641.52 887V668.8H683.92L687.52 692H690.12C697.854 683.467 706.92 676.933 717.32 672.4C727.854 667.733 739.32 665.4 751.72 665.4C764.787 665.4 776.387 668 786.52 673.2C796.787 678.267 804.854 686.6 810.72 698.2C816.587 709.8 819.52 725.267 819.52 744.6V887H768.72V747.8C768.72 733.533 765.72 723.667 759.72 718.2C753.854 712.733 745.854 710 735.72 710C730.92 710 725.854 710.733 720.52 712.2C715.187 713.667 710.054 716 705.12 719.2C700.32 722.267 696.12 726.333 692.52 731.4V887H641.52Z" fill="white"/>
+            </svg>
+          </div>
+          <div>
+            <p className="text-[12.5px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500, lineHeight: 1.2 }}>Inertia</p>
+            <p className="text-[10px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.5 }}>New project</p>
+          </div>
         </div>
+        <span className="text-[11px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.45 }}>9:41 AM</span>
       </div>
-      <div className="relative">
-        {PROCESS_STEPS.map((step, i) => {
-          const isActive = activeStep === i;
-          const isPast = i < activeStep;
-          const isLast = i === PROCESS_STEPS.length - 1;
+      {/* Messages */}
+      <div className="flex-1 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-6 pointer-events-none z-10" style={{ background: "linear-gradient(to bottom, rgb(var(--surface)), transparent)" }} />
+        <div className="absolute inset-x-0 bottom-0 h-8 pointer-events-none z-10" style={{ background: "linear-gradient(to top, rgb(var(--surface)), transparent)" }} />
+      <div
+        ref={containerRef}
+        className="h-full flex flex-col justify-end gap-2 px-4 py-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        style={{ transition: "opacity 500ms ease", opacity: fading ? 0 : 1 }}
+      >
+        {CHAT_MESSAGES.slice(0, shown).map((msg, i) => {
+          const prevFrom = i > 0 ? CHAT_MESSAGES[i - 1].from : null;
+          const showLabel = msg.from !== prevFrom;
+          const isLatest = i === shown - 1;
           return (
-            <button
-              key={step.label}
-              onClick={() => setActiveStep(i)}
-              className="relative w-full text-left flex gap-0"
-              style={{ background: "transparent" }}
-            >
-              {/* Spine cell — 56px wide, everything centered */}
-              <div className="flex flex-col items-center shrink-0 relative" style={{ width: 56 }}>
-                {/* Circle */}
+            <ChatBubbleWrapper key={i} from={msg.from} isLatest={isLatest}>
+              {showLabel && (
+                <span className={`text-[10px] tracking-tight px-1 ${msg.from === "us" ? "text-left" : "text-right"}`} style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>
+                  {msg.from === "us" ? "Inertia" : "You"}
+                </span>
+              )}
+              <div className={`flex ${msg.from === "us" ? "justify-start" : "justify-end"}`}>
                 <div
-                  className="rounded-full flex items-center justify-center shrink-0 transition-all duration-500 relative z-10"
+                  className="rounded-xl px-3.5 py-2 max-w-[72%] text-[12px] tracking-tight leading-relaxed"
                   style={{
-                    marginTop: 22,
-                    width: 30, height: 30,
-                    background: isActive ? "var(--accent-gradient)" : isPast ? "#3264f0" : "rgb(var(--surface))",
-                    border: isActive || isPast ? "none" : "1.5px solid rgb(var(--line))",
-                    boxShadow: isActive ? "0 0 14px rgba(50,100,240,0.35)" : "none",
-                    opacity: resetting && isPast ? 0 : 1,
+                    background: msg.from === "us" ? "rgb(var(--fg) / 0.9)" : "rgb(var(--surface-elevated))",
+                    color: msg.from === "us" ? "rgb(var(--bg))" : "rgb(var(--fg))",
+                    borderBottomLeftRadius: msg.from === "us" ? 4 : undefined,
+                    borderBottomRightRadius: msg.from === "them" ? 4 : undefined,
+                    border: msg.from === "them" ? "1px solid rgb(var(--line) / 0.6)" : "none",
                   }}
                 >
-                  {isPast ? (
-                    <svg viewBox="0 0 10 10" fill="none" style={{ width: 11, height: 11 }}>
-                      <polyline points="1.5,5 4,7.5 8.5,2.5" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : (
-                    <span style={{ fontSize: 11, fontWeight: 500, color: isActive ? "#fff" : "rgb(var(--muted))", opacity: isActive ? 1 : 0.5 }}>{step.num}</span>
-                  )}
+                  {isLatest ? <WordReveal text={msg.text} from={msg.from} /> : msg.text}
                 </div>
-                {/* Connector */}
-                {!isLast && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: "calc(50% - 0.75px)",
-                      top: 22 + 30,
-                      bottom: -22,
-                      width: 1.5,
-                      background: isPast ? "rgba(50,100,240,0.35)" : "rgb(var(--line))",
-                      opacity: resetting && isPast ? 0 : isPast ? 1 : 0.3,
-                      transition: "background 500ms ease, opacity 400ms ease",
-                    }}
-                  />
-                )}
               </div>
-
-              {/* Content cell */}
-              <div
-                className="flex-1 min-w-0 pr-5"
-                style={{
-                  paddingTop: 22, paddingBottom: 22,
-                  minHeight: isActive ? 0 : 72,
-                  borderBottom: "none",
-                }}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span
-                    className="text-[17px] tracking-tight"
-                    style={{ fontWeight: isActive ? 500 : 400, color: isActive ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: resetting && isPast ? 0 : isActive ? 1 : isPast ? 0.45 : 0.6, transition: "color 300ms ease, opacity 400ms ease" }}
-                  >{step.label}</span>
-                  {isActive && !isLast && (
-                    <div style={{ width: 48, height: 3, borderRadius: 3, background: "rgb(var(--line))", overflow: "hidden", opacity: 0.5, flexShrink: 0 }}>
-                      <div
-                        key={progressKey}
-                        style={{
-                          height: "100%",
-                          borderRadius: 3,
-                          background: "var(--accent-gradient)",
-                          animation: "progress-fill 3.8s linear forwards",
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
-                <ExpandingContent open={isActive}>
-                  <div className="flex flex-col gap-3 pt-2 pb-1">
-                    <span className="block text-[14px] tracking-tight leading-relaxed" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>{step.desc}</span>
-                    <div style={{ height: 1, background: "rgb(var(--line))", opacity: 0.5 }} />
-                    <div>{step.visual}</div>
-                  </div>
-                </ExpandingContent>
-              </div>
-            </button>
+            </ChatBubbleWrapper>
           );
         })}
+        {typing && (
+          <div
+            className={`flex ${nextFrom === "us" ? "justify-start" : "justify-end"}`}
+            style={{ opacity: 0, animation: `${nextFrom === "us" ? "chat-in-left" : "chat-in-right"} 800ms cubic-bezier(0.22,1,0.36,1) forwards` }}
+          >
+            <div
+              className="rounded-xl px-3.5 py-2.5 flex items-center gap-[5px]"
+              style={{
+                background: nextFrom === "us" ? "rgb(var(--fg) / 0.9)" : "rgb(var(--surface-elevated))",
+                borderBottomLeftRadius: nextFrom === "us" ? 4 : undefined,
+                borderBottomRightRadius: nextFrom === "them" ? 4 : undefined,
+                border: nextFrom === "them" ? "1px solid rgb(var(--line) / 0.6)" : "none",
+              }}
+            >
+              {[0, 1, 2].map(i => (
+                <div key={i} className="rounded-full" style={{ width: 5, height: 5, background: nextFrom === "us" ? "rgb(var(--bg))" : "rgb(var(--muted))", opacity: 0.5, animation: `typing-dot 1.1s ease-in-out ${i * 180}ms infinite` }} />
+              ))}
+            </div>
+          </div>
+        )}
+        {shown >= CHAT_MESSAGES.length && !fading && (
+          <div className="flex justify-center pt-2" style={{ opacity: 0, animation: "chat-in 520ms cubic-bezier(0.22,1,0.36,1) 800ms forwards" }}>
+            <a
+              href="https://www.instagram.com/by.inertia/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] tracking-tight text-white transition-opacity hover:opacity-90"
+              style={{ background: "var(--accent-gradient)" }}
+            >
+              Start a project
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+            </a>
+          </div>
+        )}
+        <div ref={bottomRef} className="h-4" />
+      </div>
+      </div>
+      {/* Input box */}
+      <div className="px-4 py-3" style={{ borderTop: "1px solid rgb(var(--line) / 0.5)" }}>
+        <a
+          href="https://www.instagram.com/by.inertia/"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2 rounded-full px-3 py-2 transition-opacity hover:opacity-80 group"
+          style={{ background: "rgb(var(--surface-elevated))", border: "1px solid rgb(var(--line) / 0.6)" }}
+        >
+          <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: "rgb(var(--fg) / 0.1)" }}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="w-3 h-3" style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>
+              <line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/>
+            </svg>
+          </div>
+          <ChatPlaceholder />
+          <div className="rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ width: 24, height: 24, background: "var(--accent-gradient)" }}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+              <line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/>
+            </svg>
+          </div>
+        </a>
       </div>
     </div>
   );
@@ -1132,30 +1320,22 @@ function PlatformSignal() {
       {/* Mobile: stacked */}
       <div className="sm:hidden flex flex-col gap-8 py-10">
         <div className="px-3">
-        <div
-          className="flex flex-col gap-4 text-center items-center"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(12px)",
-            transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
-          }}
-        >
-          <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
-            The whole thing.{" "}
-            <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Done right.</span>
-          </p>
-          <p className="text-[1rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs" style={{ opacity: 0.7 }}>
-            Design, storefront, backend, campaigns. Inertia builds it all, so nothing falls through the gaps.
-          </p>
-          <a
-            href="https://www.instagram.com/by.inertia/"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex self-center items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+          <div
+            className="flex flex-col gap-4 text-center items-center"
+            style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0)" : "translateY(12px)",
+              transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
+            }}
           >
-            Start a project ↗
-          </a>
-        </div>
+            <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
+              The whole thing.{" "}
+              <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Done right.</span>
+            </p>
+            <p className="text-[1rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs" style={{ opacity: 0.7 }}>
+              Design, storefront, backend, campaigns. Inertia builds it all, so nothing falls through the gaps.
+            </p>
+          </div>
         </div>
         <div
           className="px-3 w-full"
@@ -1166,6 +1346,21 @@ function PlatformSignal() {
           }}
         >
           <PlatformDiagram />
+        </div>
+        <div className="px-3 flex justify-center"
+          style={{
+            opacity: visible ? 1 : 0,
+            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 300ms",
+          }}
+        >
+          <a
+            href="https://www.instagram.com/by.inertia/"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+          >
+            Start a project ↗
+          </a>
         </div>
       </div>
 

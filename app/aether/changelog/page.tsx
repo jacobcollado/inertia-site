@@ -15,7 +15,7 @@ const CHANGELOG: Entry[] = [
     label: "minor",
     summary: "Music player, SMS capture widget, signup notification card, custom cursor support, and a CRT effect toggle.",
     notes: [
-      { type: "added",    title: "Music player section",                      detail: "Merchants can now add ambient audio to any page via a dedicated music player section. Accepts any direct audio URL. Playback is user-initiated to respect autoplay policies, and the player UI is minimal by design — a small fixed control that stays out of the way." },
+      { type: "added",    title: "Music player section",                      detail: "Merchants can now add ambient audio to any page via a dedicated music player section. Accepts any direct audio URL. Playback is user-initiated to respect autoplay policies, and the player UI is minimal by design. A small fixed control that stays out of the way." },
       { type: "added",    title: "SMS overlay widget",                        detail: "A corner-anchored SMS signup widget with a configurable position (top-left, middle-right, etc.), heading, body copy, and signup URL. Dismisses on click-outside and remembers the dismissed state for the session." },
       { type: "added",    title: "Signup notification card",                  detail: "A non-intrusive slide-in card that prompts email or SMS signups after a configurable delay. Supports a discount code reveal on success, suppress-for-N-days logic, and full color customisation without touching code." },
       { type: "added",    title: "Custom cursor support",                     detail: "Theme settings now include a cursor image picker. When set, the custom cursor replaces the default pointer across the entire storefront including links and buttons. Unset to revert to the system cursor." },
@@ -87,21 +87,17 @@ const CHANGELOG: Entry[] = [
   },
 ];
 
-const TYPE_COLOR: Record<NoteType, string> = {
-  added:    "rgb(var(--green))",
-  improved: "rgb(var(--accent))",
-  fixed:    "rgb(var(--amber))",
-  removed:  "rgb(var(--muted))",
+const TYPE_META: Record<NoteType, { label: string; color: string; bg: string }> = {
+  added:    { label: "Added",    color: "rgb(var(--green))",  bg: "rgb(var(--green) / 0.08)"  },
+  improved: { label: "Improved", color: "rgb(var(--accent))", bg: "rgb(var(--accent) / 0.08)" },
+  fixed:    { label: "Fixed",    color: "rgb(var(--amber))",  bg: "rgb(var(--amber) / 0.08)"  },
+  removed:  { label: "Removed",  color: "rgb(var(--muted))",  bg: "rgb(var(--muted) / 0.08)"  },
 };
 
-const TYPE_LABEL: Record<NoteType, string> = {
-  added: "Added", improved: "Improved", fixed: "Fixed", removed: "Removed",
-};
-
-const LABEL_META: Record<ReleaseLabel, { label: string; bg: string; color: string }> = {
-  major: { label: "Major",  bg: "rgb(var(--fg))",     color: "rgb(var(--bg))" },
-  minor: { label: "Minor",  bg: "rgb(var(--surface))", color: "rgb(var(--muted))" },
-  patch: { label: "Patch",  bg: "rgb(var(--surface))", color: "rgb(var(--muted))" },
+const LABEL_META: Record<ReleaseLabel, { label: string; color: string; bg: string }> = {
+  major: { label: "Major", color: "rgb(var(--fg))",    bg: "rgb(var(--fg) / 0.1)"    },
+  minor: { label: "Minor", color: "rgb(var(--muted))", bg: "rgb(var(--fg) / 0.05)"   },
+  patch: { label: "Patch", color: "rgb(var(--muted))", bg: "rgb(var(--fg) / 0.05)"   },
 };
 
 function formatDate(iso: string) {
@@ -140,98 +136,104 @@ export default function AetherChangelog() {
       <div className="grid-rule" aria-hidden="true" />
 
       {/* Releases */}
-      <section className="rise px-3 pt-6">
-        <div className="flex flex-col divide-y divide-[rgb(var(--line))]">
+      <section className="rise px-3 pt-2">
+        <div className="flex flex-col">
           {CHANGELOG.map((entry, ei) => {
             const isOpen = open === entry.version;
             const lm = LABEL_META[entry.label];
-            return (
-              <div key={entry.version} id={`v${entry.version}`} className="scroll-mt-20">
+            const noteCount = entry.notes.length;
 
-                {/* Row header — always visible */}
+            return (
+              <div key={entry.version} id={`v${entry.version}`} className="scroll-mt-20 border-b border-[rgb(var(--line))]">
+
+                {/* Row header */}
                 <button
-                  className="w-full flex items-center gap-4 sm:gap-6 py-6 text-left [-webkit-tap-highlight-color:transparent] group"
+                  className="w-full flex items-start sm:items-center gap-4 sm:gap-6 py-7 sm:py-8 text-left [-webkit-tap-highlight-color:transparent] group"
                   onClick={() => setOpen(isOpen ? null : entry.version)}
                 >
-                  {/* version + badge */}
-                  <div className="flex items-center gap-3 shrink-0 min-w-[120px] sm:min-w-[160px]">
-                    <span className="text-[16px] sm:text-[18px] font-medium tracking-tight tabular-nums text-[rgb(var(--fg))]">
+                  {/* Left: version + badges */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 shrink-0 sm:min-w-[200px]">
+                    <span className="text-[18px] sm:text-[20px] font-semibold tracking-tight tabular-nums text-[rgb(var(--fg))] leading-none">
                       v{entry.version}
                     </span>
-                    <span
-                      className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full bg-[rgb(var(--surface))] text-[rgb(var(--muted))]"
-                    >
-                      {lm.label}
-                    </span>
-                    {ei === 0 && (
-                      <span className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
-                        Latest
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-[11px] font-medium tracking-tight px-2.5 py-1 rounded-full"
+                        style={{ background: lm.bg, color: lm.color }}
+                      >
+                        {lm.label}
                       </span>
-                    )}
+                      {ei === 0 && (
+                        <span className="text-[11px] font-medium tracking-tight px-2.5 py-1 rounded-full bg-[rgb(var(--accent))] text-white">
+                          Latest
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* summary */}
-                  <p className="flex-1 text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] hidden sm:block" style={{ opacity: 0.7 }}>
-                    {entry.summary}
-                  </p>
+                  {/* Center: summary + meta */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.65 }}>
+                      {entry.summary}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-[12px] tabular-nums tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+                        {formatDate(entry.date)}
+                      </span>
+                      <span className="text-[rgb(var(--line))]" aria-hidden="true">·</span>
+                      <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+                        {noteCount} {noteCount === 1 ? "change" : "changes"}
+                      </span>
+                    </div>
+                  </div>
 
-                  {/* date + chevron */}
-                  <div className="flex items-center gap-4 shrink-0 ml-auto">
-                    <span className="text-[12px] tabular-nums tracking-tight text-[rgb(var(--muted))] hidden sm:block" style={{ opacity: 0.4 }}>
-                      {formatDate(entry.date)}
-                    </span>
-                    <svg
-                      viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6"
-                      strokeLinecap="round" strokeLinejoin="round"
-                      className="w-4 h-4 text-[rgb(var(--muted))] shrink-0 transition-transform duration-300"
-                      style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-                      aria-hidden="true"
+                  {/* Chevron */}
+                  <div className="shrink-0 flex items-center self-center ml-auto sm:ml-0">
+                    <span
+                      className="flex items-center justify-center w-7 h-7 rounded-full transition-colors duration-200"
+                      style={{ background: isOpen ? "rgb(var(--fg) / 0.07)" : "transparent" }}
                     >
-                      <path d="M4 6l4 4 4-4" />
-                    </svg>
+                      <svg
+                        viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8"
+                        strokeLinecap="round" strokeLinejoin="round"
+                        className="w-3.5 h-3.5 text-[rgb(var(--muted))] shrink-0 transition-transform duration-300"
+                        style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                        aria-hidden="true"
+                      >
+                        <path d="M4 6l4 4 4-4" />
+                      </svg>
+                    </span>
                   </div>
                 </button>
-
-                {/* mobile summary */}
-                <p className="sm:hidden text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] pb-4 -mt-2" style={{ opacity: 0.6 }}>
-                  {entry.summary}
-                </p>
 
                 {/* Expanded notes */}
                 <div
                   className="overflow-hidden"
                   style={{
-                    maxHeight: isOpen ? `${entry.notes.length * 200}px` : "0px",
+                    maxHeight: isOpen ? `${noteCount * 200}px` : "0px",
                     opacity: isOpen ? 1 : 0,
-                    transition: "max-height 400ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease",
+                    transition: "max-height 420ms cubic-bezier(0.22,1,0.36,1), opacity 280ms ease",
                   }}
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[rgb(var(--line))] mb-6">
-                    {entry.notes.map((note, i) => (
-                      <div
-                        key={i}
-                        className="flex flex-col gap-2 p-6 bg-[rgb(var(--bg))] hover:bg-[rgb(var(--surface))] transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ background: TYPE_COLOR[note.type] }}
-                          />
-                          <span
-                            className="text-[11px] font-medium tracking-tight"
-                            style={{ color: TYPE_COLOR[note.type] }}
-                          >
-                            {TYPE_LABEL[note.type]}
-                          </span>
+                  <div className="flex flex-col pb-8">
+                    {entry.notes.map((note, i) => {
+                      const tm = TYPE_META[note.type];
+                      return (
+                        <div key={i} className="flex flex-col gap-1 py-4 border-t border-[rgb(var(--line))] first:border-t-0">
+                          <div className="flex items-baseline gap-2.5">
+                            <span className="text-[11px] font-medium tracking-tight shrink-0 w-16" style={{ color: tm.color }}>
+                              {tm.label}
+                            </span>
+                            <span className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
+                              {note.title}
+                            </span>
+                          </div>
+                          <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] pl-[4.5rem]" style={{ opacity: 0.75 }}>
+                            {note.detail}
+                          </p>
                         </div>
-                        <p className="text-[14px] font-medium tracking-tight text-[rgb(var(--fg))] leading-snug">
-                          {note.title}
-                        </p>
-                        <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.7 }}>
-                          {note.detail}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -241,7 +243,7 @@ export default function AetherChangelog() {
         </div>
       </section>
 
-      <div className="grid-rule" aria-hidden="true" />
+      <div className="grid-rule mt-2" aria-hidden="true" />
 
       {/* CTA */}
       <section className="flex flex-col items-center text-center px-3 py-16 sm:py-24 gap-5 rise">

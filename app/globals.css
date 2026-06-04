@@ -546,6 +546,31 @@ h1:hover .redact > span.redact-inner,
   to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
 }
 
+@keyframes word-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes chat-in-left {
+  from { opacity: 0; transform: translateX(-6px) translateY(3px); }
+  to   { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+@keyframes chat-in-right {
+  from { opacity: 0; transform: translateX(6px) translateY(3px); }
+  to   { opacity: 1; transform: translateX(0) translateY(0); }
+}
+
+@keyframes chat-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%            { transform: translateY(-4px); opacity: 0.9; }
+}
+
 @keyframes char-in-from-top {
   from { opacity: 0; transform: translateY(-10px) scale(0.97); filter: blur(4px); }
   to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
