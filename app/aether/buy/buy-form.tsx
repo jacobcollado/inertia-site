@@ -264,9 +264,9 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
             <span className="text-[13px] tracking-tight text-red-500 text-center">{error || "Something went wrong."}</span>
           )}
 
-          <div className="flex items-center justify-center gap-1.5" style={{ opacity: 0.4 }}>
+          <div className="flex items-center justify-center gap-2" style={{ opacity: 0.5 }}>
             <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Powered and secured by</span>
-            <span className="text-[15px] font-semibold tracking-tight" style={{ color: "#635BFF", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", letterSpacing: "-0.5px" }}>stripe</span>
+            <img src="/stripe-wordmark.svg" alt="Stripe" className="h-5 w-auto" draggable={false} />
           </div>
         </div>
       )}
