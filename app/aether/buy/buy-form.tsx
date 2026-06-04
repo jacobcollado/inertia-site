@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ShieldCheck, MailCheck, PackageCheck } from "lucide-react";
-import { FaCcVisa, FaCcMastercard, FaCcApplePay, FaGooglePay, FaStripe } from "react-icons/fa";
-import { SiKlarna } from "react-icons/si";
+import { SiStripe } from "react-icons/si";
 
 type Status = "idle" | "submitting" | "sent" | "error";
 
@@ -266,17 +265,17 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
           )}
 
           {/* Payment methods */}
-          <div className="flex flex-col items-center gap-2.5">
-            <div className="flex items-center gap-3 flex-wrap justify-center">
-              <FaCcVisa size={32} style={{ color: "#1A1F71" }} aria-label="Visa" />
-              <FaCcMastercard size={32} style={{ color: "#EB001B" }} aria-label="Mastercard" />
-              <FaCcApplePay size={32} style={{ color: "rgb(var(--fg))", opacity: 0.85 }} aria-label="Apple Pay" />
-              <FaGooglePay size={32} style={{ color: "#4285F4" }} aria-label="Google Pay" />
-              <SiKlarna size={24} style={{ color: "#FF9999" }} aria-label="Klarna" />
-              <span className="text-[13px] font-extrabold tracking-tight" style={{ color: "#60FA9B", fontFamily: "sans-serif" }} aria-label="Affirm">Affirm</span>
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              {["Visa", "Mastercard", "Apple Pay", "Google Pay", "Klarna", "Affirm"].map((name, i) => (
+                <React.Fragment key={name}>
+                  <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>{name}</span>
+                  {i < 5 && <span className="text-[rgb(var(--line))]" style={{ opacity: 0.4 }}>·</span>}
+                </React.Fragment>
+              ))}
             </div>
-            <div className="flex items-center gap-1.5 text-[rgb(var(--muted))]" style={{ opacity: 0.35 }}>
-              <FaStripe size={22} aria-hidden="true" />
+            <div className="flex items-center gap-1 text-[rgb(var(--muted))]" style={{ opacity: 0.3 }}>
+              <SiStripe size={14} aria-hidden="true" />
               <span className="text-[11px] tracking-tight">Secured by Stripe</span>
             </div>
           </div>
