@@ -265,8 +265,8 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
           )}
 
           <div className="flex items-center gap-1.5 text-[rgb(var(--muted))]" style={{ opacity: 0.35 }}>
-            <SiStripe size={16} aria-hidden="true" />
-            <span className="text-[11px] tracking-tight">Secured by Stripe</span>
+            <span className="text-[11px] tracking-tight">Powered and secured by</span>
+            <SiStripe size={28} aria-label="Stripe" />
           </div>
         </div>
       )}
