@@ -266,21 +266,26 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
           )}
 
           {/* Payment methods */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-3 flex-wrap justify-center">
-              <FaCcVisa size={36} className="text-[rgb(var(--muted))]" style={{ opacity: 0.6 }} aria-label="Visa" />
-              <FaCcMastercard size={36} className="text-[rgb(var(--muted))]" style={{ opacity: 0.6 }} aria-label="Mastercard" />
-              <FaCcApplePay size={36} className="text-[rgb(var(--muted))]" style={{ opacity: 0.6 }} aria-label="Apple Pay" />
-              <FaGooglePay size={36} className="text-[rgb(var(--muted))]" style={{ opacity: 0.6 }} aria-label="Google Pay" />
-              <SiKlarna size={32} style={{ color:"#FFB3C7", opacity:0.85 }} aria-label="Klarna" />
-              {/* Affirm — no icon exists in any icon library, use wordmark */}
-              <svg viewBox="0 0 60 24" className="h-5 w-auto opacity-60" aria-label="Affirm" role="img" fill="currentColor" style={{ color:"rgb(var(--muted))" }}>
-                <text x="0" y="18" fontFamily="sans-serif" fontWeight="700" fontSize="16" letterSpacing="-0.5">Affirm</text>
-              </svg>
+          <div className="flex flex-col items-center gap-2.5">
+            {/* Icons — all same height, neutral muted color */}
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              {[
+                { label: "Visa", el: <FaCcVisa /> },
+                { label: "Mastercard", el: <FaCcMastercard /> },
+                { label: "Apple Pay", el: <FaCcApplePay /> },
+                { label: "Google Pay", el: <FaGooglePay /> },
+                { label: "Klarna", el: <SiKlarna /> },
+              ].map(({ label, el }) => (
+                <span key={label} className="text-[rgb(var(--muted))] opacity-50 flex items-center" style={{ fontSize: 28 }} aria-label={label}>
+                  {el}
+                </span>
+              ))}
+              <span className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] opacity-50 border border-[rgb(var(--line))] rounded px-1.5 py-0.5">Affirm</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <FaStripe size={16} className="text-[rgb(var(--muted))]" style={{ opacity: 0.4 }} aria-hidden="true" />
-              <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Secured by Stripe</span>
+            {/* Stripe badge */}
+            <div className="flex items-center gap-1.5 text-[rgb(var(--muted))] opacity-35">
+              <FaStripe size={22} aria-hidden="true" />
+              <span className="text-[11px] tracking-tight">Secured by Stripe</span>
             </div>
           </div>
         </div>
