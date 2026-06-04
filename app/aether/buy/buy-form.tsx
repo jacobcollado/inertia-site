@@ -265,34 +265,15 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
             <span className="text-[13px] tracking-tight text-red-500 text-center">{error || "Something went wrong."}</span>
           )}
 
-          {/* Payment methods — all in uniform pill containers */}
+          {/* Payment methods */}
           <div className="flex flex-col items-center gap-2.5">
-            <div className="flex items-center gap-1.5 flex-wrap justify-center">
-              {[
-                { label: "Visa", content: <FaCcVisa size={20} /> },
-                { label: "Mastercard", content: <FaCcMastercard size={20} /> },
-                { label: "Apple Pay", content: <FaCcApplePay size={20} /> },
-                { label: "Google Pay", content: <FaGooglePay size={20} /> },
-                { label: "Klarna", content: <span className="text-[11px] font-bold tracking-tight">Klarna</span> },
-                { label: "Affirm", content: <span className="text-[11px] font-bold tracking-tight">Affirm</span> },
-              ].map(({ label, content }) => (
-                <div
-                  key={label}
-                  className="flex items-center justify-center rounded"
-                  style={{
-                    height: 24,
-                    minWidth: 36,
-                    padding: "0 6px",
-                    background: "rgb(var(--fg) / 0.06)",
-                    border: "1px solid rgb(var(--line))",
-                    color: "rgb(var(--muted))",
-                    opacity: 0.6,
-                  }}
-                  aria-label={label}
-                >
-                  {content}
-                </div>
-              ))}
+            <div className="flex items-center gap-3 flex-wrap justify-center">
+              <FaCcVisa size={32} style={{ color: "#1A1F71" }} aria-label="Visa" />
+              <FaCcMastercard size={32} style={{ color: "#EB001B" }} aria-label="Mastercard" />
+              <FaCcApplePay size={32} style={{ color: "rgb(var(--fg))", opacity: 0.85 }} aria-label="Apple Pay" />
+              <FaGooglePay size={32} style={{ color: "#4285F4" }} aria-label="Google Pay" />
+              <SiKlarna size={24} style={{ color: "#FF9999" }} aria-label="Klarna" />
+              <span className="text-[13px] font-extrabold tracking-tight" style={{ color: "#60FA9B", fontFamily: "sans-serif" }} aria-label="Affirm">Affirm</span>
             </div>
             <div className="flex items-center gap-1.5 text-[rgb(var(--muted))]" style={{ opacity: 0.35 }}>
               <FaStripe size={22} aria-hidden="true" />
