@@ -264,35 +264,9 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
             <span className="text-[13px] tracking-tight text-red-500 text-center">{error || "Something went wrong."}</span>
           )}
 
-          {/* Payment methods */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex items-center gap-1.5 flex-wrap justify-center">
-              {[
-                { name: "Visa",       bg: "#1A1F71", color: "#fff" },
-                { name: "Mastercard", bg: "#252525", color: "#fff" },
-                { name: "Apple Pay",  bg: "rgb(var(--fg))", color: "rgb(var(--bg))" },
-                { name: "Google Pay", bg: "#fff",    color: "#3c4043", border: true },
-                { name: "Klarna",     bg: "#FFB3C7", color: "#17120F" },
-                { name: "Affirm",     bg: "#060809", color: "#fff" },
-              ].map(({ name, bg, color, border }) => (
-                <span
-                  key={name}
-                  className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium tracking-tight"
-                  style={{
-                    background: bg,
-                    color,
-                    border: border ? "1px solid #e0e0e0" : "none",
-                    opacity: 0.85,
-                  }}
-                >
-                  {name}
-                </span>
-              ))}
-            </div>
-            <div className="flex items-center gap-1.5 text-[rgb(var(--muted))]" style={{ opacity: 0.35 }}>
-              <SiStripe size={16} aria-hidden="true" />
-              <span className="text-[11px] tracking-tight">Secured by Stripe</span>
-            </div>
+          <div className="flex items-center gap-1.5 text-[rgb(var(--muted))]" style={{ opacity: 0.35 }}>
+            <SiStripe size={16} aria-hidden="true" />
+            <span className="text-[11px] tracking-tight">Secured by Stripe</span>
           </div>
         </div>
       )}
