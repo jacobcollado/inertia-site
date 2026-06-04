@@ -266,7 +266,7 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
 
           <div className="flex items-center justify-center gap-2" style={{ opacity: 0.5 }}>
             <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Powered and secured by</span>
-            <img src="/stripe-wordmark.svg" alt="Stripe" className="h-5 w-auto" draggable={false} />
+            <img src="/stripe-wordmark.svg" alt="Stripe" className="h-5 w-auto" draggable={false} style={{ filter: "grayscale(1) brightness(0) invert(0.45)" }} />
           </div>
         </div>
       )}
