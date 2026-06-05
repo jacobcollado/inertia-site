@@ -388,7 +388,7 @@ function MobileAccordion({ item, onNavigate, drawerOpen, showDesc }: { item: Nav
   }, [open]);
 
   return (
-    <div className="mobile-nav__section">
+    <div className="mobile-nav__section" data-open={open}>
       <button
         className="mobile-nav__section-trigger"
         onClick={() => setOpen((v) => !v)}

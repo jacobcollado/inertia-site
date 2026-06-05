@@ -1116,17 +1116,12 @@ h1:hover .redact > span.redact-inner,
   position: relative;
 }
 
-.mobile-nav__section::after {
+.mobile-nav__section[data-open="true"]::after {
   content: "";
   display: block;
   height: 1px;
   background: rgb(var(--line));
   margin: 0 24px;
-}
-
-.mobile-nav__section:last-child::after,
-.mobile-nav__section:nth-last-child(2)::after {
-  display: none;
 }
 
 .mobile-nav__section-trigger {
