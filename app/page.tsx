@@ -1409,13 +1409,6 @@ function PlatformSignal() {
 
 const NEWS_ITEMS: { title: string; tag: string; date: string; href: string; image?: string }[] = [
   {
-    title: "Why your Shopify theme is costing you conversions",
-    tag: "Storefronts",
-    date: "May 2025",
-    href: "/blog",
-    image: "/blog/shopify-theme-conversions.png",
-  },
-  {
     title: "Aether: a theme built for brands that take design seriously",
     tag: "Product",
     date: "Apr 2025",
@@ -1423,11 +1416,25 @@ const NEWS_ITEMS: { title: string; tag: string; date: string; href: string; imag
     image: "/blog/aether-theme.png",
   },
   {
+    title: "Why your Shopify theme is costing you conversions",
+    tag: "Storefronts",
+    date: "May 2025",
+    href: "/blog/shopify-conversion-rate-optimization",
+    image: "/blog/shopify-theme-conversions.png",
+  },
+  {
     title: "The case for owning your stack end to end",
     tag: "Ops",
     date: "Mar 2025",
     href: "/blog",
     image: "/blog/owning-your-stack.png",
+  },
+  {
+    title: "A quiet forecast on AI capability",
+    tag: "AI",
+    date: "Apr 2026",
+    href: "/blog/ai-capability-forecast",
+    image: "/blog/ai-capability-forecast.png",
   },
 ];
 
@@ -1473,7 +1480,7 @@ function NewsCarousel() {
       </div>
 
       {/* Mobile: stacked */}
-      <div className="flex flex-col gap-6 px-6 sm:hidden">
+      <div className="flex flex-col gap-6 px-3 sm:hidden">
         {NEWS_ITEMS.map((item, i) => (
           <Link key={i} href={item.href} draggable={false} className="group flex flex-col gap-3">
             <div className="w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] group-hover:border-[rgb(var(--fg)/0.2)] transition-colors" style={{ aspectRatio: "1200/630", background: "rgb(var(--surface))" }}>
