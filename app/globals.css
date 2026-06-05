@@ -25,6 +25,18 @@
   color-scheme: light;
 }
 
+/* Bento grid: force dark background + white text in light mode only */
+:root:not(.dark) .bento-light-invert {
+  --fg: 255 255 255;
+  --muted: 255 255 255;
+  --bg: 14 14 14;
+  --surface: 30 30 34;
+  --surface-elevated: 50 50 55;
+  --line: 60 60 65;
+  --chat-bubble-fg: 255 255 255;
+  --chat-us-color: 14 14 14;
+}
+
 .dark {
   --bg: 14 14 14;
   --surface: 22 22 22;
