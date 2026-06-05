@@ -1424,7 +1424,7 @@ const NEWS_ITEMS: { title: string; tag: string; date: string; href: string; imag
   },
   {
     title: "The case for owning your stack end to end",
-    tag: "Studio",
+    tag: "Ops",
     date: "Mar 2025",
     href: "/blog",
     image: "/blog/owning-your-stack.png",
@@ -2251,14 +2251,23 @@ function StackDiagram() {
           {/* Each page is exactly viewport width, snaps cleanly */}
           {/* Page 1: clients (tall left) + 100% + 24h */}
           <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
-            <MetricCard className="flex flex-col relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
-              <div className="flex-1 relative flex items-end gap-1 p-5 pb-3" aria-hidden="true">
-                {[28,38,45,55,62,72,85,100].map((h,i)=>(
-                  <div key={i} className="flex-1" style={{ height:`${h}%`, background:i>=6?"var(--accent-gradient)":`rgb(var(--fg) / ${0.12+i*0.05})` }} />
-                ))}
-                <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-              </div>
-              <div className="relative z-10 mx-3 mb-3 rounded-xl p-3" style={{ background:"rgb(var(--fg) / 0.08)", backdropFilter:"blur(12px)", border:"1px solid rgb(var(--fg) / 0.08)" }}>
+            <MetricCard className="relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
+              <svg viewBox="0 0 300 200" fill="none" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" aria-hidden="true">
+                <defs>
+                  <linearGradient id="wave-fill-m" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(50 100 240)" stopOpacity="0.18" />
+                    <stop offset="100%" stopColor="rgb(50 100 240)" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="wave-stroke-m" x1="0" y1="0" x2="1" y2="0">
+                    <stop stopColor="rgb(50 100 240)" />
+                    <stop offset="1" stopColor="rgb(100 180 200)" />
+                  </linearGradient>
+                </defs>
+                <path d="M0 180 C40 175 60 160 90 145 C120 130 140 120 170 100 C200 80 230 55 300 30 L300 200 L0 200 Z" fill="url(#wave-fill-m)" />
+                <path d="M0 180 C40 175 60 160 90 145 C120 130 140 120 170 100 C200 80 230 55 300 30" stroke="url(#wave-stroke-m)" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
+              <div className="absolute inset-x-3 bottom-3 z-10 rounded-xl p-3" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Clients worked with</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>Over 4+ years</span>
@@ -2331,7 +2340,7 @@ function StackDiagram() {
             <MetricCard className="flex flex-col justify-end relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
               <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover dark:invert" style={{ opacity:0.18 }} />
               <div className="absolute inset-x-0 top-0 h-2/3 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-              <div className="relative z-10 mx-3 mb-3 rounded-xl p-3" style={{ background:"rgb(var(--fg) / 0.08)", backdropFilter:"blur(12px)", border:"1px solid rgb(var(--fg) / 0.08)" }}>
+              <div className="relative z-10 mx-3 mb-3 rounded-xl p-3" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}>US</span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Based clients</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>& globally</span>
@@ -2364,14 +2373,24 @@ function StackDiagram() {
         <div className="hidden sm:grid gap-3 bento-light-invert" style={{ gridTemplateColumns:"repeat(4, 1fr)" }}>
 
           {/* clients — col 1-2, row 1-2 */}
-          <div className="flex flex-col relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"1 / 3", gridRow:"1 / 3", minHeight:260 }}>
-            <div className="flex-1 relative flex items-end gap-1.5 p-7 pb-4" aria-hidden="true">
-              {[18,28,38,30,45,55,48,62,72,65,85,100].map((h,i) => (
-                <div key={i} className="flex-1" style={{ height:`${h}%`, background:i>=9?"var(--accent-gradient)":`rgb(var(--fg) / ${0.1+i*0.04})` }} />
-              ))}
-              <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-            </div>
-            <div className="relative z-10 mx-3 mb-3 rounded-xl p-4" style={{ background:"rgb(var(--fg) / 0.08)", backdropFilter:"blur(12px)", border:"1px solid rgb(var(--fg) / 0.08)" }}>
+          <div className="relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"1 / 3", gridRow:"1 / 3", minHeight:260 }}>
+            <svg viewBox="0 0 500 300" fill="none" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" aria-hidden="true">
+              <defs>
+                <linearGradient id="wave-fill-d" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgb(50 100 240)" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="rgb(50 100 240)" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="wave-stroke-d" x1="0" y1="0" x2="1" y2="0">
+                  <stop stopColor="rgb(50 100 240)" />
+                  <stop offset="1" stopColor="rgb(100 180 200)" />
+                </linearGradient>
+              </defs>
+              <path d="M0 270 C60 265 100 245 160 220 C220 195 270 170 330 140 C390 110 440 75 500 40 L500 300 L0 300 Z" fill="url(#wave-fill-d)" />
+              <path d="M0 270 C60 265 100 245 160 220 C220 195 270 170 330 140 C390 110 440 75 500 40" stroke="url(#wave-stroke-d)" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+            <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
+            {/* Glass floats at bottom over the chart */}
+            <div className="absolute inset-x-3 bottom-3 z-10 rounded-xl p-4" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
               <span className="text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
               <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Clients worked with</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>Over 4+ years across every category</span>
@@ -2489,7 +2508,7 @@ function StackDiagram() {
           <div className="flex flex-col justify-end relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"3 / 5", gridRow:"2 / 4" }}>
             <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover dark:invert" style={{ opacity:0.15 }} />
             <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-            <div className="relative z-10 m-3 rounded-xl p-4" style={{ background:"rgb(var(--fg) / 0.08)", backdropFilter:"blur(12px)", border:"1px solid rgb(var(--fg) / 0.08)" }}>
+            <div className="relative z-10 m-3 rounded-xl p-4" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
               <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}>US</span>
               <span className="text-[14px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Clients across the US</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>& globally</span>
