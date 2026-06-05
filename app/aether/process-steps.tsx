@@ -12,20 +12,20 @@ const STEPS = [
   {
     step: "Install",
     desc: "Live in under an hour",
-    tooltip: "Download the .zip, upload it in Shopify Admin, and publish. All 35 sections are ready to drag onto any page. No developer needed.",
+    tooltip: "Download the .zip, upload it in Shopify Admin, and publish. All 41 sections are ready to drag onto any page. No developer needed.",
   },
   {
     step: "Sell",
     desc: "Built to convert from day one",
-    tooltip: "Every layout decision — trust badges, sticky cart, product gallery — was tested across 11 live stores before shipping. It works out of the box.",
+    tooltip: "Every layout decision — trust badges, sticky cart, product gallery — was tested across live stores before shipping. It works out of the box.",
   },
 ];
 
-const TOOLTIP_W = 224; // w-56 = 14rem = 224px
+const TOOLTIP_W = 240;
 
-function StepTooltip({ s, i }: { s: typeof STEPS[number]; i: number }) {
+function StepTooltip({ s }: { s: typeof STEPS[number] }) {
   const [hovered, setHovered] = useState(false);
-  const [offset, setOffset] = useState(0); // px shift from center
+  const [offset, setOffset] = useState(0);
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const handleEnter = () => {
@@ -34,75 +34,74 @@ function StepTooltip({ s, i }: { s: typeof STEPS[number]; i: number }) {
       const tooltipLeft = rect.left + rect.width / 2 - TOOLTIP_W / 2;
       const tooltipRight = tooltipLeft + TOOLTIP_W;
       const vw = window.innerWidth;
-      const pad = 12;
-      if (tooltipLeft < pad) {
-        setOffset(pad - tooltipLeft);
-      } else if (tooltipRight > vw - pad) {
-        setOffset((vw - pad) - tooltipRight);
-      } else {
-        setOffset(0);
-      }
+      const pad = 16;
+      if (tooltipLeft < pad) setOffset(pad - tooltipLeft);
+      else if (tooltipRight > vw - pad) setOffset((vw - pad) - tooltipRight);
+      else setOffset(0);
     }
     setHovered(true);
   };
 
-  // caret stays centered on the trigger regardless of tooltip shift
   const caretOffset = -offset;
 
   return (
     <div
       ref={triggerRef}
-      className="relative"
+      className="relative flex flex-col items-center"
       onMouseEnter={handleEnter}
       onMouseLeave={() => setHovered(false)}
     >
-      <span
-        className="text-[clamp(2.4rem,5vw,3.5rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] cursor-default select-none transition-opacity duration-200"
-        style={{ opacity: hovered ? 0.6 : 1 }}
-      >
-        {s.step}
-      </span>
+      {/* Step word + info badge */}
+      <div className="flex items-start gap-1.5">
+        <span
+          className="text-[clamp(2.4rem,5vw,3.5rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] cursor-default select-none transition-opacity duration-300"
+          style={{ opacity: hovered ? 0.7 : 1 }}
+        >
+          {s.step}
+        </span>
+        <span
+          className="mt-1 flex items-center justify-center rounded-full text-[10px] font-medium tracking-tight transition-all duration-300"
+          style={{
+            width: 16,
+            height: 16,
+            background: hovered ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.1)",
+            color: hovered ? "rgb(var(--bg))" : "rgb(var(--muted))",
+          }}
+          aria-hidden="true"
+        >
+          ?
+        </span>
+      </div>
 
-      {/* indicator */}
-      <span className="flex items-center justify-center gap-1 mt-1.5">
-        <span
-          className="block h-px rounded-full transition-all duration-300"
-          style={{ width: hovered ? 20 : 6, background: "rgb(var(--fg))", opacity: hovered ? 0.5 : 0.2 }}
-        />
-        <span
-          className="block w-1 h-1 rounded-full transition-all duration-300"
-          style={{ background: "rgb(var(--fg))", opacity: hovered ? 0.9 : 0.25, transform: hovered ? "scale(1.2)" : "scale(1)" }}
-        />
-        <span
-          className="block h-px rounded-full transition-all duration-300"
-          style={{ width: hovered ? 20 : 6, background: "rgb(var(--fg))", opacity: hovered ? 0.5 : 0.2 }}
-        />
-      </span>
-
-      {/* tooltip */}
+      {/* Tooltip — below the step word */}
       <div
-        className="pointer-events-none absolute bottom-full mb-3 z-20 text-left rounded-xl border border-[rgb(var(--line))] px-3.5 py-3"
+        className="pointer-events-none absolute top-full mt-3 z-20 text-left rounded-2xl"
         style={{
           width: TOOLTIP_W,
           left: `calc(50% - ${TOOLTIP_W / 2}px + ${offset}px)`,
-          background: "rgb(var(--bg))",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06)",
+          background: "rgb(var(--surface-elevated) / 0.9)",
+          backdropFilter: "blur(16px)",
+          border: "1px solid rgb(var(--line) / 0.6)",
+          boxShadow: "0 16px 48px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08)",
+          padding: "14px 16px",
           opacity: hovered ? 1 : 0,
-          transform: hovered ? "translateY(0)" : "translateY(4px)",
-          transition: "opacity 160ms cubic-bezier(0.22,1,0.36,1), transform 160ms cubic-bezier(0.22,1,0.36,1)",
+          transform: hovered ? "translateY(0) scale(1)" : "translateY(-6px) scale(0.98)",
+          transition: "opacity 200ms cubic-bezier(0.22,1,0.36,1), transform 200ms cubic-bezier(0.22,1,0.36,1)",
+          transformOrigin: "top center",
         }}
       >
-        <p className="text-[12.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-          {s.tooltip}
-        </p>
-        {/* caret — stays over trigger */}
+        {/* Caret pointing up */}
         <div
-          className="absolute -bottom-[5px] w-2.5 h-2.5 border-r border-b border-[rgb(var(--line))] bg-[rgb(var(--bg))]"
+          className="absolute -top-[5px] w-2.5 h-2.5 border-l border-t border-[rgb(var(--line) / 0.6)]"
           style={{
             left: `calc(50% + ${caretOffset}px)`,
             transform: "translateX(-50%) rotate(45deg)",
+            background: "rgb(var(--surface-elevated) / 0.9)",
           }}
         />
+        <p className="text-[12.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+          {s.tooltip}
+        </p>
       </div>
     </div>
   );
@@ -114,7 +113,7 @@ export function ProcessSteps() {
       {STEPS.map((s, i) => (
         <div key={s.step} className="contents">
           <div className="flex flex-col items-center gap-3 text-center">
-            <StepTooltip s={s} i={i} />
+            <StepTooltip s={s} />
             <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
               {s.desc}
             </span>

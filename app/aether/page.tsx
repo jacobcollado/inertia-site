@@ -4,6 +4,7 @@ import { DemoButton } from "./demo-button";
 import { HeroRule } from "./hero-rule";
 import { FeaturesScroll } from "./features-scroll";
 import { ProcessSteps } from "./process-steps";
+import { MobilePricing } from "./mobile-pricing";
 
 export const metadata: Metadata = {
   title: "Aether - Premium Shopify Theme for Independent Brands",
@@ -32,7 +33,7 @@ const KEY_FEATURES = [
     visual: "upsell",
     image: "/aether/upsell.png",
     flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g key="i"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></g></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></g></svg>,
   },
   {
     title: "Scarcity",
@@ -41,7 +42,7 @@ const KEY_FEATURES = [
     visual: "scarcity",
     image: "/aether/scarcity.png",
     flip: true,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g key="i"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></g></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></g></svg>,
   },
   {
     title: "Guided format",
@@ -50,23 +51,23 @@ const KEY_FEATURES = [
     visual: "guided",
     image: "/aether/guided.png",
     flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g key="i"><path d="M3 3h18v4H3z"/><path d="M3 10h11v4H3z"/><path d="M3 17h7v4H3z"/></g></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g><path d="M3 3h18v4H3z"/><path d="M3 10h11v4H3z"/><path d="M3 17h7v4H3z"/></g></svg>,
   },
 ];
 
 const SECONDARY_FEATURES = [
-  { name: "41 sections", desc: "Everything you need, nothing you don't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="7" width="9" height="3" rx="1"/><rect x="1" y="12" width="6" height="3" rx="1"/></g></svg> },
+  { name: "41 sections", desc: "Everything you need, nothing you don't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="7" width="9" height="3" rx="1"/><rect x="1" y="12" width="6" height="3" rx="1"/></g></svg> },
   { name: "Dark mode", desc: "Looks as good at midnight as midday", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/></svg> },
-  { name: "Mega menu", desc: "Navigation that handles large catalogues", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><rect x="1" y="1" width="14" height="2.5" rx="0.5"/><rect x="1" y="5.5" width="6.5" height="9" rx="0.5"/><rect x="8.5" y="5.5" width="6.5" height="9" rx="0.5"/></g></svg> },
-  { name: "Sticky cart", desc: "Add to cart stays in reach at all times", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><path d="M1 1h2l1.5 7.5h7L13 4H4"/><circle cx="6.5" cy="13" r="1"/><circle cx="11" cy="13" r="1"/></g></svg> },
-  { name: "Mobile optimised", desc: "Built for thumbs first", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><rect x="4" y="1" width="8" height="14" rx="1.5"/><line x1="8" y1="12" x2="8" y2="12.5" strokeWidth="1.8"/></g></svg> },
-  { name: "Quick buy", desc: "Purchase without leaving the page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><circle cx="8" cy="8" r="7"/><polyline points="5 8 7 10 11 6"/></g></svg> },
-  { name: "Video hero", desc: "Autoplay video in the first section", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><rect x="1" y="2" width="14" height="12" rx="1.5"/><polygon points="6 5.5 11 8 6 10.5" fill="currentColor" opacity="0.5"/></g></svg> },
-  { name: "Lookbook", desc: "Editorial layouts for campaign content", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><rect x="1" y="1" width="6.5" height="14" rx="1"/><rect x="8.5" y="1" width="6.5" height="8" rx="1"/><rect x="8.5" y="10" width="6.5" height="5" rx="1"/></g></svg> },
-  { name: "SMS + email capture", desc: "Corner widget and popup, both built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><rect x="1" y="3" width="14" height="10" rx="1.5"/><polyline points="1 3 8 9 15 3"/></g></svg> },
-  { name: "Music player", desc: "Ambient audio to set the brand mood", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><circle cx="5" cy="13" r="2"/><circle cx="12" cy="11" r="2"/><path d="M7 13V4l7-2v9"/></g></svg> },
-  { name: "Custom fonts", desc: "Upload any font directly in the editor", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><path d="M2 13L6 3l4 10M3.5 9.5h5"/><path d="M11 5v8M11 5c0-1.1.9-2 2-2s2 .9 2 2"/></g></svg> },
-  { name: "FAQs", desc: "Accordion answers on any page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g key="i"><circle cx="8" cy="8" r="7"/><path d="M6 6a2 2 0 1 1 2 2v1"/><circle cx="8" cy="12" r="0.5" fill="currentColor"/></g></svg> },
+  { name: "Mega menu", desc: "Navigation that handles large catalogues", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="1" width="14" height="2.5" rx="0.5"/><rect x="1" y="5.5" width="6.5" height="9" rx="0.5"/><rect x="8.5" y="5.5" width="6.5" height="9" rx="0.5"/></g></svg> },
+  { name: "Sticky cart", desc: "Add to cart stays in reach at all times", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><path d="M1 1h2l1.5 7.5h7L13 4H4"/><circle cx="6.5" cy="13" r="1"/><circle cx="11" cy="13" r="1"/></g></svg> },
+  { name: "Mobile optimised", desc: "Built for thumbs first", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="4" y="1" width="8" height="14" rx="1.5"/><line x1="8" y1="12" x2="8" y2="12.5" strokeWidth="1.8"/></g></svg> },
+  { name: "Quick buy", desc: "Purchase without leaving the page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><circle cx="8" cy="8" r="7"/><polyline points="5 8 7 10 11 6"/></g></svg> },
+  { name: "Video hero", desc: "Autoplay video in the first section", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="2" width="14" height="12" rx="1.5"/><polygon points="6 5.5 11 8 6 10.5" fill="currentColor" opacity="0.5"/></g></svg> },
+  { name: "Lookbook", desc: "Editorial layouts for campaign content", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="1" width="6.5" height="14" rx="1"/><rect x="8.5" y="1" width="6.5" height="8" rx="1"/><rect x="8.5" y="10" width="6.5" height="5" rx="1"/></g></svg> },
+  { name: "SMS + email capture", desc: "Corner widget and popup, both built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="3" width="14" height="10" rx="1.5"/><polyline points="1 3 8 9 15 3"/></g></svg> },
+  { name: "Music player", desc: "Ambient audio to set the brand mood", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><circle cx="5" cy="13" r="2"/><circle cx="12" cy="11" r="2"/><path d="M7 13V4l7-2v9"/></g></svg> },
+  { name: "Custom fonts", desc: "Upload any font directly in the editor", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><path d="M2 13L6 3l4 10M3.5 9.5h5"/><path d="M11 5v8M11 5c0-1.1.9-2 2-2s2 .9 2 2"/></g></svg> },
+  { name: "FAQs", desc: "Accordion answers on any page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><circle cx="8" cy="8" r="7"/><path d="M6 6a2 2 0 1 1 2 2v1"/><circle cx="8" cy="12" r="0.5" fill="currentColor"/></g></svg> },
 ];
 
 const TIERS = [
@@ -157,56 +158,11 @@ export default function AetherPage() {
       <div className="grid-rule" aria-hidden="true" />
 
       {/* Pricing */}
-      <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16">
-        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3 text-center">Simple pricing</p>
-        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center" style={{ opacity: 0.6 }}>One purchase. Everything included. Pick the license that fits.</p>
+      <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16 max-w-2xl mx-auto w-full">
+        <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4 text-center">One price. Everything in.</p>
+        <p className="text-[clamp(1rem,1.6vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center max-w-sm mx-auto" style={{ opacity: 0.6 }}>No feature gates. No upsells. Pick the license that fits your store and get every section we've ever built.</p>
 
-        {/* Table */}
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="w-[46%] pb-3 text-left border-b border-[rgb(var(--line))]" />
-              {TIERS.map((t) => (
-                <th key={t.name} className="pb-3 text-center border-b border-[rgb(var(--line))]">
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-[15px] tracking-tight font-medium" style={{ color: t.color }}>{t.name}</span>
-                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>{t.price}</span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {PRICING_ROWS.map((f) => (
-              <tr key={f.label} className="hover:bg-[rgb(var(--fg)/0.02)] transition-colors">
-                <td className="py-2.5 pr-4 text-[15px] tracking-tight text-[rgb(var(--muted))] border-b border-[rgb(var(--line))]" style={{ opacity: 0.7 }}>
-                  {f.label}
-                </td>
-                {([f.standard, f.lifetime, f.enterprise] as (boolean | string)[]).map((val, ci) => (
-                  <td key={ci} className="py-2.5 text-center border-b border-[rgb(var(--line))]">
-                    {val === true ? (
-                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}><polyline points="2 8 6 12 14 4" /></svg>
-                    ) : val === false ? (
-                      <span className="inline-block w-3 h-px align-middle bg-[rgb(var(--line))]" />
-                    ) : (
-                      <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.7 }}>{val}</span>
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="flex justify-center mt-10">
-          <Link
-            href="/aether/buy"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
-          >
-            Get Aether
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </Link>
-        </div>
+        <MobilePricing tiers={TIERS} rows={PRICING_ROWS} />
       </div>
 
 

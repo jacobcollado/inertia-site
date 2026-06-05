@@ -161,6 +161,8 @@ function Visual({ feature, index, alt }: { feature: Feature; index: number; alt:
 
 export function FeaturesScroll({ features }: { features: Feature[] }) {
   const [active, setActive] = useState(0);
+  const [displayed, setDisplayed] = useState(0);
+  const [fading, setFading] = useState(false);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -182,17 +184,32 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (active === displayed) return;
+    setFading(true);
+    const t = setTimeout(() => {
+      setDisplayed(active);
+      setFading(false);
+    }, 200);
+    return () => clearTimeout(t);
+  }, [active, displayed]);
+
   return (
     <div className="flex flex-col sm:flex-row px-3 py-16 sm:py-0 sm:pb-8 sm:-mt-[8vh]">
       {/* Left: scrolling text */}
       <div className="flex flex-col flex-1 pr-0 sm:pr-16">
         {features.map((f, i) => {
+          const isActive = active === i;
           return (
             <div
               key={f.title}
               ref={(el) => { itemRefs.current[i] = el; }}
               className="flex flex-col gap-5 justify-center min-h-[520px] sm:h-[85vh] sm:min-h-0 py-12 sm:py-0"
-              style={{ opacity: active === i ? 1 : 0.35, transition: "opacity 300ms ease" }}
+              style={{
+                opacity: isActive ? 1 : 0.25,
+                transform: isActive ? "translateY(0)" : "translateY(6px)",
+                transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
+              }}
             >
               <div className="flex items-center gap-3 text-[rgb(var(--muted))]">
                 {f.icon}
@@ -222,13 +239,18 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
         })}
       </div>
 
-      {/* Right: sticky visual — desktop only. Pinned over the full viewport and
-          vertically centered, matching the active text block (also h-screen,
-          centered), so the two track together as you scroll. */}
+      {/* Right: sticky visual — desktop only */}
       <div className="hidden sm:block w-[50%] shrink-0">
         <div className="sticky top-0 flex items-center" style={{ height: "100vh" }}>
-          <div className="w-full">
-            <Visual feature={features[active]} index={active} alt={`${features[active]?.title ?? ""} example`} />
+          <div
+            className="w-full"
+            style={{
+              opacity: fading ? 0 : 1,
+              transform: fading ? "translateY(10px) scale(0.99)" : "translateY(0) scale(1)",
+              transition: "opacity 200ms ease, transform 200ms ease",
+            }}
+          >
+            <Visual feature={features[displayed]} index={displayed} alt={`${features[displayed]?.title ?? ""} example`} />
           </div>
         </div>
       </div>
