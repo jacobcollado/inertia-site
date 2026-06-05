@@ -97,7 +97,7 @@ export default function AetherPage() {
       {/* Hero */}
       <section className="flex flex-col items-center justify-center gap-5 px-6 text-center rise" style={{ minHeight: 420 }}>
         <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] flex items-center gap-2.5">
-          <span className="inline-flex items-center rounded-full px-2 py-1 text-[12px] tracking-tight leading-none text-white" style={{ background: "var(--accent-gradient)" }}>Aether</span>
+          <span className="inline-flex items-center rounded-full px-2 py-1 text-[12px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>Aether</span>
           <span className="w-px h-3.5 bg-[rgb(var(--line))]" aria-hidden="true" />
           A Shopify theme by Inertia
         </p>

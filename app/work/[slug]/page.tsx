@@ -95,7 +95,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
                 href={piece.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
+                className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
                 style={{ background: "var(--accent-gradient)" }}
               >
                 Visit site

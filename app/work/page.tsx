@@ -142,7 +142,7 @@ export default function WorkIndexPage() {
           <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
               style={{ background: "var(--accent-gradient)" }}
             >
               Start a project

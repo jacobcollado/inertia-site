@@ -160,7 +160,7 @@ export default async function LicensesPortalPage() {
             </p>
             <Link
               href="/aether/buy"
-              className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[13px] font-medium tracking-tight text-white self-center transition-opacity hover:opacity-85"
+              className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] self-center transition-opacity hover:opacity-85"
               style={{ background: "var(--accent-gradient)" }}
             >
               Get Aether

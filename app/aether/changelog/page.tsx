@@ -164,7 +164,7 @@ export default function AetherChangelog() {
                         {lm.label}
                       </span>
                       {ei === 0 && (
-                        <span className="text-[11px] font-medium tracking-tight px-2.5 py-1 rounded-full bg-[rgb(var(--accent))] text-white">
+                        <span className="text-[11px] font-medium tracking-tight px-2.5 py-1 rounded-full bg-[rgb(var(--accent))] text-[rgb(var(--bg))]">
                           Latest
                         </span>
                       )}

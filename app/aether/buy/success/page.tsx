@@ -34,7 +34,7 @@ export default async function BuySuccessPage({
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/portal/licenses"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-white transition-opacity hover:opacity-85"
+            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-85"
             style={{ background: "var(--accent-gradient)" }}
           >
             View my licenses

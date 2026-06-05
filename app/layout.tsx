@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "./theme-provider";
 import { RouteFade } from "./route-fade";
@@ -10,6 +11,12 @@ import { CookieBanner } from "./cookie-banner";
 import { ScrollReveal } from "./scroll-reveal";
 import { cn } from "@/lib/utils";
 import Script from "next/script";
+
+const satoshi = localFont({
+  src: "../public/fonts/Satoshi-Variable.woff2",
+  variable: "--font-satoshi",
+  display: "swap",
+});
 
 const BASE_URL = "https://byinertia.com";
 
@@ -57,14 +64,8 @@ const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans")} suppressHydrationWarning>
+    <html lang="en" className={cn(satoshi.variable, "font-sans")} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="" />
-        <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&f[]=erode@300,400,500&display=swap"
-        />
         <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script
           type="application/ld+json"

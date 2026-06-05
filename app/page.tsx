@@ -478,9 +478,9 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
         {hero && (
           <Link
             href="/aether"
-            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] px-3 py-1 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.2)] transition-colors"
+            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--fg)/0.15)] bg-[rgb(var(--fg)/0.07)] px-3 py-1 text-[12px] font-light tracking-wide text-[rgb(var(--fg))] hover:bg-[rgb(var(--fg)/0.12)] transition-colors"
           >
-            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] tracking-tight leading-none text-white" style={{ background: "var(--accent-gradient)" }}>New</span>
+            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)", fontWeight: 300 }}>New</span>
             Aether theme for Shopify
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
           </Link>
@@ -543,9 +543,8 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
             </div>
             <button
               type="submit"
-              className="group shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-white hover:opacity-90 transition-opacity disabled:opacity-30 self-stretch sm:self-auto flex items-center justify-center gap-1.5"
+              className="group shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity self-stretch sm:self-auto flex items-center justify-center gap-1.5"
               style={{ background: "var(--accent-gradient)" }}
-              disabled={!input.trim()}
             >
               Begin
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -723,8 +722,8 @@ function AetherFeature() {
       <div className="flex flex-col items-center text-center gap-3 py-10" style={fade(0)}>
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
           Meet{" "}
-          <span style={{ background: "var(--accent-gradient)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "#fff", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
-            <SiShopify style={{ display: "inline", width: "0.8em", height: "0.8em", color: "#fff", flexShrink: 0 }} />Aether
+          <span style={{ background: "rgb(var(--fg))", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "rgb(var(--bg))", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
+            <SiShopify style={{ display: "inline", width: "0.8em", height: "0.8em", color: "rgb(var(--bg))", flexShrink: 0 }} />Aether
           </span>
         </h2>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
@@ -751,7 +750,7 @@ function AetherFeature() {
                 <Link href="/aether" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] transition-transform duration-200 hover:-translate-y-px active:translate-y-px">
                   See Aether
                 </Link>
-                <Link href="/aether/buy" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight text-white transition-transform duration-200 hover:-translate-y-px active:translate-y-px" style={{ background: "var(--accent-gradient)" }}>
+                <Link href="/aether/buy" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight text-[rgb(var(--bg))] transition-transform duration-200 hover:-translate-y-px active:translate-y-px" style={{ background: "var(--accent-gradient)" }}>
                   Buy from $85
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-80"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
                 </Link>
@@ -893,7 +892,7 @@ function AetherFeature() {
 
       {/* CTA */}
       <div className="flex flex-col sm:flex-row sm:justify-end items-center gap-3 pt-6" style={fade(280)}>
-        <Link href="/aether" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-white hover:opacity-90 transition-opacity" style={{ background: "var(--accent-gradient)" }}>
+        <Link href="/aether" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity" style={{ background: "var(--accent-gradient)" }}>
           Explore Aether
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
         </Link>
@@ -1186,9 +1185,9 @@ function PlatformDiagram() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgb(var(--line) / 0.5)" }}>
         <div className="flex items-center gap-2">
-          <div className="rounded-lg shrink-0 flex items-center justify-center" style={{ width: 28, height: 28, background: "var(--accent-gradient)" }}>
+          <div className="rounded-lg shrink-0 flex items-center justify-center" style={{ width: 28, height: 28, background: "rgb(var(--fg))" }}>
             <svg viewBox="558 591 262 296" fill="none" className="w-4 h-4" aria-hidden="true">
-              <path d="M558.47 887V591H610.07V887H558.47ZM641.52 887V668.8H683.92L687.52 692H690.12C697.854 683.467 706.92 676.933 717.32 672.4C727.854 667.733 739.32 665.4 751.72 665.4C764.787 665.4 776.387 668 786.52 673.2C796.787 678.267 804.854 686.6 810.72 698.2C816.587 709.8 819.52 725.267 819.52 744.6V887H768.72V747.8C768.72 733.533 765.72 723.667 759.72 718.2C753.854 712.733 745.854 710 735.72 710C730.92 710 725.854 710.733 720.52 712.2C715.187 713.667 710.054 716 705.12 719.2C700.32 722.267 696.12 726.333 692.52 731.4V887H641.52Z" fill="white"/>
+              <path d="M558.47 887V591H610.07V887H558.47ZM641.52 887V668.8H683.92L687.52 692H690.12C697.854 683.467 706.92 676.933 717.32 672.4C727.854 667.733 739.32 665.4 751.72 665.4C764.787 665.4 776.387 668 786.52 673.2C796.787 678.267 804.854 686.6 810.72 698.2C816.587 709.8 819.52 725.267 819.52 744.6V887H768.72V747.8C768.72 733.533 765.72 723.667 759.72 718.2C753.854 712.733 745.854 710 735.72 710C730.92 710 725.854 710.733 720.52 712.2C715.187 713.667 710.054 716 705.12 719.2C700.32 722.267 696.12 726.333 692.52 731.4V887H641.52Z" fill="rgb(var(--bg))"/>
             </svg>
           </div>
           <div>
@@ -1222,7 +1221,7 @@ function PlatformDiagram() {
                 <div
                   className="rounded-xl px-3.5 py-2 max-w-[72%] text-[12px] tracking-tight leading-relaxed"
                   style={{
-                    background: msg.from === "us" ? "rgb(var(--fg) / 0.9)" : "transparent",
+                    background: msg.from === "us" ? "rgb(var(--fg) / 0.9)" : "rgb(var(--fg) / 0.08)",
                     color: msg.from === "us" ? "rgb(var(--chat-us-color, var(--bg)))" : "rgb(var(--chat-bubble-fg, var(--fg)))",
                     borderBottomLeftRadius: msg.from === "us" ? 4 : undefined,
                     borderBottomRightRadius: msg.from === "them" ? 4 : undefined,
@@ -1261,7 +1260,7 @@ function PlatformDiagram() {
               href="https://www.instagram.com/by.inertia/"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] tracking-tight text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-90"
               style={{ background: "var(--accent-gradient)" }}
             >
               Start a project
@@ -1287,8 +1286,8 @@ function PlatformDiagram() {
             </svg>
           </div>
           <ChatPlaceholder />
-          <div className="rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ width: 24, height: 24, background: "var(--accent-gradient)" }}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+          <div className="rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ width: 24, height: 24, background: "rgb(var(--fg))" }}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="rgb(var(--bg))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
               <line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/>
             </svg>
           </div>
@@ -1702,7 +1701,7 @@ function RotatingPanel() {
       {/* Label - sits just above phrase, tightly grouped */}
       <p
         key={`label-${animKey}`}
-        className="text-[clamp(0.78rem,1.6vw,0.88rem)] tracking-tight text-[rgb(var(--muted))]"
+        className="text-[clamp(0.78rem,1.6vw,0.88rem)] font-light tracking-tight text-[rgb(var(--muted))]"
         style={{
           opacity: exiting ? 0 : 1,
           transform: exiting ? "translateY(-4px)" : "translateY(0px)",
@@ -2529,7 +2528,7 @@ function StackDiagram() {
             href="https://www.instagram.com/by.inertia/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-white hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity"
             style={{ background: "var(--accent-gradient)" }}
           >
             Start a project ↗

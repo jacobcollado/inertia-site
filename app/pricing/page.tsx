@@ -94,7 +94,7 @@ export default function PricingPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{tier.name}</span>
                   {tier.badge && (
-                    <span className="text-[10px] tracking-tight font-medium px-2 py-1 rounded-full text-white" style={{ background: "var(--accent-gradient)" }}>{tier.badge}</span>
+                    <span className="text-[10px] tracking-tight font-medium px-2 py-1 rounded-full text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>{tier.badge}</span>
                   )}
                 </div>
                 <div className="flex items-baseline gap-2">
@@ -105,7 +105,7 @@ export default function PricingPage() {
               </div>
               <Link
                 href={tier.href}
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity shrink-0"
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity shrink-0"
                 style={{ background: "var(--accent-gradient)" }}
               >
                 {tier.cta}
@@ -139,7 +139,7 @@ export default function PricingPage() {
           </div>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity shrink-0"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity shrink-0"
             style={{ background: "var(--accent-gradient)" }}
           >
             Get a quote
@@ -188,7 +188,7 @@ export default function PricingPage() {
         <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
             style={{ background: "var(--accent-gradient)" }}
           >
             Start a conversation

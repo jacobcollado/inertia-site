@@ -59,7 +59,7 @@ export default function EnterprisePage() {
       {/* Hero */}
       <section className="px-3 pt-16 sm:pt-24 pb-14 flex flex-col items-center text-center rise">
         <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] flex items-center gap-2.5 mb-6">
-          <span className="inline-flex items-center rounded-full px-2 py-1 text-[12px] tracking-tight leading-none text-white" style={{ background: "var(--accent-gradient)" }}>Enterprise</span>
+          <span className="inline-flex items-center rounded-full px-2 py-1 text-[12px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>Enterprise</span>
           <span className="w-px h-3.5 bg-[rgb(var(--line))]" aria-hidden="true" />
           Aether for teams
         </p>
@@ -155,7 +155,7 @@ export default function EnterprisePage() {
               <div className="flex items-center justify-between">
                 <span className="text-[14px] tracking-tight font-medium text-[rgb(var(--fg))]">{plan.name}</span>
                 {plan.featured && (
-                  <span className="text-[10px] tracking-tight font-medium px-2 py-1 rounded-full text-white" style={{ background: "var(--accent-gradient)" }}>
+                  <span className="text-[10px] tracking-tight font-medium px-2 py-1 rounded-full text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>
                     Best value
                   </span>
                 )}

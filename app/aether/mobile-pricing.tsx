@@ -72,7 +72,7 @@ export function MobilePricing({
             <div className="flex items-center gap-2">
               <span className="text-[15px] sm:text-[17px] font-medium tracking-tight text-[rgb(var(--accent))]">{tier.name}</span>
               {tier.badge && (
-                <span className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full text-white" style={{ background: "var(--accent-gradient)" }}>{tier.badge}</span>
+                <span className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>{tier.badge}</span>
               )}
             </div>
             <span className="text-[13px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.65 }}>
@@ -113,7 +113,7 @@ export function MobilePricing({
         {/* CTA */}
         <Link
           href={tier.name === "Enterprise" ? "/aether/enterprise" : "/aether/buy"}
-          className="flex items-center justify-center gap-1.5 rounded-full py-3 text-[14px] font-medium tracking-tight transition-opacity hover:opacity-80 text-white"
+          className="flex items-center justify-center gap-1.5 rounded-full py-3 text-[14px] font-medium tracking-tight transition-opacity hover:opacity-80 text-[rgb(var(--bg))]"
           style={{ background: "var(--accent-gradient)" }}
         >
           {tier.name === "Enterprise" ? "Contact us" : `Get ${tier.name}`}

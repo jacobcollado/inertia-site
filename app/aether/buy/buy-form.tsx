@@ -249,7 +249,7 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
           <button
             onClick={handleStripeCheckout}
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-white transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+            className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
             style={{ background: "var(--accent-gradient)" }}
           >
             {isSubmitting ? <Spinner /> : null}
