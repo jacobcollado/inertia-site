@@ -622,7 +622,7 @@ function DarkModeToggleCard() {
 
   const startInterval = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => setDark(d => !d), 2200);
+    intervalRef.current = setInterval(() => setDark(d => !d), 2800);
   };
 
   const onActivity = () => {
@@ -646,40 +646,51 @@ function DarkModeToggleCard() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const bg = dark ? "#0e0e0e" : "#f5f5f3";
-  const line1 = dark ? "#2a2a2a" : "#d4d4d0";
-  const line2 = dark ? "#1e1e1e" : "#e2e2de";
-  const imgBg = dark ? "#1a1a1a" : "#e8e8e4";
-  const btn = dark ? "#fff" : "#1a1a1a";
-  const btnText = dark ? "#0e0e0e" : "#fff";
+  const d = dark;
 
   return (
-    <div className="absolute inset-0 flex flex-col p-4 transition-colors duration-700" style={{ background: bg }} aria-hidden="true">
-      {/* toggle pill — top right */}
-      <div className="flex justify-end mb-3">
-        <div
-          className="flex items-center gap-1 rounded-full px-2 py-1 cursor-pointer transition-colors duration-700"
-          style={{ background: dark ? "#1e1e1e" : "#e2e2de" }}
-          onClick={() => setDark(d => !d)}
-        >
-          <span className="text-[10px] transition-colors duration-700" style={{ color: dark ? "#888" : "#999" }}>
-            {dark ? "☾" : "☀︎"}
-          </span>
-          <div className="rounded-full transition-all duration-500" style={{
-            width: 14, height: 14,
-            background: dark ? "#fff" : "#1a1a1a",
-            boxShadow: dark ? "0 0 6px 1px rgba(255,255,255,0.2)" : "none",
-          }} />
-        </div>
+    <div
+      className="absolute inset-0 flex flex-col items-center justify-start gap-5 cursor-pointer overflow-hidden px-4 pt-6"
+      style={{ background: d ? "#0a0a0a" : "#f2f1ef", transition: "background 700ms ease" }}
+      onClick={() => { setDark(v => !v); onActivity(); }}
+      aria-hidden="true"
+    >
+      {/* icon */}
+      <div style={{ transition: "transform 600ms cubic-bezier(0.34,1.4,0.64,1)", transform: d ? "rotate(-20deg)" : "rotate(0deg)" }}>
+        {d ? (
+          <svg viewBox="0 0 48 48" fill="none" style={{ width: 42, height: 42 }}>
+            <path d="M34 28.5A13 13 0 0 1 17.5 12 12 12 0 1 0 34 28.5Z" fill="#e0e0e0" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 48 48" fill="none" style={{ width: 42, height: 42 }}>
+            <circle cx="24" cy="24" r="8" fill="#1a1a1a" />
+            {[0,45,90,135,180,225,270,315].map((angle, i) => {
+              const rad = angle * Math.PI / 180;
+              return <line key={i} x1={24 + Math.cos(rad)*13} y1={24 + Math.sin(rad)*13} x2={24 + Math.cos(rad)*18} y2={24 + Math.sin(rad)*18} stroke="#1a1a1a" strokeWidth="2.5" strokeLinecap="round" />;
+            })}
+          </svg>
+        )}
       </div>
-      {/* mini product card */}
-      <div className="rounded-lg p-3 flex-1 flex flex-col gap-2 transition-colors duration-700" style={{ background: dark ? "#141414" : "#ebebea", border: `1px solid ${dark ? "#222" : "#ddddd8"}` }}>
-        <div className="rounded transition-colors duration-700" style={{ height: 36, background: imgBg }} />
-        <div className="rounded transition-colors duration-700" style={{ height: 5, width: "65%", background: line1 }} />
-        <div className="rounded transition-colors duration-700" style={{ height: 4, width: "45%", background: line2 }} />
-        <div className="mt-auto rounded-md flex items-center justify-center transition-colors duration-700" style={{ height: 22, background: btn }}>
-          <div className="rounded transition-colors duration-700" style={{ height: 3, width: "40%", background: btnText, opacity: 0.6 }} />
-        </div>
+
+      {/* toggle track */}
+      <div
+        className="relative rounded-full flex items-center shrink-0"
+        style={{
+          width: 64, height: 32,
+          background: d ? "#252525" : "#d0d0cc",
+          border: `1.5px solid ${d ? "#333" : "#bbbbb7"}`,
+          transition: "background 700ms ease, border-color 700ms ease",
+          padding: "0 3px",
+        }}
+      >
+        <div style={{
+          width: 24, height: 24,
+          borderRadius: "50%",
+          background: d ? "#fff" : "#1a1a1a",
+          transform: d ? "translateX(32px)" : "translateX(0px)",
+          transition: "transform 500ms cubic-bezier(0.34,1.2,0.64,1), background 500ms ease",
+          boxShadow: d ? "0 1px 6px rgba(0,0,0,0.7)" : "0 1px 4px rgba(0,0,0,0.25)",
+        }} />
       </div>
     </div>
   );
@@ -730,10 +741,10 @@ function AetherFeature() {
       </div>
 
       {/* Bento grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bento-light-invert">
+      <div className="grid grid-cols-2 sm:grid-cols-3 sm:grid-rows-2 gap-3 bento-light-invert">
 
-        {/* Hero — tall, spans 1 col on desktop */}
-        <div className={`${cardBase} sm:col-span-1 relative flex flex-col justify-end group`} style={{ ...fade(60), minHeight: 360, height: "clamp(360px, 50vw, 520px)" }}>
+        {/* Hero — full width on mobile, tall left col on desktop */}
+        <div className={`${cardBase} col-span-2 sm:col-span-1 sm:row-span-2 relative flex flex-col justify-end group`} style={{ ...fade(60), minHeight: 280 }}>
           {/* image fills entire card */}
           <div className="absolute inset-0 overflow-hidden rounded-2xl">
             <img src="/aether/guided.png" alt="" className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]" draggable={false} aria-hidden="true" />
@@ -748,9 +759,9 @@ function AetherFeature() {
                 <Link href="/aether" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] transition-transform duration-200 hover:-translate-y-px active:translate-y-px">
                   See Aether
                 </Link>
-                <Link href="/aether/buy" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight text-[rgb(var(--bg))] transition-transform duration-200 hover:-translate-y-px active:translate-y-px" style={{ background: "var(--accent-gradient)" }}>
+                <Link href="/aether/buy" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight transition-all duration-200 hover:-translate-y-px active:translate-y-px" style={{ border: "1px solid rgb(var(--fg) / 0.3)", color: "rgb(var(--fg) / 0.7)" }}>
                   Buy from $85
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-80"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-60"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
                 </Link>
               </div>
             </GlassLabelAccent>
@@ -758,10 +769,10 @@ function AetherFeature() {
         </div>
 
         {/* Right 2 cols — 2×2 grid of feature cards */}
-        <div className="sm:col-span-2 grid grid-cols-2 gap-3">
+        <div className="col-span-2 sm:col-span-2 sm:row-span-2 grid grid-cols-2 gap-3">
 
           {/* 41 sections — layout blocks */}
-          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(120), minHeight: 220 }}>
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(120), minHeight: 180 }}>
             {/* big stat — top left */}
             <span className="absolute top-4 left-4 sm:top-5 sm:left-5 text-[2.2rem] sm:text-[3rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none tabular-nums z-10">41</span>
             {/* layout block mosaic */}
@@ -794,10 +805,10 @@ function AetherFeature() {
           </div>
 
           {/* Dark mode — animated toggle */}
-          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(160), minHeight: 220 }}>
+          <div className={`${cardBase} relative flex flex-col justify-between overflow-hidden group`} style={{ ...fade(160), minHeight: 240 }}>
             <DarkModeToggleCard />
             {/* bottom label */}
-            <div className="relative z-10 mt-auto p-3 sm:p-5 pt-0">
+            <div className="relative z-10 p-3 sm:p-4 pt-0 mt-auto">
               <GlassLabelAccent>
                 <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Dark mode</p>
                 <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>On by default. Looks right either way.</p>
@@ -806,37 +817,50 @@ function AetherFeature() {
           </div>
 
           {/* Live in &lt;1hr — step timeline */}
-          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(200), minHeight: 220 }}>
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(200), minHeight: 180 }}>
             {/* visual area */}
             <div className="flex-1 flex flex-col justify-center px-5 pt-5 pb-3" aria-hidden="true">
-              <span className="text-[2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-4">Done by lunch.</span>
+              <span className="text-[2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-5">Done by lunch.</span>
               {/* timeline */}
-              <div className="flex flex-col">
-                {([
-                  { label: "License", accent: false },
-                  { label: "Install", accent: false },
-                  { label: "Live",    accent: true  },
-                ] as { label: string; accent: boolean }[]).map((step, i, arr) => (
-                  <div key={i} className="flex items-start gap-3">
-                    {/* dot + connector */}
-                    <div className="flex flex-col items-center" style={{ width: 20 }}>
+              <div className="flex gap-3.5">
+                {/* connector column */}
+                <div className="flex flex-col items-center shrink-0" style={{ width: 24 }}>
+                  {([false, false, true] as boolean[]).map((accent, i, arr) => (
+                    <React.Fragment key={i}>
                       <div className="flex items-center justify-center rounded-full shrink-0" style={{
-                        width: 18, height: 18,
-                        background: step.accent ? "var(--accent-gradient)" : "rgb(var(--fg) / 0.10)",
-                        boxShadow: step.accent ? "0 0 8px 2px rgba(60,170,160,0.3)" : "none",
-                        flexShrink: 0,
+                        width: 24, height: 24,
+                        background: accent ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.08)",
+                        border: accent ? "none" : "1.5px solid rgb(var(--fg) / 0.18)",
                       }}>
-                        <svg viewBox="0 0 10 10" fill="none" style={{ width: 9, height: 9 }}>
-                          <polyline points="2,5 4.2,7.5 8,3" stroke={step.accent ? "#fff" : "rgb(var(--fg))"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={step.accent ? 1 : 0.45} />
+                        <svg viewBox="0 0 12 12" fill="none" style={{ width: 11, height: 11 }}>
+                          <polyline points="2,6 5,9 10,3" stroke={accent ? "rgb(var(--bg))" : "rgb(var(--fg))"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity={accent ? 1 : 0.3} />
                         </svg>
                       </div>
                       {i < arr.length - 1 && (
-                        <div style={{ width: 1, height: 14, background: "rgb(var(--fg) / 0.10)", marginTop: 2 }} />
+                        <div style={{ width: 1.5, flex: 1, minHeight: 14, background: "rgb(var(--fg) / 0.10)" }} />
                       )}
+                    </React.Fragment>
+                  ))}
+                </div>
+                {/* label column */}
+                <div className="flex flex-col">
+                  {([
+                    { label: "Purchase license", accent: false },
+                    { label: "Install to store",  accent: false },
+                    { label: "Go live",           accent: true  },
+                  ] as { label: string; accent: boolean }[]).map((step, i) => (
+                    <div key={i} className="flex items-center" style={{ height: 24, marginBottom: i < 2 ? 14 : 0 }}>
+                      <span style={{
+                        fontSize: step.accent ? 15 : 13,
+                        color: step.accent ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                        opacity: step.accent ? 1 : 0.5,
+                        fontWeight: step.accent ? 500 : 400,
+                        letterSpacing: "-0.02em",
+                        lineHeight: 1,
+                      }}>{step.label}</span>
                     </div>
-                    <span className="text-[12px] sm:text-[13px] tracking-tight leading-none pt-[3px]" style={{ color: step.accent ? "rgb(var(--fg))" : "rgb(var(--muted))", opacity: step.accent ? 1 : 0.5, marginBottom: i < arr.length - 1 ? 2 : 0 }}>{step.label}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
             {/* glass label */}
@@ -849,31 +873,26 @@ function AetherFeature() {
           </div>
 
           {/* Conversion — funnel */}
-          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(240), minHeight: 220 }}>
+          <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(240), minHeight: 180 }}>
             {/* stat + funnel in normal flow */}
-            <div className="flex-1 flex flex-col justify-center px-4 pt-4 pb-2 gap-3" aria-hidden="true">
-              <div>
-                <p className="text-[1.6rem] sm:text-[2rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-0.5 tabular-nums">1 in 4</p>
-                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>visitors converts</p>
+            <div className="flex-1 flex flex-col items-center justify-center px-4 pt-4 pb-2 gap-1" aria-hidden="true">
+              {/* donut arc — 25% fill */}
+              <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
+                <svg viewBox="0 0 90 90" fill="none" style={{ width: 90, height: 90, transform: "rotate(-90deg)" }}>
+                  {/* track */}
+                  <circle cx="45" cy="45" r="34" stroke="rgb(var(--fg))" strokeOpacity="0.08" strokeWidth="10" fill="none" />
+                  {/* 25% arc — circumference = 2π×34 ≈ 213.6 */}
+                  <circle cx="45" cy="45" r="34" stroke="rgb(var(--fg))" strokeOpacity="0.85" strokeWidth="10" fill="none"
+                    strokeDasharray="213.6"
+                    strokeDashoffset={213.6 * 0.75}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.04em", color: "rgb(var(--fg))", lineHeight: 1 }}>1 in 4</span>
+                </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                {[
-                  { label: "Visitors",   w: 1,    accent: false },
-                  { label: "Browsers",   w: 0.72, accent: false },
-                  { label: "Added cart", w: 0.46, accent: false },
-                  { label: "Purchased",  w: 0.25, accent: true  },
-                ].map((row, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="rounded-sm shrink-0" style={{
-                      width: `${row.w * 55}%`,
-                      height: 9,
-                      background: row.accent ? "var(--accent-gradient)" : `rgb(var(--fg) / ${0.08 + i * 0.04})`,
-                      boxShadow: row.accent ? "0 0 8px 2px rgba(60,170,160,0.25)" : "none",
-                    }} />
-                    <span className="text-[10px] tracking-tight whitespace-nowrap" style={{ color: "rgb(var(--muted))", opacity: row.accent ? 0.8 : 0.4 }}>{row.label}</span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] text-center" style={{ opacity: 0.45 }}>visitors purchase</p>
             </div>
             {/* glass label */}
             <div className="p-3 sm:p-4 pt-0">
@@ -894,7 +913,7 @@ function AetherFeature() {
           Explore Aether
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
         </Link>
-        <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors">
+        <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-colors" style={{ border: "1px solid rgb(var(--fg) / 0.25)", color: "rgb(var(--fg) / 0.6)" }}>
           Buy now, from $85
         </Link>
       </div>
