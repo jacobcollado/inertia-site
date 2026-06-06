@@ -83,7 +83,7 @@ export default function PrivacyPage() {
       {/* Document header */}
       <div className="mb-10">
         <h1 className="text-[2.4rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
-          Inertia Privacy Policy — Client and Visitor
+          Inertia Privacy Policy
         </h1>
         <div className="flex flex-wrap gap-x-8 gap-y-1">
           <p className="text-[16px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
