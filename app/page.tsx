@@ -2884,8 +2884,12 @@ function TechItem({ tech }: { tech: typeof TECH_ALL[0] }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <span className="transition-colors duration-300" style={{ color: hovered ? tech.color : "rgb(var(--muted))" }}>
-        <tech.icon className="w-6 h-6 sm:w-8 sm:h-8 shrink-0" />
+      {/* mobile: always colored. desktop: colored on hover only */}
+      <span className="transition-colors duration-300 sm:hidden" style={{ color: tech.color }}>
+        <tech.icon className="w-6 h-6 shrink-0" />
+      </span>
+      <span className="transition-colors duration-300 hidden sm:block" style={{ color: hovered ? tech.color : "rgb(var(--muted))" }}>
+        <tech.icon className="w-8 h-8 shrink-0" />
       </span>
       <span className="text-[17px] sm:text-[20px] tracking-tight whitespace-nowrap text-[rgb(var(--muted))]">{tech.name}</span>
     </div>
