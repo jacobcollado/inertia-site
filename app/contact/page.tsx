@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="page-container mx-auto w-full max-w-lg flex flex-col justify-center px-6 pt-0 pb-16" style={{ minHeight: "calc(100vh - 64px)" }}>
+    <main className="page-container mx-auto w-full max-w-lg px-6 pt-16 pb-24">
       <ContactForm />
     </main>
   );

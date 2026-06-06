@@ -147,8 +147,8 @@ export function ContactForm() {
               onClick={() => setCategoryId(c.id)}
               className="rounded-full px-3.5 py-1.5 text-[12px] tracking-tight transition-all duration-200 [-webkit-tap-highlight-color:transparent]"
               style={{
-                background: active ? "rgb(var(--fg))" : "transparent",
-                color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
+                background: active ? "var(--btn-bg)" : "transparent",
+                color: active ? "var(--btn-fg)" : "rgb(var(--muted))",
               }}
             >
               {c.label}
