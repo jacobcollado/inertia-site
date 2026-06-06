@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   },
 };
 
-const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var t=(s==='light')?'light':'dark';if(t==='dark')document.documentElement.classList.add('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
+const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');if(s==='dark'){document.documentElement.classList.add('dark');}else if(!s){document.documentElement.classList.remove('dark');}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -142,8 +142,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </RouteFade>
             </SiteShell>
           </ViewModeProvider>
+          <CookieBanner />
         </ThemeProvider>
-        <CookieBanner />
         <Analytics />
       </body>
     </html>
