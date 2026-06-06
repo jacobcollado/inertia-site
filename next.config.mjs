@@ -18,7 +18,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://cdn.fontshare.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://api.stripe.com https://*.myshopify.com https://*.myshopify.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://api.stripe.com https://*.myshopify.com https://us.posthog.com",
       "script-src-elem 'self' 'unsafe-inline' https://js.stripe.com",
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       "frame-ancestors 'none'",
@@ -30,6 +30,18 @@ const securityHeaders = [
 const nextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
   },
   async redirects() {
     return [

@@ -10,28 +10,13 @@ function PostHogPageview() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (pathname) {
-      let url = window.origin + pathname;
-      if (searchParams.toString()) {
-        url += `?${searchParams.toString()}`;
-      }
-      posthog.capture("$pageview", { $current_url: url });
-    }
+    posthog.capture("$pageview");
   }, [pathname, searchParams]);
 
   return null;
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-      person_profiles: "identified_only",
-      capture_pageview: false,
-      capture_pageleave: true,
-    });
-  }, []);
-
   return (
     <PHProvider client={posthog}>
       <Suspense fallback={null}>
