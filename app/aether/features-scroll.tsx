@@ -222,7 +222,7 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
               </p>
               <ul className="flex flex-col gap-2.5">
                 {f.points.map((p) => (
-                  <li key={`${f.title}-${p}`} className="flex items-center gap-2.5 text-[15px] tracking-tight text-[rgb(var(--muted))]">
+                  <li key={p} className="flex items-center gap-2.5 text-[15px] tracking-tight text-[rgb(var(--muted))]">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0" style={{ color: "rgb(var(--accent))" }} aria-hidden="true">
                       <polyline points="2 8 6 12 14 4" />
                     </svg>

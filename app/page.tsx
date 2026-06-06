@@ -478,11 +478,12 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
         {hero && (
           <Link
             href="/aether"
-            className="inline-flex items-center gap-2 rounded-full bg-[rgb(var(--fg)/0.85)] dark:bg-white px-3 py-1 text-[12px] font-light tracking-wide text-[rgb(var(--bg))] dark:text-black hover:bg-[rgb(var(--fg))] transition-colors"
+            className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] hover:opacity-80 transition-opacity"
+            style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--fg) / 0.1)", transform: "translateY(-16px)" }}
           >
-            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] tracking-tight leading-none" style={{ background: "rgb(var(--bg)/0.35)", color: "rgb(var(--bg))", fontWeight: 300 }}>New</span>
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.8)" }}>New</span>
             Aether theme for Shopify
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-40"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
           </Link>
         )}
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>

@@ -19,6 +19,8 @@ export function DemoButton({ href, password }: { href: string; password: string 
     }, 1000);
   };
 
+  const showTooltip = hovered && state === "idle";
+
   return (
     <div className="relative w-full">
       <a
@@ -28,7 +30,7 @@ export function DemoButton({ href, password }: { href: string; password: string 
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-5 py-2 hover:border-[rgb(var(--fg))/0.4] transition-colors text-[13px] font-medium tracking-tight"
+        className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-5 py-2 hover:border-[rgb(var(--fg)/0.4)] transition-colors text-[13px] font-medium tracking-tight"
       >
         {state === "copied" ? (
           <>
@@ -45,28 +47,45 @@ export function DemoButton({ href, password }: { href: string; password: string 
         )}
       </a>
 
-      {/* Hover hint */}
+      {/* Desktop tooltip — centered under the button via inset-x-0 + mx-auto */}
       <div
-        className="pointer-events-none absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap rounded-lg px-3 py-1.5"
+        className="pointer-events-none hidden sm:flex absolute top-full mt-2 inset-x-0 justify-center z-20"
         style={{
-          background: "rgb(var(--surface-elevated) / 0.95)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgb(var(--line) / 0.5)",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-          opacity: hovered && state === "idle" ? 1 : 0,
-          transform: hovered && state === "idle" ? "translateY(0)" : "translateY(4px)",
+          opacity: showTooltip ? 1 : 0,
+          transform: showTooltip ? "translateY(0)" : "translateY(-4px)",
           transition: "opacity 160ms ease, transform 160ms ease",
         }}
       >
-        <p className="text-[11.5px] tracking-tight text-[rgb(var(--muted))]">
-          Store password <span className="font-medium text-[rgb(var(--fg))]">{password}</span> will be copied
-        </p>
-        {/* caret */}
         <div
-          className="absolute -bottom-[4px] left-1/2 -translate-x-1/2 w-2 h-2 border-r border-b border-[rgb(var(--line) / 0.5)]"
-          style={{ background: "rgb(var(--surface-elevated) / 0.95)", transform: "translateX(-50%) rotate(45deg)" }}
-        />
+          className="relative whitespace-nowrap rounded-lg px-3 py-1.5"
+          style={{
+            background: "rgb(var(--surface-elevated))",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgb(var(--line))",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          }}
+        >
+          <div
+            className="absolute -top-[4px] left-1/2 w-2 h-2"
+            style={{
+              background: "rgb(var(--surface-elevated))",
+              border: "1px solid rgb(var(--line))",
+              borderBottom: "none",
+              borderRight: "none",
+              transform: "translateX(-50%) rotate(45deg)",
+            }}
+          />
+          <p className="text-[11.5px] tracking-tight text-[rgb(var(--muted))]">
+            Store password <span className="font-medium text-[rgb(var(--fg))]">{password}</span> will be copied
+          </p>
+        </div>
       </div>
+
+      {/* Mobile hint — absolute so it doesn't affect row height */}
+      <p className="sm:hidden absolute top-full left-0 right-0 text-center text-[11px] tracking-tight text-[rgb(var(--muted))] mt-1.5" style={{ opacity: 0.5 }}>
+        Tapping copies password <span className="font-medium" style={{ opacity: 1 }}>{password}</span>
+      </p>
     </div>
   );
 }
