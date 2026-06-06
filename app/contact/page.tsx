@@ -8,14 +8,8 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-6xl min-h-screen flex flex-col">
-
-      <div className="flex-1 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-        <ContactForm />
-      </div>
-
-
+    <main className="page-container mx-auto w-full max-w-lg flex flex-col justify-center px-6 pt-0 pb-16" style={{ minHeight: "calc(100vh - 64px)" }}>
+      <ContactForm />
     </main>
   );
 }
-

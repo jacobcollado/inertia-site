@@ -103,7 +103,7 @@ export function SiteFooter() {
           <Link href="/about" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">About</Link>
           <Link href="/roadmap" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Roadmap</Link>
           <Link href="/careers" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Careers</Link>
-          <Link href="/contact" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Help</Link>
+          <Link href="/contact" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Contact</Link>
           <Link href="/policies" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Policies</Link>
         </div>
 

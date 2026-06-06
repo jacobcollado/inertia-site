@@ -74,6 +74,7 @@ const NAV: NavItem[] = [
     ],
   },
   { label: "Pricing", href: "/pricing" },
+  { label: "Contact", href: "/contact" },
 ];
 
 /* ── Desktop mega menu ───────────────────────────────────────────── */
