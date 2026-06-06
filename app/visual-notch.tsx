@@ -443,19 +443,8 @@ function MobileAccordion({ item, onNavigate, drawerOpen, showDesc }: { item: Nav
 }
 
 function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
-
   return (
     <>
-      <div
-        className="mobile-nav__backdrop"
-        data-open={open}
-        aria-hidden="true"
-        onClick={onClose}
-      />
       <div className="mobile-nav__drawer" data-open={open} aria-label="Mobile navigation">
         <div className="mobile-nav__drawer-inner">
           {NAV.map((item) => (
@@ -612,32 +601,8 @@ export function VisualNotch() {
   const handleClose = useCallback(() => setOpenIndex(null), []);
 
   useEffect(() => {
-    const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
-    if (!bg) return;
-
-    if (mobileOpen) {
-      bg.style.backdropFilter = "none";
-      (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "none";
-      bg.style.background = "transparent";
-      bg.style.opacity = "0";
-      bg.style.backdropFilter = "none";
-      bg.style.webkitMaskImage = "none";
-      bg.style.maskImage = "none";
-
-    } else {
-      bg.style.background = "";
-      bg.style.opacity = "";
-      bg.style.webkitMaskImage = "";
-      bg.style.maskImage = "";
-
-    }
-
-    // Blur page content
-    const main = document.querySelector<HTMLElement>("main, .page-container");
-    if (main) {
-      main.style.transition = "filter 500ms cubic-bezier(0.22,1,0.36,1)";
-      main.style.filter = mobileOpen ? "blur(6px)" : "none";
-    }
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
   useEffect(() => {

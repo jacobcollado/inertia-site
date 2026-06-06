@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Heading } from "@/lib/posts";
+import { GlassFilterDef, GLASS_FILTER_ID } from "@/components/ui/glass-card";
 
 export function TOC({ headings }: { headings: Heading[] }) {
   const [activeId, setActiveId] = useState<string>("");
@@ -51,6 +52,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
   const activeHeading = headings.find((h) => h.id === activeId) ?? headings[0];
   const activeIndex = headings.findIndex((h) => h.id === activeId);
   const progress = headings.length > 1 ? Math.max(0, activeIndex) / (headings.length - 1) : 0;
+
 
   // Desktop TOC — sticky in left grid column
   const desktopAside = (
@@ -114,16 +116,18 @@ export function TOC({ headings }: { headings: Heading[] }) {
   const mobilePill = (
     <div className="xl:hidden">
       {/* Floating pill */}
+      <GlassFilterDef />
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label="Table of contents"
         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2.5 rounded-full px-4 py-2.5 [-webkit-tap-highlight-color:transparent] focus:outline-none"
         style={{
-          background: "rgb(var(--surface))",
-          border: "1px solid rgb(var(--line))",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-          backdropFilter: "blur(12px)",
+          backdropFilter: `url(#${GLASS_FILTER_ID}) blur(14px)`,
+          WebkitBackdropFilter: `url(#${GLASS_FILTER_ID}) blur(14px)`,
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.18)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
         }}
       >
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5 text-[rgb(var(--muted))]" aria-hidden="true">
