@@ -256,7 +256,7 @@ export default function AetherChangelog() {
         <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
           <Link
             href="/aether/buy"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Get Aether
           </Link>

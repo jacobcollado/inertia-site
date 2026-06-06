@@ -97,7 +97,7 @@ function TierCard({ tier }: { tier: string }) {
           <div className="flex items-center gap-2">
             <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{displayed.label}</span>
             {displayed.badge && (
-              <span className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+              <span className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full bg-[var(--btn-bg)] text-[var(--btn-fg)]">
                 {displayed.badge}
               </span>
             )}
@@ -315,7 +315,7 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
             <button
               type="submit"
               disabled={!name || !email || !message || isSubmitting}
-              className="inline-flex items-center gap-2.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))] px-5 py-2.5 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80 disabled:opacity-25 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+              className="inline-flex items-center gap-2.5 rounded-full bg-[var(--btn-bg)] text-[var(--btn-fg)] px-5 py-2.5 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80 disabled:opacity-25 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
             >
               {isSubmitting ? <Spinner /> : null}
               Get a quote

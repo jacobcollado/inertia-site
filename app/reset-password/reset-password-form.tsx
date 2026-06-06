@@ -118,7 +118,7 @@ export function ResetPasswordForm() {
                 </div>
                 {error && <p className="text-[13px] tracking-tight text-red-500 -mt-4">{error}</p>}
                 <button type="submit" disabled={loading || !password || !confirm}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[13.5px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity duration-150 disabled:opacity-20 disabled:cursor-not-allowed self-start">
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[13.5px] tracking-tight font-medium bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity duration-150 disabled:opacity-20 disabled:cursor-not-allowed self-start">
                   {loading ? "Saving…" : "Set password"}
                   {!loading && (
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">

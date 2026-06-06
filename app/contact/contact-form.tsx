@@ -381,8 +381,8 @@ export function ContactForm() {
                 disabled={!canAdvance}
                 className="send-btn inline-flex items-center gap-2 rounded-full pl-6 pr-5 py-2.5 text-[14px] tracking-tight font-medium transition-all duration-200 disabled:opacity-25 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
                 style={{
-                  background: "rgb(var(--fg))",
-                  color: "rgb(var(--bg))",
+                  background: "var(--btn-bg)",
+                  color: "var(--btn-fg)",
                 }}
               >
                 {isLast ? "Send message" : "Continue"}

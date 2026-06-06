@@ -178,7 +178,7 @@ export function FitQuiz() {
                 <button
                   onClick={() => pick("yes")}
                   className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-[13px] tracking-tight font-medium transition-all hover:opacity-80 [-webkit-tap-highlight-color:transparent]"
-                  style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+                  style={{ background: "var(--btn-bg)", color: "var(--btn-fg)" }}
                 >
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
                     <polyline points="2 8 6 12 14 4" />
@@ -230,7 +230,7 @@ export function FitQuiz() {
                 <Link
                   href={verdict.cta.href}
                   className="flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full text-[13px] tracking-tight font-medium transition-opacity hover:opacity-80"
-                  style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+                  style={{ background: "var(--btn-bg)", color: "var(--btn-fg)" }}
                 >
                   {verdict.cta.label}
                 </Link>

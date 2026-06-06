@@ -16,7 +16,9 @@
   --muted: 100 100 100;
   --line: 200 200 200;
   --accent: 34 98 255;
-  --accent-gradient: rgb(20 20 20);
+  --accent-gradient: rgb(var(--fg) / 0.85);
+  --btn-bg: rgb(var(--fg) / 0.85);
+  --btn-fg: rgb(var(--bg));
   /* Accent swatches â€” deeper on white for legibility */
   --green: 16 168 100;
   --blue: 37 99 235;
@@ -46,7 +48,9 @@
   --muted: 140 140 140;
   --line: 38 38 38;
   --accent: 88 140 255;
-  --accent-gradient: rgb(237 237 237);
+  --accent-gradient: rgb(var(--fg) / 0.85);
+  --btn-bg: rgb(var(--fg) / 0.85);
+  --btn-fg: rgb(var(--bg));
   /* Accent swatches â€” bright on black */
   --green: 52 211 153;
   --blue: 96 165 250;

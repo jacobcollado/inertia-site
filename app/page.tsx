@@ -478,9 +478,9 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
         {hero && (
           <Link
             href="/aether"
-            className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--fg)/0.15)] bg-[rgb(var(--fg)/0.07)] px-3 py-1 text-[12px] font-light tracking-wide text-[rgb(var(--fg))] hover:bg-[rgb(var(--fg)/0.12)] transition-colors"
+            className="inline-flex items-center gap-2 rounded-full bg-[rgb(var(--fg)/0.85)] dark:bg-white px-3 py-1 text-[12px] font-light tracking-wide text-[rgb(var(--bg))] dark:text-black hover:bg-[rgb(var(--fg))] transition-colors"
           >
-            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)", fontWeight: 300 }}>New</span>
+            <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] tracking-tight leading-none" style={{ background: "rgb(var(--bg)/0.35)", color: "rgb(var(--bg))", fontWeight: 300 }}>New</span>
             Aether theme for Shopify
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-50"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
           </Link>
@@ -521,10 +521,8 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border"
             style={{
               background: "rgb(var(--surface))",
-              borderColor: focused ? "rgba(60,170,160,0.55)" : "rgb(var(--fg) / 0.18)",
-              boxShadow: focused
-                ? "0 0 0 3px rgba(50,100,240,0.07), 0 0 28px 4px rgba(60,170,160,0.13)"
-                : "0 0 18px 4px rgba(50,100,240,0.07), 0 0 32px 8px rgba(60,170,160,0.06)",
+              borderColor: focused ? "rgb(var(--fg) / 0.4)" : "rgb(var(--fg) / 0.18)",
+              boxShadow: focused ? "0 0 0 3px rgb(var(--fg) / 0.04)" : "none",
               animation: "none",
               transition: "border-color 250ms ease, box-shadow 350ms ease",
             }}
@@ -722,7 +720,7 @@ function AetherFeature() {
       <div className="flex flex-col items-center text-center gap-3 py-10" style={fade(0)}>
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
           Meet{" "}
-          <span style={{ background: "rgb(var(--fg))", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "rgb(var(--bg))", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
+          <span style={{ background: "rgb(var(--fg) / 0.85)", borderRadius: "6px", padding: "0.05em 0.25em 0.1em", color: "rgb(var(--bg))", display: "inline-flex", alignItems: "center", gap: "0.15em", verticalAlign: "baseline" }}>
             <SiShopify style={{ display: "inline", width: "0.8em", height: "0.8em", color: "rgb(var(--bg))", flexShrink: 0 }} />Aether
           </span>
         </h2>
@@ -747,7 +745,7 @@ function AetherFeature() {
               <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-1">The theme your store deserves.</p>
               <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug mb-3" style={{ opacity: 0.6 }}>Designed for brands that care about every pixel.</p>
               <div className="flex items-center gap-2">
-                <Link href="/aether" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] transition-transform duration-200 hover:-translate-y-px active:translate-y-px">
+                <Link href="/aether" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] transition-transform duration-200 hover:-translate-y-px active:translate-y-px">
                   See Aether
                 </Link>
                 <Link href="/aether/buy" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight text-[rgb(var(--bg))] transition-transform duration-200 hover:-translate-y-px active:translate-y-px" style={{ background: "var(--accent-gradient)" }}>
@@ -1356,7 +1354,7 @@ function PlatformSignal() {
             href="https://www.instagram.com/by.inertia/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Start a project ↗
           </a>
@@ -1384,7 +1382,7 @@ function PlatformSignal() {
             href="https://www.instagram.com/by.inertia/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex self-start items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity"
+            className="inline-flex self-start items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Start a project ↗
           </a>
@@ -1690,7 +1688,7 @@ function RotatingPanel() {
 
   const current = ALL_PHRASES[phraseIdx];
   const isExternal = current.cta.href.startsWith("http");
-  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-80 transition-opacity";
+  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity";
 
   return (
     <div
@@ -2256,17 +2254,17 @@ function StackDiagram() {
         <MetricsCarousel>
           {/* Each page is exactly viewport width, snaps cleanly */}
           {/* Page 1: clients (tall left) + 100% + 24h */}
-          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
+          <div className="grid gap-3 shrink-0 bento-light-invert" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
             <MetricCard className="relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
               <svg viewBox="0 0 300 200" fill="none" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" aria-hidden="true">
                 <defs>
                   <linearGradient id="wave-fill-m" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgb(50 100 240)" stopOpacity="0.18" />
-                    <stop offset="100%" stopColor="rgb(50 100 240)" stopOpacity="0" />
+                    <stop offset="0%" stopColor="rgb(var(--fg))" stopOpacity="0.14" />
+                    <stop offset="100%" stopColor="rgb(var(--fg))" stopOpacity="0" />
                   </linearGradient>
                   <linearGradient id="wave-stroke-m" x1="0" y1="0" x2="1" y2="0">
-                    <stop stopColor="rgb(50 100 240)" />
-                    <stop offset="1" stopColor="rgb(100 180 200)" />
+                    <stop stopColor="rgb(var(--fg))" stopOpacity="0.7" />
+                    <stop offset="1" stopColor="rgb(var(--fg))" stopOpacity="0.4" />
                   </linearGradient>
                 </defs>
                 <path d="M0 180 C40 175 60 160 90 145 C120 130 140 120 170 100 C200 80 230 55 300 30 L300 200 L0 200 Z" fill="url(#wave-fill-m)" />
@@ -2281,15 +2279,14 @@ function StackDiagram() {
             </MetricCard>
             <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
               <div className="flex flex-col gap-1">
-                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
+                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={100} duration={1400} suffix="%" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing</span>
               </div>
               <svg viewBox="0 0 48 48" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
-                <defs><linearGradient id="dg-p1" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
                 <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
-                <circle cx="24" cy="24" r="17" stroke="url(#dg-p1)" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)"/>
-                <polyline points="19,24 23,28 30,20" stroke="url(#dg-p1)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <circle cx="24" cy="24" r="17" stroke="rgb(var(--fg))" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)" opacity="0.7"/>
+                <polyline points="19,24 23,28 30,20" stroke="rgb(var(--fg))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.7"/>
               </svg>
             </MetricCard>
             <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
@@ -2302,9 +2299,8 @@ function StackDiagram() {
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request</span>
               </div>
               <svg viewBox="0 0 52 52" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
-                <defs><linearGradient id="cg-p1" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
                 <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
-                <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#cg-p1)" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="rgb(var(--fg))" strokeWidth="2.5" strokeLinecap="round" opacity="0.7"/>
                 <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
                 <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
                 <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
@@ -2313,7 +2309,7 @@ function StackDiagram() {
           </div>
 
           {/* Page 2: 5 days + 98% + US map */}
-          <div className="grid gap-3 shrink-0" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
+          <div className="grid gap-3 shrink-0 bento-light-invert" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
             <MetricCard className="flex flex-col relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
               <div className="p-5 pb-0">
                 <div className="flex items-baseline gap-1 leading-none mb-1">
@@ -2330,7 +2326,7 @@ function StackDiagram() {
                     return (
                       <div key={di} className="flex-1 flex flex-col-reverse gap-0.5">
                         {blocks.map((h, bi) => (
-                          <div key={bi} style={{ height: h * 0.55, borderRadius:"2px 2px 0 0", background: isLast ? "var(--accent-gradient)" : `rgb(var(--fg) / ${0.07 + bi * 0.05})` }} />
+                          <div key={bi} style={{ height: h * 0.55, borderRadius:"2px 2px 0 0", background: isLast ? "rgb(var(--fg) / 0.75)" : `rgb(var(--fg) / ${0.07 + bi * 0.05})` }} />
                         ))}
                       </div>
                     );
@@ -2344,7 +2340,7 @@ function StackDiagram() {
               </div>
             </MetricCard>
             <MetricCard className="flex flex-col justify-end relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
-              <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover dark:invert" style={{ opacity:0.18 }} />
+              <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover invert dark:invert" style={{ opacity:0.18 }} />
               <div className="absolute inset-x-0 top-0 h-2/3 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
               <div className="relative z-10 mx-3 mb-3 rounded-xl p-3" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
                 <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}>US</span>
@@ -2354,13 +2350,13 @@ function StackDiagram() {
             </MetricCard>
             <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
               <div className="flex flex-col gap-1">
-                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={98} duration={1200} suffix="%" /></span>
+                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={98} duration={1200} suffix="%" /></span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction</span>
                 <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Client feedback</span>
               </div>
               <div className="flex flex-col gap-1.5 mt-2" aria-hidden="true">
                 <div style={{ height:3, borderRadius:2, background:"rgb(var(--fg) / 0.08)", overflow:"hidden" }}>
-                  <div style={{ height:"100%", width:"98%", background:"var(--accent-gradient)" }} />
+                  <div style={{ height:"100%", width:"98%", background:"rgb(var(--fg) / 0.75)" }} />
                 </div>
                 <div className="flex gap-2">
                   {[["9.9","Quality"],["9.7","Comms"],["9.6","Speed"],["9.8","Value"]].map(([score, label]) => (
@@ -2383,12 +2379,12 @@ function StackDiagram() {
             <svg viewBox="0 0 500 300" fill="none" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" aria-hidden="true">
               <defs>
                 <linearGradient id="wave-fill-d" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgb(50 100 240)" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="rgb(50 100 240)" stopOpacity="0" />
+                  <stop offset="0%" stopColor="rgb(var(--fg))" stopOpacity="0.12" />
+                  <stop offset="100%" stopColor="rgb(var(--fg))" stopOpacity="0" />
                 </linearGradient>
                 <linearGradient id="wave-stroke-d" x1="0" y1="0" x2="1" y2="0">
-                  <stop stopColor="rgb(50 100 240)" />
-                  <stop offset="1" stopColor="rgb(100 180 200)" />
+                  <stop stopColor="rgb(var(--fg))" stopOpacity="0.5" />
+                  <stop offset="1" stopColor="rgb(var(--fg))" stopOpacity="0.2" />
                 </linearGradient>
               </defs>
               <path d="M0 270 C60 265 100 245 160 220 C220 195 270 170 330 140 C390 110 440 75 500 40 L500 300 L0 300 Z" fill="url(#wave-fill-d)" />
@@ -2406,15 +2402,14 @@ function StackDiagram() {
           {/* 100% — col 3, row 1 */}
           <div className="flex flex-col justify-between p-5 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"3", gridRow:"1", minHeight:160 }}>
             <div className="flex flex-col gap-1.5">
-              <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={100} duration={1400} suffix="%" /></span>
+              <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={100} duration={1400} suffix="%" /></span>
               <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house delivery</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing, ever</span>
             </div>
             <svg viewBox="0 0 48 48" fill="none" className="mt-3" style={{ width:36, height:36 }} aria-hidden="true">
-              <defs><linearGradient id="dg-d" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
               <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
-              <circle cx="24" cy="24" r="17" stroke="url(#dg-d)" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)"/>
-              <polyline points="19,24 23,28 30,20" stroke="url(#dg-d)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <circle cx="24" cy="24" r="17" stroke="rgb(var(--fg))" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)" opacity="0.7"/>
+              <polyline points="19,24 23,28 30,20" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.7"/>
             </svg>
           </div>
 
@@ -2429,9 +2424,8 @@ function StackDiagram() {
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request, every time</span>
             </div>
             <svg viewBox="0 0 52 52" fill="none" className="mt-3" style={{ width:36, height:36 }} aria-hidden="true">
-              <defs><linearGradient id="cg-d" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#3264f0"/><stop offset="1" stopColor="#64b4c8"/></linearGradient></defs>
               <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
-              <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="url(#cg-d)" strokeWidth="2.5" strokeLinecap="round"/>
+              <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="rgb(var(--fg))" strokeWidth="2.5" strokeLinecap="round" opacity="0.7"/>
               <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
               <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
               <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
@@ -2476,12 +2470,12 @@ function StackDiagram() {
             target="_blank"
             rel="noreferrer"
             className="flex flex-col justify-between p-7 rounded-2xl hover:opacity-90 transition-opacity"
-            style={{ background:"var(--accent-gradient)", gridColumn:"4", gridRow:"2", minHeight:160 }}
+            style={{ background:"var(--btn-bg)", gridColumn:"4", gridRow:"2", minHeight:160 }}
           >
-            <span className="text-[13px] tracking-tight text-white" style={{ opacity:0.7 }}>Ready to start?</span>
+            <span className="text-[13px] tracking-tight text-[var(--btn-fg)]" style={{ opacity:0.7 }}>Ready to start?</span>
             <div>
-              <p className="text-[1.4rem] font-medium tracking-tight text-white leading-snug mb-3">Let's build something.</p>
-              <span className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-white" style={{ opacity:0.8 }}>
+              <p className="text-[1.4rem] font-medium tracking-tight text-[var(--btn-fg)] leading-snug mb-3">Let's build something.</p>
+              <span className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[var(--btn-fg)]" style={{ opacity:0.8 }}>
                 Start a project
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
               </span>
@@ -2491,13 +2485,13 @@ function StackDiagram() {
           {/* 98% — col 1-2, row 3 */}
           <div className="flex flex-col justify-between p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"1 / 3", gridRow:"3", minHeight:160 }}>
             <div className="flex flex-col gap-1.5">
-              <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", background:"var(--accent-gradient)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}><CountUp to={98} duration={1200} suffix="%" /></span>
+              <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={98} duration={1200} suffix="%" /></span>
               <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction rate</span>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>From client feedback</span>
             </div>
             <div className="flex flex-col gap-2.5 mt-4" aria-hidden="true">
               <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background:"rgb(var(--fg) / 0.08)" }}>
-                <div className="absolute inset-y-0 left-0 rounded-full" style={{ width:"98%", background:"var(--accent-gradient)" }} />
+                <div className="absolute inset-y-0 left-0 rounded-full" style={{ width:"98%", background:"rgb(var(--fg) / 0.75)" }} />
               </div>
               <div className="flex gap-3">
                 {[["Quality","9.9"],["Communication","9.7"],["Speed","9.6"],["Value","9.8"]].map(([label, score]) => (
@@ -2512,7 +2506,7 @@ function StackDiagram() {
 
           {/* Map — col 3-4, row 2-3 */}
           <div className="flex flex-col justify-end relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"3 / 5", gridRow:"2 / 4" }}>
-            <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover dark:invert" style={{ opacity:0.15 }} />
+            <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover invert dark:invert" style={{ opacity:0.15 }} />
             <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
             <div className="relative z-10 m-3 rounded-xl p-4" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
               <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}>US</span>
