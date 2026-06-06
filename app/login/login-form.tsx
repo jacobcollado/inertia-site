@@ -127,15 +127,15 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
             {/* Tab notch */}
             <div className="flex justify-center">
-              <div className="flex items-center gap-1 border border-[rgb(var(--line))] rounded-full p-[3px]">
+              <div className="flex items-center gap-1 rounded-full p-[3px]" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                 {(["signin", "signup"] as const).map((t) => (
                   <button
                     key={t}
                     onClick={() => switchTab(t)}
                     className="px-4 py-1.5 text-[12px] tracking-tight rounded-full transition-all duration-200"
                     style={{
-                      background: tab === t ? "rgb(var(--fg))" : "transparent",
-                      color: tab === t ? "rgb(var(--bg))" : "rgb(var(--muted))",
+                      background: tab === t ? "var(--btn-bg)" : "transparent",
+                      color: tab === t ? "var(--btn-fg)" : "rgb(var(--muted))",
                     }}
                   >
                     {t === "signin" ? "Sign in" : "Create account"}
