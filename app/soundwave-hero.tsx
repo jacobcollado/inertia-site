@@ -155,6 +155,46 @@ function RotatingWord() {
   );
 }
 
+function WaveBtn({ href, label, words, external, className, style }: { href: string; label: string; words: string[]; external?: boolean; className?: string; style?: React.CSSProperties }) {
+  const [hovered, setHovered] = useState(false);
+  const Tag = external ? "a" : ("a" as "a");
+  const extraProps = external ? { target: "_blank", rel: "noreferrer" } : {};
+  return (
+    <Tag
+      href={href}
+      {...extraProps}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[13px] sm:text-[15px] font-medium tracking-tight hover:opacity-90 transition-opacity inline-flex items-center ${className ?? ""}`}
+      style={{ gap: "0.3em", ...style }}
+    >
+      {words.map((w, i) => (
+        <span key={i} style={{ display: "inline-block", animation: hovered ? `cta-wave 600ms cubic-bezier(0.22,1,0.36,1) ${i * 60}ms infinite alternate` : "none" }}>{w}</span>
+      ))}
+    </Tag>
+  );
+}
+
+function HeroCtas() {
+  return (
+    <div className="pointer-events-auto flex items-center gap-3 flex-wrap justify-center" style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 600ms forwards" }}>
+      <WaveBtn
+        href="https://www.instagram.com/by.inertia/"
+        label="Start a project"
+        words={["Start", "a", "project", "↗"]}
+        external
+        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)" }}
+      />
+      <WaveBtn
+        href="/aether"
+        label="See Aether"
+        words={["See", "Aether", "→"]}
+        style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}
+      />
+    </div>
+  );
+}
+
 export function SoundwaveHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -271,18 +311,7 @@ export function SoundwaveHero() {
           <span className="text-[15px] tracking-tight" style={{ color: "rgb(var(--fg) / 0.4)" }}>Every touchpoint, handled.</span>
         </div>
 
-        <div className="pointer-events-auto flex items-center gap-3 flex-wrap justify-center" style={{ opacity: 0, animation: "hero-line 600ms cubic-bezier(0.16,1,0.3,1) 600ms forwards" }}>
-          <a href="https://www.instagram.com/by.inertia/" target="_blank" rel="noreferrer"
-            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[13px] sm:text-[15px] font-medium tracking-tight transition-opacity hover:opacity-75"
-            style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
-            Start a project ↗
-          </a>
-          <a href="/aether"
-            className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[13px] sm:text-[15px] font-medium tracking-tight transition-opacity hover:opacity-75"
-            style={{ background: "transparent", color: "rgb(var(--fg))", border: "1px solid rgb(var(--fg) / 0.35)" }}>
-            See Aether →
-          </a>
-        </div>
+        <HeroCtas />
       </div>
     </section>
   );

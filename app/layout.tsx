@@ -11,6 +11,7 @@ import { CookieBanner } from "./cookie-banner";
 import { ScrollReveal } from "./scroll-reveal";
 import { cn } from "@/lib/utils";
 import Script from "next/script";
+import { PostHogProvider } from "./posthog-provider";
 
 const satoshi = localFont({
   src: "../public/fonts/Satoshi-Variable.woff2",
@@ -132,6 +133,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans antialiased">
+        <PostHogProvider>
         <ThemeProvider>
           <ViewModeProvider>
             <LenisProvider />
@@ -145,6 +147,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CookieBanner />
         </ThemeProvider>
         <Analytics />
+        </PostHogProvider>
       </body>
     </html>
   );

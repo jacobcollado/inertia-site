@@ -426,6 +426,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
   const [everFocused, setEverFocused] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [beginHovered, setBeginHovered] = useState(false);
 
   // Measure actual perimeter once mounted — no transition fires here
   useEffect(() => {
@@ -542,11 +543,14 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
             </div>
             <button
               type="submit"
-              className="group shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity self-stretch sm:self-auto flex items-center justify-center gap-1.5"
-              style={{ background: "var(--accent-gradient)" }}
+              onMouseEnter={() => setBeginHovered(true)}
+              onMouseLeave={() => setBeginHovered(false)}
+              className="shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity self-stretch sm:self-auto inline-flex items-center justify-center"
+              style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)", gap: "0.3em" }}
             >
-              Begin
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-0.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              {["Begin", "→"].map((w, i) => (
+                <span key={i} style={{ display: "inline-block", animation: beginHovered ? `cta-wave 600ms cubic-bezier(0.22,1,0.36,1) ${i * 60}ms infinite alternate` : "none" }}>{w}</span>
+              ))}
             </button>
           </div>
         </div>
@@ -757,9 +761,7 @@ function AetherFeature() {
               <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-1">The theme your store deserves.</p>
               <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug mb-3" style={{ opacity: 0.6 }}>Designed for brands that care about every pixel.</p>
               <div className="flex items-center gap-2">
-                <Link href="/aether" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] transition-transform duration-200 hover:-translate-y-px active:translate-y-px">
-                  See Aether
-                </Link>
+                <ProjectCta label="See Aether" href="/aether" arrow="→" external={false} size="sm" />
                 <Link href="/aether/buy" className="isolate inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight transition-all duration-200 hover:-translate-y-px active:translate-y-px" style={{ border: "1px solid rgb(var(--fg) / 0.3)", color: "rgb(var(--fg) / 0.7)" }}>
                   Buy from $85
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-60"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
@@ -910,10 +912,7 @@ function AetherFeature() {
 
       {/* CTA */}
       <div className="flex flex-col sm:flex-row sm:justify-end items-center gap-3 pt-6" style={fade(280)}>
-        <Link href="/aether" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity" style={{ background: "var(--accent-gradient)" }}>
-          Explore Aether
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
-        </Link>
+        <ProjectCta label="Explore Aether" href="/aether" arrow="→" external={false} />
         <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-colors" style={{ border: "1px solid rgb(var(--fg) / 0.25)", color: "rgb(var(--fg) / 0.6)" }}>
           Buy now, from $85
         </Link>
@@ -1140,6 +1139,29 @@ function ChatPlaceholder() {
   );
 }
 
+// Typewriter for "You" messages staged in the input box
+function InputTypewriter({ text, onDone }: { text: string; onDone: () => void }) {
+  const [displayed, setDisplayed] = useState("");
+
+  useEffect(() => {
+    setDisplayed("");
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(interval);
+        // short pause after fully typed before "sending"
+        setTimeout(onDone, 520);
+      }
+    }, 38);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text]);
+
+  return <>{displayed}<span className="animate-pulse">|</span></>;
+}
+
 const CHAT_MESSAGES = [
   { from: "them", text: "Hey, we need a Shopify store. Something that actually feels like a brand." },
   { from: "us",   text: "Got it. Walk us through what you're building and who it's for." },
@@ -1150,9 +1172,14 @@ const CHAT_MESSAGES = [
   { from: "them", text: "Let's go." },
 ];
 
+// Phone-shaped chat diagram
+// "them" (You) messages are staged in the input box first, then sent up
+type ChatPhase = "idle" | "user-typing" | "user-sent" | "inertia-typing";
+
 function PlatformDiagram() {
   const [shown, setShown] = useState(0);
-  const [typing, setTyping] = useState(false);
+  const [phase, setPhase] = useState<ChatPhase>("idle");
+  const [inputText, setInputText] = useState("");
   const [fading, setFading] = useState(false);
   const [inView, setInView] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -1170,156 +1197,342 @@ function PlatformDiagram() {
     return () => obs.disconnect();
   }, []);
 
+  // Advance the sequence
   useEffect(() => {
     if (!inView) return;
+
     if (shown >= CHAT_MESSAGES.length) {
       const t = setTimeout(() => {
         setFading(true);
-        setTimeout(() => { setShown(0); setFading(false); }, 600);
+        setTimeout(() => { setShown(0); setPhase("idle"); setInputText(""); setFading(false); }, 600);
       }, 3200);
       return () => clearTimeout(t);
     }
-    const delay = shown === 0 ? 1400 : 1400;
+
+    if (phase !== "idle") return;
+
+    const nextMsg = CHAT_MESSAGES[shown];
+    const delay = shown === 0 ? 1400 : 900;
+
     const t = setTimeout(() => {
-      setTyping(true);
-      const typingDuration = CHAT_MESSAGES[shown].from === "us" ? 2200 : 1600;
-      setTimeout(() => {
-        setTyping(false);
-        setShown(s => s + 1);
-      }, typingDuration);
+      if (nextMsg.from === "them") {
+        // Stage in input box
+        setPhase("user-typing");
+        setInputText(nextMsg.text);
+      } else {
+        // Inertia types with dots
+        setPhase("inertia-typing");
+        setTimeout(() => {
+          setPhase("idle");
+          setShown(s => s + 1);
+        }, 2200);
+      }
     }, delay);
     return () => clearTimeout(t);
-  }, [shown, inView]);
+  }, [shown, inView, phase]);
+
+  // After input typewriter calls onDone, "send" the message
+  const handleInputDone = () => {
+    setPhase("user-sent");
+    setTimeout(() => {
+      setInputText("");
+      setPhase("idle");
+      setShown(s => s + 1);
+    }, 300);
+  };
 
   useEffect(() => {
     if (!inView) return;
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [shown, typing, inView]);
+  }, [shown, phase, inView]);
 
   const nextFrom = shown < CHAT_MESSAGES.length ? CHAT_MESSAGES[shown].from : null;
+  const showInputTyping = phase === "user-typing" || phase === "user-sent";
 
   return (
-    <div ref={cardRef} className="w-full rounded-2xl border border-[rgb(var(--line))] overflow-hidden flex flex-col bento-light-invert" style={{ background: "rgb(var(--surface-elevated))", height: 380 }}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgb(var(--line) / 0.5)" }}>
-        <div className="flex items-center gap-2">
-          <div className="rounded-lg shrink-0 flex items-center justify-center" style={{ width: 28, height: 28, background: "rgb(var(--fg))" }}>
-            <svg viewBox="558 591 262 296" fill="none" className="w-4 h-4" aria-hidden="true">
-              <path d="M558.47 887V591H610.07V887H558.47ZM641.52 887V668.8H683.92L687.52 692H690.12C697.854 683.467 706.92 676.933 717.32 672.4C727.854 667.733 739.32 665.4 751.72 665.4C764.787 665.4 776.387 668 786.52 673.2C796.787 678.267 804.854 686.6 810.72 698.2C816.587 709.8 819.52 725.267 819.52 744.6V887H768.72V747.8C768.72 733.533 765.72 723.667 759.72 718.2C753.854 712.733 745.854 710 735.72 710C730.92 710 725.854 710.733 720.52 712.2C715.187 713.667 710.054 716 705.12 719.2C700.32 722.267 696.12 726.333 692.52 731.4V887H641.52Z" fill="rgb(var(--bg))"/>
-            </svg>
-          </div>
-          <div>
-            <p className="text-[12.5px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500, lineHeight: 1.2 }}>Inertia</p>
-            <p className="text-[10px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.5 }}>New project</p>
-          </div>
-        </div>
-        <span className="text-[11px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.45 }}>9:41 AM</span>
+    // Phone frame
+    <div
+      ref={cardRef}
+      className="mx-auto flex flex-col bento-light-invert"
+      style={{
+        width: "min(270px, 100%)",
+        height: 520,
+        background: "rgb(var(--surface-elevated))",
+        border: "8px solid rgb(var(--fg) / 0.12)",
+        borderRadius: 40,
+        overflow: "hidden",
+        boxShadow: "0 0 0 1px rgb(var(--line) / 0.4), 0 24px 48px rgba(0,0,0,0.12)",
+        position: "relative",
+      }}
+    >
+      {/* Status bar */}
+      <div className="relative flex items-center justify-between px-5 pt-3 pb-1 shrink-0" style={{ background: "rgb(var(--surface-elevated))" }}>
+        <span className="text-[10px] tracking-tight font-medium" style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>9:41</span>
+        <div className="absolute left-1/2 -translate-x-1/2 rounded-full" style={{ width: 72, height: 14, background: "rgb(var(--fg))", opacity: 0.1 }} />
+        <div style={{ width: 32 }} />
       </div>
+
+      {/* Chat header */}
+      <div className="flex items-center gap-2.5 px-4 py-2.5 shrink-0" style={{ borderBottom: "1px solid rgb(var(--line) / 0.4)", background: "rgb(var(--surface-elevated))" }}>
+        <div className="rounded-full shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, background: "rgb(var(--fg))" }}>
+          <svg viewBox="558 591 262 296" fill="none" className="w-4 h-4" aria-hidden="true">
+            <path d="M558.47 887V591H610.07V887H558.47ZM641.52 887V668.8H683.92L687.52 692H690.12C697.854 683.467 706.92 676.933 717.32 672.4C727.854 667.733 739.32 665.4 751.72 665.4C764.787 665.4 776.387 668 786.52 673.2C796.787 678.267 804.854 686.6 810.72 698.2C816.587 709.8 819.52 725.267 819.52 744.6V887H768.72V747.8C768.72 733.533 765.72 723.667 759.72 718.2C753.854 712.733 745.854 710 735.72 710C730.92 710 725.854 710.733 720.52 712.2C715.187 713.667 710.054 716 705.12 719.2C700.32 722.267 696.12 726.333 692.52 731.4V887H641.52Z" fill="rgb(var(--bg))"/>
+          </svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] tracking-tight" style={{ fontWeight: 600, color: "rgb(var(--fg))", lineHeight: 1.2 }}>Inertia</p>
+          <p className="text-[10px] tracking-tight" style={{ color: "rgb(var(--fg))", opacity: 0.45 }}>New project</p>
+        </div>
+      </div>
+
       {/* Messages */}
       <div className="flex-1 relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-6 pointer-events-none z-10" style={{ background: "linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-        <div className="absolute inset-x-0 bottom-0 h-8 pointer-events-none z-10" style={{ background: "linear-gradient(to top, rgb(var(--surface-elevated)), transparent)" }} />
-      <div
-        ref={containerRef}
-        className="h-full flex flex-col justify-end gap-2 px-4 py-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        style={{ transition: "opacity 500ms ease", opacity: fading ? 0 : 1 }}
-      >
-        {CHAT_MESSAGES.slice(0, shown).map((msg, i) => {
-          const prevFrom = i > 0 ? CHAT_MESSAGES[i - 1].from : null;
-          const showLabel = msg.from !== prevFrom;
-          const isLatest = i === shown - 1;
-          return (
-            <ChatBubbleWrapper key={i} from={msg.from} isLatest={isLatest}>
-              {showLabel && (
-                <span className={`text-[10px] tracking-tight px-1 ${msg.from === "us" ? "text-left" : "text-right"}`} style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>
-                  {msg.from === "us" ? "Inertia" : "You"}
-                </span>
-              )}
-              <div className={`flex ${msg.from === "us" ? "justify-start" : "justify-end"}`}>
-                <div
-                  className="rounded-xl px-3.5 py-2 max-w-[72%] text-[12px] tracking-tight leading-relaxed"
-                  style={{
-                    background: msg.from === "us" ? "rgb(var(--fg) / 0.9)" : "rgb(var(--fg) / 0.08)",
-                    color: msg.from === "us" ? "rgb(var(--chat-us-color, var(--bg)))" : "rgb(var(--chat-bubble-fg, var(--fg)))",
-                    borderBottomLeftRadius: msg.from === "us" ? 4 : undefined,
-                    borderBottomRightRadius: msg.from === "them" ? 4 : undefined,
-                    border: msg.from === "them" ? "1px solid rgb(var(--line) / 0.6)" : "none",
-                  }}
-                >
-                  {isLatest ? <WordReveal text={msg.text} from={msg.from} /> : msg.text}
-                </div>
-              </div>
-            </ChatBubbleWrapper>
-          );
-        })}
-        {typing && (
-          <div
-            className={`flex ${nextFrom === "us" ? "justify-start" : "justify-end"}`}
-            style={{ opacity: 0, animation: `${nextFrom === "us" ? "chat-in-left" : "chat-in-right"} 800ms cubic-bezier(0.22,1,0.36,1) forwards` }}
-          >
-            <div
-              className="rounded-xl px-3.5 py-2.5 flex items-center gap-[5px]"
-              style={{
-                background: nextFrom === "us" ? "rgb(var(--fg) / 0.9)" : "transparent",
-                borderBottomLeftRadius: nextFrom === "us" ? 4 : undefined,
-                borderBottomRightRadius: nextFrom === "them" ? 4 : undefined,
-                border: nextFrom === "them" ? "1px solid rgb(var(--line) / 0.6)" : "none",
-              }}
-            >
-              {[0, 1, 2].map(i => (
-                <div key={i} className="rounded-full" style={{ width: 5, height: 5, background: nextFrom === "us" ? "rgb(var(--chat-us-color, var(--bg)))" : "rgb(var(--chat-bubble-fg, var(--muted)))", opacity: 0.5, animation: `typing-dot 1.1s ease-in-out ${i * 180}ms infinite` }} />
-              ))}
-            </div>
-          </div>
-        )}
-        {shown >= CHAT_MESSAGES.length && !fading && (
-          <div className="flex justify-center pt-2" style={{ opacity: 0, animation: "chat-in 520ms cubic-bezier(0.22,1,0.36,1) 800ms forwards" }}>
-            <a
-              href="https://www.instagram.com/by.inertia/"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent-gradient)" }}
-            >
-              Start a project
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
-            </a>
-          </div>
-        )}
-        <div ref={bottomRef} className="h-4" />
-      </div>
-      </div>
-      {/* Input box */}
-      <div className="px-4 py-3" style={{ borderTop: "1px solid rgb(var(--line) / 0.5)" }}>
-        <a
-          href="https://www.instagram.com/by.inertia/"
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-2 rounded-full px-3 py-2 transition-opacity hover:opacity-80 group"
-          style={{ background: "rgb(var(--surface-elevated))", border: "1px solid rgb(var(--line) / 0.6)" }}
+        <div className="absolute inset-x-0 top-0 h-5 pointer-events-none z-10" style={{ background: "linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
+        <div className="absolute inset-x-0 bottom-0 h-6 pointer-events-none z-10" style={{ background: "linear-gradient(to top, rgb(var(--surface-elevated)), transparent)" }} />
+        <div
+          ref={containerRef}
+          className="h-full flex flex-col justify-end gap-2 px-3.5 py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          style={{ transition: "opacity 500ms ease", opacity: fading ? 0 : 1 }}
         >
-          <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: "rgb(var(--fg) / 0.1)" }}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="w-3 h-3" style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>
+          {CHAT_MESSAGES.slice(0, shown).map((msg, i) => {
+            const prevFrom = i > 0 ? CHAT_MESSAGES[i - 1].from : null;
+            const showLabel = msg.from !== prevFrom;
+            const isLatest = i === shown - 1;
+            return (
+              <ChatBubbleWrapper key={i} from={msg.from} isLatest={isLatest}>
+                {showLabel && (
+                  <span className={`text-[10px] tracking-tight px-1 ${msg.from === "us" ? "text-left" : "text-right"}`} style={{ color: "rgb(var(--fg))", opacity: 0.4 }}>
+                    {msg.from === "us" ? "Inertia" : "You"}
+                  </span>
+                )}
+                <div className={`flex ${msg.from === "us" ? "justify-start" : "justify-end"}`}>
+                  <div
+                    className="rounded-2xl px-3 py-2 max-w-[78%] text-[12px] tracking-tight leading-relaxed"
+                    style={{
+                      background: msg.from === "us" ? "rgb(var(--fg) / 0.9)" : "rgb(var(--fg) / 0.08)",
+                      color: msg.from === "us" ? "rgb(var(--chat-us-color, var(--bg)))" : "rgb(var(--chat-bubble-fg, var(--fg)))",
+                      borderBottomLeftRadius: msg.from === "us" ? 6 : undefined,
+                      borderBottomRightRadius: msg.from === "them" ? 6 : undefined,
+                      border: msg.from === "them" ? "1px solid rgb(var(--line) / 0.5)" : "none",
+                    }}
+                  >
+                    {isLatest ? <WordReveal text={msg.text} from={msg.from} /> : msg.text}
+                  </div>
+                </div>
+              </ChatBubbleWrapper>
+            );
+          })}
+
+          {/* Inertia typing indicator */}
+          {phase === "inertia-typing" && (
+            <div
+              className="flex justify-start"
+              style={{ opacity: 0, animation: "chat-in-left 800ms cubic-bezier(0.22,1,0.36,1) forwards" }}
+            >
+              <div
+                className="rounded-2xl px-3 py-2.5 flex items-center gap-[5px]"
+                style={{ background: "rgb(var(--fg) / 0.9)", borderBottomLeftRadius: 6 }}
+              >
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="rounded-full" style={{ width: 5, height: 5, background: "rgb(var(--chat-us-color, var(--bg)))", opacity: 0.6, animation: `typing-dot 1.1s ease-in-out ${i * 180}ms infinite` }} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {shown >= CHAT_MESSAGES.length && !fading && (
+            <div className="flex justify-center pt-2" style={{ opacity: 0, animation: "chat-in 520ms cubic-bezier(0.22,1,0.36,1) 800ms forwards" }}>
+              <a
+                href="https://www.instagram.com/by.inertia/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-90"
+                style={{ background: "var(--accent-gradient)" }}
+              >
+                Start a project
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+              </a>
+            </div>
+          )}
+          <div ref={bottomRef} className="h-1" />
+        </div>
+      </div>
+
+      {/* Input box */}
+      <div className="px-3 py-3 shrink-0" style={{ borderTop: "1px solid rgb(var(--line) / 0.4)", background: "rgb(var(--surface-elevated))" }}>
+        <div
+          className="flex items-center gap-2 rounded-2xl px-1.5 py-1.5"
+          style={{ background: "rgb(var(--fg) / 0.05)", border: "1px solid rgb(var(--line) / 0.6)", minHeight: 36 }}
+        >
+          {/* + button */}
+          <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: "rgb(var(--fg) / 0.08)" }}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="w-3 h-3" style={{ color: "rgb(var(--fg))", opacity: 0.4 }}>
               <line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/>
             </svg>
           </div>
-          <ChatPlaceholder />
-          <div className="rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" style={{ width: 24, height: 24, background: "rgb(var(--fg))" }}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="rgb(var(--bg))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
-              <line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/>
+          {showInputTyping ? (
+            <span className="flex-1 text-[12px] tracking-tight leading-relaxed" style={{ color: "rgb(var(--fg))", wordBreak: "break-word" }}>
+              {phase === "user-typing"
+                ? <InputTypewriter key={inputText} text={inputText} onDone={handleInputDone} />
+                : inputText
+              }
+            </span>
+          ) : (
+            <ChatPlaceholder />
+          )}
+          {/* Send button — filled when user has text */}
+          <div
+            className="rounded-full flex items-center justify-center shrink-0"
+            style={{
+              width: 24,
+              height: 24,
+              background: showInputTyping ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.12)",
+              transition: "background 200ms ease",
+            }}
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke={showInputTyping ? "rgb(var(--bg))" : "rgb(var(--fg))"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" style={{ opacity: showInputTyping ? 1 : 0.35 }}>
+              <line x1="8" y1="13" x2="8" y2="3"/><polyline points="4 7 8 3 12 7"/>
             </svg>
           </div>
-        </a>
+        </div>
+      </div>
+
+      {/* Home bar */}
+      <div className="flex justify-center pb-2 shrink-0" style={{ background: "rgb(var(--surface-elevated))" }}>
+        <div className="rounded-full" style={{ width: 100, height: 4, background: "rgb(var(--fg))", opacity: 0.15 }} />
       </div>
     </div>
   );
 }
 
+function ProjectCta({ className, style, label = "Start a project", href = "https://www.instagram.com/by.inertia/", arrow = "↗", external = true, size = "md" }: {
+  className?: string;
+  style?: React.CSSProperties;
+  label?: string;
+  href?: string;
+  arrow?: string;
+  external?: boolean;
+  size?: "sm" | "md";
+}) {
+  const [hovered, setHovered] = useState(false);
+  const words = [...label.split(" "), arrow];
+  const px = size === "sm" ? "px-3.5" : "px-4";
+  const py = size === "sm" ? "py-1.5" : "py-2";
+  const fs = size === "sm" ? "text-[12px]" : "text-[14px]";
+  const Tag = external ? "a" : Link;
+  const extraProps = external ? { target: "_blank", rel: "noreferrer" } : {};
+  return (
+    <Tag
+      href={href}
+      {...extraProps}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`inline-flex items-center rounded-full ${px} ${py} ${fs} tracking-tight ${className ?? ""}`}
+      style={{
+        background: "var(--btn-bg)",
+        color: "var(--btn-fg)",
+        boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)",
+        gap: "0.3em",
+        ...style,
+      }}
+    >
+      {words.map((word, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-block",
+            animation: hovered ? `cta-wave 600ms cubic-bezier(0.22,1,0.36,1) ${i * 60}ms infinite alternate` : "none",
+          }}
+        >
+          {word}
+        </span>
+      ))}
+    </Tag>
+  );
+}
+
 // -- Platform signal ----------------------------------------------------
+
+const SIGNAL_TABS = [
+  {
+    label: "Storefronts",
+    headline: "Your store,",
+    accent: "done right.",
+    body: "A lot of brands leave money on the table with a site that doesn't match what they're actually selling. We design, build, and launch it. One team, start to finish.",
+    visual: (
+      <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
+        {/* grid of product tiles */}
+        {[0,1,2].map(col => [0,1].map(row => (
+          <rect key={`${col}-${row}`} x={18 + col * 46} y={10 + row * 38} width={36} height={30} rx={4} stroke="currentColor" strokeWidth="1.2" opacity={0.18 + col * 0.08 + row * 0.04}/>
+        )))}
+        {/* highlighted tile */}
+        <rect x={64} y={10} width={36} height={30} rx={4} fill="currentColor" opacity={0.08}/>
+        <rect x={64} y={10} width={36} height={30} rx={4} stroke="currentColor" strokeWidth="1.4" opacity={0.5}/>
+        {/* price line on highlighted */}
+        <rect x={69} y={32} width={10} height={2} rx={1} fill="currentColor" opacity={0.5}/>
+        <rect x={82} y={32} width={14} height={2} rx={1} fill="currentColor" opacity={0.18}/>
+        {/* bottom CTA bar */}
+        <rect x={42} y={70} width={76} height={12} rx={6} fill="currentColor" opacity={0.12}/>
+        <rect x={42} y={70} width={76} height={12} rx={6} stroke="currentColor" strokeWidth="1" opacity={0.2}/>
+        <rect x={55} y={74} width={50} height={4} rx={2} fill="currentColor" opacity={0.25}/>
+      </svg>
+    ),
+  },
+  {
+    label: "Rebrands",
+    headline: "Your brand grew.",
+    accent: "Your identity should too.",
+    body: "We know the difference between a refresh and a full rebrand. We help you figure out which one you need, then build it properly. Logo, site, content, all of it.",
+    visual: (
+      <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
+        {/* faded old mark — circle */}
+        <circle cx="58" cy="45" r="22" stroke="currentColor" strokeWidth="1.2" strokeDasharray="4 3" opacity={0.18}/>
+        <circle cx="58" cy="45" r="8" stroke="currentColor" strokeWidth="1.1" opacity={0.12}/>
+        {/* arrow pointing right */}
+        <path d="M88 45h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity={0.3}/>
+        <path d="M102 39l6 6-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity={0.3}/>
+        {/* new mark — sharp geometry */}
+        <polygon points="122,24 142,66 102,66" stroke="currentColor" strokeWidth="1.4" opacity={0.55}/>
+        <polygon points="122,34 134,58 110,58" fill="currentColor" opacity={0.08}/>
+        {/* center dot */}
+        <circle cx="122" cy="52" r="2" fill="currentColor" opacity={0.4}/>
+      </svg>
+    ),
+  },
+  {
+    label: "Campaigns",
+    headline: "Good creative",
+    accent: "doesn't run itself.",
+    body: "Ads, landing pages, email flows. We build the funnel and make sure the numbers make sense. You stay focused on the business. We stay focused on growing it.",
+    visual: (
+      <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
+        {/* funnel stages */}
+        {([
+          { x: 30, w: 100, y: 10, h: 14, o: 0.18 },
+          { x: 42, w: 76,  y: 30, h: 14, o: 0.28 },
+          { x: 56, w: 48,  y: 50, h: 14, o: 0.4  },
+          { x: 66, w: 28,  y: 70, h: 10, o: 0.55 },
+        ] as {x:number;w:number;y:number;h:number;o:number}[]).map((r, i) => (
+          <g key={i}>
+            <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={3} stroke="currentColor" strokeWidth="1.2" opacity={r.o}/>
+            {i === 3 && <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={3} fill="currentColor" opacity={0.08}/>}
+          </g>
+        ))}
+        {/* right-side metric lines */}
+        <rect x={140} y={12} width={10} height={2} rx={1} fill="currentColor" opacity={0.2}/>
+        <rect x={140} y={32} width={10} height={2} rx={1} fill="currentColor" opacity={0.28}/>
+        <rect x={140} y={52} width={10} height={2} rx={1} fill="currentColor" opacity={0.38}/>
+        <rect x={140} y={72} width={10} height={2} rx={1} fill="currentColor" opacity={0.5}/>
+      </svg>
+    ),
+  },
+];
 
 function PlatformSignal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const [tab, setTab] = useState(0);
+  const [tabVisible, setTabVisible] = useState(true);
 
   useEffect(() => {
     const el = ref.current;
@@ -1332,26 +1545,71 @@ function PlatformSignal() {
     return () => obs.disconnect();
   }, []);
 
+  const switchTab = (i: number) => {
+    if (i === tab) return;
+    setTabVisible(false);
+    setTimeout(() => { setTab(i); setTabVisible(true); }, 180);
+  };
+
+  const t = SIGNAL_TABS[tab];
+
+  const tabs = (
+    <div
+      className="inline-flex self-start rounded-full p-1 gap-0.5"
+      style={{ background: "rgb(var(--fg) / 0.08)", border: "1px solid rgb(var(--line))" }}
+    >
+      {SIGNAL_TABS.map((s, i) => (
+        <button
+          key={s.label}
+          onClick={() => switchTab(i)}
+          className="rounded-full px-3.5 py-1 text-[12px] tracking-tight"
+          style={{
+            background: i === tab ? "var(--btn-bg)" : "transparent",
+            color: i === tab ? "var(--btn-fg)" : "rgb(var(--fg))",
+            opacity: i === tab ? 1 : 0.4,
+            fontWeight: i === tab ? 500 : 400,
+            transition: "background 200ms ease, color 200ms ease, opacity 200ms ease",
+          }}
+        >
+          {s.label}
+        </button>
+      ))}
+    </div>
+  );
+
+  const copy = (mobile?: boolean) => (
+    <div
+      className={`flex flex-col ${mobile ? "gap-4 items-center text-center" : "gap-5"}`}
+      style={{
+        opacity: tabVisible ? 1 : 0,
+        transform: tabVisible ? "translateY(0)" : "translateY(6px)",
+        transition: "opacity 200ms ease, transform 200ms ease",
+      }}
+    >
+<p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-snug ${mobile ? "text-[clamp(2rem,5vw,3rem)]" : "text-[clamp(2rem,2.8vw,2.8rem)]"}`}>
+        {t.headline}{!mobile && tab === 1 ? <br /> : " "}
+        <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{t.accent}</span>
+      </p>
+      <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] ${mobile ? "text-[1rem] max-w-xs" : "text-[clamp(1rem,1.8vw,1.05rem)] max-w-sm"}`} style={{ opacity: 0.7 }}>
+        {t.body}
+      </p>
+    </div>
+  );
+
   return (
     <section ref={ref} className="flex flex-col">
       {/* Mobile: stacked */}
       <div className="sm:hidden flex flex-col gap-8 py-10">
         <div className="px-3">
           <div
-            className="flex flex-col gap-4 text-center items-center"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "translateY(0)" : "translateY(12px)",
               transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
             }}
           >
-            <p className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
-              The whole thing.{" "}
-              <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Done right.</span>
-            </p>
-            <p className="text-[1rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs" style={{ opacity: 0.7 }}>
-              Design, storefront, backend, campaigns. Inertia builds it all, so nothing falls through the gaps.
-            </p>
+            <div className="mb-4 flex justify-center">{tabs}</div>
+            {copy(true)}
           </div>
         </div>
         <div
@@ -1370,14 +1628,7 @@ function PlatformSignal() {
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 300ms",
           }}
         >
-          <a
-            href="https://www.instagram.com/by.inertia/"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
-          >
-            Start a project ↗
-          </a>
+          <ProjectCta />
         </div>
       </div>
 
@@ -1391,21 +1642,9 @@ function PlatformSignal() {
             transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
-          <p className="text-[clamp(2rem,2.8vw,2.8rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug">
-            The whole thing.{" "}
-            <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>Done right.</span>
-          </p>
-          <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm" style={{ opacity: 0.7 }}>
-            Most agencies hand off. We don't. Design, storefront, backend, campaigns. Built and owned by one team, so nothing falls through the gaps.
-          </p>
-          <a
-            href="https://www.instagram.com/by.inertia/"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex self-start items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
-          >
-            Start a project ↗
-          </a>
+          {tabs}
+          {copy()}
+          <ProjectCta className="self-start" style={{ marginLeft: "4px" }} />
         </div>
         <div
           className="flex-[1.4] min-w-0"
@@ -1703,7 +1942,6 @@ function RotatingPanel() {
 
   const current = ALL_PHRASES[phraseIdx];
   const isExternal = current.cta.href.startsWith("http");
-  const ctaClass = "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[14px] tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity";
 
   return (
     <div
@@ -1779,17 +2017,12 @@ function RotatingPanel() {
           animation: exiting ? "none" : "rise-in 400ms 100ms cubic-bezier(0.22,1,0.36,1) both",
         }}
       >
-        {isExternal ? (
-          <a href={current.cta.href} target="_blank" rel="noreferrer" className={ctaClass}>
-            {current.cta.label}
-            <span aria-hidden="true">↗</span>
-          </a>
-        ) : (
-          <Link href={current.cta.href} className={ctaClass}>
-            {current.cta.label}
-            <span aria-hidden="true">→</span>
-          </Link>
-        )}
+        <ProjectCta
+          label={current.cta.label}
+          href={current.cta.href}
+          arrow={isExternal ? "↗" : "→"}
+          external={isExternal}
+        />
       </div>
     </div>
   );
@@ -2198,6 +2431,7 @@ function StackDiagram() {
   const raf = useRef<number | null>(null);
   const target = useRef({ x: 0, y: 0 });
   const isHovering = useRef(false);
+  const [bentoCta, setBentoCta] = useState(false);
 
   useEffect(() => {
     const STIFFNESS = 0.18;
@@ -2484,15 +2718,18 @@ function StackDiagram() {
             href="https://www.instagram.com/by.inertia/"
             target="_blank"
             rel="noreferrer"
+            onMouseEnter={() => setBentoCta(true)}
+            onMouseLeave={() => setBentoCta(false)}
             className="flex flex-col justify-between p-7 rounded-2xl hover:opacity-90 transition-opacity"
             style={{ background:"var(--btn-bg)", gridColumn:"4", gridRow:"2", minHeight:160 }}
           >
             <span className="text-[13px] tracking-tight text-[var(--btn-fg)]" style={{ opacity:0.7 }}>Ready to start?</span>
             <div>
               <p className="text-[1.4rem] font-medium tracking-tight text-[var(--btn-fg)] leading-snug mb-3">Let's build something.</p>
-              <span className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[var(--btn-fg)]" style={{ opacity:0.8 }}>
-                Start a project
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
+              <span className="inline-flex text-[13px] tracking-tight text-[var(--btn-fg)]" style={{ opacity:0.8, gap:"0.3em" }}>
+                {["Start", "a", "project", "↗"].map((w, i) => (
+                  <span key={i} style={{ display:"inline-block", animation: bentoCta ? `cta-wave 600ms cubic-bezier(0.22,1,0.36,1) ${i * 60}ms infinite alternate` : "none" }}>{w}</span>
+                ))}
               </span>
             </div>
           </a>
@@ -2533,15 +2770,7 @@ function StackDiagram() {
         </div>
         {/* Mobile CTA remains below */}
         <div className="flex flex-col sm:hidden items-center gap-4 pt-2">
-          <a
-            href="https://www.instagram.com/by.inertia/"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity"
-            style={{ background: "var(--accent-gradient)" }}
-          >
-            Start a project ↗
-          </a>
+          <ProjectCta />
           <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
             No commitment. We usually reply within 24h.
           </span>

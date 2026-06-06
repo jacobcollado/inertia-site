@@ -1,9 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "./actions";
+
+function WaveLink({ href, words, className, style }: { href: string; words: string[]; className?: string; style?: React.CSSProperties }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <Link
+      href={href}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={`inline-flex items-center rounded-full tracking-tight hover:opacity-85 transition-opacity ${className ?? ""}`}
+      style={{ gap: "0.3em", ...style }}
+    >
+      {words.map((w, i) => (
+        <span key={i} style={{ display: "inline-block", animation: hovered ? `cta-wave 600ms cubic-bezier(0.22,1,0.36,1) ${i * 60}ms infinite alternate` : "none" }}>{w}</span>
+      ))}
+    </Link>
+  );
+}
 
 function PortalLink({ href, label }: { href: string; label: string }) {
   const [loading, setLoading] = useState(false);
@@ -62,13 +79,12 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
         >
           Sign in
         </Link>
-        <Link
+        <WaveLink
           href="/login?tab=signup"
-          className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[13px] tracking-tight hover:opacity-85 transition-opacity"
-          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)" }}
-        >
-          Create account
-        </Link>
+          words={["Create", "account"]}
+          className="px-3.5 py-1.5 text-[13px]"
+          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)" }}
+        />
       </div>
     );
   }
@@ -145,12 +161,11 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
         >
           Sign in
         </Link>
-        <Link
+        <WaveLink
           href="/login?tab=signup"
+          words={["Request", "access"]}
           style={{
             flex: 1,
-            display: "flex",
-            alignItems: "center",
             justifyContent: "center",
             height: "36px",
             borderRadius: "100px",
@@ -160,11 +175,9 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
             letterSpacing: "-0.02em",
             color: "var(--btn-fg)",
             textDecoration: "none",
-            transition: "opacity 140ms ease",
+            boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)",
           }}
-        >
-          Request access
-        </Link>
+        />
       </div>
     );
   }
@@ -197,13 +210,12 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
       >
         Sign in
       </Link>
-      <Link
+      <WaveLink
         href="/login?tab=signup"
-        className="inline-flex items-center rounded-full px-4 py-2 text-[15px] font-medium tracking-tight hover:opacity-85 transition-opacity"
-        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)" }}
-      >
-        Create account
-      </Link>
+        words={["Create", "account"]}
+        className="px-4 py-2 text-[15px] font-medium"
+        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)" }}
+      />
     </div>
   );
 }
