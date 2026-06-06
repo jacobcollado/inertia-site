@@ -29,7 +29,7 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [{ source: "/((?!ingest).*)", headers: securityHeaders }];
   },
   async rewrites() {
     return [
