@@ -33,7 +33,7 @@ const KEY_FEATURES = [
     visual: "upsell",
     image: "/aether/upsell.png",
     flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></g></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
   {
     title: "Scarcity",
@@ -42,7 +42,7 @@ const KEY_FEATURES = [
     visual: "scarcity",
     image: "/aether/scarcity.png",
     flip: true,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></g></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
   },
   {
     title: "Guided format",
@@ -51,23 +51,23 @@ const KEY_FEATURES = [
     visual: "guided",
     image: "/aether/guided.png",
     flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><g><path d="M3 3h18v4H3z"/><path d="M3 10h11v4H3z"/><path d="M3 17h7v4H3z"/></g></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
 ];
 
 const SECONDARY_FEATURES = [
-  { name: "41 sections", desc: "Everything you need, nothing you don't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="7" width="9" height="3" rx="1"/><rect x="1" y="12" width="6" height="3" rx="1"/></g></svg> },
+  { name: "41 sections", desc: "Everything you need, nothing you don't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="2" width="14" height="3" rx="1"/><rect key="b" x="1" y="7" width="9" height="3" rx="1"/><rect key="c" x="1" y="12" width="6" height="3" rx="1"/></svg> },
   { name: "Dark mode", desc: "Looks as good at midnight as midday", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/></svg> },
-  { name: "Mega menu", desc: "Navigation that handles large catalogues", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="1" width="14" height="2.5" rx="0.5"/><rect x="1" y="5.5" width="6.5" height="9" rx="0.5"/><rect x="8.5" y="5.5" width="6.5" height="9" rx="0.5"/></g></svg> },
-  { name: "Sticky cart", desc: "Add to cart stays in reach at all times", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><path d="M1 1h2l1.5 7.5h7L13 4H4"/><circle cx="6.5" cy="13" r="1"/><circle cx="11" cy="13" r="1"/></g></svg> },
-  { name: "Mobile optimised", desc: "Built for thumbs first", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="4" y="1" width="8" height="14" rx="1.5"/><line x1="8" y1="12" x2="8" y2="12.5" strokeWidth="1.8"/></g></svg> },
-  { name: "Quick buy", desc: "Purchase without leaving the page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><circle cx="8" cy="8" r="7"/><polyline points="5 8 7 10 11 6"/></g></svg> },
-  { name: "Video hero", desc: "Autoplay video in the first section", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="2" width="14" height="12" rx="1.5"/><polygon points="6 5.5 11 8 6 10.5" fill="currentColor" opacity="0.5"/></g></svg> },
-  { name: "Lookbook", desc: "Editorial layouts for campaign content", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="1" width="6.5" height="14" rx="1"/><rect x="8.5" y="1" width="6.5" height="8" rx="1"/><rect x="8.5" y="10" width="6.5" height="5" rx="1"/></g></svg> },
-  { name: "SMS + email capture", desc: "Corner widget and popup, both built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><rect x="1" y="3" width="14" height="10" rx="1.5"/><polyline points="1 3 8 9 15 3"/></g></svg> },
-  { name: "Music player", desc: "Ambient audio to set the brand mood", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><circle cx="5" cy="13" r="2"/><circle cx="12" cy="11" r="2"/><path d="M7 13V4l7-2v9"/></g></svg> },
-  { name: "Custom fonts", desc: "Upload any font directly in the editor", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><path d="M2 13L6 3l4 10M3.5 9.5h5"/><path d="M11 5v8M11 5c0-1.1.9-2 2-2s2 .9 2 2"/></g></svg> },
-  { name: "FAQs", desc: "Accordion answers on any page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><g><circle cx="8" cy="8" r="7"/><path d="M6 6a2 2 0 1 1 2 2v1"/><circle cx="8" cy="12" r="0.5" fill="currentColor"/></g></svg> },
+  { name: "Mega menu", desc: "Navigation that handles large catalogues", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="1" width="14" height="2.5" rx="0.5"/><rect key="b" x="1" y="5.5" width="6.5" height="9" rx="0.5"/><rect key="c" x="8.5" y="5.5" width="6.5" height="9" rx="0.5"/></svg> },
+  { name: "Sticky cart", desc: "Add to cart stays in reach at all times", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M1 1h2l1.5 7.5h7L13 4H4"/><circle key="b" cx="6.5" cy="13" r="1"/><circle key="c" cx="11" cy="13" r="1"/></svg> },
+  { name: "Mobile optimised", desc: "Built for thumbs first", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="4" y="1" width="8" height="14" rx="1.5"/><line key="b" x1="8" y1="12" x2="8" y2="12.5" strokeWidth="1.8"/></svg> },
+  { name: "Quick buy", desc: "Purchase without leaving the page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><polyline key="b" points="5 8 7 10 11 6"/></svg> },
+  { name: "Video hero", desc: "Autoplay video in the first section", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="2" width="14" height="12" rx="1.5"/><polygon key="b" points="6 5.5 11 8 6 10.5" fill="currentColor" opacity="0.5"/></svg> },
+  { name: "Lookbook", desc: "Editorial layouts for campaign content", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="1" width="6.5" height="14" rx="1"/><rect key="b" x="8.5" y="1" width="6.5" height="8" rx="1"/><rect key="c" x="8.5" y="10" width="6.5" height="5" rx="1"/></svg> },
+  { name: "SMS + email capture", desc: "Corner widget and popup, both built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="3" width="14" height="10" rx="1.5"/><polyline key="b" points="1 3 8 9 15 3"/></svg> },
+  { name: "Music player", desc: "Ambient audio to set the brand mood", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="5" cy="13" r="2"/><circle key="b" cx="12" cy="11" r="2"/><path key="c" d="M7 13V4l7-2v9"/></svg> },
+  { name: "Custom fonts", desc: "Upload any font directly in the editor", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M2 13L6 3l4 10M3.5 9.5h5"/><path key="b" d="M11 5v8M11 5c0-1.1.9-2 2-2s2 .9 2 2"/></svg> },
+  { name: "FAQs", desc: "Accordion answers on any page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><path key="b" d="M6 6a2 2 0 1 1 2 2v1"/><circle key="c" cx="8" cy="12" r="0.5" fill="currentColor"/></svg> },
 ];
 
 const TIERS = [
@@ -95,32 +95,31 @@ export default function AetherPage() {
     <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Hero */}
-      <section className="flex flex-col items-center justify-center gap-5 px-6 text-center rise" style={{ minHeight: 420 }}>
-        <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] flex items-center gap-2.5">
-          <span className="inline-flex items-center rounded-full px-2 py-1 text-[12px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>Aether</span>
-          <span className="w-px h-3.5 bg-[rgb(var(--line))]" aria-hidden="true" />
+      <section className="flex flex-col items-center justify-center gap-5 px-4 sm:px-6 text-center rise" style={{ minHeight: 420, paddingTop: 80, paddingBottom: 40 }}>
+        <p className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] -mt-4" style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--fg) / 0.1)" }}>
+          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.8)" }}>Aether</span>
           A Shopify theme by Inertia
         </p>
-        <h1 className="text-[clamp(2.8rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
+        <h1 className="text-[clamp(2.2rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
           Design is the Product.
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
           A Shopify theme for independent brands that take how things look seriously.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 w-full px-2 sm:px-0 text-[13px] tracking-tight">
+        <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
             href="/aether/buy"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Buy a license
           </Link>
-          <div className="w-full sm:w-auto flex gap-2">
-            <div className="flex-[2] sm:flex-none">
+          <div className="w-full flex gap-2">
+            <div className="flex-[2]">
               <DemoButton href={DEMO_URL} password="aether" />
             </div>
             <Link
               href="/docs?from=aether"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-5 py-2 text-[13px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-5 py-2 text-[13px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
             >
               Docs
             </Link>
