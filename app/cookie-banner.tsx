@@ -59,7 +59,7 @@ export function CookieBanner() {
             style={{ background: "rgb(var(--surface-elevated))", boxShadow: "0 8px 32px rgb(0 0 0 / 0.18)" }}
           >
             <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] flex-1">
-              We use cookies to keep you signed in and understand how the site is used.{" "}
+              We use cookies to keep you signed in, measure site usage, and record anonymised sessions to improve the experience. All inputs are masked.{" "}
               <Link href="/policies/privacy-policy" className="underline underline-offset-2 hover:text-[rgb(var(--fg))] transition-colors">
                 Privacy policy
               </Link>

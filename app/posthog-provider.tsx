@@ -13,6 +13,10 @@ if (typeof window !== "undefined" && !posthog.__loaded) {
     capture_pageview: false,
     capture_pageleave: true,
     capture_performance: true,
+    session_recording: {
+      maskAllInputs: true,
+      maskTextSelector: "input, textarea, [data-ph-mask]",
+    },
   });
 }
 

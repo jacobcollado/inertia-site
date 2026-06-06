@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = { title: "Privacy Policy" };
 
-const EFFECTIVE = "May 1, 2026";
+const EFFECTIVE = "June 6, 2026";
 const COMPANY = "Inertia Studio LLC";
 const CONTACT = "hello@byinertia.com";
 
@@ -31,7 +31,7 @@ const SECTIONS = [
   {
     id: "cookies",
     title: "Cookies & Tracking",
-    body: "We use a small number of browser storage entries. One stores your theme preference (light or dark mode) along with a timestamp so the site remembers your choice between visits. When you sign in to the client portal, Supabase sets a session cookie to keep you authenticated. This cookie contains a session token, not your password or payment details. We do not use advertising cookies, cross-site tracking cookies, third-party analytics pixels, or browser fingerprinting. You can clear cookies at any time in your browser settings. Doing so will sign you out of the portal and reset your theme preference.",
+    body: "We use a small number of browser storage entries. One stores your theme preference (light or dark mode) along with a timestamp so the site remembers your choice between visits. When you sign in to the client portal, Supabase sets a session cookie to keep you authenticated. This cookie contains a session token, not your password or payment details. We use PostHog to collect anonymised page-view analytics and to record anonymised session replays — these help us understand how visitors navigate the site so we can improve it. All form inputs and text fields are masked in session recordings; we never capture passwords, payment details, or personal data entered into forms. PostHog analytics data is routed through our own domain and stored on PostHog's US servers. We do not use advertising cookies, cross-site tracking cookies, or browser fingerprinting. You can clear cookies at any time in your browser settings. Doing so will sign you out of the portal and reset your theme preference.",
   },
   {
     id: "retention",
