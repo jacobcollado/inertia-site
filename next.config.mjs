@@ -49,6 +49,7 @@ const nextConfig = {
       { source: "/privacy", destination: "/policies/privacy-policy", permanent: true },
     ];
   },
+  skipTrailingSlashRedirect: true,
   turbopack: {
     root: path.resolve("."),
   },
