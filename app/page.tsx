@@ -3453,27 +3453,27 @@ function VisualLayout() {
         <TechMarquee />
       </div>
 
-      <div className="py-6 sm:py-10" />
+      <div className="py-8 sm:py-14" />
 
       <AetherFeature />
 
-      <div className="py-6 sm:py-10" />
+      <div className="py-8 sm:py-14" />
 
       <PlatformSignal />
 
-      <div className="py-6 sm:py-10" />
+      <div className="py-8 sm:py-14" />
 
       <NewsCarousel />
 
-      <div className="py-6 sm:py-10" />
+      <div className="py-8 sm:py-14" />
 
       <StackDiagram />
 
-      <div className="py-6 sm:py-10" />
+      <div className="py-12 sm:py-20" />
 
       <Faq />
 
-      <div className="py-6 sm:py-10" />
+      <div className="py-8 sm:py-14" />
 
       <StartPrompt closing />
 
