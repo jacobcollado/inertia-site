@@ -871,6 +871,147 @@ function DarkModeToggleCard() {
   );
 }
 
+const AETHER_SLIDES = [
+  {
+    label: "Guided selling",
+    desc: "Helps shoppers find the right product, then nudges them to checkout.",
+    src: "/aether/guided.png",
+  },
+  {
+    label: "Built-in upsells",
+    desc: "Raise average order value without bolting on another app.",
+    src: "/aether/upsell.png",
+  },
+  {
+    label: "Honest urgency",
+    desc: "Real stock and timing cues that build trust instead of breaking it.",
+    src: "/aether/scarcity.png",
+  },
+] as const;
+
+const AETHER_SLIDE_MS = 4200;
+
+function AetherSpotlight() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  // progress is 0..1 across the current slide, drives the fill bar on the active row
+  const [progress, setProgress] = useState(0);
+  const startRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (paused) return;
+    startRef.current = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startRef.current;
+      const p = Math.min(elapsed / AETHER_SLIDE_MS, 1);
+      setProgress(p);
+      if (p >= 1) {
+        setActive((i) => (i + 1) % AETHER_SLIDES.length);
+        startRef.current = now;
+        setProgress(0);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [paused, active]);
+
+  const select = (i: number) => {
+    setActive(i);
+    setProgress(0);
+    startRef.current = performance.now();
+  };
+
+  return (
+    <div
+      className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(280px,360px)] gap-4 sm:gap-5"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Persistent preview — the anchor. Slides crossfade in place. */}
+      <div
+        className="relative rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--surface-elevated))] overflow-hidden"
+        style={{ aspectRatio: "16 / 10" }}
+      >
+        {AETHER_SLIDES.map((slide, i) => {
+          const on = i === active;
+          return (
+            <img
+              key={slide.src}
+              src={slide.src}
+              alt={slide.label}
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover object-top will-change-transform"
+              style={{
+                opacity: on ? 1 : 0,
+                // active sits flat and sharp; inactive drifts down a touch, scales
+                // up, and softens — so the swap reads as a deliberate settle.
+                transform: on ? "scale(1) translateY(0)" : "scale(1.035) translateY(1.5%)",
+                filter: on ? "blur(0px)" : "blur(6px)",
+                zIndex: on ? 1 : 0,
+                transition: "opacity 900ms cubic-bezier(0.4,0,0.2,1), transform 1100ms cubic-bezier(0.22,1,0.36,1), filter 900ms cubic-bezier(0.4,0,0.2,1)",
+              }}
+            />
+          );
+        })}
+        {/* caption pinned bottom-left so there's always a "you are here" label */}
+        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 pointer-events-none">
+          <div className="absolute inset-x-0 bottom-0 pointer-events-none" style={{ height: "70%", background: "linear-gradient(to top, rgb(var(--surface-elevated)) 8%, transparent)" }} />
+          <p className="relative text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.7 }}>
+            <span key={active} className="tabular-nums inline-block" style={{ animation: "rise-in 500ms cubic-bezier(0.22,1,0.36,1)" }}>{active + 1}</span>
+            <span className="mx-1.5" style={{ opacity: 0.4 }}>/</span>
+            <span className="tabular-nums">{AETHER_SLIDES.length}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Feature list — the map. Active row highlighted with a progress fill. */}
+      <div className="flex flex-col gap-1.5 self-center">
+        {AETHER_SLIDES.map((slide, i) => {
+          const on = i === active;
+          return (
+            <button
+              key={slide.src}
+              type="button"
+              onClick={() => select(i)}
+              className="group relative text-left rounded-xl px-4 py-3.5 transition-colors duration-300"
+              style={{ background: on ? "rgb(var(--fg) / 0.05)" : "transparent" }}
+            >
+              <span className="flex items-center justify-between gap-3">
+                <span
+                  className="text-[15px] sm:text-[16px] tracking-tight transition-colors duration-300"
+                  style={{ color: on ? "rgb(var(--fg))" : "rgb(var(--muted))" }}
+                >
+                  {slide.label}
+                </span>
+                <span className="text-[12px] tabular-nums tracking-tight transition-opacity duration-300" style={{ color: "rgb(var(--muted))", opacity: on ? 0.6 : 0.3 }}>
+                  {i + 1}
+                </span>
+              </span>
+              <span
+                className="block overflow-hidden transition-all duration-300"
+                style={{ maxHeight: on ? 60 : 0, opacity: on ? 1 : 0 }}
+              >
+                <span className="block text-[12.5px] sm:text-[13px] leading-snug tracking-tight text-[rgb(var(--muted))] pt-1.5" style={{ opacity: 0.7 }}>
+                  {slide.desc}
+                </span>
+              </span>
+              {/* progress rail — only the active row fills, giving a sense of pace + place */}
+              <span className="absolute left-4 right-4 bottom-0 h-px rounded-full overflow-hidden" style={{ background: "rgb(var(--fg) / 0.08)", opacity: on ? 1 : 0 }}>
+                <span
+                  className="block h-full rounded-full"
+                  style={{ width: `${on ? progress * 100 : 0}%`, background: "rgb(var(--fg) / 0.55)" }}
+                />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AetherFeature() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -915,8 +1056,14 @@ function AetherFeature() {
         </p>
       </div>
 
-      {/* Bento grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 sm:grid-rows-2 gap-3 bento-light-invert">
+      {/* Auto-advancing spotlight: one persistent preview, a feature list that
+          doubles as a map of where you are. */}
+      <div style={fade(60)}>
+        <AetherSpotlight />
+      </div>
+
+      {/* Bento grid (replaced by spotlight above) */}
+      <div className="hidden grid-cols-2 sm:grid-cols-3 sm:grid-rows-2 gap-3 bento-light-invert">
 
         {/* Hero — full width on mobile, tall left col on desktop */}
         <div className={`${cardBase} col-span-2 sm:col-span-1 sm:row-span-2 relative flex flex-col justify-end group`} style={{ ...fade(60), minHeight: 280 }}>
@@ -1015,8 +1162,8 @@ function AetherFeature() {
 
       </div>
 
-      {/* CTA */}
-      <div className="flex flex-row sm:justify-end items-center gap-3 pt-6" style={fade(280)}>
+      {/* CTA — left-aligned so it sits under the preview, not floating far right */}
+      <div className="flex flex-row flex-wrap justify-start items-center gap-3 pt-8" style={fade(280)}>
         <ProjectCta label="Explore Aether" href="/aether" arrow="→" external={false} />
         <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-colors" style={{ border: "1px solid rgb(var(--fg) / 0.25)", color: "rgb(var(--fg) / 0.6)" }}>
           Buy now, from $85
@@ -1692,9 +1839,13 @@ function PlatformSignal() {
   );
 
   return (
-    <section ref={ref} className="flex flex-col">
+    <section ref={ref} className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
+      <div
+        className="relative flex flex-col"
+        style={{ background: "rgb(var(--orbit-surface))", borderRadius: 48, overflow: "hidden" }}
+      >
       {/* Mobile: stacked */}
-      <div className="sm:hidden flex flex-col gap-8 py-10">
+      <div className="sm:hidden flex flex-col gap-8 py-10 px-4">
         <div className="px-3">
           <div
             style={{
@@ -1731,9 +1882,9 @@ function PlatformSignal() {
       </div>
 
       {/* Desktop: copy left, diagram right */}
-      <div className="hidden sm:flex items-center gap-10 py-12 max-w-[80rem] mx-auto w-full">
+      <div className="hidden sm:flex items-center justify-center gap-16 py-16 px-10 max-w-[80rem] mx-auto w-full">
         <div
-          className="flex-[1.2] flex flex-col gap-6"
+          className="flex-1 max-w-md flex flex-col gap-6"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(12px)",
@@ -1745,7 +1896,7 @@ function PlatformSignal() {
           <ProjectCta className="self-start" style={{ marginLeft: "4px" }} />
         </div>
         <div
-          className="flex-[1.4] min-w-0"
+          className="flex-1 flex justify-center min-w-0"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -1754,6 +1905,7 @@ function PlatformSignal() {
         >
           <PlatformDiagram />
         </div>
+      </div>
       </div>
     </section>
   );
