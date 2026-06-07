@@ -966,47 +966,54 @@ function AetherSpotlight() {
         </div>
       </div>
 
-      {/* Feature list — the map. Active row highlighted with a progress fill. */}
-      <div className="flex flex-col gap-1.5 self-center">
-        {AETHER_SLIDES.map((slide, i) => {
-          const on = i === active;
-          return (
-            <button
-              key={slide.src}
-              type="button"
-              onClick={() => select(i)}
-              className="group relative text-left rounded-xl px-4 py-3.5 transition-colors duration-300"
-              style={{ background: on ? "rgb(var(--fg) / 0.05)" : "transparent" }}
-            >
-              <span className="flex items-center justify-between gap-3">
-                <span
-                  className="text-[15px] sm:text-[16px] tracking-tight transition-colors duration-300"
-                  style={{ color: on ? "rgb(var(--fg))" : "rgb(var(--muted))" }}
-                >
-                  {slide.label}
-                </span>
-                <span className="text-[12px] tabular-nums tracking-tight transition-opacity duration-300" style={{ color: "rgb(var(--muted))", opacity: on ? 0.6 : 0.3 }}>
-                  {i + 1}
-                </span>
-              </span>
-              <span
-                className="block overflow-hidden transition-all duration-300"
-                style={{ maxHeight: on ? 60 : 0, opacity: on ? 1 : 0 }}
+      {/* Feature list — the map. Compact equal rows; the active description lives
+          in one fixed slot below so switching rows never reflows the layout. */}
+      <div className="flex flex-col self-center">
+        <div className="flex flex-col gap-1">
+          {AETHER_SLIDES.map((slide, i) => {
+            const on = i === active;
+            return (
+              <button
+                key={slide.src}
+                type="button"
+                onClick={() => select(i)}
+                className="group relative text-left rounded-xl px-4 py-3 transition-colors duration-300"
+                style={{ background: on ? "rgb(var(--fg) / 0.05)" : "transparent" }}
               >
-                <span className="block text-[12.5px] sm:text-[13px] leading-snug tracking-tight text-[rgb(var(--muted))] pt-1.5" style={{ opacity: 0.7 }}>
-                  {slide.desc}
+                <span className="flex items-center justify-between gap-3">
+                  <span
+                    className="text-[15px] sm:text-[16px] tracking-tight transition-colors duration-300"
+                    style={{ color: on ? "rgb(var(--fg))" : "rgb(var(--muted))" }}
+                  >
+                    {slide.label}
+                  </span>
+                  <span className="text-[12px] tabular-nums tracking-tight transition-opacity duration-300" style={{ color: "rgb(var(--muted))", opacity: on ? 0.6 : 0.3 }}>
+                    {i + 1}
+                  </span>
                 </span>
-              </span>
-              {/* progress rail — only the active row fills, giving a sense of pace + place */}
-              <span className="absolute left-4 right-4 bottom-0 h-px rounded-full overflow-hidden" style={{ background: "rgb(var(--fg) / 0.08)", opacity: on ? 1 : 0 }}>
-                <span
-                  className="block h-full rounded-full"
-                  style={{ width: `${on ? progress * 100 : 0}%`, background: "rgb(var(--fg) / 0.55)" }}
-                />
-              </span>
-            </button>
-          );
-        })}
+                {/* progress rail — only the active row fills, giving a sense of pace + place */}
+                <span className="absolute left-4 right-4 bottom-0 h-px rounded-full overflow-hidden" style={{ background: "rgb(var(--fg) / 0.08)", opacity: on ? 1 : 0 }}>
+                  <span
+                    className="block h-full rounded-full"
+                    style={{ width: `${on ? progress * 100 : 0}%`, background: "rgb(var(--fg) / 0.55)" }}
+                  />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {/* single fixed-height description slot — crossfades, never shifts layout */}
+        <div className="relative px-4 mt-3" style={{ minHeight: 56 }}>
+          {AETHER_SLIDES.map((slide, i) => (
+            <p
+              key={slide.src}
+              className="absolute inset-x-4 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--fg))] transition-opacity duration-300"
+              style={{ opacity: i === active ? 0.92 : 0 }}
+            >
+              {slide.desc}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -1725,8 +1732,8 @@ const SIGNAL_TABS = [
   },
   {
     label: "Rebrands",
-    headline: "Your brand grew.",
-    accent: "Your identity should too.",
+    headline: "Your brand,",
+    accent: "caught up.",
     body: "We know the difference between a refresh and a full rebrand. We help you figure out which one you need, then build it properly. Logo, site, content, all of it.",
     visual: (
       <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
@@ -1746,8 +1753,8 @@ const SIGNAL_TABS = [
   },
   {
     label: "Campaigns",
-    headline: "Good creative",
-    accent: "doesn't run itself.",
+    headline: "Creative that",
+    accent: "converts.",
     body: "Ads, landing pages, email flows. We build the funnel and make sure the numbers make sense. You stay focused on the business. We stay focused on growing it.",
     visual: (
       <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
@@ -1777,6 +1784,9 @@ function PlatformSignal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [tab, setTab] = useState(0);
+  // copyTab drives the headline/body so it can swap mid-fade while the pill (tab)
+  // slides immediately.
+  const [copyTab, setCopyTab] = useState(0);
   const [tabVisible, setTabVisible] = useState(true);
 
   useEffect(() => {
@@ -1792,28 +1802,45 @@ function PlatformSignal() {
 
   const switchTab = (i: number) => {
     if (i === tab) return;
+    // Pill slides immediately (driven by `tab`). Copy fades out, swaps while
+    // hidden, then fades back in so the two read as one fluid motion.
+    setTab(i);
     setTabVisible(false);
-    setTimeout(() => { setTab(i); setTabVisible(true); }, 180);
+    setTimeout(() => { setCopyTab(i); setTabVisible(true); }, 180);
   };
 
-  const t = SIGNAL_TABS[tab];
+  const t = SIGNAL_TABS[copyTab];
 
   const tabs = (
     <div
-      className="inline-flex self-start rounded-full p-1 gap-0.5"
-      style={{ background: "rgb(var(--fg) / 0.08)", border: "1px solid rgb(var(--line))" }}
+      className="relative inline-grid self-start rounded-full p-1"
+      style={{
+        background: "rgb(var(--fg) / 0.08)",
+        border: "1px solid rgb(var(--line))",
+        gridTemplateColumns: `repeat(${SIGNAL_TABS.length}, 1fr)`,
+      }}
     >
+      {/* single sliding highlight — translates between tabs for a fluid move */}
+      <span
+        aria-hidden="true"
+        className="absolute top-1 bottom-1 left-1 rounded-full pointer-events-none"
+        style={{
+          width: `calc((100% - 0.5rem) / ${SIGNAL_TABS.length})`,
+          background: "var(--btn-bg)",
+          transform: `translateX(${tab * 100}%)`,
+          transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
+        }}
+      />
       {SIGNAL_TABS.map((s, i) => (
         <button
           key={s.label}
           onClick={() => switchTab(i)}
-          className="rounded-full px-4 py-2 text-[14px] tracking-tight"
+          className="relative z-10 rounded-full px-4 py-2 text-[14px] tracking-tight whitespace-nowrap"
           style={{
-            background: i === tab ? "var(--btn-bg)" : "transparent",
             color: i === tab ? "var(--btn-fg)" : "rgb(var(--fg))",
-            opacity: i === tab ? 1 : 0.4,
+            opacity: i === tab ? 1 : 0.45,
             fontWeight: i === tab ? 500 : 400,
-            transition: "background 200ms ease, color 200ms ease, opacity 200ms ease",
+            transition: "color 320ms ease, opacity 320ms ease",
           }}
         >
           {s.label}
@@ -1832,7 +1859,7 @@ function PlatformSignal() {
       }}
     >
 <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.3] ${mobile ? "text-[clamp(2rem,5vw,3rem)]" : "text-[clamp(2rem,2.8vw,2.8rem)]"}`}>
-        {t.headline}{tab === 1 || tab === 2 ? <br /> : " "}
+        {t.headline}{" "}
         <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{t.accent}</span>
       </p>
       <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] mt-2 ${mobile ? "text-[1rem]" : "text-[clamp(1rem,1.8vw,1.05rem)] max-w-sm"}`} style={{ opacity: 0.7 }}>
