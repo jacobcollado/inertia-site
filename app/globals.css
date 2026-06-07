@@ -824,20 +824,11 @@ h1:hover .redact > span.redact-inner,
   transition: top 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* While the mobile menu is open the body is locked with overflow:hidden, which
-   breaks position:sticky and lets the header scroll away. Pin it to the top and
-   keep it above the drawer (z-index 44) so the logo and close button stay visible. */
-.site-header--open {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-}
-
 /* When open, make the header background solid so it matches the drawer's
    surface. Drop the fade mask and any inline blur/alpha left by the scroll
-   handler so there is no seam between the header and the menu below it. */
+   handler so there is no seam between the header and the menu below it. The
+   header stays position:sticky here — switching it to fixed pulls it out of
+   flow and shifts the page content up by its height when the menu opens. */
 .site-header--open .site-header__bg {
   background: rgb(var(--bg)) !important;
   backdrop-filter: none !important;

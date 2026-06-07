@@ -163,6 +163,41 @@ const PLACEHOLDER_OPTIONS = [
   "A Framer site for my agency...",
 ];
 
+// Hero quick-input chips: each routes to the most relevant page. Shopify work
+// points at Aether, everything else lands on the contact form with the matching
+// category preselected via ?type=.
+const HERO_INTENTS: { label: string; href: string; icon: React.ReactNode }[] = [
+  {
+    label: "A Shopify store",
+    href: "/contact?type=shopify",
+    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
+  },
+  {
+    label: "The Aether theme",
+    href: "/aether",
+    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
+  },
+  {
+    label: "A web app or dashboard",
+    href: "/contact?type=enterprise",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+        <rect x="1.5" y="1.5" width="5" height="5" rx="1" /><rect x="9.5" y="1.5" width="5" height="5" rx="1" />
+        <rect x="1.5" y="9.5" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    label: "Something else",
+    href: "/contact?type=general",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+        <circle cx="8" cy="8" r="6.5" /><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 2.4c-.5.3-.8.6-.8 1.2" /><circle cx="8" cy="11.6" r="0.6" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+];
+
 function PlaceholderChar({ ch, idx, animKey, entering, exiting, stagger }: {
   ch: string; idx: number; animKey: number; entering: boolean; exiting: boolean; stagger: number;
 }) {
@@ -451,10 +486,6 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
     return () => el.removeEventListener("scroll", updateScrollState);
   }, []);
 
-  const handleSuggestion = (s: string) => {
-    setInput(s);
-    inputRef.current?.focus();
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -523,7 +554,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 rounded-xl px-4 sm:px-5 py-3 sm:py-3.5 border"
             style={{
               background: "rgb(var(--surface))",
-              borderColor: focused ? "rgb(var(--fg) / 0.4)" : "rgb(var(--fg) / 0.18)",
+              borderColor: focused ? "rgb(var(--fg) / 0.4)" : "transparent",
               boxShadow: focused ? "0 0 0 3px rgb(var(--fg) / 0.04)" : "none",
               animation: "none",
               transition: "border-color 250ms ease, box-shadow 350ms ease",
@@ -575,21 +606,19 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
               ref={scrollRef}
               className="flex gap-2 overflow-x-auto overflow-y-hidden touch-pan-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
             >
-              {PROMPT_SUGGESTIONS.map((s, i) => (
-                <button
+              {HERO_INTENTS.map((s, i) => (
+                <Link
                   key={s.label}
-                  type="button"
-                  onClick={() => handleSuggestion(s.label)}
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
+                  href={s.href}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] hover:opacity-80 transition-opacity"
                   style={{
-                    opacity: 1,
-                    transform: "translateY(0)",
+                    background: "rgb(var(--fg) / 0.06)",
                     transition: `opacity 300ms cubic-bezier(0.22,1,0.36,1) ${i * 40}ms, transform 300ms cubic-bezier(0.22,1,0.36,1) ${i * 40}ms`,
                   }}
                 >
                   {s.icon}
                   {s.label}
-                </button>
+                </Link>
               ))}
             </div>
             <div className="pointer-events-none absolute inset-y-0 left-0 w-10 transition-opacity duration-200"

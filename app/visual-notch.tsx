@@ -602,24 +602,27 @@ export function VisualNotch() {
 
   useEffect(() => {
     if (!mobileOpen) return;
-    // Lock scroll robustly on mobile: overflow:hidden alone doesn't hold on iOS,
-    // so pin the body in place and restore the exact scroll position on close.
-    const scrollY = window.scrollY;
-    const { style } = document.body;
-    style.position = "fixed";
-    style.top = `-${scrollY}px`;
-    style.left = "0";
-    style.right = "0";
-    style.width = "100%";
-    style.overflow = "hidden";
+    // Lock scroll without repositioning the page (position:fixed shifts content
+    // and makes the open feel janky). Pad for the scrollbar width so the layout
+    // doesn't jump, and block touch scrolling on the background for iOS.
+    const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+    const html = document.documentElement;
+    const { body } = document;
+    const prevOverflow = body.style.overflow;
+    const prevPadding = body.style.paddingRight;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
+    const blockTouch = (e: TouchEvent) => {
+      // Allow scrolling inside the drawer itself, block it everywhere else.
+      if (!(e.target as HTMLElement)?.closest(".mobile-nav__drawer")) e.preventDefault();
+    };
+    document.addEventListener("touchmove", blockTouch, { passive: false });
     return () => {
-      style.position = "";
-      style.top = "";
-      style.left = "";
-      style.right = "";
-      style.width = "";
-      style.overflow = "";
-      window.scrollTo(0, scrollY);
+      html.style.overflow = "";
+      body.style.overflow = prevOverflow;
+      body.style.paddingRight = prevPadding;
+      document.removeEventListener("touchmove", blockTouch);
     };
   }, [mobileOpen]);
 

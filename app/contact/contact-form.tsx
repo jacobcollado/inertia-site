@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import confetti from "canvas-confetti";
 
 type Status = "idle" | "submitting" | "sent" | "error";
@@ -65,7 +66,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function ContactForm() {
-  const [categoryId, setCategoryId] = useState("shopify");
+  const searchParams = useSearchParams();
+  const requestedType = searchParams.get("type");
+  const initialCategory = CATEGORIES.some((c) => c.id === requestedType) ? requestedType! : "shopify";
+  const [categoryId, setCategoryId] = useState(initialCategory);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
