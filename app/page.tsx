@@ -2435,8 +2435,10 @@ function ClientOrbit() {
 
   // viewBox centred on the cluster (ORBIT_CENTER 1003,466) on each breakpoint.
   // Mobile zooms into the centre so nodes and text read larger (crops the wide sides).
-  const viewBox = isMobile ? "623 226 760 480" : "63 206 1881 520";
-  const aspect = isMobile ? "760 / 480" : "1881 / 520";
+  // On mobile the viewBox is lowered (smaller y origin offset start) so the node cluster sits
+  // a bit further down inside the taller crop, leaving more headroom for the flowing text above.
+  const viewBox = isMobile ? "623 146 760 560" : "63 206 1881 520";
+  const aspect = isMobile ? "760 / 560" : "1881 / 520";
 
   return (
     <div ref={wrapRef} className="relative w-full" style={{ aspectRatio: aspect }}>
@@ -2588,7 +2590,7 @@ function StackDiagram() {
           overflow: "hidden",
         }}
       >
-        <div className="flex flex-col items-center gap-6 sm:gap-6 pb-10 sm:pb-12">
+        <div className="flex flex-col items-center gap-6 sm:gap-6 pb-16 sm:pb-12">
           {/* Full-bleed: the orbit visual spans the entire section width, edge to edge */}
           <div className="w-full">
             <ClientOrbit />
@@ -2609,6 +2611,132 @@ function StackDiagram() {
         </div>
       </div>
     </div>
+  );
+}
+
+const FAQ_ITEMS = [
+  {
+    q: "How much does a project cost?",
+    a: "It comes down to scope. Once we understand what you're after, we put together a fixed price for the whole project. You'll know the number before any work begins, and it won't move unless the scope does.",
+  },
+  {
+    q: "How long does it take?",
+    a: "A typical project takes around five weeks. Smaller ones move faster, larger ones can run a week or two longer. We give you a real timeline at the start and keep the work moving against it.",
+  },
+  {
+    q: "What do you build?",
+    a: "Shopify storefronts, brand identities, and custom web products. Everything is designed and built by us, from a real brief rather than a template, so what you end up with belongs to your brand and no one else's.",
+  },
+  {
+    q: "Who owns the work?",
+    a: "You do. We don't post it, list it, or point to it anywhere unless you've told us that's alright. If you'd rather the project stay quiet, it stays quiet.",
+  },
+  {
+    q: "How do we start?",
+    a: "Tell us what you're working on, where you'd like it to go, and roughly when you need it. We read every message and reply within a day. If it feels like a fit, we'll set up a short call before scoping anything.",
+  },
+] as const;
+
+function FaqItem({ item, open, onToggle }: { item: { q: string; a: string }; open: boolean; onToggle: () => void }) {
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    setHeight(open ? el.scrollHeight : 0);
+  }, [open, item.a]);
+
+  return (
+    <div
+      style={{
+        background: open ? "rgb(var(--orbit-surface))" : "transparent",
+        borderRadius: 24,
+        transition: "background 350ms cubic-bezier(0.22,1,0.36,1)",
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-4 text-left py-5 px-5 sm:px-6 group"
+      >
+        <span className="text-[clamp(1rem,2vw,1.15rem)] tracking-tight font-normal text-[rgb(var(--fg))]">
+          {item.q}
+        </span>
+        <span
+          className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5" style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 300ms cubic-bezier(0.22,1,0.36,1)" }}>
+            <line x1="8" y1="3" x2="8" y2="13" />
+            <line x1="3" y1="8" x2="13" y2="8" />
+          </svg>
+        </span>
+      </button>
+      <div
+        style={{
+          height,
+          overflow: "hidden",
+          transition: "height 350ms cubic-bezier(0.22,1,0.36,1)",
+        }}
+      >
+        <div ref={bodyRef} className="pb-5 px-5 sm:px-6 pr-11">
+          <p className="text-[clamp(0.95rem,1.7vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.85 }}>
+            {item.a}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Faq() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <section
+      ref={ref}
+      className="px-6 sm:px-8 flex flex-col items-center"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(16px)",
+        transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
+      }}
+    >
+      <div className="w-full max-w-2xl flex flex-col gap-8">
+        <div className="flex flex-col gap-3 text-center">
+          <p className="text-[clamp(1.8rem,4.5vw,2.6rem)] tracking-tight font-normal leading-[1.1] text-[rgb(var(--fg))]">
+            Before you reach out.
+          </p>
+          <p className="text-[clamp(0.95rem,1.7vw,1.05rem)] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.7 }}>
+            A few things worth knowing first.
+          </p>
+        </div>
+        <div className="flex flex-col gap-1">
+          {FAQ_ITEMS.map((item, i) => (
+            <FaqItem
+              key={item.q}
+              item={item}
+              open={openIndex === i}
+              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -3314,6 +3442,10 @@ function VisualLayout() {
       <div className="py-6 sm:py-10" />
 
       <StartPrompt closing />
+
+      <div className="py-10 sm:py-16" />
+
+      <Faq />
 
       <div className="py-12 sm:py-20" />
 
