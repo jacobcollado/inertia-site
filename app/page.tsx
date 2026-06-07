@@ -482,7 +482,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
             className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] hover:opacity-80 transition-opacity"
             style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--fg) / 0.1)", transform: "translateY(-16px)" }}
           >
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.8)" }}>New</span>
+            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.5)" }}>New</span>
             Aether theme for Shopify
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-40"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
           </Link>
@@ -618,6 +618,147 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
   );
 }
 
+function LiveTimestampCard() {
+  const STEPS = [
+    { time: "9:00 AM", label: "Purchase" },
+    { time: "9:14 AM", label: "Install" },
+    { time: "9:28 AM", label: "Store live" },
+  ];
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx(i => (i + 1) % STEPS.length);
+        setVisible(true);
+      }, 400);
+    }, 2600);
+    return () => clearInterval(t);
+  }, []);
+
+  const step = STEPS[idx];
+
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center gap-2" aria-hidden="true">
+      <span
+        className="tabular-nums font-normal tracking-tight text-[rgb(var(--fg))]"
+        style={{
+          fontSize: "clamp(2.2rem, 5vw, 3rem)",
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(8px)",
+          transition: "opacity 350ms ease, transform 350ms ease",
+        }}
+      >
+        {step.time}
+      </span>
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          padding: "3px 10px",
+          borderRadius: 999,
+          background: "rgb(var(--fg) / 0.07)",
+          border: "1px solid rgb(var(--fg) / 0.12)",
+          fontSize: 11,
+          letterSpacing: "-0.01em",
+          color: "rgb(var(--muted))",
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(4px)",
+          transition: "opacity 350ms ease 100ms, transform 350ms ease 100ms",
+        }}
+      >
+        {step.label}
+      </span>
+    </div>
+  );
+}
+
+const BAR_DATA = [0.4, 0.55, 0.45, 0.65, 0.6, 0.8, 1];
+
+function BarChartCard() {
+  return (
+    <div className="flex-1 flex items-end gap-1.5 px-4 pt-5 pb-3" aria-hidden="true">
+      {BAR_DATA.map((h, i) => {
+        const isLast = i === BAR_DATA.length - 1;
+        return (
+          <div key={i} className="flex-1 flex flex-col items-center gap-1">
+            <div
+              className="w-full rounded-md"
+              style={{
+                height: `${h * 80}px`,
+                background: isLast ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.12)",
+                transition: "height 600ms cubic-bezier(0.22,1,0.36,1)",
+              }}
+            />
+            <span style={{ fontSize: 9, color: "rgb(var(--muted))", opacity: 0.4 }}>
+              {["M", "T", "W", "T", "F", "S", "S"][i]}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const HEAT_DATA = (() => {
+  const weeks = 9;
+  const days = 7;
+  // deterministic pseudo-random to avoid hydration mismatch
+  const seeded = (n: number) => ((Math.sin(n * 127.1 + 311.7) * 43758.5453) % 1 + 1) % 1;
+  return Array.from({ length: weeks }, (_, w) =>
+    Array.from({ length: days }, (_, d) => {
+      const progress = (w * days + d) / (weeks * days);
+      const base = 0.05 + progress * 0.6;
+      return Math.min(1, base + (seeded(w * days + d) * 0.35 - 0.1));
+    })
+  );
+})();
+
+function HeatCalendarCard() {
+  return (
+    <div className="flex-1 flex flex-col justify-center px-4 pt-4 pb-2 gap-1.5" aria-hidden="true">
+      <div className="flex gap-1">
+        {HEAT_DATA.map((week, w) => (
+          <div key={w} className="flex flex-col gap-1 flex-1">
+            {week.map((val, d) => (
+              <div
+                key={d}
+                className="rounded-sm w-full"
+                style={{ height: 10, background: `rgb(var(--fg) / ${(val * 0.7 + 0.05).toFixed(2)})` }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RevenueCard() {
+  return (
+    <div className="flex-1 flex flex-col justify-center px-4 pt-4 pb-2 gap-3" aria-hidden="true">
+      {/* Before */}
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[10px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>Before</span>
+        <span className="tabular-nums font-normal tracking-tight text-[rgb(var(--muted))]" style={{ fontSize: "1.5rem", letterSpacing: "-0.04em", lineHeight: 1, opacity: 0.4, textDecoration: "line-through", textDecorationColor: "rgb(var(--muted) / 0.3)" }}>$8,400</span>
+      </div>
+      {/* After */}
+      <div className="flex flex-col gap-0.5">
+        <span className="text-[10px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>After</span>
+        <span className="tabular-nums font-normal tracking-tight text-[rgb(var(--fg))]" style={{ fontSize: "2rem", letterSpacing: "-0.04em", lineHeight: 1 }}>$14,200</span>
+      </div>
+      {/* Delta pill */}
+      <span style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 999, background: "rgb(var(--fg) / 0.07)", border: "1px solid rgb(var(--fg) / 0.12)", fontSize: 11, letterSpacing: "-0.01em", color: "rgb(var(--muted))", width: "fit-content" }}>
+        +69% monthly revenue
+      </span>
+    </div>
+  );
+}
+
 // -- Aether feature moment ----------------------------------------------
 
 function DarkModeToggleCard() {
@@ -720,7 +861,7 @@ function AetherFeature() {
   const glassLabel = { background: "rgb(var(--surface-elevated) / 0.72)", backdropFilter: "blur(12px)", borderTop: "1px solid rgb(var(--line) / 0.5)" } as const;
   const GlassLabelAccent = ({ children }: { children: React.ReactNode }) => (
     <div className="rounded-xl p-3 sm:p-4 relative overflow-hidden" style={glassLabel}>
-      <div className="absolute inset-0 rounded-xl pointer-events-none" aria-hidden="true" style={{ background: "rgba(0,0,0,0.25)" }} />
+      <div className="absolute inset-0 rounded-xl pointer-events-none" aria-hidden="true" style={{ background: "rgba(0,0,0,0.16)" }} />
       {children}
     </div>
   );
@@ -807,101 +948,36 @@ function AetherFeature() {
             </div>
           </div>
 
-          {/* Dark mode — animated toggle */}
+          {/* Bar chart card */}
           <div className={`${cardBase} relative flex flex-col justify-between overflow-hidden group`} style={{ ...fade(160), minHeight: 240 }}>
-            <DarkModeToggleCard />
-            {/* bottom label */}
+            <BarChartCard />
             <div className="relative z-10 p-3 sm:p-4 pt-0 mt-auto">
               <GlassLabelAccent>
-                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Dark mode</p>
-                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>On by default. Looks right either way.</p>
+                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Sales at a glance</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Weekly revenue, always climbing.</p>
               </GlassLabelAccent>
             </div>
           </div>
 
-          {/* Live in &lt;1hr — step timeline */}
+          {/* Live in minutes — timestamp */}
           <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(200), minHeight: 180 }}>
-            {/* visual area */}
-            <div className="flex-1 flex flex-col justify-center px-5 pt-5 pb-3" aria-hidden="true">
-              <span className="text-[2rem] sm:text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-none mb-5">Done by lunch.</span>
-              {/* timeline */}
-              <div className="flex gap-3.5">
-                {/* connector column */}
-                <div className="flex flex-col items-center shrink-0" style={{ width: 24 }}>
-                  {([false, false, true] as boolean[]).map((accent, i, arr) => (
-                    <React.Fragment key={i}>
-                      <div className="flex items-center justify-center rounded-full shrink-0" style={{
-                        width: 24, height: 24,
-                        background: accent ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.08)",
-                        border: accent ? "none" : "1.5px solid rgb(var(--fg) / 0.18)",
-                      }}>
-                        <svg viewBox="0 0 12 12" fill="none" style={{ width: 11, height: 11 }}>
-                          <polyline points="2,6 5,9 10,3" stroke={accent ? "rgb(var(--bg))" : "rgb(var(--fg))"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity={accent ? 1 : 0.3} />
-                        </svg>
-                      </div>
-                      {i < arr.length - 1 && (
-                        <div style={{ width: 1.5, flex: 1, minHeight: 14, background: "rgb(var(--fg) / 0.10)" }} />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-                {/* label column */}
-                <div className="flex flex-col">
-                  {([
-                    { label: "Purchase license", accent: false },
-                    { label: "Install to store",  accent: false },
-                    { label: "Go live",           accent: true  },
-                  ] as { label: string; accent: boolean }[]).map((step, i) => (
-                    <div key={i} className="flex items-center" style={{ height: 24, marginBottom: i < 2 ? 14 : 0 }}>
-                      <span style={{
-                        fontSize: step.accent ? 15 : 13,
-                        color: step.accent ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                        opacity: step.accent ? 1 : 0.5,
-                        fontWeight: step.accent ? 500 : 400,
-                        letterSpacing: "-0.02em",
-                        lineHeight: 1,
-                      }}>{step.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <LiveTimestampCard />
             {/* glass label */}
             <div className="p-3 sm:p-4 pt-0">
               <GlassLabelAccent>
-                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Live in an hour</p>
-                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>No dev needed. License, install, ship.</p>
+                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Live in minutes</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>License, install, done.</p>
               </GlassLabelAccent>
             </div>
           </div>
 
-          {/* Conversion — funnel */}
+          {/* Heat calendar card */}
           <div className={`${cardBase} flex flex-col justify-between overflow-hidden relative group`} style={{ ...fade(240), minHeight: 180 }}>
-            {/* stat + funnel in normal flow */}
-            <div className="flex-1 flex flex-col items-center justify-center px-4 pt-4 pb-2 gap-1" aria-hidden="true">
-              {/* donut arc — 25% fill */}
-              <div className="relative flex items-center justify-center" style={{ width: 90, height: 90 }}>
-                <svg viewBox="0 0 90 90" fill="none" style={{ width: 90, height: 90, transform: "rotate(-90deg)" }}>
-                  {/* track */}
-                  <circle cx="45" cy="45" r="34" stroke="rgb(var(--fg))" strokeOpacity="0.08" strokeWidth="10" fill="none" />
-                  {/* 25% arc — circumference = 2π×34 ≈ 213.6 */}
-                  <circle cx="45" cy="45" r="34" stroke="rgb(var(--fg))" strokeOpacity="0.85" strokeWidth="10" fill="none"
-                    strokeDasharray="213.6"
-                    strokeDashoffset={213.6 * 0.75}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span style={{ fontSize: 20, fontWeight: 500, letterSpacing: "-0.04em", color: "rgb(var(--fg))", lineHeight: 1 }}>1 in 4</span>
-                </div>
-              </div>
-              <p className="text-[11px] tracking-tight text-[rgb(var(--muted))] text-center" style={{ opacity: 0.45 }}>visitors purchase</p>
-            </div>
-            {/* glass label */}
+            <HeatCalendarCard />
             <div className="p-3 sm:p-4 pt-0">
               <GlassLabelAccent>
-                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Built to convert</p>
-                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>Upsells, bundles, and post-purchase blocks. Out of the box.</p>
+                <p className="text-[14px] sm:text-[15px] font-normal tracking-tight text-[rgb(var(--fg))] mb-0.5">Revenue by design</p>
+                <p className="text-[11px] sm:text-[12px] tracking-tight text-[rgb(var(--muted))] leading-snug" style={{ opacity: 0.5 }}>More revenue, same traffic.</p>
               </GlassLabelAccent>
             </div>
           </div>
@@ -1361,17 +1437,11 @@ function PlatformDiagram() {
       {/* Input box */}
       <div className="px-3 py-3 shrink-0" style={{ borderTop: "1px solid rgb(var(--line) / 0.4)", background: "rgb(var(--surface-elevated))" }}>
         <div
-          className="flex items-center gap-2 rounded-2xl px-1.5 py-1.5"
+          className="relative rounded-2xl px-2.5 py-2"
           style={{ background: "rgb(var(--fg) / 0.05)", border: "1px solid rgb(var(--line) / 0.6)", minHeight: 36 }}
         >
-          {/* + button */}
-          <div className="rounded-full flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: "rgb(var(--fg) / 0.08)" }}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="w-3 h-3" style={{ color: "rgb(var(--fg))", opacity: 0.4 }}>
-              <line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/>
-            </svg>
-          </div>
           {showInputTyping ? (
-            <span className="flex-1 text-[12px] tracking-tight leading-relaxed" style={{ color: "rgb(var(--fg))", wordBreak: "break-word" }}>
+            <span className="block text-[12px] tracking-tight leading-relaxed pr-8" style={{ color: "rgb(var(--fg))", wordBreak: "break-word" }}>
               {phase === "user-typing"
                 ? <InputTypewriter key={inputText} text={inputText} onDone={handleInputDone} />
                 : inputText
@@ -1380,20 +1450,16 @@ function PlatformDiagram() {
           ) : (
             <ChatPlaceholder />
           )}
-          {/* Send button — filled when user has text */}
-          <div
-            className="rounded-full flex items-center justify-center shrink-0"
-            style={{
-              width: 24,
-              height: 24,
-              background: showInputTyping ? "rgb(var(--fg))" : "rgb(var(--fg) / 0.12)",
-              transition: "background 200ms ease",
-            }}
-          >
-            <svg viewBox="0 0 16 16" fill="none" stroke={showInputTyping ? "rgb(var(--bg))" : "rgb(var(--fg))"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" style={{ opacity: showInputTyping ? 1 : 0.35 }}>
-              <line x1="8" y1="13" x2="8" y2="3"/><polyline points="4 7 8 3 12 7"/>
-            </svg>
-          </div>
+          {showInputTyping && (
+            <div
+              className="absolute bottom-1.5 right-1.5 rounded-full flex items-center justify-center shrink-0"
+              style={{ width: 24, height: 24, background: "rgb(var(--fg))" }}
+            >
+              <svg viewBox="0 0 16 16" fill="none" stroke="rgb(var(--bg))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <line x1="8" y1="13" x2="8" y2="3"/><polyline points="4 7 8 3 12 7"/>
+              </svg>
+            </div>
+          )}
         </div>
       </div>
 

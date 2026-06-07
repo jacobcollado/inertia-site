@@ -27,16 +27,17 @@
   color-scheme: light;
 }
 
-/* Bento grid: force dark background + white text in light mode only */
+
+/* Bento grid: neutral grey in light mode */
 :root:not(.dark) .bento-light-invert {
-  --fg: 255 255 255;
-  --muted: 255 255 255;
-  --bg: 14 14 14;
-  --surface: 30 30 34;
-  --surface-elevated: 50 50 55;
-  --line: 60 60 65;
-  --chat-bubble-fg: 255 255 255;
-  --chat-us-color: 14 14 14;
+  --fg: 18 18 18;
+  --muted: 100 100 100;
+  --bg: 255 255 255;
+  --surface: 240 240 240;
+  --surface-elevated: 230 230 230;
+  --line: 210 210 210;
+  --chat-bubble-fg: 18 18 18;
+  --chat-us-color: 240 240 240;
 }
 
 .dark {
