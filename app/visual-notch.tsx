@@ -602,27 +602,26 @@ export function VisualNotch() {
 
   useEffect(() => {
     if (!mobileOpen) return;
-    // Lock scroll without repositioning the page (position:fixed shifts content
-    // and makes the open feel janky). Pad for the scrollbar width so the layout
-    // doesn't jump, and block touch scrolling on the background for iOS.
-    const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
-    const html = document.documentElement;
+    // Lock scroll by pinning the body at its current scroll offset. Using
+    // overflow:hidden on <html> breaks the sticky header once the page is
+    // scrolled (it resolves to its static, off-screen position). Pinning the
+    // body keeps everything put; the header is switched to position:fixed via
+    // .site-header--open so it stays glued to the viewport top. Restore the
+    // exact scroll position on close.
+    const scrollY = window.scrollY;
     const { body } = document;
-    const prevOverflow = body.style.overflow;
-    const prevPadding = body.style.paddingRight;
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-    if (scrollbarW > 0) body.style.paddingRight = `${scrollbarW}px`;
-    const blockTouch = (e: TouchEvent) => {
-      // Allow scrolling inside the drawer itself, block it everywhere else.
-      if (!(e.target as HTMLElement)?.closest(".mobile-nav__drawer")) e.preventDefault();
-    };
-    document.addEventListener("touchmove", blockTouch, { passive: false });
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
     return () => {
-      html.style.overflow = "";
-      body.style.overflow = prevOverflow;
-      body.style.paddingRight = prevPadding;
-      document.removeEventListener("touchmove", blockTouch);
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      window.scrollTo(0, scrollY);
     };
   }, [mobileOpen]);
 

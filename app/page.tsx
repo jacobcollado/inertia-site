@@ -874,17 +874,17 @@ function DarkModeToggleCard() {
 const AETHER_SLIDES = [
   {
     label: "Guided selling",
-    desc: "Helps shoppers find the right product, then nudges them to checkout.",
+    desc: "Walks shoppers to the right product and toward checkout.",
     src: "/aether/guided.png",
   },
   {
     label: "Built-in upsells",
-    desc: "Raise average order value without bolting on another app.",
+    desc: "Lifts order value without bolting on another paid app.",
     src: "/aether/upsell.png",
   },
   {
     label: "Honest urgency",
-    desc: "Real stock and timing cues that build trust instead of breaking it.",
+    desc: "Real stock and timing cues that earn trust, not doubt.",
     src: "/aether/scarcity.png",
   },
 ] as const;
@@ -966,54 +966,51 @@ function AetherSpotlight() {
         </div>
       </div>
 
-      {/* Feature list — the map. Compact equal rows; the active description lives
-          in one fixed slot below so switching rows never reflows the layout. */}
-      <div className="flex flex-col self-center">
-        <div className="flex flex-col gap-1">
-          {AETHER_SLIDES.map((slide, i) => {
-            const on = i === active;
-            return (
-              <button
-                key={slide.src}
-                type="button"
-                onClick={() => select(i)}
-                className="group relative text-left rounded-xl px-4 py-3 transition-colors duration-300"
-                style={{ background: on ? "rgb(var(--fg) / 0.05)" : "transparent" }}
-              >
-                <span className="flex items-center justify-between gap-3">
-                  <span
-                    className="text-[15px] sm:text-[16px] tracking-tight transition-colors duration-300"
-                    style={{ color: on ? "rgb(var(--fg))" : "rgb(var(--muted))" }}
-                  >
-                    {slide.label}
-                  </span>
-                  <span className="text-[12px] tabular-nums tracking-tight transition-opacity duration-300" style={{ color: "rgb(var(--muted))", opacity: on ? 0.6 : 0.3 }}>
-                    {i + 1}
-                  </span>
-                </span>
-                {/* progress rail — only the active row fills, giving a sense of pace + place */}
-                <span className="absolute left-4 right-4 bottom-0 h-px rounded-full overflow-hidden" style={{ background: "rgb(var(--fg) / 0.08)", opacity: on ? 1 : 0 }}>
-                  <span
-                    className="block h-full rounded-full"
-                    style={{ width: `${on ? progress * 100 : 0}%`, background: "rgb(var(--fg) / 0.55)" }}
-                  />
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        {/* single fixed-height description slot — crossfades, never shifts layout */}
-        <div className="relative px-4 mt-3" style={{ minHeight: 56 }}>
-          {AETHER_SLIDES.map((slide, i) => (
-            <p
+      {/* Feature list — the map. The active row reveals its description in a
+          fixed-height area; equal-length copy keeps every active row the same
+          height, so switching never reflows the layout. */}
+      <div className="flex flex-col gap-1 self-center">
+        {AETHER_SLIDES.map((slide, i) => {
+          const on = i === active;
+          return (
+            <button
               key={slide.src}
-              className="absolute inset-x-4 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--fg))] transition-opacity duration-300"
-              style={{ opacity: i === active ? 0.92 : 0 }}
+              type="button"
+              onClick={() => select(i)}
+              className="group relative text-left rounded-xl px-4 py-3.5 transition-colors duration-300"
+              style={{ background: on ? "rgb(var(--fg) / 0.05)" : "transparent" }}
             >
-              {slide.desc}
-            </p>
-          ))}
-        </div>
+              <span className="flex items-center justify-between gap-3">
+                <span
+                  className="text-[15px] sm:text-[16px] tracking-tight transition-colors duration-300"
+                  style={{ color: on ? "rgb(var(--fg))" : "rgb(var(--muted))" }}
+                >
+                  {slide.label}
+                </span>
+                <span className="text-[12px] tabular-nums tracking-tight transition-opacity duration-300" style={{ color: "rgb(var(--muted))", opacity: on ? 0.6 : 0.3 }}>
+                  {i + 1}
+                </span>
+              </span>
+              {/* description — fixed reserved height when active; equal-length
+                  copy means all three active states match, so no jump */}
+              <span
+                className="block overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                style={{ height: on ? 44 : 0, opacity: on ? 1 : 0 }}
+              >
+                <span className="block text-[13px] sm:text-[13.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))] pt-1.5" style={{ opacity: 0.85 }}>
+                  {slide.desc}
+                </span>
+              </span>
+              {/* progress rail — only the active row fills, giving a sense of pace + place */}
+              <span className="absolute left-4 right-4 bottom-0 h-px rounded-full overflow-hidden" style={{ background: "rgb(var(--fg) / 0.08)", opacity: on ? 1 : 0 }}>
+                <span
+                  className="block h-full rounded-full"
+                  style={{ width: `${on ? progress * 100 : 0}%`, background: "rgb(var(--fg) / 0.55)" }}
+                />
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
