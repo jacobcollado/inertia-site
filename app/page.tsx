@@ -2713,7 +2713,7 @@ function Faq() {
   return (
     <section
       ref={ref}
-      className="px-6 sm:px-8 flex flex-col items-center"
+      className="px-3 sm:px-8 flex flex-col items-center"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(16px)",
