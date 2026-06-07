@@ -2616,6 +2616,10 @@ function StackDiagram() {
 
 const FAQ_ITEMS = [
   {
+    q: "What is Inertia?",
+    a: "We design and build for people who want their vision brought to life properly. Shopify storefronts, custom web products, and brand identities, made for anyone from e-commerce brands to trades to influencers. Whatever you're building, we do it all, in-house and one project at a time.",
+  },
+  {
     q: "How much does a project cost?",
     a: "It comes down to scope. Once we understand what you're after, we put together a fixed price for the whole project. You'll know the number before any work begins, and it won't move unless the scope does.",
   },
@@ -2624,8 +2628,8 @@ const FAQ_ITEMS = [
     a: "A typical project takes around five weeks. Smaller ones move faster, larger ones can run a week or two longer. We give you a real timeline at the start and keep the work moving against it.",
   },
   {
-    q: "What do you build?",
-    a: "Shopify storefronts, brand identities, and custom web products. Everything is designed and built by us, from a real brief rather than a template, so what you end up with belongs to your brand and no one else's.",
+    q: "How do you work?",
+    a: "Every project starts from your brief, not a template. We design and build the whole thing ourselves, stay close to you through each stage, and only ever take on a few projects at once so yours gets real attention.",
   },
   {
     q: "Who owns the work?",
@@ -2661,7 +2665,7 @@ function FaqItem({ item, open, onToggle }: { item: { q: string; a: string }; ope
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-4 text-left py-5 px-5 sm:px-6 group"
       >
-        <span className="text-[clamp(1rem,2vw,1.15rem)] tracking-tight font-normal text-[rgb(var(--fg))]">
+        <span className="text-[clamp(1.15rem,4vw,1.25rem)] tracking-tight font-normal text-[rgb(var(--fg))]">
           {item.q}
         </span>
         <span
@@ -2682,7 +2686,7 @@ function FaqItem({ item, open, onToggle }: { item: { q: string; a: string }; ope
         }}
       >
         <div ref={bodyRef} className="pb-5 px-5 sm:px-6 pr-11">
-          <p className="text-[clamp(0.95rem,1.7vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.85 }}>
+          <p className="text-[clamp(1.05rem,3.4vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.85 }}>
             {item.a}
           </p>
         </div>
@@ -2719,10 +2723,7 @@ function Faq() {
       <div className="w-full max-w-2xl flex flex-col gap-8">
         <div className="flex flex-col gap-3 text-center">
           <p className="text-[clamp(1.8rem,4.5vw,2.6rem)] tracking-tight font-normal leading-[1.1] text-[rgb(var(--fg))]">
-            Before you reach out.
-          </p>
-          <p className="text-[clamp(0.95rem,1.7vw,1.05rem)] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.7 }}>
-            A few things worth knowing first.
+            FAQ
           </p>
         </div>
         <div className="flex flex-col gap-1">
