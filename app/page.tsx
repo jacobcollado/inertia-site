@@ -1495,7 +1495,10 @@ function PlatformDiagram() {
 
   useEffect(() => {
     if (!inView) return;
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    // Scroll only the chat container, never the page. scrollIntoView would walk
+    // up to the window and yank the whole screen on mobile.
+    const el = containerRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [shown, phase, inView]);
 
   const nextFrom = shown < CHAT_MESSAGES.length ? CHAT_MESSAGES[shown].from : null;
@@ -1543,8 +1546,8 @@ function PlatformDiagram() {
         <div className="absolute inset-x-0 bottom-0 h-6 pointer-events-none z-10" style={{ background: "linear-gradient(to top, rgb(var(--surface-elevated)), transparent)" }} />
         <div
           ref={containerRef}
-          className="h-full flex flex-col justify-end gap-2 px-3.5 py-3 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-          style={{ transition: "opacity 500ms ease", opacity: fading ? 0 : 1 }}
+          className="h-full flex flex-col justify-end gap-2 px-3.5 py-3 overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          style={{ transition: "opacity 500ms ease", opacity: fading ? 0 : 1, touchAction: "none" }}
         >
           {CHAT_MESSAGES.slice(0, shown).map((msg, i) => {
             const prevFrom = i > 0 ? CHAT_MESSAGES[i - 1].from : null;
