@@ -3442,11 +3442,11 @@ function VisualLayout() {
 
       <div className="py-6 sm:py-10" />
 
-      <StartPrompt closing />
+      <Faq />
 
       <div className="py-10 sm:py-16" />
 
-      <Faq />
+      <StartPrompt closing />
 
       <div className="py-12 sm:py-20" />
 

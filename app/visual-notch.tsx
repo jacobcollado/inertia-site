@@ -601,8 +601,26 @@ export function VisualNotch() {
   const handleClose = useCallback(() => setOpenIndex(null), []);
 
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    if (!mobileOpen) return;
+    // Lock scroll robustly on mobile: overflow:hidden alone doesn't hold on iOS,
+    // so pin the body in place and restore the exact scroll position on close.
+    const scrollY = window.scrollY;
+    const { style } = document.body;
+    style.position = "fixed";
+    style.top = `-${scrollY}px`;
+    style.left = "0";
+    style.right = "0";
+    style.width = "100%";
+    style.overflow = "hidden";
+    return () => {
+      style.position = "";
+      style.top = "";
+      style.left = "";
+      style.right = "";
+      style.width = "";
+      style.overflow = "";
+      window.scrollTo(0, scrollY);
+    };
   }, [mobileOpen]);
 
   useEffect(() => {
