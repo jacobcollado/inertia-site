@@ -83,7 +83,7 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
           href="/login?tab=signup"
           words={["Create", "account"]}
           className="px-3.5 py-1.5 text-[13px]"
-          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)" }}
+          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
         />
       </div>
     );
@@ -175,7 +175,7 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
             letterSpacing: "-0.02em",
             color: "var(--btn-fg)",
             textDecoration: "none",
-            boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)",
+            border: "3px solid var(--btn-border)",
           }}
         />
       </div>
@@ -214,7 +214,7 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
         href="/login?tab=signup"
         words={["Create", "account"]}
         className="px-4 py-2 text-[15px] font-medium"
-        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)" }}
+        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
       />
     </div>
   );

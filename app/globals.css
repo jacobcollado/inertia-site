@@ -20,6 +20,10 @@
   --accent-gradient: rgb(var(--fg) / 0.85);
   --btn-bg: rgb(var(--fg) / 0.85);
   --btn-fg: rgb(var(--bg));
+  /* Contrasting CTA border. The button fill is near-black and translucent, so
+     mixing it with black barely changes anything. Use an explicit dark-grey,
+     solid (no alpha), a clearly lighter-than-black edge that still contrasts. */
+  --btn-border: rgb(70 70 70);
   /* Accent swatches â€” deeper on white for legibility */
   --green: 16 168 100;
   --blue: 37 99 235;
@@ -54,6 +58,9 @@
   --accent-gradient: rgb(var(--fg) / 0.85);
   --btn-bg: rgb(var(--fg) / 0.85);
   --btn-fg: rgb(var(--bg));
+  /* Dark mode: button is near-white, so a stronger black mix reads as a clear
+     darker edge. */
+  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
   /* Accent swatches â€” bright on black */
   --green: 52 211 153;
   --blue: 96 165 250;

@@ -183,7 +183,7 @@ function HeroCtas() {
         label="Start a project"
         words={["Start", "a", "project", "↗"]}
         external
-        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)" }}
+        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
       />
       <WaveBtn
         href="/aether"

@@ -577,7 +577,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
               onMouseEnter={() => setBeginHovered(true)}
               onMouseLeave={() => setBeginHovered(false)}
               className="shrink-0 rounded-full px-4 py-2 text-[13px] tracking-tight text-[rgb(var(--bg))] hover:opacity-90 transition-opacity self-stretch sm:self-auto inline-flex items-center justify-center"
-              style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)", gap: "0.3em" }}
+              style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)", gap: "0.3em" }}
             >
               {["Begin", "→"].map((w, i) => (
                 <span key={i} style={{ display: "inline-block", animation: beginHovered ? `cta-wave 600ms cubic-bezier(0.22,1,0.36,1) ${i * 60}ms infinite alternate` : "none" }}>{w}</span>
@@ -1526,7 +1526,7 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
       style={{
         background: "var(--btn-bg)",
         color: "var(--btn-fg)",
-        boxShadow: "0 0 0 2px rgb(var(--bg)), 0 0 0 3px rgb(var(--fg) / 0.5)",
+        border: "3px solid var(--btn-border)",
         gap: "0.3em",
         ...style,
       }}
@@ -3465,7 +3465,7 @@ function VisualLayout() {
 
       <NewsCarousel />
 
-      <div className="py-2 sm:py-4" />
+      <div className="py-6 sm:py-10" />
 
       <StackDiagram />
 
@@ -3473,7 +3473,7 @@ function VisualLayout() {
 
       <Faq />
 
-      <div className="py-10 sm:py-16" />
+      <div className="py-6 sm:py-10" />
 
       <StartPrompt closing />
 
