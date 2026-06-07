@@ -3268,17 +3268,19 @@ const TECH_ALL: { name: string; icon: React.ComponentType<{ className?: string }
   { name: "Meta",       icon: SiMeta,       color: "#0082FB" },
 ];
 
-function TechItem({ tech }: { tech: typeof TECH_ALL[0] }) {
+function TechItem({ tech, active, onActivate }: { tech: typeof TECH_ALL[0]; active: boolean; onActivate: () => void }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
+      data-tech-item
       className="flex items-center gap-2 sm:gap-3 px-6 sm:px-8 transition-all duration-300 cursor-default"
-      style={{ opacity: hovered ? 0.8 : 0.4 }}
+      style={{ opacity: hovered || active ? 0.8 : 0.4 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onActivate}
     >
-      {/* mobile: always colored. desktop: colored on hover only */}
-      <span className="transition-colors duration-300 sm:hidden" style={{ color: tech.color }}>
+      {/* mobile: neutral until tapped, then latches colored until tapping off */}
+      <span className="transition-colors duration-300 sm:hidden" style={{ color: active ? tech.color : "rgb(var(--muted))" }}>
         <tech.icon className="w-6 h-6 shrink-0" />
       </span>
       <span className="transition-colors duration-300 hidden sm:block" style={{ color: hovered ? tech.color : "rgb(var(--muted))" }}>
@@ -3291,11 +3293,30 @@ function TechItem({ tech }: { tech: typeof TECH_ALL[0] }) {
 
 function TechMarquee() {
   const items = [...TECH_ALL, ...TECH_ALL, ...TECH_ALL];
+  // Latched active icon (mobile): tap to color it, tap off to clear.
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (activeIdx === null) return;
+    const clear = (e: PointerEvent) => {
+      // Ignore taps that landed on a tech item (it manages its own toggle).
+      if ((e.target as HTMLElement)?.closest("[data-tech-item]")) return;
+      setActiveIdx(null);
+    };
+    document.addEventListener("pointerdown", clear);
+    return () => document.removeEventListener("pointerdown", clear);
+  }, [activeIdx]);
+
   return (
-    <div className="relative overflow-hidden select-none pt-2 pb-6 -mt-4" aria-hidden="true">
+    <div className="relative overflow-hidden select-none pt-2 pb-6 -mt-4">
       <div className="marquee-row marquee-row--fwd">
         {items.map((tech, i) => (
-          <TechItem key={i} tech={tech} />
+          <TechItem
+            key={i}
+            tech={tech}
+            active={activeIdx === i}
+            onActivate={() => setActiveIdx((cur) => (cur === i ? null : i))}
+          />
         ))}
       </div>
       <div className="pointer-events-none absolute inset-y-0 left-0 w-32" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
