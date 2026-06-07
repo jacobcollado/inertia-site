@@ -63,7 +63,7 @@ export default function EnterprisePage() {
           Aether for teams
         </p>
         <h1 className="text-[clamp(2.4rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-5 max-w-2xl">
-          Aether at scale.
+          Aether at scale
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.2rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-8 max-w-md">
           A Shopify foundation for agencies and studios that ship stores for a living.

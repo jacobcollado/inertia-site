@@ -12,6 +12,7 @@
   --bg: 250 249 247;
   --surface: 242 241 239;
   --surface-elevated: 255 255 255;
+  --orbit-surface: 225 223 219;
   --fg: 14 14 14;
   --muted: 100 100 100;
   --line: 200 200 200;
@@ -44,6 +45,7 @@
   --bg: 14 14 14;
   --surface: 22 22 22;
   --surface-elevated: 30 30 30;
+  --orbit-surface: 24 24 24;
   --fg: 237 237 237;
   --map-filter: invert(1);
   --muted: 140 140 140;
@@ -91,6 +93,7 @@ html {
 
 html,
 body {
+  overflow-x: clip;
   overscroll-behavior: none;
   user-select: none;
   -webkit-user-select: none;
@@ -1306,7 +1309,6 @@ h1:hover .redact > span.redact-inner,
 
 .page-container {
   position: relative;
-  overflow-x: hidden;
 }
 
 /* â”€â”€ Section divider â€” full width, touching both grid lines â”€â”€â”€â”€â”€â”€â”€ */

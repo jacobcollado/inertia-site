@@ -480,7 +480,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           <Link
             href="/aether"
             className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] hover:opacity-80 transition-opacity"
-            style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--fg) / 0.1)", transform: "translateY(-16px)" }}
+            style={{ background: "rgb(var(--fg) / 0.06)", transform: "translateY(-16px)" }}
           >
             <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.5)" }}>New</span>
             Aether theme for Shopify
@@ -987,7 +987,7 @@ function AetherFeature() {
       </div>
 
       {/* CTA */}
-      <div className="flex flex-col sm:flex-row sm:justify-end items-center gap-3 pt-6" style={fade(280)}>
+      <div className="flex flex-row sm:justify-end items-center gap-3 pt-6" style={fade(280)}>
         <ProjectCta label="Explore Aether" href="/aether" arrow="→" external={false} />
         <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-colors" style={{ border: "1px solid rgb(var(--fg) / 0.25)", color: "rgb(var(--fg) / 0.6)" }}>
           Buy now, from $85
@@ -1628,7 +1628,7 @@ function PlatformSignal() {
         <button
           key={s.label}
           onClick={() => switchTab(i)}
-          className="rounded-full px-3.5 py-1 text-[12px] tracking-tight"
+          className="rounded-full px-4 py-2 text-[14px] tracking-tight"
           style={{
             background: i === tab ? "var(--btn-bg)" : "transparent",
             color: i === tab ? "var(--btn-fg)" : "rgb(var(--fg))",
@@ -1645,18 +1645,18 @@ function PlatformSignal() {
 
   const copy = (mobile?: boolean) => (
     <div
-      className={`flex flex-col ${mobile ? "gap-4 items-start text-left" : "gap-5"}`}
+      className={`flex flex-col ${mobile ? "gap-1 items-start text-left" : "gap-1.5"}`}
       style={{
         opacity: tabVisible ? 1 : 0,
         transform: tabVisible ? "translateY(0)" : "translateY(6px)",
         transition: "opacity 200ms ease, transform 200ms ease",
       }}
     >
-<p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-snug ${mobile ? "text-[clamp(2rem,5vw,3rem)]" : "text-[clamp(2rem,2.8vw,2.8rem)]"}`}>
+<p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.3] ${mobile ? "text-[clamp(2rem,5vw,3rem)]" : "text-[clamp(2rem,2.8vw,2.8rem)]"}`}>
         {t.headline}{tab === 1 || tab === 2 ? <br /> : " "}
         <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{t.accent}</span>
       </p>
-      <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] ${mobile ? "text-[1rem] max-w-xs" : "text-[clamp(1rem,1.8vw,1.05rem)] max-w-sm"}`} style={{ opacity: 0.7 }}>
+      <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] mt-2 ${mobile ? "text-[1rem]" : "text-[clamp(1rem,1.8vw,1.05rem)] max-w-sm"}`} style={{ opacity: 0.7 }}>
         {t.body}
       </p>
     </div>
@@ -1688,7 +1688,7 @@ function PlatformSignal() {
         >
           <PlatformDiagram />
         </div>
-        <div className="px-3 flex flex-col items-start gap-2 mt-4"
+        <div className="px-3 flex flex-col items-center gap-2 mt-4"
           style={{
             opacity: visible ? 1 : 0,
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 300ms",
@@ -1796,10 +1796,10 @@ function NewsCarousel() {
   return (
     <section className="py-12 sm:py-16">
       <div className="px-3 max-w-[80rem] mx-auto w-full mb-8 flex items-end justify-between">
-        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight w-full text-center sm:text-left">
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight text-left">
           Recent news
         </h2>
-        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors hidden sm:block shrink-0">
+        <Link href="/blog" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors shrink-0">
           All posts →
         </Link>
       </div>
@@ -2344,38 +2344,6 @@ function PulseGrid() {
 
 
 
-function CountUp({ to, duration = 2200, suffix = "" }: { to: number; duration?: number; suffix?: string }) {
-  const [val, setVal] = useState(0);
-  const [started, setStarted] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setStarted(true); obs.disconnect(); }
-    }, { threshold: 0.3 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!started) return;
-    const start = performance.now();
-    const from = Math.round(to * 0.6); // start from 60% so it doesn't crawl from zero
-    const tick = (now: number) => {
-      const p = Math.min((now - start) / duration, 1);
-      // gentler ease: quintic out feels smooth without snapping at the end
-      const ease = 1 - Math.pow(1 - p, 5);
-      setVal(Math.round(from + ease * (to - from)));
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [started, to, duration]);
-
-  return <span ref={ref}>{val.toLocaleString()}{suffix}</span>;
-}
-
 function MissionPhrase() {
   const ref = useRef<HTMLParagraphElement>(null);
   const [visible, setVisible] = useState(false);
@@ -2404,126 +2372,137 @@ function MissionPhrase() {
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
       }}
     >
-      Obsessive{" "}
+      Brands that{" "}
       <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-        by default.
+        stay
       </span>
     </p>
   );
 }
 
-const STAT_ROWS = [
-  { label: "Clients worked with", desc: "Over 4+ years across every category", value: 1100, suffix: "+", duration: 1400 },
-  { label: "In-house delivery", desc: "No outsourcing, ever", value: 100, suffix: "%", duration: 1400 },
-  { label: "Support response", desc: "Every request, every time", value: 24, suffix: "h", duration: 1000 },
-  { label: "Average kickoff", desc: "First message to live", value: 5, suffix: "d", duration: 800 },
-  { label: "Satisfaction rate", desc: "From client feedback", value: 98, suffix: "%", duration: 1200 },
+const ORBIT_LOGOS = [
+  { src: "/work-logos/ft-gioo.png", name: "FT Gioo" },
+  { src: "/work-logos/1400.png", name: "1400" },
+  { src: "/work-logos/allure-new-york.png", name: "Allure New York" },
 ] as const;
 
-function StatSpotlight() {
-  const [active, setActive] = useState(0);
-  const [visible, setVisible] = useState(true);
-  const ref = useRef<HTMLDivElement>(null);
-  const [started, setStarted] = useState(false);
+// Cluster convergence point (where the three curves meet), in the viewBox below.
+const ORBIT_CENTER = { x: 1003, y: 466 };
+
+// Triangular cluster offsets relative to the center: FT Gioo on top, 1400 bottom-left, Allure bottom-right.
+// Larger nodes with tighter offsets so the circles overlap; a thick background-colored ring blends the overlaps.
+const ORBIT_CLUSTER = [
+  { dx: 0, dy: -60, size: 134 },    // [0] FT Gioo  (top)
+  { dx: -72, dy: 48, size: 142 },   // [1] 1400     (bottom-left)
+  { dx: 68, dy: 56, size: 134 },    // [2] Allure   (bottom-right)
+] as const;
+
+// Curve guides + flowing text. Ported directly from Wispr Flow's live implementation:
+// invisible bezier guide paths, text marquee animated via the <text> element's x attribute,
+// side="right" flips text that runs along a right-to-left curve so it stays upright.
+const ORBIT_LINE_TEXT = "Brands we've shipped for, stores we've grown, partners who keep coming back. ";
+const ORBIT_LINES = [
+  // curve starting just past the Allure node's edge, sweeping out and up toward the top-right
+  { id: "orbit-curve-1", d: "M1140 560C1442.47 736 1601.47 197 1880.08 470", side: "left",  values: "-2000;0" },
+  // curve sweeping in from the left edge into the cluster (text mirrored with side="right")
+  { id: "orbit-curve-2", d: "M0.996582 478.306C522.685 698.66 488.489 283.416 848.352 517.18",  side: "right", values: "0;-2000" },
+  // rises vertically out of the top-center of the FT Gioo node, then arcs broadly out and up to the right
+  { id: "orbit-curve-3", d: "M1003 339C1003 230 1120 170 1340 165C1620 158 1640 60 1640 -120", side: "left",  values: "-2000;0" },
+] as const;
+
+function ClientOrbit() {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const el = ref.current;
+    const el = wrapRef.current;
     if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
-      { threshold: 0.4 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!started) return;
-    const t = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setActive(i => (i + 1) % STAT_ROWS.length);
-        setVisible(true);
-      }, 350);
-    }, 3200);
-    return () => clearInterval(t);
-  }, [started]);
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
-  const goTo = (i: number) => {
-    if (i === active) return;
-    setVisible(false);
-    setTimeout(() => { setActive(i); setVisible(true); }, 350);
-  };
-
-  const s = STAT_ROWS[active];
+  // viewBox centred on the cluster (ORBIT_CENTER 1003,466) on each breakpoint.
+  // Mobile zooms into the centre so nodes and text read larger (crops the wide sides).
+  const viewBox = isMobile ? "623 226 760 480" : "63 206 1881 520";
+  const aspect = isMobile ? "760 / 480" : "1881 / 520";
 
   return (
-    <div
-      ref={ref}
-      className="relative flex flex-col items-center justify-center gap-8 py-14 sm:py-20 px-6 rounded-2xl bento-light-invert"
-      style={{
-        background: "rgb(var(--surface))",
-        boxShadow: "inset 0 1px 2px rgb(0 0 0 / 0.06)",
-      }}
-    >
-      <div
-        className="absolute inset-0 rounded-2xl pointer-events-none"
-        aria-hidden="true"
-        style={{
-          backgroundImage: "radial-gradient(rgb(var(--fg) / 0.12) 1px, transparent 1px)",
-          backgroundSize: "18px 18px",
-          maskImage: "radial-gradient(ellipse at center, black 35%, transparent 80%)",
-          WebkitMaskImage: "radial-gradient(ellipse at center, black 35%, transparent 80%)",
-        }}
-      />
-      <div className="absolute inset-3 sm:inset-4 rounded-xl pointer-events-none" aria-hidden="true" style={{ border: "1px solid rgb(var(--line) / 0.4)" }} />
-      <div className="flex flex-col items-center text-center gap-1 sm:gap-3 sm:min-h-[140px]">
-        <span
-          className="font-normal tracking-tight tabular-nums leading-none text-[rgb(var(--fg))]"
-          style={{
-            fontSize: "clamp(3.4rem, 9vw, 5.6rem)",
-            letterSpacing: "-0.05em",
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(10px)",
-            transition: "opacity 350ms ease, transform 350ms ease",
-          }}
-        >
-          {started ? <CountUp to={s.value} duration={s.duration} suffix={s.suffix} /> : `0${s.suffix}`}
-        </span>
-        <div
-          className="flex flex-col items-center gap-1"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(6px)",
-            transition: "opacity 350ms ease 80ms, transform 350ms ease 80ms",
-          }}
-        >
-          <span className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>{s.label}</span>
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{s.desc}</span>
-        </div>
-      </div>
+    <div ref={wrapRef} className="relative w-full" style={{ aspectRatio: aspect }}>
+      <svg viewBox={viewBox} fill="none" className="w-full h-full" aria-hidden="true">
+        <defs>
+          {ORBIT_LINES.map((line) => (
+            <path key={line.id} id={line.id} d={line.d} stroke="transparent" strokeWidth={2} fill="none" />
+          ))}
+        </defs>
 
-      {/* Progress dashes — also act as nav */}
-      <div className="flex items-center gap-2">
-        {STAT_ROWS.map((row, i) => (
-          <button
-            key={row.label}
-            onClick={() => goTo(i)}
-            aria-label={`Show ${row.label}`}
+        {/* Three flowing text marquees, each tracing a curve (Wispr Flow technique) */}
+        {ORBIT_LINES.map((line, i) => (
+          <text
+            key={line.id}
+            x={-2000}
+            {...(line.side === "right" ? { side: "right" } : {})}
             style={{
-              height: 4,
-              width: active === i ? 28 : 12,
-              borderRadius: 3,
-              background: active === i ? "rgb(var(--fg))" : "rgb(var(--line))",
-              opacity: active === i ? 0.8 : 0.5,
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              transition: "width 350ms cubic-bezier(0.22,1,0.36,1), opacity 350ms ease, background 350ms ease",
+              fontSize: 34,
+              fontWeight: 400,
+              fill: "rgb(var(--fg))",
+              opacity: visible ? 0.45 : 0,
+              transition: `opacity 700ms ease ${150 + i * 120}ms`,
             }}
-          />
+          >
+            <textPath xlinkHref={`#${line.id}`}>
+              {ORBIT_LINE_TEXT.repeat(10)}
+            </textPath>
+            <animate attributeName="x" dur="34s" values={line.values} repeatCount="indefinite" />
+          </text>
         ))}
-      </div>
+
+        {/* Triangular logo cluster anchored where the three curves converge */}
+        {ORBIT_CLUSTER.map((b, i) => {
+          const logo = ORBIT_LOGOS[i % ORBIT_LOGOS.length];
+          const x = ORBIT_CENTER.x + b.dx;
+          const y = ORBIT_CENTER.y + b.dy;
+          const r = b.size / 2;
+          return (
+            <g
+              key={logo.name + i}
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible
+                  ? `translate(${x}px, ${y}px) scale(1)`
+                  : `translate(${x}px, ${y}px) scale(0.6)`,
+                transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${400 + i * 110}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${400 + i * 110}ms`,
+              }}
+            >
+              {/* Ring in the exact block background color blends the overlapping circles together */}
+              <circle r={r + 12} fill="rgb(var(--orbit-surface))" />
+              <circle r={r} fill="rgb(var(--surface-elevated))" stroke="rgb(var(--line))" strokeWidth={2} />
+              <foreignObject x={-r} y={-r} width={b.size} height={b.size} style={{ overflow: "visible" }}>
+                <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                  <img
+                    src={logo.src}
+                    alt={logo.name}
+                    className="block"
+                    style={{ maxWidth: "60%", maxHeight: "60%", objectFit: "contain" }}
+                    loading="lazy"
+                  />
+                </div>
+              </foreignObject>
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
@@ -2600,26 +2579,32 @@ function StackDiagram() {
   }, []);
 
   return (
-    <div className="max-w-[80rem] mx-auto w-full px-3 sm:px-0">
-      {/* Heading + stats */}
-      <div className="relative flex flex-col justify-center py-10 gap-10">
-        <div className="flex flex-col items-center gap-3">
-          <MissionPhrase />
-          <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center" style={{ opacity: 0.7 }}>
-            Four years. Over a thousand clients. The numbers speak for themselves.
-          </p>
-        </div>
-        <div className="mx-auto w-full" style={{ maxWidth: 560 }}>
-          <StatSpotlight />
-        </div>
+    <div className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
+      <div
+        className="relative"
+        style={{
+          background: "rgb(var(--orbit-surface))",
+          borderRadius: 48,
+          overflow: "hidden",
+        }}
+      >
+        <div className="flex flex-col items-center gap-6 sm:gap-6 pb-10 sm:pb-12">
+          {/* Full-bleed: the orbit visual spans the entire section width, edge to edge */}
+          <div className="w-full">
+            <ClientOrbit />
+          </div>
 
-        {/* CTA */}
-        <div className="mx-auto w-full" style={{ maxWidth: 560 }}>
-          <div className="flex flex-col items-end sm:items-center gap-4 pt-2">
-            <ProjectCta />
-            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-              No commitment. We usually reply within 24h.
-            </span>
+          <div className="flex flex-col items-center gap-5 text-center max-w-lg px-3 sm:px-6">
+            <MissionPhrase />
+            <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm" style={{ opacity: 0.7 }}>
+              A storefront is the start, not the finish. We stick around, and so do the brands who trust us with theirs.
+            </p>
+            <div className="flex flex-col items-center gap-3 mt-2">
+              <ProjectCta />
+              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+                No commitment. We usually reply within 24h.
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -3095,7 +3080,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
             <>
               <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-3">Inertia Dashboard</p>
               <h2 className="text-[clamp(1.25rem,4vw,1.5rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-snug mb-2">
-                Your project, all in one place.
+                Your project, all in one place
               </h2>
               <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mb-7">
                 Status updates, files, invoices, and support. Built for clients who want visibility without the back-and-forth.
@@ -3310,23 +3295,23 @@ function VisualLayout() {
         <TechMarquee />
       </div>
 
-      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
+      <div className="py-6 sm:py-10" />
 
       <AetherFeature />
 
-      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
+      <div className="py-6 sm:py-10" />
 
       <PlatformSignal />
 
-      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
+      <div className="py-6 sm:py-10" />
 
       <NewsCarousel />
 
-      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
+      <div className="py-2 sm:py-4" />
 
       <StackDiagram />
 
-      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
+      <div className="py-6 sm:py-10" />
 
       <StartPrompt closing />
 

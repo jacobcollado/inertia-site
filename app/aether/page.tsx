@@ -101,7 +101,7 @@ export default function AetherPage() {
           A Shopify theme by Inertia
         </p>
         <h1 className="text-[clamp(2.2rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
-          Design is the Product.
+          Design is the Product
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
           A Shopify theme for independent brands that take how things look seriously.
