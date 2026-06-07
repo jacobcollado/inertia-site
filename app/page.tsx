@@ -1645,7 +1645,7 @@ function PlatformSignal() {
 
   const copy = (mobile?: boolean) => (
     <div
-      className={`flex flex-col ${mobile ? "gap-4 items-center text-center" : "gap-5"}`}
+      className={`flex flex-col ${mobile ? "gap-4 items-start text-left" : "gap-5"}`}
       style={{
         opacity: tabVisible ? 1 : 0,
         transform: tabVisible ? "translateY(0)" : "translateY(6px)",
@@ -1653,7 +1653,7 @@ function PlatformSignal() {
       }}
     >
 <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-snug ${mobile ? "text-[clamp(2rem,5vw,3rem)]" : "text-[clamp(2rem,2.8vw,2.8rem)]"}`}>
-        {t.headline}{!mobile && tab === 1 ? <br /> : " "}
+        {t.headline}{tab === 1 || tab === 2 ? <br /> : " "}
         <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{t.accent}</span>
       </p>
       <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] ${mobile ? "text-[1rem] max-w-xs" : "text-[clamp(1rem,1.8vw,1.05rem)] max-w-sm"}`} style={{ opacity: 0.7 }}>
@@ -1674,12 +1674,12 @@ function PlatformSignal() {
               transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
             }}
           >
-            <div className="mb-4 flex justify-center">{tabs}</div>
+            <div className="mb-4 flex justify-start">{tabs}</div>
             {copy(true)}
           </div>
         </div>
         <div
-          className="px-3 w-full"
+          className="px-3 w-full py-4"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(16px)",
@@ -1688,13 +1688,16 @@ function PlatformSignal() {
         >
           <PlatformDiagram />
         </div>
-        <div className="px-3 flex justify-center"
+        <div className="px-3 flex flex-col items-start gap-2 mt-4"
           style={{
             opacity: visible ? 1 : 0,
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 300ms",
           }}
         >
           <ProjectCta />
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+            No commitment. We usually reply within 24h.
+          </span>
         </div>
       </div>
 
@@ -2391,7 +2394,7 @@ function MissionPhrase() {
   return (
     <p
       ref={ref}
-      className="text-[clamp(2.4rem,5.5vw,3.6rem)] font-normal tracking-tight leading-[1.15] text-center sm:text-left pr-4 sm:pr-12"
+      className="text-[clamp(2.4rem,5.5vw,3.6rem)] font-normal tracking-tight leading-[1.15] text-center"
       style={{
         paddingTop: "6px",
         paddingBottom: "12px",
@@ -2409,73 +2412,115 @@ function MissionPhrase() {
   );
 }
 
-function MetricCard({ children, className = "", style = {} }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
-  const [pressed, setPressed] = useState(false);
-  return (
-    <div
-      className={`transition-all duration-200 cursor-default select-none ${className}`}
-      style={{
-        ...style,
-        transform: pressed ? "scale(0.97)" : "scale(1)",
-        filter: pressed ? "brightness(1.05)" : "none",
-      }}
-      onMouseEnter={e => (e.currentTarget.style.filter = "brightness(1.04)")}
-      onMouseLeave={e => { e.currentTarget.style.filter = "none"; setPressed(false); }}
-      onMouseDown={() => setPressed(true)}
-      onMouseUp={() => setPressed(false)}
-      onTouchStart={() => setPressed(true)}
-      onTouchEnd={() => setPressed(false)}
-    >
-      {children}
-    </div>
-  );
-}
+const STAT_ROWS = [
+  { label: "Clients worked with", desc: "Over 4+ years across every category", value: 1100, suffix: "+", duration: 1400 },
+  { label: "In-house delivery", desc: "No outsourcing, ever", value: 100, suffix: "%", duration: 1400 },
+  { label: "Support response", desc: "Every request, every time", value: 24, suffix: "h", duration: 1000 },
+  { label: "Average kickoff", desc: "First message to live", value: 5, suffix: "d", duration: 800 },
+  { label: "Satisfaction rate", desc: "From client feedback", value: 98, suffix: "%", duration: 1200 },
+] as const;
 
-function MetricsCarousel({ children }: { children: React.ReactNode }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [page, setPage] = useState(0);
-  const pages = 2;
+function StatSpotlight() {
+  const [active, setActive] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const ref = useRef<HTMLDivElement>(null);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    const el = scrollRef.current;
+    const el = ref.current;
     if (!el) return;
-    const onScroll = () => {
-      const pageWidth = el.clientWidth;
-      const p = Math.min(Math.round(el.scrollLeft / pageWidth), pages - 1);
-      setPage(p);
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setStarted(true); observer.disconnect(); } },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
-  const goTo = (p: number) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ left: p * el.clientWidth, behavior: "smooth" });
+  useEffect(() => {
+    if (!started) return;
+    const t = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setActive(i => (i + 1) % STAT_ROWS.length);
+        setVisible(true);
+      }, 350);
+    }, 3200);
+    return () => clearInterval(t);
+  }, [started]);
+
+  const goTo = (i: number) => {
+    if (i === active) return;
+    setVisible(false);
+    setTimeout(() => { setActive(i); setVisible(true); }, 350);
   };
 
+  const s = STAT_ROWS[active];
+
   return (
-    <div className="sm:hidden flex flex-col bento-light-invert">
-      <div ref={scrollRef} className="overflow-x-auto -mx-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex" style={{ scrollSnapType:"x mandatory", paddingLeft:12 }}>
-        {children}
+    <div
+      ref={ref}
+      className="relative flex flex-col items-center justify-center gap-8 py-14 sm:py-20 px-6 rounded-2xl bento-light-invert"
+      style={{
+        background: "rgb(var(--surface))",
+        boxShadow: "inset 0 1px 2px rgb(0 0 0 / 0.06)",
+      }}
+    >
+      <div
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        aria-hidden="true"
+        style={{
+          backgroundImage: "radial-gradient(rgb(var(--fg) / 0.12) 1px, transparent 1px)",
+          backgroundSize: "18px 18px",
+          maskImage: "radial-gradient(ellipse at center, black 35%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 35%, transparent 80%)",
+        }}
+      />
+      <div className="absolute inset-3 sm:inset-4 rounded-xl pointer-events-none" aria-hidden="true" style={{ border: "1px solid rgb(var(--line) / 0.4)" }} />
+      <div className="flex flex-col items-center text-center gap-1 sm:gap-3 sm:min-h-[140px]">
+        <span
+          className="font-normal tracking-tight tabular-nums leading-none text-[rgb(var(--fg))]"
+          style={{
+            fontSize: "clamp(3.4rem, 9vw, 5.6rem)",
+            letterSpacing: "-0.05em",
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(10px)",
+            transition: "opacity 350ms ease, transform 350ms ease",
+          }}
+        >
+          {started ? <CountUp to={s.value} duration={s.duration} suffix={s.suffix} /> : `0${s.suffix}`}
+        </span>
+        <div
+          className="flex flex-col items-center gap-1"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(6px)",
+            transition: "opacity 350ms ease 80ms, transform 350ms ease 80ms",
+          }}
+        >
+          <span className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>{s.label}</span>
+          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{s.desc}</span>
+        </div>
       </div>
-      <div className="flex items-center justify-center gap-2 mt-4">
-        {Array.from({ length: pages }).map((_, i) => (
+
+      {/* Progress dashes — also act as nav */}
+      <div className="flex items-center gap-2">
+        {STAT_ROWS.map((row, i) => (
           <button
-            key={i}
+            key={row.label}
             onClick={() => goTo(i)}
+            aria-label={`Show ${row.label}`}
             style={{
               height: 4,
-              width: page === i ? 24 : 8,
+              width: active === i ? 28 : 12,
               borderRadius: 3,
-              background: page === i ? "var(--accent-gradient)" : "rgb(var(--line))",
-              opacity: page === i ? 1 : 0.3,
+              background: active === i ? "rgb(var(--fg))" : "rgb(var(--line))",
+              opacity: active === i ? 0.8 : 0.5,
               border: "none",
               padding: 0,
               cursor: "pointer",
-              transition: "width 350ms cubic-bezier(0.22,1,0.36,1), opacity 350ms ease",
+              transition: "width 350ms cubic-bezier(0.22,1,0.36,1), opacity 350ms ease, background 350ms ease",
             }}
-            aria-label={`Page ${i + 1}`}
           />
         ))}
       </div>
@@ -2497,7 +2542,6 @@ function StackDiagram() {
   const raf = useRef<number | null>(null);
   const target = useRef({ x: 0, y: 0 });
   const isHovering = useRef(false);
-  const [bentoCta, setBentoCta] = useState(false);
 
   useEffect(() => {
     const STIFFNESS = 0.18;
@@ -2559,287 +2603,24 @@ function StackDiagram() {
     <div className="max-w-[80rem] mx-auto w-full px-3 sm:px-0">
       {/* Heading + stats */}
       <div className="relative flex flex-col justify-center py-10 gap-10">
-        <div className="flex flex-col items-center sm:items-start gap-3">
+        <div className="flex flex-col items-center gap-3">
           <MissionPhrase />
-          <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center sm:text-left" style={{ opacity: 0.7 }}>
+          <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm text-center" style={{ opacity: 0.7 }}>
             Four years. Over a thousand clients. The numbers speak for themselves.
           </p>
         </div>
-        {/* Mobile bento carousel — 2×2 visible, scroll for more */}
-        <MetricsCarousel>
-          {/* Each page is exactly viewport width, snaps cleanly */}
-          {/* Page 1: clients (tall left) + 100% + 24h */}
-          <div className="grid gap-3 shrink-0 bento-light-invert" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
-            <MetricCard className="relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
-              <svg viewBox="0 0 300 200" fill="none" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" aria-hidden="true">
-                <defs>
-                  <linearGradient id="wave-fill-m" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="rgb(var(--fg))" stopOpacity="0.14" />
-                    <stop offset="100%" stopColor="rgb(var(--fg))" stopOpacity="0" />
-                  </linearGradient>
-                  <linearGradient id="wave-stroke-m" x1="0" y1="0" x2="1" y2="0">
-                    <stop stopColor="rgb(var(--fg))" stopOpacity="0.7" />
-                    <stop offset="1" stopColor="rgb(var(--fg))" stopOpacity="0.4" />
-                  </linearGradient>
-                </defs>
-                <path d="M0 180 C40 175 60 160 90 145 C120 130 140 120 170 100 C200 80 230 55 300 30 L300 200 L0 200 Z" fill="url(#wave-fill-m)" />
-                <path d="M0 180 C40 175 60 160 90 145 C120 130 140 120 170 100 C200 80 230 55 300 30" stroke="url(#wave-stroke-m)" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-              <div className="absolute inset-x-3 bottom-3 z-10 rounded-xl p-3" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
-                <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Clients worked with</span>
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>Over 4+ years</span>
-              </div>
-            </MetricCard>
-            <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
-              <div className="flex flex-col gap-1">
-                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={100} duration={1400} suffix="%" /></span>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house</span>
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing</span>
-              </div>
-              <svg viewBox="0 0 48 48" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
-                <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
-                <circle cx="24" cy="24" r="17" stroke="rgb(var(--fg))" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)" opacity="0.7"/>
-                <polyline points="19,24 23,28 30,20" stroke="rgb(var(--fg))" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.7"/>
-              </svg>
-            </MetricCard>
-            <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:130 }}>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-baseline gap-1 leading-none">
-                  <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={24} duration={1000} /></span>
-                  <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>h</span>
-                </div>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Support</span>
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request</span>
-              </div>
-              <svg viewBox="0 0 52 52" fill="none" className="mt-2" style={{ width:28, height:28 }} aria-hidden="true">
-                <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
-                <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="rgb(var(--fg))" strokeWidth="2.5" strokeLinecap="round" opacity="0.7"/>
-                <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
-                <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
-                <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
-              </svg>
-            </MetricCard>
-          </div>
-
-          {/* Page 2: 5 days + 98% + US map */}
-          <div className="grid gap-3 shrink-0 bento-light-invert" style={{ scrollSnapAlign:"start", width:"calc(100vw - 24px)", marginRight:12, gridTemplateColumns:"1fr 1fr", gridTemplateRows:"auto auto" }}>
-            <MetricCard className="flex flex-col relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
-              <div className="p-5 pb-0">
-                <div className="flex items-baseline gap-1 leading-none mb-1">
-                  <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={5} duration={800} /></span>
-                  <span className="text-[1.1rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>d</span>
-                </div>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Avg kickoff</span>
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.4 }}>First msg to live</span>
-              </div>
-              <div className="absolute bottom-0 inset-x-0" aria-hidden="true">
-                <div className="flex items-end gap-0.5 px-4" style={{ height:44 }}>
-                  {[[14,22],[18,14,20],[12,24,16],[20,12,22,14],[16,26,18,22,14]].map((blocks, di) => {
-                    const isLast = di === 4;
-                    return (
-                      <div key={di} className="flex-1 flex flex-col-reverse gap-0.5">
-                        {blocks.map((h, bi) => (
-                          <div key={bi} style={{ height: h * 0.55, borderRadius:"2px 2px 0 0", background: isLast ? "rgb(var(--fg) / 0.75)" : `rgb(var(--fg) / ${0.07 + bi * 0.05})` }} />
-                        ))}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex gap-0.5 px-4 pb-1.5 pt-0.5">
-                  {["M","T","W","T","F"].map((d, i) => (
-                    <div key={i} className="flex-1 text-center" style={{ fontSize:7, color:"rgb(var(--muted))", opacity: i===4 ? 0.7 : 0.25 }}>{d}</div>
-                  ))}
-                </div>
-              </div>
-            </MetricCard>
-            <MetricCard className="flex flex-col justify-end relative overflow-hidden rounded-2xl row-span-2" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:280 }}>
-              <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover invert dark:invert" style={{ opacity:0.18 }} />
-              <div className="absolute inset-x-0 top-0 h-2/3 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-              <div className="relative z-10 mx-3 mb-3 rounded-xl p-3" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
-                <span className="text-[2.4rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}>US</span>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Based clients</span>
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>& globally</span>
-              </div>
-            </MetricCard>
-            <MetricCard className="flex flex-col justify-between p-5 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", minHeight:160 }}>
-              <div className="flex flex-col gap-1">
-                <span className="text-[2.4rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={98} duration={1200} suffix="%" /></span>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction</span>
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Client feedback</span>
-              </div>
-              <div className="flex flex-col gap-1.5 mt-2" aria-hidden="true">
-                <div style={{ height:3, borderRadius:2, background:"rgb(var(--fg) / 0.08)", overflow:"hidden" }}>
-                  <div style={{ height:"100%", width:"98%", background:"rgb(var(--fg) / 0.75)" }} />
-                </div>
-                <div className="flex gap-2">
-                  {[["9.9","Quality"],["9.7","Comms"],["9.6","Speed"],["9.8","Value"]].map(([score, label]) => (
-                    <div key={label} className="flex flex-col gap-0">
-                      <span style={{ fontSize:11, fontWeight:500, color:"rgb(var(--fg))", letterSpacing:"-0.02em" }}>{score}</span>
-                      <span style={{ fontSize:8, color:"rgb(var(--muted))", opacity:0.4 }}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </MetricCard>
-          </div>
-        </MetricsCarousel>
-
-        {/* Desktop bento grid — 4 cols, varied spans */}
-        <div className="hidden sm:grid gap-3 bento-light-invert" style={{ gridTemplateColumns:"repeat(4, 1fr)" }}>
-
-          {/* clients — col 1-2, row 1-2 */}
-          <div className="relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"1 / 3", gridRow:"1 / 3", minHeight:260 }}>
-            <svg viewBox="0 0 500 300" fill="none" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full" aria-hidden="true">
-              <defs>
-                <linearGradient id="wave-fill-d" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgb(var(--fg))" stopOpacity="0.12" />
-                  <stop offset="100%" stopColor="rgb(var(--fg))" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id="wave-stroke-d" x1="0" y1="0" x2="1" y2="0">
-                  <stop stopColor="rgb(var(--fg))" stopOpacity="0.5" />
-                  <stop offset="1" stopColor="rgb(var(--fg))" stopOpacity="0.2" />
-                </linearGradient>
-              </defs>
-              <path d="M0 270 C60 265 100 245 160 220 C220 195 270 170 330 140 C390 110 440 75 500 40 L500 300 L0 300 Z" fill="url(#wave-fill-d)" />
-              <path d="M0 270 C60 265 100 245 160 220 C220 195 270 170 330 140 C390 110 440 75 500 40" stroke="url(#wave-stroke-d)" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
-            <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-            {/* Glass floats at bottom over the chart */}
-            <div className="absolute inset-x-3 bottom-3 z-10 rounded-xl p-4" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
-              <span className="text-[3.2rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}><CountUp to={1100} duration={1400} suffix="+" /></span>
-              <span className="text-[15px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Clients worked with</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>Over 4+ years across every category</span>
-            </div>
-          </div>
-
-          {/* 100% — col 3, row 1 */}
-          <div className="flex flex-col justify-between p-5 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"3", gridRow:"1", minHeight:160 }}>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={100} duration={1400} suffix="%" /></span>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>In-house delivery</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>No outsourcing, ever</span>
-            </div>
-            <svg viewBox="0 0 48 48" fill="none" className="mt-3" style={{ width:36, height:36 }} aria-hidden="true">
-              <circle cx="24" cy="24" r="17" stroke="rgb(var(--line))" strokeWidth="5" opacity="0.2"/>
-              <circle cx="24" cy="24" r="17" stroke="rgb(var(--fg))" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${2*Math.PI*17}`} strokeDashoffset="0" transform="rotate(-90 24 24)" opacity="0.7"/>
-              <polyline points="19,24 23,28 30,20" stroke="rgb(var(--fg))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.7"/>
-            </svg>
-          </div>
-
-          {/* 24h — col 4, row 1 */}
-          <div className="flex flex-col justify-between p-5 sm:p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"4", gridRow:"1", minHeight:160 }}>
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-baseline gap-1 leading-none">
-                <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={24} duration={1000} /></span>
-                <span className="text-[1.2rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>h</span>
-              </div>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Support response</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>Every request, every time</span>
-            </div>
-            <svg viewBox="0 0 52 52" fill="none" className="mt-3" style={{ width:36, height:36 }} aria-hidden="true">
-              <circle cx="26" cy="26" r="20" stroke="rgb(var(--line))" strokeWidth="2" opacity="0.25"/>
-              <path d="M26 6 A20 20 0 1 1 6.1 26" stroke="rgb(var(--fg))" strokeWidth="2.5" strokeLinecap="round" opacity="0.7"/>
-              <line x1="26" y1="26" x2="26" y2="14" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
-              <line x1="26" y1="26" x2="35" y2="31" stroke="rgb(var(--fg))" strokeWidth="1.8" strokeLinecap="round" opacity="0.55"/>
-              <circle cx="26" cy="26" r="2.5" fill="rgb(var(--fg))" opacity="0.7"/>
-            </svg>
-          </div>
-
-          {/* 5d — col 3, row 2 */}
-          <div className="flex flex-col relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"3", gridRow:"2", minHeight:160 }}>
-            <div className="relative z-10 p-5 sm:p-6">
-              <div className="flex items-baseline gap-1 leading-none mb-1">
-                <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums" style={{ letterSpacing:"-0.04em" }}><CountUp to={5} duration={800} /></span>
-                <span className="text-[1.2rem] text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>days</span>
-              </div>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Average kickoff</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>First message to live</span>
-            </div>
-            {/* Sprint chart pinned to bottom, never overlaps text */}
-            <div className="absolute bottom-0 inset-x-0 flex flex-col" aria-hidden="true">
-              <div className="flex items-end gap-1 px-5" style={{ height:48 }}>
-                {[[14,22],[18,14,20],[12,24,16],[20,12,22,14],[16,26,18,22,14]].map((blocks, di) => {
-                  const isLast = di === 4;
-                  return (
-                    <div key={di} className="flex-1 flex flex-col-reverse gap-0.5">
-                      {blocks.map((h, bi) => (
-                        <div key={bi} style={{ height: h * 0.65, borderRadius:"2px 2px 0 0", background: isLast ? "var(--accent-gradient)" : `rgb(var(--fg) / ${0.07 + bi * 0.05})` }} />
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex gap-1 px-5 pb-1.5 pt-1">
-                {["M","T","W","T","F"].map((d, i) => (
-                  <div key={i} className="flex-1 text-center" style={{ fontSize:8, color:"rgb(var(--muted))", opacity: i===4 ? 0.7 : 0.25 }}>{d}</div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* CTA — col 4, row 2 */}
-          <a
-            href="https://www.instagram.com/by.inertia/"
-            target="_blank"
-            rel="noreferrer"
-            onMouseEnter={() => setBentoCta(true)}
-            onMouseLeave={() => setBentoCta(false)}
-            className="flex flex-col justify-between p-7 rounded-2xl hover:opacity-90 transition-opacity"
-            style={{ background:"var(--btn-bg)", gridColumn:"4", gridRow:"2", minHeight:160 }}
-          >
-            <span className="text-[13px] tracking-tight text-[var(--btn-fg)]" style={{ opacity:0.7 }}>Ready to start?</span>
-            <div>
-              <p className="text-[1.4rem] font-medium tracking-tight text-[var(--btn-fg)] leading-snug mb-3">Let's build something.</p>
-              <span className="inline-flex text-[13px] tracking-tight text-[var(--btn-fg)]" style={{ opacity:0.8, gap:"0.3em" }}>
-                {["Start", "a", "project", "↗"].map((w, i) => (
-                  <span key={i} style={{ display:"inline-block", animation: bentoCta ? `cta-wave 600ms cubic-bezier(0.22,1,0.36,1) ${i * 60}ms infinite alternate` : "none" }}>{w}</span>
-                ))}
-              </span>
-            </div>
-          </a>
-
-          {/* 98% — col 1-2, row 3 */}
-          <div className="flex flex-col justify-between p-7 relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"1 / 3", gridRow:"3", minHeight:160 }}>
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[2.6rem] font-normal tracking-tight tabular-nums leading-none" style={{ letterSpacing:"-0.04em", color:"rgb(var(--fg))" }}><CountUp to={98} duration={1200} suffix="%" /></span>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))]" style={{ fontWeight:500 }}>Satisfaction rate</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity:0.4 }}>From client feedback</span>
-            </div>
-            <div className="flex flex-col gap-2.5 mt-4" aria-hidden="true">
-              <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background:"rgb(var(--fg) / 0.08)" }}>
-                <div className="absolute inset-y-0 left-0 rounded-full" style={{ width:"98%", background:"rgb(var(--fg) / 0.75)" }} />
-              </div>
-              <div className="flex gap-3">
-                {[["Quality","9.9"],["Communication","9.7"],["Speed","9.6"],["Value","9.8"]].map(([label, score]) => (
-                  <div key={label} className="flex flex-col gap-0.5">
-                    <span style={{ fontSize:13, fontWeight:500, color:"rgb(var(--fg))", letterSpacing:"-0.02em" }}>{score}</span>
-                    <span style={{ fontSize:10, color:"rgb(var(--muted))", opacity:0.4, letterSpacing:"-0.01em" }}>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Map — col 3-4, row 2-3 */}
-          <div className="flex flex-col justify-end relative overflow-hidden rounded-2xl" style={{ background:"rgb(var(--surface-elevated))", border:"1px solid rgb(var(--line))", gridColumn:"3 / 5", gridRow:"2 / 4" }}>
-            <img src="/us-map.svg" alt="" aria-hidden="true" draggable={false} className="absolute inset-0 w-full h-full object-cover invert dark:invert" style={{ opacity:0.15 }} />
-            <div className="absolute inset-x-0 top-0 h-1/2 pointer-events-none" style={{ background:"linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-            <div className="relative z-10 m-3 rounded-xl p-4" style={{ background:"rgb(var(--surface-elevated) / 0.72)", backdropFilter:"blur(12px)", borderTop:"1px solid rgb(var(--line) / 0.5)", boxShadow:"inset 0 0 0 1000px rgba(0,0,0,0.25)" }}>
-              <span className="text-[2.6rem] font-normal tracking-tight text-[rgb(var(--fg))] tabular-nums leading-none block" style={{ letterSpacing:"-0.04em" }}>US</span>
-              <span className="text-[14px] tracking-tight text-[rgb(var(--fg))] block" style={{ fontWeight:500 }}>Clients across the US</span>
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] block" style={{ opacity:0.5 }}>& globally</span>
-            </div>
-          </div>
-
+        <div className="mx-auto w-full" style={{ maxWidth: 560 }}>
+          <StatSpotlight />
         </div>
-        {/* Mobile CTA remains below */}
-        <div className="flex flex-col sm:hidden items-center gap-4 pt-2">
-          <ProjectCta />
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-            No commitment. We usually reply within 24h.
-          </span>
+
+        {/* CTA */}
+        <div className="mx-auto w-full" style={{ maxWidth: 560 }}>
+          <div className="flex flex-col items-end sm:items-center gap-4 pt-2">
+            <ProjectCta />
+            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+              No commitment. We usually reply within 24h.
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -3529,23 +3310,23 @@ function VisualLayout() {
         <TechMarquee />
       </div>
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
 
       <AetherFeature />
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
 
       <PlatformSignal />
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
 
       <NewsCarousel />
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
 
       <StackDiagram />
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-6 sm:py-10 px-3 sm:px-0"><div className="grid-rule" aria-hidden="true" /></div>
 
       <StartPrompt closing />
 
