@@ -602,26 +602,10 @@ export function VisualNotch() {
 
   useEffect(() => {
     if (!mobileOpen) return;
-    // Lock scroll by pinning the body at its current scroll offset. Using
-    // overflow:hidden on <html> breaks the sticky header once the page is
-    // scrolled (it resolves to its static, off-screen position). Pinning the
-    // body keeps everything put; the header is switched to position:fixed via
-    // .site-header--open so it stays glued to the viewport top. Restore the
-    // exact scroll position on close.
-    const scrollY = window.scrollY;
-    const { body } = document;
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.left = "0";
-    body.style.right = "0";
-    body.style.width = "100%";
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    document.addEventListener("touchmove", prevent, { passive: false });
     return () => {
-      body.style.position = "";
-      body.style.top = "";
-      body.style.left = "";
-      body.style.right = "";
-      body.style.width = "";
-      window.scrollTo(0, scrollY);
+      document.removeEventListener("touchmove", prevent);
     };
   }, [mobileOpen]);
 
@@ -647,6 +631,7 @@ export function VisualNotch() {
     <>
       <div className={`site-header${mobileOpen ? " site-header--open" : ""}`} ref={headerRef}>
         <div className="site-header__bg" aria-hidden="true" />
+        <div className="site-header__bg-fill" aria-hidden="true" />
         <div className="site-header__inner">
           {/* Brand */}
           <Link href="/" className="site-header__brand">

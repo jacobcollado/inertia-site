@@ -835,27 +835,6 @@ h1:hover .redact > span.redact-inner,
    lock), which detaches position:sticky from any scroll context. Pin the header
    to the viewport top so it stays visible even when the menu was opened after
    scrolling down. Body is held in place, so this causes no content jump. */
-.site-header--open {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-}
-
-/* When open, make the header background solid so it matches the drawer's
-   surface. Drop the fade mask and any inline blur/alpha left by the scroll
-   handler so there is no seam between the header and the menu below it. */
-.site-header--open .site-header__bg {
-  background: rgb(var(--bg)) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  -webkit-mask-image: none;
-  mask-image: none;
-}
-
-
-
 .site-header__bg {
   position: absolute;
   inset: 0;
@@ -864,6 +843,27 @@ h1:hover .redact > span.redact-inner,
   mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.95) 65%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 92%, transparent 100%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* Solid fill that fades in on open — separate from the masked bg so it isn't
+   clipped by the mask. Sits between the masked bg and the inner content. */
+.site-header__bg-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgb(var(--bg));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+
+.site-header--open .site-header__bg {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.site-header--open .site-header__bg-fill {
+  opacity: 1;
 }
 
 .site-header__inner {
@@ -1104,30 +1104,32 @@ h1:hover .redact > span.redact-inner,
 
 .mobile-nav__drawer {
   position: fixed;
-  /* Tuck up under the header (which is 72px) so there's no hairline seam where
-     the page behind shows through. The header sits above at z-index 50, and the
-     8px overlap is absorbed by the drawer-inner's existing top padding. */
   top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 44;
   background: rgb(var(--bg));
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 280ms ease;
   overflow-y: auto;
+  visibility: hidden;
 }
 
 .mobile-nav__drawer[data-open="true"] {
-  opacity: 1;
   pointer-events: auto;
+  visibility: visible;
 }
 
 .mobile-nav__drawer-inner {
   display: flex;
   flex-direction: column;
   padding-top: 8px;
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.mobile-nav__drawer[data-open="true"] .mobile-nav__drawer-inner {
+  opacity: 1;
 }
 
 /* Accordion section */
