@@ -44,7 +44,7 @@ const NAV: NavItem[] = [
     children: [
       { label: "Aether theme", description: "One-time purchase, lifetime updates.", href: "/aether", icon: <SiShopify /> },
       { label: "Live demo", description: "See Aether running on a real store.", href: "https://aether-starter.myshopify.com", icon: <HiOutlineSparkles />, external: true },
-      { label: "Enterprise", description: "Custom licensing for larger teams.", href: "/aether/enterprise", icon: <HiOutlineBuildingOffice /> },
+      { label: "Commercial", description: "Licensing for agencies and studios building client stores.", href: "/aether/commercial", icon: <HiOutlineBuildingOffice /> },
       { label: "Add-ons", description: "Extend your theme with optional modules.", disabled: true, icon: <HiOutlinePuzzlePiece /> },
     ],
   },

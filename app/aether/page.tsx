@@ -96,7 +96,7 @@ export default function AetherPage() {
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center rise" style={{ minHeight: 480, paddingTop: 80, paddingBottom: 40 }}>
-        <p className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] -mt-4" style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--fg) / 0.1)" }}>
+        <p className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] -mt-4" style={{ background: "rgb(var(--fg) / 0.06)" }}>
           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.5)" }}>Aether</span>
           Aether, a Shopify theme by Inertia
         </p>

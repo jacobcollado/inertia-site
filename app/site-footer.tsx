@@ -74,7 +74,7 @@ export function SiteFooter() {
         <div className="flex flex-col gap-2.5 min-w-[120px]">
           <p className="text-[14px] sm:text-[15px] font-[500] tracking-tight text-[rgb(var(--muted))] opacity-40 mb-1">Products</p>
           <Link href="/aether" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Aether theme</Link>
-          <Link href="/aether/enterprise" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Enterprise</Link>
+          <Link href="/aether/commercial" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Commercial</Link>
           <span className="inline-flex items-center gap-2">
             <span className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] opacity-30 cursor-not-allowed select-none">Add-ons</span>
             <span className="inline-flex items-center rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] opacity-40 px-1.5 pt-[2px] pb-[3px] text-[9px] tracking-tight leading-none">soon</span>

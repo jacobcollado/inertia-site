@@ -162,9 +162,9 @@ export default function PricingPage() {
             </div>
           ))}
           {/* Enterprise cell */}
-          <Link href="/aether/enterprise" className="group flex flex-col gap-3 p-7 bg-[rgb(var(--bg))] hover:bg-[rgb(var(--surface))] transition-colors">
+          <Link href="/aether/commercial" className="group flex flex-col gap-3 p-7 bg-[rgb(var(--bg))] hover:bg-[rgb(var(--surface))] transition-colors">
             <div className="flex items-start justify-between gap-4">
-              <p className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">Aether Enterprise</p>
+              <p className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">Aether Commercial</p>
               <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] shrink-0 mt-0.5" style={{ opacity: 0.45 }}>From $59 / store</span>
             </div>
             <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">Per-store or unlimited licensing for agencies and studios deploying Aether at scale.</p>

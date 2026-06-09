@@ -4,33 +4,33 @@ import { getAllPosts, formatDate } from "@/lib/posts";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "We build Shopify storefronts, brand identities, and digital products for independent brands. Small studio, high craft, real ownership over every detail we ship.",
+  description: "Inertia is a small studio building Shopify storefronts, brand identities, and digital products. A few projects at a time, full attention on every detail.",
 };
 
 const PRINCIPLES = [
   {
-    title: "Time is the only non-renewable resource",
-    body: "Most software steals it. We build things that give it back. Every product we make is measured against one question: does this free someone up, or does it slow them down?",
+    title: "Time is the one thing you cannot buy back",
+    body: "Most software quietly takes it. We try to build the opposite, things that hand it back. Every decision gets weighed against one question: does this free someone up, or does it tie them down?",
   },
   {
-    title: "Automation should be invisible",
-    body: "The best systems don't feel like systems. They just work. We build infrastructure that runs in the background so the people using it can focus on what actually matters.",
+    title: "Good systems disappear",
+    body: "If you can feel the machinery, it is not finished. The best infrastructure works quietly in the background, leaving people free to think about the things that actually need them.",
   },
   {
-    title: "Better results, not just faster ones",
-    body: "Speed without quality is just wasted time moved earlier. Our infrastructure is designed to optimize outcomes, not just remove friction.",
+    title: "Faster is not the same as better",
+    body: "Speed is easy to sell and easy to fake. We care about outcomes: a storefront that converts, a brand that holds up, a system that still makes sense a year from now.",
   },
   {
-    title: "Vertical integration by design",
-    body: "We don't build isolated tools. We build layers that connect, from storefronts to client ops to the products people use every day. Each layer makes the next one better.",
+    title: "Layers that strengthen each other",
+    body: "We do not make one-off tools. Storefront, brand, client ops, every piece is built to make the others better. The whole is the product.",
   },
 ];
 
 const LINKS = [
-  { label: "Aether Theme",       desc: "Our Shopify theme for independent brands.",       href: "/aether"   },
-  { label: "Inertia Dashboard",  desc: "Client ops, in one place. In progress.",           href: "/roadmap"  },
-  { label: "Work with us",       desc: "Custom Shopify builds and brand projects.",         href: "/contact"  },
-  { label: "Careers",            desc: "Join the team.",                                   href: "/careers"  },
+  { label: "Aether Theme",       desc: "Our Shopify theme for founders who would rather not babysit their store.",  href: "/aether"   },
+  { label: "Inertia Dashboard",  desc: "Your whole project in one calm place. Still in the works.",                href: "/roadmap"  },
+  { label: "Work with us",       desc: "Storefronts, identities, and products, built with full attention.",         href: "/contact"  },
+  { label: "Careers",            desc: "Small team, careful work. Come do it with us.",                             href: "/careers"  },
 ];
 
 export default function AboutPage() {
@@ -44,14 +44,14 @@ export default function AboutPage() {
 
         {/* Left */}
         <div className="flex flex-col gap-7 flex-1">
-          <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>Our mission</p>
-          <h1 className="text-[clamp(2.6rem,4.5vw,3.5rem)] font-normal tracking-[-0.04em] leading-[1.02] text-[rgb(var(--fg))]">
-            Convert wasted time
+          <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>Why we exist</p>
+          <h1 className="text-[clamp(2.6rem,4.5vw,3.5rem)] font-normal tracking-[-0.04em] leading-[1.15] text-[rgb(var(--fg))]">
+            We build the things
             <br />
-            <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>into momentum</span>
+            <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "inline-block" }}>you keep putting off</span>
           </h1>
           <p className="text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
-            We build infrastructure that replaces tedious, repetitive work with automation, vertically integrated into the products and workflows people already use.
+            We are a small studio that builds what independent brands run on: storefronts, identities, and the quiet systems underneath them. The aim is always the same. Less time spent running the machine, more time spent on the work only you can do.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link
@@ -97,9 +97,9 @@ export default function AboutPage() {
       <section className="px-3 py-20 sm:py-32 rise">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-[clamp(2rem,4.5vw,3.4rem)] font-normal tracking-[-0.04em] leading-[1.2] text-[rgb(var(--fg))]">
-            Most people spend their days inside systems that were never designed to work for them. We think that&apos;s fixable.{" "}
+            Most of the tools people rely on were built for someone else&apos;s workflow. We think the work should fit the person doing it.{" "}
             <span style={{ color: "rgb(var(--muted))", opacity: 0.4 }}>
-              Not by doing things faster. By removing the need to do them at all.
+              Not faster ways to do tedious things. Fewer tedious things to do.
             </span>
           </p>
         </div>
@@ -110,8 +110,8 @@ export default function AboutPage() {
       {/* Principles */}
       <section className="px-3 pt-16 sm:pt-24 pb-16 rise">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
-          <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">How we think about it</p>
-          <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs" style={{ opacity: 0.6 }}>The principles behind every product we build.</p>
+          <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">What we hold onto</p>
+          <p className="text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs" style={{ opacity: 0.6 }}>Four ideas that shape everything we ship.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-[rgb(var(--line))]">
           {PRINCIPLES.map((p, i) => (
@@ -179,9 +179,9 @@ export default function AboutPage() {
       {/* Bottom CTA */}
       <section className="px-3 py-16 sm:py-24 rise">
         <div className="rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--surface))] px-8 sm:px-16 py-14 sm:py-20 flex flex-col items-center text-center gap-6 max-w-3xl mx-auto">
-          <p className="text-[clamp(1.6rem,2.8vw,2.2rem)] font-normal tracking-[-0.03em] leading-snug text-[rgb(var(--fg))]">We start with commerce</p>
+          <p className="text-[clamp(1.6rem,2.8vw,2.2rem)] font-normal tracking-[-0.03em] leading-snug text-[rgb(var(--fg))]">It starts with the store</p>
           <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
-            Shopify storefronts are where Inertia began, and where the infrastructure is most immediately useful. Aether is our first layer: a theme that runs the store so founders don&apos;t have to micromanage it.
+            Inertia began with Shopify storefronts, and that is still where careful infrastructure pays off fastest. Aether is the first layer: a theme that keeps the store running well, so founders can stop micromanaging it and get back to the brand.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
             <Link

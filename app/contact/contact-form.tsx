@@ -19,28 +19,28 @@ const CATEGORIES: Category[] = [
     id: "shopify",
     label: "Shopify store",
     heading: "Tell us about your store",
-    placeholder: "What are you selling, what's the goal, and where are you now?",
+    placeholder: "What you sell, where the store is at, and what you want it to do better.",
     fields: ["url", "budget"],
   },
   {
     id: "aether",
     label: "Aether support",
-    heading: "What do you need help with?",
-    placeholder: "Describe the issue or what you're trying to do.",
+    heading: "What can we help with?",
+    placeholder: "What happened, or what you're trying to do. Screenshots help.",
     fields: ["url"],
   },
   {
     id: "enterprise",
-    label: "Enterprise",
-    heading: "Let's talk about your project",
-    placeholder: "Give us an overview — team size, scope, and what you're trying to achieve.",
+    label: "Agencies and studios",
+    heading: "Tell us about the work",
+    placeholder: "The project, your team, rough scope, and the outcome you're after.",
     fields: ["company", "url", "budget"],
   },
   {
     id: "general",
-    label: "General",
+    label: "Something else",
     heading: "What's on your mind?",
-    placeholder: "Anything at all.",
+    placeholder: "Whatever it is, we read everything.",
     fields: [],
   },
 ];
@@ -117,11 +117,11 @@ export function ContactForm() {
   if (status === "sent") {
     return (
       <div className="flex flex-col gap-4" style={{ animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both" }}>
-        <p className="text-[1.8rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight">
+        <p className="text-[clamp(2rem,5vw,2.8rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight">
           {name ? `Thanks, ${name}.` : "Message received."}
         </p>
         <p className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>
-          {email ? `We'll follow up at ${email} within one business day.` : "We'll be in touch shortly."}
+          {email ? `We'll reply at ${email} within one business day.` : "We'll be in touch shortly."}
         </p>
       </div>
     );
@@ -132,16 +132,16 @@ export function ContactForm() {
 
       {/* heading */}
       <div>
-        <h1 className="text-[2rem] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight mb-1">
+        <h1 className="text-[clamp(2rem,5vw,2.8rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight mb-2">
           {category.heading}
         </h1>
         <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>
-          We'll get back to you within one business day.
+          We reply within one business day.
         </p>
       </div>
 
       {/* category pill tabs */}
-      <div className="inline-flex items-center rounded-full p-1 gap-0.5 self-start flex-wrap" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+      <div className="grid grid-cols-2 sm:inline-flex sm:grid-cols-none items-center rounded-2xl sm:rounded-full p-1 gap-0.5 w-full sm:w-auto sm:self-start" style={{ background: "rgb(var(--fg) / 0.06)" }}>
         {CATEGORIES.map((c) => {
           const active = c.id === categoryId;
           return (
@@ -149,7 +149,7 @@ export function ContactForm() {
               key={c.id}
               type="button"
               onClick={() => setCategoryId(c.id)}
-              className="rounded-full px-3.5 py-1.5 text-[12px] tracking-tight transition-all duration-200 [-webkit-tap-highlight-color:transparent]"
+              className="rounded-[50px] px-3.5 py-2 sm:py-1.5 text-[12px] tracking-tight transition-all duration-200 [-webkit-tap-highlight-color:transparent]"
               style={{
                 background: active ? "var(--btn-bg)" : "transparent",
                 color: active ? "var(--btn-fg)" : "rgb(var(--muted))",

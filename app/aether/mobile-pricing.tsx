@@ -112,7 +112,7 @@ export function MobilePricing({
 
         {/* CTA */}
         <Link
-          href={tier.name === "Enterprise" ? "/aether/enterprise" : "/aether/buy"}
+          href={tier.name === "Enterprise" ? "/aether/commercial" : "/aether/buy"}
           className="flex items-center justify-center gap-1.5 rounded-full py-3 text-[14px] font-medium tracking-tight transition-opacity hover:opacity-80 text-[rgb(var(--bg))]"
           style={{ background: "var(--accent-gradient)" }}
         >
