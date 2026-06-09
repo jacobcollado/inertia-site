@@ -6,18 +6,18 @@ import { useRef, useState } from "react";
 const STEPS = [
   {
     step: "Buy",
-    desc: "One-time or annual license",
-    tooltip: "From $85. Pay once for lifetime, or $85/yr for annual. One license covers one store. No hidden fees, no per-month charges.",
+    desc: "One license, lifetime or annual",
+    tooltip: "From $85. Pay once and keep it forever, or $85 a year if you'd rather spread it out. One license covers one store, and the price you see is the whole price. No monthly charges underneath.",
   },
   {
     step: "Install",
-    desc: "Live in under an hour",
-    tooltip: "Download the .zip, upload it in Shopify Admin, and publish. All 41 sections are ready to drag onto any page. No developer needed.",
+    desc: "Live the same afternoon",
+    tooltip: "Download the .zip, upload it in Shopify admin, publish. All 41 sections are ready to drag onto any page, and none of it needs a developer.",
   },
   {
     step: "Sell",
-    desc: "Built to convert from day one",
-    tooltip: "Every layout decision — trust badges, sticky cart, product gallery — was tested across live stores before shipping. It works out of the box.",
+    desc: "Tuned on live stores, not mockups",
+    tooltip: "Every layout decision, from the trust badges to the sticky cart to the product gallery, was tested on real stores before it shipped. Nothing in the theme is a guess.",
   },
 ];
 

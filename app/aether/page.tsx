@@ -28,8 +28,8 @@ export const metadata: Metadata = {
 const KEY_FEATURES = [
   {
     title: "Upsell",
-    desc: "Surface related products, bundles, and add-ons at the right moment, without interrupting the buy.",
-    points: ["Post-purchase upsell block", "Bundle builder section", "Frequently bought together"],
+    desc: "Bundles, add-ons, and related products appear where they earn their place: in the cart, after checkout, alongside the product. Never in the way of the purchase itself.",
+    points: ["Post-purchase offer block", "Bundle builder section", "Frequently bought together rail"],
     visual: "upsell",
     image: "/aether/upsell.png",
     flip: false,
@@ -37,8 +37,8 @@ const KEY_FEATURES = [
   },
   {
     title: "Scarcity",
-    desc: "Low stock counters, countdown timers, and sold indicators. Built to create urgency without feeling cheap.",
-    points: ["Live inventory counter", "Countdown timer block", "Sold-out state styling"],
+    desc: "Real stock numbers and real deadlines, presented like information rather than pressure. Urgency that fits a considered brand.",
+    points: ["Live inventory counter", "Countdown timer block", "Designed sold-out states"],
     visual: "scarcity",
     image: "/aether/scarcity.png",
     flip: true,
@@ -46,8 +46,8 @@ const KEY_FEATURES = [
   },
   {
     title: "Guided format",
-    desc: "Every section pulls the customer forward. No dead ends. No dropped carts.",
-    points: ["Sticky add-to-cart bar", "Progress indicators", "Cart drawer with upsells"],
+    desc: "Each section hands off to the next, so browsing turns into buying without the customer ever hitting a dead end.",
+    points: ["Sticky add-to-cart bar", "Progress indicators through checkout", "Cart drawer with built-in upsells"],
     visual: "guided",
     image: "/aether/guided.png",
     flip: false,
@@ -56,18 +56,18 @@ const KEY_FEATURES = [
 ];
 
 const SECONDARY_FEATURES = [
-  { name: "41 sections", desc: "Everything you need, nothing you don't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="2" width="14" height="3" rx="1"/><rect key="b" x="1" y="7" width="9" height="3" rx="1"/><rect key="c" x="1" y="12" width="6" height="3" rx="1"/></svg> },
-  { name: "Dark mode", desc: "Looks as good at midnight as midday", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/></svg> },
-  { name: "Mega menu", desc: "Navigation that handles large catalogues", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="1" width="14" height="2.5" rx="0.5"/><rect key="b" x="1" y="5.5" width="6.5" height="9" rx="0.5"/><rect key="c" x="8.5" y="5.5" width="6.5" height="9" rx="0.5"/></svg> },
-  { name: "Sticky cart", desc: "Add to cart stays in reach at all times", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M1 1h2l1.5 7.5h7L13 4H4"/><circle key="b" cx="6.5" cy="13" r="1"/><circle key="c" cx="11" cy="13" r="1"/></svg> },
-  { name: "Mobile optimised", desc: "Built for thumbs first", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="4" y="1" width="8" height="14" rx="1.5"/><line key="b" x1="8" y1="12" x2="8" y2="12.5" strokeWidth="1.8"/></svg> },
-  { name: "Quick buy", desc: "Purchase without leaving the page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><polyline key="b" points="5 8 7 10 11 6"/></svg> },
-  { name: "Video hero", desc: "Autoplay video in the first section", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="2" width="14" height="12" rx="1.5"/><polygon key="b" points="6 5.5 11 8 6 10.5" fill="currentColor" opacity="0.5"/></svg> },
-  { name: "Lookbook", desc: "Editorial layouts for campaign content", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="1" width="6.5" height="14" rx="1"/><rect key="b" x="8.5" y="1" width="6.5" height="8" rx="1"/><rect key="c" x="8.5" y="10" width="6.5" height="5" rx="1"/></svg> },
-  { name: "SMS + email capture", desc: "Corner widget and popup, both built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="3" width="14" height="10" rx="1.5"/><polyline key="b" points="1 3 8 9 15 3"/></svg> },
-  { name: "Music player", desc: "Ambient audio to set the brand mood", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="5" cy="13" r="2"/><circle key="b" cx="12" cy="11" r="2"/><path key="c" d="M7 13V4l7-2v9"/></svg> },
-  { name: "Custom fonts", desc: "Upload any font directly in the editor", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M2 13L6 3l4 10M3.5 9.5h5"/><path key="b" d="M11 5v8M11 5c0-1.1.9-2 2-2s2 .9 2 2"/></svg> },
-  { name: "FAQs", desc: "Accordion answers on any page", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><path key="b" d="M6 6a2 2 0 1 1 2 2v1"/><circle key="c" cx="8" cy="12" r="0.5" fill="currentColor"/></svg> },
+  { name: "41 sections", desc: "Every layout a store actually uses, none it doesn't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="2" width="14" height="3" rx="1"/><rect key="b" x="1" y="7" width="9" height="3" rx="1"/><rect key="c" x="1" y="12" width="6" height="3" rx="1"/></svg> },
+  { name: "Dark mode", desc: "A full dark palette, not an inverted afterthought", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/></svg> },
+  { name: "Mega menu", desc: "Deep catalogues, organised at a glance", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="1" width="14" height="2.5" rx="0.5"/><rect key="b" x="1" y="5.5" width="6.5" height="9" rx="0.5"/><rect key="c" x="8.5" y="5.5" width="6.5" height="9" rx="0.5"/></svg> },
+  { name: "Sticky cart", desc: "Add to cart follows the scroll, so the decision never goes cold", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M1 1h2l1.5 7.5h7L13 4H4"/><circle key="b" cx="6.5" cy="13" r="1"/><circle key="c" cx="11" cy="13" r="1"/></svg> },
+  { name: "Mobile optimised", desc: "Designed thumb-first, then scaled up to desktop", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="4" y="1" width="8" height="14" rx="1.5"/><line key="b" x1="8" y1="12" x2="8" y2="12.5" strokeWidth="1.8"/></svg> },
+  { name: "Quick buy", desc: "Straight from the collection grid, no detour", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><polyline key="b" points="5 8 7 10 11 6"/></svg> },
+  { name: "Video hero", desc: "Open on motion, muted, instant", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="2" width="14" height="12" rx="1.5"/><polygon key="b" points="6 5.5 11 8 6 10.5" fill="currentColor" opacity="0.5"/></svg> },
+  { name: "Lookbook", desc: "Magazine-style layouts for campaigns and drops", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="1" width="6.5" height="14" rx="1"/><rect key="b" x="8.5" y="1" width="6.5" height="8" rx="1"/><rect key="c" x="8.5" y="10" width="6.5" height="5" rx="1"/></svg> },
+  { name: "SMS + email capture", desc: "Corner widget and popup, styled to match, built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="1" y="3" width="14" height="10" rx="1.5"/><polyline key="b" points="1 3 8 9 15 3"/></svg> },
+  { name: "Music player", desc: "Optional ambient audio, because a brand can have a soundtrack", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="5" cy="13" r="2"/><circle key="b" cx="12" cy="11" r="2"/><path key="c" d="M7 13V4l7-2v9"/></svg> },
+  { name: "Custom fonts", desc: "Upload your own type files straight into the editor", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M2 13L6 3l4 10M3.5 9.5h5"/><path key="b" d="M11 5v8M11 5c0-1.1.9-2 2-2s2 .9 2 2"/></svg> },
+  { name: "FAQs", desc: "Accordion answers wherever the doubts show up", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><path key="b" d="M6 6a2 2 0 1 1 2 2v1"/><circle key="c" cx="8" cy="12" r="0.5" fill="currentColor"/></svg> },
 ];
 
 const TIERS = [
@@ -98,13 +98,13 @@ export default function AetherPage() {
       <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center rise" style={{ minHeight: 480, paddingTop: 80, paddingBottom: 40 }}>
         <p className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] -mt-4" style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--fg) / 0.1)" }}>
           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.5)" }}>Aether</span>
-          A Shopify theme by Inertia
+          Aether, a Shopify theme by Inertia
         </p>
         <h1 className="text-[clamp(2.2rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
-          Design is the Product
+          Design is the product
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
-          A Shopify theme for independent brands that take how things look seriously.
+          A Shopify theme for independent brands that treat how the store looks as part of what they sell.
         </p>
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
@@ -134,8 +134,8 @@ export default function AetherPage() {
 
       {/* Secondary features */}
       <div className="px-3 pb-16 sm:pb-24 rise">
-        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3">And everything else</p>
-        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">41 sections, ready the moment you install</p>
+        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3">And the rest of it</p>
+        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">Every section ships in the box, ready the moment you publish</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
           {SECONDARY_FEATURES.map((f) => (
             <div key={f.name} className="flex items-start gap-3 py-4">
@@ -158,8 +158,8 @@ export default function AetherPage() {
 
       {/* Pricing */}
       <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16 max-w-2xl mx-auto w-full">
-        <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4 text-center">One price. Everything in.</p>
-        <p className="text-[clamp(1rem,1.6vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center max-w-sm mx-auto" style={{ opacity: 0.6 }}>No feature gates. No upsells. Pick the license that fits your store and get every section we've ever built.</p>
+        <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4 text-center">One price, the whole theme</p>
+        <p className="text-[clamp(1rem,1.6vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center max-w-sm mx-auto" style={{ opacity: 0.6 }}>No feature gates, no pro tier, nothing sold separately. Pick the license that fits your store and every section we have ever built comes with it.</p>
 
         <MobilePricing tiers={TIERS} rows={PRICING_ROWS} />
       </div>

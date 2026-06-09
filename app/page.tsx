@@ -69,7 +69,7 @@ const BUILDING = [
   {
     name: "Inertia",
     type: "Agency",
-    description: "Your vision, built properly. No handoffs, no excuses.",
+    description: "One team from first sketch to launch day. Your vision, built properly.",
     cta: "Work with us",
     href: "https://www.instagram.com/by.inertia/",
     sketch: <SketchInertia />,
@@ -77,7 +77,7 @@ const BUILDING = [
   {
     name: "Aether Theme",
     type: "Themes",
-    description: "A Shopify theme that makes your store feel like a brand.",
+    description: "The Shopify theme for stores that want to feel designed, not templated.",
     cta: "See Aether",
     href: "/aether",
     sketch: <MockupAether />,
@@ -85,7 +85,7 @@ const BUILDING = [
   {
     name: "Inertia Dashboard",
     type: "Software",
-    description: "Everything your project needs, in one place you'll actually check.",
+    description: "Timelines, files, and progress in one place you'll actually open.",
     cta: "Join waitlist",
     href: "#",
     sketch: <MockupDashboard />,
@@ -304,7 +304,7 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   );
 }
 
-const ROTATING_WORDS = ["remembered", "chosen", "trusted", "noticed", "converted", "different"];
+const ROTATING_WORDS = ["remembered", "chosen", "trusted", "noticed", "revisited", "shared"];
 const HOLD_MS = 2600;
 const CHAR_STAGGER = 32;
 const FILL_MS = 800;
@@ -519,10 +519,10 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
           </Link>
         )}
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
-          {closing ? <>Your next project starts with a message.</> : hero ? <>Your store deserves to be <RotatingWord />.</> : "What are you building?"}
+          {closing ? <>The hardest part is the first push.</> : hero ? <>Your store deserves to be <RotatingWord />.</> : "What are you building?"}
         </p>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs mt-6">
-          {closing ? "Drop us a line. We’ll get back to you within 24 hours." : hero ? "Tell us what you’re building. We’ll make sure it lands." : "Tell us. We’ll figure out the rest."}
+          {closing ? "Send a message. We’ll handle the momentum from there." : hero ? "Tell us what you’re making. We’ll give it momentum." : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
 
@@ -641,7 +641,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
         </div>
       </form>
       <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-50">
-        No commitment. We usually reply within 24h.
+        No pressure, no spam. A real reply within a day.
       </p>
     </section>
   );
@@ -1056,7 +1056,7 @@ function AetherFeature() {
           </span>
         </h2>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
-          Your store should feel like a brand. Aether makes that the default.
+          Most themes build stores. Aether builds brands.
         </p>
       </div>
 
@@ -1705,9 +1705,9 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
 const SIGNAL_TABS = [
   {
     label: "Storefronts",
-    headline: "Your store,",
-    accent: "done right.",
-    body: "A lot of brands leave money on the table with a site that doesn't match what they're actually selling. We design, build, and launch it. One team, start to finish.",
+    headline: "A store that",
+    accent: "sells itself.",
+    body: "Most brands lose sales to a site that undersells what they make. We design, build, and launch your storefront, one team from first sketch to first sale.",
     visual: (
       <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
         {/* grid of product tiles */}
@@ -1729,9 +1729,9 @@ const SIGNAL_TABS = [
   },
   {
     label: "Rebrands",
-    headline: "Your brand,",
-    accent: "caught up.",
-    body: "We know the difference between a refresh and a full rebrand. We help you figure out which one you need, then build it properly. Logo, site, content, all of it.",
+    headline: "Same business,",
+    accent: "sharper story.",
+    body: "A refresh and a full rebrand are different jobs, and we tell you straight which one you actually need. Then we build it properly, logo, site, content, all of it.",
     visual: (
       <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
         {/* faded old mark — circle */}
@@ -1750,9 +1750,9 @@ const SIGNAL_TABS = [
   },
   {
     label: "Campaigns",
-    headline: "Creative that",
-    accent: "converts.",
-    body: "Ads, landing pages, email flows. We build the funnel and make sure the numbers make sense. You stay focused on the business. We stay focused on growing it.",
+    headline: "Every click,",
+    accent: "accounted for.",
+    body: "Ads, landing pages, and email flows built as one funnel, with numbers that hold up. You run the business, we grow it.",
     visual: (
       <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
         {/* funnel stages */}
@@ -2580,9 +2580,10 @@ function MissionPhrase() {
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
       }}
     >
-      Brands that{" "}
+      Projects end.{" "}
+      <br className="sm:hidden" />
       <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-        stay
+        Partnerships don&apos;t.
       </span>
     </p>
   );
@@ -2608,7 +2609,7 @@ const ORBIT_CLUSTER = [
 // Curve guides + flowing text. Ported directly from Wispr Flow's live implementation:
 // invisible bezier guide paths, text marquee animated via the <text> element's x attribute,
 // side="right" flips text that runs along a right-to-left curve so it stays upright.
-const ORBIT_LINE_TEXT = "Brands we've shipped for, stores we've grown, partners who keep coming back. ";
+const ORBIT_LINE_TEXT = "Stores we've launched, brands we've grown, partners who never left. ";
 const ORBIT_LINES = [
   // curve starting just past the Allure node's edge, sweeping out and up toward the top-right
   { id: "orbit-curve-1", d: "M1140 560C1442.47 736 1601.47 197 1880.08 470", side: "left",  values: "-2000;0" },
@@ -2807,12 +2808,12 @@ function StackDiagram() {
           <div className="flex flex-col items-center gap-5 text-center max-w-lg px-3 sm:px-6">
             <MissionPhrase />
             <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm" style={{ opacity: 0.7 }}>
-              A storefront is the start, not the finish. We stick around, and so do the brands who trust us with theirs.
+              Launch day is the start, not the finish line. We keep building, and the brands we build with keep coming back.
             </p>
             <div className="flex flex-col items-center gap-3 mt-2">
               <ProjectCta />
               <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-                No commitment. We usually reply within 24h.
+                No commitment, no pressure. We usually reply within 24 hours.
               </span>
             </div>
           </div>
@@ -2825,27 +2826,27 @@ function StackDiagram() {
 const FAQ_ITEMS = [
   {
     q: "What is Inertia?",
-    a: "We design and build for people who want their vision brought to life properly. Shopify storefronts, custom web products, and brand identities, made for anyone from e-commerce brands to trades to influencers. Whatever you're building, we do it all, in-house and one project at a time.",
+    a: "We're a small design and build studio. Shopify stores, custom web products, brand identities, all done in-house for anyone from e-commerce brands to trades to influencers. One project at a time, built properly.",
   },
   {
-    q: "How much does a project cost?",
-    a: "It comes down to scope. Once we understand what you're after, we put together a fixed price for the whole project. You'll know the number before any work begins, and it won't move unless the scope does.",
+    q: "What does a project cost?",
+    a: "Depends on the scope, so we don't do vague ranges. Once we know what you're after, you get one fixed price for the whole thing before any work starts. It only moves if the scope does.",
   },
   {
-    q: "How long does it take?",
-    a: "A typical project takes around five weeks. Smaller ones move faster, larger ones can run a week or two longer. We give you a real timeline at the start and keep the work moving against it.",
+    q: "How long will it take?",
+    a: "Most projects land around five weeks. Smaller ones move quicker, bigger ones might run a week or two longer. You get a real timeline up front and we keep the work moving against it.",
   },
   {
-    q: "How do you work?",
-    a: "Every project starts from your brief, not a template. We design and build the whole thing ourselves, stay close to you through each stage, and only ever take on a few projects at once so yours gets real attention.",
+    q: "How do you actually work?",
+    a: "We start from your brief, not a template. Everything is designed and built by us, you're kept close at every stage, and we only take on a few projects at once so yours gets proper attention.",
   },
   {
     q: "Who owns the work?",
-    a: "You do. We don't post it, list it, or point to it anywhere unless you've told us that's alright. If you'd rather the project stay quiet, it stays quiet.",
+    a: "You do, fully. We don't post it, list it, or point to it anywhere unless you've said that's fine. If you want the project kept quiet, it stays quiet.",
   },
   {
     q: "How do we start?",
-    a: "Tell us what you're working on, where you'd like it to go, and roughly when you need it. We read every message and reply within a day. If it feels like a fit, we'll set up a short call before scoping anything.",
+    a: "Send us what you're working on, where you want it to go, and roughly when you need it. We read every message and reply within a day. If it feels like a fit, we'll jump on a short call before scoping anything.",
   },
 ] as const;
 
