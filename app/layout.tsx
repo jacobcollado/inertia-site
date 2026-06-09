@@ -56,8 +56,12 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large", "max-video-preview": -1 },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
     shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
 };
 
@@ -73,9 +77,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebSite",
+            "@id": "https://byinertia.com/#website",
             "name": "Inertia",
             "alternateName": "Inertia Studio",
             "url": "https://byinertia.com",
+            "publisher": { "@id": "https://byinertia.com/#organization" },
             "potentialAction": {
               "@type": "SearchAction",
               "target": { "@type": "EntryPoint", "urlTemplate": "https://byinertia.com/blog?q={search_term_string}" },
@@ -88,6 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
+            "@id": "https://byinertia.com/#organization",
             "name": "Inertia",
             "alternateName": "Inertia Studio",
             "url": "https://byinertia.com",

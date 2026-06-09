@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Policies - Inertia" };
+export const metadata: Metadata = {
+  title: "Policies",
+  description: "The fine print, kept plain. Terms, privacy, and refunds for working with Inertia and buying Aether.",
+};
 
 const DOCS = [
   {

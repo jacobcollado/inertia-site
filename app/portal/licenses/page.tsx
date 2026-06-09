@@ -4,7 +4,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Your Licenses — Inertia",
+  title: "Your licenses",
+  description: "Manage your Aether licenses, download the latest theme files, and view your purchase history.",
 };
 
 export const revalidate = 0;

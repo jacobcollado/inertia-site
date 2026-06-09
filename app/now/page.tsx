@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Now",
-  description: "What Jacob Collado is working on right now.",
+  description: "A snapshot of what Inertia is focused on right now. Current work, what's shipping next, and what we're thinking about.",
 };
 
 export default function NowPage() {

@@ -3,6 +3,7 @@ import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
   title: "Client portal",
+  description: "Sign in to track your project, view updates, and manage your Aether licenses in one place.",
 };
 
 type Search = { tab?: string };

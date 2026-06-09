@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Refund Policy" };
+export const metadata: Metadata = {
+  title: "Refund Policy",
+  description: "Digital products are final sale, but we will always work to make things right. Here's how refunds work at Inertia.",
+};
 
 const EFFECTIVE = "June 1, 2026";
 const COMPANY = "Inertia Studio LLC";

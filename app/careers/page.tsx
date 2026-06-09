@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Careers",
-  description: "We build things that matter. Join us.",
+  description: "A small studio that stays small on purpose. Craft over output, async by default, no layers between idea and execution. See open roles at Inertia.",
 };
 
 const VALUES = [

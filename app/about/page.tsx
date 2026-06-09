@@ -4,7 +4,7 @@ import { getAllPosts, formatDate } from "@/lib/posts";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Inertia exists to vertically integrate into human lives and convert wasted time into automation.",
+  description: "We build Shopify storefronts, brand identities, and digital products for independent brands. Small studio, high craft, real ownership over every detail we ship.",
 };
 
 const PRINCIPLES = [

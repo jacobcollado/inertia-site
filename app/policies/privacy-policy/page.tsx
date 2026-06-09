@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Privacy Policy" };
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "What data Inertia collects, why we collect it, and how long we keep it. No surprises.",
+};
 
 const EFFECTIVE = "June 6, 2026";
 const COMPANY = "Inertia Studio LLC";

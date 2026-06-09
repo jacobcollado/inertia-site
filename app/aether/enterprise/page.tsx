@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Aether Enterprise",
-  description: "Scale Shopify stores faster using Aether as your foundation. Built for agencies, brand studios, and high-volume operators.",
+  description: "Build client stores faster on Aether. Per-store or unlimited commercial licenses, lifetime updates, and full client handoff. Made for agencies, brand studios, and operators.",
 };
 
 const WHO = [

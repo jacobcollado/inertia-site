@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Terms of Service" };
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "How engagements with Inertia work. Ownership, payment, revisions, support, and the rest, in plain terms.",
+};
 
 const EFFECTIVE = "May 1, 2026";
 const COMPANY = "Inertia Studio LLC";

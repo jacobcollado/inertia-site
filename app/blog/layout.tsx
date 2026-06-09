@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Journal - Shopify, Design & Building Digital Products",
+  title: "Journal",
   description: "Honest takes on Shopify development, ecommerce design, and building digital products. Written by the Inertia studio team.",
   alternates: { canonical: "https://byinertia.com/blog" },
   openGraph: {

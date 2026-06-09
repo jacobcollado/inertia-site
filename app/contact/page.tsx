@@ -4,7 +4,7 @@ import { ContactForm } from "./contact-form";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Start a project with Inertia. Tell us what you're building.",
+  description: "Tell us what you're building. Shopify storefronts, brand identities, and custom web work, shipped on time. We reply within one business day.",
 };
 
 export default function ContactPage() {

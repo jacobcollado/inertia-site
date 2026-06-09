@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Roadmap",
-  description: "What we've shipped, what we're building, and what's coming next.",
+  description: "Where we're headed. What's shipped, what's in progress, and what's planned across Aether and the Inertia studio. Built in the open.",
 };
 
 type Status = "shipped" | "in-progress" | "planned";

@@ -7,7 +7,7 @@ import { ProcessSteps } from "./process-steps";
 import { MobilePricing } from "./mobile-pricing";
 
 export const metadata: Metadata = {
-  title: "Aether - Premium Shopify Theme for Independent Brands",
+  title: "Aether",
   description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
   alternates: { canonical: "https://byinertia.com/aether" },
   openGraph: {
@@ -33,7 +33,7 @@ const KEY_FEATURES = [
     visual: "upsell",
     image: "/aether/upsell.png",
     flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
   {
     title: "Scarcity",
@@ -42,7 +42,7 @@ const KEY_FEATURES = [
     visual: "scarcity",
     image: "/aether/scarcity.png",
     flip: true,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
   },
   {
     title: "Guided format",
@@ -51,7 +51,7 @@ const KEY_FEATURES = [
     visual: "guided",
     image: "/aether/guided.png",
     flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path d="M3 3h18v4H3z"/><path d="M3 10h11v4H3z"/><path d="M3 17h7v4H3z"/></svg>,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
 ];
 
