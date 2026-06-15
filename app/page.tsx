@@ -168,22 +168,21 @@ const PLACEHOLDER_OPTIONS = [
 // category preselected via ?type=.
 const HERO_INTENTS: { label: string; href: string; icon: React.ReactNode }[] = [
   {
-    label: "A Shopify store",
-    href: "/contact?type=shopify",
-    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
-  },
-  {
-    label: "The Aether theme",
-    href: "/aether",
-    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
-  },
-  {
     label: "A web app or dashboard",
     href: "/contact?type=enterprise",
     icon: (
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
         <rect x="1.5" y="1.5" width="5" height="5" rx="1" /><rect x="9.5" y="1.5" width="5" height="5" rx="1" />
         <rect x="1.5" y="9.5" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    label: "A brand identity",
+    href: "/contact?type=general",
+    icon: (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+        <circle cx="8" cy="8" r="3" /><circle cx="8" cy="8" r="6.5" strokeOpacity="0.4" />
       </svg>
     ),
   },
@@ -195,6 +194,16 @@ const HERO_INTENTS: { label: string; href: string; icon: React.ReactNode }[] = [
         <circle cx="8" cy="8" r="6.5" /><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 2.4c-.5.3-.8.6-.8 1.2" /><circle cx="8" cy="11.6" r="0.6" fill="currentColor" stroke="none" />
       </svg>
     ),
+  },
+  {
+    label: "A Shopify store",
+    href: "/contact?type=shopify",
+    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
+  },
+  {
+    label: "The Aether theme",
+    href: "/aether",
+    icon: <SiShopify className="w-3.5 h-3.5 shrink-0" />,
   },
 ];
 
@@ -304,7 +313,7 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   );
 }
 
-const ROTATING_WORDS = ["remembered", "chosen", "trusted", "noticed", "revisited", "shared"];
+const ROTATING_WORDS = ["remembered", "trusted", "noticed", "coveted", "iconic", "unforgettable"];
 const HOLD_MS = 2600;
 const CHAR_STAGGER = 32;
 const FILL_MS = 800;
@@ -394,12 +403,17 @@ function RotatingWord() {
 
   const RESIZE_EASE = "cubic-bezier(0.22,1,0.36,1)";
 
+  // The highlighter swipes in while the word holds, then clears as it exits —
+  // so each new word looks freshly re-highlighted.
+  const highlightShown = phase === "hold";
+
   return (
     <span style={{
       display: "inline-block",
       position: "relative",
       verticalAlign: "baseline",
       width: containerWidth,
+      transform: "rotate(-1.6deg)",
       transition: containerWidth ? `width ${exitDuration * 0.75}ms ${RESIZE_EASE}` : "none",
     }}>
       {ROTATING_WORDS.map((w, wi) => (
@@ -408,44 +422,44 @@ function RotatingWord() {
           ref={(el) => { wordSizerRefs.current[wi] = el; }}
           aria-hidden="true"
           style={{ position: "absolute", visibility: "hidden", whiteSpace: "nowrap", pointerEvents: "none" }}
-        >{w}</span>
+        >{w}.</span>
       ))}
-      <span aria-live="polite" style={{ display: "flex", justifyContent: "center", whiteSpace: "nowrap" }}>
-        {word.split("").map((ch, i) => {
-          const exitDelay = i * CHAR_STAGGER * 0.55;
-          return phase === "exit" ? (
-            <ExitChar key={`${index}-${i}-exit`} ch={ch} />
-          ) : (
-            <span key={`${index}-${i}-enter`} aria-hidden="true" style={{
-              display: "inline-block",
-              width: ch === " " ? "0.28em" : undefined,
-              opacity: 0,
-              transform: "translateY(-10px) scale(0.97)",
-              filter: "blur(4px)",
-              animation: `char-in-from-top 280ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
-            }}>{ch}</span>
-          );
-        })}
-      </span>
-      {/* Underline — neutral base that draws in, gradient fades over it */}
-      <span style={{
-        position: "absolute", left: 0, right: 0, bottom: "-0.12em",
-        height: "2px", borderRadius: "2px", display: "block",
-        background: "rgb(var(--fg) / 0.2)",
-        transformOrigin: "left",
-        transform: "scaleX(1)",
-        opacity: 1,
-        transition: "transform 500ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease",
-      }}>
-        <span style={{
-          position: "absolute", inset: 0, borderRadius: "2px",
-          background: "var(--accent-gradient)",
-          transformOrigin: "left",
-          transform: phase === "hold" ? "scaleX(1)" : "scaleX(0)",
-          transition: phase === "hold"
-            ? "transform 900ms cubic-bezier(0.22,1,0.36,1)"
-            : "transform 300ms cubic-bezier(0.4,0,1,1) 80ms",
-        }} />
+
+      <span aria-live="polite" style={{ position: "relative", display: "flex", justifyContent: "center", whiteSpace: "nowrap" }}>
+        {/* Highlighter swipe — anchored to the text box, re-draws per word */}
+        <span
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "-0.12em", right: "-0.12em",
+            top: "0.08em", bottom: "0.08em",
+            background: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.5) 2%, rgb(var(--accent) / 0.45) 98%, rgb(var(--accent) / 0) 99.7%)",
+            borderRadius: "0.04em",
+            transform: highlightShown ? "scaleX(1)" : "scaleX(0)",
+            transformOrigin: "left center",
+            transition: highlightShown
+              ? "transform 700ms cubic-bezier(0.22,1,0.36,1)"
+              : "transform 320ms cubic-bezier(0.4,0,1,1)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+        <span style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "center", whiteSpace: "nowrap" }}>
+          {`${word}.`.split("").map((ch, i) => {
+            return phase === "exit" ? (
+              <ExitChar key={`${index}-${i}-exit`} ch={ch} />
+            ) : (
+              <span key={`${index}-${i}-enter`} aria-hidden="true" style={{
+                display: "inline-block",
+                width: ch === " " ? "0.28em" : undefined,
+                opacity: 0,
+                transform: "translateY(-10px) scale(0.97)",
+                filter: "blur(4px)",
+                animation: `char-in-from-top 280ms cubic-bezier(0.22,1,0.36,1) ${i * CHAR_STAGGER}ms forwards`,
+              }}>{ch}</span>
+            );
+          })}
+        </span>
       </span>
     </span>
   );
@@ -502,27 +516,16 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
   const arrowClass = "flex shrink-0 items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200";
 
   return (
-    <section className={`px-6 sm:px-8 flex flex-col items-center gap-3 ${hero ? "min-h-[calc(100svh-140px)] justify-center pt-6 pb-16" : "py-16 sm:py-28"}`}>
+    <section className={`relative px-6 sm:px-8 flex flex-col items-center gap-3 ${hero ? "min-h-[calc(100svh-140px)] justify-center pt-6 pb-16" : "py-16 sm:py-28"}`}>
       {closing && (
         <div className="w-px h-12 bg-[rgb(var(--line))] opacity-40 mb-4" />
       )}
       <div className="flex flex-col items-center gap-3 text-center">
-        {hero && (
-          <Link
-            href="/aether"
-            className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] hover:opacity-80 transition-opacity"
-            style={{ background: "rgb(var(--fg) / 0.06)", transform: "translateY(-16px)" }}
-          >
-            <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.5)" }}>New</span>
-            Aether theme for Shopify
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 opacity-40"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
-          </Link>
-        )}
         <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
-          {closing ? <>The hardest part is the first push.</> : hero ? <>Your store deserves to be <RotatingWord />.</> : "What are you building?"}
+          {closing ? <>The hardest part is the first push.</> : hero ? <>What you build should be <RotatingWord /></> : "What are you building?"}
         </p>
-        <p className="text-[clamp(1rem,1.8vw,1.1rem)] tracking-tight text-[rgb(var(--muted))] max-w-xs mt-6">
-          {closing ? "Send a message. We’ll handle the momentum from there." : hero ? "Tell us what you’re making. We’ll give it momentum." : "Tell us. We’ll figure out the rest."}
+        <p className="text-[clamp(1.15rem,2.1vw,1.4rem)] tracking-tight text-[rgb(var(--muted))] max-w-sm mt-6">
+          {closing ? "Send a message. We’ll handle the momentum from there." : hero ? <>Tell us what you’re making.<br />We’ll give it momentum.</> : "Tell us. We’ll figure out the rest."}
         </p>
       </div>
 
@@ -1209,93 +1212,153 @@ function ExpandingContent({ open, children }: { open: boolean; children: React.R
   );
 }
 
-const PROCESS_STEPS = [
-  {
-    num: "1", label: "Brief",
-    desc: "We dig into your business, your customers, and what's actually not working. No templates, no assumptions.",
-    visual: (
-      <div className="flex flex-col gap-2">
-        {[
-          { label: "What are you building?", done: true },
-          { label: "Who is it for?", done: true },
-          { label: "What isn't working?", done: true },
-          { label: "What does success look like?", done: false },
-        ].map((q) => (
-          <div key={q.label} className="flex items-center gap-2.5">
-            <div style={{
-              width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-              background: q.done ? "rgba(50,100,240,0.12)" : "transparent",
-              border: q.done ? "none" : "1.5px solid rgb(var(--line))",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              {q.done && (
-                <svg viewBox="0 0 10 10" fill="none" style={{ width: 8, height: 8 }}>
-                  <polyline points="2,5 4.2,7.5 8,3" stroke="#3264f0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
+// Staggers its children in with a rise + fade each time `active` flips on.
+// `resetKey` forces a fresh stagger when a step is revisited.
+function RevealRows({ active, resetKey, children }: { active: boolean; resetKey: number; children: React.ReactNode[] }) {
+  return (
+    <>
+      {children.map((child, i) => (
+        <div
+          key={`${resetKey}-${i}`}
+          style={{
+            opacity: active ? 1 : 0,
+            transform: active ? "translateY(0)" : "translateY(6px)",
+            transition: `opacity 380ms cubic-bezier(0.22,1,0.36,1) ${active ? i * 160 : 0}ms, transform 380ms cubic-bezier(0.22,1,0.36,1) ${active ? i * 160 : 0}ms`,
+          }}
+        >
+          {child}
+        </div>
+      ))}
+    </>
+  );
+}
+
+const BRIEF_QUESTIONS = [
+  "What are you building?",
+  "Who is it for?",
+  "What isn't working?",
+  "What does success look like?",
+];
+
+// The first three questions arrive already answered; the last one flips from
+// open to answered mid-animation, like the conversation is happening live.
+function BriefVisual({ active, resetKey }: { active: boolean; resetKey: number }) {
+  const [lastDone, setLastDone] = useState(false);
+
+  useEffect(() => {
+    setLastDone(false);
+    if (!active) return;
+    const t = setTimeout(() => setLastDone(true), 1900);
+    return () => clearTimeout(t);
+  }, [active, resetKey]);
+
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <RevealRows active={active} resetKey={resetKey}>
+        {BRIEF_QUESTIONS.map((label, i) => {
+          const isLast = i === BRIEF_QUESTIONS.length - 1;
+          const done = isLast ? lastDone : true;
+          return (
+            <div key={label} className="flex items-center gap-2.5">
+              <div style={{
+                width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
+                background: done ? "rgba(50,100,240,0.12)" : "transparent",
+                border: done ? "none" : "1.5px solid rgb(var(--line))",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "background 300ms ease, border-color 300ms ease",
+                animation: isLast && !done && active ? "brief-pulse 1.1s ease-in-out infinite" : "none",
+              }}>
+                {done && (
+                  <svg viewBox="0 0 10 10" fill="none" style={{ width: 8, height: 8 }}>
+                    <polyline points="2,5 4.2,7.5 8,3" stroke="#3264f0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <span style={{ fontSize: 11.5, color: "rgb(var(--muted))", opacity: done ? 0.5 : 0.8, textDecoration: done ? "line-through" : "none", transition: "opacity 300ms ease" }}>{label}</span>
             </div>
-            <span style={{ fontSize: 11.5, color: "rgb(var(--muted))", opacity: q.done ? 0.5 : 0.8, textDecoration: q.done ? "line-through" : "none" }}>{q.label}</span>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    num: "2", label: "Design",
-    desc: "Every screen is designed with intent. We move fast but never skip the details that make a brand feel premium.",
-    visual: (
-      <div className="flex flex-col gap-2 w-full">
-        {/* Type scale */}
-        <div className="flex items-baseline gap-3">
-          <span style={{ fontSize: 18, fontWeight: 500, color: "rgb(var(--fg))", opacity: 0.9, letterSpacing: "-0.5px" }}>Aa</span>
-          <span style={{ fontSize: 13, color: "rgb(var(--fg))", opacity: 0.5 }}>Aa</span>
-          <span style={{ fontSize: 10, color: "rgb(var(--muted))", opacity: 0.4 }}>Aa</span>
-          <div style={{ flex: 1, height: 1, background: "rgb(var(--line))", opacity: 0.3, marginBottom: 3 }} />
-        </div>
-        {/* Color palette */}
-        <div className="flex gap-1.5 w-full">
-          {[
-            "var(--accent-gradient)",
-            "rgb(var(--fg))",
-            "rgb(var(--fg) / 0.5)",
-            "rgb(var(--fg) / 0.15)",
-            "rgb(var(--surface))",
-          ].map((bg, i) => (
-            <div key={i} style={{ flex: 1, height: 14, borderRadius: 4, background: bg, border: "1px solid rgb(var(--line) / 0.3)" }} />
-          ))}
-        </div>
-      </div>
-    ),
-  },
-  {
-    num: "3", label: "Build",
-    desc: "Clean code, real infrastructure, documented and handed over properly. Built to last, not to look good in a demo.",
-    visual: (
-      <div className="flex flex-col gap-1.5 w-full rounded-lg px-3 py-3" style={{ background: "rgb(var(--bg))", border: "1px solid rgb(var(--line))", fontFamily: "monospace" }}>
+          );
+        })}
+      </RevealRows>
+    </div>
+  );
+}
+
+const DEPLOY_LINE = "deployed to production";
+
+// The first three log lines arrive resolved; the deploy line types itself
+// out character by character with a blinking cursor, like it's happening now.
+function BuildVisual({ active, resetKey }: { active: boolean; resetKey: number }) {
+  const [typed, setTyped] = useState(0);
+
+  useEffect(() => {
+    setTyped(0);
+    if (!active) return;
+    const start = setTimeout(() => {
+      const interval = setInterval(() => {
+        setTyped((n) => {
+          if (n >= DEPLOY_LINE.length) {
+            clearInterval(interval);
+            return n;
+          }
+          return n + 1;
+        });
+      }, 38);
+    }, 760);
+    return () => clearTimeout(start);
+  }, [active, resetKey]);
+
+  const lines = [
+    { prefix: "~", text: "git push origin main", color: "rgb(var(--muted))", opacity: 0.45 },
+    { prefix: "·", text: "build passed  42s", color: "rgb(var(--muted))", opacity: 0.45 },
+    { prefix: "·", text: "tests passed  128/128", color: "rgb(var(--muted))", opacity: 0.45 },
+  ];
+
+  return (
+    <div className="flex flex-col gap-1.5 w-full rounded-lg px-3 py-3" style={{ background: "rgb(var(--bg))", border: "1px solid rgb(var(--line))", fontFamily: "monospace" }}>
+      <RevealRows active={active} resetKey={resetKey}>
         {[
-          { prefix: "~", text: "git push origin main", color: "rgb(var(--muted))", opacity: 0.45 },
-          { prefix: "·", text: "build passed  42s", color: "rgb(var(--muted))", opacity: 0.45 },
-          { prefix: "·", text: "tests passed  128/128", color: "rgb(var(--muted))", opacity: 0.45 },
-          { prefix: "▲", text: "deployed to production", color: "#3264f0", opacity: 1 },
-        ].map((line, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <span style={{ fontSize: 10, color: i === 3 ? "#3264f0" : "rgb(var(--muted))", opacity: i === 3 ? 0.9 : 0.35, flexShrink: 0, width: 10 }}>{line.prefix}</span>
-            <span style={{ fontSize: 11.5, color: line.color, opacity: line.opacity, letterSpacing: "0.01em" }}>{line.text}</span>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    num: "4", label: "Launch",
-    desc: "We stay until it's live, stable, and performing. The engagement doesn't end at delivery.",
-    visual: (
-      <div className="flex flex-col gap-2.5 w-full">
-        {/* Metric rows */}
+          ...lines.map((line, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <span style={{ fontSize: 10, color: "rgb(var(--muted))", opacity: 0.35, flexShrink: 0, width: 10 }}>{line.prefix}</span>
+              <span style={{ fontSize: 11.5, color: line.color, opacity: line.opacity, letterSpacing: "0.01em" }}>{line.text}</span>
+            </div>
+          )),
+          <div key="deploy" className="flex items-center gap-2">
+            <span style={{ fontSize: 10, color: "#3264f0", opacity: 0.9, flexShrink: 0, width: 10 }}>▲</span>
+            <span style={{ fontSize: 11.5, color: "#3264f0", opacity: 1, letterSpacing: "0.01em" }}>
+              {DEPLOY_LINE.slice(0, typed)}
+              <span style={{
+                display: "inline-block", width: 6, height: 12, marginLeft: 2, marginBottom: -2,
+                background: "#3264f0",
+                opacity: typed >= DEPLOY_LINE.length ? 0 : undefined,
+                animation: typed < DEPLOY_LINE.length ? "build-cursor 0.9s steps(1) infinite" : "none",
+              }} />
+            </span>
+          </div>,
+        ]}
+      </RevealRows>
+    </div>
+  );
+}
+
+// Bars fill first; once they've landed, a "Live" pill fades in as the payoff.
+function LaunchVisual({ active, resetKey }: { active: boolean; resetKey: number }) {
+  const [live, setLive] = useState(false);
+
+  useEffect(() => {
+    setLive(false);
+    if (!active) return;
+    const t = setTimeout(() => setLive(true), 1000);
+    return () => clearTimeout(t);
+  }, [active, resetKey]);
+
+  return (
+    <div className="flex flex-col gap-2.5 w-full">
+      <RevealRows active={active} resetKey={resetKey}>
         {[
-          { label: "Uptime", value: "99.9%", bar: 0.999 },
-          { label: "Conversion", value: "+24%", bar: 0.72 },
-          { label: "Load time", value: "0.8s", bar: 0.88 },
+          { label: "Uptime", value: "99.9%" },
+          { label: "Conversion", value: "+24%" },
+          { label: "Load time", value: "0.8s" },
         ].map((m) => (
           <div key={m.label} className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
@@ -1303,353 +1366,362 @@ const PROCESS_STEPS = [
               <span style={{ fontSize: 11, fontWeight: 500, color: "#3264f0", opacity: 0.9, fontVariantNumeric: "tabular-nums" }}>{m.value}</span>
             </div>
             <div style={{ height: 4, borderRadius: 4, background: "rgb(var(--line))", opacity: 0.25, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", inset: 0, right: `${(1 - m.bar) * 100}%`, background: "var(--accent-gradient)", borderRadius: 4, opacity: 0.8 }} />
+              <div
+                style={{
+                  position: "absolute", inset: 0, borderRadius: 4, background: "var(--accent-gradient)", opacity: 0.8,
+                  transformOrigin: "left", transform: active ? "scaleX(1)" : "scaleX(0)",
+                  transition: `transform 700ms cubic-bezier(0.22,1,0.36,1) ${active ? 200 : 0}ms`,
+                }}
+              />
             </div>
           </div>
         ))}
+      </RevealRows>
+      <div
+        className="flex items-center gap-2 mt-1"
+        style={{
+          opacity: live ? 1 : 0,
+          transform: live ? "translateY(0)" : "translateY(4px)",
+          transition: "opacity 420ms cubic-bezier(0.22,1,0.36,1), transform 420ms cubic-bezier(0.22,1,0.36,1)",
+        }}
+      >
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#2ecc71", flexShrink: 0, animation: live ? "launch-pulse 1.6s ease-in-out infinite" : "none" }} />
+        <span style={{ fontSize: 11, fontWeight: 500, color: "rgb(var(--fg))", opacity: 0.75, letterSpacing: "-0.01em" }}>Live</span>
       </div>
-    ),
-  },
-];
-
-function WordReveal({ text, from }: { text: string; from: string }) {
-  const words = text.split(" ");
-  return (
-    <span>
-      {words.map((word, i) => (
-        <span
-          key={i}
-          style={{
-            display: "inline-block",
-            opacity: 0,
-            animation: `word-in 480ms cubic-bezier(0.22,1,0.36,1) ${i * 90}ms forwards`,
-            marginRight: i < words.length - 1 ? "0.28em" : 0,
-          }}
-        >
-          {word}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function ChatBubbleWrapper({ from, isLatest, children }: { from: string; isLatest: boolean; children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isLatest || !ref.current) return;
-    const el = ref.current;
-    el.style.opacity = "0";
-    el.style.transform = from === "us" ? "translateX(-6px) translateY(4px)" : "translateX(6px) translateY(4px)";
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        el.style.transition = "opacity 800ms cubic-bezier(0.22,1,0.36,1) 200ms, transform 800ms cubic-bezier(0.22,1,0.36,1) 200ms";
-        el.style.opacity = "1";
-        el.style.transform = "translateX(0) translateY(0)";
-      });
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [isLatest, from]);
-
-  return (
-    <div ref={ref} className="flex flex-col gap-0.5" style={{ opacity: isLatest ? 0 : 1 }}>
-      {children}
     </div>
   );
 }
 
-const CHAT_PLACEHOLDERS = [
-  "I need a Shopify store...",
-  "Rebranding from scratch...",
-  "An iOS app for my brand...",
-  "A dashboard for my team...",
-  "A Framer site for my agency...",
-  "A Meta ad campaign...",
+const PROCESS_STEPS = [
+  {
+    num: "1", label: "Brief",
+    desc: "We dig into your business, your customers, and what's actually not working. No templates, no assumptions.",
+    visual: (active: boolean, resetKey: number) => <BriefVisual active={active} resetKey={resetKey} />,
+  },
+  {
+    num: "2", label: "Design",
+    desc: "Every screen is designed with intent. We move fast but never skip the details that make a brand feel premium.",
+    visual: (active: boolean, resetKey: number) => (
+      <div className="flex flex-col gap-1.5 sm:gap-3 w-full">
+        <RevealRows active={active} resetKey={resetKey}>
+          {/* wireframe — boxy, unstyled layout */}
+          <div className="flex flex-col gap-1 sm:gap-1.5 w-full rounded-lg p-2 sm:p-3" style={{ border: "1px dashed rgb(var(--line))" }}>
+            <div className="flex items-center justify-between">
+              <div style={{ width: 28, height: 8, borderRadius: 2, background: "rgb(var(--fg) / 0.15)" }} />
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => <div key={i} style={{ width: 12, height: 8, borderRadius: 2, background: "rgb(var(--fg) / 0.12)" }} />)}
+              </div>
+            </div>
+            <div style={{ width: "60%", height: 12, borderRadius: 2, background: "rgb(var(--fg) / 0.12)" }} />
+            <div style={{ width: "85%", height: 6, borderRadius: 2, background: "rgb(var(--fg) / 0.08)" }} />
+            <div style={{ width: 50, height: 16, borderRadius: 4, background: "rgb(var(--fg) / 0.1)" }} />
+          </div>
+          {/* arrow */}
+          <div className="flex items-center justify-center" style={{ opacity: 0.35 }}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="8" y1="2" x2="8" y2="13"/><polyline points="4 9 8 13 12 9"/></svg>
+          </div>
+          {/* styled — same layout, finished design */}
+          <div className="flex flex-col gap-1 sm:gap-1.5 w-full rounded-lg p-2 sm:p-3" style={{ background: "rgb(var(--surface-elevated))", border: "1px solid rgb(var(--line))" }}>
+            <div className="flex items-center justify-between">
+              <span style={{ fontSize: 12, fontWeight: 500, color: "rgb(var(--fg))", letterSpacing: "-0.02em" }}>Brand</span>
+              <div className="flex gap-1.5">
+                {["var(--accent-gradient)", "rgb(var(--fg) / 0.4)", "rgb(var(--fg) / 0.15)"].map((bg, i) => (
+                  <div key={i} style={{ width: 12, height: 12, borderRadius: 4, background: bg }} />
+                ))}
+              </div>
+            </div>
+            <span style={{ fontSize: 14, fontWeight: 500, color: "rgb(var(--fg))", letterSpacing: "-0.02em" }}>Made to feel premium</span>
+            <span style={{ fontSize: 10.5, color: "rgb(var(--muted))", opacity: 0.6 }}>Every detail considered.</span>
+            <div className="rounded-full self-start px-2.5 py-1" style={{ background: "var(--accent-gradient)" }}>
+              <span style={{ fontSize: 10, color: "#fff" }}>Get started</span>
+            </div>
+          </div>
+        </RevealRows>
+      </div>
+    ),
+  },
+  {
+    num: "3", label: "Build",
+    desc: "Clean code, real infrastructure, documented and handed over properly. Built to last, not to look good in a demo.",
+    visual: (active: boolean, resetKey: number) => <BuildVisual active={active} resetKey={resetKey} />,
+  },
+  {
+    num: "4", label: "Launch",
+    desc: "We stay until it's live, stable, and performing. The engagement doesn't end at delivery.",
+    visual: (active: boolean, resetKey: number) => <LaunchVisual active={active} resetKey={resetKey} />,
+  },
 ];
 
-function ChatPlaceholder() {
-  const [idx, setIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
+const BUILD_LOG_SLIDE_MS = 4200;
+
+function BuildLog() {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [revealKey, setRevealKey] = useState(0);
+  const startRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIdx(i => (i + 1) % CHAT_PLACEHOLDERS.length);
-        setVisible(true);
-      }, 350);
-    }, 3000);
-    return () => clearInterval(t);
-  }, []);
+    if (paused) return;
+    startRef.current = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startRef.current;
+      const p = Math.min(elapsed / BUILD_LOG_SLIDE_MS, 1);
+      setProgress(p);
+      if (p >= 1) {
+        setActive((i) => (i + 1) % PROCESS_STEPS.length);
+        setRevealKey((k) => k + 1);
+        startRef.current = now;
+        setProgress(0);
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [paused, active]);
+
+  const select = (i: number) => {
+    setActive(i);
+    setRevealKey((k) => k + 1);
+    setProgress(0);
+    startRef.current = performance.now();
+  };
 
   return (
-    <span
-      className="flex-1 text-[12px] tracking-tight text-[rgb(var(--fg))] truncate"
-      style={{
-        opacity: visible ? 0.4 : 0,
-        transition: "opacity 350ms ease",
-      }}
-    >
-      {CHAT_PLACEHOLDERS[idx]}
-    </span>
+    <section className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+      <div className="flex flex-col items-center text-center gap-3 pb-10">
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
+          How we ship
+        </h2>
+        <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
+          Same process for every project, from a quick brief to a live build.
+        </p>
+      </div>
+
+      <div
+        className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(280px,360px)] gap-4 sm:gap-5"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {/* Terminal frame — persistent window, content swaps per step */}
+        <div
+          className="relative rounded-lg border border-[rgb(var(--line))] overflow-hidden flex flex-col aspect-[4/3.4] sm:aspect-[16/10]"
+          style={{ background: "rgb(var(--bg))", fontFamily: "monospace" }}
+        >
+          {/* window chrome */}
+          <div className="flex items-center gap-2 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgb(var(--line))" }}>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-full" style={{ width: 9, height: 9, background: "rgb(var(--fg) / 0.15)" }} />
+              <span className="rounded-full" style={{ width: 9, height: 9, background: "rgb(var(--fg) / 0.15)" }} />
+              <span className="rounded-full" style={{ width: 9, height: 9, background: "rgb(var(--fg) / 0.15)" }} />
+            </div>
+            <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] ml-2" style={{ opacity: 0.5 }}>
+              step-{PROCESS_STEPS[active].num}.{PROCESS_STEPS[active].label.toLowerCase()}
+            </span>
+          </div>
+
+          {/* content */}
+          <div className="relative flex-1 px-5 py-6 sm:px-7 sm:py-8 flex items-center justify-center overflow-hidden">
+            {PROCESS_STEPS.map((step, i) => {
+              const on = i === active;
+              return (
+                <div
+                  key={step.num}
+                  className="absolute inset-0 flex items-center justify-center px-5 py-6 sm:px-7 sm:py-8"
+                  style={{
+                    opacity: on ? 1 : 0,
+                    transform: on ? "translateY(0)" : "translateY(8px)",
+                    transition: "opacity 600ms cubic-bezier(0.4,0,0.2,1), transform 700ms cubic-bezier(0.22,1,0.36,1)",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <div className="w-full max-w-sm">{step.visual(on, revealKey)}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* footer — progress dots */}
+          <div className="flex items-center justify-center gap-1.5 px-4 py-3 shrink-0" style={{ borderTop: "1px solid rgb(var(--line))" }}>
+            {PROCESS_STEPS.map((step, i) => (
+              <span
+                key={step.num}
+                className="rounded-full transition-all duration-300"
+                style={{
+                  width: i === active ? 16 : 6,
+                  height: 6,
+                  background: i === active ? "rgb(var(--fg) / 0.55)" : "rgb(var(--fg) / 0.12)",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Step list */}
+        <div className="flex flex-col gap-1 self-center">
+          {PROCESS_STEPS.map((step, i) => {
+            const on = i === active;
+            return (
+              <button
+                key={step.num}
+                type="button"
+                onClick={() => select(i)}
+                className="group relative text-left rounded-xl px-4 py-3.5 transition-colors duration-300"
+                style={{ background: on ? "rgb(var(--fg) / 0.05)" : "transparent" }}
+              >
+                <span className="flex items-center justify-between gap-3">
+                  <span
+                    className="text-[15px] sm:text-[16px] tracking-tight transition-colors duration-300"
+                    style={{ color: on ? "rgb(var(--fg))" : "rgb(var(--muted))" }}
+                  >
+                    {step.label}
+                  </span>
+                  <span className="text-[12px] tabular-nums tracking-tight font-mono transition-opacity duration-300" style={{ color: "rgb(var(--muted))", opacity: on ? 0.6 : 0.3 }}>
+                    {step.num}
+                  </span>
+                </span>
+                <span
+                  className="block overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                  style={{ height: on ? 60 : 0, opacity: on ? 1 : 0 }}
+                >
+                  <span className="block text-[13px] sm:text-[13.5px] leading-relaxed tracking-tight text-[rgb(var(--muted))] pt-1.5" style={{ opacity: 0.85 }}>
+                    {step.desc}
+                  </span>
+                </span>
+                <span className="absolute left-4 right-4 bottom-0 h-px rounded-full overflow-hidden" style={{ background: "rgb(var(--fg) / 0.08)", opacity: on ? 1 : 0 }}>
+                  <span
+                    className="block h-full rounded-full"
+                    style={{ width: `${on ? progress * 100 : 0}%`, background: "rgb(var(--fg) / 0.55)" }}
+                  />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 
-// Typewriter for "You" messages staged in the input box
-function InputTypewriter({ text, onDone }: { text: string; onDone: () => void }) {
-  const [displayed, setDisplayed] = useState("");
-
-  useEffect(() => {
-    setDisplayed("");
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setDisplayed(text.slice(0, i));
-      if (i >= text.length) {
-        clearInterval(interval);
-        // short pause after fully typed before "sending"
-        setTimeout(onDone, 520);
-      }
-    }, 38);
-    return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text]);
-
-  return <>{displayed}<span className="animate-pulse">|</span></>;
-}
-
-const CHAT_MESSAGES = [
-  { from: "them", text: "Hey, we need a Shopify store. Something that actually feels like a brand." },
-  { from: "us",   text: "Got it. Walk us through what you're building and who it's for." },
-  { from: "them", text: "Streetwear brand. Young audience. Current site looks generic." },
-  { from: "us",   text: "We'll handle design, storefront, and the full build. One team, no handoffs." },
-  { from: "them", text: "How fast can you move?" },
-  { from: "us",   text: "Brief this week. Live in 3." },
-  { from: "them", text: "Let's go." },
+// Wordmark wall — the things we build, advanced one at a time. The list steps
+// upward at a steady interval; the word in the centre band is lit, rest dimmed.
+const WORDWALL_SERVICES = [
+  "online stores",
+  "brand identity",
+  "mobile apps",
+  "growth campaigns",
+  "marketing sites",
+  "dashboards",
+  "design systems",
+  "content & copy",
 ];
 
-// Phone-shaped chat diagram
-// "them" (You) messages are staged in the input box first, then sent up
-type ChatPhase = "idle" | "user-typing" | "user-sent" | "inertia-typing";
+const ROW_H = 96; // px per word row
 
 function PlatformDiagram() {
-  const [shown, setShown] = useState(0);
-  const [phase, setPhase] = useState<ChatPhase>("idle");
-  const [inputText, setInputText] = useState("");
-  const [fading, setFading] = useState(false);
-  const [inView, setInView] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const n = WORDWALL_SERVICES.length;
+  // Three copies are rendered. active stays in the middle copy's range [n, 2n)
+  // so there is always a full copy of words above and below the centred one —
+  // no empty top/bottom. We snap-reset by n when it leaves that range.
+  const [active, setActive] = useState(n);
+  const [snap, setSnap] = useState(false);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => setInView(e.isIntersecting),
-      { threshold: 0.1 }
-    );
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.1 });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  // Advance the sequence
+  // Step to the next word on an interval
   useEffect(() => {
     if (!inView) return;
+    const t = setInterval(() => setActive((a) => a + 1), 2200);
+    return () => clearInterval(t);
+  }, [inView]);
 
-    if (shown >= CHAT_MESSAGES.length) {
+  // Once the active word reaches the end of the middle copy, jump back by n
+  // with no transition so the loop is seamless.
+  useEffect(() => {
+    if (active >= 2 * n) {
       const t = setTimeout(() => {
-        setFading(true);
-        setTimeout(() => { setShown(0); setPhase("idle"); setInputText(""); setFading(false); }, 600);
-      }, 3200);
+        setSnap(true);
+        setActive((a) => a - n);
+      }, 1150); // after the eased step settles
       return () => clearTimeout(t);
     }
+  }, [active, n]);
 
-    if (phase !== "idle") return;
-
-    const nextMsg = CHAT_MESSAGES[shown];
-    const delay = shown === 0 ? 1400 : 900;
-
-    const t = setTimeout(() => {
-      if (nextMsg.from === "them") {
-        // Stage in input box
-        setPhase("user-typing");
-        setInputText(nextMsg.text);
-      } else {
-        // Inertia types with dots
-        setPhase("inertia-typing");
-        setTimeout(() => {
-          setPhase("idle");
-          setShown(s => s + 1);
-        }, 2200);
-      }
-    }, delay);
-    return () => clearTimeout(t);
-  }, [shown, inView, phase]);
-
-  // After input typewriter calls onDone, "send" the message
-  const handleInputDone = () => {
-    setPhase("user-sent");
-    setTimeout(() => {
-      setInputText("");
-      setPhase("idle");
-      setShown(s => s + 1);
-    }, 300);
-  };
-
+  // Clear the snap flag right after the no-transition reset paints
   useEffect(() => {
-    if (!inView) return;
-    // Scroll only the chat container, never the page. scrollIntoView would walk
-    // up to the window and yank the whole screen on mobile.
-    const el = containerRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [shown, phase, inView]);
+    if (!snap) return;
+    const raf = requestAnimationFrame(() => requestAnimationFrame(() => setSnap(false)));
+    return () => cancelAnimationFrame(raf);
+  }, [snap]);
 
-  const nextFrom = shown < CHAT_MESSAGES.length ? CHAT_MESSAGES[shown].from : null;
-  const showInputTyping = phase === "user-typing" || phase === "user-sent";
+  // Three copies so the active index can sit in the middle range with full
+  // copies above and below.
+  const loop = [...WORDWALL_SERVICES, ...WORDWALL_SERVICES, ...WORDWALL_SERVICES];
+
+  // Translate so the active row lands on the vertical centre (360px).
+  const offset = 360 - ROW_H / 2 - active * ROW_H;
 
   return (
-    // Phone frame
     <div
       ref={cardRef}
-      className="mx-auto flex flex-col bento-light-invert"
+      className="mx-auto relative overflow-hidden bento-light-invert"
       style={{
-        width: "min(270px, 100%)",
-        height: 520,
+        width: "min(640px, 100%)",
+        height: 720,
         background: "rgb(var(--surface-elevated))",
-        border: "8px solid rgb(var(--fg) / 0.12)",
-        borderRadius: 40,
-        overflow: "hidden",
-        boxShadow: "0 0 0 1px rgb(var(--line) / 0.4), 0 24px 48px rgba(0,0,0,0.12)",
-        position: "relative",
+        borderRadius: 24,
+        boxShadow: "0 0 0 1px rgb(var(--line) / 0.4)",
       }}
     >
-      {/* Status bar */}
-      <div className="relative flex items-center justify-between px-5 pt-3 pb-1 shrink-0" style={{ background: "rgb(var(--surface-elevated))" }}>
-        <span className="text-[10px] tracking-tight font-medium" style={{ color: "rgb(var(--fg))", opacity: 0.5 }}>9:41</span>
-        <div className="absolute left-1/2 -translate-x-1/2 rounded-full" style={{ width: 72, height: 14, background: "rgb(var(--fg))", opacity: 0.1 }} />
-        <div style={{ width: 32 }} />
-      </div>
-
-      {/* Chat header */}
-      <div className="flex items-center gap-2.5 px-4 py-2.5 shrink-0" style={{ borderBottom: "1px solid rgb(var(--line) / 0.4)", background: "rgb(var(--surface-elevated))" }}>
-        <div className="rounded-full shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, background: "rgb(var(--fg))" }}>
-          <svg viewBox="558 591 262 296" fill="none" className="w-4 h-4" aria-hidden="true">
-            <path d="M558.47 887V591H610.07V887H558.47ZM641.52 887V668.8H683.92L687.52 692H690.12C697.854 683.467 706.92 676.933 717.32 672.4C727.854 667.733 739.32 665.4 751.72 665.4C764.787 665.4 776.387 668 786.52 673.2C796.787 678.267 804.854 686.6 810.72 698.2C816.587 709.8 819.52 725.267 819.52 744.6V887H768.72V747.8C768.72 733.533 765.72 723.667 759.72 718.2C753.854 712.733 745.854 710 735.72 710C730.92 710 725.854 710.733 720.52 712.2C715.187 713.667 710.054 716 705.12 719.2C700.32 722.267 696.12 726.333 692.52 731.4V887H641.52Z" fill="rgb(var(--bg))"/>
-          </svg>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] tracking-tight" style={{ fontWeight: 600, color: "rgb(var(--fg))", lineHeight: 1.2 }}>Inertia</p>
-          <p className="text-[10px] tracking-tight" style={{ color: "rgb(var(--fg))", opacity: 0.45 }}>New project</p>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-5 pointer-events-none z-10" style={{ background: "linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
-        <div className="absolute inset-x-0 bottom-0 h-6 pointer-events-none z-10" style={{ background: "linear-gradient(to top, rgb(var(--surface-elevated)), transparent)" }} />
-        <div
-          ref={containerRef}
-          className="h-full flex flex-col justify-end gap-2 px-3.5 py-3 overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-          style={{ transition: "opacity 500ms ease", opacity: fading ? 0 : 1, touchAction: "none" }}
-        >
-          {CHAT_MESSAGES.slice(0, shown).map((msg, i) => {
-            const prevFrom = i > 0 ? CHAT_MESSAGES[i - 1].from : null;
-            const showLabel = msg.from !== prevFrom;
-            const isLatest = i === shown - 1;
-            return (
-              <ChatBubbleWrapper key={i} from={msg.from} isLatest={isLatest}>
-                {showLabel && (
-                  <span className={`text-[10px] tracking-tight px-1 ${msg.from === "us" ? "text-left" : "text-right"}`} style={{ color: "rgb(var(--fg))", opacity: 0.4 }}>
-                    {msg.from === "us" ? "Inertia" : "You"}
-                  </span>
-                )}
-                <div className={`flex ${msg.from === "us" ? "justify-start" : "justify-end"}`}>
-                  <div
-                    className="rounded-2xl px-3 py-2 max-w-[78%] text-[12px] tracking-tight leading-relaxed"
-                    style={{
-                      background: msg.from === "us" ? "rgb(var(--fg) / 0.9)" : "rgb(var(--fg) / 0.08)",
-                      color: msg.from === "us" ? "rgb(var(--chat-us-color, var(--bg)))" : "rgb(var(--chat-bubble-fg, var(--fg)))",
-                      borderBottomLeftRadius: msg.from === "us" ? 6 : undefined,
-                      borderBottomRightRadius: msg.from === "them" ? 6 : undefined,
-                      border: msg.from === "them" ? "1px solid rgb(var(--line) / 0.5)" : "none",
-                    }}
-                  >
-                    {isLatest ? <WordReveal text={msg.text} from={msg.from} /> : msg.text}
-                  </div>
-                </div>
-              </ChatBubbleWrapper>
-            );
-          })}
-
-          {/* Inertia typing indicator */}
-          {phase === "inertia-typing" && (
+      {/* stepping track */}
+      <div
+        className="absolute inset-x-0 top-0 flex flex-col"
+        style={{
+          transform: `translateY(${offset}px)`,
+          transition: snap ? "none" : "transform 1100ms cubic-bezier(0.33,1,0.68,1)",
+          willChange: "transform",
+        }}
+      >
+        {loop.map((word, i) => {
+          const on = i === active;
+          return (
             <div
-              className="flex justify-start"
-              style={{ opacity: 0, animation: "chat-in-left 800ms cubic-bezier(0.22,1,0.36,1) forwards" }}
+              key={i}
+              className="flex items-center justify-center text-center px-6 select-none"
+              style={{ height: ROW_H }}
             >
-              <div
-                className="rounded-2xl px-3 py-2.5 flex items-center gap-[5px]"
-                style={{ background: "rgb(var(--fg) / 0.9)", borderBottomLeftRadius: 6 }}
+              <span
+                className="inline-flex items-center justify-center text-[clamp(1.9rem,3.4vw,2.6rem)] tracking-tight rounded-full px-7"
+                style={{
+                  height: 68,
+                  lineHeight: 1,
+                  color: "rgb(var(--fg))",
+                  opacity: on ? 1 : 0.14,
+                  transform: on ? "scale(1.04)" : "scale(0.96)",
+                  background: on ? "rgb(var(--accent) / 0.1)" : "transparent",
+                  border: on ? "1.5px solid rgb(var(--accent) / 0.35)" : "1.5px solid transparent",
+                  transition: "opacity 900ms cubic-bezier(0.33,1,0.68,1), transform 900ms cubic-bezier(0.33,1,0.68,1), background 900ms ease, border-color 900ms ease",
+                }}
               >
-                {[0, 1, 2].map(i => (
-                  <div key={i} className="rounded-full" style={{ width: 5, height: 5, background: "rgb(var(--chat-us-color, var(--bg)))", opacity: 0.6, animation: `typing-dot 1.1s ease-in-out ${i * 180}ms infinite` }} />
-                ))}
-              </div>
+                {word}
+              </span>
             </div>
-          )}
-
-          {shown >= CHAT_MESSAGES.length && !fading && (
-            <div className="flex justify-center pt-2" style={{ opacity: 0, animation: "chat-in 520ms cubic-bezier(0.22,1,0.36,1) 800ms forwards" }}>
-              <a
-                href="https://www.instagram.com/by.inertia/"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent-gradient)" }}
-              >
-                Start a project
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
-              </a>
-            </div>
-          )}
-          <div ref={bottomRef} className="h-1" />
-        </div>
+          );
+        })}
       </div>
 
-      {/* Input box */}
-      <div className="px-3 py-3 shrink-0" style={{ borderTop: "1px solid rgb(var(--line) / 0.4)", background: "rgb(var(--surface-elevated))" }}>
-        <div
-          className="relative rounded-2xl px-2.5 py-2"
-          style={{ background: "rgb(var(--fg) / 0.05)", border: "1px solid rgb(var(--line) / 0.6)", minHeight: 36 }}
-        >
-          {showInputTyping ? (
-            <span className="block text-[12px] tracking-tight leading-relaxed pr-8" style={{ color: "rgb(var(--fg))", wordBreak: "break-word" }}>
-              {phase === "user-typing"
-                ? <InputTypewriter key={inputText} text={inputText} onDone={handleInputDone} />
-                : inputText
-              }
-            </span>
-          ) : (
-            <ChatPlaceholder />
-          )}
-          {showInputTyping && (
-            <div
-              className="absolute bottom-1.5 right-1.5 rounded-full flex items-center justify-center shrink-0"
-              style={{ width: 24, height: 24, background: "rgb(var(--fg))" }}
-            >
-              <svg viewBox="0 0 16 16" fill="none" stroke="rgb(var(--bg))" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
-                <line x1="8" y1="13" x2="8" y2="3"/><polyline points="4 7 8 3 12 7"/>
-              </svg>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Home bar */}
-      <div className="flex justify-center pb-2 shrink-0" style={{ background: "rgb(var(--surface-elevated))" }}>
-        <div className="rounded-full" style={{ width: 100, height: 4, background: "rgb(var(--fg))", opacity: 0.15 }} />
-      </div>
+      {/* top / bottom fades */}
+      <div className="absolute inset-x-0 top-0 h-2/5 pointer-events-none z-10" style={{ background: "linear-gradient(to bottom, rgb(var(--surface-elevated)), transparent)" }} />
+      <div className="absolute inset-x-0 bottom-0 h-2/5 pointer-events-none z-10" style={{ background: "linear-gradient(to top, rgb(var(--surface-elevated)), transparent)" }} />
     </div>
   );
 }
@@ -1661,13 +1733,13 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
   href?: string;
   arrow?: string;
   external?: boolean;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
 }) {
   const [hovered, setHovered] = useState(false);
   const words = [...label.split(" "), arrow];
-  const px = size === "sm" ? "px-3.5" : "px-4";
-  const py = size === "sm" ? "py-1.5" : "py-2";
-  const fs = size === "sm" ? "text-[12px]" : "text-[14px]";
+  const px = size === "sm" ? "px-3.5" : size === "lg" ? "px-6" : "px-4";
+  const py = size === "sm" ? "py-1.5" : size === "lg" ? "py-3" : "py-2";
+  const fs = size === "sm" ? "text-[12px]" : size === "lg" ? "text-[16px]" : "text-[14px]";
   const Tag = external ? "a" : Link;
   const extraProps = external ? { target: "_blank", rel: "noreferrer" } : {};
   return (
@@ -1676,7 +1748,7 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
       {...extraProps}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`inline-flex items-center rounded-full ${px} ${py} ${fs} tracking-tight ${className ?? ""}`}
+      className={`inline-flex items-center rounded-full ${px} ${py} ${fs} font-medium tracking-tight ${className ?? ""}`}
       style={{
         background: "var(--btn-bg)",
         color: "var(--btn-fg)",
@@ -1702,89 +1774,40 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
 
 // -- Platform signal ----------------------------------------------------
 
-const SIGNAL_TABS = [
-  {
-    label: "Storefronts",
-    headline: "A store that",
-    accent: "sells itself.",
-    body: "Most brands lose sales to a site that undersells what they make. We design, build, and launch your storefront, one team from first sketch to first sale.",
-    visual: (
-      <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
-        {/* grid of product tiles */}
-        {[0,1,2].map(col => [0,1].map(row => (
-          <rect key={`${col}-${row}`} x={18 + col * 46} y={10 + row * 38} width={36} height={30} rx={4} stroke="currentColor" strokeWidth="1.2" opacity={0.18 + col * 0.08 + row * 0.04}/>
-        )))}
-        {/* highlighted tile */}
-        <rect x={64} y={10} width={36} height={30} rx={4} fill="currentColor" opacity={0.08}/>
-        <rect x={64} y={10} width={36} height={30} rx={4} stroke="currentColor" strokeWidth="1.4" opacity={0.5}/>
-        {/* price line on highlighted */}
-        <rect x={69} y={32} width={10} height={2} rx={1} fill="currentColor" opacity={0.5}/>
-        <rect x={82} y={32} width={14} height={2} rx={1} fill="currentColor" opacity={0.18}/>
-        {/* bottom CTA bar */}
-        <rect x={42} y={70} width={76} height={12} rx={6} fill="currentColor" opacity={0.12}/>
-        <rect x={42} y={70} width={76} height={12} rx={6} stroke="currentColor" strokeWidth="1" opacity={0.2}/>
-        <rect x={55} y={74} width={50} height={4} rx={2} fill="currentColor" opacity={0.25}/>
-      </svg>
-    ),
-  },
-  {
-    label: "Rebrands",
-    headline: "Same business,",
-    accent: "sharper story.",
-    body: "A refresh and a full rebrand are different jobs, and we tell you straight which one you actually need. Then we build it properly, logo, site, content, all of it.",
-    visual: (
-      <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
-        {/* faded old mark — circle */}
-        <circle cx="58" cy="45" r="22" stroke="currentColor" strokeWidth="1.2" strokeDasharray="4 3" opacity={0.18}/>
-        <circle cx="58" cy="45" r="8" stroke="currentColor" strokeWidth="1.1" opacity={0.12}/>
-        {/* arrow pointing right */}
-        <path d="M88 45h18" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" opacity={0.3}/>
-        <path d="M102 39l6 6-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity={0.3}/>
-        {/* new mark — sharp geometry */}
-        <polygon points="122,24 142,66 102,66" stroke="currentColor" strokeWidth="1.4" opacity={0.55}/>
-        <polygon points="122,34 134,58 110,58" fill="currentColor" opacity={0.08}/>
-        {/* center dot */}
-        <circle cx="122" cy="52" r="2" fill="currentColor" opacity={0.4}/>
-      </svg>
-    ),
-  },
-  {
-    label: "Campaigns",
-    headline: "Every click,",
-    accent: "accounted for.",
-    body: "Ads, landing pages, and email flows built as one funnel, with numbers that hold up. You run the business, we grow it.",
-    visual: (
-      <svg viewBox="0 0 160 90" fill="none" className="w-full h-full" aria-hidden="true">
-        {/* funnel stages */}
-        {([
-          { x: 30, w: 100, y: 10, h: 14, o: 0.18 },
-          { x: 42, w: 76,  y: 30, h: 14, o: 0.28 },
-          { x: 56, w: 48,  y: 50, h: 14, o: 0.4  },
-          { x: 66, w: 28,  y: 70, h: 10, o: 0.55 },
-        ] as {x:number;w:number;y:number;h:number;o:number}[]).map((r, i) => (
-          <g key={i}>
-            <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={3} stroke="currentColor" strokeWidth="1.2" opacity={r.o}/>
-            {i === 3 && <rect x={r.x} y={r.y} width={r.w} height={r.h} rx={3} fill="currentColor" opacity={0.08}/>}
-          </g>
-        ))}
-        {/* right-side metric lines */}
-        <rect x={140} y={12} width={10} height={2} rx={1} fill="currentColor" opacity={0.2}/>
-        <rect x={140} y={32} width={10} height={2} rx={1} fill="currentColor" opacity={0.28}/>
-        <rect x={140} y={52} width={10} height={2} rx={1} fill="currentColor" opacity={0.38}/>
-        <rect x={140} y={72} width={10} height={2} rx={1} fill="currentColor" opacity={0.5}/>
-      </svg>
-    ),
-  },
-];
+// Highlighter-marker accent — a hand-drawn looking accent swipe behind text.
+function Highlight({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span
+      className={`relative inline-block text-[rgb(var(--fg))] ${className ?? ""}`}
+      style={{
+        backgroundImage: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.5) 2%, rgb(var(--accent) / 0.45) 98%, rgb(var(--accent) / 0) 99.7%)",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "100% 70%",
+        backgroundPosition: "0 62%",
+        padding: "0.02em 0.18em",
+        margin: "0 -0.18em",
+        borderRadius: "0.12em",
+        transform: "rotate(-1.6deg)",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+const SIGNAL_COPY = {
+  headline: "Tell us what you need,",
+  accent: "we build it.",
+  // body split so a key phrase can carry the highlighter accent
+  bodyLead: "You run the business.",
+  bodyPre: "We handle ",
+  bodyAccent: "everything else",
+  bodyPost: ".",
+};
 
 function PlatformSignal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  const [tab, setTab] = useState(0);
-  // copyTab drives the headline/body so it can swap mid-fade while the pill (tab)
-  // slides immediately.
-  const [copyTab, setCopyTab] = useState(0);
-  const [tabVisible, setTabVisible] = useState(true);
 
   useEffect(() => {
     const el = ref.current;
@@ -1797,70 +1820,19 @@ function PlatformSignal() {
     return () => obs.disconnect();
   }, []);
 
-  const switchTab = (i: number) => {
-    if (i === tab) return;
-    // Pill slides immediately (driven by `tab`). Copy fades out, swaps while
-    // hidden, then fades back in so the two read as one fluid motion.
-    setTab(i);
-    setTabVisible(false);
-    setTimeout(() => { setCopyTab(i); setTabVisible(true); }, 180);
-  };
-
-  const t = SIGNAL_TABS[copyTab];
-
-  const tabs = (
-    <div
-      className="relative inline-grid self-start rounded-full p-1"
-      style={{
-        background: "rgb(var(--fg) / 0.08)",
-        border: "1px solid rgb(var(--line))",
-        gridTemplateColumns: `repeat(${SIGNAL_TABS.length}, 1fr)`,
-      }}
-    >
-      {/* single sliding highlight — translates between tabs for a fluid move */}
-      <span
-        aria-hidden="true"
-        className="absolute top-1 bottom-1 left-1 rounded-full pointer-events-none"
-        style={{
-          width: `calc((100% - 0.5rem) / ${SIGNAL_TABS.length})`,
-          background: "var(--btn-bg)",
-          transform: `translateX(${tab * 100}%)`,
-          transition: "transform 320ms cubic-bezier(0.22,1,0.36,1)",
-        }}
-      />
-      {SIGNAL_TABS.map((s, i) => (
-        <button
-          key={s.label}
-          onClick={() => switchTab(i)}
-          className="relative z-10 rounded-full px-4 py-2 text-[14px] tracking-tight whitespace-nowrap"
-          style={{
-            color: i === tab ? "var(--btn-fg)" : "rgb(var(--fg))",
-            opacity: i === tab ? 1 : 0.45,
-            fontWeight: i === tab ? 500 : 400,
-            transition: "color 320ms ease, opacity 320ms ease",
-          }}
-        >
-          {s.label}
-        </button>
-      ))}
-    </div>
-  );
+  const t = SIGNAL_COPY;
 
   const copy = (mobile?: boolean) => (
-    <div
-      className={`flex flex-col ${mobile ? "gap-1 items-start text-left" : "gap-1.5"}`}
-      style={{
-        opacity: tabVisible ? 1 : 0,
-        transform: tabVisible ? "translateY(0)" : "translateY(6px)",
-        transition: "opacity 200ms ease, transform 200ms ease",
-      }}
-    >
-<p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.3] ${mobile ? "text-[clamp(2rem,5vw,3rem)]" : "text-[clamp(2rem,2.8vw,2.8rem)]"}`}>
-        {t.headline}{" "}
-        <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{t.accent}</span>
+    <div className="flex flex-col gap-1.5 items-center text-center">
+      <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25] ${mobile ? "text-[clamp(2.7rem,7.6vw,3.6rem)]" : "text-[clamp(2.6rem,3.6vw,3.6rem)]"}`}>
+        <span className="block whitespace-nowrap">{t.headline}</span>
+        <span className="block">
+          <Highlight>{t.accent}</Highlight>
+        </span>
       </p>
-      <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] mt-2 ${mobile ? "text-[1rem]" : "text-[clamp(1rem,1.8vw,1.05rem)] max-w-sm"}`} style={{ opacity: 0.7 }}>
-        {t.body}
+      <p className={`leading-snug tracking-tight text-[rgb(var(--muted))] mt-6 ${mobile ? "text-[1.15rem]" : "text-[clamp(1.25rem,1.9vw,1.6rem)]"}`} style={{ opacity: 0.85 }}>
+        <span className="block">{t.bodyLead}</span>
+        <span className="block mt-1">{t.bodyPre}{t.bodyAccent}{t.bodyPost}</span>
       </p>
     </div>
   );
@@ -1869,19 +1841,19 @@ function PlatformSignal() {
     <section ref={ref} className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
       <div
         className="relative flex flex-col"
-        style={{ background: "rgb(var(--orbit-surface))", borderRadius: 48, overflow: "hidden" }}
+        style={{ background: "rgb(var(--orbit-surface))", borderRadius: 48, overflow: "hidden", minHeight: "85vh" }}
       >
       {/* Mobile: stacked */}
-      <div className="sm:hidden flex flex-col gap-8 py-10 px-4">
+      <div className="sm:hidden flex flex-col gap-8 py-14 px-4 flex-1 justify-center">
         <div className="px-3">
           <div
+            className="flex flex-col items-center"
             style={{
               opacity: visible ? 1 : 0,
               transform: visible ? "translateY(0)" : "translateY(12px)",
               transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
             }}
           >
-            <div className="mb-4 flex justify-start">{tabs}</div>
             {copy(true)}
           </div>
         </div>
@@ -1901,26 +1873,25 @@ function PlatformSignal() {
             transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 300ms",
           }}
         >
-          <ProjectCta />
+          <ProjectCta size="lg" />
           <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
             No commitment. We usually reply within 24h.
           </span>
         </div>
       </div>
 
-      {/* Desktop: copy left, diagram right */}
-      <div className="hidden sm:flex items-center justify-center gap-16 py-16 px-10 max-w-[80rem] mx-auto w-full">
+      {/* Desktop: copy left (aligned with logo), diagram right (aligned with header end) */}
+      <div className="hidden sm:flex items-center justify-center gap-32 py-24 px-6 max-w-[80rem] mx-auto w-full flex-1">
         <div
-          className="flex-1 max-w-md flex flex-col gap-6"
+          className="flex-1 max-w-2xl flex flex-col items-center text-center gap-6 min-w-0 self-start pt-8"
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? "translateY(0)" : "translateY(12px)",
             transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
-          {tabs}
           {copy()}
-          <ProjectCta className="self-start" style={{ marginLeft: "4px" }} />
+          <ProjectCta size="lg" />
         </div>
         <div
           className="flex-1 flex justify-center min-w-0"
@@ -2119,31 +2090,17 @@ const IconWhop = ({ className, style }: { className?: string; style?: React.CSSP
 
 const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNode; cta: { label: string; href: string } }[] = [
   {
-    label: "Right now we're building",
-    text: "Shopify storefronts",
-    v: "--blue",
-    icon: <SiShopify className="w-5 h-5 shrink-0" />,
-    cta: { label: "See Aether", href: "/aether" },
-  },
-  {
-    label: "Right now we're writing",
-    text: "Shopify Liquid",
-    v: "--blue",
-    icon: <SiShopify className="w-5 h-5 shrink-0" />,
-    cta: { label: "See Aether", href: "/aether" },
-  },
-  {
-    label: "Right now we're licensing",
-    text: "Aether Theme",
-    v: "--blue",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-    cta: { label: "License Aether", href: "/aether/buy" },
-  },
-  {
     label: "Right now we're shipping",
     text: "iOS Apps",
     v: "--green",
     icon: <SiApple className="w-5 h-5 shrink-0" />,
+    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    label: "Right now we're crafting",
+    text: "Brand Identities",
+    v: "--purple",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>,
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
@@ -2152,6 +2109,13 @@ const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNo
     v: "--green",
     icon: <SiFramer className="w-5 h-5 shrink-0" />,
     cta: { label: "Start a project", href: "https://www.instagram.com/by.inertia/" },
+  },
+  {
+    label: "Right now we're doing",
+    text: "UI Design",
+    v: "--purple",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
+    cta: { label: "View our work", href: "/work" },
   },
   {
     label: "Right now we're deploying on",
@@ -2168,6 +2132,13 @@ const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNo
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
+    label: "Right now we're building",
+    text: "Shopify storefronts",
+    v: "--blue",
+    icon: <SiShopify className="w-5 h-5 shrink-0" />,
+    cta: { label: "See Aether", href: "/aether" },
+  },
+  {
     label: "Right now we're setting up",
     text: "Whop Storefronts",
     v: "--amber",
@@ -2175,18 +2146,18 @@ const ALL_PHRASES: { label: string; text: string; v: string; icon: React.ReactNo
     cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
   },
   {
-    label: "Right now we're crafting",
-    text: "Brand Identities",
-    v: "--purple",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>,
-    cta: { label: "Work with us", href: "https://www.instagram.com/by.inertia/" },
+    label: "Right now we're writing",
+    text: "Shopify Liquid",
+    v: "--blue",
+    icon: <SiShopify className="w-5 h-5 shrink-0" />,
+    cta: { label: "See Aether", href: "/aether" },
   },
   {
-    label: "Right now we're doing",
-    text: "UI Design",
-    v: "--purple",
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
-    cta: { label: "View our work", href: "/work" },
+    label: "Right now we're licensing",
+    text: "Aether Theme",
+    v: "--blue",
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+    cta: { label: "License Aether", href: "/aether/buy" },
   },
 ];
 
@@ -3274,7 +3245,7 @@ function TechItem({ tech, active, onActivate }: { tech: typeof TECH_ALL[0]; acti
   return (
     <div
       data-tech-item
-      className="flex items-center gap-2 sm:gap-3 px-6 sm:px-8 transition-all duration-300 cursor-default"
+      className="flex items-center gap-3 sm:gap-3 px-9 sm:px-14 transition-all duration-300 cursor-default"
       style={{ opacity: hovered || active ? 0.8 : 0.4 }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -3282,12 +3253,12 @@ function TechItem({ tech, active, onActivate }: { tech: typeof TECH_ALL[0]; acti
     >
       {/* mobile: neutral until tapped, then latches colored until tapping off */}
       <span className="transition-colors duration-300 sm:hidden" style={{ color: active ? tech.color : "rgb(var(--muted))" }}>
-        <tech.icon className="w-6 h-6 shrink-0" />
-      </span>
-      <span className="transition-colors duration-300 hidden sm:block" style={{ color: hovered ? tech.color : "rgb(var(--muted))" }}>
         <tech.icon className="w-8 h-8 shrink-0" />
       </span>
-      <span className="text-[17px] sm:text-[20px] tracking-tight whitespace-nowrap text-[rgb(var(--muted))]">{tech.name}</span>
+      <span className="transition-colors duration-300 hidden sm:block" style={{ color: hovered ? tech.color : "rgb(var(--muted))" }}>
+        <tech.icon className="w-9 h-9 shrink-0" />
+      </span>
+      <span className="text-[21px] sm:text-[22px] tracking-tight whitespace-nowrap text-[rgb(var(--muted))]">{tech.name}</span>
     </div>
   );
 }
@@ -3309,7 +3280,7 @@ function TechMarquee() {
   }, [activeIdx]);
 
   return (
-    <div className="relative overflow-hidden select-none pt-2 pb-6 -mt-4">
+    <div className="relative overflow-hidden select-none pt-8 pb-6">
       <div className="marquee-row marquee-row--fwd">
         {items.map((tech, i) => (
           <TechItem
@@ -3320,8 +3291,6 @@ function TechMarquee() {
           />
         ))}
       </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-32" style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)" }} />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-32" style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)" }} />
     </div>
   );
 }
@@ -3641,6 +3610,347 @@ function BlogGrid({ posts }: { posts: PostMeta[] }) {
   );
 }
 
+// -- Stat highlights -----------------------------------------------------
+
+function useReveal(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+
+  return { ref, visible };
+}
+
+function StatStrip({
+  heading,
+  body,
+  stats,
+}: {
+  heading: React.ReactNode;
+  body: string;
+  stats: { value: string; label: string }[];
+}) {
+  const { ref, visible } = useReveal();
+  const fade = (delay: number) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(16px)",
+    transition: `opacity 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
+
+  return (
+    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+      <div className="flex flex-col items-center text-center gap-3 pb-10" style={fade(0)}>
+        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
+          {heading}
+        </h2>
+        <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
+          {body}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-[rgb(var(--line))] rounded-2xl overflow-hidden border border-[rgb(var(--line))]">
+        {stats.map((s, i) => (
+          <div
+            key={s.label}
+            className="flex flex-col items-center gap-2 px-6 py-10 text-center"
+            style={{ background: "rgb(var(--surface-elevated))", ...fade(80 + i * 60) }}
+          >
+            <span
+              className="text-[clamp(2.4rem,6vw,3.6rem)] font-normal tracking-tight leading-none tabular-nums"
+              style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
+            >
+              {s.value}
+            </span>
+            <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.65 }}>
+              {s.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function GrowthHighlight() {
+  const { ref, visible } = useReveal();
+
+  // Bars climb left → right (before → after). Heights are % of the chart.
+  const bars = [
+    { h: 22, label: "Before" },
+    { h: 38 },
+    { h: 51 },
+    { h: 67 },
+    { h: 84, label: "After", peak: true },
+  ];
+
+  const fade = (delay: number) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(16px)",
+    transition: `opacity 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
+
+  return (
+    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center">
+        {/* Copy */}
+        <div className="flex flex-col gap-1.5 items-center text-center" style={fade(0)}>
+          <h2 className="text-[clamp(2.6rem,3.6vw,3.6rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25]">
+            Growth,{" "}
+            <span className="whitespace-nowrap" style={{ color: "rgb(var(--accent))" }}>
+              <span
+                className="inline-block"
+                style={{
+                  opacity: visible ? 0.7 : 0,
+                  transform: visible ? "translateX(0)" : "translateX(6px)",
+                  transition: "opacity 450ms cubic-bezier(0.22,1,0.36,1) 200ms, transform 450ms cubic-bezier(0.22,1,0.36,1) 200ms",
+                }}
+              >
+                [
+              </span>
+              <span style={{ margin: "0 0.18em" }}>not guesses.</span>
+              <span
+                className="inline-block"
+                style={{
+                  opacity: visible ? 0.7 : 0,
+                  transform: visible ? "translateX(0)" : "translateX(-6px)",
+                  transition: "opacity 450ms cubic-bezier(0.22,1,0.36,1) 320ms, transform 450ms cubic-bezier(0.22,1,0.36,1) 320ms",
+                }}
+              >
+                ]
+              </span>
+            </span>
+          </h2>
+          <p className="text-[clamp(1.25rem,1.9vw,1.6rem)] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md mt-6" style={{ opacity: 0.85 }}>
+            Every build is judged on the numbers it moves. Here&apos;s what that&apos;s looked like for the brands we&apos;ve worked with.
+          </p>
+          <div className="flex items-center justify-center gap-6 mt-2 flex-wrap">
+            {[
+              { value: "5x", label: "Conversion lift" },
+              { value: "3.2x", label: "Qualified leads" },
+            ].map((s) => (
+              <div key={s.label} className="flex flex-col items-center">
+                <span className="text-[clamp(1.6rem,3vw,2rem)] tracking-tight tabular-nums text-[rgb(var(--fg))]">{s.value}</span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Rising bar chart */}
+        <div
+          className="relative rounded-2xl border border-[rgb(var(--line))] p-6 sm:p-8 overflow-hidden"
+          style={{ background: "rgb(var(--surface-elevated))", ...fade(120) }}
+        >
+          {/* called-out stat */}
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-[clamp(1.8rem,3.4vw,2.4rem)] tracking-tight tabular-nums" style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              +24%
+            </span>
+            <svg viewBox="0 0 16 16" fill="none" stroke="rgb(var(--accent))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mb-1">
+              <path d="M3 11l5-5 3 3 2-2" /><path d="M13 5h-3M13 5v3" />
+            </svg>
+          </div>
+          <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-6" style={{ opacity: 0.6 }}>Revenue per visitor</p>
+
+          {/* bars */}
+          <div className="flex items-end justify-between gap-2 sm:gap-3" style={{ height: 180 }}>
+            {bars.map((b, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center justify-end h-full gap-2">
+                <div
+                  className="w-full rounded-t-md"
+                  style={{
+                    height: visible ? `${b.h}%` : "0%",
+                    background: b.peak ? "var(--accent-gradient)" : "rgb(var(--fg) / 0.12)",
+                    transition: `height 800ms cubic-bezier(0.22,1,0.36,1) ${200 + i * 110}ms`,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* before / after axis */}
+          <div className="flex items-center justify-between mt-3 text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+            <span>Before</span>
+            <span>After</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SpeedHighlight() {
+  return (
+    <StatStrip
+      heading="Speed is a feature."
+      body="A slow build is a missed window. We ship fast without cutting corners, and keep it fast once it's live."
+      stats={[
+        { value: "Days", label: "From kickoff to live" },
+        { value: "0.8s", label: "Median load time" },
+        { value: "99.9%", label: "Uptime, every month" },
+      ]}
+    />
+  );
+}
+
+// -- Personalization -----------------------------------------------------
+
+// Hand-drawn pencil underline — a slightly irregular stroke that sketches in.
+function PencilUnderline({ visible }: { visible: boolean }) {
+  const ref = useRef<SVGPathElement>(null);
+  const [len, setLen] = useState(0);
+  useEffect(() => {
+    if (ref.current) setLen(ref.current.getTotalLength());
+  }, []);
+  return (
+    <path
+      ref={ref}
+      d="M2 9 Q 100 2, 198 8"
+      fill="none"
+      stroke="rgb(var(--accent))"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="miter"
+      strokeDasharray={len}
+      strokeDashoffset={visible ? 0 : len}
+      style={{ transition: "stroke-dashoffset 600ms cubic-bezier(0.4,0,0.2,1) 250ms" }}
+    />
+  );
+}
+
+// A blueprint line that draws itself in (stroke-dash) when the section reveals.
+function BlueprintPath({
+  d, visible, delay = 0, dur = 700, accent = false, dash,
+}: { d: string; visible: boolean; delay?: number; dur?: number; accent?: boolean; dash?: number }) {
+  const ref = useRef<SVGPathElement>(null);
+  const [len, setLen] = useState(0);
+  useEffect(() => {
+    if (ref.current) setLen(ref.current.getTotalLength());
+  }, []);
+  return (
+    <path
+      ref={ref}
+      d={d}
+      fill="none"
+      stroke={accent ? "rgb(var(--accent))" : "rgb(var(--fg) / 0.5)"}
+      strokeWidth={accent ? 1.6 : 1.2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeDasharray={dash ? `${dash} ${dash}` : len}
+      strokeDashoffset={visible ? 0 : len}
+      style={{ transition: `stroke-dashoffset ${dur}ms cubic-bezier(0.22,1,0.36,1) ${delay}ms` }}
+    />
+  );
+}
+
+function Personalization() {
+  const { ref, visible } = useReveal();
+  const fade = (delay: number) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(16px)",
+    transition: `opacity 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
+
+  return (
+    <section ref={ref} className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
+      <div style={{ background: "rgb(var(--orbit-surface))", borderRadius: 48, overflow: "hidden" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center max-w-[80rem] mx-auto w-full px-4 sm:px-8 py-16 sm:py-24">
+        {/* Copy */}
+        <div className="flex flex-col gap-1.5 items-center text-center" style={fade(0)}>
+          <h2 className="text-[clamp(2.6rem,3.6vw,3.6rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25]">
+            Built around{" "}
+            <span className="relative inline-block whitespace-nowrap" style={{ color: "rgb(var(--accent))" }}>
+              your business.
+              {/* hand-drawn pencil underline that sketches in */}
+              <svg
+                className="absolute left-0 w-full pointer-events-none"
+                style={{ bottom: "-0.12em", height: "0.32em", overflow: "visible" }}
+                viewBox="0 0 200 12"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <PencilUnderline visible={visible} />
+              </svg>
+            </span>
+          </h2>
+          <p className="text-[clamp(1.25rem,1.9vw,1.6rem)] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md mt-6" style={{ opacity: 0.85 }}>
+            Nothing off the shelf. We design and build to fit how your business actually works, not stretched from a template.
+          </p>
+        </div>
+
+        {/* Fitted blueprint — draws itself in on scroll */}
+        <div
+          className="relative rounded-2xl border border-[rgb(var(--line))] p-6 sm:p-8 overflow-hidden"
+          style={{
+            background: "rgb(var(--surface-elevated))",
+            backgroundImage: "linear-gradient(rgb(var(--fg) / 0.035) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--fg) / 0.035) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+            ...fade(120),
+          }}
+        >
+          <svg viewBox="0 0 320 240" fill="none" className="relative w-full h-auto" aria-hidden="true">
+            {/* top width dimension */}
+            <BlueprintPath d="M44 22h232" visible={visible} delay={120} accent />
+            <BlueprintPath d="M44 18v8M276 18v8" visible={visible} delay={120} accent />
+
+            {/* outer frame */}
+            <BlueprintPath d="M44 44h232v176H44Z" visible={visible} delay={240} dur={950} />
+
+            {/* corner registration marks */}
+            <BlueprintPath d="M44 44h10M44 44v10M276 44h-10M276 44v10M44 220h10M44 220v-10M276 220h-10M276 220v-10" visible={visible} delay={1100} accent />
+
+            {/* nav bar */}
+            <BlueprintPath d="M44 70h232" visible={visible} delay={520} />
+            <BlueprintPath d="M56 56h40" visible={visible} delay={580} accent />
+            <BlueprintPath d="M212 56h24M242 56h22" visible={visible} delay={640} />
+
+            {/* hero block */}
+            <BlueprintPath d="M56 86h140v58H56Z" visible={visible} delay={720} dur={820} />
+            <BlueprintPath d="M68 104h88M68 118h54" visible={visible} delay={900} />
+            <BlueprintPath d="M68 132h40" visible={visible} delay={980} accent />
+
+            {/* side panel */}
+            <BlueprintPath d="M208 86h56v58h-56Z" visible={visible} delay={800} />
+            <BlueprintPath d="M220 104h32M220 118h24" visible={visible} delay={960} />
+
+            {/* product / content grid */}
+            <BlueprintPath d="M56 158h62v50H56Z" visible={visible} delay={1040} />
+            <BlueprintPath d="M129 158h62v50h-62Z" visible={visible} delay={1120} />
+            <BlueprintPath d="M202 158h62v50h-62Z" visible={visible} delay={1200} />
+
+            {/* right height dimension */}
+            <BlueprintPath d="M292 44v176" visible={visible} delay={320} accent />
+            <BlueprintPath d="M288 44h8M288 220h8" visible={visible} delay={320} accent />
+          </svg>
+
+          {/* dimension label — pill */}
+          <div
+            className="absolute bottom-5 left-7 inline-flex items-center rounded-full px-3 py-1.5"
+            style={{
+              border: "1px solid rgb(var(--line))",
+              background: "rgb(var(--surface-elevated))",
+              opacity: visible ? 1 : 0,
+              transition: "opacity 500ms ease 1250ms",
+            }}
+          >
+            <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Drawn to fit your business</span>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+  );
+}
+
 function VisualLayout() {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   return (
@@ -3650,17 +3960,37 @@ function VisualLayout() {
 
       <StartPrompt hero />
 
-      <div className="relative left-1/2 -translate-x-1/2 w-screen max-w-[80rem]">
-        <TechMarquee />
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <PlatformSignal />
       </div>
+
+      <section className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", marginTop: -96, zIndex: 0 }}>
+        <div style={{ background: "rgb(var(--surface-elevated))", borderRadius: "0 0 48px 48px", overflow: "hidden" }}>
+          <div style={{ paddingTop: 96 }}>
+            <TechMarquee />
+          </div>
+        </div>
+      </section>
+
+      <div className="py-10 sm:py-16" />
+
+      <GrowthHighlight />
+
+      <div className="py-10 sm:py-16" />
+
+      <Personalization />
+
+      <div className="py-10 sm:py-16" />
+
+      <SpeedHighlight />
+
+      <div className="py-10 sm:py-16" />
+
+      <BuildLog />
 
       <div className="py-10 sm:py-16" />
 
       <AetherFeature />
-
-      <div className="py-10 sm:py-16" />
-
-      <PlatformSignal />
 
       <div className="py-10 sm:py-16" />
 

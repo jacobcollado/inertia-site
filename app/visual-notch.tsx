@@ -79,25 +79,35 @@ const NAV: NavItem[] = [
 
 /* ── Desktop mega menu ───────────────────────────────────────────── */
 
-function DropdownItem({ child, onClose }: { child: Child; onClose: () => void }) {
+function DropdownItem({ child, onClose, index, stagger }: { child: Child; onClose: () => void; index?: number; stagger?: boolean }) {
+  // When the menu's content swaps, each item eases in with a small per-item
+  // delay so the new links cascade rather than appearing all at once.
+  const animStyle: React.CSSProperties = stagger
+    ? { animation: `dropdown-item-in 420ms cubic-bezier(0.22,1,0.36,1) ${(index ?? 0) * 45}ms both` }
+    : {};
+
   const inner = (
-    <span className="site-header__dropdown-text">
-      <span className="site-header__dropdown-label">
-        {child.label}
-        {child.disabled && <span className="site-header__soon">soon</span>}
-        {child.external && <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 10, height: 10, opacity: 0.4, flexShrink: 0 }}><path d="M4 12L12 4M7 4h5v5"/></svg>}
+    <>
+      <span className="site-header__dropdown-icon" aria-hidden="true">{child.icon}</span>
+      <span className="site-header__dropdown-text">
+        <span className="site-header__dropdown-label">
+          {child.label}
+          {child.disabled && <span className="site-header__soon">soon</span>}
+          {child.external && <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: 10, height: 10, opacity: 0.4, flexShrink: 0 }}><path d="M4 12L12 4M7 4h5v5"/></svg>}
+        </span>
+        {child.description && <span className="site-header__dropdown-desc">{child.description}</span>}
       </span>
-    </span>
+    </>
   );
 
   if (child.disabled) return (
-    <span className="site-header__dropdown-item site-header__dropdown-item--disabled">{inner}</span>
+    <span className="site-header__dropdown-item site-header__dropdown-item--disabled" style={animStyle}>{inner}</span>
   );
   if (child.external) return (
-    <a href={child.href} target="_blank" rel="noreferrer" className="site-header__dropdown-item">{inner}</a>
+    <a href={child.href} target="_blank" rel="noreferrer" className="site-header__dropdown-item" style={animStyle}>{inner}</a>
   );
   return (
-    <Link href={child.href!} className="site-header__dropdown-item" onClick={onClose}>{inner}</Link>
+    <Link href={child.href!} className="site-header__dropdown-item" onClick={onClose} style={animStyle}>{inner}</Link>
   );
 }
 
@@ -164,17 +174,14 @@ function DropdownContent({ phase, enterX, style, item, onClose }: {
     if (phase !== "enter") return;
     const el = ref.current;
     if (!el) return;
-    // Snap to offset with no transition, then let the style transition take over
+    // Slide the block in from the travel direction. Opacity/blur is handled
+    // per-item (staggered) so the links cascade in instead of popping together.
     el.style.transition = "none";
-    el.style.opacity = "0";
-    el.style.transform = `translateX(${enterX}px) translateY(3px)`;
-    el.style.filter = "blur(4px)";
+    el.style.transform = `translateX(${enterX}px)`;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         el.style.transition = "";
-        el.style.opacity = "";
         el.style.transform = "";
-        el.style.filter = "";
       });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -182,8 +189,8 @@ function DropdownContent({ phase, enterX, style, item, onClose }: {
 
   return (
     <div ref={ref} style={{ position: "relative", width: "100%", ...style }}>
-      {item?.children?.map((child) => (
-        <DropdownItem key={child.label} child={child} onClose={onClose} />
+      {item?.children?.map((child, i) => (
+        <DropdownItem key={child.label} child={child} onClose={onClose} index={i} stagger={phase === "enter"} />
       ))}
     </div>
   );
@@ -208,6 +215,7 @@ function SharedDropdown({
   const item = openIndex !== null ? NAV[openIndex] : null;
   const prevItemRef = useRef<NavItem | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const tabRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const prevOpenIndex = useRef<number | null>(null);
@@ -251,7 +259,7 @@ function SharedDropdown({
       visibleIndexRef.current = openIndex;
       setContentKey(k => k + 1);
       setContentPhase("enter");
-    }, 200);
+    }, 230);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openIndex]);
 
@@ -267,108 +275,132 @@ function SharedDropdown({
 
   useEffect(() => {
     const panel = panelRef.current;
+    const tab = tabRef.current;
     if (!panel) return;
 
     if (openIndex === null) {
       panel.style.width = "0px";
       panel.style.height = "0px";
+      if (tab) tab.removeAttribute("data-open");
       prevOpenIndex.current = null;
       return;
     }
 
     const trigger = triggerEls[openIndex];
     const nav = navRef.current;
-    if (!trigger || !nav) return;
+    if (!trigger || !nav || !measureRef.current) return;
 
     const navRect = nav.getBoundingClientRect();
     const triggerRect = trigger.getBoundingClientRect();
     const newLeft = triggerRect.left - navRect.left;
+    const triggerWidth = triggerRect.width;
     const isSliding = prevOpenIndex.current !== null && prevOpenIndex.current !== openIndex;
 
     prevOpenIndex.current = openIndex;
 
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
+    const { offsetWidth: w, offsetHeight: h } = measureRef.current;
+
     if (isSliding) {
-      panel.style.transition = "left 380ms cubic-bezier(0.22,1,0.36,1), width 380ms cubic-bezier(0.22,1,0.36,1), height 380ms cubic-bezier(0.22,1,0.36,1), opacity 280ms cubic-bezier(0.22,1,0.36,1), transform 380ms cubic-bezier(0.22,1,0.36,1)";
+      // Sliding between menus — panel AND tab animate left/width together.
+      panel.style.transition = "left 460ms cubic-bezier(0.22,1,0.36,1), width 460ms cubic-bezier(0.22,1,0.36,1), height 460ms cubic-bezier(0.22,1,0.36,1), opacity 320ms cubic-bezier(0.22,1,0.36,1), transform 460ms cubic-bezier(0.22,1,0.36,1)";
+      if (tab) tab.style.transition = "left 460ms cubic-bezier(0.22,1,0.36,1), width 460ms cubic-bezier(0.22,1,0.36,1)";
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = requestAnimationFrame(() => {
-          if (!measureRef.current || !panelRef.current) return;
-          const { offsetWidth: w, offsetHeight: h } = measureRef.current;
+          if (!panelRef.current) return;
           panelRef.current.style.left = `${newLeft}px`;
           panelRef.current.style.width = `${w}px`;
           panelRef.current.style.height = `${h}px`;
+          if (tabRef.current) {
+            tabRef.current.style.left = `${newLeft}px`;
+            tabRef.current.style.width = `${triggerWidth}px`;
+          }
         });
       });
     } else {
+      // First open — size panel + tab instantly, then fade/slide both in
+      // together as one connected shape.
       panel.style.transition = "none";
       panel.style.left = `${newLeft}px`;
-      panel.style.width = "0px";
-      panel.style.height = "0px";
+      panel.style.width = `${w}px`;
+      panel.style.height = `${h}px`;
+      if (tab) {
+        tab.style.transition = "none";
+        tab.style.left = `${newLeft}px`;
+        tab.style.width = `${triggerWidth}px`;
+      }
 
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = requestAnimationFrame(() => {
-          if (!measureRef.current || !panelRef.current) return;
-          const { offsetWidth: w, offsetHeight: h } = measureRef.current;
-          panelRef.current.style.transition = "width 220ms cubic-bezier(0.22,1,0.36,1), height 220ms cubic-bezier(0.22,1,0.36,1), opacity 180ms cubic-bezier(0.22,1,0.36,1), transform 220ms cubic-bezier(0.22,1,0.36,1)";
-          panelRef.current.style.width = `${w}px`;
-          panelRef.current.style.height = `${h}px`;
+          if (!panelRef.current) return;
+          panelRef.current.style.transition = "opacity 180ms cubic-bezier(0.22,1,0.36,1), transform 220ms cubic-bezier(0.22,1,0.36,1)";
+          if (tabRef.current) {
+            tabRef.current.style.transition = "opacity 180ms cubic-bezier(0.22,1,0.36,1), transform 220ms cubic-bezier(0.22,1,0.36,1)";
+            // Reveal on the SAME frame the panel opens, so tab + menu sync.
+            tabRef.current.setAttribute("data-open", "true");
+          }
         });
       });
     }
   }, [openIndex, triggerEls, navRef]);
 
-  const exitX = direction * 10;
-  const enterX = direction * -6;
+  const exitX = direction * 16;
+  const enterX = direction * -12;
   const contentStyle: React.CSSProperties = contentPhase === "exit"
     ? {
         opacity: 0,
-        transform: `translateX(${exitX}px) translateY(2px)`,
-        filter: "blur(3px)",
-        transition: "opacity 180ms cubic-bezier(0.4,0,1,1), transform 180ms cubic-bezier(0.4,0,1,1), filter 180ms cubic-bezier(0.4,0,1,1)",
+        transform: `translateX(${exitX}px)`,
+        filter: "blur(5px)",
+        transition: "opacity 300ms cubic-bezier(0.4,0,0.2,1), transform 300ms cubic-bezier(0.4,0,0.2,1), filter 300ms cubic-bezier(0.4,0,0.2,1)",
       }
     : contentPhase === "enter"
     ? {
         opacity: 1,
-        transform: "translateX(0) translateY(0)",
+        transform: "translateX(0)",
         filter: "blur(0px)",
-        transition: "opacity 200ms cubic-bezier(0.22,1,0.36,1) 30ms, transform 200ms cubic-bezier(0.22,1,0.36,1) 30ms, filter 200ms cubic-bezier(0.22,1,0.36,1) 30ms",
+        transition: "opacity 520ms cubic-bezier(0.22,1,0.36,1), transform 560ms cubic-bezier(0.22,1,0.36,1), filter 520ms cubic-bezier(0.22,1,0.36,1)",
       }
     : {
         opacity: 1,
-        transform: "translateX(0) translateY(0)",
+        transform: "translateX(0)",
         filter: "blur(0px)",
       };
 
   return (
-    <div
-      ref={panelRef}
-      className="site-header__dropdown"
-      data-open={isOpen}
-      aria-hidden={!isOpen}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-    >
-      {/* Hidden sizer — always reflects incoming item's natural size */}
+    <>
+      {/* Connecting tab — single element that slides between triggers in sync
+          with the panel, merging the active trigger into the panel. */}
+      <div ref={tabRef} className="site-header__dropdown-tab" aria-hidden="true" />
       <div
-        ref={measureRef}
-        style={{ position: "absolute", visibility: "hidden", pointerEvents: "none", top: 0, left: 0, minWidth: 280 }}
+        ref={panelRef}
+        className="site-header__dropdown"
+        data-open={isOpen}
+        aria-hidden={!isOpen}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
       >
-        {displayItem?.children?.map((child) => (
-          <DropdownItem key={child.label} child={child} onClose={onClose} />
-        ))}
-      </div>
+        {/* Hidden sizer — always reflects incoming item's natural size */}
+        <div
+          ref={measureRef}
+          style={{ position: "absolute", visibility: "hidden", pointerEvents: "none", top: 0, left: 0, minWidth: 280 }}
+        >
+          {displayItem?.children?.map((child) => (
+            <DropdownItem key={child.label} child={child} onClose={onClose} />
+          ))}
+        </div>
 
-      {/* Visible content — fades out then in on item change */}
-      <DropdownContent
-        key={contentKey}
-        phase={contentPhase}
-        enterX={enterX}
-        style={contentStyle}
-        item={visibleItem}
-        onClose={onClose}
-      />
-    </div>
+        {/* Visible content — fades out then in on item change */}
+        <DropdownContent
+          key={contentKey}
+          phase={contentPhase}
+          enterX={enterX}
+          style={contentStyle}
+          item={visibleItem}
+          onClose={onClose}
+        />
+      </div>
+    </>
   );
 }
 

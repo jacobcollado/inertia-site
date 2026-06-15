@@ -59,73 +59,8 @@ export default function PricingPage() {
           Pricing
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.15rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md mb-8" style={{ opacity: 0.7 }}>
-          Set prices for Aether. Quote-based for everything else.
+          Custom work, priced per project. Aether is available at a set price for stores that just need a great theme.
         </p>
-
-        {/* Toggle */}
-        <div className="inline-flex items-center rounded-full border border-[rgb(var(--line))] p-1 gap-1">
-          {AETHER_TIERS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setActive(t.key as "standard" | "lifetime")}
-              className="rounded-full px-5 py-2 text-[13px] tracking-tight font-medium transition-all duration-200"
-              style={{
-                background: active === t.key ? "rgb(var(--fg))" : "transparent",
-                color: active === t.key ? "rgb(var(--bg))" : "rgb(var(--muted))",
-              }}
-            >
-              {t.name}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <div className="grid-rule" aria-hidden="true" />
-
-      {/* Aether tier card */}
-      <section className="px-3 pt-16 sm:pt-24 pb-14 rise">
-        <div className="max-w-3xl mx-auto">
-          <div
-            className="rounded-2xl border border-[rgb(var(--line))] p-8 sm:p-12 flex flex-col gap-8"
-            style={{ background: "rgb(var(--surface))" }}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{tier.name}</span>
-                  {tier.badge && (
-                    <span className="text-[10px] tracking-tight font-medium px-2 py-1 rounded-full text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>{tier.badge}</span>
-                  )}
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-[3.5rem] font-normal tracking-[-0.05em] leading-none tabular-nums text-[rgb(var(--fg))]">{tier.price}</span>
-                  <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{tier.term}</span>
-                </div>
-                <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm">{tier.desc}</p>
-              </div>
-              <Link
-                href={tier.href}
-                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity shrink-0"
-                style={{ background: "var(--accent-gradient)" }}
-              >
-                {tier.cta}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </Link>
-            </div>
-
-            <div className="border-t border-[rgb(var(--line))] pt-6">
-              <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mb-4" style={{ opacity: 0.45 }}>What&apos;s included</p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {tier.includes.map((item) => (
-                  <li key={item} className="flex items-center gap-2.5 text-[14px] tracking-tight text-[rgb(var(--muted))]">
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ color: "rgb(var(--accent))" }}><polyline points="2 8 6 12 14 4" /></svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
       </section>
 
       <div className="grid-rule" aria-hidden="true" />
@@ -174,6 +109,76 @@ export default function PricingPage() {
               ))}
             </div>
           </Link>
+        </div>
+      </section>
+
+      <div className="grid-rule" aria-hidden="true" />
+
+      {/* Aether tier card */}
+      <section className="px-3 pt-16 sm:pt-24 pb-14 rise">
+        <div className="max-w-3xl mx-auto flex flex-col gap-8">
+          <div className="flex flex-col gap-2 items-center text-center">
+            <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">Aether theme</p>
+            <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>Set prices for a Shopify theme that feels designed, not templated.</p>
+
+            {/* Toggle */}
+            <div className="inline-flex items-center rounded-full border border-[rgb(var(--line))] p-1 gap-1 mt-4">
+              {AETHER_TIERS.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setActive(t.key as "standard" | "lifetime")}
+                  className="rounded-full px-5 py-2 text-[13px] tracking-tight font-medium transition-all duration-200"
+                  style={{
+                    background: active === t.key ? "rgb(var(--fg))" : "transparent",
+                    color: active === t.key ? "rgb(var(--bg))" : "rgb(var(--muted))",
+                  }}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="rounded-2xl border border-[rgb(var(--line))] p-8 sm:p-12 flex flex-col gap-8"
+            style={{ background: "rgb(var(--surface))" }}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{tier.name}</span>
+                  {tier.badge && (
+                    <span className="text-[10px] tracking-tight font-medium px-2 py-1 rounded-full text-[rgb(var(--bg))]" style={{ background: "var(--accent-gradient)" }}>{tier.badge}</span>
+                  )}
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-[3.5rem] font-normal tracking-[-0.05em] leading-none tabular-nums text-[rgb(var(--fg))]">{tier.price}</span>
+                  <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{tier.term}</span>
+                </div>
+                <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm">{tier.desc}</p>
+              </div>
+              <Link
+                href={tier.href}
+                className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity shrink-0"
+                style={{ background: "var(--accent-gradient)" }}
+              >
+                {tier.cta}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </Link>
+            </div>
+
+            <div className="border-t border-[rgb(var(--line))] pt-6">
+              <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mb-4" style={{ opacity: 0.45 }}>What&apos;s included</p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {tier.includes.map((item) => (
+                  <li key={item} className="flex items-center gap-2.5 text-[14px] tracking-tight text-[rgb(var(--muted))]">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ color: "rgb(var(--accent))" }}><polyline points="2 8 6 12 14 4" /></svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 

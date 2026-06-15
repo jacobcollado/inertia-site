@@ -610,6 +610,12 @@ h1:hover .redact > span.redact-inner,
   30%            { transform: translateY(-4px); opacity: 0.9; }
 }
 
+/* Mega-menu links cascade in, one after another */
+@keyframes dropdown-item-in {
+  from { opacity: 0; transform: translateY(6px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
 @keyframes char-in-from-top {
   from { opacity: 0; transform: translateY(-10px) scale(0.97); filter: blur(4px); }
   to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
@@ -654,6 +660,21 @@ h1:hover .redact > span.redact-inner,
 @keyframes input-halo {
   0%, 100% { box-shadow: 0 0 0 2px rgba(50,100,240,0.05), 0 0 18px 4px rgba(60,170,160,0.06); }
   50%       { box-shadow: 0 0 0 3px rgba(50,100,240,0.09), 0 0 28px 6px rgba(60,170,160,0.10); }
+}
+
+@keyframes brief-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(50,100,240,0.25); }
+  50%       { box-shadow: 0 0 0 4px rgba(50,100,240,0.12); }
+}
+
+@keyframes build-cursor {
+  0%, 49%  { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes launch-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(46,204,113,0.35); }
+  50%       { box-shadow: 0 0 0 4px rgba(46,204,113,0.12); }
 }
 
 @keyframes marquee {
@@ -939,6 +960,52 @@ h1:hover .redact > span.redact-inner,
   opacity: 1;
 }
 
+.site-header__link[aria-expanded="true"] {
+  color: rgb(var(--fg));
+  opacity: 1;
+}
+
+/* Trigger sits above the connecting tab so its label shows on the tab. */
+.site-header__menu-root {
+  position: relative;
+  z-index: 2;
+}
+
+/* Connecting tab — a single element (JS-positioned) that slides between
+   triggers in sync with the panel, merging the active trigger into the panel
+   as one continuous shape. Sits below the trigger labels, above the panel. */
+.site-header__dropdown-tab {
+  position: absolute;
+  top: 0.55rem;
+  bottom: -2px;                        /* overlap the panel's top border */
+  left: 0;
+  width: 0;
+  background: rgb(var(--surface-elevated));
+  border: 1px solid rgb(var(--line));
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+  z-index: 1;                          /* above the panel, to cover its top border */
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.site-header__dropdown-tab[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Strip that masks the panel's top border under the tab width (seamless join) */
+.site-header__dropdown-tab::after {
+  content: "";
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: 0;
+  height: 3px;
+  background: rgb(var(--surface-elevated));
+}
+
 .site-header__chevron {
   width: 9px;
   height: 9px;
@@ -947,19 +1014,22 @@ h1:hover .redact > span.redact-inner,
   transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Dropdown panel — single shared panel, slides between nav items */
+/* Dropdown panel — single shared panel, slides between nav items.
+   The active trigger renders a tab that merges into this panel's top edge. */
 .site-header__dropdown {
   position: absolute;
-  top: calc(100% + 4px);
+  top: 100%;
   background: rgb(var(--surface-elevated));
   border: 1px solid rgb(var(--line));
-  box-shadow: 0 4px 24px rgb(0 0 0 / 0.08);
-  border-radius: 12px;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.1);
+  border-radius: 0 12px 12px 12px;     /* square top-left so the tab flows straight in */
   display: block;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(4px);
+  transform: translateY(6px);
+  transform-origin: top left;
   overflow: hidden;
+  transition: opacity 180ms cubic-bezier(0.22, 1, 0.36, 1), transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .site-header__dropdown[data-open="true"] {
