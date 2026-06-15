@@ -521,7 +521,7 @@ function StartPrompt({ closing, hero }: { closing?: boolean; hero?: boolean }) {
         <div className="w-px h-12 bg-[rgb(var(--line))] opacity-40 mb-4" />
       )}
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-2xl" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
+        <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.05] ${hero ? "text-[clamp(2.6rem,6vw,4rem)] max-w-3xl px-2" : "text-[clamp(2rem,5vw,3rem)] max-w-lg"}`}>
           {closing ? <>The hardest part is the first push.</> : hero ? <>What you build should be <RotatingWord /></> : "What are you building?"}
         </p>
         <p className="text-[clamp(1.15rem,2.1vw,1.4rem)] tracking-tight text-[rgb(var(--muted))] max-w-sm mt-6">
@@ -3630,56 +3630,6 @@ function useReveal(threshold = 0.15) {
   return { ref, visible };
 }
 
-function StatStrip({
-  heading,
-  body,
-  stats,
-}: {
-  heading: React.ReactNode;
-  body: string;
-  stats: { value: string; label: string }[];
-}) {
-  const { ref, visible } = useReveal();
-  const fade = (delay: number) => ({
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(16px)",
-    transition: `opacity 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
-  });
-
-  return (
-    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
-      <div className="flex flex-col items-center text-center gap-3 pb-10" style={fade(0)}>
-        <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
-          {heading}
-        </h2>
-        <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md" style={{ opacity: 0.7 }}>
-          {body}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-[rgb(var(--line))] rounded-2xl overflow-hidden border border-[rgb(var(--line))]">
-        {stats.map((s, i) => (
-          <div
-            key={s.label}
-            className="flex flex-col items-center gap-2 px-6 py-10 text-center"
-            style={{ background: "rgb(var(--surface-elevated))", ...fade(80 + i * 60) }}
-          >
-            <span
-              className="text-[clamp(2.4rem,6vw,3.6rem)] font-normal tracking-tight leading-none tabular-nums"
-              style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}
-            >
-              {s.value}
-            </span>
-            <span className="text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.65 }}>
-              {s.label}
-            </span>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 function GrowthHighlight() {
   const { ref, visible } = useReveal();
 
@@ -3789,16 +3739,90 @@ function GrowthHighlight() {
 }
 
 function SpeedHighlight() {
+  const { ref, visible } = useReveal();
+
+  const fade = (delay: number) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(16px)",
+    transition: `opacity 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 550ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
+
+  // Two bars race: a typical site (slow) vs ours (fast). Widths are % full.
+  const races = [
+    { label: "Typical site", time: "4.1s", w: 38, fast: false, dur: 1900 },
+    { label: "Built by us", time: "0.8s", w: 100, fast: true, dur: 900 },
+  ];
+
   return (
-    <StatStrip
-      heading="Speed is a feature."
-      body="A slow build is a missed window. We ship fast without cutting corners, and keep it fast once it's live."
-      stats={[
-        { value: "Days", label: "From kickoff to live" },
-        { value: "0.8s", label: "Median load time" },
-        { value: "99.9%", label: "Uptime, every month" },
-      ]}
-    />
+    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center">
+        {/* Copy */}
+        <div className="flex flex-col gap-1.5 items-center text-center" style={fade(0)}>
+          <h2 className="text-[clamp(2.6rem,3.6vw,3.6rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25]">
+            Speed is a{" "}
+            <span
+              className="inline-block whitespace-nowrap"
+              style={{
+                color: "rgb(var(--accent))",
+                animation: visible ? "speed-streak 600ms cubic-bezier(0.16,1,0.3,1) 200ms both" : "none",
+                opacity: visible ? undefined : 0,
+              }}
+            >
+              feature.
+            </span>
+          </h2>
+          <p className="text-[clamp(1.25rem,1.9vw,1.6rem)] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md mt-6" style={{ opacity: 0.85 }}>
+            A slow build is a missed window. We ship fast without cutting corners, and keep it fast once it&apos;s live.
+          </p>
+          <div className="flex items-center justify-center gap-6 mt-2 flex-wrap">
+            {[
+              { value: "Days", label: "Kickoff to live" },
+              { value: "99.9%", label: "Uptime, monthly" },
+            ].map((s) => (
+              <div key={s.label} className="flex flex-col items-center">
+                <span className="text-[clamp(1.6rem,3vw,2rem)] tracking-tight tabular-nums text-[rgb(var(--fg))]">{s.value}</span>
+                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Load-bar race */}
+        <div
+          className="relative rounded-2xl border border-[rgb(var(--line))] p-6 sm:p-8 overflow-hidden"
+          style={{ background: "rgb(var(--surface-elevated))", ...fade(120) }}
+        >
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-[clamp(1.8rem,3.4vw,2.4rem)] tracking-tight tabular-nums" style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              0.8s
+            </span>
+            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>median load</span>
+          </div>
+          <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] mb-7" style={{ opacity: 0.6 }}>Pages that open before they can bounce.</p>
+
+          <div className="flex flex-col gap-6">
+            {races.map((r, i) => (
+              <div key={r.label} className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: r.fast ? 0.9 : 0.55 }}>{r.label}</span>
+                  <span className="text-[13px] tabular-nums tracking-tight" style={{ color: r.fast ? "rgb(var(--accent))" : "rgb(var(--muted))", opacity: r.fast ? 1 : 0.6 }}>{r.time}</span>
+                </div>
+                <div className="relative h-2.5 rounded-full overflow-hidden" style={{ background: "rgb(var(--fg) / 0.07)" }}>
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full"
+                    style={{
+                      width: visible ? `${r.w}%` : "0%",
+                      background: r.fast ? "var(--accent-gradient)" : "rgb(var(--fg) / 0.25)",
+                      transition: `width ${r.dur}ms cubic-bezier(0.22,1,0.36,1) ${250 + i * 120}ms`,
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -3986,13 +4010,10 @@ function VisualLayout() {
 
       <div className="py-10 sm:py-16" />
 
-      <BuildLog />
+      {/* Hidden for now — bring back when ready */}
+      {/* <AetherFeature />
 
-      <div className="py-10 sm:py-16" />
-
-      <AetherFeature />
-
-      <div className="py-10 sm:py-16" />
+      <div className="py-10 sm:py-16" /> */}
 
       <NewsCarousel />
 

@@ -616,6 +616,13 @@ h1:hover .redact > span.redact-inner,
   to   { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 
+/* Speed accent — word streaks in fast with horizontal motion blur */
+@keyframes speed-streak {
+  0%   { opacity: 0; transform: translateX(34px); filter: blur(7px); }
+  60%  { opacity: 1; filter: blur(2px); }
+  100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
 @keyframes char-in-from-top {
   from { opacity: 0; transform: translateY(-10px) scale(0.97); filter: blur(4px); }
   to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
