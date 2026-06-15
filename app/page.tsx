@@ -313,7 +313,7 @@ function AnimatedPlaceholder({ active }: { active: boolean }) {
   );
 }
 
-const ROTATING_WORDS = ["remembered", "trusted", "noticed", "coveted", "iconic", "unforgettable"];
+const ROTATING_WORDS = ["trusted", "noticed", "coveted", "iconic", "wanted"];
 const HOLD_MS = 2600;
 const CHAR_STAGGER = 32;
 const FILL_MS = 800;
