@@ -9,27 +9,47 @@
 }
 
 :root {
-  --bg: 250 249 247;
-  --surface: 242 241 239;
-  --surface-elevated: 255 255 255;
-  --orbit-surface: 225 223 219;
-  --fg: 14 14 14;
-  --muted: 100 100 100;
-  --line: 200 200 200;
-  --accent: 34 98 255;
+  /* Site is permanently dark to match the hero. Pure-black base so the page
+     and the black hero are seamless. Kept as "R G B" triplets because the whole
+     site consumes them via rgb(var(--x)). The .dark block below mirrors these
+     for any code/style still scoped to .dark (which is force-applied on <html>). */
+  --bg: 0 0 0;                /* pure black, matches hero #000 */
+  --surface: 17 17 17;        /* raised surface */
+  --surface-elevated: 23 23 23;
+  --orbit-surface: 20 20 20;
+  --fg: 237 237 237;          /* near-white ink */
+  --muted: 140 140 140;
+  --line: 38 38 38;
+  --map-filter: invert(1);
+  --accent: 237 237 237;      /* neutral: accent = primary ink */
   --accent-gradient: rgb(var(--fg) / 0.85);
   --btn-bg: rgb(var(--fg) / 0.85);
   --btn-fg: rgb(var(--bg));
-  /* Contrasting CTA border. The button fill is near-black and translucent, so
-     mixing it with black barely changes anything. Use an explicit dark-grey,
-     solid (no alpha), a clearly lighter-than-black edge that still contrasts. */
-  --btn-border: rgb(70 70 70);
-  /* Accent swatches â€” deeper on white for legibility */
-  --green: 16 168 100;
-  --blue: 37 99 235;
-  --amber: 180 120 0;
-  --purple: 109 40 217;
-  color-scheme: light;
+  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
+  /* Accent swatches â€” neutralized to grays (was green/blue/amber/purple) */
+  --green: 140 140 140;
+  --blue: 140 140 140;
+  --amber: 140 140 140;
+  --purple: 140 140 140;
+
+  /* â”€â”€ Geist reference tokens (additive) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* Intent steps for the accent, neutral (no blue). */
+  --accent-hover: 255 255 255;  /* brighten on hover */
+  --accent-border: 64 64 64;    /* subtle border on dark */
+  --accent-soft: 28 28 28;      /* gray tint fill */
+
+  /* Radius scale (Geist: 6 / 12 / 16 / full). */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Elevation. */
+  --shadow-raised: 0 2px 2px rgba(0, 0, 0, 0.3);
+  --shadow-popover: 0 1px 1px rgba(0, 0, 0, 0.2), 0 4px 8px -4px rgba(0, 0, 0, 0.4), 0 16px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-modal: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 16px -4px rgba(0, 0, 0, 0.4), 0 24px 32px -8px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
 }
 
 
@@ -46,26 +66,31 @@
 }
 
 .dark {
-  --bg: 14 14 14;
-  --surface: 22 22 22;
-  --surface-elevated: 30 30 30;
-  --orbit-surface: 24 24 24;
+  --bg: 0 0 0;
+  --surface: 17 17 17;
+  --surface-elevated: 23 23 23;
+  --orbit-surface: 20 20 20;
   --fg: 237 237 237;
   --map-filter: invert(1);
   --muted: 140 140 140;
   --line: 38 38 38;
-  --accent: 88 140 255;
+  --accent: 237 237 237;      /* neutral: accent = primary ink on dark */
   --accent-gradient: rgb(var(--fg) / 0.85);
   --btn-bg: rgb(var(--fg) / 0.85);
   --btn-fg: rgb(var(--bg));
   /* Dark mode: button is near-white, so a stronger black mix reads as a clear
      darker edge. */
   --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
-  /* Accent swatches â€” bright on black */
-  --green: 52 211 153;
-  --blue: 96 165 250;
-  --amber: 251 191 36;
-  --purple: 167 139 250;
+  /* Accent swatches â€” neutralized to grays (was green/blue/amber/purple) */
+  --green: 140 140 140;
+  --blue: 140 140 140;
+  --amber: 140 140 140;
+  --purple: 140 140 140;
+
+  /* Neutral accent intent steps, dark variants (radius/shadow tokens inherit from :root). */
+  --accent-hover: 255 255 255;  /* brighten on hover */
+  --accent-border: 64 64 64;    /* subtle border on dark */
+  --accent-soft: 28 28 28;      /* gray tint fill */
   color-scheme: dark;
 }
 
@@ -124,7 +149,7 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 9999px rgb(59 130 246 / 0.06) inset !important;
+  -webkit-box-shadow: 0 0 0 9999px rgb(var(--fg) / 0.04) inset !important;
   -webkit-text-fill-color: rgb(var(--fg)) !important;
   caret-color: rgb(var(--fg));
   transition: background-color 9999s ease-in-out 0s;
@@ -659,19 +684,19 @@ h1:hover .redact > span.redact-inner,
 }
 
 @keyframes node-ring-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(50,100,240,0.35); }
-  70%  { box-shadow: 0 0 0 6px rgba(50,100,240,0); }
-  100% { box-shadow: 0 0 0 0 rgba(50,100,240,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(120,120,120,0.35); }
+  70%  { box-shadow: 0 0 0 6px rgba(120,120,120,0); }
+  100% { box-shadow: 0 0 0 0 rgba(120,120,120,0); }
 }
 
 @keyframes input-halo {
-  0%, 100% { box-shadow: 0 0 0 2px rgba(50,100,240,0.05), 0 0 18px 4px rgba(60,170,160,0.06); }
-  50%       { box-shadow: 0 0 0 3px rgba(50,100,240,0.09), 0 0 28px 6px rgba(60,170,160,0.10); }
+  0%, 100% { box-shadow: 0 0 0 2px rgba(120,120,120,0.05), 0 0 18px 4px rgba(120,120,120,0.06); }
+  50%       { box-shadow: 0 0 0 3px rgba(120,120,120,0.09), 0 0 28px 6px rgba(120,120,120,0.10); }
 }
 
 @keyframes brief-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(50,100,240,0.25); }
-  50%       { box-shadow: 0 0 0 4px rgba(50,100,240,0.12); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(120,120,120,0.25); }
+  50%       { box-shadow: 0 0 0 4px rgba(120,120,120,0.12); }
 }
 
 @keyframes build-cursor {
@@ -680,8 +705,8 @@ h1:hover .redact > span.redact-inner,
 }
 
 @keyframes launch-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(46,204,113,0.35); }
-  50%       { box-shadow: 0 0 0 4px rgba(46,204,113,0.12); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(120,120,120,0.35); }
+  50%       { box-shadow: 0 0 0 4px rgba(120,120,120,0.12); }
 }
 
 @keyframes marquee {
@@ -697,6 +722,236 @@ h1:hover .redact > span.redact-inner,
 @keyframes hero-canvas {
   0%   { opacity: 0; }
   100% { opacity: 1; }
+}
+
+/* â”€â”€ Vercel-style dark hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Sphere-in-motion: a heavy back-lit object drifting. The rim-light halo and
+   the sphere drift together, very slowly, so it reads as momentum not spin. */
+@keyframes sphere-drift {
+  0%, 100% { transform: translate(0, 0); }
+  50%       { transform: translate(0, -10px); }
+}
+
+@keyframes sphere-glow-breathe {
+  0%, 100% { opacity: 0.85; }
+  50%       { opacity: 1; }
+}
+
+.vhero-sphere {
+  animation: sphere-drift 9s ease-in-out infinite;
+}
+.vhero-glow {
+  animation: sphere-glow-breathe 7s ease-in-out infinite;
+}
+
+/* Long-exposure arc: draws itself once on mount, then settles. The arc is a
+   light-painting trail — bright at the leading tip, fading toward the tail. */
+.vhero-arc {
+  animation: vhero-arc-draw 1500ms cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+.vhero-arc-ghost {
+  animation: vhero-arc-draw 1700ms cubic-bezier(0.22, 1, 0.36, 1) 320ms both;
+}
+@keyframes vhero-arc-draw {
+  from { stroke-dashoffset: var(--arc-len); }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Leading-tip dot fades/scales in once the arc has nearly finished drawing. */
+.vhero-arc-tip {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: vhero-tip-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 1500ms both;
+}
+@keyframes vhero-tip-in {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vhero-arc,
+  .vhero-arc-ghost { animation: none; stroke-dashoffset: 0; }
+  .vhero-arc-tip { animation: none; opacity: 1; }
+}
+
+/* Kinetic "I": the Inertia monogram pushed into motion. The solid letter lands
+   while strobe echoes trail off behind it, then everything settles. */
+.vhero-i {
+  opacity: 0;
+  animation: vhero-i-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+}
+@keyframes vhero-i-in {
+  from { opacity: 0; transform: translateX(-26px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
+/* Echo copies slide in from the left, staggered, holding at a faded offset.
+   The settled opacity/transform are declared on the element itself (not just via
+   the animation fill) so that when :hover swaps in the pulse animation, these
+   values persist instead of collapsing to 0. */
+.vhero-i-echo {
+  opacity: var(--echo-o);
+  transform: translateX(var(--echo-x));
+  animation: vhero-i-echo-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes vhero-i-echo-in {
+  from { opacity: 0; transform: translateX(calc(var(--echo-x) - 22px)); }
+  to   { opacity: var(--echo-o); transform: translateX(var(--echo-x)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vhero-i { animation: none; opacity: 1; transform: none; filter: none; }
+  .vhero-i-echo { animation: none; opacity: var(--echo-o); transform: translateX(var(--echo-x)); }
+}
+
+/* Rainbow echoes: resting glow lives here (not inline). */
+.vhero-i-rainbow {
+  filter: blur(var(--rb-blur)) drop-shadow(0 0 14px var(--rb-color));
+}
+
+/* ── Radial spectrum burst centerpiece ──────────────────────────────── */
+
+.vhero-burst-group {
+  opacity: 0;
+  animation: vhero-burst-in 900ms cubic-bezier(0.22, 1, 0.36, 1) 150ms forwards;
+}
+@keyframes vhero-burst-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.vhero-burst-corona {
+  animation: vhero-spin 40s linear infinite;
+}
+.vhero-burst-rays {
+  animation: vhero-spin-rev 60s linear infinite;
+}
+.vhero-burst-core {
+  animation: vhero-core-pulse 5s ease-in-out infinite;
+}
+@keyframes vhero-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes vhero-spin-rev {
+  to { transform: rotate(-360deg); }
+}
+@keyframes vhero-core-pulse {
+  0%, 100% { opacity: 0.9;  transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vhero-burst-group { animation: none; opacity: 1; transform: none; }
+  .vhero-burst-corona,
+  .vhero-burst-rays,
+  .vhero-burst-core { animation: none; }
+}
+
+/* ── Prism centerpiece ──────────────────────────────────────────────── */
+
+/* Incoming white beam: fades in from the left toward the letter. */
+.vhero-beam {
+  opacity: 0;
+  transform-origin: left center;
+  animation: vhero-beam-in 700ms cubic-bezier(0.22, 1, 0.36, 1) 200ms forwards;
+}
+@keyframes vhero-beam-in {
+  from { opacity: 0; transform: scaleX(0.4); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+
+/* Refracted rays: fan out from the letter edge (scaleX from origin), staggered,
+   then settle into a gentle shimmer that breathes opacity + length. */
+.vhero-ray {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation:
+    vhero-ray-fan 650ms cubic-bezier(0.22, 1, 0.36, 1) var(--ray-delay) forwards,
+    vhero-ray-shimmer 3600ms ease-in-out calc(var(--ray-delay) + 700ms) infinite;
+}
+@keyframes vhero-ray-fan {
+  from { opacity: 0; transform: scaleX(0.2); }
+  to   { opacity: var(--ray-o); transform: scaleX(1); }
+}
+@keyframes vhero-ray-shimmer {
+  0%, 100% { opacity: var(--ray-o); transform: scaleX(1); }
+  50%       { opacity: calc(var(--ray-o) * 1.45); transform: scaleX(1.06); }
+}
+
+/* Bright catch where light exits the letter's right edge — gentle pulse. */
+.vhero-prism-catch {
+  opacity: 0;
+  animation:
+    vhero-catch-in 600ms cubic-bezier(0.22, 1, 0.36, 1) 500ms forwards,
+    vhero-catch-pulse 3600ms ease-in-out 1100ms infinite;
+}
+@keyframes vhero-catch-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes vhero-catch-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%       { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vhero-beam { animation: none; opacity: 1; transform: none; }
+  .vhero-ray { animation: none; opacity: var(--ray-o); transform: none; }
+  .vhero-prism-catch { animation: none; opacity: 1; }
+}
+
+/* Sweeping rim-light: the bright hotspot orbits behind the letter so different
+   edges catch the glow as it travels. Non-uniform keyframe timing makes it feel
+   like a light source easing around the silhouette rather than spinning evenly.
+   Offsets are a fraction of the box, so it scales with the responsive monogram. */
+.vhero-sweep {
+  animation: vhero-sweep-orbit 11s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes vhero-sweep-orbit {
+  0%   { transform: translate(22%, -14%);  opacity: 0.9; }   /* upper right */
+  20%  { transform: translate(0%, -24%);   opacity: 1; }     /* top */
+  40%  { transform: translate(-22%, -12%); opacity: 0.85; }  /* upper left */
+  55%  { transform: translate(-20%, 12%);  opacity: 0.8; }   /* lower left */
+  70%  { transform: translate(0%, 20%);    opacity: 0.85; }  /* bottom */
+  85%  { transform: translate(20%, 12%);   opacity: 0.9; }   /* lower right */
+  100% { transform: translate(22%, -14%);  opacity: 0.9; }   /* back to start */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vhero-sweep { animation: none; transform: translate(0%, -18%); }
+}
+
+/* Center-glow noise: slowly orbits + drifts so the grain feels alive and the
+   light seems to shift direction around the monogram. */
+.vhero-noise {
+  animation: vhero-noise-drift 26s linear infinite;
+  will-change: transform, background-position;
+}
+@keyframes vhero-noise-drift {
+  0%   { transform: rotate(0deg) scale(1.05);   background-position: 0px 0px; }
+  25%  { transform: rotate(90deg) scale(1.1);   background-position: 40px 20px; }
+  50%  { transform: rotate(180deg) scale(1.05); background-position: 20px 50px; }
+  75%  { transform: rotate(270deg) scale(1.1);  background-position: -30px 30px; }
+  100% { transform: rotate(360deg) scale(1.05); background-position: 0px 0px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vhero-noise { animation: none; }
+}
+
+/* Hero tagline lines reveal one after another */
+@keyframes vhero-line-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vhero-sphere,
+  .vhero-glow { animation: none; }
 }
 
 @keyframes hero-line {
@@ -900,7 +1155,7 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   align-items: center;
   margin: 0 12px;
-  max-width: 80rem;
+  max-width: 88rem;
   height: 72px;
 }
 

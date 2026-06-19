@@ -7,6 +7,7 @@ import { SiShopify, SiTypescript, SiTailwindcss, SiMeta, SiFramer, SiVercel, SiA
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
 import { ContourCanvas } from "./contour-canvas";
+import { HeroContour } from "./hero-contour";
 import { createClient } from "@/lib/supabase/client";
 import type { PostMeta } from "@/lib/posts";
 
@@ -1049,7 +1050,7 @@ function AetherFeature() {
   });
 
   return (
-    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] pb-10">
+    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] pb-10">
       {/* Section label + heading */}
       <div className="flex flex-col items-center text-center gap-3 py-10" style={fade(0)}>
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
@@ -1489,7 +1490,7 @@ function BuildLog() {
   };
 
   return (
-    <section className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+    <section className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem]">
       <div className="flex flex-col items-center text-center gap-3 pb-10">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-snug max-w-md">
           How we ship
@@ -1795,16 +1796,6 @@ function Highlight({ children, className }: { children: React.ReactNode; classNa
   );
 }
 
-const SIGNAL_COPY = {
-  headline: "Tell us what you need,",
-  accent: "we build it.",
-  // body split so a key phrase can carry the highlighter accent
-  bodyLead: "You run the business.",
-  bodyPre: "We handle ",
-  bodyAccent: "everything else",
-  bodyPost: ".",
-};
-
 function PlatformSignal() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -1820,90 +1811,45 @@ function PlatformSignal() {
     return () => obs.disconnect();
   }, []);
 
-  const t = SIGNAL_COPY;
+  const fade = (delay: number) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(14px)",
+    transition: `opacity 600ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 600ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
 
-  const copy = (mobile?: boolean) => (
-    <div className="flex flex-col gap-1.5 items-center text-center">
-      <p className={`tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25] ${mobile ? "text-[clamp(2.7rem,7.6vw,3.6rem)]" : "text-[clamp(2.6rem,3.6vw,3.6rem)]"}`}>
-        <span className="block whitespace-nowrap">{t.headline}</span>
-        <span className="block">
-          <Highlight>{t.accent}</Highlight>
-        </span>
-      </p>
-      <p className={`leading-snug tracking-tight text-[rgb(var(--muted))] mt-6 ${mobile ? "text-[1.15rem]" : "text-[clamp(1.25rem,1.9vw,1.6rem)]"}`} style={{ opacity: 0.85 }}>
-        <span className="block">{t.bodyLead}</span>
-        <span className="block mt-1">{t.bodyPre}{t.bodyAccent}{t.bodyPost}</span>
-      </p>
-    </div>
-  );
-
+  // No card chrome — clean and airy on the page, à la Vercel's first scroll
+  // section: oversized heading top-left, descriptor right, centerpiece floating.
   return (
-    <section ref={ref} className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
-      <div
-        className="relative flex flex-col"
-        style={{ background: "rgb(var(--orbit-surface))", borderRadius: 48, overflow: "hidden", minHeight: "85vh" }}
-      >
-      {/* Mobile: stacked */}
-      <div className="sm:hidden flex flex-col gap-8 py-14 px-4 flex-1 justify-center">
-        <div className="px-3">
-          <div
-            className="flex flex-col items-center"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(12px)",
-              transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
-            }}
-          >
-            {copy(true)}
-          </div>
-        </div>
-        <div
-          className="px-3 w-full py-4"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(16px)",
-            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 150ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 150ms",
-          }}
+    <section ref={ref} className="relative mx-auto w-full max-w-[88rem] px-6 sm:px-8 py-20 sm:py-28">
+      {/* Top row: oversized heading left, short descriptor right */}
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 lg:gap-12">
+        <h2
+          className="font-normal tracking-tight leading-[0.95] text-[rgb(var(--fg))] text-[clamp(3.5rem,9vw,7rem)]"
+          style={fade(0)}
         >
+          Anything
+        </h2>
+        <p
+          className="font-mono text-[12px] sm:text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs lg:pt-4 lg:text-right"
+          style={fade(120)}
+        >
+          Tell us what you need. You run the business, we handle everything else.
+        </p>
+      </div>
+
+      {/* Centerpiece — floating, no card */}
+      <div className="mt-14 sm:mt-20 flex justify-center" style={fade(220)}>
+        <div className="w-full max-w-3xl">
           <PlatformDiagram />
-        </div>
-        <div className="px-3 flex flex-col items-center gap-2 mt-4"
-          style={{
-            opacity: visible ? 1 : 0,
-            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 300ms",
-          }}
-        >
-          <ProjectCta size="lg" />
-          <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-            No commitment. We usually reply within 24h.
-          </span>
         </div>
       </div>
 
-      {/* Desktop: copy left (aligned with logo), diagram right (aligned with header end) */}
-      <div className="hidden sm:flex items-center justify-center gap-32 py-24 px-6 max-w-[80rem] mx-auto w-full flex-1">
-        <div
-          className="flex-1 max-w-2xl flex flex-col items-center text-center gap-6 min-w-0 self-start pt-8"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(12px)",
-            transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
-          }}
-        >
-          {copy()}
-          <ProjectCta size="lg" />
-        </div>
-        <div
-          className="flex-1 flex justify-center min-w-0"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? "translateY(0)" : "translateY(16px)",
-            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 150ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 150ms",
-          }}
-        >
-          <PlatformDiagram />
-        </div>
-      </div>
+      {/* CTA */}
+      <div className="mt-14 sm:mt-16 flex flex-col items-center gap-3" style={fade(320)}>
+        <ProjectCta size="lg" />
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+          No commitment. We usually reply within 24h.
+        </span>
       </div>
     </section>
   );
@@ -1974,7 +1920,7 @@ function NewsCarousel() {
 
   return (
     <section className="py-12 sm:py-16">
-      <div className="px-3 max-w-[80rem] mx-auto w-full mb-8 flex items-end justify-between">
+      <div className="px-3 max-w-[88rem] mx-auto w-full mb-8 flex items-end justify-between">
         <h2 className="text-[clamp(2rem,5vw,3rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-tight text-left">
           Recent news
         </h2>
@@ -2012,7 +1958,7 @@ function NewsCarousel() {
       <div className="relative hidden sm:block">
         <div
           ref={trackRef}
-          className="flex gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab px-3 max-w-[80rem] mx-auto"
+          className="flex gap-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] cursor-grab px-3 max-w-[88rem] mx-auto"
           style={{ paddingRight: 24 }}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
@@ -2539,43 +2485,22 @@ function MissionPhrase() {
   }, []);
 
   return (
-    <p
+    <h2
       ref={ref}
-      className="text-[clamp(2.4rem,5.5vw,3.6rem)] font-normal tracking-tight leading-[1.15] text-center"
+      className="font-normal tracking-tight leading-[0.95] text-center text-[rgb(var(--fg))] text-[clamp(3.5rem,7vw,5.5rem)]"
       style={{
-        paddingTop: "6px",
-        paddingBottom: "12px",
-        color: "rgb(var(--fg))",
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(12px)",
         transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
       }}
     >
-      Projects end.{" "}
-      <br className="sm:hidden" />
-      <span style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-        Partnerships don&apos;t.
-      </span>
-    </p>
+      Partnerships
+    </h2>
   );
 }
 
-const ORBIT_LOGOS = [
-  { src: "/work-logos/ft-gioo.png", name: "FT Gioo" },
-  { src: "/work-logos/1400.png", name: "1400" },
-  { src: "/work-logos/allure-new-york.png", name: "Allure New York" },
-] as const;
-
-// Cluster convergence point (where the three curves meet), in the viewBox below.
+// Convergence point where the three flowing curves meet — the center node sits here.
 const ORBIT_CENTER = { x: 1003, y: 466 };
-
-// Triangular cluster offsets relative to the center: FT Gioo on top, 1400 bottom-left, Allure bottom-right.
-// Larger nodes with tighter offsets so the circles overlap; a thick background-colored ring blends the overlaps.
-const ORBIT_CLUSTER = [
-  { dx: 0, dy: -60, size: 134 },    // [0] FT Gioo  (top)
-  { dx: -72, dy: 48, size: 142 },   // [1] 1400     (bottom-left)
-  { dx: 68, dy: 56, size: 134 },    // [2] Allure   (bottom-right)
-] as const;
 
 // Curve guides + flowing text. Ported directly from Wispr Flow's live implementation:
 // invisible bezier guide paths, text marquee animated via the <text> element's x attribute,
@@ -2650,40 +2575,41 @@ function ClientOrbit() {
           </text>
         ))}
 
-        {/* Triangular logo cluster anchored where the three curves converge */}
-        {ORBIT_CLUSTER.map((b, i) => {
-          const logo = ORBIT_LOGOS[i % ORBIT_LOGOS.length];
-          const x = ORBIT_CENTER.x + b.dx;
-          const y = ORBIT_CENTER.y + b.dy;
-          const r = b.size / 2;
-          return (
-            <g
-              key={logo.name + i}
-              style={{
-                opacity: visible ? 1 : 0,
-                transform: visible
-                  ? `translate(${x}px, ${y}px) scale(1)`
-                  : `translate(${x}px, ${y}px) scale(0.6)`,
-                transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${400 + i * 110}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${400 + i * 110}ms`,
-              }}
-            >
-              {/* Ring in the exact block background color blends the overlapping circles together */}
-              <circle r={r + 12} fill="rgb(var(--orbit-surface))" />
-              <circle r={r} fill="rgb(var(--surface-elevated))" stroke="rgb(var(--line))" strokeWidth={2} />
-              <foreignObject x={-r} y={-r} width={b.size} height={b.size} style={{ overflow: "visible" }}>
-                <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
-                  <img
-                    src={logo.src}
-                    alt={logo.name}
-                    className="block"
-                    style={{ maxWidth: "60%", maxHeight: "60%", objectFit: "contain" }}
-                    loading="lazy"
-                  />
-                </div>
-              </foreignObject>
-            </g>
-          );
-        })}
+        {/* Center node — where the three curves converge. A single neutral node
+            with the Inertia mark, replacing the old brand-logo cluster. */}
+        <g
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible
+              ? `translate(${ORBIT_CENTER.x}px, ${ORBIT_CENTER.y}px) scale(1)`
+              : `translate(${ORBIT_CENTER.x}px, ${ORBIT_CENTER.y}px) scale(0.6)`,
+            transformOrigin: `${ORBIT_CENTER.x}px ${ORBIT_CENTER.y}px`,
+            transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1) 400ms, transform 600ms cubic-bezier(0.22,1,0.36,1) 400ms",
+          }}
+        >
+          {/* soft glow halo */}
+          <circle r={120} fill="rgb(var(--fg))" opacity={0.06} style={{ filter: "blur(14px)" }} />
+          {/* outer ring blends into the section background */}
+          <circle r={84} fill="rgb(var(--orbit-surface))" />
+          {/* node body */}
+          <circle r={72} fill="rgb(var(--surface-elevated))" stroke="rgb(var(--line))" strokeWidth={2} />
+          {/* Inertia mark */}
+          <text
+            x={0}
+            y={2}
+            textAnchor="middle"
+            dominantBaseline="central"
+            style={{
+              fontFamily: "var(--font-satoshi), sans-serif",
+              fontWeight: 600,
+              fontSize: 72,
+              letterSpacing: "-0.04em",
+              fill: "rgb(var(--fg))",
+            }}
+          >
+            I
+          </text>
+        </g>
       </svg>
     </div>
   );
@@ -2762,31 +2688,22 @@ function StackDiagram() {
 
   return (
     <div className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
-      <div
-        className="relative"
-        style={{
-          background: "rgb(var(--orbit-surface))",
-          borderRadius: 48,
-          overflow: "hidden",
-        }}
-      >
-        <div className="flex flex-col items-center gap-6 sm:gap-6 pb-16 sm:pb-12">
-          {/* Full-bleed: the orbit visual spans the entire section width, edge to edge */}
-          <div className="w-full">
-            <ClientOrbit />
-          </div>
+      <div className="flex flex-col items-center gap-8">
+        {/* Full-bleed: the orbit visual spans the entire section width, edge to edge */}
+        <div className="w-full">
+          <ClientOrbit />
+        </div>
 
-          <div className="flex flex-col items-center gap-5 text-center max-w-lg px-3 sm:px-6">
-            <MissionPhrase />
-            <p className="text-[clamp(1rem,1.8vw,1.05rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm" style={{ opacity: 0.7 }}>
-              Launch day is the start, not the finish line. We keep building, and the brands we build with keep coming back.
-            </p>
-            <div className="flex flex-col items-center gap-3 mt-2">
-              <ProjectCta />
-              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-                No commitment, no pressure. We usually reply within 24 hours.
-              </span>
-            </div>
+        <div className="flex flex-col items-center gap-5 text-center max-w-lg px-3 sm:px-6">
+          <MissionPhrase />
+          <p className="font-mono text-[12px] sm:text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs">
+            Launch day is the start, not the finish line. The brands we build with keep coming back.
+          </p>
+          <div className="flex flex-col items-center gap-3 mt-2">
+            <ProjectCta />
+            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+              No commitment, no pressure. We usually reply within 24 hours.
+            </span>
           </div>
         </div>
       </div>
@@ -3649,57 +3566,20 @@ function GrowthHighlight() {
   });
 
   return (
-    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem]">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center">
-        {/* Copy */}
-        <div className="flex flex-col gap-1.5 items-center text-center" style={fade(0)}>
-          <h2 className="text-[clamp(2.6rem,3.6vw,3.6rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25]">
-            Growth,{" "}
-            <span className="whitespace-nowrap" style={{ color: "rgb(var(--accent))" }}>
-              <span
-                className="inline-block"
-                style={{
-                  opacity: visible ? 0.7 : 0,
-                  transform: visible ? "translateX(0)" : "translateX(6px)",
-                  transition: "opacity 450ms cubic-bezier(0.22,1,0.36,1) 200ms, transform 450ms cubic-bezier(0.22,1,0.36,1) 200ms",
-                }}
-              >
-                [
-              </span>
-              <span style={{ margin: "0 0.18em" }}>not guesses.</span>
-              <span
-                className="inline-block"
-                style={{
-                  opacity: visible ? 0.7 : 0,
-                  transform: visible ? "translateX(0)" : "translateX(-6px)",
-                  transition: "opacity 450ms cubic-bezier(0.22,1,0.36,1) 320ms, transform 450ms cubic-bezier(0.22,1,0.36,1) 320ms",
-                }}
-              >
-                ]
-              </span>
-            </span>
+        {/* Copy — minimal: short heading + mono descriptor */}
+        <div className="flex flex-col items-start text-left" style={fade(0)}>
+          <h2 className="font-normal tracking-tight leading-[0.95] text-[rgb(var(--fg))] text-[clamp(3.5rem,7vw,5.5rem)]">
+            Growth
           </h2>
-          <p className="text-[clamp(1.25rem,1.9vw,1.6rem)] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md mt-6" style={{ opacity: 0.85 }}>
-            Every build is judged on the numbers it moves. Here&apos;s what that&apos;s looked like for the brands we&apos;ve worked with.
+          <p className="font-mono text-[12px] sm:text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs mt-5">
+            Every build is judged on the numbers it moves.
           </p>
-          <div className="flex items-center justify-center gap-6 mt-2 flex-wrap">
-            {[
-              { value: "5x", label: "Conversion lift" },
-              { value: "3.2x", label: "Qualified leads" },
-            ].map((s) => (
-              <div key={s.label} className="flex flex-col items-center">
-                <span className="text-[clamp(1.6rem,3vw,2rem)] tracking-tight tabular-nums text-[rgb(var(--fg))]">{s.value}</span>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>{s.label}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Rising bar chart */}
-        <div
-          className="relative rounded-2xl border border-[rgb(var(--line))] p-6 sm:p-8 overflow-hidden"
-          style={{ background: "rgb(var(--surface-elevated))", ...fade(120) }}
-        >
+        {/* Rising bar chart — no card */}
+        <div className="relative p-2 sm:p-4 overflow-hidden" style={fade(120)}>
           {/* called-out stat */}
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-[clamp(1.8rem,3.4vw,2.4rem)] tracking-tight tabular-nums" style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
@@ -3754,44 +3634,20 @@ function SpeedHighlight() {
   ];
 
   return (
-    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+    <section ref={ref} className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem]">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center">
-        {/* Copy */}
-        <div className="flex flex-col gap-1.5 items-center text-center" style={fade(0)}>
-          <h2 className="text-[clamp(2.6rem,3.6vw,3.6rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25]">
-            Speed is a{" "}
-            <span
-              className="inline-block whitespace-nowrap"
-              style={{
-                color: "rgb(var(--accent))",
-                animation: visible ? "speed-streak 600ms cubic-bezier(0.16,1,0.3,1) 200ms both" : "none",
-                opacity: visible ? undefined : 0,
-              }}
-            >
-              feature.
-            </span>
+        {/* Copy — minimal: short heading + mono descriptor */}
+        <div className="flex flex-col items-start text-left" style={fade(0)}>
+          <h2 className="font-normal tracking-tight leading-[0.95] text-[rgb(var(--fg))] text-[clamp(3.5rem,7vw,5.5rem)]">
+            Speed
           </h2>
-          <p className="text-[clamp(1.25rem,1.9vw,1.6rem)] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md mt-6" style={{ opacity: 0.85 }}>
-            A slow build is a missed window. We ship fast without cutting corners, and keep it fast once it&apos;s live.
+          <p className="font-mono text-[12px] sm:text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs mt-5">
+            We ship fast without cutting corners, and keep it fast once it&apos;s live.
           </p>
-          <div className="flex items-center justify-center gap-6 mt-2 flex-wrap">
-            {[
-              { value: "Days", label: "Kickoff to live" },
-              { value: "99.9%", label: "Uptime, monthly" },
-            ].map((s) => (
-              <div key={s.label} className="flex flex-col items-center">
-                <span className="text-[clamp(1.6rem,3vw,2rem)] tracking-tight tabular-nums text-[rgb(var(--fg))]">{s.value}</span>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>{s.label}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
-        {/* Load-bar race */}
-        <div
-          className="relative rounded-2xl border border-[rgb(var(--line))] p-6 sm:p-8 overflow-hidden"
-          style={{ background: "rgb(var(--surface-elevated))", ...fade(120) }}
-        >
+        {/* Load-bar race — no card */}
+        <div className="relative p-2 sm:p-4 overflow-hidden" style={fade(120)}>
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-[clamp(1.8rem,3.4vw,2.4rem)] tracking-tight tabular-nums" style={{ background: "var(--accent-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               0.8s
@@ -3885,41 +3741,22 @@ function Personalization() {
   });
 
   return (
-    <section ref={ref} className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
-      <div style={{ background: "rgb(var(--orbit-surface))", borderRadius: 48, overflow: "hidden" }}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center max-w-[80rem] mx-auto w-full px-4 sm:px-8 py-16 sm:py-24">
-        {/* Copy */}
-        <div className="flex flex-col gap-1.5 items-center text-center" style={fade(0)}>
-          <h2 className="text-[clamp(2.6rem,3.6vw,3.6rem)] tracking-tight font-normal text-[rgb(var(--fg))] leading-[1.25]">
-            Built around{" "}
-            <span className="relative inline-block whitespace-nowrap" style={{ color: "rgb(var(--accent))" }}>
-              your business.
-              {/* hand-drawn pencil underline that sketches in */}
-              <svg
-                className="absolute left-0 w-full pointer-events-none"
-                style={{ bottom: "-0.12em", height: "0.32em", overflow: "visible" }}
-                viewBox="0 0 200 12"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <PencilUnderline visible={visible} />
-              </svg>
-            </span>
+    <section ref={ref} className="relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center w-full">
+        {/* Copy — minimal: short heading + mono descriptor */}
+        <div className="flex flex-col items-start text-left" style={fade(0)}>
+          <h2 className="font-normal tracking-tight leading-[0.95] text-[rgb(var(--fg))] text-[clamp(3.5rem,7vw,5.5rem)]">
+            Yours
           </h2>
-          <p className="text-[clamp(1.25rem,1.9vw,1.6rem)] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md mt-6" style={{ opacity: 0.85 }}>
-            Nothing off the shelf. We design and build to fit how your business actually works, not stretched from a template.
+          <p className="font-mono text-[12px] sm:text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xs mt-5">
+            Built to fit how your business actually works, never stretched from a template.
           </p>
         </div>
 
-        {/* Fitted blueprint — draws itself in on scroll */}
+        {/* Fitted blueprint — draws itself in on scroll, no card */}
         <div
-          className="relative rounded-2xl border border-[rgb(var(--line))] p-6 sm:p-8 overflow-hidden"
-          style={{
-            background: "rgb(var(--surface-elevated))",
-            backgroundImage: "linear-gradient(rgb(var(--fg) / 0.035) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--fg) / 0.035) 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-            ...fade(120),
-          }}
+          className="relative p-2 sm:p-4 overflow-hidden"
+          style={fade(120)}
         >
           <svg viewBox="0 0 320 240" fill="none" className="relative w-full h-auto" aria-hidden="true">
             {/* top width dimension */}
@@ -3970,6 +3807,183 @@ function Personalization() {
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+// -- Vercel-style dark hero --------------------------------------------
+
+// Kinetic "I" centerpiece: the Inertia monogram pushed into motion. The solid
+// letter sits center-bright while strobe echoes trail off to the left, like a
+// long-exposure of the letter being shoved rightward — momentum made literal.
+// Draws in then settles. Always dark, independent of theme.
+// Generative topographic centerpiece: an animated, mouse-reactive contour field
+// (your ContourCanvas engine) masked into a disc. Lines are mostly neutral; the
+// peaks/ridges bloom into spectrum. Code-art, distinctly Inertia, no assets.
+function HeroMesh() {
+  const discFade =
+    "radial-gradient(circle at 50% 50%, #000 0%, #000 46%, rgba(0,0,0,0.5) 66%, transparent 80%)";
+
+  return (
+    <div
+      className="vhero-mesh-group relative flex items-center justify-center overflow-hidden"
+      style={{ width: "min(520px, 90vw)", height: "min(520px, 90vw)" }}
+      aria-hidden="true"
+    >
+      {/* The contour field, masked into a soft disc so it reads as a centerpiece
+          and fades into the black rather than ending at a hard edge. */}
+      <div
+        className="absolute inset-0"
+        style={{ WebkitMaskImage: discFade, maskImage: discFade }}
+      >
+        <HeroContour />
+      </div>
+
+      {/* Faint central light lift so the middle reads as the focal point. */}
+      <div
+        className="absolute"
+        style={{
+          inset: "18%",
+          background:
+            "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 42%, transparent 70%)",
+          filter: "blur(26px)",
+          mixBlendMode: "screen",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Noise texture over the field. */}
+      <div
+        className="vhero-noise absolute"
+        style={{
+          inset: "-15%",
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+          backgroundSize: "180px 180px",
+          opacity: 0.1,
+          mixBlendMode: "screen",
+          WebkitMaskImage:
+            "radial-gradient(circle at 50% 50%, #000 0%, rgba(0,0,0,0.5) 44%, transparent 66%)",
+          maskImage:
+            "radial-gradient(circle at 50% 50%, #000 0%, rgba(0,0,0,0.5) 44%, transparent 66%)",
+          pointerEvents: "none",
+        }}
+      />
+    </div>
+  );
+}
+
+const HERO_TAGLINE = ["FOR AMBITIOUS BRANDS", "TO LAUNCH, GROW AND SCALE", "BUILT BY INERTIA"];
+
+const HERO_LOGOS: { label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
+  { label: "Shopify", Icon: SiShopify },
+  { label: "Next.js", Icon: SiNextdotjs },
+  { label: "React", Icon: SiReact },
+  { label: "Vercel", Icon: SiVercel },
+  { label: "Stripe", Icon: SiStripe },
+  { label: "Supabase", Icon: SiSupabase },
+  { label: "Cloudflare", Icon: SiCloudflare },
+];
+
+function VercelHero() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.05 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const fade = (delay: number) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(14px)",
+    transition: `opacity 600ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 600ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+  });
+
+  return (
+    <section
+      ref={ref}
+      className="relative"
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#000", color: "#ededed" }}
+    >
+      <div
+        className="relative flex flex-col"
+        style={{ minHeight: "calc(100svh - 72px)", overflow: "hidden" }}
+      >
+        {/* Main grid: stacks on mobile, three columns on desktop */}
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_minmax(0,1.05fr)_1fr] lg:items-center gap-10 lg:gap-6 max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-16 pb-10 lg:py-0">
+          {/* Left: headline + buttons */}
+          <div className="order-2 lg:order-1 flex flex-col items-center text-center lg:items-start lg:text-left">
+            <h1
+              className="font-normal tracking-tight leading-[0.85] text-[clamp(4rem,14vw,4.4rem)]"
+              style={{ ...fade(0), color: "#fff" }}
+            >
+              Brands with<br />momentum
+            </h1>
+            <div className="flex items-center gap-3 mt-8" style={fade(120)}>
+              <a
+                href="https://www.instagram.com/by.inertia/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] font-medium tracking-tight transition-transform duration-200 hover:-translate-y-px active:translate-y-px"
+                style={{ background: "#ededed", color: "#000" }}
+              >
+                Start a project
+              </a>
+              <Link
+                href="/contact"
+                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] font-medium tracking-tight transition-colors duration-200"
+                style={{ background: "#0a0a0a", color: "#ededed", border: "1px solid #2a2a2a" }}
+              >
+                Talk to us
+              </Link>
+            </div>
+          </div>
+
+          {/* Center: gradient-mesh aurora */}
+          <div className="order-1 lg:order-2 flex justify-center" style={fade(60)}>
+            <HeroMesh />
+          </div>
+
+          {/* Right: mono tagline lines */}
+          <div className="order-3 flex flex-col items-center lg:items-end gap-2.5">
+            {HERO_TAGLINE.map((line, i) => (
+              <span
+                key={i}
+                className="font-mono text-[12px] tracking-[0.12em]"
+                style={{
+                  color: "#8f8f8f",
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? "translateY(0)" : "translateY(6px)",
+                  transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${260 + i * 90}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${260 + i * 90}ms`,
+                }}
+              >
+                {line}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom logo strip */}
+        <div
+          className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 pb-10"
+          style={fade(360)}
+        >
+          <div className="flex flex-wrap items-center justify-center lg:justify-between gap-x-10 gap-y-5">
+            {HERO_LOGOS.map(({ label, Icon }) => (
+              <div key={label} className="flex items-center gap-2" style={{ color: "#8f8f8f" }}>
+                <Icon className="w-5 h-5" />
+                <span className="text-[14px] font-medium tracking-tight">{label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -3980,56 +3994,54 @@ function VisualLayout() {
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
-    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex flex-col">
+    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
 
-      <StartPrompt hero />
+      <VercelHero />
 
-      <div style={{ position: "relative", zIndex: 1 }}>
-        <PlatformSignal />
-      </div>
+      <div className="py-16 sm:py-28" />
 
-      <section className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", marginTop: -96, zIndex: 0 }}>
-        <div style={{ background: "rgb(var(--surface-elevated))", borderRadius: "0 0 48px 48px", overflow: "hidden" }}>
-          <div style={{ paddingTop: 96 }}>
-            <TechMarquee />
-          </div>
+      <PlatformSignal />
+
+      <section className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
+        <div style={{ background: "rgb(var(--surface-elevated))", borderRadius: 48, overflow: "hidden" }}>
+          <TechMarquee />
         </div>
       </section>
 
-      <div className="py-10 sm:py-16" />
+      <div className="py-16 sm:py-28" />
 
       <GrowthHighlight />
 
-      <div className="py-10 sm:py-16" />
+      <div className="py-16 sm:py-28" />
 
       <Personalization />
 
-      <div className="py-10 sm:py-16" />
+      <div className="py-16 sm:py-28" />
 
       <SpeedHighlight />
 
-      <div className="py-10 sm:py-16" />
+      <div className="py-16 sm:py-28" />
 
       {/* Hidden for now — bring back when ready */}
       {/* <AetherFeature />
 
-      <div className="py-10 sm:py-16" /> */}
+      <div className="py-16 sm:py-28" /> */}
 
       <NewsCarousel />
 
-      <div className="py-10 sm:py-16" />
+      <div className="py-16 sm:py-28" />
 
       <StackDiagram />
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-20 sm:py-32" />
 
       <Faq />
 
-      <div className="py-10 sm:py-16" />
+      <div className="py-16 sm:py-28" />
 
       <StartPrompt closing />
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-20 sm:py-32" />
 
     </main>
     </>

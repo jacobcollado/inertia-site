@@ -106,7 +106,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
       {/* Top bar — fixed so it doesn't affect centering */}
       <div className="fixed top-0 inset-x-0 z-10 px-6" style={{ height: 72 }}>
-        <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "80rem" }}>
+        <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "88rem" }}>
           <Link href="/" className="opacity-80 hover:opacity-100 transition-opacity">
             <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
           </Link>

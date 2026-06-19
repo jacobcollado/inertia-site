@@ -54,7 +54,7 @@ const PLANS = [
 
 export default function EnterprisePage() {
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Hero */}
       <section className="px-3 flex flex-col items-center justify-center text-center rise" style={{ minHeight: 420, paddingTop: 80, paddingBottom: 40 }}>

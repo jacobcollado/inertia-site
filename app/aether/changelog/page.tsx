@@ -108,7 +108,7 @@ export default function AetherChangelog() {
   const [open, setOpen] = useState<string | null>(CHANGELOG[0].version);
 
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Back nav */}
       <div className="px-3 pt-6 pb-2 rise">

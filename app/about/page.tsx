@@ -36,7 +36,7 @@ const LINKS = [
 export default function AboutPage() {
   const latestPosts = getAllPosts().slice(0, 3);
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Hero */}
       <section className="relative flex flex-col sm:flex-row gap-12 sm:gap-20 px-3 pt-16 sm:pt-24 pb-16 rise overflow-hidden">

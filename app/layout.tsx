@@ -10,7 +10,6 @@ import { SiteShell } from "./site-shell";
 import { CookieBanner } from "./cookie-banner";
 import { ScrollReveal } from "./scroll-reveal";
 import { cn } from "@/lib/utils";
-import Script from "next/script";
 import { PostHogProvider } from "./posthog-provider";
 
 const satoshi = localFont({
@@ -65,13 +64,10 @@ export const metadata: Metadata = {
   },
 };
 
-const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');if(s==='dark'){document.documentElement.classList.add('dark');}else if(!s){document.documentElement.classList.remove('dark');}}catch(e){}})();`;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn(satoshi.variable, "font-sans")} suppressHydrationWarning>
+    <html lang="en" className={cn(satoshi.variable, "font-sans", "dark")} suppressHydrationWarning>
       <head>
-        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify({

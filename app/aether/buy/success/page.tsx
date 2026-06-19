@@ -13,7 +13,7 @@ export default async function BuySuccessPage({
   await searchParams; // consumed but not used — session data handled by webhook
 
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
       <div className="flex flex-col items-center justify-center flex-1 text-center px-3 py-24 rise">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center mb-6"

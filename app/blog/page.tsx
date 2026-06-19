@@ -16,7 +16,7 @@ export default function BlogIndex() {
   }, []);
 
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col px-3">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col px-3">
 
       <div className="pt-12 sm:pt-16" />
 

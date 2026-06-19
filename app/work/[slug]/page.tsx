@@ -50,7 +50,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   const next = idx >= 0 ? all[(idx + 1) % all.length] : null;
 
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Hero */}
       <section className="px-3 pt-16 sm:pt-24 pb-14 rise">

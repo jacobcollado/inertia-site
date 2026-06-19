@@ -79,7 +79,7 @@ export default function WorkIndexPage() {
   }, []);
 
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Hero */}
       <section className="flex flex-col items-center text-center px-3 pt-16 sm:pt-24 pb-12 sm:pb-16 rise">

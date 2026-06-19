@@ -208,7 +208,7 @@ function TopNav({ client, tab, setTab, mobileOpen, setMobileOpen, unreadMessages
 
   return (
     <header className="sticky top-0 z-30 bg-[rgb(var(--bg))] border-b border-[rgb(var(--line))] md:border-b md:border-[rgb(var(--line))]">
-      <div className="w-full pl-6 sm:max-w-[80rem] sm:mx-auto sm:px-6 flex items-center" style={{ height: 72 }}>
+      <div className="w-full pl-6 sm:max-w-[88rem] sm:mx-auto sm:px-6 flex items-center" style={{ height: 72 }}>
         {/* Logo — goes to overview */}
         <button onClick={() => { trigger("selection"); setTab("overview"); }}>
           <InertiaLogo className="h-[18px] w-auto" />
@@ -1290,7 +1290,6 @@ function SettingsRow({ label, hint, children, border = true }: { label: string; 
 }
 
 function SettingsTab({ client, setTab }: { client: Client | null; setTab: (t: Tab) => void }) {
-  const { theme, toggle } = useTheme();
   const { trigger } = useWebHaptics();
   const [pending, startTransition] = useTransition();
   const [name, setName] = useState(client?.name ?? "");
@@ -1353,25 +1352,6 @@ function SettingsTab({ client, setTab }: { client: Client | null; setTab: (t: Ta
             {error && <span className="text-[13px] tracking-tight text-red-400">{error}</span>}
           </div>
         </form>
-      </SettingsSection>
-
-      {/* Appearance */}
-      <SettingsSection label="Appearance">
-        <SettingsRow label="Theme" hint={`Currently ${theme} mode`} border={false}>
-          <div className="flex items-center gap-1 p-0.5 rounded-full" style={{ background: "rgb(var(--line))" }}>
-            {(["light", "dark"] as const).map(t => (
-              <button key={t} onClick={() => { if (theme !== t) toggle(); }}
-                className="px-4 py-1.5 rounded-full text-[13px] tracking-tight capitalize transition-all duration-150"
-                style={{
-                  background: theme === t ? "rgb(var(--bg))" : "transparent",
-                  color: theme === t ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                  boxShadow: theme === t ? "0 1px 3px rgb(0 0 0 / 0.12)" : "none",
-                }}>
-                {t}
-              </button>
-            ))}
-          </div>
-        </SettingsRow>
       </SettingsSection>
 
       {/* Support */}
@@ -1443,7 +1423,7 @@ export function DashboardShell({ client, projects, invoices, files, messages: in
       )}
       <TopNav client={client} tab={tab} setTab={setTab} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} unreadMessages={unread} />
 
-      <main className="w-full px-6 sm:max-w-[80rem] sm:mx-auto py-10" style={{ animation: "rise-in 240ms cubic-bezier(0.22,1,0.36,1) both" }}>
+      <main className="w-full px-6 sm:max-w-[88rem] sm:mx-auto py-10" style={{ animation: "rise-in 240ms cubic-bezier(0.22,1,0.36,1) both" }}>
         <div style={{ display: tab === "overview"  ? undefined : "none" }}>
           <OverviewTab client={client} projects={projects} invoices={invoices} files={files} messages={messages} projectUpdates={projectUpdates} setTab={setTab} />
         </div>

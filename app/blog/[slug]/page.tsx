@@ -172,7 +172,7 @@ export default async function BlogPost({
   const stats = readingStats(post.content);
 
   return (
-    <main className="relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] px-3">
+    <main className="relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] px-3">
 <div className="xl:grid xl:grid-cols-[1fr_minmax(0,48rem)_1fr] xl:gap-8">
         {/* Left gutter — mobile TOC only */}
         <TOC headings={headings} />
