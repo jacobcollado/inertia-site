@@ -594,10 +594,12 @@ export function VisualNotch() {
 
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
+  const isAether = pathname.startsWith("/aether");
+  const useMinimalHeader = isPolicies || isAether;
 
   if (isHome) return null;
 
-  if (isPolicies) {
+  if (useMinimalHeader) {
     return (
       <div className="site-header" ref={headerRef}>
         <div className="site-header__bg" aria-hidden="true" />

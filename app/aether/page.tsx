@@ -4,7 +4,7 @@ import { DemoButton } from "./demo-button";
 import { HeroRule } from "./hero-rule";
 import { FeaturesScroll } from "./features-scroll";
 import { ProcessSteps } from "./process-steps";
-import { MobilePricing } from "./mobile-pricing";
+import { InlinePricing } from "./inline-pricing";
 
 export const metadata: Metadata = {
   title: "Aether",
@@ -138,8 +138,7 @@ export default function AetherPage() {
         <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">Every section ships in the box, ready the moment you publish</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
           {SECONDARY_FEATURES.map((f) => (
-            <div key={f.name} className="flex items-start gap-3 py-4">
-              <span className="text-[rgb(var(--muted))] mt-0.5" style={{ opacity: 0.5 }}>{f.icon}</span>
+            <div key={f.name} className="flex items-start py-4">
               <div className="flex flex-col gap-0.5">
                 <span className="text-[15px] tracking-tight font-medium text-[rgb(var(--fg))]">{f.name}</span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{f.desc}</span>
@@ -161,7 +160,7 @@ export default function AetherPage() {
         <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4 text-center">One price, the whole theme</p>
         <p className="text-[clamp(1rem,1.6vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center max-w-sm mx-auto" style={{ opacity: 0.6 }}>No feature gates, no pro tier, nothing sold separately. Pick the license that fits your store and every section we have ever built comes with it.</p>
 
-        <MobilePricing tiers={TIERS} rows={PRICING_ROWS} />
+        <InlinePricing />
       </div>
 
 

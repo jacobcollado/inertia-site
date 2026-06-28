@@ -2742,6 +2742,10 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
     q: "Can you help with just design, or just development?",
     a: <>We prefer to {hl("own the full process")}, but we're open to talking through what you actually need.</>,
   },
+  {
+    q: "Do you still offer the Aether Shopify theme?",
+    a: <>Yes. {hl("Aether")} is our Shopify theme, available from $85. It ships with 41 sections, dark mode, sticky cart, and mega menu. You can buy a license and go live the same afternoon at <Link href="/aether" style={{ color: "#0a84ff", textDecoration: "none" }}>byinertia.com/aether</Link>.</>,
+  },
 ];
 
 function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNode; open: boolean; onToggle: () => void; delay: number }) {
@@ -3905,28 +3909,37 @@ function VercelHero() {
             From the first sketch to launch day, we stay close. No hand-offs, no guesswork.
           </p>
 
-          <div className="flex items-center gap-3" style={fade(300)}>
-            <a
-              href="https://www.instagram.com/by.inertia/"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-              style={{ background: "#ededed", color: "#000", transition: "opacity 150ms ease, transform 150ms ease" }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-              onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
-            >
-              Start a project
-            </a>
+          <div className="flex flex-col items-center gap-4" style={fade(300)}>
+            <div className="flex items-center gap-3">
+              <a
+                href="https://cal.com/jacob-c-99otvp/15min"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
+                style={{ background: "#ededed", color: "#000", transition: "opacity 150ms ease, transform 150ms ease" }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+                onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
+              >
+                Book a call
+              </a>
+              <Link
+                href="/contact"
+                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
+                style={{ background: "#1a1a1a", color: "#ededed", transition: "opacity 150ms ease, transform 150ms ease" }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+                onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
+              >
+                Send a message
+              </Link>
+            </div>
             <Link
-              href="/contact"
-              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-              style={{ background: "#1a1a1a", color: "#ededed", transition: "opacity 150ms ease, transform 150ms ease" }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-              onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
+              href="/aether"
+              className="text-[13px] tracking-tight transition-opacity duration-150 hover:opacity-70"
+              style={{ color: "#5a5a5a" }}
             >
-              Send a message
+              Looking for the Aether <SiShopify className="inline w-3 h-3 relative -top-px" style={{ color: "#5a5a5a" }} /> theme? →
             </Link>
           </div>
         </div>

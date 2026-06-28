@@ -211,8 +211,7 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
                 transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
               }}
             >
-              <div className="flex items-center gap-3 text-[rgb(var(--muted))]">
-                {f.icon}
+              <div className="flex items-center gap-3">
                 <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
                   {f.title}
                 </h2>

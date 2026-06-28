@@ -15,10 +15,16 @@ export const FollowerPointerCard = ({
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isInside, setIsInside] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
   const x = useMotionValue(-999);
   const y = useMotionValue(-999);
 
   useEffect(() => {
+    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+
+  useEffect(() => {
+    if (isTouch) return;
     const el = ref.current;
     if (!el) return;
 
@@ -39,12 +45,12 @@ export const FollowerPointerCard = ({
       el.removeEventListener("mouseleave", onLeave);
       window.removeEventListener("mousemove", onMove);
     };
-  }, [x, y]);
+  }, [x, y, isTouch]);
 
   return (
     <div
       ref={ref}
-      style={{ cursor: "none" }}
+      style={{ cursor: isTouch ? "auto" : "none" }}
       className={cn("relative", className)}
     >
       {children}

@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/aether/buy/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url:  `${origin}/aether/buy`,
+      cancel_url:  `${origin}/aether#pricing`,
       allow_promotion_codes: true,
       metadata: { tier },
     });
