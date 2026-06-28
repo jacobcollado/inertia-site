@@ -4037,10 +4037,12 @@ function WorkThumbnails() {
             />
           ))}
 
-          {/* Bottom label */}
-          <div className="absolute inset-x-0 bottom-0 p-4 z-10">
-            <p className="text-[14px] tracking-tight text-white font-normal">{item.title}</p>
-            <p className="text-[11px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{item.category}</p>
+          {/* Bottom fade + label */}
+          <div className="absolute inset-x-0 bottom-0 z-10" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)", backdropFilter: "blur(0px)" }}>
+            <div className="p-4" style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", maskImage: "linear-gradient(to top, black 60%, transparent 100%)", WebkitMaskImage: "linear-gradient(to top, black 60%, transparent 100%)" }}>
+              <p className="text-[14px] sm:text-[18px] tracking-tight text-white font-normal">{item.title}</p>
+              <p className="text-[11px] sm:text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{item.category}</p>
+            </div>
           </div>
         </div>
       </FollowerPointerCard>
