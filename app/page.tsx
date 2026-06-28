@@ -3983,7 +3983,7 @@ function CalEmbed() {
 
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div id="my-cal-inline-15min" style={{ width: "100%", height: "clamp(700px, 100svh, 900px)", overflow: "scroll" }} />
+      <div id="my-cal-inline-15min" style={{ width: "100%", height: "clamp(800px, 110svh, 1050px)", overflow: "scroll" }} />
     </section>
   );
 }
