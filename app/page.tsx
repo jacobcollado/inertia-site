@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+
 import { SiShopify, SiTypescript, SiTailwindcss, SiMeta, SiFramer, SiVercel, SiApple, SiNextdotjs, SiReact, SiSupabase, SiCloudflare, SiStripe } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
@@ -10,6 +11,7 @@ import { ContourCanvas } from "./contour-canvas";
 import { HeroContour } from "./hero-contour";
 import { createClient } from "@/lib/supabase/client";
 import type { PostMeta } from "@/lib/posts";
+import { FollowerPointerCard } from "@/components/ui/following-pointer";
 
 function formatDate(iso: string): string {
   if (!iso) return "";
@@ -3873,18 +3875,6 @@ function HeroMesh() {
   );
 }
 
-const HERO_TAGLINE = ["FOR AMBITIOUS BRANDS", "TO LAUNCH, GROW AND SCALE", "BUILT BY INERTIA"];
-
-const HERO_LOGOS: { label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
-  { label: "Shopify", Icon: SiShopify },
-  { label: "Next.js", Icon: SiNextdotjs },
-  { label: "React", Icon: SiReact },
-  { label: "Vercel", Icon: SiVercel },
-  { label: "Stripe", Icon: SiStripe },
-  { label: "Supabase", Icon: SiSupabase },
-  { label: "Cloudflare", Icon: SiCloudflare },
-];
-
 function VercelHero() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -3913,78 +3903,138 @@ function VercelHero() {
       style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#000", color: "#ededed" }}
     >
       <div
-        className="relative flex flex-col"
-        style={{ minHeight: "calc(100svh - 72px)", overflow: "hidden" }}
+        className="relative flex items-center"
       >
-        {/* Main grid: stacks on mobile, three columns on desktop */}
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_minmax(0,1.05fr)_1fr] lg:items-center gap-10 lg:gap-6 max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-16 pb-10 lg:py-0">
-          {/* Left: headline + buttons */}
-          <div className="order-2 lg:order-1 flex flex-col items-center text-center lg:items-start lg:text-left">
-            <h1
-              className="font-normal tracking-tight leading-[0.85] text-[clamp(4rem,14vw,4.4rem)]"
-              style={{ ...fade(0), color: "#fff" }}
+        <div className="max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-24 pb-10 flex flex-col items-center text-center gap-10">
+          <img src="/logo.png" alt="Inertia" className="h-8 w-auto invert" style={fade(0)} aria-hidden="true" />
+          <h1
+            className="font-normal tracking-tight leading-[0.88]"
+            style={{ ...fade(60), color: "#fff", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
+          >
+            <span className="hidden sm:inline">Design studio for founders moving fast.</span>
+            <span className="sm:hidden">Design studio for founders<br />moving fast.</span>
+          </h1>
+
+          <p
+            className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
+            style={{ ...fade(180), color: "#8f8f8f" }}
+          >
+            Direction, design, and development, one focused team. We work with fashion brands, trade businesses, and founders moving fast to turn early ideas into products built for real traction.
+          </p>
+          <p
+            className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
+            style={{ ...fade(240), color: "#8f8f8f" }}
+          >
+            From the first sketch to launch day, we stay close. No hand-offs, no guesswork.
+          </p>
+
+          <div className="flex items-center gap-3" style={fade(300)}>
+            <a
+              href="https://www.instagram.com/by.inertia/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-transform duration-200 hover:-translate-y-px active:translate-y-px"
+              style={{ background: "#ededed", color: "#000" }}
             >
-              Brands with<br />momentum
-            </h1>
-            <div className="flex items-center gap-3 mt-8" style={fade(120)}>
-              <a
-                href="https://www.instagram.com/by.inertia/"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] font-medium tracking-tight transition-transform duration-200 hover:-translate-y-px active:translate-y-px"
-                style={{ background: "#ededed", color: "#000" }}
-              >
-                Start a project
-              </a>
-              <Link
-                href="/contact"
-                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] font-medium tracking-tight transition-colors duration-200"
-                style={{ background: "#0a0a0a", color: "#ededed", border: "1px solid #2a2a2a" }}
-              >
-                Talk to us
-              </Link>
-            </div>
-          </div>
-
-          {/* Center: gradient-mesh aurora */}
-          <div className="order-1 lg:order-2 flex justify-center" style={fade(60)}>
-            <HeroMesh />
-          </div>
-
-          {/* Right: mono tagline lines */}
-          <div className="order-3 flex flex-col items-center lg:items-end gap-2.5">
-            {HERO_TAGLINE.map((line, i) => (
-              <span
-                key={i}
-                className="font-mono text-[12px] tracking-[0.12em]"
-                style={{
-                  color: "#8f8f8f",
-                  opacity: visible ? 1 : 0,
-                  transform: visible ? "translateY(0)" : "translateY(6px)",
-                  transition: `opacity 500ms cubic-bezier(0.22,1,0.36,1) ${260 + i * 90}ms, transform 500ms cubic-bezier(0.22,1,0.36,1) ${260 + i * 90}ms`,
-                }}
-              >
-                {line}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom logo strip */}
-        <div
-          className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 pb-10"
-          style={fade(360)}
-        >
-          <div className="flex flex-wrap items-center justify-center lg:justify-between gap-x-10 gap-y-5">
-            {HERO_LOGOS.map(({ label, Icon }) => (
-              <div key={label} className="flex items-center gap-2" style={{ color: "#8f8f8f" }}>
-                <Icon className="w-5 h-5" />
-                <span className="text-[14px] font-medium tracking-tight">{label}</span>
-              </div>
-            ))}
+              Start a project
+            </a>
+            <Link
+              href="/contact"
+              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-colors duration-200"
+              style={{ background: "transparent", color: "#ededed", border: "1px solid #2a2a2a" }}
+            >
+              Send a message
+            </Link>
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+function CalEmbed() {
+  const ref = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    const run = () => {
+      const Cal = (window as any).Cal;
+      Cal("init", "15min", { origin: "https://app.cal.com" });
+      Cal.ns["15min"]("inline", {
+        elementOrSelector: ref.current,
+        config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
+        calLink: "jacob-c-99otvp/15min",
+      });
+      Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view" });
+    };
+
+    if ((window as any).Cal?.loaded) {
+      run();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://app.cal.com/embed/embed.js";
+      script.async = true;
+      script.onload = run;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  return (
+    <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <div ref={ref} style={{ width: "100%", height: 700 }} />
+    </section>
+  );
+}
+
+const WORK_ITEMS = [
+  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app" },
+  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design" },
+];
+
+function WorkThumbnails() {
+  const [active, setActive] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const advance = () => {
+    setActive(i => (i + 1) % WORK_ITEMS.length);
+  };
+
+  useEffect(() => {
+    timerRef.current = setInterval(advance, 6000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  const item = WORK_ITEMS[active];
+
+  return (
+    <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <FollowerPointerCard title="View project" className="w-full">
+        <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a" }}>
+          {WORK_ITEMS.map((w, i) => (
+            <img
+              key={w.src}
+              src={w.src}
+              alt={w.title}
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover object-top"
+              style={{
+                opacity: i === active ? 1 : 0,
+                transition: "opacity 600ms ease",
+                zIndex: i === active ? 1 : 0,
+              }}
+            />
+          ))}
+
+          {/* Bottom label */}
+          <div className="absolute inset-x-0 bottom-0 p-4 z-10">
+            <p className="text-[14px] tracking-tight text-white font-normal">{item.title}</p>
+            <p className="text-[11px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{item.category}</p>
+          </div>
+        </div>
+      </FollowerPointerCard>
     </section>
   );
 }
@@ -3998,48 +4048,13 @@ function VisualLayout() {
 
       <VercelHero />
 
-      <div className="py-16 sm:py-28" />
+      <div className="py-6 sm:py-10" />
 
-      <PlatformSignal />
+      <WorkThumbnails />
 
-      <section className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}>
-        <div style={{ background: "rgb(var(--surface-elevated))", borderRadius: 48, overflow: "hidden" }}>
-          <TechMarquee />
-        </div>
-      </section>
+      <div className="py-16 sm:py-24" />
 
-      <div className="py-16 sm:py-28" />
-
-      <GrowthHighlight />
-
-      <div className="py-16 sm:py-28" />
-
-      <Personalization />
-
-      <div className="py-16 sm:py-28" />
-
-      <SpeedHighlight />
-
-      <div className="py-16 sm:py-28" />
-
-      {/* Hidden for now — bring back when ready */}
-      {/* <AetherFeature />
-
-      <div className="py-16 sm:py-28" /> */}
-
-      <NewsCarousel />
-
-      <div className="py-16 sm:py-28" />
-
-      <StackDiagram />
-
-      <div className="py-20 sm:py-32" />
-
-      <Faq />
-
-      <div className="py-16 sm:py-28" />
-
-      <StartPrompt closing />
+      <CalEmbed />
 
       <div className="py-20 sm:py-32" />
 

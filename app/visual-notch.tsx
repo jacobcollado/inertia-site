@@ -659,6 +659,10 @@ export function VisualNotch() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [mobileOpen]);
 
+  const isHome = pathname === "/";
+
+  if (isHome) return null;
+
   return (
     <>
       <div className={`site-header${mobileOpen ? " site-header--open" : ""}`} ref={headerRef}>
