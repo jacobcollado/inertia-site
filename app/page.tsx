@@ -3953,38 +3953,33 @@ function VercelHero() {
 }
 
 function CalEmbed() {
-  const ref = useRef<HTMLDivElement>(null);
-  const initialized = useRef(false);
-
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
+    (function (C: any, A: string, L: string) {
+      const p = (a: any, ar: any) => a.q.push(ar);
+      const d = document;
+      C.Cal = C.Cal || function (this: any) {
+        const cal = C.Cal;
+        const ar = arguments;
+        if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script") as HTMLScriptElement).src = A; cal.loaded = true; }
+        if (ar[0] === L) { const api: any = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar);
+      };
+    })(window, "https://app.cal.com/embed/embed.js", "init");
 
-    const run = () => {
-      const Cal = (window as any).Cal;
-      Cal("init", "15min", { origin: "https://app.cal.com" });
-      Cal.ns["15min"]("inline", {
-        elementOrSelector: ref.current,
-        config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
-        calLink: "jacob-c-99otvp/15min",
-      });
-      Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view" });
-    };
-
-    if ((window as any).Cal?.loaded) {
-      run();
-    } else {
-      const script = document.createElement("script");
-      script.src = "https://app.cal.com/embed/embed.js";
-      script.async = true;
-      script.onload = run;
-      document.head.appendChild(script);
-    }
+    const Cal = (window as any).Cal;
+    Cal("init", "15min", { origin: "https://app.cal.com" });
+    Cal.config = Cal.config || {};
+    Cal.config.forwardQueryParams = true;
+    Cal.ns["15min"]("inline", {
+      elementOrSelector: "#my-cal-inline-15min",
+      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
+      calLink: "jacob-c-99otvp/15min",
+    });
+    Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view" });
   }, []);
 
   return (
     <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div ref={ref} style={{ width: "100%", height: 700 }} />
+      <div id="my-cal-inline-15min" style={{ width: "100%", height: 700, overflow: "scroll" }} />
     </section>
   );
 }
