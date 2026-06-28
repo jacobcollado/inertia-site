@@ -2713,128 +2713,105 @@ function StackDiagram() {
   );
 }
 
-const FAQ_ITEMS = [
-  {
-    q: "What is Inertia?",
-    a: "We're a small design and build studio. Shopify stores, custom web products, brand identities, all done in-house for anyone from e-commerce brands to trades to influencers. One project at a time, built properly.",
-  },
-  {
-    q: "What does a project cost?",
-    a: "Depends on the scope, so we don't do vague ranges. Once we know what you're after, you get one fixed price for the whole thing before any work starts. It only moves if the scope does.",
-  },
-  {
-    q: "How long will it take?",
-    a: "Most projects land around five weeks. Smaller ones move quicker, bigger ones might run a week or two longer. You get a real timeline up front and we keep the work moving against it.",
-  },
-  {
-    q: "How do you actually work?",
-    a: "We start from your brief, not a template. Everything is designed and built by us, you're kept close at every stage, and we only take on a few projects at once so yours gets proper attention.",
-  },
-  {
-    q: "Who owns the work?",
-    a: "You do, fully. We don't post it, list it, or point to it anywhere unless you've said that's fine. If you want the project kept quiet, it stays quiet.",
-  },
-  {
-    q: "How do we start?",
-    a: "Send us what you're working on, where you want it to go, and roughly when you need it. We read every message and reply within a day. If it feels like a fit, we'll jump on a short call before scoping anything.",
-  },
-] as const;
+const hl = (text: string) => (
+  <span style={{ background: "rgba(10,132,255,0.18)", color: "#0a84ff", borderRadius: 4, padding: "1px 3px" }}>{text}</span>
+);
 
-function FaqItem({ item, open, onToggle }: { item: { q: string; a: string }; open: boolean; onToggle: () => void }) {
+const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
+  {
+    q: "What kind of projects do you take on?",
+    a: <>We work with {hl("fashion brands")}, {hl("trade businesses")}, and founder-led companies building digital products, storefronts, and brand identities.</>,
+  },
+  {
+    q: "How does the process work?",
+    a: <>We start with a {hl("short discovery call")} to understand what you're building, then move into {hl("direction, design, and development")} as one continuous process.</>,
+  },
+  {
+    q: "Do you work with early-stage founders?",
+    a: <>Yes. We work best with founders who have {hl("a clear vision")} but need the right team to shape and ship it properly.</>,
+  },
+  {
+    q: "How long does a project take?",
+    a: <>Depends on scope. A focused storefront or landing page can ship in {hl("2-4 weeks")}. Larger product builds typically run {hl("6-12 weeks")}.</>,
+  },
+  {
+    q: "What does it cost?",
+    a: <>Projects are scoped and quoted individually. Most engagements {hl("start from $3,000")} depending on what's being built.</>,
+  },
+  {
+    q: "Can you help with just design, or just development?",
+    a: <>We prefer to {hl("own the full process")}, but we're open to talking through what you actually need.</>,
+  },
+];
+
+function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNode; open: boolean; onToggle: () => void; delay: number }) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
 
   useEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
-    setHeight(open ? el.scrollHeight : 0);
-  }, [open, item.a]);
+    const target = open ? el.scrollHeight : 0;
+    setHeight(target);
+  }, [open]);
 
   return (
     <div
-      style={{
-        background: open ? "rgb(var(--orbit-surface))" : "transparent",
-        borderRadius: 24,
-        transition: "background 350ms cubic-bezier(0.22,1,0.36,1)",
-      }}
+      className="rise"
+      style={{ "--rise-delay": `${delay}ms` } as React.CSSProperties}
     >
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="w-full flex items-center justify-between gap-4 text-left py-5 px-5 sm:px-6 group"
-      >
-        <span className="text-[clamp(1.15rem,4vw,1.25rem)] tracking-tight font-normal text-[rgb(var(--fg))]">
-          {item.q}
-        </span>
-        <span
-          className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))] group-hover:border-[rgb(var(--fg)/0.3)] transition-all duration-200"
-          aria-hidden="true"
-        >
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5" style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)", transition: "transform 300ms cubic-bezier(0.22,1,0.36,1)" }}>
-            <line x1="8" y1="3" x2="8" y2="13" />
-            <line x1="3" y1="8" x2="13" y2="8" />
-          </svg>
-        </span>
-      </button>
       <div
         style={{
-          height,
-          overflow: "hidden",
-          transition: "height 350ms cubic-bezier(0.22,1,0.36,1)",
+          borderRadius: 16,
+          background: open ? "rgb(var(--surface))" : "transparent",
+          transition: "background 350ms cubic-bezier(0.22,1,0.36,1)",
+          marginBottom: 6,
         }}
       >
-        <div ref={bodyRef} className="pb-5 px-5 sm:px-6 pr-11">
-          <p className="text-[clamp(1.05rem,3.4vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.85 }}>
-            {item.a}
-          </p>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className="w-full flex items-center justify-between gap-6 py-5 px-5"
+        >
+          <span className="flex-1 text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--fg))] text-center">{q}</span>
+        </button>
+        <div
+          style={{
+            height,
+            overflow: "hidden",
+            transition: "height 350ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        >
+          <div ref={bodyRef} className="pb-5 px-5">
+            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-center">
+              {a}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function Faq() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+function Faq() { return null; }
+
+function IndexFaq() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { setVisible(true); obs.disconnect(); }
-    }, { threshold: 0.15 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
   return (
-    <section
-      ref={ref}
-      className="px-3 sm:px-8 flex flex-col items-center"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(16px)",
-        transition: "opacity 600ms cubic-bezier(0.22,1,0.36,1), transform 600ms cubic-bezier(0.22,1,0.36,1)",
-      }}
-    >
-      <div className="w-full max-w-2xl flex flex-col gap-8">
-        <div className="flex flex-col gap-3 text-center">
-          <p className="text-[clamp(1.8rem,4.5vw,2.6rem)] tracking-tight font-normal leading-[1.1] text-[rgb(var(--fg))]">
-            FAQ
-          </p>
-        </div>
-        <div className="flex flex-col gap-1">
-          {FAQ_ITEMS.map((item, i) => (
-            <FaqItem
-              key={item.q}
-              item={item}
-              open={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? null : i)}
-            />
-          ))}
-        </div>
+    <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <div className="max-w-2xl mx-auto">
+        {FAQ_ITEMS.map((item, i) => (
+          <FaqItem
+            key={item.q}
+            q={item.q}
+            a={item.a}
+            open={openIndex === i}
+            onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+            delay={i * 40}
+          />
+        ))}
       </div>
     </section>
   );
@@ -3933,15 +3910,21 @@ function VercelHero() {
               href="https://www.instagram.com/by.inertia/"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-transform duration-200 hover:-translate-y-px active:translate-y-px"
-              style={{ background: "#ededed", color: "#000" }}
+              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
+              style={{ background: "#ededed", color: "#000", transition: "opacity 150ms ease, transform 150ms ease" }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+              onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
               Start a project
             </a>
             <Link
               href="/contact"
-              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-colors duration-200"
-              style={{ background: "transparent", color: "#ededed", border: "1px solid #2a2a2a" }}
+              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
+              style={{ background: "#1a1a1a", color: "#ededed", transition: "opacity 150ms ease, transform 150ms ease" }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+              onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
               Send a message
             </Link>
@@ -3954,32 +3937,47 @@ function VercelHero() {
 
 function CalEmbed() {
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://app.cal.com/embed/embed.js";
-    script.async = true;
-    script.onload = () => {
-      const Cal = (window as any).Cal;
-      Cal("init", "15min", { origin: "https://app.cal.com" });
-      Cal.config = Cal.config || {};
-      Cal.config.forwardQueryParams = true;
-      Cal.ns["15min"]("inline", {
-        elementOrSelector: "#my-cal-inline-15min",
-        config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
-        calLink: "jacob-c-99otvp/15min",
-      });
-      Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view" });
-    };
-    document.head.appendChild(script);
+    // Set up the Cal queue function before the script loads
+    (function (C: any, A: string, L: string) {
+      let p = function (a: any, ar: any) { a.q.push(ar); };
+      let d = document;
+      C.Cal = C.Cal || function () {
+        let cal = C.Cal; let ar = arguments;
+        if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; (d.head.appendChild(d.createElement("script")) as HTMLScriptElement).src = A; cal.loaded = true; }
+        if (ar[0] === L) { let api: any = function () { p(api, arguments); }; let namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar);
+      };
+    })(window, "https://app.cal.com/embed/embed.js", "init");
+
+    const Cal = (window as any).Cal;
+    Cal("init", "15min", { origin: "https://app.cal.com" });
+    Cal.config = Cal.config || {};
+    Cal.config.forwardQueryParams = true;
+    Cal.ns["15min"]("inline", {
+      elementOrSelector: "#my-cal-inline-15min",
+      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
+      calLink: "jacob-c-99otvp/15min",
+    });
+    Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view" });
   }, []);
 
   return (
-    <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div id="my-cal-inline-15min" style={{ width: "100%", height: 700, overflow: "scroll" }} />
+    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <div id="my-cal-inline-15min" style={{ width: "100%", height: "clamp(700px, 100svh, 900px)", overflow: "scroll" }} />
     </section>
   );
 }
 
 const WORK_ITEMS = [
+  { src: "/work/aether-1.png", title: "Aether Theme", category: "Shopify theme" },
+  { src: "/work/aether-2.png", title: "Aether Theme", category: "Cart design" },
+  { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page" },
+  { src: "/work/inertia-site.png", title: "Inertia", category: "Web design" },
+  { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront" },
+  { src: "/work/ftgioo-2.png", title: "Ft. Gioo", category: "Shop page" },
+  { src: "/work/ftgioo-3.png", title: "Ft. Gioo", category: "Collection page" },
+  { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store" },
+  { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page" },
+  { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page" },
   { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app" },
   { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design" },
 ];
@@ -4000,7 +3998,7 @@ function WorkThumbnails() {
   const item = WORK_ITEMS[active];
 
   return (
-    <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <FollowerPointerCard title="View project" className="w-full">
         <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a" }}>
           {WORK_ITEMS.map((w, i) => (
@@ -4045,6 +4043,10 @@ function VisualLayout() {
       <div className="py-16 sm:py-24" />
 
       <CalEmbed />
+
+      <div className="py-16 sm:py-24" />
+
+      <IndexFaq />
 
       <div className="py-20 sm:py-32" />
 

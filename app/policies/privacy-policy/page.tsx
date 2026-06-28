@@ -65,7 +65,7 @@ const SECTIONS = [
 
 export default function PrivacyPage() {
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full pt-6 pb-24 px-3" style={{ maxWidth: "88rem" }}>
+    <main className="policy-body mx-auto w-full pt-6 pb-24 px-6 sm:px-8" style={{ maxWidth: "52rem" }}>
 
       {/* TOC */}
       <div className="mb-10 p-6 rounded-xl bg-[rgb(var(--surface))]">

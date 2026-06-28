@@ -507,80 +507,13 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 /* ── Logo spring ─────────────────────────────────────────────────── */
 
 function InertiaLogo() {
-  const ref = useRef<HTMLSpanElement>(null);
-  const pos = useRef({ x: 0, y: 0 });
-  const vel = useRef({ x: 0, y: 0 });
-  const raf = useRef<number | null>(null);
-  const target = useRef({ x: 0, y: 0 });
-  const isHovering = useRef(false);
-
-  useEffect(() => {
-    const STIFFNESS = 0.18;
-    const DAMPING = 0.72;
-
-    const tick = () => {
-      if (!ref.current) return;
-      const tx = isHovering.current ? target.current.x : 0;
-      const ty = isHovering.current ? target.current.y : 0;
-      const ax = (tx - pos.current.x) * STIFFNESS;
-      const ay = (ty - pos.current.y) * STIFFNESS;
-      vel.current.x = vel.current.x * DAMPING + ax;
-      vel.current.y = vel.current.y * DAMPING + ay;
-      pos.current.x += vel.current.x;
-      pos.current.y += vel.current.y;
-
-      const settled = !isHovering.current &&
-        Math.abs(pos.current.x) < 0.01 && Math.abs(pos.current.y) < 0.01 &&
-        Math.abs(vel.current.x) < 0.01 && Math.abs(vel.current.y) < 0.01;
-
-      if (!settled) {
-        ref.current.style.transform = `translate(${pos.current.x.toFixed(2)}px, ${pos.current.y.toFixed(2)}px)`;
-        raf.current = requestAnimationFrame(tick);
-      } else {
-        pos.current = { x: 0, y: 0 };
-        vel.current = { x: 0, y: 0 };
-        ref.current.style.transform = "";
-        raf.current = null;
-      }
-    };
-
-    const onMove = (e: MouseEvent) => {
-      if (!ref.current) return;
-      const rect = ref.current.closest(".site-header__brand")!.getBoundingClientRect();
-      target.current = {
-        x: (e.clientX - (rect.left + rect.width / 2)) * 0.18,
-        y: (e.clientY - (rect.top + rect.height / 2)) * 0.18,
-      };
-      if (!raf.current) raf.current = requestAnimationFrame(tick);
-    };
-
-    const onEnter = () => { isHovering.current = true; };
-    const onLeave = () => {
-      isHovering.current = false;
-      if (!raf.current) raf.current = requestAnimationFrame(tick);
-    };
-
-    const brand = ref.current?.closest(".site-header__brand");
-    brand?.addEventListener("mousemove", onMove as EventListener);
-    brand?.addEventListener("mouseenter", onEnter);
-    brand?.addEventListener("mouseleave", onLeave);
-    return () => {
-      brand?.removeEventListener("mousemove", onMove as EventListener);
-      brand?.removeEventListener("mouseenter", onEnter);
-      brand?.removeEventListener("mouseleave", onLeave);
-      if (raf.current) cancelAnimationFrame(raf.current);
-    };
-  }, []);
-
   return (
-    <span ref={ref} style={{ display: "inline-block", willChange: "transform" }}>
-      <img
-        src="/logo.png"
-        alt="Inertia"
-        className="h-5 w-auto dark:invert invert-0"
-        style={{ display: "block" }}
-      />
-    </span>
+    <img
+      src="/logo.png"
+      alt="Inertia"
+      className="h-5 w-auto dark:invert invert-0"
+      style={{ display: "block" }}
+    />
   );
 }
 
@@ -660,8 +593,47 @@ export function VisualNotch() {
   }, [mobileOpen]);
 
   const isHome = pathname === "/";
+  const isPolicies = pathname.startsWith("/policies");
 
   if (isHome) return null;
+
+  if (isPolicies) {
+    return (
+      <div className="site-header" ref={headerRef}>
+        <div className="site-header__bg" aria-hidden="true" />
+        <div className="site-header__bg-fill" aria-hidden="true" />
+        <div className="site-header__inner">
+          <Link href="/" className="site-header__brand">
+            <InertiaLogo />
+          </Link>
+          <div className="site-header__actions">
+            <a
+              href="https://cal.com/jacob-c-99otvp/15min"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "8px 18px",
+                borderRadius: 999,
+                background: "rgb(var(--fg))",
+                color: "rgb(var(--bg))",
+                fontSize: 15,
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
+                textDecoration: "none",
+                transition: "opacity 150ms ease, transform 150ms ease",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+            >
+              Book a call
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

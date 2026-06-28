@@ -534,6 +534,15 @@ h1:hover .redact > span.redact-inner,
   animation-delay: var(--rise-delay, 0ms);
 }
 
+.policy-body a {
+  color: #0a84ff;
+  text-decoration: none;
+}
+.policy-body a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 @keyframes rise {
   to {
     opacity: 1;

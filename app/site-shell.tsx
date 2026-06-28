@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { VisualNotch } from "./visual-notch";
-import { SiteFooter } from "./site-footer";
+import { SiteFooter, MinimalFooter } from "./site-footer";
 
 const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password", "/docs"];
 
@@ -12,11 +12,15 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
   if (bare) return <>{children}</>;
 
+  const isHome = pathname === "/";
+  const isPolicies = pathname.startsWith("/policies");
+  const useMinimalFooter = isHome || isPolicies;
+
   return (
     <>
       <VisualNotch />
       {children}
-      <SiteFooter />
+      {useMinimalFooter ? <MinimalFooter /> : <SiteFooter />}
     </>
   );
 }
