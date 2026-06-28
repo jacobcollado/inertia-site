@@ -4051,19 +4051,19 @@ function VisualLayout() {
 
       <VercelHero />
 
-      <div className="py-4 sm:py-6" />
+      <div className="py-6 sm:py-6" />
 
       <WorkThumbnails />
 
-      <div className="py-10 sm:py-14" />
+      <div className="py-14 sm:py-14" />
 
       <CalEmbed />
 
-      <div className="py-3 sm:py-5" />
+      <div className="py-8 sm:py-5" />
 
       <IndexFaq />
 
-      <div className="py-12 sm:py-20" />
+      <div className="py-16 sm:py-20" />
 
     </main>
     </>
