@@ -23,7 +23,7 @@ const BASE_URL = "https://byinertia.com";
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Inertia - Design Studio",
+    default: "Inertia | Design Studio for Founders",
     template: "%s - Inertia",
   },
   description: "Inertia is a design studio for founders and brands moving fast. Direction, design, and development, one focused team.",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     type: "website",
     url: BASE_URL,
     siteName: "Inertia",
-    title: "Inertia - Design Studio",
+    title: "Inertia | Design Studio for Founders",
     description: "Inertia is a design studio for founders and brands moving fast. Direction, design, and development, one focused team.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Inertia - Design Studio" }],
   },
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@inertia_dev",
     creator: "@inertia_dev",
-    title: "Inertia - Design Studio",
+    title: "Inertia | Design Studio for Founders",
     description: "Inertia is a design studio for founders and brands moving fast. Direction, design, and development, one focused team.",
     images: ["/og.png"],
   },
