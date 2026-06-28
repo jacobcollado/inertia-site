@@ -15,7 +15,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
-  const useMinimalFooter = isHome || isPolicies || isAether;
+  const isWork = pathname.startsWith("/work");
+  const useMinimalFooter = isHome || isPolicies || isAether || isWork;
 
   return (
     <>

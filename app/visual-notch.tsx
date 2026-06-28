@@ -595,7 +595,8 @@ export function VisualNotch() {
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
-  const useMinimalHeader = isPolicies || isAether;
+  const isWork = pathname.startsWith("/work");
+  const useMinimalHeader = isPolicies || isAether || isWork;
 
   if (isHome) return null;
 

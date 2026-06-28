@@ -4021,7 +4021,7 @@ function WorkThumbnails() {
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <FollowerPointerCard title="View project" className="w-full">
-        <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a" }}>
+        <Link href="/work" className="block relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a", cursor: "none" }}>
           {WORK_ITEMS.map((w, i) => (
             <img
               key={w.src}
@@ -4044,7 +4044,7 @@ function WorkThumbnails() {
               <p className="text-[11px] sm:text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{item.category}</p>
             </div>
           </div>
-        </div>
+        </Link>
       </FollowerPointerCard>
     </section>
   );
