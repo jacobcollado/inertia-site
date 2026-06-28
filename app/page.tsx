@@ -3923,8 +3923,10 @@ function VercelHero() {
               >
                 Book a call
               </a>
-              <Link
-                href="/contact"
+              <a
+                href="https://t.me/kayzxyz"
+                target="_blank"
+                rel="noreferrer"
                 className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
                 style={{ background: "#1a1a1a", color: "#ededed", transition: "opacity 150ms ease, transform 150ms ease" }}
                 onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
@@ -3932,7 +3934,7 @@ function VercelHero() {
                 onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
               >
                 Send a message
-              </Link>
+              </a>
             </div>
             <Link
               href="/aether"
@@ -4049,19 +4051,19 @@ function VisualLayout() {
 
       <VercelHero />
 
-      <div className="py-6 sm:py-10" />
+      <div className="py-4 sm:py-6" />
 
       <WorkThumbnails />
 
-      <div className="py-16 sm:py-24" />
+      <div className="py-10 sm:py-14" />
 
       <CalEmbed />
 
-      <div className="py-16 sm:py-24" />
+      <div className="py-3 sm:py-5" />
 
       <IndexFaq />
 
-      <div className="py-20 sm:py-32" />
+      <div className="py-12 sm:py-20" />
 
     </main>
     </>
