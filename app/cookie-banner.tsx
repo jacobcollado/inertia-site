@@ -60,7 +60,10 @@ export function CookieBanner() {
 
   useEffect(() => {
     try {
-      if (!localStorage.getItem("cookie_consent")) setCookieVisible(true);
+      if (!localStorage.getItem("cookie_consent")) {
+        const t = setTimeout(() => setCookieVisible(true), 2500);
+        return () => clearTimeout(t);
+      }
     } catch {}
   }, []);
 
@@ -82,18 +85,18 @@ export function CookieBanner() {
     <>
       {cookieVisible && (
         <div
-          className="fixed bottom-0 left-0 right-0 z-[100] px-4 pb-4 sm:px-6 sm:pb-6"
+          className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-0 z-[100] px-4 pb-4 sm:px-6 sm:pb-6 sm:max-w-lg"
           style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}
         >
           <div
-            className="mx-auto max-w-2xl rounded-xl border border-[rgb(var(--line))]"
+            className="mx-auto max-w-2xl rounded-xl"
             style={{ background: "rgb(var(--surface-elevated))", boxShadow: "0 8px 32px rgb(0 0 0 / 0.18)" }}
           >
             {/* Default row */}
             <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
               <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] flex-1">
-                We use cookies to keep you signed in and measure site usage.{" "}
-                <Link href="/policies/privacy-policy" className="underline underline-offset-2 hover:text-[rgb(var(--fg))] transition-colors">
+                We use cookies to understand how people use this site and to make it better. Nothing is sold or shared.{" "}
+                <Link href="/policies/privacy-policy" style={{ color: "#0a84ff" }} className="underline underline-offset-2 transition-colors">
                   Privacy policy
                 </Link>
               </p>

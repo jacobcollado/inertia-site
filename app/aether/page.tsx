@@ -108,8 +108,9 @@ export default function AetherPage() {
         </p>
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
-            href="/aether/buy"
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
+            href="/aether#pricing"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight hover:opacity-80 transition-opacity"
+            style={{ background: "#1a1a1a", color: "#ededed" }}
           >
             Buy a license
           </Link>

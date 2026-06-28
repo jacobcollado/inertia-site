@@ -3856,6 +3856,10 @@ function HeroMesh() {
   );
 }
 
+const HL = ({ children }: { children: React.ReactNode }) => (
+  <span style={{ background: "rgba(10,132,255,0.18)", color: "#0a84ff", borderRadius: 4, padding: "1px 3px" }}>{children}</span>
+);
+
 function VercelHero() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -3900,49 +3904,51 @@ function VercelHero() {
             className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(180), color: "#8f8f8f" }}
           >
-            Direction, design, and development, one focused team. We work with fashion brands, trade businesses, and founders moving fast to turn early ideas into products built for real traction.
+            Direction, design, and development, one focused team. We work with fashion brands, trade businesses, and founders moving fast to turn early ideas into products built for real <HL>traction</HL>.
           </p>
           <p
             className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(240), color: "#8f8f8f" }}
           >
-            From the first sketch to launch day, we stay close. No hand-offs, no guesswork.
+            From the first sketch to launch day, we stay <HL>close</HL>. No hand-offs, no guesswork.
           </p>
 
-          <div className="flex flex-col items-center gap-4" style={fade(300)}>
-            <div className="flex items-center gap-3">
-              <a
-                href="https://cal.com/jacob-c-99otvp/15min"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-                style={{ background: "#ededed", color: "#000", transition: "opacity 150ms ease, transform 150ms ease" }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-                onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
-              >
-                Book a call
-              </a>
-              <a
-                href="https://t.me/kayzxyz"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-                style={{ background: "#1a1a1a", color: "#ededed", transition: "opacity 150ms ease, transform 150ms ease" }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-                onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
-              >
-                Send a message
-              </a>
-            </div>
-            <Link
-              href="/aether"
-              className="text-[13px] tracking-tight transition-opacity duration-150 hover:opacity-70"
-              style={{ color: "#5a5a5a" }}
+          <p
+            className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
+            style={{ ...fade(270), color: "#8f8f8f" }}
+          >
+            Also building on Shopify? Our{" "}
+            <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ background: "rgba(10,132,255,0.18)", color: "#0a84ff", borderRadius: 4, padding: "1px 3px", borderBottom: "1px solid #0a84ff", textDecoration: "none" }}>
+              Aether <SiShopify className="inline w-3 h-3 relative -top-px" />
+            </Link>{" "}
+            theme ships in an afternoon.
+          </p>
+
+          <div className="flex items-center gap-3" style={fade(300)}>
+            <a
+              href="https://cal.com/jacob-c-99otvp/15min"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
+              style={{ background: "#ededed", color: "#000", transition: "opacity 150ms ease, transform 150ms ease" }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+              onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
-              Looking for the Aether <SiShopify className="inline w-3 h-3 relative -top-px" style={{ color: "#5a5a5a" }} /> theme? →
-            </Link>
+              Book a call
+            </a>
+            <a
+              href="https://t.me/kayzxyz"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
+              style={{ background: "#1a1a1a", color: "#ededed", transition: "opacity 150ms ease, transform 150ms ease" }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+              onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
+            >
+              Send a message
+            </a>
           </div>
         </div>
       </div>
