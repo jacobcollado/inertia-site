@@ -114,6 +114,7 @@ export function SiteFooter() {
             Changelog
             <span className="text-[11px] tabular-nums opacity-40">May 2026</span>
           </Link>
+          <Link href="/components" className="text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">Components</Link>
         </div>
 
         <div className="flex flex-col gap-2.5 min-w-[100px]">

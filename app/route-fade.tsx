@@ -7,6 +7,7 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const ref = useRef<HTMLDivElement>(null);
   const first = useRef(true);
+  const isComponents = pathname.startsWith("/components");
 
   useEffect(() => {
     if (first.current) {
@@ -22,13 +23,15 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
       window.scrollTo({ top: 0, behavior: "auto" });
     }
 
+    if (isComponents) return;
+
     el.classList.remove("route-enter");
     void el.offsetWidth;
     el.classList.add("route-enter");
-  }, [pathname]);
+  }, [pathname, isComponents]);
 
   return (
-    <div ref={ref} className="route-enter" key={pathname}>
+    <div ref={ref} className={isComponents ? undefined : "route-enter"} key={pathname}>
       {children}
     </div>
   );

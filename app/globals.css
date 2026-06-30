@@ -197,6 +197,14 @@ html {
   background: rgb(var(--muted));
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes dash-march {
   to { stroke-dashoffset: -48; }
 }

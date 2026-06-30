@@ -3896,21 +3896,21 @@ function VercelHero() {
             className="font-normal tracking-tight leading-[0.88]"
             style={{ ...fade(60), color: "#fff", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
           >
-            <span className="hidden sm:inline">Design studio for founders moving fast.</span>
-            <span className="sm:hidden">Design studio for founders<br />moving fast.</span>
+            <span className="hidden sm:inline">The design studio for founders moving fast.</span>
+            <span className="sm:hidden">The design studio<br />for founders moving fast.</span>
           </h1>
 
           <p
             className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(180), color: "#8f8f8f" }}
           >
-            Direction, design, and development, one focused team. We work with fashion brands, trade businesses, and founders moving fast to turn early ideas into products built for real <HL>traction</HL>.
+            Design and development under one roof. You bring the idea, we bring it to launch, no agency hand-offs, no <HL>twelve-person Slack channel</HL>.
           </p>
           <p
             className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(240), color: "#8f8f8f" }}
           >
-            From the first sketch to launch day, we stay <HL>close</HL>. No hand-offs, no guesswork.
+            Fashion brands, trade businesses, and founders who need to move <HL>now</HL>. If that's you, let's talk.
           </p>
 
           <p
@@ -4001,6 +4001,9 @@ const WORK_ITEMS = [
   { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page" },
   { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app" },
   { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design" },
+  { src: "/work/ellora-la/1.png", title: "Ellora La", category: "Shopify storefront" },
+  { src: "/work/ellora-la/2.png", title: "Ellora La", category: "Collection page" },
+  { src: "/work/ellora-la/3.png", title: "Ellora La", category: "Product page" },
 ];
 
 function WorkThumbnails() {
