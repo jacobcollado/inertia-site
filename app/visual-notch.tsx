@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { HeaderAuth } from "./dashboard/header-auth";
+import { TOC_ITEMS } from "./components/shared";
 import { useWebHaptics } from "web-haptics/react";
 import { SiShopify } from "react-icons/si";
 import {
@@ -21,6 +22,7 @@ import {
   HiOutlineQuestionMarkCircle,
   HiOutlineShieldCheck,
   HiOutlineMapPin,
+  HiOutlineSwatch,
 } from "react-icons/hi2";
 
 type Child = {
@@ -61,6 +63,7 @@ const NAV: NavItem[] = [
       { label: "Blog", description: "Thoughts on building things that work.", href: "/blog", icon: <HiOutlineNewspaper /> },
       { label: "Docs", description: "Guides, references, and how-tos.", href: "/docs", icon: <HiOutlineBookOpen /> },
       { label: "Changelog", description: "Every update, documented.", href: "/aether/changelog", icon: <HiOutlineClipboardDocumentList /> },
+      { label: "Components", description: "The design system this site is built from.", href: "/components", icon: <HiOutlineSwatch /> },
     ],
   },
   {
@@ -404,6 +407,51 @@ function SharedDropdown({
   );
 }
 
+/* ── Components mobile menu ─────────────────────────────────────── */
+
+function ComponentsMobileMenu({ onClose }: { onClose: () => void }) {
+  const pathname = usePathname();
+  return (
+    <nav
+      aria-label="Components navigation"
+      className="flex flex-col absolute top-20 right-3 left-3 px-3"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <Link href="/components" onClick={onClose} className="text-[22px] tracking-tight text-[rgb(var(--fg))] mb-4 block" style={{ opacity: 0.9 }}>
+        Components
+      </Link>
+      <div className="flex flex-col gap-3 mb-6">
+        {TOC_ITEMS.map((item) => {
+          const active = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onClose}
+              className="text-[18px] tracking-tight transition-colors"
+              style={{
+                color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
+                opacity: active ? 1 : 0.7,
+              }}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
+      <a
+        href="https://cal.com/jacob-c-99otvp/15min"
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center justify-center w-full rounded-full py-3 text-[15px] font-medium tracking-tight transition-opacity"
+        style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", letterSpacing: "-0.01em" }}
+      >
+        Book a call
+      </a>
+    </nav>
+  );
+}
+
 /* ── Mobile drawer ───────────────────────────────────────────────── */
 
 function MobileAccordion({ item, onNavigate, drawerOpen, showDesc }: { item: NavItem; onNavigate: () => void; drawerOpen: boolean; showDesc?: boolean }) {
@@ -596,45 +644,69 @@ export function VisualNotch() {
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
   const isWork = pathname.startsWith("/work");
-  const useMinimalHeader = isPolicies || isAether || isWork;
+  const isComponents = pathname.startsWith("/components");
+  const useMinimalHeader = isPolicies || isAether || isWork || isComponents;
 
   if (isHome) return null;
 
   if (useMinimalHeader) {
     return (
-      <div className="site-header" ref={headerRef}>
-        <div className="site-header__bg" aria-hidden="true" />
-        <div className="site-header__bg-fill" aria-hidden="true" />
-        <div className="site-header__inner">
-          <Link href="/" className="site-header__brand">
-            <InertiaLogo />
-          </Link>
-          <div className="site-header__actions">
-            <a
-              href="https://cal.com/jacob-c-99otvp/15min"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                padding: "8px 18px",
-                borderRadius: 999,
-                background: "rgb(var(--fg))",
-                color: "rgb(var(--bg))",
-                fontSize: 15,
-                fontWeight: 500,
-                letterSpacing: "-0.01em",
-                textDecoration: "none",
-                transition: "opacity 150ms ease, transform 150ms ease",
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
-            >
-              Book a call
-            </a>
+      <>
+        <div className={`site-header${mobileOpen ? " site-header--open" : ""}`} ref={headerRef}>
+          <div className="site-header__bg" aria-hidden="true" />
+          <div className="site-header__bg-fill" aria-hidden="true" />
+          <div className="site-header__inner" style={isComponents ? { maxWidth: "96rem" } : undefined}>
+            <Link href="/" className="site-header__brand">
+              <InertiaLogo />
+            </Link>
+            <div className="site-header__actions">
+              <a
+                href="https://cal.com/jacob-c-99otvp/15min"
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:inline-flex"
+                style={{
+                  alignItems: "center",
+                  padding: "8px 18px",
+                  borderRadius: 999,
+                  background: "rgb(var(--fg))",
+                  color: "rgb(var(--bg))",
+                  fontSize: 15,
+                  fontWeight: 500,
+                  letterSpacing: "-0.01em",
+                  textDecoration: "none",
+                  transition: "opacity 150ms ease, transform 150ms ease",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+              >
+                Book a call
+              </a>
+              <button
+                className="site-header__hamburger sm:hidden"
+                onClick={() => {
+                  trigger("medium");
+                  setMobileOpen((v) => !v);
+                }}
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileOpen}
+              >
+                <span className="site-header__hamburger-bar" data-open={mobileOpen} />
+                <span className="site-header__hamburger-bar" data-open={mobileOpen} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+        {mobileOpen && (
+          <div
+            className="sm:hidden fixed inset-0 z-20"
+            style={{ background: "rgb(var(--bg) / 0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
+            onClick={() => setMobileOpen(false)}
+          >
+            <ComponentsMobileMenu onClose={() => setMobileOpen(false)} />
+          </div>
+        )}
+      </>
     );
   }
 

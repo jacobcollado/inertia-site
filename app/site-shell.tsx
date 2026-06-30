@@ -16,13 +16,15 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
   const isWork = pathname.startsWith("/work");
-  const useMinimalFooter = isHome || isPolicies || isAether || isWork;
+  const isComponents = pathname.startsWith("/components");
+  const noFooter = isComponents;
+  const useMinimalFooter = isHome || isPolicies || isAether || isWork || isComponents;
 
   return (
     <>
       <VisualNotch />
       {children}
-      {useMinimalFooter ? <MinimalFooter /> : <SiteFooter />}
+      {noFooter ? null : useMinimalFooter ? <MinimalFooter /> : <SiteFooter />}
     </>
   );
 }
