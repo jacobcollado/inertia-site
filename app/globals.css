@@ -13,19 +13,19 @@
      and the black hero are seamless. Kept as "R G B" triplets because the whole
      site consumes them via rgb(var(--x)). The .dark block below mirrors these
      for any code/style still scoped to .dark (which is force-applied on <html>). */
-  --bg: 0 0 0;                /* pure black, matches hero #000 */
-  --surface: 17 17 17;        /* raised surface */
-  --surface-elevated: 23 23 23;
-  --orbit-surface: 20 20 20;
-  --fg: 237 237 237;          /* near-white ink */
-  --muted: 140 140 140;
-  --line: 38 38 38;
-  --map-filter: invert(1);
-  --accent: 237 237 237;      /* neutral: accent = primary ink */
+  --bg: 255 255 255;          /* pure white base */
+  --surface: 245 245 245;     /* raised surface */
+  --surface-elevated: 235 235 235;
+  --orbit-surface: 240 240 240;
+  --fg: 18 18 18;             /* near-black ink */
+  --muted: 110 110 110;
+  --line: 225 225 225;
+  --map-filter: none;
+  --accent: 18 18 18;         /* neutral: accent = primary ink */
   --accent-gradient: rgb(var(--fg) / 0.85);
   --btn-bg: rgb(var(--fg) / 0.85);
   --btn-fg: rgb(var(--bg));
-  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
+  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, white);
   /* Accent swatches â€” neutralized to grays (was green/blue/amber/purple) */
   --green: 140 140 140;
   --blue: 140 140 140;
@@ -34,9 +34,9 @@
 
   /* â”€â”€ Geist reference tokens (additive) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   /* Intent steps for the accent, neutral (no blue). */
-  --accent-hover: 255 255 255;  /* brighten on hover */
-  --accent-border: 64 64 64;    /* subtle border on dark */
-  --accent-soft: 28 28 28;      /* gray tint fill */
+  --accent-hover: 0 0 0;        /* darken on hover */
+  --accent-border: 210 210 210; /* subtle border on light */
+  --accent-soft: 235 235 235;   /* gray tint fill */
 
   /* Radius scale (Geist: 6 / 12 / 16 / full). */
   --radius-sm: 6px;
@@ -45,11 +45,11 @@
   --radius-full: 9999px;
 
   /* Elevation. */
-  --shadow-raised: 0 2px 2px rgba(0, 0, 0, 0.3);
-  --shadow-popover: 0 1px 1px rgba(0, 0, 0, 0.2), 0 4px 8px -4px rgba(0, 0, 0, 0.4), 0 16px 24px -8px rgba(0, 0, 0, 0.5);
-  --shadow-modal: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 16px -4px rgba(0, 0, 0, 0.4), 0 24px 32px -8px rgba(0, 0, 0, 0.6);
+  --shadow-raised: 0 2px 2px rgba(0, 0, 0, 0.08);
+  --shadow-popover: 0 1px 1px rgba(0, 0, 0, 0.05), 0 4px 8px -4px rgba(0, 0, 0, 0.1), 0 16px 24px -8px rgba(0, 0, 0, 0.12);
+  --shadow-modal: 0 1px 1px rgba(0, 0, 0, 0.05), 0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 24px 32px -8px rgba(0, 0, 0, 0.15);
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 
@@ -66,32 +66,32 @@
 }
 
 .dark {
-  --bg: 0 0 0;
-  --surface: 17 17 17;
-  --surface-elevated: 23 23 23;
-  --orbit-surface: 20 20 20;
-  --fg: 237 237 237;
-  --map-filter: invert(1);
-  --muted: 140 140 140;
-  --line: 38 38 38;
-  --accent: 237 237 237;      /* neutral: accent = primary ink on dark */
+  --bg: 255 255 255;
+  --surface: 245 245 245;
+  --surface-elevated: 235 235 235;
+  --orbit-surface: 240 240 240;
+  --fg: 18 18 18;
+  --map-filter: none;
+  --muted: 110 110 110;
+  --line: 225 225 225;
+  --accent: 18 18 18;         /* neutral: accent = primary ink on light */
   --accent-gradient: rgb(var(--fg) / 0.85);
   --btn-bg: rgb(var(--fg) / 0.85);
   --btn-fg: rgb(var(--bg));
-  /* Dark mode: button is near-white, so a stronger black mix reads as a clear
-     darker edge. */
-  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
+  /* Light mode: button is near-black, so a lighter mix reads as a clear
+     lighter edge. */
+  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, white);
   /* Accent swatches â€” neutralized to grays (was green/blue/amber/purple) */
   --green: 140 140 140;
   --blue: 140 140 140;
   --amber: 140 140 140;
   --purple: 140 140 140;
 
-  /* Neutral accent intent steps, dark variants (radius/shadow tokens inherit from :root). */
-  --accent-hover: 255 255 255;  /* brighten on hover */
-  --accent-border: 64 64 64;    /* subtle border on dark */
-  --accent-soft: 28 28 28;      /* gray tint fill */
-  color-scheme: dark;
+  /* Neutral accent intent steps, light variants (radius/shadow tokens inherit from :root). */
+  --accent-hover: 0 0 0;        /* darken on hover */
+  --accent-border: 210 210 210; /* subtle border on light */
+  --accent-soft: 235 235 235;   /* gray tint fill */
+  color-scheme: light;
 }
 
 html {

@@ -3866,17 +3866,24 @@ function HeroMesh() {
   );
 }
 
-// Hand-drawn underline for "wait" in the hero heading — a single sketched
-// arc, as if drawn quickly with a pen underneath the word.
+// Hand-drawn underline for "wait" in the hero heading — three overlapping
+// sketched arcs, as if drawn quickly by hand and gone over a couple more times.
 function WaitUnderline({ children }: { children: React.ReactNode }) {
-  const pathRef = useRef<SVGPathElement>(null);
-  const [len, setLen] = useState(0);
+  const path2Ref = useRef<SVGPathElement>(null);
+  const path3Ref = useRef<SVGPathElement>(null);
+  const [len2, setLen2] = useState(0);
+  const [len3, setLen3] = useState(0);
   const [visible, setVisible] = useState(false);
+  const [visible2, setVisible2] = useState(false);
+  const [visible3, setVisible3] = useState(false);
 
   useEffect(() => {
-    if (pathRef.current) setLen(pathRef.current.getTotalLength());
-    const t = setTimeout(() => setVisible(true), 650);
-    return () => clearTimeout(t);
+    if (path2Ref.current) setLen2(path2Ref.current.getTotalLength());
+    if (path3Ref.current) setLen3(path3Ref.current.getTotalLength());
+    const t1 = setTimeout(() => setVisible(true), 650);
+    const t2 = setTimeout(() => setVisible2(true), 1400);
+    const t3 = setTimeout(() => setVisible3(true), 1950);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
   return (
@@ -3897,16 +3904,41 @@ function WaitUnderline({ children }: { children: React.ReactNode }) {
           pointerEvents: "none",
         }}
       >
+        {/* Tapered fill: same arc as a variable-width ribbon, thin at both
+            ends and fullest at the middle, like a pen stroke easing on and off. */}
         <path
-          ref={pathRef}
-          d="M1.5 13 Q 50 6.5, 98.5 13"
+          d="M1.5 13.3
+             Q 50 6.9, 98.5 13.3
+             Q 50 8.1, 1.5 12.7 Z"
+          fill="#0a84ff"
+          style={{
+            clipPath: visible ? "inset(0 0% 0 0)" : "inset(0 100% 0 0)",
+            transition: "clip-path 650ms cubic-bezier(0.65,0,0.35,1)",
+          }}
+        />
+        <path
+          ref={path2Ref}
+          d="M4 12.2 Q 48 8, 96.5 11.8"
           fill="none"
           stroke="#0a84ff"
-          strokeWidth="2.4"
+          strokeWidth="1.4"
           strokeLinecap="round"
-          strokeDasharray={len}
-          strokeDashoffset={visible ? 0 : len}
-          style={{ transition: "stroke-dashoffset 700ms cubic-bezier(0.65,0,0.35,1)" }}
+          strokeOpacity="0.5"
+          strokeDasharray={len2}
+          strokeDashoffset={visible2 ? 0 : len2}
+          style={{ transition: "stroke-dashoffset 500ms cubic-bezier(0.65,0,0.35,1)" }}
+        />
+        <path
+          ref={path3Ref}
+          d="M2.5 13.6 Q 51 9.2, 97 14"
+          fill="none"
+          stroke="#0a84ff"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+          strokeOpacity="0.4"
+          strokeDasharray={len3}
+          strokeDashoffset={visible3 ? 0 : len3}
+          style={{ transition: "stroke-dashoffset 420ms cubic-bezier(0.65,0,0.35,1)" }}
         />
       </svg>
     </span>
@@ -3952,16 +3984,16 @@ function VercelHero() {
     <section
       ref={ref}
       className="relative"
-      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#000", color: "#ededed" }}
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#fff", color: "#1a1a1a" }}
     >
       <div
         className="relative flex items-center"
       >
         <div className="max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-24 pb-10 flex flex-col items-start text-left sm:items-center sm:text-center gap-10">
-          <img src="/logo.png" alt="Inertia" className="h-8 w-auto invert" style={fade(0)} aria-hidden="true" />
+          <img src="/logo.png" alt="Inertia" className="h-8 w-auto" style={fade(0)} aria-hidden="true" />
           <h1
             className="font-normal tracking-tight leading-[0.88]"
-            style={{ ...fade(60), color: "#fff", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
+            style={{ ...fade(60), color: "#1a1a1a", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
           >
             <span className="hidden sm:inline">Design for founders who don't <WaitUnderline>wait</WaitUnderline>.</span>
             <span className="sm:hidden">Design for founders<br />who don't <WaitUnderline>wait</WaitUnderline>.</span>
@@ -3969,20 +4001,20 @@ function VercelHero() {
 
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(180), color: "#8f8f8f" }}
+            style={{ ...fade(180), color: "#5c5c5c" }}
           >
             Design and development under one roof. Fewer people, faster decisions, <HL>work that actually ships</HL>.
           </p>
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(240), color: "#8f8f8f" }}
+            style={{ ...fade(240), color: "#5c5c5c" }}
           >
             Whether you're launching a label, running a trade, or shipping a product, you want it done <HL>right the first time</HL>. So do we.
           </p>
 
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(270), color: "#8f8f8f" }}
+            style={{ ...fade(270), color: "#5c5c5c" }}
           >
             On Shopify?{" "}
             <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ color: "#0a84ff", borderBottom: "1px solid #0a84ff", textDecoration: "none" }}>
@@ -3997,7 +4029,7 @@ function VercelHero() {
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-              style={{ background: "#ededed", color: "#000", transition: "opacity 150ms ease, transform 150ms ease" }}
+              style={{ background: "#1a1a1a", color: "#fff", transition: "opacity 150ms ease, transform 150ms ease" }}
               onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
@@ -4009,7 +4041,7 @@ function VercelHero() {
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-              style={{ background: "#1a1a1a", color: "#ededed", transition: "opacity 150ms ease, transform 150ms ease" }}
+              style={{ background: "#f0f0f0", color: "#1a1a1a", transition: "opacity 150ms ease, transform 150ms ease" }}
               onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
