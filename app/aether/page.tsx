@@ -5,6 +5,7 @@ import { HeroRule } from "./hero-rule";
 import { FeaturesScroll } from "./features-scroll";
 import { ProcessSteps } from "./process-steps";
 import { InlinePricing } from "./inline-pricing";
+import { AetherFaq } from "./faq";
 
 export const metadata: Metadata = {
   title: "Aether",
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 const KEY_FEATURES = [
   {
     title: "Upsell",
-    desc: "Bundles, add-ons, and related products appear where they earn their place: in the cart, after checkout, alongside the product. Never in the way of the purchase itself.",
+    desc: "More per order, without the hard sell. Bundles and add-ons appear at the moments they make sense and stay out of the way the rest of the time.",
     points: ["Post-purchase offer block", "Bundle builder section", "Frequently bought together rail"],
     visual: "upsell",
     image: "/aether/upsell.png",
@@ -37,7 +38,7 @@ const KEY_FEATURES = [
   },
   {
     title: "Scarcity",
-    desc: "Real stock numbers and real deadlines, presented like information rather than pressure. Urgency that fits a considered brand.",
+    desc: "When there are four left, say four. Aether treats scarcity as honesty, which is why it converts for brands that can't afford to look desperate.",
     points: ["Live inventory counter", "Countdown timer block", "Designed sold-out states"],
     visual: "scarcity",
     image: "/aether/scarcity.png",
@@ -46,7 +47,7 @@ const KEY_FEATURES = [
   },
   {
     title: "Guided format",
-    desc: "Each section hands off to the next, so browsing turns into buying without the customer ever hitting a dead end.",
+    desc: "No dead ends anywhere in the store. Each section leads into the next, so a browser is always one scroll away from becoming a buyer.",
     points: ["Sticky add-to-cart bar", "Progress indicators through checkout", "Cart drawer with built-in upsells"],
     visual: "guided",
     image: "/aether/guided.png",
@@ -95,7 +96,7 @@ export default function AetherPage() {
     <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Hero */}
-      <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center rise" style={{ minHeight: 480, paddingTop: 80, paddingBottom: 40 }}>
+      <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center rise pt-12 sm:pt-20" style={{ minHeight: 480, paddingBottom: 40 }}>
         <p className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] -mt-4" style={{ background: "rgb(var(--fg) / 0.06)" }}>
           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.5)" }}>Aether</span>
           Aether, a Shopify theme by Inertia
@@ -136,7 +137,7 @@ export default function AetherPage() {
       {/* Secondary features */}
       <div className="px-3 pb-16 sm:pb-24 rise">
         <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3">And the rest of it</p>
-        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">Every section ships in the box, ready the moment you publish</p>
+        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">No add-on store, no pro unlock. It all comes standard.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
           {SECONDARY_FEATURES.map((f) => (
             <div key={f.name} className="flex items-start py-4">
@@ -159,11 +160,15 @@ export default function AetherPage() {
       {/* Pricing */}
       <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16 max-w-2xl mx-auto w-full">
         <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4 text-center">One price, the whole theme</p>
-        <p className="text-[clamp(1rem,1.6vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center max-w-sm mx-auto" style={{ opacity: 0.6 }}>No feature gates, no pro tier, nothing sold separately. Pick the license that fits your store and every section we have ever built comes with it.</p>
+        <p className="text-[clamp(1rem,1.6vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center max-w-sm mx-auto" style={{ opacity: 0.6 }}>There is no cut-down version of Aether. Standard and Lifetime ship the same theme, every section included, nothing sold separately.</p>
 
         <InlinePricing />
       </div>
 
+      <div className="grid-rule" aria-hidden="true" />
+
+      {/* FAQ */}
+      <AetherFaq />
 
     </main>
   );

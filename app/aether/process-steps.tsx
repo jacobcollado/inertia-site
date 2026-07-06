@@ -6,18 +6,18 @@ import { useState } from "react";
 const STEPS = [
   {
     step: "Buy",
-    desc: "One license, lifetime or annual",
-    detail: "From $85. Pay once and keep it forever, or $85 a year if you'd rather spread it out. One license covers one store, and the price you see is the whole price. No monthly charges underneath.",
+    desc: "Pick a license, that's it",
+    detail: "Two options, no fine print. Standard at $85 a year, or Lifetime at $105 once with priority support. Same theme, same 41 sections, same single-store license. The only difference is how you'd rather pay.",
   },
   {
     step: "Install",
     desc: "Live the same afternoon",
-    detail: "Download the .zip, upload it in Shopify admin, publish. All 41 sections are ready to drag onto any page, and none of it needs a developer.",
+    detail: "Download the .zip, upload it in Shopify admin, hit publish. Most stores are live within the hour. All 41 sections drag onto any page, and at no point do you need to hire anyone.",
   },
   {
     step: "Sell",
     desc: "Tuned on live stores, not mockups",
-    detail: "Every layout decision, from the trust badges to the sticky cart to the product gallery, was tested on real stores before it shipped. Nothing in the theme is a guess.",
+    detail: "The sticky cart, the trust badges, the gallery order, the upsell placements. All of it ran on live stores with real traffic before it shipped. What you're installing is what already worked.",
   },
 ];
 

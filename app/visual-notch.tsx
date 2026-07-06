@@ -665,7 +665,7 @@ export function VisualNotch() {
                 href="https://cal.com/jacob-c-99otvp/15min"
                 target="_blank"
                 rel="noreferrer"
-                className="hidden sm:inline-flex"
+                className={isComponents ? "hidden sm:inline-flex" : "inline-flex"}
                 style={{
                   alignItems: "center",
                   padding: "8px 18px",
@@ -683,22 +683,24 @@ export function VisualNotch() {
               >
                 Book a call
               </a>
-              <button
-                className="site-header__hamburger sm:hidden"
-                onClick={() => {
-                  trigger("medium");
-                  setMobileOpen((v) => !v);
-                }}
-                aria-label={mobileOpen ? "Close menu" : "Open menu"}
-                aria-expanded={mobileOpen}
-              >
-                <span className="site-header__hamburger-bar" data-open={mobileOpen} />
-                <span className="site-header__hamburger-bar" data-open={mobileOpen} />
-              </button>
+              {isComponents && (
+                <button
+                  className="site-header__hamburger sm:hidden"
+                  onClick={() => {
+                    trigger("medium");
+                    setMobileOpen((v) => !v);
+                  }}
+                  aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                  aria-expanded={mobileOpen}
+                >
+                  <span className="site-header__hamburger-bar" data-open={mobileOpen} />
+                  <span className="site-header__hamburger-bar" data-open={mobileOpen} />
+                </button>
+              )}
             </div>
           </div>
         </div>
-        {mobileOpen && (
+        {isComponents && mobileOpen && (
           <div
             className="sm:hidden fixed inset-0 z-20"
             style={{ background: "rgb(var(--bg) / 0.6)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}

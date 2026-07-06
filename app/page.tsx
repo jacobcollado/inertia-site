@@ -3968,20 +3968,20 @@ function VercelHero() {
           </h1>
 
           <p
-            className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
+            className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(180), color: "#8f8f8f" }}
           >
             Design and development under one roof. Fewer people, faster decisions, <HL>work that actually ships</HL>.
           </p>
           <p
-            className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
+            className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(240), color: "#8f8f8f" }}
           >
             Whether you're launching a label, running a trade, or shipping a product, you want it done <HL>right the first time</HL>. So do we.
           </p>
 
           <p
-            className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
+            className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(270), color: "#8f8f8f" }}
           >
             On Shopify?{" "}
@@ -4091,7 +4091,7 @@ function WorkThumbnails() {
   const item = WORK_ITEMS[active];
 
   return (
-    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section className="rise w-full max-w-[88rem] mx-auto px-3 sm:px-8">
       <FollowerPointerCard title="View project" className="w-full">
         <Link href="/work" className="block relative w-full rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a", cursor: "none" }}>
         <div className="absolute inset-0 overflow-hidden rounded-2xl">
