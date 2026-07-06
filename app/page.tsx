@@ -436,7 +436,7 @@ function RotatingWord() {
             position: "absolute",
             left: "-0.12em", right: "-0.12em",
             top: "0.08em", bottom: "0.08em",
-            background: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.5) 2%, rgb(var(--accent) / 0.45) 98%, rgb(var(--accent) / 0) 99.7%)",
+            background: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.62) 2.5%, rgb(var(--accent) / 0.3) 20%, rgb(var(--accent) / 0.28) 80%, rgb(var(--accent) / 0.58) 97.5%, rgb(var(--accent) / 0) 99.7%)",
             borderRadius: "0.04em",
             transform: highlightShown ? "scaleX(1)" : "scaleX(0)",
             transformOrigin: "left center",
@@ -1783,7 +1783,7 @@ function Highlight({ children, className }: { children: React.ReactNode; classNa
     <span
       className={`relative inline-block text-[rgb(var(--fg))] ${className ?? ""}`}
       style={{
-        backgroundImage: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.5) 2%, rgb(var(--accent) / 0.45) 98%, rgb(var(--accent) / 0) 99.7%)",
+        backgroundImage: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.62) 2.5%, rgb(var(--accent) / 0.3) 20%, rgb(var(--accent) / 0.28) 80%, rgb(var(--accent) / 0.58) 97.5%, rgb(var(--accent) / 0) 99.7%)",
         backgroundRepeat: "no-repeat",
         backgroundSize: "100% 70%",
         backgroundPosition: "0 62%",
@@ -2714,7 +2714,17 @@ function StackDiagram() {
 }
 
 const hl = (text: string) => (
-  <span style={{ background: "rgba(10,132,255,0.18)", color: "#0a84ff", borderRadius: 4, padding: "1px 3px" }}>{text}</span>
+  <span
+    style={{
+      backgroundImage:
+        "linear-gradient(104deg, rgba(10,132,255,0) 0.3%, rgba(10,132,255,0.32) 2.5%, rgba(10,132,255,0.14) 20%, rgba(10,132,255,0.12) 80%, rgba(10,132,255,0.3) 97.5%, rgba(10,132,255,0) 99.7%)",
+      color: "#0a84ff",
+      borderRadius: 4,
+      padding: "1px 3px",
+    }}
+  >
+    {text}
+  </span>
 );
 
 const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
@@ -2778,7 +2788,7 @@ function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNod
           aria-expanded={open}
           className="w-full flex items-center justify-between gap-6 py-5 px-5"
         >
-          <span className="flex-1 text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--fg))] text-center">{q}</span>
+          <span className="flex-1 text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--fg))] text-left sm:text-center">{q}</span>
         </button>
         <div
           style={{
@@ -2788,7 +2798,7 @@ function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNod
           }}
         >
           <div ref={bodyRef} className="pb-5 px-5">
-            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-center">
+            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-left sm:text-center">
               {a}
             </p>
           </div>
@@ -3856,8 +3866,65 @@ function HeroMesh() {
   );
 }
 
+// Hand-drawn underline for "wait" in the hero heading — a single sketched
+// arc, as if drawn quickly with a pen underneath the word.
+function WaitUnderline({ children }: { children: React.ReactNode }) {
+  const pathRef = useRef<SVGPathElement>(null);
+  const [len, setLen] = useState(0);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (pathRef.current) setLen(pathRef.current.getTotalLength());
+    const t = setTimeout(() => setVisible(true), 650);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <span style={{ position: "relative", display: "inline-block" }}>
+      {children}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 100 14"
+        preserveAspectRatio="none"
+        style={{
+          position: "absolute",
+          left: "-2%",
+          right: "-2%",
+          bottom: "-0.32em",
+          width: "104%",
+          height: "0.4em",
+          overflow: "visible",
+          pointerEvents: "none",
+        }}
+      >
+        <path
+          ref={pathRef}
+          d="M1.5 13 Q 50 6.5, 98.5 13"
+          fill="none"
+          stroke="#0a84ff"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeDasharray={len}
+          strokeDashoffset={visible ? 0 : len}
+          style={{ transition: "stroke-dashoffset 700ms cubic-bezier(0.65,0,0.35,1)" }}
+        />
+      </svg>
+    </span>
+  );
+}
+
 const HL = ({ children }: { children: React.ReactNode }) => (
-  <span style={{ background: "rgba(10,132,255,0.18)", color: "#0a84ff", borderRadius: 4, padding: "1px 3px" }}>{children}</span>
+  <span
+    style={{
+      backgroundImage:
+        "linear-gradient(104deg, rgba(10,132,255,0) 0.3%, rgba(10,132,255,0.32) 2.5%, rgba(10,132,255,0.14) 20%, rgba(10,132,255,0.12) 80%, rgba(10,132,255,0.3) 97.5%, rgba(10,132,255,0) 99.7%)",
+      color: "#0a84ff",
+      borderRadius: 4,
+      padding: "1px 3px",
+    }}
+  >
+    {children}
+  </span>
 );
 
 function VercelHero() {
@@ -3890,38 +3957,38 @@ function VercelHero() {
       <div
         className="relative flex items-center"
       >
-        <div className="max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-24 pb-10 flex flex-col items-center text-center gap-10">
+        <div className="max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-24 pb-10 flex flex-col items-start text-left sm:items-center sm:text-center gap-10">
           <img src="/logo.png" alt="Inertia" className="h-8 w-auto invert" style={fade(0)} aria-hidden="true" />
           <h1
             className="font-normal tracking-tight leading-[0.88]"
             style={{ ...fade(60), color: "#fff", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
           >
-            <span className="hidden sm:inline">The design studio for founders moving fast.</span>
-            <span className="sm:hidden">The design studio<br />for founders moving fast.</span>
+            <span className="hidden sm:inline">Design for founders who don't <WaitUnderline>wait</WaitUnderline>.</span>
+            <span className="sm:hidden">Design for founders<br />who don't <WaitUnderline>wait</WaitUnderline>.</span>
           </h1>
 
           <p
             className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(180), color: "#8f8f8f" }}
           >
-            Design and development under one roof. You bring the idea, we bring it to launch, no agency hand-offs, no <HL>twelve-person Slack channel</HL>.
+            Design and development under one roof. Fewer people, faster decisions, <HL>work that actually ships</HL>.
           </p>
           <p
             className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(240), color: "#8f8f8f" }}
           >
-            Fashion brands, trade businesses, and founders who need to move <HL>now</HL>. If that's you, let's talk.
+            Whether you're launching a label, running a trade, or shipping a product, you want it done <HL>right the first time</HL>. So do we.
           </p>
 
           <p
             className="text-[15px] sm:text-[19px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(270), color: "#8f8f8f" }}
           >
-            Also building on Shopify? Our{" "}
-            <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ background: "rgba(10,132,255,0.18)", color: "#0a84ff", borderRadius: 4, padding: "1px 3px", borderBottom: "1px solid #0a84ff", textDecoration: "none" }}>
+            On Shopify?{" "}
+            <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ color: "#0a84ff", borderBottom: "1px solid #0a84ff", textDecoration: "none" }}>
               Aether <SiShopify className="inline w-3 h-3 relative -top-px" />
-            </Link>{" "}
-            theme ships in an afternoon.
+            </Link>
+            , our theme, takes you from install to live in an afternoon.
           </p>
 
           <div className="flex items-center gap-3" style={fade(300)}>
@@ -3996,6 +4063,8 @@ const WORK_ITEMS = [
   { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront" },
   { src: "/work/ftgioo-2.png", title: "Ft. Gioo", category: "Shop page" },
   { src: "/work/ftgioo-3.png", title: "Ft. Gioo", category: "Collection page" },
+  { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront" },
+  { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page" },
   { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store" },
   { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page" },
   { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page" },
@@ -4024,7 +4093,8 @@ function WorkThumbnails() {
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <FollowerPointerCard title="View project" className="w-full">
-        <Link href="/work" className="block relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a", cursor: "none" }}>
+        <Link href="/work" className="block relative w-full rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a", cursor: "none" }}>
+        <div className="absolute inset-0 overflow-hidden rounded-2xl">
           {WORK_ITEMS.map((w, i) => (
             <img
               key={w.src}
@@ -4041,12 +4111,13 @@ function WorkThumbnails() {
           ))}
 
           {/* Bottom fade + label */}
-          <div className="absolute inset-x-0 bottom-0 z-10" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)", backdropFilter: "blur(0px)" }}>
+          <div className="absolute inset-x-0 bottom-0 z-10" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)" }}>
             <div className="p-4" style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", maskImage: "linear-gradient(to top, black 60%, transparent 100%)", WebkitMaskImage: "linear-gradient(to top, black 60%, transparent 100%)" }}>
               <p className="text-[14px] sm:text-[18px] tracking-tight text-white font-normal">{item.title}</p>
               <p className="text-[11px] sm:text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{item.category}</p>
             </div>
           </div>
+        </div>
         </Link>
       </FollowerPointerCard>
     </section>

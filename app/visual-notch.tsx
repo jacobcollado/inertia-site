@@ -643,11 +643,12 @@ export function VisualNotch() {
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
+  const isWorkIndex = pathname === "/work";
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
-  const useMinimalHeader = isPolicies || isAether || isWork || isComponents;
+  const useMinimalHeader = isPolicies || isAether || (isWork && !isWorkIndex) || isComponents;
 
-  if (isHome) return null;
+  if (isHome || isWorkIndex) return null;
 
   if (useMinimalHeader) {
     return (
