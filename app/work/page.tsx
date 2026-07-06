@@ -13,6 +13,21 @@ function slugAnchor(slug: string) {
   return `project-${slug}`;
 }
 
+// Live link + status overrides for the /work index, keyed by slug. Kept here
+// rather than in each project's MDX since /work is the only surface these
+// still drive (individual /work/[slug] pages are no longer in active use).
+const WORK_LINKS: Record<string, { url?: string; status?: string; year?: string; yearLabel?: string }> = {
+  "trippie-redd": { status: "Inactive", year: "June 2025" },
+  "ellora-la": { url: "https://ellora.la", year: "Early 2026" },
+  "aether": { url: "https://aether-starter.myshopify.com", year: "2023", yearLabel: "2023 - Present" },
+  "allure-new-york": { url: "https://allurenewyork.com", year: "March 2026" },
+  "inboundly": { url: "https://inboundly.us", year: "May 2026" },
+  "ft-gioo": { url: "https://ftgioo.com", year: "June 2025" },
+  "samuel-norris": { url: "https://samuelnorrisofficial.com", year: "Early 2025" },
+  "mood-swings": { url: "https://moodswings.us", year: "August 2025" },
+  "subtle-goods": { url: "https://subtlegoods.shop", year: "June 2026" },
+};
+
 // A loosely sketched back-arrow, as if drawn quickly by hand rather than a
 // precise geometric icon.
 function HandDrawnArrow() {
@@ -154,6 +169,11 @@ export default function WorkIndexPage() {
               ...(w.preview ? [w.preview] : []),
               ...(w.images ?? []),
             ];
+            const override = WORK_LINKS[w.slug];
+            const url = override?.url;
+            const status = override?.status;
+            const year = override?.year ?? w.year;
+            const yearLabel = override?.yearLabel ?? year?.match(/\d{4}/)?.[0];
 
             return (
               <div key={w.slug} id={slugAnchor(w.slug)} className="flex flex-col gap-5 scroll-mt-24">
@@ -161,18 +181,31 @@ export default function WorkIndexPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))]">{w.client}</span>
+                    {url ? (
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] hover:opacity-70 transition-opacity underline underline-offset-4 decoration-[rgb(var(--line))] hover:decoration-[rgb(var(--fg))]"
+                      >
+                        {w.client}
+                      </a>
+                    ) : (
+                      <span className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))]">{w.client}</span>
+                    )}
                     {w.service && (
                       <span className="text-[16px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
                         {serviceShort(w.service)}
                       </span>
                     )}
                   </div>
-                  {w.year && (
-                    <span className="text-[15px] tabular-nums tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.35 }}>
-                      {w.year.match(/\d{4}/)?.[0]}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {(status || yearLabel) && (
+                      <span className="text-[11px] tabular-nums tracking-tight rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))" }}>
+                        {status && yearLabel ? `${status} - ${yearLabel}` : status || yearLabel}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Stacked images */}
