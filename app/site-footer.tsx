@@ -104,12 +104,6 @@ export function MinimalFooter() {
     <footer className="w-full max-w-[88rem] mx-auto px-6 sm:px-8 py-8 flex flex-col items-center text-center gap-4">
       <ChicagoTime />
       <div className="rise flex items-center gap-5" style={{ "--rise-delay": "80ms" } as React.CSSProperties}>
-        <Link href="/work" className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.4 }}>
-          Work
-        </Link>
-        <Link href="/aether" className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.4 }}>
-          Aether theme
-        </Link>
         <Link href="/policies/terms-of-service" className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.4 }}>
           Terms of service
         </Link>
