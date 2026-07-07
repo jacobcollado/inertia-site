@@ -436,7 +436,7 @@ function RotatingWord() {
             position: "absolute",
             left: "-0.12em", right: "-0.12em",
             top: "0.08em", bottom: "0.08em",
-            background: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.62) 2.5%, rgb(var(--accent) / 0.3) 20%, rgb(var(--accent) / 0.28) 80%, rgb(var(--accent) / 0.58) 97.5%, rgb(var(--accent) / 0) 99.7%)",
+            background: "linear-gradient(104deg, rgb(var(--accent) / 0) 0.3%, rgb(var(--accent) / 0.28) 2.5%, rgb(var(--accent) / 0.22) 35%, rgb(var(--accent) / 0.42) 65%, rgb(var(--accent) / 0.72) 97.5%, rgb(var(--accent) / 0) 99.7%)",
             borderRadius: "0.04em",
             transform: highlightShown ? "scaleX(1)" : "scaleX(0)",
             transformOrigin: "left center",
@@ -4074,10 +4074,10 @@ function CalEmbed() {
     Cal.config.forwardQueryParams = true;
     Cal.ns["15min"]("inline", {
       elementOrSelector: "#my-cal-inline-15min",
-      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
+      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "light" },
       calLink: "jacob-c-99otvp/15min",
     });
-    Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view" });
+    Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view", theme: "light" });
   }, []);
 
   return (
@@ -4090,6 +4090,7 @@ function CalEmbed() {
 const WORK_ITEMS = [
   { src: "/work/aether-1.png", title: "Aether Theme", category: "Shopify theme" },
   { src: "/work/aether-2.png", title: "Aether Theme", category: "Cart design" },
+  { src: "/work/ellora-la/1.png", title: "Ellora La", category: "Shopify storefront" },
   { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page" },
   { src: "/work/inertia-site.png", title: "Inertia", category: "Web design" },
   { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront" },
@@ -4102,7 +4103,6 @@ const WORK_ITEMS = [
   { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page" },
   { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app" },
   { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design" },
-  { src: "/work/ellora-la/1.png", title: "Ellora La", category: "Shopify storefront" },
   { src: "/work/ellora-la/2.png", title: "Ellora La", category: "Collection page" },
   { src: "/work/ellora-la/3.png", title: "Ellora La", category: "Product page" },
 ];
