@@ -7,8 +7,6 @@ import Link from "next/link";
 import { SiShopify, SiTypescript, SiTailwindcss, SiMeta, SiFramer, SiVercel, SiApple, SiNextdotjs, SiReact, SiSupabase, SiCloudflare, SiStripe } from "react-icons/si";
 import { useEffect, useState } from "react";
 import { TooltipPill } from "./tooltip-pill";
-import { ContourCanvas } from "./contour-canvas";
-import { HeroContour } from "./hero-contour";
 import { createClient } from "@/lib/supabase/client";
 import type { PostMeta } from "@/lib/posts";
 import { FollowerPointerCard } from "@/components/ui/following-pointer";
@@ -1783,30 +1781,40 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
 // approach as WaitUnderline) rather than a parent's IntersectionObserver
 // "visible" flag, since that flag can flip true in the same commit as the
 // path-length measurement and leave nothing for the transition to animate.
-// translateZ(0) promotes the stroke to its own compositing layer so it isn't
-// re-rasterized (and doesn't visibly pop/redraw) every time an ancestor's
-// opacity animates during a route transition.
-const SCRIBBLE_TRANSITION = {
-  transition: "stroke-dashoffset 900ms cubic-bezier(0.65,0,0.35,1)",
-  transform: "translateZ(0)",
-} as const;
+// Driven entirely by a manual rAF loop rather than a CSS transition on
+// stroke-dashoffset — a route change can leave other work competing for the
+// main thread right as this mounts, and a React-state-driven CSS transition
+// can visibly stutter/reset if a paint gets skipped mid-transition. Directly
+// writing the value every frame is immune to that: whatever frame the browser
+// next has time for just picks up wherever the eased progress actually is.
+const DRAW_DURATION = 900;
+function easeInOutQuint(t: number) { return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2; }
 
 function ScribblePass({ delay, path, color }: { delay: number; path: string; color: string }) {
   const ref = useRef<SVGPathElement>(null);
-  // Start with an arbitrarily large dash length so the path is fully hidden
-  // from the very first paint — a dasharray of 0 (before the real length is
-  // measured) draws as a solid line, causing a flash of the full circle.
-  const [length, setLength] = useState(2000);
-  const [drawn, setDrawn] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (ref.current) setLength(ref.current.getTotalLength());
-    setDrawn(false);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => { setDrawn(true); timerRef.current = null; }, delay);
+    const el = ref.current;
+    if (!el) return;
+    const length = el.getTotalLength();
+    el.style.strokeDasharray = String(length);
+    el.style.strokeDashoffset = String(length);
+
+    let rafId = 0;
+    let startTime = 0;
+    const timer = setTimeout(() => {
+      const tick = (now: number) => {
+        if (!startTime) startTime = now;
+        const t = Math.min(1, (now - startTime) / DRAW_DURATION);
+        el.style.strokeDashoffset = String(length * (1 - easeInOutQuint(t)));
+        if (t < 1) rafId = requestAnimationFrame(tick);
+      };
+      rafId = requestAnimationFrame(tick);
+    }, delay);
+
     return () => {
-      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+      clearTimeout(timer);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1821,9 +1829,6 @@ function ScribblePass({ delay, path, color }: { delay: number; path: string; col
       strokeLinecap="round"
       strokeLinejoin="round"
       opacity="0.85"
-      strokeDasharray={length}
-      strokeDashoffset={drawn ? 0 : length}
-      style={SCRIBBLE_TRANSITION}
     />
   );
 }
@@ -3900,66 +3905,6 @@ function Personalization() {
 }
 
 // -- Vercel-style dark hero --------------------------------------------
-
-// Kinetic "I" centerpiece: the Inertia monogram pushed into motion. The solid
-// letter sits center-bright while strobe echoes trail off to the left, like a
-// long-exposure of the letter being shoved rightward — momentum made literal.
-// Draws in then settles. Always dark, independent of theme.
-// Generative topographic centerpiece: an animated, mouse-reactive contour field
-// (your ContourCanvas engine) masked into a disc. Lines are mostly neutral; the
-// peaks/ridges bloom into spectrum. Code-art, distinctly Inertia, no assets.
-function HeroMesh() {
-  const discFade =
-    "radial-gradient(circle at 50% 50%, #000 0%, #000 46%, rgba(0,0,0,0.5) 66%, transparent 80%)";
-
-  return (
-    <div
-      className="vhero-mesh-group relative flex items-center justify-center overflow-hidden"
-      style={{ width: "min(520px, 90vw)", height: "min(520px, 90vw)" }}
-      aria-hidden="true"
-    >
-      {/* The contour field, masked into a soft disc so it reads as a centerpiece
-          and fades into the black rather than ending at a hard edge. */}
-      <div
-        className="absolute inset-0"
-        style={{ WebkitMaskImage: discFade, maskImage: discFade }}
-      >
-        <HeroContour />
-      </div>
-
-      {/* Faint central light lift so the middle reads as the focal point. */}
-      <div
-        className="absolute"
-        style={{
-          inset: "18%",
-          background:
-            "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 42%, transparent 70%)",
-          filter: "blur(26px)",
-          mixBlendMode: "screen",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Noise texture over the field. */}
-      <div
-        className="vhero-noise absolute"
-        style={{
-          inset: "-15%",
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-          backgroundSize: "180px 180px",
-          opacity: 0.1,
-          mixBlendMode: "screen",
-          WebkitMaskImage:
-            "radial-gradient(circle at 50% 50%, #000 0%, rgba(0,0,0,0.5) 44%, transparent 66%)",
-          maskImage:
-            "radial-gradient(circle at 50% 50%, #000 0%, rgba(0,0,0,0.5) 44%, transparent 66%)",
-          pointerEvents: "none",
-        }}
-      />
-    </div>
-  );
-}
 
 // Hand-drawn underline for "wait" in the hero heading — three overlapping
 // sketched arcs, as if drawn quickly by hand and gone over a couple more times.
