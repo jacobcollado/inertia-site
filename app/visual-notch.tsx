@@ -559,7 +559,7 @@ function InertiaLogo() {
     <img
       src="/logo.png"
       alt="Inertia"
-      className="h-5 w-auto"
+      className="h-6 w-auto"
       style={{ display: "block" }}
     />
   );
@@ -665,14 +665,14 @@ export function VisualNotch() {
                 href="https://cal.com/jacob-c-99otvp/15min"
                 target="_blank"
                 rel="noreferrer"
-                className={isComponents ? "hidden sm:inline-flex" : "inline-flex"}
+                className={(isComponents ? "hidden sm:inline-flex" : "inline-flex") + " px-4 py-2.5 text-[15px] sm:px-5 sm:py-2.5 sm:text-[16px]"}
                 style={{
                   alignItems: "center",
-                  padding: "8px 18px",
+                  justifyContent: "center",
+                  lineHeight: 1,
                   borderRadius: 999,
                   background: "rgb(var(--fg))",
                   color: "rgb(var(--bg))",
-                  fontSize: 15,
                   fontWeight: 500,
                   letterSpacing: "-0.01em",
                   textDecoration: "none",

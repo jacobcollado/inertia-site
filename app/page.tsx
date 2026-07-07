@@ -1174,7 +1174,10 @@ function AetherFeature() {
 
       {/* CTA — left-aligned so it sits under the preview, not floating far right */}
       <div className="flex flex-row flex-wrap justify-start items-center gap-3 pt-8" style={fade(280)}>
-        <ProjectCta label="Explore Aether" href="/aether" arrow="→" external={false} />
+        <div className="relative inline-flex">
+          <ScribbleCircle delay={520} />
+          <ProjectCta label="Explore Aether" href="/aether" arrow="→" external={false} />
+        </div>
         <Link href="/aether/buy" className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] tracking-tight transition-colors" style={{ border: "1px solid rgb(var(--fg) / 0.25)", color: "rgb(var(--fg) / 0.6)" }}>
           Buy now, from $85
         </Link>
@@ -1772,6 +1775,92 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
         </span>
       ))}
     </Tag>
+  );
+}
+
+// Hand-drawn, slightly sloppy circle annotation that draws itself in around
+// a CTA — like someone circled it with a pen. Timed off its own mount (same
+// approach as WaitUnderline) rather than a parent's IntersectionObserver
+// "visible" flag, since that flag can flip true in the same commit as the
+// path-length measurement and leave nothing for the transition to animate.
+const SCRIBBLE_TRANSITION = { transition: "stroke-dashoffset 900ms cubic-bezier(0.65,0,0.35,1)" } as const;
+
+function ScribblePass({ delay, path, color }: { delay: number; path: string; color: string }) {
+  const ref = useRef<SVGPathElement>(null);
+  // Start with an arbitrarily large dash length so the path is fully hidden
+  // from the very first paint — a dasharray of 0 (before the real length is
+  // measured) draws as a solid line, causing a flash of the full circle.
+  const [length, setLength] = useState(2000);
+  const [drawn, setDrawn] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (ref.current) setLength(ref.current.getTotalLength());
+    setDrawn(false);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => { setDrawn(true); timerRef.current = null; }, delay);
+    return () => {
+      if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <path
+      ref={ref}
+      d={path}
+      fill="none"
+      stroke={color}
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity="0.85"
+      strokeDasharray={length}
+      strokeDashoffset={drawn ? 0 : length}
+      style={SCRIBBLE_TRANSITION}
+    />
+  );
+}
+
+// Hand-drawn, slightly sloppy circle annotation that draws itself in around
+// a CTA — like someone circled it with a pen twice. Overshoots and closes
+// messily on purpose so it doesn't read as a clean vector ellipse.
+function ScribbleCircle({ delay = 0, color = "rgb(var(--accent))" }: { delay?: number; color?: string }) {
+  const path1 =
+    "M 24,7 " +
+    "C 10,6 3,17 4,32 " +
+    "C 5,48 18,60 42,61 " +
+    "C 68,62 90,52 92,35 " +
+    "C 94,17 78,5 52,4 " +
+    "C 36,3.4 20,8 22,10 " +
+    "C 23,10.8 30,9 30,9";
+  const path2 =
+    "M 30,4 " +
+    "C 14,3 1,14 3,30 " +
+    "C 5,46 20,63 46,64 " +
+    "C 70,65 93,54 93,37 " +
+    "C 93,20 74,8 48,7 " +
+    "C 32,6.4 18,11 20,13";
+
+  return (
+    <svg
+      viewBox="0 0 96 66"
+      aria-hidden="true"
+      className="pointer-events-none absolute"
+      style={{
+        left: "-10%",
+        right: "-10%",
+        top: "-32%",
+        bottom: "-32%",
+        width: "120%",
+        height: "164%",
+        overflow: "visible",
+      }}
+      preserveAspectRatio="none"
+    >
+      <ScribblePass delay={delay} path={path1} color={color} />
+      <ScribblePass delay={delay + 260} path={path2} color={color} />
+    </svg>
   );
 }
 
@@ -3962,8 +4051,16 @@ const HL = ({ children }: { children: React.ReactNode }) => (
 function VercelHero() {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  // Next.js App Router can keep this whole component instance alive across a
+  // client-side nav away from and back to "/" — no unmount, no re-render of
+  // children like ScribblePass, so its one-time draw-in state stays stuck at
+  // "already drawn" from the previous visit and just reappears instantly.
+  // mountId increments each time this effect actually re-fires, and gets used
+  // as a key below to force the scribble to remount and replay its animation.
+  const [mountId, setMountId] = useState(0);
 
   useEffect(() => {
+    setMountId((n) => n + 1);
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
@@ -3976,8 +4073,8 @@ function VercelHero() {
 
   const fade = (delay: number) => ({
     opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(14px)",
-    transition: `opacity 600ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 600ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+    transform: visible ? "translateY(0)" : "translateY(18px)",
+    transition: `opacity 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
   });
 
   return (
@@ -3993,7 +4090,7 @@ function VercelHero() {
           <img src="/logo.png" alt="Inertia" className="h-8 w-auto" style={fade(0)} aria-hidden="true" />
           <h1
             className="font-normal tracking-tight leading-[0.88]"
-            style={{ ...fade(60), color: "#1a1a1a", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
+            style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
           >
             <span className="hidden sm:inline">Design for founders who don't <WaitUnderline>wait</WaitUnderline>.</span>
             <span className="sm:hidden">Design for founders<br />who don't <WaitUnderline>wait</WaitUnderline>.</span>
@@ -4001,36 +4098,39 @@ function VercelHero() {
 
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(180), color: "#5c5c5c" }}
+            style={{ ...fade(300), color: "#5c5c5c" }}
           >
             Design and development under one roof. Fewer people, faster decisions, <HL>work that actually ships</HL>.
           </p>
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(240), color: "#5c5c5c" }}
+            style={{ ...fade(420), color: "#5c5c5c" }}
           >
             Whether you're launching a label, running a trade, or shipping a product, you want it done <HL>right the first time</HL>. So do we.
           </p>
 
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(270), color: "#5c5c5c" }}
+            style={{ ...fade(540), color: "#5c5c5c" }}
           >
             On Shopify?{" "}
-            <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ color: "#0a84ff", borderBottom: "1px solid #0a84ff", textDecoration: "none" }}>
-              Aether <SiShopify className="inline w-3 h-3 relative -top-px" />
-            </Link>
+            <span className="relative inline-block">
+              <ScribbleCircle key={mountId} delay={950} color="#0a84ff" />
+              <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ color: "#0a84ff", textDecoration: "none" }}>
+                Aether <SiShopify className="inline w-3 h-3 relative -top-px" />
+              </Link>
+            </span>
             , our theme, takes you from install to live in an afternoon.
           </p>
 
-          <div className="flex items-center gap-3" style={fade(300)}>
+          <div className="flex items-center gap-3">
             <a
               href="https://cal.com/jacob-c-99otvp/15min"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-              style={{ background: "#1a1a1a", color: "#fff", transition: "opacity 150ms ease, transform 150ms ease" }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              className="inline-flex items-center rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
+              style={{ ...fade(660), background: "#1a1a1a", color: "#fff" }}
+              onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
@@ -4040,9 +4140,9 @@ function VercelHero() {
               href="https://t.me/kayzxyz"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-full px-5 py-2.5 text-[14px] tracking-tight"
-              style={{ background: "#f0f0f0", color: "#1a1a1a", transition: "opacity 150ms ease, transform 150ms ease" }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              className="inline-flex items-center rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
+              style={{ ...fade(720), background: "#f0f0f0", color: "#1a1a1a" }}
+              onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
