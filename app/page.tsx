@@ -1783,7 +1783,13 @@ function ProjectCta({ className, style, label = "Start a project", href = "https
 // approach as WaitUnderline) rather than a parent's IntersectionObserver
 // "visible" flag, since that flag can flip true in the same commit as the
 // path-length measurement and leave nothing for the transition to animate.
-const SCRIBBLE_TRANSITION = { transition: "stroke-dashoffset 900ms cubic-bezier(0.65,0,0.35,1)" } as const;
+// translateZ(0) promotes the stroke to its own compositing layer so it isn't
+// re-rasterized (and doesn't visibly pop/redraw) every time an ancestor's
+// opacity animates during a route transition.
+const SCRIBBLE_TRANSITION = {
+  transition: "stroke-dashoffset 900ms cubic-bezier(0.65,0,0.35,1)",
+  transform: "translateZ(0)",
+} as const;
 
 function ScribblePass({ delay, path, color }: { delay: number; path: string; color: string }) {
   const ref = useRef<SVGPathElement>(null);
@@ -4115,7 +4121,7 @@ function VercelHero() {
           >
             On Shopify?{" "}
             <span className="relative inline-block">
-              <ScribbleCircle key={mountId} delay={950} color="#0a84ff" />
+              <ScribbleCircle key={mountId} delay={2500} color="#0a84ff" />
               <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ color: "#0a84ff", textDecoration: "none" }}>
                 Aether <SiShopify className="inline w-3 h-3 relative -top-px" />
               </Link>
