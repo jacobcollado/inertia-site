@@ -94,6 +94,49 @@
   color-scheme: light;
 }
 
+/* â”€â”€ shadcn/ui theme bridge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   shadcn's dashboard-01 components (Card, Sidebar, Chart, etc.) expect
+   tokens named --background, --primary, --muted, --accent, --border, etc.
+   Those names collide with this site's own "R G B" triplet tokens of the
+   same name (--muted, --accent, --border are already used site-wide as
+   rgb(var(--x))). So shadcn's tokens are namespaced under --sh-* here and
+   mapped in tailwind.config.ts under the "sh-" color prefix instead of
+   overwriting the site's existing variables. */
+:root {
+  --sh-background: #ffffff;
+  --sh-foreground: #121212;
+  --sh-card: #ffffff;
+  --sh-card-foreground: #121212;
+  --sh-popover: #ffffff;
+  --sh-popover-foreground: #121212;
+  --sh-primary: #0a84ff;
+  --sh-primary-foreground: #ffffff;
+  --sh-secondary: #f2f2f2;
+  --sh-secondary-foreground: #121212;
+  --sh-muted: #f2f2f2;
+  --sh-muted-foreground: #6e6e6e;
+  --sh-accent: #f2f2f2;
+  --sh-accent-foreground: #121212;
+  --sh-destructive: #ef4444;
+  --sh-border: #e1e1e1;
+  --sh-input: #e1e1e1;
+  --sh-ring: #0a84ff;
+  --sh-sidebar: #f0f0f0;
+  --sh-sidebar-foreground: #121212;
+  --sh-sidebar-primary: #0a84ff;
+  --sh-sidebar-primary-foreground: #ffffff;
+  --sh-sidebar-accent: #e2e2e2;
+  --sh-sidebar-accent-foreground: #121212;
+  --sh-sidebar-border: #e1e1e1;
+  --sh-sidebar-ring: #0a84ff;
+  --sh-chart-1: #0a84ff;
+  --sh-chart-2: #6e6e6e;
+  --sh-chart-3: #a3a3a3;
+  --sh-chart-4: #c4c4c4;
+  --sh-chart-5: #e1e1e1;
+  --sh-radius: 0.625rem;
+}
+
 html {
   background: rgb(var(--bg));
   color: rgb(var(--fg));

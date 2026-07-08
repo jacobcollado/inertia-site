@@ -3,11 +3,17 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+// Routes with their own persistent shell (sidebar, nav, etc.) that must not
+// be torn down and remounted on every navigation — the key={pathname} remount
+// below is skipped for these so their layout survives route changes.
+const PERSISTENT_SHELL_PREFIXES = ["/admin", "/dashboard"];
+
 export function RouteFade({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const ref = useRef<HTMLDivElement>(null);
   const first = useRef(true);
   const isComponents = pathname.startsWith("/components");
+  const isPersistentShell = PERSISTENT_SHELL_PREFIXES.some(p => pathname === p || pathname.startsWith(p + "/"));
 
   useEffect(() => {
     if (first.current) {
@@ -23,12 +29,16 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
       window.scrollTo({ top: 0, behavior: "auto" });
     }
 
-    if (isComponents) return;
+    if (isComponents || isPersistentShell) return;
 
     el.classList.remove("route-enter");
     void el.offsetWidth;
     el.classList.add("route-enter");
-  }, [pathname, isComponents]);
+  }, [pathname, isComponents, isPersistentShell]);
+
+  if (isPersistentShell) {
+    return <div ref={ref}>{children}</div>;
+  }
 
   return (
     <div ref={ref} className={isComponents ? undefined : "route-enter"} key={pathname}>

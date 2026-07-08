@@ -4100,6 +4100,14 @@ function VercelHero() {
               Send a message
             </a>
           </div>
+
+          <Link
+            href="/login"
+            className="text-[13px] tracking-tight transition-opacity hover:opacity-70"
+            style={{ ...fade(780), color: "#8a8a8a" }}
+          >
+            Already a client? Sign in
+          </Link>
         </div>
       </div>
     </section>

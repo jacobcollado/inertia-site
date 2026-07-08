@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -34,7 +34,8 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
       type="button"
       disabled={loading}
       onClick={onOAuth}
-      className="flex items-center justify-center gap-2.5 w-full border border-[rgb(var(--line))] py-3.5 text-[14px] tracking-tight text-[rgb(var(--fg))] rounded-full hover:border-[rgb(var(--fg))/0.4] hover:bg-[rgb(var(--line))/0.3] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+      className="flex items-center justify-center gap-2.5 w-full py-3.5 text-[14px] tracking-tight rounded-full hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+      style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
     >
       {oauthProvider === "google" ? <Spinner /> : (
         <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
@@ -49,20 +50,54 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
   );
 }
 
-const EXIT_MS = 160;
-const ENTER_MS = 280;
+const EXIT_MS = 180;
+const ENTER_MS = 380;
 
 export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<"signin" | "signup">(initialTab);
   const [displayedTab, setDisplayedTab] = useState<"signin" | "signup">(initialTab);
   const [phase, setPhase] = useState<"idle" | "exit" | "enter">("idle");
+  const [direction, setDirection] = useState<1 | -1>(1);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [oauthProvider, setOauthProvider] = useState<"google" | null>(null);
+  const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
+  const signinSizerRef = useRef<HTMLDivElement>(null);
+  const signupSizerRef = useRef<HTMLDivElement>(null);
+  const tabRefs = useRef<Partial<Record<"signin" | "signup", HTMLButtonElement | null>>>({});
+  const [pillRect, setPillRect] = useState<{ left: number; width: number } | null>(null);
+
+  // Measure both tab variants and lock the card to the taller one, so
+  // switching tabs never reflows the surrounding card.
+  useEffect(() => {
+    const measure = () => {
+      const h1 = signinSizerRef.current?.offsetHeight ?? 0;
+      const h2 = signupSizerRef.current?.offsetHeight ?? 0;
+      const tallest = Math.max(h1, h2);
+      if (tallest > 0) setCardHeight(tallest);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [error]);
+
+  // Track the active tab button's position so the pill indicator can glide
+  // between "Sign in" and "Create account" instead of just swapping color.
+  useEffect(() => {
+    const measurePill = () => {
+      const el = tabRefs.current[tab];
+      if (!el) return;
+      setPillRect({ left: el.offsetLeft, width: el.offsetWidth });
+    };
+    measurePill();
+    window.addEventListener("resize", measurePill);
+    return () => window.removeEventListener("resize", measurePill);
+  }, [tab]);
 
   const switchTab = (t: "signin" | "signup") => {
     if (t === tab) return;
+    setDirection(t === "signup" ? 1 : -1);
     setError("");
     setTab(t);
     setPhase("exit");
@@ -90,16 +125,45 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     });
   };
 
-  const heading = displayedTab === "signin" ? "Sign in to your portal." : "Create your account.";
-  const subheading = displayedTab === "signin"
-    ? "View your project, invoices, and files."
-    : "New or existing client. Once you're in, we'll confirm your access.";
+  const renderBody = (t: "signin" | "signup") => (
+    <>
+      {/* Heading */}
+      <div className="flex flex-col text-center">
+        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">
+          {t === "signin" ? "Welcome back to Inertia" : "Welcome to Inertia"}
+        </p>
+        <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+          {t === "signin" ? "Sign in to your portal" : "Create your account"}
+        </h1>
+        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mt-4">
+          {t === "signin" ? "View your project, invoices, and files." : "New or existing client. Once you're in, we'll confirm your access."}
+        </p>
+      </div>
+
+      {/* Google button */}
+      <GoogleButton onOAuth={() => onOAuth("google")} loading={loading} oauthProvider={oauthProvider} />
+
+      {error && <ErrorMessage msg={error} />}
+
+      {/* Switch tab link */}
+      <button
+        type="button"
+        onClick={() => switchTab(t === "signin" ? "signup" : "signin")}
+        className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center"
+      >
+        {t === "signin" ? "No account? Create one →" : "Already have an account? Sign in →"}
+      </button>
+    </>
+  );
+
+  const exitX = direction * -14;
+  const enterX = direction * 14;
 
   const contentStyle: React.CSSProperties = phase === "exit"
-    ? { opacity: 0, transform: "translateY(6px) scale(0.98)", filter: "blur(2px)", transition: `opacity ${EXIT_MS}ms ease, transform ${EXIT_MS}ms ease, filter ${EXIT_MS}ms ease` }
+    ? { opacity: 0, transform: `translateX(${exitX}px) scale(0.98)`, filter: "blur(3px)", transition: `opacity ${EXIT_MS}ms cubic-bezier(0.4,0,1,1), transform ${EXIT_MS}ms cubic-bezier(0.4,0,1,1), filter ${EXIT_MS}ms cubic-bezier(0.4,0,1,1)` }
     : phase === "enter"
-    ? { opacity: 0, transform: "translateY(-6px) scale(0.98)", filter: "blur(2px)", transition: "none" }
-    : { opacity: 1, transform: "translateY(0) scale(1)", filter: "blur(0px)", transition: `opacity ${ENTER_MS}ms cubic-bezier(0.22,1,0.36,1), transform ${ENTER_MS}ms cubic-bezier(0.22,1,0.36,1), filter ${ENTER_MS}ms cubic-bezier(0.22,1,0.36,1)` };
+    ? { opacity: 0, transform: `translateX(${enterX}px) scale(0.98)`, filter: "blur(3px)", transition: "none" }
+    : { opacity: 1, transform: "translateX(0) scale(1)", filter: "blur(0px)", transition: `opacity ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1), transform ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1), filter ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1)` };
 
   return (
     <div className="w-full min-h-screen">
@@ -107,18 +171,22 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
       {/* Top bar — fixed so it doesn't affect centering */}
       <div className="fixed top-0 inset-x-0 z-10 px-6" style={{ height: 72 }}>
         <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "88rem" }}>
-          <Link href="/" className="opacity-80 hover:opacity-100 transition-opacity">
-            <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
+          <Link href="/" className="sm:hidden text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.6 }}>
+            ← Back to index
           </Link>
           <ThemeToggle />
         </div>
       </div>
 
       {/* Form — centered against full viewport */}
-      <div className="min-h-screen flex items-center justify-center px-6 py-24">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
+        <Link href="/" className="hidden sm:block w-full max-w-[420px] text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors mb-4" style={{ opacity: 0.6 }}>
+          ← Back to index
+        </Link>
         <div
           className="w-full max-w-[420px] rounded-2xl border border-[rgb(var(--line))] p-8 sm:p-10"
           style={{
+            position: "relative",
             background: "rgb(var(--surface-elevated))",
             animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
           }}
@@ -127,16 +195,26 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
             {/* Tab notch */}
             <div className="flex justify-center">
-              <div className="flex items-center gap-1 rounded-full p-[3px]" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+              <div className="relative flex items-center gap-1 rounded-full p-[3px]" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+                {pillRect && (
+                  <div
+                    aria-hidden="true"
+                    className="absolute top-[3px] bottom-[3px] rounded-full"
+                    style={{
+                      left: pillRect.left,
+                      width: pillRect.width,
+                      background: "#0a84ff",
+                      transition: "left 320ms cubic-bezier(0.65,0,0.35,1), width 320ms cubic-bezier(0.65,0,0.35,1)",
+                    }}
+                  />
+                )}
                 {(["signin", "signup"] as const).map((t) => (
                   <button
                     key={t}
+                    ref={(el) => { tabRefs.current[t] = el; }}
                     onClick={() => switchTab(t)}
-                    className="px-4 py-1.5 text-[12px] tracking-tight rounded-full transition-all duration-200"
-                    style={{
-                      background: tab === t ? "var(--btn-bg)" : "transparent",
-                      color: tab === t ? "var(--btn-fg)" : "rgb(var(--muted))",
-                    }}
+                    className="relative px-4 py-1.5 text-[12px] tracking-tight rounded-full transition-colors duration-200"
+                    style={{ color: tab === t ? "#fff" : "rgb(var(--muted))" }}
                   >
                     {t === "signin" ? "Sign in" : "Create account"}
                   </button>
@@ -144,40 +222,39 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               </div>
             </div>
 
-            {/* Animated content */}
-            <div style={contentStyle} className="flex flex-col gap-6">
-
-              {/* Heading */}
-              <div className="flex flex-col text-center">
-                <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50">
-                  {tab === "signin" ? "Welcome back to Inertia" : "Welcome to Inertia"}
-                </p>
-                <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
-                  {heading}
-                </h1>
-                <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mt-3">
-                  {subheading}
-                </p>
+            {/* Animated content — height locked to the taller of the two tabs
+                so switching never resizes the card. */}
+            <div style={{ height: cardHeight, transition: "height 280ms cubic-bezier(0.22,1,0.36,1)", overflow: "hidden" }}>
+              <div style={contentStyle} className="flex flex-col gap-6">
+                {renderBody(displayedTab)}
               </div>
-
-              {/* Google button */}
-              <GoogleButton onOAuth={() => onOAuth("google")} loading={loading} oauthProvider={oauthProvider} />
-
-              {error && <ErrorMessage msg={error} />}
-
-              {/* Switch tab link */}
-              <button
-                type="button"
-                onClick={() => switchTab(tab === "signin" ? "signup" : "signin")}
-                className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center"
-              >
-                {displayedTab === "signin" ? "No account? Create one →" : "Already have an account? Sign in →"}
-              </button>
-
             </div>
 
           </div>
+
+          {/* Hidden sizers — off-screen copies of both tabs used only to
+              measure natural height. Not visible, not interactive. */}
+          <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, visibility: "hidden", pointerEvents: "none", zIndex: -1 }}>
+            <div ref={signinSizerRef} className="flex flex-col gap-6">
+              {renderBody("signin")}
+            </div>
+            <div ref={signupSizerRef} className="flex flex-col gap-6">
+              {renderBody("signup")}
+            </div>
+          </div>
         </div>
+
+        <p className="w-full max-w-[420px] text-[12px] tracking-tight text-[rgb(var(--muted))] text-center mt-6" style={{ opacity: 0.5 }}>
+          By continuing, you agree to our{" "}
+          <Link href="/policies/terms-of-service" className="underline hover:text-[rgb(var(--fg))] transition-colors">
+            Terms of service
+          </Link>{" "}
+          and{" "}
+          <Link href="/policies/privacy-policy" className="underline hover:text-[rgb(var(--fg))] transition-colors">
+            Privacy policy
+          </Link>
+          .
+        </p>
       </div>
 
     </div>
