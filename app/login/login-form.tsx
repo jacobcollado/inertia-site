@@ -28,6 +28,196 @@ function ErrorMessage({ msg }: { msg: string }) {
   );
 }
 
+function InfoMessage({ msg }: { msg: string }) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-2.5 rounded-full text-[13px] tracking-tight" style={{ background: "rgb(10 132 255 / 0.08)", color: "#0a84ff" }}>
+      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="1.5" y="3" width="13" height="10" rx="1.5" />
+        <path d="M2 4l6 4.5L14 4" />
+      </svg>
+      {msg}
+    </div>
+  );
+}
+
+function Divider() {
+  return (
+    <div className="flex items-center gap-3" aria-hidden="true">
+      <div className="flex-1 h-px" style={{ background: "rgb(var(--line))" }} />
+      <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>or</span>
+      <div className="flex-1 h-px" style={{ background: "rgb(var(--line))" }} />
+    </div>
+  );
+}
+
+function EmailToggle({ onToggle }: { onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex items-center justify-center gap-2 w-full py-3.5 text-[14px] tracking-tight rounded-full border transition-colors hover:border-[rgb(var(--fg)/0.3)]"
+      style={{ borderColor: "rgb(var(--line))", color: "rgb(var(--fg))" }}
+    >
+      <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="1.5" y="3" width="13" height="10" rx="1.5" />
+        <path d="M2 4l6 4.5L14 4" />
+      </svg>
+      Continue with email
+    </button>
+  );
+}
+
+function EmailForm({
+  mode,
+  loading,
+  onSubmit,
+  onBack,
+}: {
+  mode: "signin" | "signup";
+  loading: boolean;
+  onSubmit: (email: string, password: string) => void;
+  onBack: () => void;
+}) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [capsLock, setCapsLock] = useState(false);
+  const inputBase = "w-full px-4 py-3 text-[14px] tracking-tight rounded-xl outline-none transition-colors bg-transparent";
+
+  const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (typeof e.getModifierState === "function") setCapsLock(e.getModifierState("CapsLock"));
+  };
+
+  // Lightweight strength check — length plus a mix of character classes.
+  // Not a full policy, just a nudge in the right direction for new accounts.
+  const strength = (() => {
+    if (!password) return null;
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+    if (score <= 2) return { label: "Weak", color: "rgb(220 38 38)", score };
+    if (score <= 3) return { label: "Okay", color: "rgb(217 119 6)", score };
+    return { label: "Strong", color: "rgb(22 163 74)", score };
+  })();
+
+  return (
+    <>
+      {/* Back to Google/email choice */}
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start"
+      >
+        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="10 4 6 8 10 12" />
+        </svg>
+        Back
+      </button>
+
+      {/* Heading */}
+      <div className="flex items-center justify-center gap-2">
+        <h2 className="text-[1.4rem] font-medium tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
+          Continue with email
+        </h2>
+      </div>
+
+      <form
+        onSubmit={(e) => { e.preventDefault(); onSubmit(email, password); }}
+        className="flex flex-col gap-3"
+      >
+        <input
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className={inputBase}
+          style={{ border: "1.5px solid rgb(var(--line))", color: "rgb(var(--fg))" }}
+          onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
+          onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--line))")}
+        />
+        <div className="relative">
+          <input
+            type="password"
+            required
+            minLength={8}
+            autoComplete={mode === "signin" ? "current-password" : "new-password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyUp={checkCapsLock}
+            onKeyDown={checkCapsLock}
+            className={inputBase}
+            style={{
+              border: "1.5px solid rgb(var(--line))",
+              color: "rgb(var(--fg))",
+              paddingRight: capsLock && mode === "signup" && strength ? 68 : capsLock || (mode === "signup" && strength) ? 44 : undefined,
+            }}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "rgb(var(--line))"; setCapsLock(false); }}
+          />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {capsLock && (
+              <span
+                title="Caps Lock is on"
+                className="flex items-center justify-center rounded-md"
+                style={{ width: 26, height: 26, background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" }}
+              >
+                <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M8 2l4.5 4.5h-3V11h-3V6.5h-3L8 2z" />
+                  <rect x="4.5" y="12.5" width="7" height="1.5" rx="0.5" fill="currentColor" stroke="none" />
+                </svg>
+              </span>
+            )}
+            {mode === "signup" && strength && (
+              <span className="group relative flex items-center" tabIndex={0}>
+                <span
+                  className="flex items-center justify-center rounded-md"
+                  style={{ width: 26, height: 26, background: "rgb(var(--fg) / 0.06)" }}
+                >
+                  <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke={strength.color} strokeWidth="1.75" strokeLinecap="round" aria-hidden="true">
+                    <line x1="3" y1="12" x2="3" y2="8" opacity={strength.score >= 1 ? 1 : 0.25} />
+                    <line x1="8" y1="12" x2="8" y2="5" opacity={strength.score >= 2 ? 1 : 0.25} />
+                    <line x1="13" y1="12" x2="13" y2="2" opacity={strength.score >= 4 ? 1 : 0.25} />
+                  </svg>
+                </span>
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute top-full right-0 mt-2 w-max max-w-[200px] rounded-lg px-2.5 py-1.5 text-[11.5px] leading-snug tracking-tight opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus:opacity-100"
+                  style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", zIndex: 20 }}
+                >
+                  <span style={{ color: strength.color }}>{strength.label} password.</span>{" "}
+                  Use 12+ characters with a mix of letters, numbers, and symbols.
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+        {mode === "signin" && (
+          <Link
+            href="/reset-password"
+            className="self-end text-[12.5px] tracking-tight text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]"
+          >
+            Forgot password?
+          </Link>
+        )}
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex items-center justify-center gap-2.5 w-full py-3.5 text-[14px] font-medium tracking-tight rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
+        >
+          {loading ? <Spinner /> : null}
+          {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+        </button>
+      </form>
+    </>
+  );
+}
+
 function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void; loading: boolean; oauthProvider: "google" | null }) {
   return (
     <button
@@ -57,6 +247,8 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<"signin" | "signup">(initialTab);
   const [displayedTab, setDisplayedTab] = useState<"signin" | "signup">(initialTab);
+  const [view, setView] = useState<Record<"signin" | "signup", "auth" | "email">>({ signin: "auth", signup: "auth" });
+  const [displayedView, setDisplayedView] = useState<"auth" | "email">("auth");
   const [phase, setPhase] = useState<"idle" | "exit" | "enter">("idle");
   const [direction, setDirection] = useState<1 | -1>(1);
   const [error, setError] = useState("");
@@ -65,22 +257,44 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
   const signinSizerRef = useRef<HTMLDivElement>(null);
   const signupSizerRef = useRef<HTMLDivElement>(null);
+  const signinEmailSizerRef = useRef<HTMLDivElement>(null);
+  const signupEmailSizerRef = useRef<HTMLDivElement>(null);
+  const liveContentRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Partial<Record<"signin" | "signup", HTMLButtonElement | null>>>({});
   const [pillRect, setPillRect] = useState<{ left: number; width: number } | null>(null);
+  const checkEmail = searchParams.get("checkEmail") === "1";
 
-  // Measure both tab variants and lock the card to the taller one, so
-  // switching tabs never reflows the surrounding card.
+  // Measure every tab × view combination and lock the card to the tallest,
+  // so switching tabs or swapping to the email card never reflows it.
   useEffect(() => {
     const measure = () => {
-      const h1 = signinSizerRef.current?.offsetHeight ?? 0;
-      const h2 = signupSizerRef.current?.offsetHeight ?? 0;
-      const tallest = Math.max(h1, h2);
+      const heights = [
+        signinSizerRef.current?.offsetHeight ?? 0,
+        signupSizerRef.current?.offsetHeight ?? 0,
+        signinEmailSizerRef.current?.offsetHeight ?? 0,
+        signupEmailSizerRef.current?.offsetHeight ?? 0,
+      ];
+      const tallest = Math.max(...heights);
       if (tallest > 0) setCardHeight(tallest);
     };
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [error]);
+  }, [error, checkEmail]);
+
+  // Also track the live content's real height — typing into the password
+  // field can grow it beyond the static sizer baseline (caps lock warning,
+  // strength meter), so the card should grow to fit rather than clip it.
+  useEffect(() => {
+    const el = liveContentRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(([entry]) => {
+      const h = entry.contentRect.height;
+      setCardHeight((prev) => (prev === undefined ? h : Math.max(prev, h)));
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [displayedTab, displayedView]);
 
   // Track the active tab button's position so the pill indicator can glide
   // between "Sign in" and "Create account" instead of just swapping color.
@@ -103,6 +317,21 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     setPhase("exit");
     setTimeout(() => {
       setDisplayedTab(t);
+      setDisplayedView(view[t]);
+      setPhase("enter");
+      setTimeout(() => setPhase("idle"), ENTER_MS);
+    }, EXIT_MS);
+  };
+
+  // Swap the card between the Google/email-choice screen and the dedicated
+  // email-form screen, reusing the same slide transition as tab switching.
+  const switchView = (t: "signin" | "signup", v: "auth" | "email") => {
+    setDirection(v === "email" ? 1 : -1);
+    setError("");
+    setView((s) => ({ ...s, [t]: v }));
+    setPhase("exit");
+    setTimeout(() => {
+      setDisplayedView(v);
       setPhase("enter");
       setTimeout(() => setPhase("idle"), ENTER_MS);
     }, EXIT_MS);
@@ -125,7 +354,31 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     });
   };
 
-  const renderBody = (t: "signin" | "signup") => (
+  const onEmailSubmit = async (t: "signin" | "signup", email: string, password: string) => {
+    setLoading(true);
+    setError("");
+    const supabase = createClient();
+    const { error: authError } = t === "signin"
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
+
+    if (authError) {
+      setError(authError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (t === "signup") {
+      setLoading(false);
+      setError("");
+      window.location.href = "/login?checkEmail=1";
+      return;
+    }
+
+    window.location.href = "/dashboard";
+  };
+
+  const renderAuth = (t: "signin" | "signup") => (
     <>
       {/* Heading */}
       <div className="flex flex-col text-center">
@@ -140,8 +393,14 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         </p>
       </div>
 
+      {t === "signin" && checkEmail && <InfoMessage msg="Check your email to confirm your account." />}
+
       {/* Google button */}
       <GoogleButton onOAuth={() => onOAuth("google")} loading={loading} oauthProvider={oauthProvider} />
+
+      <Divider />
+
+      <EmailToggle onToggle={() => switchView(t, "email")} />
 
       {error && <ErrorMessage msg={error} />}
 
@@ -155,6 +414,20 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
       </button>
     </>
   );
+
+  const renderEmail = (t: "signin" | "signup") => (
+    <>
+      <EmailForm
+        mode={t}
+        loading={loading}
+        onSubmit={(email, password) => onEmailSubmit(t, email, password)}
+        onBack={() => switchView(t, "auth")}
+      />
+      {error && <ErrorMessage msg={error} />}
+    </>
+  );
+
+  const renderBody = (t: "signin" | "signup", v: "auth" | "email") => (v === "auth" ? renderAuth(t) : renderEmail(t));
 
   const exitX = direction * -14;
   const enterX = direction * 14;
@@ -171,30 +444,60 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
       {/* Top bar — fixed so it doesn't affect centering */}
       <div className="fixed top-0 inset-x-0 z-10 px-6" style={{ height: 72 }}>
         <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "88rem" }}>
-          <Link href="/" className="sm:hidden text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.6 }}>
-            ← Back to index
+          <Link href="/">
+            <img src="/logo.png" alt="Inertia" className="h-6 w-auto" style={{ display: "block" }} />
           </Link>
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <a
+              href="https://cal.com/jacob-c-99otvp/15min"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex px-4 py-2.5 text-[15px] sm:px-5 sm:py-2.5 sm:text-[16px]"
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+                borderRadius: 999,
+                background: "rgb(var(--fg))",
+                color: "rgb(var(--bg))",
+                fontWeight: 500,
+                letterSpacing: "-0.01em",
+                textDecoration: "none",
+                transition: "opacity 150ms ease, transform 150ms ease",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+            >
+              Book a call
+            </a>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 
       {/* Form — centered against full viewport */}
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
-        <Link href="/" className="hidden sm:block w-full max-w-[420px] text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors mb-4" style={{ opacity: 0.6 }}>
-          ← Back to index
-        </Link>
         <div
           className="w-full max-w-[420px] rounded-2xl border border-[rgb(var(--line))] p-8 sm:p-10"
           style={{
             position: "relative",
+            overflow: "hidden",
             background: "rgb(var(--surface-elevated))",
             animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
           }}
         >
           <div className="flex flex-col gap-6">
 
-            {/* Tab notch */}
-            <div className="flex justify-center">
+            {/* Tab notch — hidden while on the dedicated email card, since
+                Back already covers navigation there */}
+            <div
+              className="flex justify-center overflow-hidden"
+              style={{
+                height: displayedView === "auth" ? 32 : 0,
+                opacity: displayedView === "auth" ? 1 : 0,
+                transition: "height 280ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease",
+              }}
+            >
               <div className="relative flex items-center gap-1 rounded-full p-[3px]" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                 {pillRect && (
                   <div
@@ -225,21 +528,27 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             {/* Animated content — height locked to the taller of the two tabs
                 so switching never resizes the card. */}
             <div style={{ height: cardHeight, transition: "height 280ms cubic-bezier(0.22,1,0.36,1)", overflow: "hidden" }}>
-              <div style={contentStyle} className="flex flex-col gap-6">
-                {renderBody(displayedTab)}
+              <div ref={liveContentRef} style={contentStyle} className="flex flex-col gap-6">
+                {renderBody(displayedTab, displayedView)}
               </div>
             </div>
 
           </div>
 
-          {/* Hidden sizers — off-screen copies of both tabs used only to
-              measure natural height. Not visible, not interactive. */}
+          {/* Hidden sizers — off-screen copies of every tab × view combo used
+              only to measure natural height. Not visible, not interactive. */}
           <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, visibility: "hidden", pointerEvents: "none", zIndex: -1 }}>
             <div ref={signinSizerRef} className="flex flex-col gap-6">
-              {renderBody("signin")}
+              {renderBody("signin", "auth")}
             </div>
             <div ref={signupSizerRef} className="flex flex-col gap-6">
-              {renderBody("signup")}
+              {renderBody("signup", "auth")}
+            </div>
+            <div ref={signinEmailSizerRef} className="flex flex-col gap-6">
+              {renderBody("signin", "email")}
+            </div>
+            <div ref={signupEmailSizerRef} className="flex flex-col gap-6">
+              {renderBody("signup", "email")}
             </div>
           </div>
         </div>

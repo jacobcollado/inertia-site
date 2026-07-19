@@ -1255,8 +1255,21 @@ function DocsPageInner() {
   }, [activeProductId]);
 
   useEffect(() => {
-    document.body.style.overflow = sheetOpen || searchOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    const locked = sheetOpen || searchOpen;
+    if (!locked) return;
+    // Lock scroll without letting the removed scrollbar shift layout — a bare
+    // `overflow: hidden` changes the viewport width, which resets sticky
+    // elements (like the desktop sidebar) to the top instead of holding their
+    // scrolled position.
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const prevOverflow = document.body.style.overflow;
+    const prevPaddingRight = document.body.style.paddingRight;
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPaddingRight;
+    };
   }, [sheetOpen, searchOpen]);
 
   return (
@@ -1267,7 +1280,7 @@ function DocsPageInner() {
       <header className="lg:hidden flex items-center justify-between px-3 shrink-0" style={{ height: 72, background: "rgb(var(--bg))" }}>
         <div className="flex items-center gap-3 pl-3">
           <Link href="/">
-            <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
+            <img src="/logo.png" alt="Inertia" className="h-5 w-auto" />
           </Link>
           {fromAether && (
             <Link href="/aether" className="flex items-center gap-1 text-[12px] tracking-tight transition-colors" style={{ color: "rgb(var(--muted))", opacity: 0.6 }}>
@@ -1302,7 +1315,7 @@ function DocsPageInner() {
             {/* Logo */}
             <div className="flex items-center justify-between px-3 py-2 mb-1">
               <Link href="/">
-                <img src="/logo.png" alt="Inertia" className="h-5 w-auto dark:invert invert-0" />
+                <img src="/logo.png" alt="Inertia" className="h-5 w-auto" />
               </Link>
               <Link href="/aether/buy" className="text-[11px] tracking-tight font-medium transition-opacity hover:opacity-70" style={{ color: "rgb(var(--muted))", opacity: 0.5 }}>
                 Get Aether
@@ -1583,16 +1596,16 @@ function DocsPageInner() {
             ref={searchRef}
             className="w-full max-w-2xl mx-4 mt-[10vh] rounded-xl overflow-hidden flex flex-col"
             style={{
-              background: "rgba(18,18,20,0.88)",
+              background: "rgba(255,255,255,0.92)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              boxShadow: "0 32px 80px rgba(0,0,0,0.6)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.25)",
               maxHeight: "72vh",
             }}
           >
             {/* Search input */}
             <div className="flex items-center gap-3 px-5 py-4">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0" style={{ color: "rgba(255,255,255,0.3)" }} aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} aria-hidden="true">
                 <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
               </svg>
               <input
@@ -1602,13 +1615,13 @@ function DocsPageInner() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search documentation..."
                 className="flex-1 bg-transparent text-[15px] tracking-tight outline-none"
-                style={{ color: "rgba(255,255,255,0.75)", caretColor: "white" }}
+                style={{ color: "rgba(0,0,0,0.8)", caretColor: "black" }}
               />
               {searchQuery ? (
                 <button
                   onClick={() => setSearchQuery("")}
-                  style={{ color: "rgba(255,255,255,0.3)" }}
-                  className="hover:text-white transition-colors"
+                  style={{ color: "rgba(0,0,0,0.3)" }}
+                  className="hover:text-black transition-colors"
                   aria-label="Clear"
                 >
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5">
@@ -1618,14 +1631,14 @@ function DocsPageInner() {
               ) : (
                 <span
                   className="text-[11px] tracking-tight px-1.5 py-0.5 rounded"
-                  style={{ color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.12)" }}
+                  style={{ color: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,0,0,0.12)" }}
                 >
                   Esc
                 </span>
               )}
             </div>
 
-            <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
+            <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }} />
 
             {/* Results list */}
             <div className="overflow-y-auto flex-1 py-3">
@@ -1634,7 +1647,7 @@ function DocsPageInner() {
                   <div key={p.id} className="mb-2">
                     <p
                       className="text-[11px] tracking-tight font-medium px-5 py-2"
-                      style={{ color: "rgba(255,255,255,0.35)" }}
+                      style={{ color: "rgba(0,0,0,0.4)" }}
                     >
                       {p.name}
                     </p>
@@ -1648,11 +1661,11 @@ function DocsPageInner() {
                           setTimeout(() => document.getElementById(a.id)?.scrollIntoView({ behavior: "smooth" }), 80);
                         }}
                         className="flex items-center gap-3 w-full text-left px-5 py-2.5 transition-colors"
-                        style={{ color: "rgba(255,255,255,0.75)" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                        style={{ color: "rgba(0,0,0,0.78)" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.045)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       >
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.25)" }} aria-hidden="true">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} aria-hidden="true">
                           <rect x="3" y="2" width="10" height="12" rx="1.5" />
                           <line x1="5.5" y1="6" x2="10.5" y2="6" />
                           <line x1="5.5" y1="9" x2="9" y2="9" />
@@ -1663,7 +1676,7 @@ function DocsPageInner() {
                   </div>
                 ))
               ) : searchResults.length === 0 ? (
-                <p className="px-5 py-8 text-[13px] tracking-tight text-center" style={{ color: "rgba(255,255,255,0.3)" }}>
+                <p className="px-5 py-8 text-[13px] tracking-tight text-center" style={{ color: "rgba(0,0,0,0.35)" }}>
                   No results for &ldquo;{searchQuery}&rdquo;
                 </p>
               ) : (
@@ -1679,17 +1692,17 @@ function DocsPageInner() {
                         setTimeout(() => document.getElementById(r.articleId)?.scrollIntoView({ behavior: "smooth" }), 80);
                       }}
                       className="flex items-start gap-3 w-full text-left px-5 py-3 transition-colors"
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.045)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 mt-[3px]" style={{ color: "rgba(255,255,255,0.25)" }} aria-hidden="true">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 mt-[3px]" style={{ color: "rgba(0,0,0,0.3)" }} aria-hidden="true">
                         <rect x="3" y="2" width="10" height="12" rx="1.5" />
                         <line x1="5.5" y1="6" x2="10.5" y2="6" />
                         <line x1="5.5" y1="9" x2="9" y2="9" />
                       </svg>
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[13.5px] tracking-tight" style={{ color: "rgba(255,255,255,0.72)" }}>{r.articleTitle}</span>
-                        <span className="text-[11.5px] tracking-tight" style={{ color: "rgba(255,255,255,0.28)" }}>{r.productName} / {r.sectionTitle}</span>
+                        <span className="text-[13.5px] tracking-tight" style={{ color: "rgba(0,0,0,0.75)" }}>{r.articleTitle}</span>
+                        <span className="text-[11.5px] tracking-tight" style={{ color: "rgba(0,0,0,0.32)" }}>{r.productName} / {r.sectionTitle}</span>
                       </div>
                     </button>
                   );
@@ -1717,7 +1730,7 @@ function DocsPageInner() {
           {/* Top row: logo + close */}
           <div className="flex items-center justify-between">
             <Link href="/" onClick={() => setSheetOpen(false)}>
-              <img src="/logo.png" alt="Inertia" className="h-4 w-auto dark:invert invert-0" style={{ opacity: 0.7 }} />
+              <img src="/logo.png" alt="Inertia" className="h-6 w-auto" />
             </Link>
             <button
               onClick={() => setSheetOpen(false)}

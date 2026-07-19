@@ -4037,27 +4037,27 @@ function VercelHero() {
       <div
         className="relative flex items-center"
       >
-        <div className="max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-24 pb-10 flex flex-col items-start text-left sm:items-center sm:text-center gap-10">
+        <div className="max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-24 pb-10 flex flex-col items-center text-center gap-10">
           <img src="/logo.png" alt="Inertia" className="h-8 w-auto" style={fade(0)} aria-hidden="true" />
           <h1
             className="font-normal tracking-tight leading-[0.88]"
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
           >
-            <span className="hidden sm:inline">Design for founders who don't <WaitUnderline>wait</WaitUnderline>.</span>
-            <span className="sm:hidden">Design for founders<br />who don't <WaitUnderline>wait</WaitUnderline>.</span>
+            <span className="hidden sm:inline">Design that moves at your <WaitUnderline>speed</WaitUnderline>.</span>
+            <span className="sm:hidden">Design that moves<br />at your <WaitUnderline>speed</WaitUnderline>.</span>
           </h1>
 
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(300), color: "#5c5c5c" }}
           >
-            Design and development under one roof. Fewer people, faster decisions, <HL>work that actually ships</HL>.
+            We do design and development ourselves, so you're not stuck explaining your vision twice.
           </p>
           <p
             className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
             style={{ ...fade(420), color: "#5c5c5c" }}
           >
-            Whether you're launching a label, running a trade, or shipping a product, you want it done <HL>right the first time</HL>. So do we.
+            Doesn't matter if it's a label, a trade, or a product. You just want it done <HL>right</HL>. So do we.
           </p>
 
           <p
@@ -4166,51 +4166,186 @@ const WORK_ITEMS = [
   { src: "/work/ellora-la/3.png", title: "Ellora La", category: "Product page" },
 ];
 
-function WorkThumbnails() {
-  const [active, setActive] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+// Fluid, seamless carousel: a real horizontal track (not a crossfade) with a
+// slide cloned on each end so it can wrap without ever snapping backward.
+// Autoplay, drag/swipe, dot nav, and arrows all move the same `index` state;
+// the only special case is the wrap jump, which turns transitions off for one
+// frame. On desktop each slide is sized to ~78% of the track so the next (and,
+// once you've moved, previous) slide peeks in at the edges.
+const WORK_SLIDE_MS = 4200;
+const WORK_EASE = "cubic-bezier(0.65,0,0.35,1)";
+const WORK_DURATION = 900;
+const WORK_PEEK_PCT = 58; // desktop slide width as % of track
 
-  const advance = () => {
-    setActive(i => (i + 1) % WORK_ITEMS.length);
-  };
+function WorkThumbnails() {
+  const total = WORK_ITEMS.length;
+  // index runs 1..total inside a [last-clone, ...items, first-clone] track
+  const [index, setIndex] = useState(1);
+  const [animate, setAnimate] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const widthRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dragState = useRef<{ startX: number; dragging: boolean } | null>(null);
+
+  const slides = [WORK_ITEMS[total - 1], ...WORK_ITEMS, WORK_ITEMS[0]];
+  const slideWidth = isDesktop ? WORK_PEEK_PCT : 100;
+  // center the active slide within the track when it's narrower than 100%
+  const centerOffset = (100 - slideWidth) / 2;
+
+  const goTo = (i: number) => { setAnimate(true); setIndex(i); };
+  const advance = () => goTo(index + 1);
+  const retreat = () => goTo(index - 1);
 
   useEffect(() => {
-    timerRef.current = setInterval(advance, 6000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    if (paused) return;
+    timerRef.current = setTimeout(advance, WORK_SLIDE_MS);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, paused]);
+
+  useEffect(() => {
+    const measure = () => {
+      if (trackRef.current) widthRef.current = trackRef.current.parentElement!.getBoundingClientRect().width;
+      setIsDesktop(window.innerWidth >= 640);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const item = WORK_ITEMS[active];
+  // After the wrap-slide finishes animating, jump instantly (no transition)
+  // back to the real slide at the opposite end so the loop never runs out.
+  const onTransitionEnd = () => {
+    if (index === 0) { setAnimate(false); setIndex(total); }
+    else if (index === total + 1) { setAnimate(false); setIndex(1); }
+  };
+  useEffect(() => {
+    if (!animate) {
+      const id = requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [animate]);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    dragState.current = { startX: e.clientX, dragging: true };
+    setPaused(true);
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragState.current?.dragging) return;
+    setDragX(e.clientX - dragState.current.startX);
+  };
+  const endDrag = () => {
+    if (!dragState.current?.dragging) return;
+    dragState.current.dragging = false;
+    const w = widthRef.current || 1;
+    const threshold = w * 0.12;
+    setAnimate(true);
+    if (dragX < -threshold) setIndex(i => i + 1);
+    else if (dragX > threshold) setIndex(i => i - 1);
+    setDragX(0);
+    setPaused(false);
+  };
+
+  const dragPct = widthRef.current ? (dragX / widthRef.current) * 100 : 0;
+  // each slide occupies `slideWidth`%; shift left by index slides, then add
+  // the centering offset so the active slide sits in the middle on desktop
+  const trackOffset = -index * slideWidth + centerOffset + dragPct;
+
+  const arrowClass = "flex items-center justify-center size-9 rounded-full transition-all duration-200 hover:scale-105";
+  const arrowStyle = { background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--fg))" } as const;
 
   return (
-    <section className="rise w-full max-w-[88rem] mx-auto px-3 sm:px-8">
+    <section
+      className="rise relative"
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => { setPaused(false); dragState.current = null; }}
+    >
       <FollowerPointerCard title="View project" className="w-full">
-        <Link href="/work" className="block relative w-full rounded-2xl" style={{ aspectRatio: "16 / 9", background: "#0a0a0a", cursor: "none" }}>
-        <div className="absolute inset-0 overflow-hidden rounded-2xl">
-          {WORK_ITEMS.map((w, i) => (
-            <img
-              key={w.src}
-              src={w.src}
-              alt={w.title}
-              draggable={false}
-              className="absolute inset-0 w-full h-full object-cover object-top"
+        <div className="relative w-full select-none" style={{ aspectRatio: "16 / 9", maxHeight: 560, background: "rgb(var(--bg))" }}>
+          <div className="absolute inset-0 overflow-hidden">
+            <div
+              ref={trackRef}
+              className="flex h-full"
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
               style={{
-                opacity: i === active ? 1 : 0,
-                transition: "opacity 600ms ease",
-                zIndex: i === active ? 1 : 0,
+                transform: `translateX(${trackOffset}%)`,
+                transition: animate ? `transform ${WORK_DURATION}ms ${WORK_EASE}` : "none",
+                touchAction: "pan-y",
               }}
-            />
-          ))}
-
-          {/* Bottom fade + label */}
-          <div className="absolute inset-x-0 bottom-0 z-10" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)" }}>
-            <div className="p-4" style={{ backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", maskImage: "linear-gradient(to top, black 60%, transparent 100%)", WebkitMaskImage: "linear-gradient(to top, black 60%, transparent 100%)" }}>
-              <p className="text-[14px] sm:text-[18px] tracking-tight text-white font-normal">{item.title}</p>
-              <p className="text-[11px] sm:text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{item.category}</p>
+              onTransitionEnd={onTransitionEnd}
+            >
+              {slides.map((w, i) => {
+                const on = i === index;
+                // peeking slides sit shorter and grow to full height as they
+                // slide into the active center; centered vertically so both
+                // edges ease in/out together rather than pinning to the top.
+                const heightPct = on || !isDesktop ? 100 : 84;
+                return (
+                  <Link
+                    key={`${w.src}-${i}`}
+                    href="/work"
+                    draggable={false}
+                    onDragStart={(e) => e.preventDefault()}
+                    onClickCapture={(e) => { if (Math.abs(dragX) > 6) e.preventDefault(); }}
+                    className="relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
+                    style={{ width: `${slideWidth}%`, cursor: "none", WebkitUserDrag: "none" } as React.CSSProperties}
+                    tabIndex={on ? 0 : -1}
+                  >
+                    <div
+                      className="relative w-full rounded-2xl overflow-hidden"
+                      style={{
+                        height: `${heightPct}%`,
+                        transition: `height ${WORK_DURATION}ms ${WORK_EASE}`,
+                      }}
+                    >
+                      <img
+                        src={w.src}
+                        alt={w.title}
+                        draggable={false}
+                        className="w-full h-full object-cover object-top"
+                        style={{
+                          filter: on || !isDesktop ? "none" : "brightness(0.55)",
+                          transition: "filter 500ms ease",
+                        }}
+                      />
+                      {/* Bottom fade + label — scoped to this slide so it never overhangs into neighbors */}
+                      <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none">
+                        <div className="p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)" }}>
+                          <p className="text-[14px] sm:text-[18px] tracking-tight text-white font-normal">{w.title}</p>
+                          <p className="text-[11px] sm:text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{w.category}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
+
         </div>
-        </Link>
       </FollowerPointerCard>
+
+      {/* Prev / next arrows — below the carousel, mobile only (desktop drags instead) */}
+      <div className="flex sm:hidden items-center justify-end gap-3 mt-5 px-3">
+        <button type="button" aria-label="Previous project" onClick={retreat} className={arrowClass} style={arrowStyle}>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+            <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
+          </svg>
+        </button>
+        <button type="button" aria-label="Next project" onClick={advance} className={arrowClass} style={arrowStyle}>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+            <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9 4 13 8 9 12" />
+          </svg>
+        </button>
+      </div>
     </section>
   );
 }
@@ -4232,7 +4367,7 @@ function VisualLayout() {
 
       <CalEmbed />
 
-      <div className="py-14 sm:py-5" />
+      <div className="py-14 sm:py-20" />
 
       <IndexFaq />
 
