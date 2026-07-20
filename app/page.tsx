@@ -4088,29 +4088,12 @@ function VercelHero({ accentColor }: { accentColor: string }) {
       <div
         className="relative flex items-center"
       >
-        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-24 sm:pt-40 pb-10 pb-[22dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
+        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-24 sm:pt-40 pb-10 pb-[30dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
           <h1
             className="font-normal tracking-tight leading-[0.88] max-w-xl"
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             Design that moves at your{" "}
-            <span
-              className="inline-flex items-center justify-center align-middle"
-              style={{
-                width: "0.95em",
-                height: "0.95em",
-                borderRadius: "0.18em",
-                background: "rgb(var(--fg) / 0.06)",
-                marginRight: "0.12em",
-                marginBottom: "0.08em",
-                transform: "rotate(6deg)",
-                boxShadow: "inset 0 1px 1px rgb(255 255 255 / 0.5), inset 0 -2px 3px rgb(var(--fg) / 0.08), 0 2px 4px rgb(0 0 0 / 0.08), 0 6px 12px rgb(0 0 0 / 0.06)",
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: "68%", height: "68%", transition: "stroke 600ms ease, filter 600ms ease", filter: `drop-shadow(0 1px 1px rgb(255 255 255 / 0.6)) drop-shadow(0 1.5px 2px ${accentColor}55)` }} aria-hidden="true">
-                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />
-              </svg>
-            </span>
             <GradientWord color={accentColor}>speed</GradientWord>
           </h1>
 
@@ -4158,14 +4141,6 @@ function VercelHero({ accentColor }: { accentColor: string }) {
               Send a message
             </a>
           </div>
-
-          <Link
-            href="/login"
-            className="text-[13px] tracking-tight transition-opacity hover:opacity-70"
-            style={{ ...fade(780), color: "#8a8a8a" }}
-          >
-            Already a client? Sign in
-          </Link>
         </div>
       </div>
     </section>
@@ -4526,6 +4501,9 @@ function ClientCarousel() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollAnimRef = useRef<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchRef = useRef<{ startX: number; startScrollLeft: number } | null>(null);
 
   useEffect(() => {
     fetch("/api/content").then(r => r.json()).then(d => {
@@ -4544,26 +4522,60 @@ function ClientCarousel() {
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   };
 
+  // Mobile only: whichever card sits nearest the track's center gets the
+  // "active" hover-style treatment (scale + shadow), so it applies whether
+  // you got there by touch, drag, or the arrow buttons — not just touch
+  // events on that specific card.
+  const updateActiveCard = () => {
+    if (window.innerWidth >= 640) { setActiveIndex(null); return; }
+    const el = scrollRef.current;
+    const cards = cardRefs.current;
+    if (!el) return;
+    const trackRect = el.getBoundingClientRect();
+    const center = trackRect.left + trackRect.width / 2;
+    let nearest: number | null = null;
+    let nearestDist = Infinity;
+    cards.forEach((card, i) => {
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      const dist = Math.abs(r.left + r.width / 2 - center);
+      if (dist < nearestDist) { nearestDist = dist; nearest = i; }
+    });
+    setActiveIndex(nearest);
+  };
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    const onScroll = () => {
+      updateScrollState();
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+      settleTimerRef.current = setTimeout(updateActiveCard, 100);
+    };
     updateScrollState();
-    el.addEventListener("scroll", updateScrollState, { passive: true });
-    window.addEventListener("resize", updateScrollState);
+    updateActiveCard();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     // Cards' real width isn't known until their images finish loading, so
     // the initial scrollWidth read above can be stale — recheck once layout
     // settles.
-    const ro = new ResizeObserver(updateScrollState);
+    const ro = new ResizeObserver(onScroll);
     ro.observe(el);
     return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      window.removeEventListener("resize", updateScrollState);
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       ro.disconnect();
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
     };
   }, [items]);
 
-  // Scroll exactly to the start edge of the next/previous card, rather than
-  // a fixed pixel delta, so the landing position always aligns with a card.
+  // Scroll exactly to the next/previous card's snap position, rather than a
+  // fixed pixel delta, so the landing position always aligns with a card.
+  // Compares each card's own snap target (its offset on desktop's snap-start,
+  // or its centered offset on mobile's snap-center) against the current
+  // scroll position — comparing raw left-edge offsets against scrollLeft
+  // breaks on mobile since a centered card's scrollLeft sits mid-card, not
+  // at its edge.
   const scroll = (dir: "left" | "right") => {
     const el = scrollRef.current;
     if (!el) return;
@@ -4571,20 +4583,29 @@ function ClientCarousel() {
     if (cards.length === 0) return;
     if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
 
+    const isMobile = window.innerWidth < 640;
     const start = el.scrollLeft;
     const trackLeft = el.getBoundingClientRect().left;
-    const offsets = cards.map(c => c.getBoundingClientRect().left - trackLeft + el.scrollLeft);
+    const leftOffsets = cards.map(c => c.getBoundingClientRect().left - trackLeft + el.scrollLeft);
+    const maxScroll = el.scrollWidth - el.clientWidth;
 
+    // snap-center targets the offset that puts a card's own center at the
+    // track's center; snap-start targets its left edge directly.
+    const snapTargets = isMobile
+      ? cards.map((c, i) => Math.max(0, Math.min(maxScroll, leftOffsets[i] + c.clientWidth / 2 - el.clientWidth / 2)))
+      : leftOffsets;
+
+    const tolerance = 8;
     let target: number;
     if (dir === "right") {
-      target = offsets.find(o => o > start + 4) ?? offsets[offsets.length - 1];
+      target = snapTargets.find(o => o > start + tolerance) ?? snapTargets[snapTargets.length - 1];
     } else {
-      const reachable = offsets.filter(o => o < start - 4);
-      target = reachable.length ? reachable[reachable.length - 1] : offsets[0];
+      const reachable = snapTargets.filter(o => o < start - tolerance);
+      target = reachable.length ? reachable[reachable.length - 1] : snapTargets[0];
     }
-    target = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth));
+    target = Math.max(0, Math.min(target, maxScroll));
 
-    const duration = 500;
+    const duration = 320;
     const startTime = performance.now();
     const step = (now: number) => {
       const t = Math.min(1, (now - startTime) / duration);
@@ -4593,34 +4614,70 @@ function ClientCarousel() {
         scrollAnimRef.current = requestAnimationFrame(step);
       } else {
         scrollAnimRef.current = null;
+        if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+        updateActiveCard();
       }
     };
     scrollAnimRef.current = requestAnimationFrame(step);
   };
 
-  const arrowClass = "flex shrink-0 items-center justify-center w-9 h-9 rounded-full transition-all duration-200 hover:scale-105";
+  // On mobile, swiping should move exactly one card at a time rather than
+  // free-scrolling with native momentum (which can fly past several cards
+  // on a fast flick). Track the gesture ourselves and, on release, hand off
+  // to the same one-card `scroll()` used by the arrow buttons.
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (window.innerWidth >= 640) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    touchRef.current = { startX: e.touches[0].clientX, startScrollLeft: el.scrollLeft };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const t = touchRef.current;
+    touchRef.current = null;
+    if (!t || window.innerWidth >= 640) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const dx = e.changedTouches[0].clientX - t.startX;
+    // Kill any native momentum the browser started on release, so it can't
+    // keep carrying the track past the one card we're about to land on.
+    el.style.overflowX = "hidden";
+    requestAnimationFrame(() => { el.style.overflowX = "auto"; });
+    if (Math.abs(dx) < 24) {
+      el.scrollLeft = t.startScrollLeft;
+      updateActiveCard();
+      return;
+    }
+    scroll(dx < 0 ? "right" : "left");
+  };
+
+  const arrowClass = "flex shrink-0 items-center justify-center size-11 sm:size-9 rounded-full transition-all duration-200 hover:scale-105";
   const arrowStyle = { background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" } as const;
 
   if (items.length === 0) return null;
 
   return (
-    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section className="rise w-full max-w-[88rem] mx-auto px-3 sm:px-8">
       <div className="relative">
         <div
           ref={scrollRef}
-          className="flex items-center gap-3 sm:gap-4 overflow-x-auto touch-pan-x snap-x snap-mandatory scroll-smooth py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          className="flex items-center gap-3 sm:gap-4 overflow-x-auto touch-pan-x sm:snap-x sm:snap-mandatory scroll-smooth py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
+          <div className="shrink-0 sm:hidden" style={{ width: 12 }} aria-hidden="true" />
           {items.map((item, i) => (
             <Link
               key={item.slug}
               ref={(el) => { cardRefs.current[i] = el; }}
               href={`/work#project-${item.slug}`}
-              className="relative shrink-0 snap-center sm:snap-start rounded-2xl overflow-hidden group w-[240px] sm:w-[340px] transition-transform duration-500 hover:scale-105 active:scale-105"
-              style={{ aspectRatio: "4 / 5", transition: "transform 500ms ease, box-shadow 500ms ease" }}
+              className="relative shrink-0 snap-center sm:snap-start rounded-2xl overflow-hidden group w-[240px] sm:w-[340px] sm:hover:scale-105"
+              style={{
+                aspectRatio: "4 / 5",
+                transition: "transform 320ms cubic-bezier(0.22,1,0.36,1), box-shadow 320ms ease",
+                ...(activeIndex === i ? { transform: "scale(1.05)", boxShadow: "0 0 22px 0px rgba(0,0,0,0.35)" } : {}),
+              }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
-              onTouchStart={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
-              onTouchEnd={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+              onMouseLeave={(e) => { if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
             >
               <img
                 src={item.image}
@@ -4646,7 +4703,7 @@ function ClientCarousel() {
           style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)", opacity: canScrollRight ? 1 : 0 }} />
       </div>
 
-      <div className="flex items-center justify-end gap-3 mt-5 px-6 sm:px-8">
+      <div className="flex items-center justify-end gap-3 mt-5 pl-3 sm:pl-8 pr-1 sm:pr-3">
         <button type="button" aria-label="Scroll left" onClick={() => scroll("left")} className={arrowClass} style={arrowStyle} disabled={!canScrollLeft}>
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />

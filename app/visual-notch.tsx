@@ -23,6 +23,7 @@ import {
   HiOutlineShieldCheck,
   HiOutlineMapPin,
   HiOutlineSwatch,
+  HiOutlineUser,
 } from "react-icons/hi2";
 
 type Child = {
@@ -565,6 +566,77 @@ function InertiaLogo() {
   );
 }
 
+/* ── Merged CTA — two separate rounded pills (book-a-call + sign-in avatar)
+   bridged by a thin connector at vertical center, so they read as one
+   linked shape rather than a single continuous pill. ──────────────────── */
+
+function MergedCTA({ compact = false }: { compact?: boolean }) {
+  const h = compact ? 40 : 44;
+  const iconSize = compact ? 16 : 18;
+  const gap = 2;
+  return (
+    <div className="relative inline-flex items-center" style={{ height: h, gap: 0 }}>
+      <a
+        href="https://cal.com/jacob-c-99otvp/15min"
+        target="_blank"
+        rel="noreferrer"
+        className={"relative " + (compact ? "inline-flex px-4 py-2.5 text-[15px]" : "inline-flex px-4 py-2.5 text-[15px] sm:px-5 sm:py-2.5 sm:text-[16px]")}
+        style={{
+          zIndex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          lineHeight: 1,
+          borderRadius: 999,
+          background: "rgb(var(--fg))",
+          color: "rgb(var(--bg))",
+          fontWeight: 500,
+          letterSpacing: "-0.01em",
+          textDecoration: "none",
+          whiteSpace: "nowrap",
+          transition: "transform 150ms ease",
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+      >
+        Book a call
+      </a>
+      {/* Bridge — thin bar connecting the two pills, sits behind them via
+          negative margins so it overlaps into each rather than floating in
+          an empty gap. */}
+      <span
+        aria-hidden="true"
+        style={{
+          width: gap + 6,
+          marginLeft: -3,
+          marginRight: -3,
+          height: 16,
+          background: "rgb(var(--fg))",
+          zIndex: 0,
+          flexShrink: 0,
+        }}
+      />
+      <Link
+        href="/login"
+        aria-label="Sign in"
+        className="relative flex items-center justify-center"
+        style={{
+          zIndex: 1,
+          width: h,
+          height: h,
+          borderRadius: "50%",
+          background: "rgb(var(--fg))",
+          color: "rgb(var(--bg))",
+          transition: "transform 150ms ease",
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
+      >
+        <HiOutlineUser style={{ width: iconSize, height: iconSize }} />
+      </Link>
+    </div>
+  );
+}
+
 /* ── Root ────────────────────────────────────────────────────────── */
 
 let headerHasAnimated = false;
@@ -662,28 +734,12 @@ export function VisualNotch() {
               <InertiaLogo />
             </Link>
             <div className="site-header__actions">
-              <a
-                href="https://cal.com/jacob-c-99otvp/15min"
-                target="_blank"
-                rel="noreferrer"
-                className={(isComponents ? "hidden sm:inline-flex" : "inline-flex") + " px-4 py-2.5 text-[15px] sm:px-5 sm:py-2.5 sm:text-[16px]"}
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  lineHeight: 1,
-                  borderRadius: 999,
-                  background: "rgb(var(--fg))",
-                  color: "rgb(var(--bg))",
-                  fontWeight: 500,
-                  letterSpacing: "-0.01em",
-                  textDecoration: "none",
-                  transition: "opacity 150ms ease, transform 150ms ease",
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = "0.8"; (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = "1"; (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
-              >
-                Book a call
-              </a>
+              <div className="hidden sm:flex">
+                <MergedCTA />
+              </div>
+              <div className={isComponents ? "hidden" : "flex sm:hidden"}>
+                <MergedCTA compact />
+              </div>
               {isComponents && (
                 <button
                   className="site-header__hamburger sm:hidden"
