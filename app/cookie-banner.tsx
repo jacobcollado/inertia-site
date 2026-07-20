@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import posthog from "posthog-js";
+import { usePostHog } from "./posthog-provider";
 
 function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   const id = "analytics-toggle";
@@ -54,6 +54,7 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
 }
 
 export function CookieBanner() {
+  const setConsent = usePostHog();
   const [cookieVisible, setCookieVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [analytics, setAnalytics] = useState(true);
@@ -69,11 +70,7 @@ export function CookieBanner() {
 
   const applyConsent = (analyticsAllowed: boolean) => {
     try { localStorage.setItem("cookie_consent", analyticsAllowed ? "accepted" : "declined"); } catch {}
-    if (analyticsAllowed) {
-      posthog.opt_in_capturing();
-    } else {
-      posthog.opt_out_capturing();
-    }
+    setConsent(analyticsAllowed);
     setCookieVisible(false);
   };
 

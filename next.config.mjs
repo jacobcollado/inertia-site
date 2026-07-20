@@ -50,6 +50,9 @@ const nextConfig = {
     ];
   },
   skipTrailingSlashRedirect: true,
+  images: {
+    qualities: [75, 90],
+  },
   turbopack: {
     root: path.resolve("."),
   },

@@ -743,6 +743,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         draggable={false}
                         priority={inViewport}
                         loading={inViewport ? undefined : "lazy"}
+                        quality={90}
                         sizes={isDesktop ? `${WORK_PEEK_PCT}vw` : "calc(100vw - 12px)"}
                         className="object-cover object-top"
                         style={{
@@ -1027,6 +1028,7 @@ function ClientCarousel() {
                 alt={item.client}
                 fill
                 loading="lazy"
+                quality={90}
                 sizes="(max-width: 640px) 240px, 340px"
                 className="object-cover"
                 draggable={false}
