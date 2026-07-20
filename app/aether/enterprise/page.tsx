@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
+
 export const metadata: Metadata = {
   title: "Aether Enterprise",
   description: "Build client stores faster on Aether. Per-store or unlimited commercial licenses, lifetime updates, and full client handoff. Made for agencies, brand studios, and operators.",
@@ -37,7 +39,7 @@ const PLANS = [
     description: "Pay once per storefront. No renewals, no seat caps. Scales cleanly as your client list grows.",
     includes: ["Full Aether theme", "Lifetime updates for that store", "Commercial use licence", "Priority email support"],
     cta: "Get started",
-    href: "/contact?ref=enterprise-per-store",
+    href: CAL_LINK,
     featured: false,
   },
   {
@@ -47,7 +49,7 @@ const PLANS = [
     description: "One payment covers every store you ever launch on Aether. Best for agencies deploying at volume.",
     includes: ["Full Aether theme", "Unlimited store deployments", "Lifetime updates on all stores", "Dedicated support channel", "Early access to new features"],
     cta: "Get unlimited",
-    href: "/contact?ref=enterprise-unlimited",
+    href: CAL_LINK,
     featured: true,
   },
 ];
@@ -70,7 +72,9 @@ export default function EnterprisePage() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/contact?ref=enterprise"
+            href={CAL_LINK}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Talk to us
@@ -165,6 +169,8 @@ export default function EnterprisePage() {
             <Link
               key={plan.name}
               href={plan.href}
+              target="_blank"
+              rel="noreferrer"
               className="group flex flex-col gap-6 rounded-2xl border px-7 py-8 transition-colors"
               style={{
                 background: plan.featured ? "rgb(var(--surface-elevated))" : "rgb(var(--bg))",
@@ -217,7 +223,9 @@ export default function EnterprisePage() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/contact?ref=enterprise-cta"
+            href={CAL_LINK}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Talk to us

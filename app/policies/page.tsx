@@ -77,12 +77,14 @@ export default function PoliciesPage() {
         <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] max-w-sm leading-relaxed" style={{ opacity: 0.6 }}>
           Questions about any of these? We're happy to explain anything in plain language.
         </p>
-        <Link
-          href="/contact"
+        <a
+          href="https://cal.com/jacob-c-99otvp/15min"
+          target="_blank"
+          rel="noreferrer"
           className="text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors"
         >
           Get in touch &rarr;
-        </Link>
+        </a>
       </section>
 
     </main>

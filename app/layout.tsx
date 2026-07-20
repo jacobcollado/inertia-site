@@ -107,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "contactPoint": {
               "@type": "ContactPoint",
               "contactType": "customer support",
-              "url": "https://byinertia.com/contact",
+              "url": "https://cal.com/jacob-c-99otvp/15min",
             },
           })}}
         />

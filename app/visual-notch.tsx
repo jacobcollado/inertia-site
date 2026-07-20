@@ -14,17 +14,15 @@ import {
   HiOutlineNewspaper,
   HiOutlineBookOpen,
   HiOutlineClipboardDocumentList,
-  HiOutlineCreditCard,
   HiOutlineBuildingOffice,
   HiOutlinePuzzlePiece,
-  HiOutlineInformationCircle,
-  HiOutlineBriefcase,
   HiOutlineQuestionMarkCircle,
   HiOutlineShieldCheck,
-  HiOutlineMapPin,
   HiOutlineSwatch,
   HiOutlineUser,
 } from "react-icons/hi2";
+
+const CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
 
 type Child = {
   label: string;
@@ -39,6 +37,7 @@ type NavItem = {
   label: string;
   children?: Child[];
   href?: string;
+  external?: boolean;
 };
 
 const NAV: NavItem[] = [
@@ -54,7 +53,7 @@ const NAV: NavItem[] = [
   {
     label: "Work",
     children: [
-      { label: "Work with us", description: "Custom builds, shipped on time.", href: "/contact", icon: <HiOutlineChatBubbleLeftRight /> },
+      { label: "Work with us", description: "Custom builds, shipped on time.", href: CAL_LINK, icon: <HiOutlineChatBubbleLeftRight />, external: true },
       { label: "Shipped using Inertia", description: "Real stores built on our themes.", href: "/work", icon: <HiOutlineSparkles /> },
     ],
   },
@@ -70,15 +69,11 @@ const NAV: NavItem[] = [
   {
     label: "Company",
     children: [
-      { label: "About", description: "Who we are and why we build this way.", href: "/about", icon: <HiOutlineInformationCircle /> },
-      { label: "Roadmap", description: "What we've shipped and what's coming.", href: "/roadmap", icon: <HiOutlineMapPin /> },
-      { label: "Careers", description: "Join us when the time is right.", href: "/careers", icon: <HiOutlineBriefcase /> },
-      { label: "Help", description: "Get support for anything we've shipped.", href: "/contact", icon: <HiOutlineQuestionMarkCircle /> },
+      { label: "Help", description: "Get support for anything we've shipped.", href: CAL_LINK, icon: <HiOutlineQuestionMarkCircle />, external: true },
       { label: "Policies", description: "Terms, licenses, and policies.", href: "/policies", icon: <HiOutlineShieldCheck /> },
     ],
   },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact", href: CAL_LINK, external: true },
 ];
 
 /* ── Desktop mega menu ───────────────────────────────────────────── */
@@ -135,7 +130,12 @@ function NavTrigger({
   if (item.href) {
     return (
       <div className="site-header__menu-root" ref={triggerRef}>
-        <Link href={item.href} className="site-header__link site-header__link--pricing">
+        <Link
+          href={item.href}
+          target={item.external ? "_blank" : undefined}
+          rel={item.external ? "noreferrer" : undefined}
+          className="site-header__link site-header__link--pricing"
+        >
           {item.label}
         </Link>
       </div>
@@ -531,7 +531,14 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
           {NAV.map((item) => (
             item.href ? (
               <div key={item.label} className="mobile-nav__section">
-                <Link href={item.href} onClick={onClose} className="mobile-nav__section-trigger" style={{ textDecoration: "none" }}>
+                <Link
+                  href={item.href}
+                  onClick={onClose}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noreferrer" : undefined}
+                  className="mobile-nav__section-trigger"
+                  style={{ textDecoration: "none" }}
+                >
                   {item.label}
                 </Link>
               </div>

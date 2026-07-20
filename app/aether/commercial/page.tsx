@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
+
 export const metadata: Metadata = {
   title: "Aether commercial",
   description: "Ship client stores faster on Aether. Per-store or unlimited commercial licences, lifetime updates, and clean client handoff. Built for agencies, brand studios, and operators.",
@@ -37,7 +39,7 @@ const PLANS = [
     description: "Pay once for each storefront you launch. No renewals, no seat caps. Costs scale with your client list, nothing else.",
     includes: ["Full Aether theme", "Lifetime updates for that store", "Commercial use licence", "Priority email support"],
     cta: "Get started",
-    href: "/contact?ref=commercial-per-store",
+    href: CAL_LINK,
     featured: false,
   },
   {
@@ -47,7 +49,7 @@ const PLANS = [
     description: "One payment covers every store you ever launch on Aether. The obvious pick if you ship at volume.",
     includes: ["Full Aether theme", "Unlimited store deployments", "Lifetime updates on all stores", "Dedicated support channel", "Early access to new features"],
     cta: "Get unlimited",
-    href: "/contact?ref=commercial-unlimited",
+    href: CAL_LINK,
     featured: true,
   },
 ];
@@ -70,7 +72,9 @@ export default function CommercialPage() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/contact?ref=commercial"
+            href={CAL_LINK}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Talk to us
@@ -161,6 +165,8 @@ export default function CommercialPage() {
             <Link
               key={plan.name}
               href={plan.href}
+              target="_blank"
+              rel="noreferrer"
               className="group flex flex-col gap-6 rounded-2xl border px-7 py-8 transition-colors"
               style={{
                 background: plan.featured ? "rgb(var(--surface-elevated))" : "rgb(var(--bg))",
@@ -213,7 +219,9 @@ export default function CommercialPage() {
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
-            href="/contact?ref=commercial-cta"
+            href={CAL_LINK}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity"
           >
             Talk to us

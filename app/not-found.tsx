@@ -30,12 +30,14 @@ export default function NotFound() {
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M10 3L5 8l5 5" /></svg>
             Go home
           </Link>
-          <Link
-            href="/contact"
+          <a
+            href="https://cal.com/jacob-c-99otvp/15min"
+            target="_blank"
+            rel="noreferrer"
             className="text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors opacity-60 hover:opacity-100"
           >
             Contact
-          </Link>
+          </a>
         </div>
       </div>
 
