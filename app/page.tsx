@@ -4091,7 +4091,7 @@ function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accen
       <div
         className="relative flex items-center"
       >
-        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-24 sm:pt-40 pb-10 pb-[30dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
+        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-16 sm:pt-40 pb-10 pb-[34dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[12px] tracking-tight"
             style={{ ...fade(0), background: "#f0f0f0", color: "#5c5c5c" }}
@@ -4104,7 +4104,9 @@ function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accen
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             Design that moves at your{" "}
-            <GradientWord color={accentColor} trigger={accentTrigger}>speed</GradientWord>
+            <span className="inline-block" style={{ transform: "skewX(-6deg)" }}>
+              <GradientWord color={accentColor} trigger={accentTrigger}>speed</GradientWord>
+            </span>
           </h1>
 
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
@@ -4197,9 +4199,9 @@ const WORK_ITEMS = [
   { src: "/work/ellora-la/1.png", title: "Ellora La", category: "Shopify storefront", accent: "#cb591b" },
   { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page", accent: "#1a1a1a" },
   { src: "/work/inertia-site.png", title: "Inertia", category: "Web design", accent: "#154365" },
-  { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront", accent: "#dc2626" },
-  { src: "/work/ftgioo-2.png", title: "Ft. Gioo", category: "Shop page", accent: "#dc2626" },
-  { src: "/work/ftgioo-3.png", title: "Ft. Gioo", category: "Collection page", accent: "#dc2626" },
+  { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront", accent: "#b8433a" },
+  { src: "/work/ftgioo-2.png", title: "Ft. Gioo", category: "Shop page", accent: "#b8433a" },
+  { src: "/work/ftgioo-3.png", title: "Ft. Gioo", category: "Collection page", accent: "#b8433a" },
   { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront", accent: "#3a627c" },
   { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page", accent: "#4a5a2c" },
   { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store", accent: "#9c0000" },
@@ -4282,6 +4284,11 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // index runs 1..total inside the [last-clone, ...items, first-clone] track,
   // wrapping via onTransitionEnd, so map back to the real (non-clone) item.
   const activeAccent = WORK_ITEMS[((index - 1) % total + total) % total].accent;
+  // Dark blue/green accents read dimmer than warm ones at the same alpha, so
+  // give the glow a boost specifically for those slides (Aether, Inertia,
+  // Subtle Goods' olive green).
+  const isDimAccent = ["#39637e", "#5b7496", "#154365", "#4a5a2c"].includes(activeAccent);
+  const glowOpacity = isDimAccent ? 0.34 : 0.20;
 
   // Report the active slide's accent color upward so the hero can tint
   // itself to match. Keyed on `index` (not the derived color) so the hero's
@@ -4364,7 +4371,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
           width: "100vw",
           height: isDesktop ? 900 : 1500,
           pointerEvents: "none",
-          ["--hero-glow-color" as string]: hexToRgba(activeAccent, 0.20),
+          ["--hero-glow-color" as string]: hexToRgba(activeAccent, glowOpacity),
           zIndex: 0,
         }}
       />
@@ -4623,9 +4630,10 @@ function ClientCarousel() {
 
     // Scale the outgoing/incoming cards the moment the move starts, not once
     // the scroll finishes, so the shrink/grow happens *during* the motion
-    // instead of as an afterthought once it lands.
+    // instead of as an afterthought once it lands. Mobile only — desktop
+    // never shows the active-card treatment.
     if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-    setActiveIndex(targetIndex);
+    if (isMobile) setActiveIndex(targetIndex);
 
     const duration = 150;
     const startTime = performance.now();
