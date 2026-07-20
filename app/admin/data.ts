@@ -67,6 +67,8 @@ export type Overview = {
   monthlyRevenue: { month: string; amount: number }[];
   monthlyClients: { month: string; amount: number }[];
   dailyClients: { date: string; amount: number }[];
+  outstandingInvoices: { clientName: string; clientId: string; label: string; amount: number; dueDate: string; overdue: boolean }[];
+  needsAttention: { clientName: string; clientId: string; reason: string }[];
 };
 
 export async function getOverview(clients: Client[]): Promise<Overview> {
@@ -240,6 +242,37 @@ export async function getOverview(clients: Client[]): Promise<Overview> {
     .sort((a, b) => (a.date < b.date ? 1 : -1))
     .slice(0, 6);
 
+  const outstandingInvoices = allInvoices
+    .filter((inv: Record<string, unknown>) => inv.status !== "paid" && inv.status !== "draft")
+    .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
+      new Date(a.due_date as string || 0).getTime() - new Date(b.due_date as string || 0).getTime()
+    )
+    .slice(0, 5)
+    .map((inv: Record<string, unknown>) => ({
+      clientName: (clientNameMap.get(inv.client_id as string) ?? "") as string,
+      clientId: inv.client_id as string,
+      label: inv.label as string,
+      amount: inv.amount as number,
+      dueDate: inv.due_date ? fmtDate(inv.due_date as string) : "",
+      overdue: inv.due_date ? new Date(inv.due_date as string) < now : false,
+    }));
+
+  const needsAttention: { clientName: string; clientId: string; reason: string }[] = [];
+  for (const c of clients) {
+    if (c.banned) {
+      needsAttention.push({ clientName: c.company ?? c.name ?? c.email, clientId: c.id, reason: "Suspended" });
+      continue;
+    }
+    const stalled = c.projects.filter(p => p.status === "paused" || p.status === "on_hold");
+    if (stalled.length > 0) {
+      needsAttention.push({
+        clientName: c.company ?? c.name ?? c.email,
+        clientId: c.id,
+        reason: stalled.length === 1 ? "1 project on hold" : `${stalled.length} projects on hold`,
+      });
+    }
+  }
+
   return {
     totalRevenue,
     outstanding,
@@ -250,5 +283,63 @@ export async function getOverview(clients: Client[]): Promise<Overview> {
     monthlyRevenue,
     monthlyClients,
     dailyClients,
+    outstandingInvoices,
+    needsAttention: needsAttention.slice(0, 5),
   };
+}
+
+export type DocumentInvoice = {
+  id: string;
+  clientId: string;
+  clientName: string;
+  label: string;
+  amount: number;
+  status: string;
+  dueDate: string | null;
+};
+
+export type DocumentFile = {
+  id: string;
+  clientId: string;
+  clientName: string;
+  label: string;
+  url: string;
+  uploadedAt: string;
+};
+
+export async function getDocuments(clients: Client[]): Promise<{ invoices: DocumentInvoice[]; files: DocumentFile[] }> {
+  const admin = createAdminClient();
+
+  const [{ data: invoiceRows }, { data: fileRows }] = await Promise.all([
+    admin.from("invoices").select("id, client_id, label, amount, status, due_date"),
+    admin.from("files").select("id, client_id, label, url, uploaded_at"),
+  ]);
+
+  const clientIdSet = new Set(clients.map(c => c.id));
+  const clientNameMap = new Map(clients.map(c => [c.id, c.company ?? c.name ?? c.email]));
+
+  const invoices = (invoiceRows ?? [])
+    .filter((inv: Record<string, unknown>) => clientIdSet.has(inv.client_id as string))
+    .map((inv: Record<string, unknown>) => ({
+      id: inv.id as string,
+      clientId: inv.client_id as string,
+      clientName: clientNameMap.get(inv.client_id as string) ?? "",
+      label: inv.label as string,
+      amount: inv.amount as number,
+      status: inv.status as string,
+      dueDate: inv.due_date as string | null,
+    }));
+
+  const files = (fileRows ?? [])
+    .filter((f: Record<string, unknown>) => clientIdSet.has(f.client_id as string))
+    .map((f: Record<string, unknown>) => ({
+      id: f.id as string,
+      clientId: f.client_id as string,
+      clientName: clientNameMap.get(f.client_id as string) ?? "",
+      label: f.label as string,
+      url: f.url as string,
+      uploadedAt: f.uploaded_at as string,
+    }));
+
+  return { invoices, files };
 }

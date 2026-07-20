@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { SiShopify, SiTypescript, SiTailwindcss, SiMeta, SiFramer, SiVercel, SiApple, SiNextdotjs, SiReact, SiSupabase, SiCloudflare, SiStripe } from "react-icons/si";
 import { useEffect, useState } from "react";
@@ -3985,6 +3986,26 @@ function WaitUnderline({ children }: { children: React.ReactNode }) {
   );
 }
 
+function GradientWord({ children, color = "#0a84ff" }: { children: React.ReactNode; color?: string }) {
+  return (
+    <span
+      className="gradient-word"
+      style={{
+        backgroundImage: `linear-gradient(90deg, ${color}, ${color}cc, ${color})`,
+        backgroundSize: "300% 100%",
+        WebkitBackgroundClip: "text",
+        backgroundClip: "text",
+        color: "transparent",
+        WebkitTextFillColor: "transparent",
+        fontWeight: 500,
+        transition: "background-image 600ms ease",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
 const HL = ({ children }: { children: React.ReactNode }) => (
   <span
     style={{
@@ -3999,19 +4020,11 @@ const HL = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-function VercelHero() {
+function VercelHero({ accentColor }: { accentColor: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  // Next.js App Router can keep this whole component instance alive across a
-  // client-side nav away from and back to "/" — no unmount, no re-render of
-  // children like ScribblePass, so its one-time draw-in state stays stuck at
-  // "already drawn" from the previous visit and just reappears instantly.
-  // mountId increments each time this effect actually re-fires, and gets used
-  // as a key below to force the scribble to remount and replay its animation.
-  const [mountId, setMountId] = useState(0);
 
   useEffect(() => {
-    setMountId((n) => n + 1);
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
@@ -4032,47 +4045,36 @@ function VercelHero() {
     <section
       ref={ref}
       className="relative"
-      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#fff", color: "#1a1a1a" }}
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#fff", color: "#1a1a1a", overflow: "visible" }}
     >
       <div
         className="relative flex items-center"
       >
-        <div className="max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-24 pb-10 flex flex-col items-center text-center gap-10">
-          <img src="/logo.png" alt="Inertia" className="h-8 w-auto" style={fade(0)} aria-hidden="true" />
+        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-24 pb-10 pb-[22dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
           <h1
-            className="font-normal tracking-tight leading-[0.88]"
-            style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.2rem, 4vw, 2.8rem)" }}
+            className="font-normal tracking-tight leading-[0.88] max-w-xl"
+            style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
-            <span className="hidden sm:inline">Design that moves at your <WaitUnderline>speed</WaitUnderline>.</span>
-            <span className="sm:hidden">Design that moves<br />at your <WaitUnderline>speed</WaitUnderline>.</span>
+            Design that moves at your <GradientWord color={accentColor}>speed</GradientWord>
           </h1>
 
-          <p
-            className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(300), color: "#5c5c5c" }}
-          >
-            We do design and development ourselves, so you're not stuck explaining your vision twice.
-          </p>
-          <p
-            className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(420), color: "#5c5c5c" }}
-          >
-            Doesn't matter if it's a label, a trade, or a product. You just want it done <HL>right</HL>. So do we.
-          </p>
+          <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
+            <p
+              className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-right"
+              style={{ ...fade(300), color: "#5c5c5c" }}
+            >
+              We do design and development ourselves, so you're not stuck explaining your vision twice.
+            </p>
+          </div>
 
-          <p
-            className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight max-w-md"
-            style={{ ...fade(540), color: "#5c5c5c" }}
-          >
-            On Shopify?{" "}
-            <span className="relative inline-block">
-              <ScribbleCircle key={mountId} delay={2500} color="#0a84ff" />
-              <Link href="/aether" className="transition-opacity duration-150 hover:opacity-80" style={{ color: "#0a84ff", textDecoration: "none" }}>
-                Aether <SiShopify className="inline w-3 h-3 relative -top-px" />
-              </Link>
-            </span>
-            , our theme, takes you from install to live in an afternoon.
-          </p>
+          <div className="flex flex-col gap-5 max-w-lg sm:hidden">
+            <p
+              className="text-[16.5px] leading-relaxed tracking-tight"
+              style={{ ...fade(300), color: "#5c5c5c" }}
+            >
+              We do design and development ourselves, so you're not stuck explaining your vision twice.
+            </p>
+          </div>
 
           <div className="flex items-center gap-3">
             <a
@@ -4147,23 +4149,23 @@ function CalEmbed() {
 }
 
 const WORK_ITEMS = [
-  { src: "/work/aether-1.png", title: "Aether Theme", category: "Shopify theme" },
-  { src: "/work/aether-2.png", title: "Aether Theme", category: "Cart design" },
-  { src: "/work/ellora-la/1.png", title: "Ellora La", category: "Shopify storefront" },
-  { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page" },
-  { src: "/work/inertia-site.png", title: "Inertia", category: "Web design" },
-  { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront" },
-  { src: "/work/ftgioo-2.png", title: "Ft. Gioo", category: "Shop page" },
-  { src: "/work/ftgioo-3.png", title: "Ft. Gioo", category: "Collection page" },
-  { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront" },
-  { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page" },
-  { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store" },
-  { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page" },
-  { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page" },
-  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app" },
-  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design" },
-  { src: "/work/ellora-la/2.png", title: "Ellora La", category: "Collection page" },
-  { src: "/work/ellora-la/3.png", title: "Ellora La", category: "Product page" },
+  { src: "/work/aether-1.png", title: "Aether Theme", category: "Shopify theme", accent: "#39637e" },
+  { src: "/work/aether-2.png", title: "Aether Theme", category: "Cart design", accent: "#5b7496" },
+  { src: "/work/ellora-la/1.png", title: "Ellora La", category: "Shopify storefront", accent: "#cb591b" },
+  { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page", accent: "#1a1a1a" },
+  { src: "/work/inertia-site.png", title: "Inertia", category: "Web design", accent: "#154365" },
+  { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront", accent: "#dc2626" },
+  { src: "/work/ftgioo-2.png", title: "Ft. Gioo", category: "Shop page", accent: "#dc2626" },
+  { src: "/work/ftgioo-3.png", title: "Ft. Gioo", category: "Collection page", accent: "#dc2626" },
+  { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront", accent: "#3a627c" },
+  { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page", accent: "#4a5a2c" },
+  { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store", accent: "#9c0000" },
+  { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page", accent: "#1fbdf2" },
+  { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page", accent: "#a50000" },
+  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app", accent: "#6a6dff" },
+  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff" },
+  { src: "/work/ellora-la/2.png", title: "Ellora La", category: "Collection page", accent: "#6f283c" },
+  { src: "/work/ellora-la/3.png", title: "Ellora La", category: "Product page", accent: "#5f696f" },
 ];
 
 // Fluid, seamless carousel: a real horizontal track (not a crossfade) with a
@@ -4177,7 +4179,14 @@ const WORK_EASE = "cubic-bezier(0.65,0,0.35,1)";
 const WORK_DURATION = 900;
 const WORK_PEEK_PCT = 58; // desktop slide width as % of track
 
-function WorkThumbnails() {
+function hexToRgba(hex: string, alpha: number) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
+  const router = useRouter();
   const total = WORK_ITEMS.length;
   // index runs 1..total inside a [last-clone, ...items, first-clone] track
   const [index, setIndex] = useState(1);
@@ -4185,10 +4194,33 @@ function WorkThumbnails() {
   const [paused, setPaused] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [navigating, setNavigating] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const widthRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dragState = useRef<{ startX: number; dragging: boolean } | null>(null);
+  const dragState = useRef<{ startX: number; dragging: boolean; dx: number } | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [scrollScale, setScrollScale] = useState(1);
+
+  // Mobile-only parallax: as the carousel scrolls up into view, scale it
+  // from a shrunken start up to its natural size, tracking scroll position
+  // directly rather than a one-shot reveal. Desktop stays at scale 1.
+  useEffect(() => {
+    if (window.innerWidth >= 640) return;
+    const el = sectionRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // progress 0 when the section's top is at the bottom of the viewport,
+      // 1 once its top has scrolled up to the viewport's vertical center
+      const progress = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.65)));
+      setScrollScale(0.82 + progress * 0.18);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const slides = [WORK_ITEMS[total - 1], ...WORK_ITEMS, WORK_ITEMS[0]];
   const slideWidth = isDesktop ? WORK_PEEK_PCT : 100;
@@ -4205,6 +4237,17 @@ function WorkThumbnails() {
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, paused]);
+
+  // index runs 1..total inside the [last-clone, ...items, first-clone] track,
+  // wrapping via onTransitionEnd, so map back to the real (non-clone) item.
+  const activeAccent = WORK_ITEMS[((index - 1) % total + total) % total].accent;
+
+  // Report the active slide's accent color upward so the hero can tint
+  // itself to match.
+  useEffect(() => {
+    onActiveAccent?.(activeAccent);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAccent]);
 
   useEffect(() => {
     const measure = () => {
@@ -4230,13 +4273,14 @@ function WorkThumbnails() {
   }, [animate]);
 
   const onPointerDown = (e: React.PointerEvent) => {
-    dragState.current = { startX: e.clientX, dragging: true };
+    dragState.current = { startX: e.clientX, dragging: true, dx: 0 };
     setPaused(true);
-    e.currentTarget.setPointerCapture?.(e.pointerId);
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragState.current?.dragging) return;
-    setDragX(e.clientX - dragState.current.startX);
+    const dx = e.clientX - dragState.current.startX;
+    dragState.current.dx = dx;
+    setDragX(dx);
   };
   const endDrag = () => {
     if (!dragState.current?.dragging) return;
@@ -4255,18 +4299,42 @@ function WorkThumbnails() {
   // the centering offset so the active slide sits in the middle on desktop
   const trackOffset = -index * slideWidth + centerOffset + dragPct;
 
-  const arrowClass = "flex items-center justify-center size-9 rounded-full transition-all duration-200 hover:scale-105";
-  const arrowStyle = { background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--fg))" } as const;
+  const arrowClass = "flex items-center justify-center size-11 rounded-full transition-all duration-200 hover:scale-105";
+  const arrowStyle = { background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" } as const;
 
   return (
     <section
+      ref={sectionRef}
       className="rise relative"
       style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => { setPaused(false); dragState.current = null; }}
     >
+      <div
+        aria-hidden="true"
+        className="hero-glow"
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: isDesktop ? -500 : -900,
+          transform: "translateX(-50%)",
+          width: "100vw",
+          height: isDesktop ? 900 : 1500,
+          pointerEvents: "none",
+          ["--hero-glow-color" as string]: hexToRgba(activeAccent, 0.20),
+          zIndex: 0,
+        }}
+      />
       <FollowerPointerCard title="View project" className="w-full">
-        <div className="relative w-full select-none" style={{ aspectRatio: "16 / 9", maxHeight: 560, background: "rgb(var(--bg))" }}>
+        <div
+          className="relative w-full select-none"
+          style={{
+            aspectRatio: "16 / 9",
+            maxHeight: 560,
+            transform: `scale(${scrollScale})`,
+            transformOrigin: "center center",
+          }}
+        >
           <div className="absolute inset-0 overflow-hidden">
             <div
               ref={trackRef}
@@ -4289,12 +4357,13 @@ function WorkThumbnails() {
                 // edges ease in/out together rather than pinning to the top.
                 const heightPct = on || !isDesktop ? 100 : 84;
                 return (
-                  <Link
+                  <div
                     key={`${w.src}-${i}`}
-                    href="/work"
+                    role="link"
                     draggable={false}
                     onDragStart={(e) => e.preventDefault()}
-                    onClickCapture={(e) => { if (Math.abs(dragX) > 6) e.preventDefault(); }}
+                    onClick={() => { if (Math.abs(dragState.current?.dx ?? 0) <= 6) { setNavigating(true); setTimeout(() => router.push("/work"), 300); } }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
                     className="relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
                     style={{ width: `${slideWidth}%`, cursor: "none", WebkitUserDrag: "none" } as React.CSSProperties}
                     tabIndex={on ? 0 : -1}
@@ -4324,24 +4393,32 @@ function WorkThumbnails() {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
           </div>
 
+          {navigating && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.25)" }}>
+              <div
+                className="size-6 rounded-full animate-spin"
+                style={{ border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }}
+              />
+            </div>
+          )}
         </div>
       </FollowerPointerCard>
 
       {/* Prev / next arrows — below the carousel, mobile only (desktop drags instead) */}
       <div className="flex sm:hidden items-center justify-end gap-3 mt-5 px-3">
         <button type="button" aria-label="Previous project" onClick={retreat} className={arrowClass} style={arrowStyle}>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
           </svg>
         </button>
         <button type="button" aria-label="Next project" onClick={advance} className={arrowClass} style={arrowStyle}>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9 4 13 8 9 12" />
           </svg>
         </button>
@@ -4350,18 +4427,51 @@ function WorkThumbnails() {
   );
 }
 
+function DesignPhilosophy() {
+  const points = [
+    "We design around how real people move through a site, not around trends that'll date the brand in a year.",
+    "The best design disappears. It should feel effortless to the customer, even when the work behind it wasn't.",
+  ];
+  return (
+    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <div className="max-w-2xl sm:mx-auto">
+        <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
+          Design isn't something we add at the end. It's how we think about a brand from the first conversation. We build for people who'll actually spend time with the site, not for what looks good in a case study, and that shift in focus is usually what separates a site that converts from one that just looks nice.
+        </p>
+        <div className="flex flex-col gap-4 mt-8">
+          {points.map((text, i) => (
+            <div key={i} className="flex gap-3 sm:max-w-xl">
+              <span className="text-[16.5px] sm:text-[19px] tracking-tight tabular-nums shrink-0" style={{ color: "#1a1a1a" }}>
+                {i + 1}.
+              </span>
+              <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
+                {text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function VisualLayout() {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
+  const [accentColor, setAccentColor] = useState(WORK_ITEMS[0].accent);
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
 
-      <VercelHero />
+      <VercelHero accentColor={accentColor} />
 
       <div className="py-10 sm:py-6" />
 
-      <WorkThumbnails />
+      <WorkThumbnails onActiveAccent={setAccentColor} />
+
+      <div className="py-7 sm:py-5" />
+
+      <DesignPhilosophy />
 
       <div className="py-20 sm:py-14" />
 

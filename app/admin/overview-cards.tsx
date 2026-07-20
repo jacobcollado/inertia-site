@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { TrendingUpIcon, TrendingDownIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+import { TrendingUpIcon, TrendingDownIcon, TriangleAlertIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -79,7 +80,7 @@ function MiniAreaChart({
 }) {
   const color = "var(--color-amount)";
   return (
-    <ChartContainer config={config} className="aspect-auto h-20 w-full overflow-visible">
+    <ChartContainer config={config} className="aspect-auto h-20 w-full overflow-visible select-none [&_.recharts-wrapper]:!cursor-crosshair [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:focus:outline-none">
       <AreaChart data={data} margin={{ top: 6, right: 2, left: 2, bottom: 4 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -158,6 +159,7 @@ function ClientsCard({ overview }: { overview: Overview }) {
             value={[range]}
             onValueChange={(value) => setRange((value[0] as ClientRange) ?? "90d")}
             variant="outline"
+            spacing={0}
           >
             {(Object.keys(RANGE_LABELS) as ClientRange[]).map((r) => (
               <ToggleGroupItem
@@ -172,7 +174,7 @@ function ClientsCard({ overview }: { overview: Overview }) {
         </CardAction>
       </CardHeader>
       {hasClientChart ? (
-        <ChartContainer config={clientsChartConfig} className="aspect-auto h-52 w-full overflow-visible px-6">
+        <ChartContainer config={clientsChartConfig} className="aspect-auto h-52 w-full overflow-visible px-6 select-none [&_.recharts-wrapper]:!cursor-crosshair [&_.recharts-surface]:outline-none [&_.recharts-wrapper]:outline-none [&_*]:focus:outline-none">
           <AreaChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -180,7 +182,7 @@ function ClientsCard({ overview }: { overview: Overview }) {
                 <stop offset="95%" stopColor={color} stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} />
+            <CartesianGrid vertical={false} stroke="var(--sh-border)" strokeDasharray="4 4" />
             <YAxis hide domain={([min, max]: readonly [number, number]) => {
               if (min === max) return [Math.max(0, min - 1), max + 1];
               const pad = (max - min) * 0.15;
@@ -203,10 +205,139 @@ function ClientsCard({ overview }: { overview: Overview }) {
   );
 }
 
+const outstandingChartConfig = {
+  amount: { label: "Amount" },
+} satisfies ChartConfig;
+
+function OutstandingInvoiceTick({ x, y, payload, data }: {
+  x: number;
+  y: number;
+  payload: { value: string };
+  data: { name: string; overdue: boolean }[];
+}) {
+  const row = data.find(d => d.name === payload.value);
+  const label = payload.value.length > 12 ? `${payload.value.slice(0, 12)}…` : payload.value;
+  return (
+    <g transform={`translate(${x},${y})`}>
+      {row?.overdue && (
+        <TriangleAlertIcon
+          x={-100}
+          y={-7}
+          width={13}
+          height={13}
+          className="text-amber-500"
+        />
+      )}
+      <text x={row?.overdue ? -82 : -96} y={0} dy={4} textAnchor="start" className="fill-muted-foreground text-xs">
+        {label}
+      </text>
+    </g>
+  );
+}
+
+function OutstandingInvoicesCard({ overview }: { overview: Overview }) {
+  const router = useRouter();
+  const rows = overview.outstandingInvoices;
+  const data = useMemo(
+    () =>
+      [...rows]
+        .sort((a, b) => a.amount - b.amount)
+        .map(inv => ({
+          name: inv.label,
+          clientName: inv.clientName,
+          dueDate: inv.dueDate,
+          amount: inv.amount / 100,
+          overdue: inv.overdue,
+          clientId: inv.clientId,
+        })),
+    [rows]
+  );
+  return (
+    <div className="flex flex-1 flex-col gap-3 min-w-0">
+      <span className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">Outstanding invoices</span>
+      <Card className="overflow-hidden">
+        {rows.length > 0 ? (
+          <ChartContainer
+            config={outstandingChartConfig}
+            className="aspect-auto w-full px-2 py-2"
+            style={{ height: Math.max(data.length * 40, 40) }}
+          >
+            <BarChart data={data} layout="vertical" margin={{ top: 0, right: 12, left: 0, bottom: 0 }} barCategoryGap={10}>
+              <XAxis type="number" hide />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tickLine={false}
+                axisLine={false}
+                width={110}
+                className="text-xs"
+                tick={<OutstandingInvoiceTick data={data} />}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    formatter={(value, _name, item) => (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium text-foreground">{fmt$((value as number) * 100)}</span>
+                        <span className="text-muted-foreground">{item.payload.clientName} · due {item.payload.dueDate}</span>
+                      </div>
+                    )}
+                  />
+                }
+              />
+              <Bar
+                dataKey="amount"
+                radius={4}
+                isAnimationActive={false}
+                cursor="pointer"
+                onClick={(entry: { clientId?: string }) => {
+                  if (entry?.clientId) router.push(`/admin/clients/${entry.clientId}`);
+                }}
+              >
+                {data.map((_d, i) => (
+                  <Cell key={i} fill="var(--sh-muted-foreground)" fillOpacity={0.4} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        ) : (
+          <div className="flex h-24 items-center justify-center px-5 text-sm text-muted-foreground">Nothing outstanding</div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
+function NeedsAttentionCard({ overview }: { overview: Overview }) {
+  const rows = overview.needsAttention;
+  return (
+    <div className="flex flex-1 flex-col gap-3 min-w-0">
+      <span className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">Needs attention</span>
+      <Card className="overflow-hidden py-0">
+        {rows.length > 0 ? (
+          rows.map((item, i) => (
+            <Link
+              key={i}
+              href={`/admin/clients/${item.clientId}`}
+              className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-muted/50 transition-colors"
+              style={{ borderBottom: i < rows.length - 1 ? "1px solid var(--sh-border)" : "none" }}
+            >
+              <span className="text-[15px] tracking-tight truncate">{item.clientName}</span>
+              <span className="text-[13px] tracking-tight text-destructive shrink-0">{item.reason}</span>
+            </Link>
+          ))
+        ) : (
+          <div className="flex h-24 items-center justify-center px-5 text-sm text-muted-foreground">All clear</div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 export function OverviewCards({ overview, clients }: { overview: Overview; clients: Client[] }) {
   const suspended = clients.filter(c => c.banned).length;
   const totalProjects = clients.reduce((s, c) => s + c.projects.length, 0);
-  const outstandingUp = overview.outstanding > 0;
   const hasRevChart = overview.monthlyRevenue.some(d => d.amount > 0);
   const hasClientChart = overview.monthlyClients.some(d => d.amount > 0);
 
@@ -241,17 +372,17 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
         <Card className="gap-4">
           <CardHeader>
             <CardDescription>Outstanding</CardDescription>
-            <CardTitle className={`text-2xl font-semibold tabular-nums ${outstandingUp ? "text-amber-500" : ""}`}>
+            <CardTitle className="text-2xl font-semibold tabular-nums">
               {fmt$(overview.outstanding)}
             </CardTitle>
             <CardAction>
               <ChangeBadge pct={overview.change.outstanding} />
             </CardAction>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
+          <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent text-sm">
             <TrendInsight pct={overview.change.outstanding} label="Outstanding balance for the last 6 months" />
             <div className="text-muted-foreground">{fmt$(overview.totalRevenue)} collected</div>
-            <div className={outstandingUp ? "text-amber-500" : "text-muted-foreground"}>{fmt$(overview.outstanding)} owed</div>
+            <div className="text-muted-foreground">{fmt$(overview.outstanding)} owed</div>
           </CardFooter>
         </Card>
 
@@ -265,7 +396,7 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
               <ChangeBadge pct={overview.change.clients} />
             </CardAction>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
+          <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent text-sm">
             <TrendInsight pct={overview.change.clients} label="Clients for the last 6 months" />
             <div className="text-muted-foreground">{overview.totalClients} total clients</div>
             <div className="text-muted-foreground">vs. previous 30 days</div>
@@ -282,11 +413,11 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
               <ChangeBadge pct={overview.change.activeProjects} />
             </CardAction>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 text-sm">
+          <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent text-sm">
             <TrendInsight pct={overview.change.activeProjects} label="Active projects for the last 6 months" />
-            <div className="text-muted-foreground">{overview.activeProjects} of {totalProjects} total</div>
+            <div className="text-muted-foreground">{overview.activeProjects} active out of {totalProjects} total projects</div>
             <div className="text-muted-foreground">
-              {overview.totalClients - suspended} active clients
+              across {overview.totalClients - suspended} active clients
               {suspended > 0 && <span className="text-destructive">, {suspended} suspended</span>}
             </div>
           </CardFooter>
@@ -295,37 +426,34 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
 
       <ClientsCard overview={overview} />
 
-      {overview.recentActivity.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <span className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">Recent activity</span>
-          <Card className="overflow-hidden py-0">
-            {overview.recentActivity.map((item, i) => (
-              <Link
-                key={i}
-                href={`/admin/clients/${item.clientId}`}
-                className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-muted/50 transition-colors"
-                style={{ borderBottom: i < overview.recentActivity.length - 1 ? "1px solid var(--sh-border)" : "none" }}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <Badge
-                    variant="outline"
-                    className={
-                      item.type === "invoice"
-                        ? "capitalize shrink-0 border-transparent bg-primary text-white"
-                        : "capitalize shrink-0 border-transparent bg-emerald-600 text-white"
-                    }
-                  >
-                    {item.type}
-                  </Badge>
-                  <span className="text-[15px] tracking-tight truncate">{item.label}</span>
-                  <span className="text-[13px] tracking-tight text-muted-foreground truncate hidden sm:block">{item.clientName}</span>
-                </div>
-                <span className="text-[13px] tracking-tight text-muted-foreground shrink-0">{item.date}</span>
-              </Link>
-            ))}
-          </Card>
-        </div>
-      )}
+      <div className="flex flex-col gap-4 lg:flex-row">
+        {overview.recentActivity.length > 0 && (
+          <div className="flex flex-1 flex-col gap-3 min-w-0">
+            <span className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">Recent activity</span>
+            <Card className="overflow-hidden py-0">
+              {overview.recentActivity.map((item, i) => (
+                <Link
+                  key={i}
+                  href={`/admin/clients/${item.clientId}`}
+                  className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-muted/50 transition-colors"
+                  style={{ borderBottom: i < overview.recentActivity.length - 1 ? "1px solid var(--sh-border)" : "none" }}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Badge variant="outline" className="capitalize shrink-0 border-transparent bg-muted text-muted-foreground">
+                      {item.type}
+                    </Badge>
+                    <span className="text-[15px] tracking-tight truncate">{item.label}</span>
+                    <span className="text-[13px] tracking-tight text-muted-foreground truncate hidden sm:block">{item.clientName}</span>
+                  </div>
+                  <span className="text-[13px] tracking-tight text-muted-foreground shrink-0">{item.date}</span>
+                </Link>
+              ))}
+            </Card>
+          </div>
+        )}
+        <OutstandingInvoicesCard overview={overview} />
+        <NeedsAttentionCard overview={overview} />
+      </div>
     </div>
   );
 }

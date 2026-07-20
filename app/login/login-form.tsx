@@ -55,13 +55,9 @@ function EmailToggle({ onToggle }: { onToggle: () => void }) {
     <button
       type="button"
       onClick={onToggle}
-      className="flex items-center justify-center gap-2 w-full py-3.5 text-[14px] tracking-tight rounded-full border transition-colors hover:border-[rgb(var(--fg)/0.3)]"
-      style={{ borderColor: "rgb(var(--line))", color: "rgb(var(--fg))" }}
+      className="flex items-center justify-center gap-2 w-full py-2.5 text-[14px] tracking-tight rounded-full transition-colors hover:bg-[rgb(var(--fg)/0.1)]"
+      style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--fg))" }}
     >
-      <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <rect x="1.5" y="3" width="13" height="10" rx="1.5" />
-        <path d="M2 4l6 4.5L14 4" />
-      </svg>
       Continue with email
     </button>
   );
@@ -207,8 +203,8 @@ function EmailForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center justify-center gap-2.5 w-full py-3.5 text-[14px] font-medium tracking-tight rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
+          className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
         >
           {loading ? <Spinner /> : null}
           {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
@@ -224,8 +220,8 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
       type="button"
       disabled={loading}
       onClick={onOAuth}
-      className="flex items-center justify-center gap-2.5 w-full py-3.5 text-[14px] tracking-tight rounded-full hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
-      style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
+      className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] tracking-tight rounded-full hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+      style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
     >
       {oauthProvider === "google" ? <Spinner /> : (
         <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
@@ -388,9 +384,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
           {t === "signin" ? "Sign in to your portal" : "Create your account"}
         </h1>
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mt-4">
-          {t === "signin" ? "View your project, invoices, and files." : "New or existing client. Once you're in, we'll confirm your access."}
-        </p>
       </div>
 
       {t === "signin" && checkEmail && <InfoMessage msg="Check your email to confirm your account." />}
@@ -506,7 +499,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                     style={{
                       left: pillRect.left,
                       width: pillRect.width,
-                      background: "#0a84ff",
+                      background: "rgb(var(--fg))",
                       transition: "left 320ms cubic-bezier(0.65,0,0.35,1), width 320ms cubic-bezier(0.65,0,0.35,1)",
                     }}
                   />
@@ -517,7 +510,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                     ref={(el) => { tabRefs.current[t] = el; }}
                     onClick={() => switchTab(t)}
                     className="relative px-4 py-1.5 text-[12px] tracking-tight rounded-full transition-colors duration-200"
-                    style={{ color: tab === t ? "#fff" : "rgb(var(--muted))" }}
+                    style={{ color: tab === t ? "rgb(var(--bg))" : "rgb(var(--muted))" }}
                   >
                     {t === "signin" ? "Sign in" : "Create account"}
                   </button>

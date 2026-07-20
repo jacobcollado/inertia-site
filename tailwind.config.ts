@@ -53,9 +53,19 @@ const config: Config = {
         md: "calc(var(--sh-radius) - 2px)",
         sm: "calc(var(--sh-radius) - 4px)",
       },
+      borderColor: {
+        DEFAULT: "var(--sh-border)",
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Custom variant for the /admin dark toggle, scoped separately from the
+    // site-wide (permanently-on) `dark:` variant which targets `.dark`.
+    function ({ addVariant }: { addVariant: (name: string, selector: string) => void }) {
+      addVariant("admin-dark", ".admin-dark &");
+    },
+  ],
 };
 
 export default config;

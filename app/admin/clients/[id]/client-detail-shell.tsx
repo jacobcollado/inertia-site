@@ -95,24 +95,32 @@ export function ClientDetailShell({ client, projects, invoices, files, messages:
 }) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const unreadCount = messages.filter(m => m.sender === "client" && !m.read_at).length;
+  const [activeTab, setActiveTab] = useState("projects");
+
+  const Separator = () => <div className="self-stretch shrink-0 w-px mx-1 -my-[3px] bg-border" />;
 
   return (
     <div className="flex flex-col gap-6">
       <ClientHeader client={client} />
 
-      <Tabs defaultValue="projects">
-        <TabsList>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="invoices">Invoices</TabsTrigger>
-          <TabsTrigger value="files">Files</TabsTrigger>
-          <TabsTrigger value="messages">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as string)}>
+        <TabsList className="gap-0">
+          <TabsTrigger value="projects" className="data-active:bg-primary data-active:text-white">Projects</TabsTrigger>
+          <Separator />
+          <TabsTrigger value="invoices" className="data-active:bg-primary data-active:text-white">Invoices</TabsTrigger>
+          <Separator />
+          <TabsTrigger value="files" className="data-active:bg-primary data-active:text-white">Files</TabsTrigger>
+          <Separator />
+          <TabsTrigger value="messages" className="data-active:bg-primary data-active:text-white">
             Messages
             {unreadCount > 0 && (
               <Badge variant="default" size="sm" className="ml-1">{unreadCount}</Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <Separator />
+          <TabsTrigger value="account" className="data-active:bg-primary data-active:text-white">Account</TabsTrigger>
+          <Separator />
+          <TabsTrigger value="history" className="data-active:bg-primary data-active:text-white">History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="projects">

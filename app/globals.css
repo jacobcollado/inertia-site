@@ -137,6 +137,45 @@
   --sh-radius: 0.625rem;
 }
 
+/* Admin dark mode: scoped to .admin-dark rather than the site-wide .dark,
+   which stays forced-light for the rest of the site. */
+.admin-dark {
+  --sh-background: #0a0a0a;
+  --sh-foreground: #ededed;
+  --sh-card: #141414;
+  --sh-card-foreground: #ededed;
+  --sh-popover: #141414;
+  --sh-popover-foreground: #ededed;
+  --sh-primary: #0a84ff;
+  --sh-primary-foreground: #ffffff;
+  --sh-secondary: #1f1f1f;
+  --sh-secondary-foreground: #ededed;
+  --sh-muted: #1f1f1f;
+  --sh-muted-foreground: #a1a1a1;
+  --sh-accent: #1f1f1f;
+  --sh-accent-foreground: #ededed;
+  --sh-destructive: #ef4444;
+  --sh-border: #262626;
+  --sh-input: #262626;
+  --sh-ring: #0a84ff;
+  --sh-sidebar: #111111;
+  --sh-sidebar-foreground: #ededed;
+  --sh-sidebar-primary: #0a84ff;
+  --sh-sidebar-primary-foreground: #ffffff;
+  --sh-sidebar-accent: #232323;
+  --sh-sidebar-accent-foreground: #ededed;
+  --sh-sidebar-border: #262626;
+  --sh-sidebar-ring: #0a84ff;
+  --sh-chart-1: #0a84ff;
+  --sh-chart-2: #a1a1a1;
+  --sh-chart-3: #737373;
+  --sh-chart-4: #525252;
+  --sh-chart-5: #262626;
+  color-scheme: dark;
+}
+
+.admin-dark { background: var(--sh-background); }
+
 html {
   background: rgb(var(--bg));
   color: rgb(var(--fg));
@@ -663,6 +702,27 @@ h1:hover .redact > span.redact-inner,
 @keyframes cta-wave {
   from { transform: translateY(0); }
   to   { transform: translateY(-3px); }
+}
+
+.hero-glow {
+  background: radial-gradient(ellipse 100% 35% at center, var(--hero-glow-color, rgba(10,132,255,0.20)), transparent 72%);
+  animation: hero-glow-drift 26s ease-in-out infinite;
+  transition: background 600ms ease;
+  will-change: transform;
+}
+
+.gradient-word {
+  animation: gradient-word-shift 12s linear infinite;
+}
+
+@keyframes gradient-word-shift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+@keyframes hero-glow-drift {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-48%) scale(1.05); }
 }
 
 @keyframes char-in {

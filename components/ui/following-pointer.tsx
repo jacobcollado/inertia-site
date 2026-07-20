@@ -91,15 +91,15 @@ export const FollowPointer = ({
         xmlns="http://www.w3.org/2000/svg"
         style={{ display: "block", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}
       >
-        <path d="M3 3L3 20L8 14H18L3 3Z" stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+        <path d="M4 2.5C4 2.1 4.4 1.9 4.7 2.1L18.6 12.4C18.9 12.6 18.8 13.1 18.4 13.2L12.1 14.5C11.9 14.5 11.7 14.6 11.6 14.8L8.4 20.4C8.2 20.7 7.7 20.7 7.6 20.3L4 2.5Z" stroke="rgba(0,0,0,0.25)" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
       <motion.div
         initial={{ scale: 0.8, opacity: 0, y: 4 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.8, opacity: 0, y: 4 }}
         transition={{ duration: 0.15, delay: 0.05 }}
-        className="mt-1 min-w-max rounded-full px-3 py-1.5 text-[12px] tracking-tight whitespace-nowrap"
-        style={{ background: "rgba(30,30,30,0.85)", color: "#e5e5e5", border: "1px solid rgba(255,255,255,0.1)" }}
+        className="mt-1 min-w-max rounded-full px-3 py-1.5 text-[12px] tracking-tight whitespace-nowrap backdrop-blur-sm"
+        style={{ background: "rgba(30,30,30,0.55)", color: "#e5e5e5" }}
       >
         {title || "View project"}
       </motion.div>
