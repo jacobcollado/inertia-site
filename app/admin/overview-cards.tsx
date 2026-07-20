@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
+import type { YAxisTickContentProps } from "recharts/types/util/types";
 import { TrendingUpIcon, TrendingDownIcon, TriangleAlertIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -209,14 +210,12 @@ const outstandingChartConfig = {
   amount: { label: "Amount" },
 } satisfies ChartConfig;
 
-function OutstandingInvoiceTick({ x, y, payload, data }: {
-  x: number;
-  y: number;
-  payload: { value: string };
+function OutstandingInvoiceTick({ x, y, payload, data }: YAxisTickContentProps & {
   data: { name: string; overdue: boolean }[];
 }) {
-  const row = data.find(d => d.name === payload.value);
-  const label = payload.value.length > 12 ? `${payload.value.slice(0, 12)}…` : payload.value;
+  const value = String(payload.value);
+  const row = data.find(d => d.name === value);
+  const label = value.length > 12 ? `${value.slice(0, 12)}…` : value;
   return (
     <g transform={`translate(${x},${y})`}>
       {row?.overdue && (
@@ -271,7 +270,9 @@ function OutstandingInvoicesCard({ overview }: { overview: Overview }) {
                 axisLine={false}
                 width={110}
                 className="text-xs"
-                tick={<OutstandingInvoiceTick data={data} />}
+                tick={(props: YAxisTickContentProps) => (
+                  <OutstandingInvoiceTick {...props} data={data} />
+                )}
               />
               <ChartTooltip
                 cursor={false}
@@ -291,8 +292,9 @@ function OutstandingInvoicesCard({ overview }: { overview: Overview }) {
                 radius={4}
                 isAnimationActive={false}
                 cursor="pointer"
-                onClick={(entry: { clientId?: string }) => {
-                  if (entry?.clientId) router.push(`/admin/clients/${entry.clientId}`);
+                onClick={(entry) => {
+                  const clientId = entry?.payload?.clientId;
+                  if (clientId) router.push(`/admin/clients/${clientId}`);
                 }}
               >
                 {data.map((_d, i) => (
