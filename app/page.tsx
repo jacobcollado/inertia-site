@@ -4687,7 +4687,7 @@ function ClientCarousel() {
               style={{
                 aspectRatio: "4 / 5",
                 transition: "transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1)",
-                ...(activeIndex === i ? { transform: "scale(1.05)", boxShadow: "0 0 22px 0px rgba(0,0,0,0.35)" } : {}),
+                ...(activeIndex === i ? { transform: "scale(1.05)", boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
               }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
               onMouseLeave={(e) => { if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
@@ -4710,9 +4710,9 @@ function ClientCarousel() {
             </Link>
           ))}
         </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 transition-opacity duration-200"
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-16 transition-opacity duration-200"
           style={{ background: "linear-gradient(to right, rgb(var(--bg)) 0%, rgb(var(--bg) / 0.8) 40%, transparent 100%)", opacity: canScrollLeft ? 1 : 0 }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 transition-opacity duration-200"
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-12 transition-opacity duration-200"
           style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)", opacity: canScrollRight ? 1 : 0 }} />
       </div>
 
