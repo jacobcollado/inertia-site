@@ -4092,6 +4092,13 @@ function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accen
         className="relative flex items-center"
       >
         <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-24 sm:pt-40 pb-10 pb-[30dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
+          <span
+            className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[12px] tracking-tight"
+            style={{ ...fade(0), background: "#f0f0f0", color: "#5c5c5c" }}
+          >
+            900+ clients served since 2022
+          </span>
+
           <h1
             className="font-normal tracking-tight leading-[0.88] max-w-xl"
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
@@ -4669,7 +4676,7 @@ function ClientCarousel() {
   if (items.length === 0) return null;
 
   return (
-    <section className="rise w-full max-w-[88rem] mx-auto px-3 sm:px-8">
+    <section className="rise w-[100vw] ml-[calc(50%-50vw)] sm:w-full sm:ml-0 sm:max-w-[88rem] sm:mx-auto px-1.5 sm:px-8">
       <div className="relative">
         <div
           ref={scrollRef}
@@ -4677,7 +4684,7 @@ function ClientCarousel() {
           onTouchEnd={onTouchEnd}
           className="flex items-center gap-3 sm:gap-4 overflow-x-auto touch-pan-x sm:snap-x sm:snap-mandatory scroll-smooth py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
-          <div className="shrink-0 sm:hidden" style={{ width: 12 }} aria-hidden="true" />
+          <div className="shrink-0 sm:hidden" style={{ width: 6 }} aria-hidden="true" />
           {items.map((item, i) => (
             <Link
               key={item.slug}
@@ -4716,7 +4723,7 @@ function ClientCarousel() {
           style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)", opacity: canScrollRight ? 1 : 0 }} />
       </div>
 
-      <div className="flex items-center justify-end gap-3 mt-5 pl-3 sm:pl-8 pr-1 sm:pr-3">
+      <div className="flex items-center justify-end gap-3 mt-5 pl-1.5 sm:pl-8 pr-1 sm:pr-3">
         <button type="button" aria-label="Scroll left" onClick={() => scroll("left")} className={arrowClass} style={arrowStyle} disabled={!canScrollLeft}>
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
