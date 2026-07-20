@@ -4336,7 +4336,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   return (
     <section
       ref={sectionRef}
-      className="rise relative"
+      className="relative"
       style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => { setPaused(false); dragState.current = null; }}
@@ -4550,7 +4550,7 @@ function ClientCarousel() {
     const onScroll = () => {
       updateScrollState();
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-      settleTimerRef.current = setTimeout(updateActiveCard, 100);
+      settleTimerRef.current = setTimeout(updateActiveCard, 60);
     };
     updateScrollState();
     updateActiveCard();
@@ -4596,16 +4596,26 @@ function ClientCarousel() {
       : leftOffsets;
 
     const tolerance = 8;
-    let target: number;
+    let targetIndex: number;
     if (dir === "right") {
-      target = snapTargets.find(o => o > start + tolerance) ?? snapTargets[snapTargets.length - 1];
+      const found = snapTargets.findIndex(o => o > start + tolerance);
+      targetIndex = found !== -1 ? found : snapTargets.length - 1;
     } else {
-      const reachable = snapTargets.filter(o => o < start - tolerance);
-      target = reachable.length ? reachable[reachable.length - 1] : snapTargets[0];
+      let last = 0;
+      for (let i = 0; i < snapTargets.length; i++) {
+        if (snapTargets[i] < start - tolerance) last = i;
+      }
+      targetIndex = last;
     }
-    target = Math.max(0, Math.min(target, maxScroll));
+    const target = Math.max(0, Math.min(snapTargets[targetIndex], maxScroll));
 
-    const duration = 320;
+    // Scale the outgoing/incoming cards the moment the move starts, not once
+    // the scroll finishes, so the shrink/grow happens *during* the motion
+    // instead of as an afterthought once it lands.
+    if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+    setActiveIndex(targetIndex);
+
+    const duration = 150;
     const startTime = performance.now();
     const step = (now: number) => {
       const t = Math.min(1, (now - startTime) / duration);
@@ -4614,8 +4624,6 @@ function ClientCarousel() {
         scrollAnimRef.current = requestAnimationFrame(step);
       } else {
         scrollAnimRef.current = null;
-        if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-        updateActiveCard();
       }
     };
     scrollAnimRef.current = requestAnimationFrame(step);
@@ -4673,7 +4681,7 @@ function ClientCarousel() {
               className="relative shrink-0 snap-center sm:snap-start rounded-2xl overflow-hidden group w-[240px] sm:w-[340px] sm:hover:scale-105"
               style={{
                 aspectRatio: "4 / 5",
-                transition: "transform 320ms cubic-bezier(0.22,1,0.36,1), box-shadow 320ms ease",
+                transition: "transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1)",
                 ...(activeIndex === i ? { transform: "scale(1.05)", boxShadow: "0 0 22px 0px rgba(0,0,0,0.35)" } : {}),
               }}
               onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
@@ -4697,8 +4705,8 @@ function ClientCarousel() {
             </Link>
           ))}
         </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 transition-opacity duration-200"
-          style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)", opacity: canScrollLeft ? 1 : 0 }} />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-16 transition-opacity duration-200"
+          style={{ background: "linear-gradient(to right, rgb(var(--bg)) 0%, rgb(var(--bg) / 0.8) 40%, transparent 100%)", opacity: canScrollLeft ? 1 : 0 }} />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-12 transition-opacity duration-200"
           style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)", opacity: canScrollRight ? 1 : 0 }} />
       </div>
