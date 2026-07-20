@@ -2899,7 +2899,7 @@ function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNod
           }}
         >
           <div ref={bodyRef} className="pb-5 px-5">
-            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-left sm:text-center">
+            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-left sm:text-center sm:max-w-md sm:mx-auto">
               {a}
             </p>
           </div>
@@ -2916,7 +2916,7 @@ function IndexFaq() {
 
   return (
     <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl sm:max-w-xl mx-auto">
         {FAQ_ITEMS.map((item, i) => (
           <FaqItem
             key={item.q}
@@ -3986,22 +3986,60 @@ function WaitUnderline({ children }: { children: React.ReactNode }) {
   );
 }
 
-function GradientWord({ children, color = "#0a84ff" }: { children: React.ReactNode; color?: string }) {
+// Per-character ripple: each time `color` changes, every glyph cycles
+// through a couple of randomized highlight states (dim -> pill flash ->
+// settled) with a small stagger left-to-right, rather than a flat crossfade.
+function GradientWord({ children, color = "#0a84ff" }: { children: string; color?: string }) {
+  const chars = children.split("");
+  const prevColor = useRef(color);
+  const [cycleId, setCycleId] = useState(0);
+  const [displayColor, setDisplayColor] = useState(color);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // Starts deterministic (all "fill") so server and client render identically
+  // on first paint — randomization only happens client-side, inside the
+  // color-change effect below, avoiding a hydration mismatch.
+  const variantsRef = useRef<("fill" | "outline" | "ghost")[]>(chars.map(() => "fill"));
+
+  useEffect(() => {
+    if (prevColor.current === color) return;
+    prevColor.current = color;
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    setCycleId((n) => n + 1);
+    // Re-roll which characters flash filled / outlined / unfilled this cycle.
+    variantsRef.current = chars.map(() => (["fill", "outline", "ghost"] as const)[Math.floor(Math.random() * 3)]);
+    // Swap the settled color roughly mid-ripple so the last chars land in
+    // the new hue rather than snapping the whole word instantly.
+    const t = setTimeout(() => setDisplayColor(color), 260);
+    timersRef.current.push(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color]);
+
   return (
-    <span
-      className="gradient-word"
-      style={{
-        backgroundImage: `linear-gradient(90deg, ${color}, ${color}cc, ${color})`,
-        backgroundSize: "300% 100%",
-        WebkitBackgroundClip: "text",
-        backgroundClip: "text",
-        color: "transparent",
-        WebkitTextFillColor: "transparent",
-        fontWeight: 500,
-        transition: "background-image 600ms ease",
-      }}
-    >
-      {children}
+    <span className="inline-flex" aria-label={children}>
+      {chars.map((ch, i) => (
+        <span
+          key={`${cycleId}-${i}`}
+          aria-hidden="true"
+          className={`typer-char typer-char--${variantsRef.current[i]}`}
+          style={{
+            display: "inline-block",
+            color: displayColor,
+            fontWeight: 500,
+            letterSpacing: "-0.03em",
+            marginRight: ch === " " ? undefined : "-0.04em",
+            ["--ripple-color" as string]: color,
+            animationDuration: "420ms",
+            animationTimingFunction: "steps(1, jump-end)",
+            animationFillMode: "both",
+            animationDelay: `${i * 35}ms`,
+            whiteSpace: ch === " " ? "pre" : "normal",
+          }}
+        >
+          {ch}
+        </span>
+      ))}
     </span>
   );
 }
@@ -4050,12 +4088,30 @@ function VercelHero({ accentColor }: { accentColor: string }) {
       <div
         className="relative flex items-center"
       >
-        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-24 pb-10 pb-[22dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
+        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-24 sm:pt-40 pb-10 pb-[22dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
           <h1
             className="font-normal tracking-tight leading-[0.88] max-w-xl"
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
-            Design that moves at your <GradientWord color={accentColor}>speed</GradientWord>
+            Design that moves at your{" "}
+            <span
+              className="inline-flex items-center justify-center align-middle"
+              style={{
+                width: "0.95em",
+                height: "0.95em",
+                borderRadius: "0.18em",
+                background: "rgb(var(--fg) / 0.06)",
+                marginRight: "0.12em",
+                marginBottom: "0.08em",
+                transform: "rotate(6deg)",
+                boxShadow: "inset 0 1px 1px rgb(255 255 255 / 0.5), inset 0 -2px 3px rgb(var(--fg) / 0.08), 0 2px 4px rgb(0 0 0 / 0.08), 0 6px 12px rgb(0 0 0 / 0.06)",
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: "68%", height: "68%", transition: "stroke 600ms ease, filter 600ms ease", filter: `drop-shadow(0 1px 1px rgb(255 255 255 / 0.6)) drop-shadow(0 1.5px 2px ${accentColor}55)` }} aria-hidden="true">
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z" />
+              </svg>
+            </span>
+            <GradientWord color={accentColor}>speed</GradientWord>
           </h1>
 
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
@@ -4381,8 +4437,9 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         draggable={false}
                         className="w-full h-full object-cover object-top"
                         style={{
-                          filter: on || !isDesktop ? "none" : "brightness(0.55)",
-                          transition: "filter 500ms ease",
+                          filter: on || !isDesktop ? "none" : "brightness(0.55) blur(3px)",
+                          transform: on || !isDesktop ? "scale(1)" : "scale(1.06)",
+                          transition: "filter 500ms ease, transform 500ms ease",
                         }}
                       />
                       {/* Bottom fade + label — scoped to this slide so it never overhangs into neighbors */}
@@ -4455,6 +4512,156 @@ function DesignPhilosophy() {
   );
 }
 
+// Eases the native scrollLeft toward a target over rAF frames — smoother and
+// more "fluid" than the browser's built-in smooth-scroll, which feels stiff
+// at this card size.
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function ClientCarousel() {
+  const [items, setItems] = useState<{ slug: string; client: string; image: string }[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollAnimRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/content").then(r => r.json()).then(d => {
+      const work = (d.work ?? []) as { slug: string; client: string; cover?: string; preview?: string; images?: string[] }[];
+      const mapped = work
+        .map(w => ({ slug: w.slug, client: w.client, image: w.cover ?? w.preview ?? w.images?.[0] ?? "" }))
+        .filter(w => w.image);
+      setItems(mapped);
+    });
+  }, []);
+
+  const updateScrollState = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateScrollState();
+    el.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+    // Cards' real width isn't known until their images finish loading, so
+    // the initial scrollWidth read above can be stale — recheck once layout
+    // settles.
+    const ro = new ResizeObserver(updateScrollState);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+      ro.disconnect();
+    };
+  }, [items]);
+
+  // Scroll exactly to the start edge of the next/previous card, rather than
+  // a fixed pixel delta, so the landing position always aligns with a card.
+  const scroll = (dir: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cards = cardRefs.current.filter((c): c is HTMLAnchorElement => !!c);
+    if (cards.length === 0) return;
+    if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
+
+    const start = el.scrollLeft;
+    const trackLeft = el.getBoundingClientRect().left;
+    const offsets = cards.map(c => c.getBoundingClientRect().left - trackLeft + el.scrollLeft);
+
+    let target: number;
+    if (dir === "right") {
+      target = offsets.find(o => o > start + 4) ?? offsets[offsets.length - 1];
+    } else {
+      const reachable = offsets.filter(o => o < start - 4);
+      target = reachable.length ? reachable[reachable.length - 1] : offsets[0];
+    }
+    target = Math.max(0, Math.min(target, el.scrollWidth - el.clientWidth));
+
+    const duration = 500;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - startTime) / duration);
+      el.scrollLeft = start + (target - start) * easeOutCubic(t);
+      if (t < 1) {
+        scrollAnimRef.current = requestAnimationFrame(step);
+      } else {
+        scrollAnimRef.current = null;
+      }
+    };
+    scrollAnimRef.current = requestAnimationFrame(step);
+  };
+
+  const arrowClass = "flex shrink-0 items-center justify-center w-9 h-9 rounded-full transition-all duration-200 hover:scale-105";
+  const arrowStyle = { background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" } as const;
+
+  if (items.length === 0) return null;
+
+  return (
+    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <div className="relative">
+        <div
+          ref={scrollRef}
+          className="flex items-center gap-3 sm:gap-4 overflow-x-auto touch-pan-x snap-x snap-mandatory scroll-smooth py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        >
+          {items.map((item, i) => (
+            <Link
+              key={item.slug}
+              ref={(el) => { cardRefs.current[i] = el; }}
+              href={`/work#project-${item.slug}`}
+              className="relative shrink-0 snap-center sm:snap-start rounded-2xl overflow-hidden group w-[240px] sm:w-[340px] transition-transform duration-500 hover:scale-105 active:scale-105"
+              style={{ aspectRatio: "4 / 5", transition: "transform 500ms ease, box-shadow 500ms ease" }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+              onTouchStart={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
+              onTouchEnd={(e) => { e.currentTarget.style.boxShadow = "none"; }}
+            >
+              <img
+                src={item.image}
+                alt={item.client}
+                className="w-full h-full object-cover"
+                draggable={false}
+              />
+              <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col items-start gap-2 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)" }}>
+                <p className="text-[14px] tracking-tight text-white font-normal">{item.client}</p>
+                <span
+                  className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] tracking-tight"
+                  style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.85)", backdropFilter: "blur(1.5px) saturate(1.6)", WebkitBackdropFilter: "blur(1.5px) saturate(1.6)" }}
+                >
+                  View project
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-12 transition-opacity duration-200"
+          style={{ background: "linear-gradient(to right, rgb(var(--bg)), transparent)", opacity: canScrollLeft ? 1 : 0 }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 transition-opacity duration-200"
+          style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)", opacity: canScrollRight ? 1 : 0 }} />
+      </div>
+
+      <div className="flex items-center justify-end gap-3 mt-5 px-6 sm:px-8">
+        <button type="button" aria-label="Scroll left" onClick={() => scroll("left")} className={arrowClass} style={arrowStyle} disabled={!canScrollLeft}>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
+          </svg>
+        </button>
+        <button type="button" aria-label="Scroll right" onClick={() => scroll("right")} className={arrowClass} style={arrowStyle} disabled={!canScrollRight}>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+            <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9 4 13 8 9 12" />
+          </svg>
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function VisualLayout() {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   const [accentColor, setAccentColor] = useState(WORK_ITEMS[0].accent);
@@ -4469,9 +4676,13 @@ function VisualLayout() {
 
       <WorkThumbnails onActiveAccent={setAccentColor} />
 
-      <div className="py-7 sm:py-5" />
+      <div className="py-7 sm:py-12" />
 
       <DesignPhilosophy />
+
+      <div className="py-10 sm:py-8" />
+
+      <ClientCarousel />
 
       <div className="py-20 sm:py-14" />
 

@@ -646,7 +646,8 @@ export function VisualNotch() {
   const isWorkIndex = pathname === "/work";
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
-  const useMinimalHeader = isHome || isPolicies || isAether || (isWork && !isWorkIndex) || isComponents;
+  const isBlog = pathname.startsWith("/blog");
+  const useMinimalHeader = isHome || isPolicies || isAether || (isWork && !isWorkIndex) || isComponents || isBlog;
 
   if (isWorkIndex) return null;
 
