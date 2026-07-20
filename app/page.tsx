@@ -3989,9 +3989,9 @@ function WaitUnderline({ children }: { children: React.ReactNode }) {
 // Per-character ripple: each time `color` changes, every glyph cycles
 // through a couple of randomized highlight states (dim -> pill flash ->
 // settled) with a small stagger left-to-right, rather than a flat crossfade.
-function GradientWord({ children, color = "#0a84ff" }: { children: string; color?: string }) {
+function GradientWord({ children, color = "#0a84ff", trigger }: { children: string; color?: string; trigger?: number }) {
   const chars = children.split("");
-  const prevColor = useRef(color);
+  const isFirstRun = useRef(true);
   const [cycleId, setCycleId] = useState(0);
   const [displayColor, setDisplayColor] = useState(color);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -4001,9 +4001,12 @@ function GradientWord({ children, color = "#0a84ff" }: { children: string; color
   // color-change effect below, avoiding a hydration mismatch.
   const variantsRef = useRef<("fill" | "outline" | "ghost")[]>(chars.map(() => "fill"));
 
+  // Re-plays the ripple whenever `trigger` changes (falls back to `color`
+  // if no trigger is passed) — driven by an always-incrementing value
+  // rather than color equality, so it still fires when two consecutive
+  // slides happen to share the same accent color.
   useEffect(() => {
-    if (prevColor.current === color) return;
-    prevColor.current = color;
+    if (isFirstRun.current) { isFirstRun.current = false; return; }
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];
     setCycleId((n) => n + 1);
@@ -4014,7 +4017,7 @@ function GradientWord({ children, color = "#0a84ff" }: { children: string; color
     const t = setTimeout(() => setDisplayColor(color), 260);
     timersRef.current.push(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [color]);
+  }, [trigger ?? color]);
 
   return (
     <span className="inline-flex" aria-label={children}>
@@ -4058,7 +4061,7 @@ const HL = ({ children }: { children: React.ReactNode }) => (
   </span>
 );
 
-function VercelHero({ accentColor }: { accentColor: string }) {
+function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accentTrigger?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -4094,7 +4097,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             Design that moves at your{" "}
-            <GradientWord color={accentColor}>speed</GradientWord>
+            <GradientWord color={accentColor} trigger={accentTrigger}>speed</GradientWord>
           </h1>
 
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
@@ -4180,6 +4183,8 @@ function CalEmbed() {
 }
 
 const WORK_ITEMS = [
+  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app", accent: "#6a6dff" },
+  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff" },
   { src: "/work/aether-1.png", title: "Aether Theme", category: "Shopify theme", accent: "#39637e" },
   { src: "/work/aether-2.png", title: "Aether Theme", category: "Cart design", accent: "#5b7496" },
   { src: "/work/ellora-la/1.png", title: "Ellora La", category: "Shopify storefront", accent: "#cb591b" },
@@ -4191,10 +4196,8 @@ const WORK_ITEMS = [
   { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront", accent: "#3a627c" },
   { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page", accent: "#4a5a2c" },
   { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store", accent: "#9c0000" },
-  { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page", accent: "#1fbdf2" },
+  { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page", accent: "#0d1b3e" },
   { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page", accent: "#a50000" },
-  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app", accent: "#6a6dff" },
-  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff" },
   { src: "/work/ellora-la/2.png", title: "Ellora La", category: "Collection page", accent: "#6f283c" },
   { src: "/work/ellora-la/3.png", title: "Ellora La", category: "Product page", accent: "#5f696f" },
 ];
@@ -4274,11 +4277,13 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   const activeAccent = WORK_ITEMS[((index - 1) % total + total) % total].accent;
 
   // Report the active slide's accent color upward so the hero can tint
-  // itself to match.
+  // itself to match. Keyed on `index` (not the derived color) so the hero's
+  // ripple re-plays on every slide change, even when two consecutive slides
+  // happen to share the same accent.
   useEffect(() => {
     onActiveAccent?.(activeAccent);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAccent]);
+  }, [index]);
 
   useEffect(() => {
     const measure = () => {
@@ -4730,16 +4735,17 @@ function ClientCarousel() {
 function VisualLayout() {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   const [accentColor, setAccentColor] = useState(WORK_ITEMS[0].accent);
+  const [accentTrigger, setAccentTrigger] = useState(0);
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
 
-      <VercelHero accentColor={accentColor} />
+      <VercelHero accentColor={accentColor} accentTrigger={accentTrigger} />
 
       <div className="py-10 sm:py-6" />
 
-      <WorkThumbnails onActiveAccent={setAccentColor} />
+      <WorkThumbnails onActiveAccent={(c) => { setAccentColor(c); setAccentTrigger((n) => n + 1); }} />
 
       <div className="py-7 sm:py-12" />
 
