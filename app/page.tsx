@@ -843,6 +843,18 @@ function ClientCarousel() {
   // one captured at mount.
   const isTouchingRef = useRef(false);
   const liveTouchRafRef = useRef<number | null>(null);
+  const liveNearestRef = useRef<number | null>(null);
+  // Each card's offset within the scrollable track, cached once (cards don't
+  // move relative to each other — only the whole track scrolls), so the
+  // live path never needs a per-card getBoundingClientRect() call, just
+  // this fixed offset minus el.scrollLeft. scrollLeft is the browser's own
+  // authoritative, always-current scroll position — reading it directly
+  // sidesteps both problems the earlier attempts ran into: computing from
+  // getBoundingClientRect() every frame (correct but was lagging behind a
+  // fast native flick) and computing from raw finger delta (fast, but wrong
+  // whenever native scroll applied any resistance/edge behavior the model
+  // didn't account for, which broke the slow-drag case that used to work).
+  const cardOffsetsRef = useRef<number[]>([]);
   const [isTouching, setIsTouching] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -902,6 +914,21 @@ function ClientCarousel() {
     setActiveIndex(nearest);
   };
 
+  // Caches each card's position within the scrollable content (left edge
+  // relative to the track's own coordinate space, i.e. independent of the
+  // current scroll position) — cards don't move relative to each other, so
+  // this only needs recomputing when the item list or layout changes, not
+  // on every frame of a gesture.
+  const measureCardOffsets = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    cardOffsetsRef.current = cardRefs.current.map((card) => {
+      if (!card) return 0;
+      return card.getBoundingClientRect().left - el.getBoundingClientRect().left + scrollLeft;
+    });
+  };
+
   // While actively swiping, each card's scale/lift is a continuous function
   // of its own live distance from the track's center — not a binary flip
   // once some threshold is crossed — so the outgoing card visibly shrinks
@@ -909,25 +936,37 @@ function ClientCarousel() {
   // whole way between them. Written straight to each card's DOM node
   // (bypassing React state) so there's no render latency between the
   // finger's position this frame and what's painted.
+  //
+  // Driven off el.scrollLeft — the browser's own authoritative, always-
+  // current scroll position — rather than re-querying getBoundingClientRect()
+  // per card every frame (correct, but reads as laggy since that query
+  // reflects wherever the DOM happened to have last painted) or the raw
+  // finger position (fast, but the touch-to-scroll relationship isn't
+  // guaranteed 1:1 once native resistance/edge behavior kicks in). Combined
+  // with the cached per-card offsets above, this is just arithmetic — no
+  // DOM reads at all in the hot path.
   const applyLiveCardScale = () => {
     const el = scrollRef.current;
     const cards = cardRefs.current;
-    if (!el) return;
-    const trackRect = el.getBoundingClientRect();
-    const center = trackRect.left + trackRect.width / 2;
-    // Distance (in card-widths) at which a card is fully "inactive" — one
-    // full slot away (card + gap) reaches proximity 0.
+    const offsets = cardOffsetsRef.current;
+    if (!el || offsets.length === 0) return;
+    const scrollLeft = el.scrollLeft;
+    const viewportCenter = el.clientWidth / 2;
     const slot = cards[0]?.getBoundingClientRect().width ?? 300;
-    cards.forEach((card) => {
+    let nearest: number | null = null;
+    let nearestDist = Infinity;
+    cards.forEach((card, i) => {
       if (!card) return;
-      const r = card.getBoundingClientRect();
-      const dist = Math.abs(r.left + r.width / 2 - center);
+      const cardCenter = (offsets[i] ?? 0) - scrollLeft + (card.clientWidth / 2);
+      const dist = Math.abs(cardCenter - viewportCenter);
+      if (dist < nearestDist) { nearestDist = dist; nearest = i; }
       const proximity = Math.max(0, 1 - dist / slot);
       const scale = 1 + 0.05 * proximity;
       const translateY = 6 - 12 * proximity; // +6px inactive -> -6px active
       card.style.transform = `translateY(${translateY}px) scale(${scale})`;
       card.style.boxShadow = proximity > 0.01 ? `0 0 ${14 * proximity}px 0px rgba(0,0,0,${0.2 * proximity})` : "none";
     });
+    liveNearestRef.current = nearest;
   };
 
   useEffect(() => {
@@ -935,18 +974,30 @@ function ClientCarousel() {
     if (!el) return;
     let liveRaf: number | null = null;
     const onScroll = () => {
-      if (isTouchingRef.current) {
-        // rAF-throttled (at most once per frame) rather than on every raw
-        // scroll event, which fires far more often than a frame can paint.
-        if (liveRaf !== null) return;
+      // Live-scale for as long as the position is actually changing —
+      // including the momentum/deceleration phase after a quick flick,
+      // where the finger has already lifted (isTouchingRef is false) but
+      // the browser is still animating the scroll on its own. Gating this
+      // on isTouchingRef meant a fast swipe produced zero visible scaling
+      // during that glide — momentum scroll events landed in the settle-
+      // only branch below and just sat there until scrolling fully stopped,
+      // which read as "nothing happens until it's already on the next
+      // card." isTouching (the state, driving the fast/no-transition CSS
+      // below) is kept true through this whole active-scroll window too,
+      // for the same reason — it only flips back once the settle timer
+      // actually fires, meaning scrolling has genuinely stopped.
+      setIsTouching(true);
+      if (liveRaf === null) {
         liveRaf = requestAnimationFrame(() => {
           liveRaf = null;
           applyLiveCardScale();
         });
-        return;
       }
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-      settleTimerRef.current = setTimeout(updateActiveCard, 20);
+      settleTimerRef.current = setTimeout(() => {
+        setIsTouching(false);
+        updateActiveCard();
+      }, 20);
     };
     updateActiveCard();
     el.addEventListener("scroll", onScroll, { passive: true });
@@ -1112,15 +1163,17 @@ function ClientCarousel() {
   // fast/live vs. slow/settled transition speed on the active card's scale.
   const onTouchStart = () => {
     if (window.innerWidth >= 640) return;
+    measureCardOffsets();
     isTouchingRef.current = true;
     setIsTouching(true);
   };
   // Some mobile browsers throttle/coalesce the `scroll` event during a
   // touch-driven drag rather than firing it every frame, so relying on it
   // alone left the active-card update visibly lagging behind the finger
-  // instead of tracking it live. touchmove doesn't have that problem — it
-  // fires on the actual gesture — so it drives the same rAF-throttled
-  // update directly off the finger's real position.
+  // instead of tracking it live. touchmove fires reliably on the actual
+  // gesture regardless of scroll-event throttling, so it drives the same
+  // rAF-throttled update independent of whether a scroll event happened to
+  // land this frame.
   const onTouchMove = () => {
     if (!isTouchingRef.current || liveTouchRafRef.current !== null) return;
     liveTouchRafRef.current = requestAnimationFrame(() => {
@@ -1129,8 +1182,21 @@ function ClientCarousel() {
     });
   };
   const onTouchEnd = () => {
+    // Only clears the finger-is-down flag that gates touchmove's own
+    // scheduling — NOT the isTouching state that drives the fast/no-
+    // transition CSS. That one stays true through any momentum scrolling
+    // that continues after the finger lifts (owned by the scroll listener's
+    // settle timer above), otherwise it would flip back to the slow eased
+    // transition right as momentum begins, which is the same "laggy during
+    // the glide" problem this was meant to fix.
     isTouchingRef.current = false;
-    setIsTouching(false);
+    // The live scale already knows exactly which card is nearest as of the
+    // last frame — hand that straight to React so the settle transition
+    // starts from the same place the live phase left off, rather than
+    // waiting on the debounced re-measurement (which re-derives the same
+    // answer a beat later, reading as a pause before the "final" snap).
+    // Momentum scrolling after this (if any) will keep correcting it live.
+    if (liveNearestRef.current !== null) setActiveIndex(liveNearestRef.current);
   };
 
   if (items.length === 0) return null;
