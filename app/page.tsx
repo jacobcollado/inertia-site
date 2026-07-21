@@ -844,8 +844,6 @@ function ClientCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
   const padRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollAnimRef = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -885,13 +883,6 @@ function ClientCarousel() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const updateScrollState = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  };
-
   // Mobile only: whichever card sits nearest the track's center gets the
   // "active" hover-style treatment (scale + shadow), so it applies whether
   // you got there by touch, drag, or the arrow buttons — not just touch
@@ -918,19 +909,17 @@ function ClientCarousel() {
     const el = scrollRef.current;
     if (!el) return;
     const onScroll = () => {
-      updateScrollState();
       // While a finger is actively down, the touch handlers below own the
       // active-card state entirely — they set it exactly once, right when
-      // the gesture ends, the same way the arrow buttons do. Without this
-      // guard, every native scroll tick during the live swipe was also
-      // debounce-triggering an update, so the "active" card's scale/shadow
-      // kept flickering across cards as the finger passed over each one
-      // instead of settling cleanly once.
+      // the gesture ends, the same way it settled with the arrow buttons
+      // before they were removed. Without this guard, every native scroll
+      // tick during the live swipe was also debounce-triggering an update,
+      // so the "active" card's scale/shadow kept flickering across cards as
+      // the finger passed over each one instead of settling cleanly once.
       if (touchRef.current) return;
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
       settleTimerRef.current = setTimeout(updateActiveCard, 60);
     };
-    updateScrollState();
     updateActiveCard();
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
@@ -1175,9 +1164,6 @@ function ClientCarousel() {
     scroll(dx < 0 ? "right" : "left");
   };
 
-  const arrowClass = "flex shrink-0 items-center justify-center size-11 sm:size-9 rounded-full transition-all duration-200 hover:scale-105";
-  const arrowStyle = { background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" } as const;
-
   if (items.length === 0) return null;
 
   return (
@@ -1214,8 +1200,13 @@ function ClientCarousel() {
                   className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:hover:scale-[1.02] sm:cursor-grab"
                   style={{
                     aspectRatio: "4 / 5",
-                    transition: "transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1)",
-                    ...(activeIndex === i ? { transform: "scale(1.05)", boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
+                    transition: "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 750ms cubic-bezier(0.4,0,0.2,1)",
+                    transform: activeIndex === i
+                      ? "translateY(-6px) scale(1.05)"
+                      : activeIndex !== null
+                        ? "translateY(6px) scale(1)"
+                        : "translateY(0) scale(1)",
+                    ...(activeIndex === i ? { boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
                   onMouseLeave={(e) => { if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
@@ -1231,18 +1222,18 @@ function ClientCarousel() {
                     draggable={false}
                   />
                 </Link>
-                <Link
-                  href={`/work#project-${item.slug}`}
-                  draggable={false}
-                  onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
-                  className="flex flex-col gap-1.5 w-[300px] sm:w-[420px] group/cta"
-                >
-                  <span className="flex items-center justify-between gap-2 pt-3 sm:pt-0">
+                <div className="flex flex-col gap-1.5 w-[300px] sm:w-[420px]">
+                  <Link
+                    href={`/work#project-${item.slug}`}
+                    draggable={false}
+                    onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
+                    className="flex items-center justify-between gap-2 pt-3 sm:pt-0 group/cta"
+                  >
                     <p className="text-[15px] tracking-tight" style={{ color: "rgb(var(--fg))" }}>{item.client}</p>
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform duration-200 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" style={{ color: "rgb(var(--muted))" }}>
                       <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
                     </svg>
-                  </span>
+                  </Link>
                   {item.blurb && (
                     <div className="max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                       <p
@@ -1253,7 +1244,7 @@ function ClientCarousel() {
                       </p>
                     </div>
                   )}
-                </Link>
+                </div>
               </div>
             ))}
           </div>
@@ -1261,18 +1252,6 @@ function ClientCarousel() {
       </div>
       </div>
 
-      <div className="flex sm:hidden items-center justify-end gap-3 mt-5 pl-1.5 pr-1">
-        <button type="button" aria-label="Scroll left" onClick={() => scroll("left")} className={arrowClass} style={arrowStyle} disabled={!canScrollLeft}>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
-          </svg>
-        </button>
-        <button type="button" aria-label="Scroll right" onClick={() => scroll("right")} className={arrowClass} style={arrowStyle} disabled={!canScrollRight}>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9 4 13 8 9 12" />
-          </svg>
-        </button>
-      </div>
     </section>
   );
 }
