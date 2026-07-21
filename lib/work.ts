@@ -17,6 +17,9 @@ export type WorkMeta = {
   order?: number;
   cover?: string;
   preview?: string;
+  // When set, the client carousel on page.tsx uses this photo instead of
+  // its default generated gradient+logo card.
+  card?: string;
   palette?: string[];
   instagram?: string;
   url?: string;
@@ -46,6 +49,7 @@ export function getAllWork(): WorkMeta[] {
       order: typeof data.order === "number" ? data.order : 999,
       cover: data.cover,
       preview: data.preview,
+      card: data.card,
       palette: Array.isArray(data.palette) ? data.palette : undefined,
       instagram: data.instagram,
       url: data.url,

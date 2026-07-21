@@ -16,9 +16,11 @@ const hl = (text: string) => (
   <span
     style={{
       backgroundImage:
-        "linear-gradient(104deg, rgba(10,132,255,0) 0.3%, rgba(10,132,255,0.32) 2.5%, rgba(10,132,255,0.14) 20%, rgba(10,132,255,0.12) 80%, rgba(10,132,255,0.3) 97.5%, rgba(10,132,255,0) 99.7%)",
-      color: "#0a84ff",
-      borderRadius: 4,
+        "linear-gradient(104deg, rgba(120,120,120,0) 0.3%, rgba(120,120,120,0.28) 2.5%, rgba(120,120,120,0.16) 20%, rgba(120,120,120,0.14) 80%, rgba(120,120,120,0.26) 97.5%, rgba(120,120,120,0) 99.7%)",
+      color: "inherit",
+      // Uneven corner radii read as a rougher, hand-marked stroke rather
+      // than a clean uniform rectangle.
+      borderRadius: "3px 7px 4px 8px / 6px 3px 7px 2px",
       padding: "1px 3px",
     }}
   >
@@ -535,6 +537,75 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+const CLIENT_CARD_FALLBACK_PALETTE = ["#39637e", "#5b7496", "#1a3a4a"];
+
+// Per-client logo size tweak — logos come in at wildly different natural
+// proportions (a wide wordmark vs. a compact mark), so a single fixed width
+// reads too small/large for some. Multiplies the shared base width below.
+const CLIENT_CARD_LOGO_SCALE: Record<string, number> = {
+  aether: 1.15,
+  inboundly: 0.8,
+  "ellora-la": 1.2,
+};
+
+// Every other logo is forced white via filter so it reads clearly against
+// any card background — this one has its own multi-color artwork worth
+// keeping as-is.
+const CLIENT_CARD_NATURAL_COLOR_LOGO_SLUGS = new Set(["ft-gioo"]);
+
+function hexLuminance(hex: string) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+// Builds the flowing card background for the client carousel from a work
+// item's brand palette — a static (no motion) blend of every usable color
+// the palette has, so depth comes from color layering rather than
+// animation. Reads as moving water/ink rather than a scatter of blobs:
+// near-white and near-black swatches are dropped first (a bright glow or an
+// opaque black patch is what makes a gradient read as "floating shapes"
+// instead of one continuous surface), then each remaining color gets its
+// own large, heavily-overlapping, very-soft-edged current — sized well past
+// the card's own bounds so falloffs never resolve into a visible ring, and
+// no single color is reused across multiple currents (previously the same
+// hue got recycled in 2-3 places, which is what read as flat/two-tone even
+// with a 5-color palette). The darkest usable tone pools in one corner
+// instead of a flat black vignette, and a soft light sheen sits opposite it
+// for depth.
+function clientCardGradient(palette: string[] | undefined) {
+  const raw = palette && palette.length >= 2 ? palette : CLIENT_CARD_FALLBACK_PALETTE;
+  const usable = raw.filter((hex) => { const l = hexLuminance(hex); return l > 0.06 && l < 0.8; });
+  const p = usable.length >= 2 ? usable : CLIENT_CARD_FALLBACK_PALETTE;
+  const sorted = [...p].sort((a, b) => hexLuminance(a) - hexLuminance(b));
+  const deepest = sorted[0];
+  const lightest = sorted[sorted.length - 1];
+  const base = p[0];
+  // Each palette color (deduped) gets exactly one current, at a distinct
+  // position/size, cycling through a fixed set of placements.
+  const spots = [
+    { pos: "10% 12%", size: "135% 115%" },
+    { pos: "92% 18%", size: "125% 120%" },
+    { pos: "78% 92%", size: "140% 125%" },
+    { pos: "18% 96%", size: "130% 115%" },
+    { pos: "50% 45%", size: "150% 140%" },
+  ];
+  const currents = p.map((hex, i) => {
+    const spot = spots[i % spots.length];
+    const alpha = 0.62 - i * 0.06;
+    return `radial-gradient(${spot.size} at ${spot.pos}, ${hexToRgba(hex, Math.max(0.32, alpha))} 0%, transparent 64%)`;
+  });
+  const layers = [
+    ...currents,
+    `linear-gradient(155deg, ${hexToRgba(lightest, 0.16)} 0%, transparent 42%)`,
+    `radial-gradient(115% 95% at 100% 100%, ${hexToRgba(deepest, 0.55)} 0%, transparent 58%)`,
+  ];
+  return {
+    backgroundColor: base,
+    backgroundImage: layers.join(", "),
+  };
+}
+
 function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
   const router = useRouter();
   const total = WORK_ITEMS.length;
@@ -830,7 +901,7 @@ function easeInOutCubic(t: number) {
 }
 
 function ClientCarousel() {
-  const [items, setItems] = useState<{ slug: string; client: string; image: string; blurb?: string }[]>([]);
+  const [items, setItems] = useState<{ slug: string; client: string; blurb?: string; logo?: string; palette?: string[]; card?: string }[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const padRef = useRef<HTMLDivElement>(null);
@@ -876,10 +947,8 @@ function ClientCarousel() {
 
   useEffect(() => {
     fetch("/api/content").then(r => r.json()).then(d => {
-      const work = (d.work ?? []) as { slug: string; client: string; cover?: string; preview?: string; images?: string[]; summary?: string; blurb?: string }[];
-      const mapped = work
-        .map(w => ({ slug: w.slug, client: w.client, image: w.cover ?? w.preview ?? w.images?.[0] ?? "", blurb: w.blurb ?? w.summary }))
-        .filter(w => w.image);
+      const work = (d.work ?? []) as { slug: string; client: string; summary?: string; blurb?: string; logo?: string; palette?: string[]; card?: string }[];
+      const mapped = work.map(w => ({ slug: w.slug, client: w.client, blurb: w.blurb ?? w.summary, logo: w.logo, palette: w.palette, card: w.card }));
       setItems(mapped);
     });
   }, []);
@@ -1257,16 +1326,45 @@ function ClientCarousel() {
                   onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
                   onMouseLeave={(e) => { if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
                 >
-                  <Image
-                    src={item.image}
-                    alt={item.client}
-                    fill
-                    loading="lazy"
-                    quality={90}
-                    sizes="(max-width: 640px) 480px, 840px"
-                    className="object-cover"
-                    draggable={false}
-                  />
+                  {item.card ? (
+                    <Image
+                      src={item.card}
+                      alt={item.client}
+                      fill
+                      loading="lazy"
+                      quality={90}
+                      sizes="(max-width: 640px) 480px, 840px"
+                      className="object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className="absolute inset-0" style={clientCardGradient(item.palette)} />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
+                    {item.logo ? (
+                      <Image
+                        src={item.logo}
+                        alt={item.client}
+                        width={180}
+                        height={180}
+                        className="h-auto object-contain"
+                        style={{
+                          width: `${55 * (CLIENT_CARD_LOGO_SCALE[item.slug] ?? 1)}%`,
+                          filter: CLIENT_CARD_NATURAL_COLOR_LOGO_SLUGS.has(item.slug)
+                            ? "drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))"
+                            : "brightness(0) invert(1) drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))",
+                        }}
+                        draggable={false}
+                      />
+                    ) : !item.card ? (
+                      <p
+                        className="text-[22px] sm:text-[26px] font-medium tracking-tight text-center leading-tight"
+                        style={{ color: "#fff", textShadow: "0 2px 12px rgba(0,0,0,0.35)" }}
+                      >
+                        {item.client}
+                      </p>
+                    ) : null}
+                  </div>
                 </Link>
                 <div className="flex flex-col gap-1.5 w-[300px] sm:w-[420px]">
                   <Link
@@ -1327,11 +1425,11 @@ function VisualLayout() {
 
       <div className="py-20 sm:py-14" />
 
-      <CalEmbed />
+      <IndexFaq />
 
       <div className="py-14 sm:py-20" />
 
-      <IndexFaq />
+      <CalEmbed />
 
       <div className="py-20 sm:py-20" />
 
