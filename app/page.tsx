@@ -822,18 +822,9 @@ function DesignPhilosophy() {
   );
 }
 
-// Eases the native scrollLeft toward a target over rAF frames — smoother and
-// more "fluid" than the browser's built-in smooth-scroll, which feels stiff
-// at this card size.
-function easeOutCubic(t: number) {
-  return 1 - Math.pow(1 - t, 3);
-}
-
-// Gentler than easeOutCubic for a release glide — easeOutCubic moves at its
-// fastest right at t=0, which on a short/small-distance glide reads as
-// snapping off abruptly the instant you let go. This ease-in-out curve
-// ramps up smoothly first, so the motion starts unhurried rather than
-// already at full speed.
+// Ramps up smoothly rather than moving fastest right at t=0, so a release
+// glide starts unhurried instead of snapping off abruptly the instant you
+// let go.
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
@@ -844,10 +835,15 @@ function ClientCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
   const padRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const scrollAnimRef = useRef<number | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchRef = useRef<{ startX: number; startScrollLeft: number } | null>(null);
+  // Mirrors isTouching in a ref too — the scroll listener's closure below is
+  // set up once (deps: [items]) rather than re-subscribing on every touch
+  // start/end, so it needs a ref to read the live value instead of a stale
+  // one captured at mount.
+  const isTouchingRef = useRef(false);
+  const liveTouchRafRef = useRef<number | null>(null);
+  const [isTouching, setIsTouching] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
   // Desktop drag state. Position is tracked as a plain translateX offset
@@ -908,15 +904,22 @@ function ClientCarousel() {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
+    let liveRaf: number | null = null;
     const onScroll = () => {
-      // While a finger is actively down, the touch handlers below own the
-      // active-card state entirely — they set it exactly once, right when
-      // the gesture ends, the same way it settled with the arrow buttons
-      // before they were removed. Without this guard, every native scroll
-      // tick during the live swipe was also debounce-triggering an update,
-      // so the "active" card's scale/shadow kept flickering across cards as
-      // the finger passed over each one instead of settling cleanly once.
-      if (touchRef.current) return;
+      if (isTouchingRef.current) {
+        // While a finger is down, track the nearest card continuously (at
+        // most once per frame) so the outgoing card scales down and the
+        // incoming one scales up as the swipe happens, not only once it's
+        // released. rAF-throttled rather than calling on every raw scroll
+        // event, which fired far more often than the transform's own
+        // transition could keep up with and read as flickery/jittery.
+        if (liveRaf !== null) return;
+        liveRaf = requestAnimationFrame(() => {
+          liveRaf = null;
+          updateActiveCard();
+        });
+        return;
+      }
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
       settleTimerRef.current = setTimeout(updateActiveCard, 60);
     };
@@ -927,69 +930,9 @@ function ClientCarousel() {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+      if (liveRaf !== null) cancelAnimationFrame(liveRaf);
     };
   }, [items]);
-
-  // Scroll exactly to the next/previous card's snap position (mobile's
-  // native-scroll track), rather than a fixed pixel delta, so the landing
-  // position always aligns with a card.
-  const scroll = (dir: "left" | "right") => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const cards = cardRefs.current.filter((c): c is HTMLAnchorElement => !!c);
-    if (cards.length === 0) return;
-    if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
-
-    const start = el.scrollLeft;
-    const trackLeft = el.getBoundingClientRect().left;
-    const leftOffsets = cards.map(c => c.getBoundingClientRect().left - trackLeft + el.scrollLeft);
-    const maxScroll = el.scrollWidth - el.clientWidth;
-
-    // snap-center targets the offset that puts a card's own center at the
-    // track's center.
-    const snapTargets = cards.map((c, i) => Math.max(0, Math.min(maxScroll, leftOffsets[i] + c.clientWidth / 2 - el.clientWidth / 2)));
-
-    const tolerance = 8;
-    let targetIndex: number;
-    if (dir === "right") {
-      const found = snapTargets.findIndex(o => o > start + tolerance);
-      targetIndex = found !== -1 ? found : snapTargets.length - 1;
-    } else {
-      let last = 0;
-      for (let i = 0; i < snapTargets.length; i++) {
-        if (snapTargets[i] < start - tolerance) last = i;
-      }
-      targetIndex = last;
-    }
-    const target = Math.max(0, Math.min(snapTargets[targetIndex], maxScroll));
-
-    // Scale the outgoing/incoming cards the moment the move starts, not once
-    // the scroll finishes, so the shrink/grow happens *during* the motion
-    // instead of as an afterthought once it lands.
-    if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-    setActiveIndex(targetIndex);
-
-    // scroll-behavior: smooth (from the track's scroll-smooth class) would
-    // otherwise animate every single scrollLeft assignment below instead of
-    // jumping straight to it, so each rAF frame queues a competing native
-    // smooth-scroll on top of this one's own easing — disable it for the
-    // duration of the manual animation and hand control back once it lands.
-    const prevBehavior = el.style.scrollBehavior;
-    el.style.scrollBehavior = "auto";
-    const duration = 150;
-    const startTime = performance.now();
-    const step = (now: number) => {
-      const t = Math.min(1, (now - startTime) / duration);
-      el.scrollLeft = start + (target - start) * easeOutCubic(t);
-      if (t < 1) {
-        scrollAnimRef.current = requestAnimationFrame(step);
-      } else {
-        scrollAnimRef.current = null;
-        el.style.scrollBehavior = prevBehavior;
-      }
-    };
-    scrollAnimRef.current = requestAnimationFrame(step);
-  };
 
   // Desktop drag-to-reveal: rather than native overflow scrolling, the track
   // is positioned with a plain translateX. The section's left padding is a
@@ -1135,33 +1078,34 @@ function ClientCarousel() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDragging, isExpanded, isDesktop]);
 
-  // On mobile, swiping should move exactly one card at a time rather than
-  // free-scrolling with native momentum (which can fly past several cards
-  // on a fast flick). Track the gesture ourselves and, on release, hand off
-  // to the same one-card `scroll()` used by the arrow buttons.
-  const onTouchStart = (e: React.TouchEvent) => {
+  // On mobile, the track's own CSS scroll-snap (snap-x snap-mandatory +
+  // snap-center per card) handles the actual snapping natively — most
+  // mobile browsers apply that snap tension live, during the drag itself,
+  // which reads as a fluid magnetic pull toward the nearest card rather
+  // than a free scroll that only corrects itself after you let go. All
+  // that's needed here is tracking whether a finger is down, to pick the
+  // fast/live vs. slow/settled transition speed on the active card's scale.
+  const onTouchStart = () => {
     if (window.innerWidth >= 640) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    touchRef.current = { startX: e.touches[0].clientX, startScrollLeft: el.scrollLeft };
+    isTouchingRef.current = true;
+    setIsTouching(true);
   };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    const t = touchRef.current;
-    touchRef.current = null;
-    if (!t || window.innerWidth >= 640) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    const dx = e.changedTouches[0].clientX - t.startX;
-    // Kill any native momentum the browser started on release, so it can't
-    // keep carrying the track past the one card we're about to land on.
-    el.style.overflowX = "hidden";
-    requestAnimationFrame(() => { el.style.overflowX = "auto"; });
-    if (Math.abs(dx) < 24) {
-      el.scrollLeft = t.startScrollLeft;
+  // Some mobile browsers throttle/coalesce the `scroll` event during a
+  // touch-driven drag rather than firing it every frame, so relying on it
+  // alone left the active-card update visibly lagging behind the finger
+  // instead of tracking it live. touchmove doesn't have that problem — it
+  // fires on the actual gesture — so it drives the same rAF-throttled
+  // update directly off the finger's real position.
+  const onTouchMove = () => {
+    if (!isTouchingRef.current || liveTouchRafRef.current !== null) return;
+    liveTouchRafRef.current = requestAnimationFrame(() => {
+      liveTouchRafRef.current = null;
       updateActiveCard();
-      return;
-    }
-    scroll(dx < 0 ? "right" : "left");
+    });
+  };
+  const onTouchEnd = () => {
+    isTouchingRef.current = false;
+    setIsTouching(false);
   };
 
   if (items.length === 0) return null;
@@ -1176,6 +1120,7 @@ function ClientCarousel() {
         <div
           ref={scrollRef}
           onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
           onPointerDown={onPointerDownDrag}
           onPointerMove={onPointerMoveDrag}
@@ -1186,7 +1131,7 @@ function ClientCarousel() {
         >
           <div
             ref={trackRef}
-            className="flex items-start gap-3 sm:gap-4 sm:w-max"
+            className="flex items-start gap-5 sm:gap-4 sm:w-max"
             style={isDesktop ? { transform: `translateX(${translateRef.current}px)` } : undefined}
           >
             <div className="shrink-0 sm:hidden" style={{ width: 6 }} aria-hidden="true" />
@@ -1200,7 +1145,17 @@ function ClientCarousel() {
                   className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:hover:scale-[1.02] sm:cursor-grab"
                   style={{
                     aspectRatio: "4 / 5",
-                    transition: "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 750ms cubic-bezier(0.4,0,0.2,1)",
+                    // While actively swiping, the scale/position needs to
+                    // keep pace with the finger as activeIndex updates live
+                    // (every frame, at most) — a long transition here just
+                    // means it's always chasing a target that already moved
+                    // on, which reads as laggy and disconnected from the
+                    // gesture. The slower, more eased settle only applies
+                    // once the finger lifts and there's a single final state
+                    // to ease into.
+                    transition: isTouching
+                      ? "transform 150ms ease-out, box-shadow 150ms ease-out"
+                      : "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 750ms cubic-bezier(0.4,0,0.2,1)",
                     transform: activeIndex === i
                       ? "translateY(-6px) scale(1.05)"
                       : activeIndex !== null
@@ -1235,7 +1190,7 @@ function ClientCarousel() {
                     </svg>
                   </Link>
                   {item.blurb && (
-                    <div className="max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                       <p
                         className="text-[14px] leading-relaxed tracking-tight w-full"
                         style={{ color: "rgb(var(--muted))" }}
