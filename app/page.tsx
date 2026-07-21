@@ -405,7 +405,12 @@ function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accen
         <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-16 sm:pt-24 pb-10 pb-[34dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[12px] tracking-tight"
-            style={{ ...fade(0), background: "#f0f0f0", color: "#5c5c5c" }}
+            style={{
+              ...fade(0),
+              background: hexToRgba(accentColor, 0.12),
+              color: hexToRgba(accentColor, 0.85),
+              transition: `${fade(0).transition}, background 700ms ease, color 700ms ease`,
+            }}
           >
             900+ clients served since 2022
           </span>
@@ -650,7 +655,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
 
   const goTo = (i: number) => { setAnimate(true); setIndex(i); };
   const advance = () => goTo(index + 1);
-  const retreat = () => goTo(index - 1);
 
   useEffect(() => {
     if (paused) return;
@@ -726,9 +730,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // each slide occupies `slideWidth`%; shift left by index slides, then add
   // the centering offset so the active slide sits in the middle on desktop
   const trackOffset = -index * slideWidth + centerOffset + dragPct;
-
-  const arrowClass = "flex items-center justify-center size-11 rounded-full transition-all duration-200 hover:scale-105";
-  const arrowStyle = { background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" } as const;
 
   return (
     <section
@@ -847,20 +848,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
           )}
         </div>
       </FollowerPointerCard>
-
-      {/* Prev / next arrows — below the carousel, mobile only (desktop drags instead) */}
-      <div className="flex sm:hidden items-center justify-end gap-3 mt-5 px-3">
-        <button type="button" aria-label="Previous project" onClick={retreat} className={arrowClass} style={arrowStyle}>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
-          </svg>
-        </button>
-        <button type="button" aria-label="Next project" onClick={advance} className={arrowClass} style={arrowStyle}>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9 4 13 8 9 12" />
-          </svg>
-        </button>
-      </div>
     </section>
   );
 }
@@ -898,6 +885,21 @@ function DesignPhilosophy() {
 // let go.
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function AiApproach() {
+  return (
+    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <div className="max-w-2xl sm:mx-auto">
+        <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
+          We treat AI as a frontier tool, not a shortcut. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed how fast we can work, not what we're willing to ship.
+        </p>
+        <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5" style={{ color: "#5c5c5c" }}>
+          We've been fortunate to work alongside people building genuinely great things, and every project has added to how we think about the work. Along the way we've built a deep understanding of the fundamentals: design systems that hold up as a brand grows, infrastructure that stays out of the way, and the details that make a product actually resonate with the people using it.
+        </p>
+      </div>
+    </section>
+  );
 }
 
 function ClientCarousel() {
@@ -1422,6 +1424,10 @@ function VisualLayout() {
       <div className="py-10 sm:py-8" />
 
       <ClientCarousel />
+
+      <div className="py-10 sm:py-8" />
+
+      <AiApproach />
 
       <div className="py-20 sm:py-14" />
 
