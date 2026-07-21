@@ -919,6 +919,14 @@ function ClientCarousel() {
     if (!el) return;
     const onScroll = () => {
       updateScrollState();
+      // While a finger is actively down, the touch handlers below own the
+      // active-card state entirely — they set it exactly once, right when
+      // the gesture ends, the same way the arrow buttons do. Without this
+      // guard, every native scroll tick during the live swipe was also
+      // debounce-triggering an update, so the "active" card's scale/shadow
+      // kept flickering across cards as the finger passed over each one
+      // instead of settling cleanly once.
+      if (touchRef.current) return;
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
       settleTimerRef.current = setTimeout(updateActiveCard, 60);
     };
@@ -972,6 +980,13 @@ function ClientCarousel() {
     if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
     setActiveIndex(targetIndex);
 
+    // scroll-behavior: smooth (from the track's scroll-smooth class) would
+    // otherwise animate every single scrollLeft assignment below instead of
+    // jumping straight to it, so each rAF frame queues a competing native
+    // smooth-scroll on top of this one's own easing — disable it for the
+    // duration of the manual animation and hand control back once it lands.
+    const prevBehavior = el.style.scrollBehavior;
+    el.style.scrollBehavior = "auto";
     const duration = 150;
     const startTime = performance.now();
     const step = (now: number) => {
@@ -981,6 +996,7 @@ function ClientCarousel() {
         scrollAnimRef.current = requestAnimationFrame(step);
       } else {
         scrollAnimRef.current = null;
+        el.style.scrollBehavior = prevBehavior;
       }
     };
     scrollAnimRef.current = requestAnimationFrame(step);
