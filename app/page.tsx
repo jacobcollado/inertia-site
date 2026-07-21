@@ -882,7 +882,8 @@ function ClientCarousel() {
   // Mobile only: whichever card sits nearest the track's center gets the
   // "active" hover-style treatment (scale + shadow), so it applies whether
   // you got there by touch, drag, or the arrow buttons — not just touch
-  // events on that specific card.
+  // events on that specific card. This drives the settled/at-rest state via
+  // React (activeIndex), which the CSS transition eases into smoothly.
   const updateActiveCard = () => {
     if (window.innerWidth >= 640) { setActiveIndex(null); return; }
     const el = scrollRef.current;
@@ -901,27 +902,51 @@ function ClientCarousel() {
     setActiveIndex(nearest);
   };
 
+  // While actively swiping, each card's scale/lift is a continuous function
+  // of its own live distance from the track's center — not a binary flip
+  // once some threshold is crossed — so the outgoing card visibly shrinks
+  // and the incoming one visibly grows in lockstep with the finger, the
+  // whole way between them. Written straight to each card's DOM node
+  // (bypassing React state) so there's no render latency between the
+  // finger's position this frame and what's painted.
+  const applyLiveCardScale = () => {
+    const el = scrollRef.current;
+    const cards = cardRefs.current;
+    if (!el) return;
+    const trackRect = el.getBoundingClientRect();
+    const center = trackRect.left + trackRect.width / 2;
+    // Distance (in card-widths) at which a card is fully "inactive" — one
+    // full slot away (card + gap) reaches proximity 0.
+    const slot = cards[0]?.getBoundingClientRect().width ?? 300;
+    cards.forEach((card) => {
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      const dist = Math.abs(r.left + r.width / 2 - center);
+      const proximity = Math.max(0, 1 - dist / slot);
+      const scale = 1 + 0.05 * proximity;
+      const translateY = 6 - 12 * proximity; // +6px inactive -> -6px active
+      card.style.transform = `translateY(${translateY}px) scale(${scale})`;
+      card.style.boxShadow = proximity > 0.01 ? `0 0 ${14 * proximity}px 0px rgba(0,0,0,${0.2 * proximity})` : "none";
+    });
+  };
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     let liveRaf: number | null = null;
     const onScroll = () => {
       if (isTouchingRef.current) {
-        // While a finger is down, track the nearest card continuously (at
-        // most once per frame) so the outgoing card scales down and the
-        // incoming one scales up as the swipe happens, not only once it's
-        // released. rAF-throttled rather than calling on every raw scroll
-        // event, which fired far more often than the transform's own
-        // transition could keep up with and read as flickery/jittery.
+        // rAF-throttled (at most once per frame) rather than on every raw
+        // scroll event, which fires far more often than a frame can paint.
         if (liveRaf !== null) return;
         liveRaf = requestAnimationFrame(() => {
           liveRaf = null;
-          updateActiveCard();
+          applyLiveCardScale();
         });
         return;
       }
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-      settleTimerRef.current = setTimeout(updateActiveCard, 60);
+      settleTimerRef.current = setTimeout(updateActiveCard, 20);
     };
     updateActiveCard();
     el.addEventListener("scroll", onScroll, { passive: true });
@@ -1100,7 +1125,7 @@ function ClientCarousel() {
     if (!isTouchingRef.current || liveTouchRafRef.current !== null) return;
     liveTouchRafRef.current = requestAnimationFrame(() => {
       liveTouchRafRef.current = null;
-      updateActiveCard();
+      applyLiveCardScale();
     });
   };
   const onTouchEnd = () => {
@@ -1145,16 +1170,16 @@ function ClientCarousel() {
                   className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:hover:scale-[1.02] sm:cursor-grab"
                   style={{
                     aspectRatio: "4 / 5",
-                    // While actively swiping, the scale/position needs to
-                    // keep pace with the finger as activeIndex updates live
-                    // (every frame, at most) — a long transition here just
-                    // means it's always chasing a target that already moved
-                    // on, which reads as laggy and disconnected from the
-                    // gesture. The slower, more eased settle only applies
-                    // once the finger lifts and there's a single final state
-                    // to ease into.
+                    // While actively swiping, applyLiveCardScale writes
+                    // transform/boxShadow straight to the DOM every frame —
+                    // a CSS transition here would keep trying to animate
+                    // between each of those rapid targets and never catch
+                    // up, reading as laggy instead of tracking the finger
+                    // 1:1. It only applies once the finger lifts, easing
+                    // from wherever the live phase left off to the single
+                    // settled state (activeIndex) below.
                     transition: isTouching
-                      ? "transform 150ms ease-out, box-shadow 150ms ease-out"
+                      ? "none"
                       : "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 750ms cubic-bezier(0.4,0,0.2,1)",
                     transform: activeIndex === i
                       ? "translateY(-6px) scale(1.05)"
