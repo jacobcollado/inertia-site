@@ -339,7 +339,7 @@ function GradientWord({ children, color = "#0a84ff", trigger, italic }: { childr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trigger ?? color]);
 
-  const bloom = `0 0 12px ${hexToRgba(displayColor, 0.55)}, 0 0 28px ${hexToRgba(displayColor, 0.3)}`;
+  const bloom = `0 0 8px ${hexToRgba(displayColor, 0.55)}, 0 0 18px ${hexToRgba(displayColor, 0.3)}`;
 
   return (
     <span className="inline-flex" aria-label={children} style={{ textShadow: bloom, transition: "text-shadow 400ms ease" }}>
@@ -829,9 +829,20 @@ function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
 }
 
+// Gentler than easeOutCubic for a release glide — easeOutCubic moves at its
+// fastest right at t=0, which on a short/small-distance glide reads as
+// snapping off abruptly the instant you let go. This ease-in-out curve
+// ramps up smoothly first, so the motion starts unhurried rather than
+// already at full speed.
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 function ClientCarousel() {
-  const [items, setItems] = useState<{ slug: string; client: string; image: string }[]>([]);
+  const [items, setItems] = useState<{ slug: string; client: string; image: string; blurb?: string }[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const padRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -839,15 +850,39 @@ function ClientCarousel() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchRef = useRef<{ startX: number; startScrollLeft: number } | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Desktop drag state. Position is tracked as a plain translateX offset
+  // (<= 0, more negative reveals cards further right) applied directly to
+  // the DOM node via a ref rather than React state, so drag frames never
+  // wait on a render. The section's left padding follows the same drag 1:1
+  // (collapsing toward full-bleed as you pull left) rather than transitioning
+  // on a timer, so the width change tracks the cursor exactly like the
+  // cards do. It only eases back (via a CSS transition, drag released) once
+  // translateX has returned all the way to 0.
+  const translateRef = useRef(0);
+  const padRest = useRef(0);
+  const collapseDistance = 160; // px of drag needed to fully reach full-bleed
+  const dragEase = 0.6; // <1 softens the drag so it doesn't track the cursor 1:1
+  const dragRef = useRef<{ startX: number; startTranslate: number; dragging: boolean; moved: boolean } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     fetch("/api/content").then(r => r.json()).then(d => {
-      const work = (d.work ?? []) as { slug: string; client: string; cover?: string; preview?: string; images?: string[] }[];
+      const work = (d.work ?? []) as { slug: string; client: string; cover?: string; preview?: string; images?: string[]; summary?: string; blurb?: string }[];
       const mapped = work
-        .map(w => ({ slug: w.slug, client: w.client, image: w.cover ?? w.preview ?? w.images?.[0] ?? "" }))
+        .map(w => ({ slug: w.slug, client: w.client, image: w.cover ?? w.preview ?? w.images?.[0] ?? "", blurb: w.blurb ?? w.summary }))
         .filter(w => w.image);
       setItems(mapped);
     });
+  }, []);
+
+  useEffect(() => {
+    const measure = () => setIsDesktop(window.innerWidth >= 640);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, []);
 
   const updateScrollState = () => {
@@ -891,26 +926,16 @@ function ClientCarousel() {
     updateActiveCard();
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
-    // Cards' real width isn't known until their images finish loading, so
-    // the initial scrollWidth read above can be stale — recheck once layout
-    // settles.
-    const ro = new ResizeObserver(onScroll);
-    ro.observe(el);
     return () => {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      ro.disconnect();
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
     };
   }, [items]);
 
-  // Scroll exactly to the next/previous card's snap position, rather than a
-  // fixed pixel delta, so the landing position always aligns with a card.
-  // Compares each card's own snap target (its offset on desktop's snap-start,
-  // or its centered offset on mobile's snap-center) against the current
-  // scroll position — comparing raw left-edge offsets against scrollLeft
-  // breaks on mobile since a centered card's scrollLeft sits mid-card, not
-  // at its edge.
+  // Scroll exactly to the next/previous card's snap position (mobile's
+  // native-scroll track), rather than a fixed pixel delta, so the landing
+  // position always aligns with a card.
   const scroll = (dir: "left" | "right") => {
     const el = scrollRef.current;
     if (!el) return;
@@ -918,17 +943,14 @@ function ClientCarousel() {
     if (cards.length === 0) return;
     if (scrollAnimRef.current) cancelAnimationFrame(scrollAnimRef.current);
 
-    const isMobile = window.innerWidth < 640;
     const start = el.scrollLeft;
     const trackLeft = el.getBoundingClientRect().left;
     const leftOffsets = cards.map(c => c.getBoundingClientRect().left - trackLeft + el.scrollLeft);
     const maxScroll = el.scrollWidth - el.clientWidth;
 
     // snap-center targets the offset that puts a card's own center at the
-    // track's center; snap-start targets its left edge directly.
-    const snapTargets = isMobile
-      ? cards.map((c, i) => Math.max(0, Math.min(maxScroll, leftOffsets[i] + c.clientWidth / 2 - el.clientWidth / 2)))
-      : leftOffsets;
+    // track's center.
+    const snapTargets = cards.map((c, i) => Math.max(0, Math.min(maxScroll, leftOffsets[i] + c.clientWidth / 2 - el.clientWidth / 2)));
 
     const tolerance = 8;
     let targetIndex: number;
@@ -946,10 +968,9 @@ function ClientCarousel() {
 
     // Scale the outgoing/incoming cards the moment the move starts, not once
     // the scroll finishes, so the shrink/grow happens *during* the motion
-    // instead of as an afterthought once it lands. Mobile only — desktop
-    // never shows the active-card treatment.
+    // instead of as an afterthought once it lands.
     if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-    if (isMobile) setActiveIndex(targetIndex);
+    setActiveIndex(targetIndex);
 
     const duration = 150;
     const startTime = performance.now();
@@ -964,6 +985,150 @@ function ClientCarousel() {
     };
     scrollAnimRef.current = requestAnimationFrame(step);
   };
+
+  // Desktop drag-to-reveal: rather than native overflow scrolling, the track
+  // is positioned with a plain translateX. The section's left padding is a
+  // pure function of that same translateX (interpolated from its aligned
+  // resting value down to full-bleed over `collapseDistance` px), so the
+  // width change tracks the drag 1:1 in both directions instead of easing
+  // in on a timer — it only transitions once the drag ends and the padding
+  // needs to ease the rest of the way back to aligned.
+  const trackMinTranslate = () => {
+    const track = trackRef.current;
+    const viewport = scrollRef.current;
+    if (!track || !viewport) return 0;
+    // A little extra slack past where the last card's trailing edge would
+    // naturally land, so dragging all the way to the end lets it keep
+    // sliding a bit further inward instead of stopping dead right at the
+    // content's actual boundary.
+    const overdrag = 200;
+    return Math.min(0, viewport.clientWidth - track.scrollWidth - overdrag);
+  };
+
+  const applyPadForTranslate = (x: number) => {
+    const pad = padRef.current;
+    if (!pad) return;
+    const t = Math.max(0, Math.min(1, -x / collapseDistance));
+    pad.style.paddingLeft = `${padRest.current + (6 - padRest.current) * t}px`;
+  };
+
+  const onPointerDownDrag = (e: React.PointerEvent) => {
+    if (!isDesktop || e.button !== 0) return;
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    // Only arm the gesture here — don't touch isDragging/isExpanded or the
+    // padding yet. A plain click is a pointerdown with no movement at all,
+    // and flipping those on every down (even one that never becomes a real
+    // drag) was visibly bouncing the padding/cards out and back on every
+    // single card click. They only flip once real movement is confirmed, in
+    // onPointerMoveDrag below.
+    dragRef.current = { startX: e.clientX, startTranslate: translateRef.current, dragging: true, moved: false };
+    viewport.setPointerCapture(e.pointerId);
+  };
+  const onPointerMoveDrag = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    const track = trackRef.current;
+    const pad = padRef.current;
+    if (!d?.dragging || !track || !pad) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved) {
+      if (Math.abs(dx) <= 3) return;
+      d.moved = true;
+      e.preventDefault();
+      // First confirmed movement — now it's a real drag. Pin the padding to
+      // its current rendered value before flipping state, same reasoning as
+      // before: isDragging/isExpanded swap the wrapper's class to its
+      // collapsed variant instantly, and without anchoring the inline style
+      // to today's real value first, that class swap alone would snap the
+      // padding to full-bleed the moment the drag is confirmed.
+      const currentPad = parseFloat(getComputedStyle(pad).paddingLeft) || 0;
+      pad.style.paddingLeft = `${currentPad}px`;
+      if (translateRef.current === 0) padRest.current = currentPad;
+      setIsDragging(true);
+      setIsExpanded(true);
+    } else {
+      e.preventDefault();
+    }
+    // Hard-clamped to the actual bounds — no rubber-band overshoot. Dragging
+    // past either end just stops there, same as every other position in the
+    // carousel stays exactly where you leave it, with nothing left to glide
+    // or bounce back from on release.
+    const min = trackMinTranslate();
+    const next = Math.max(min, Math.min(0, d.startTranslate + dx * dragEase));
+    translateRef.current = next;
+    track.style.transform = `translateX(${next}px)`;
+    applyPadForTranslate(next);
+  };
+  const endDragDesktop = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    const viewport = scrollRef.current;
+    const pad = padRef.current;
+    dragRef.current = null;
+    // A plain click never crossed the movement threshold, so isDragging/
+    // isExpanded/padding were never touched — nothing to unwind, and
+    // releasing the pointer capture (if any was actually set) is all that's
+    // needed before letting the click proceed normally.
+    if (!d?.moved) {
+      if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+      return;
+    }
+    setIsDragging(false);
+    // Only ease the padding all the way back to aligned once you've dragged
+    // back to the very first card — anywhere past that, it settles at
+    // full-bleed. Either way, the padding was tracking the drag fluidly
+    // (partially collapsed, not just 0%/100%) right up until release, so
+    // clearing the inline value immediately and handing off to the CSS
+    // class snapped it straight to that class's binary target — a real jump
+    // whenever release happened at a partial value, which is exactly the
+    // first few cards' region (past that, the drag has already fully
+    // collapsed the padding, so there was nothing left to jump). Instead,
+    // animate the inline value the rest of the way to its resting target,
+    // then hand off to the class only once they already match.
+    const nextExpanded = translateRef.current < 0;
+    if (pad) {
+      const from = parseFloat(pad.style.paddingLeft) || padRest.current;
+      const to = nextExpanded ? 6 : padRest.current;
+      if (Math.abs(to - from) > 0.5) {
+        const startTime = performance.now();
+        const duration = 450;
+        const stepPad = (now: number) => {
+          const t = Math.min(1, (now - startTime) / duration);
+          pad.style.paddingLeft = `${from + (to - from) * easeInOutCubic(t)}px`;
+          if (t < 1) requestAnimationFrame(stepPad);
+          else pad.style.paddingLeft = "";
+        };
+        requestAnimationFrame(stepPad);
+      } else {
+        pad.style.paddingLeft = "";
+      }
+    }
+    setIsExpanded(nextExpanded);
+    if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+  };
+
+  // While the section's padding eases back to its resting (aligned) value —
+  // which only happens once translateX has returned to 0 — the viewport's
+  // width doesn't actually change here (translateX is already 0, so there's
+  // nothing to re-clamp). This still guards against the general case of the
+  // viewport resizing (e.g. window resize) while settled at the aligned width.
+  useEffect(() => {
+    if (isDragging || isExpanded || !isDesktop) return;
+    const track = trackRef.current;
+    if (!track) return;
+    let raf: number;
+    const clampDuringReturn = () => {
+      const min = trackMinTranslate();
+      if (translateRef.current < min) {
+        translateRef.current = min;
+        track.style.transform = `translateX(${min}px)`;
+      }
+      raf = requestAnimationFrame(clampDuringReturn);
+    };
+    raf = requestAnimationFrame(clampDuringReturn);
+    const stop = setTimeout(() => cancelAnimationFrame(raf), 350);
+    return () => { cancelAnimationFrame(raf); clearTimeout(stop); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDragging, isExpanded, isDesktop]);
 
   // On mobile, swiping should move exactly one card at a time rather than
   // free-scrolling with native momentum (which can fly past several cards
@@ -1000,58 +1165,87 @@ function ClientCarousel() {
   if (items.length === 0) return null;
 
   return (
-    <section className="rise w-[100vw] ml-[calc(50%-50vw)] sm:w-full sm:ml-0 sm:max-w-[88rem] sm:mx-auto px-1.5 sm:px-8">
+    <section className="rise w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
+      <div
+        ref={padRef}
+        className={`px-1.5 sm:pr-0 ${isDragging ? "" : "sm:transition-[padding-left] sm:duration-300 sm:ease-out"} ${isDragging || isExpanded ? "sm:pl-1.5" : "sm:pl-[calc(50vw-336px)]"}`}
+      >
       <div className="relative">
         <div
           ref={scrollRef}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
-          className="flex items-center gap-3 sm:gap-4 overflow-x-auto touch-pan-x sm:snap-x sm:snap-mandatory scroll-smooth py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          onPointerDown={onPointerDownDrag}
+          onPointerMove={onPointerMoveDrag}
+          onPointerUp={endDragDesktop}
+          onPointerCancel={endDragDesktop}
+          className={`overflow-x-auto sm:overflow-x-hidden touch-pan-x snap-x snap-mandatory sm:snap-none scroll-smooth py-6 sm:pb-10 sm:-ml-5 sm:pl-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]${isDragging ? " select-none" : ""}`}
+          style={{ cursor: isDragging ? "grabbing" : undefined }}
         >
-          <div className="shrink-0 sm:hidden" style={{ width: 6 }} aria-hidden="true" />
-          {items.map((item, i) => (
-            <Link
-              key={item.slug}
-              ref={(el) => { cardRefs.current[i] = el; }}
-              href={`/work#project-${item.slug}`}
-              className="relative shrink-0 snap-center sm:snap-start rounded-2xl overflow-hidden group w-[240px] sm:w-[340px] sm:hover:scale-105"
-              style={{
-                aspectRatio: "4 / 5",
-                transition: "transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1)",
-                ...(activeIndex === i ? { transform: "scale(1.05)", boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
-              onMouseLeave={(e) => { if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
-            >
-              <Image
-                src={item.image}
-                alt={item.client}
-                fill
-                loading="lazy"
-                quality={90}
-                sizes="(max-width: 640px) 240px, 340px"
-                className="object-cover"
-                draggable={false}
-              />
-              <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col items-start gap-2 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.35) 55%, transparent 100%)" }}>
-                <p className="text-[14px] tracking-tight text-white font-normal">{item.client}</p>
-                <span
-                  className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] tracking-tight"
-                  style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.85)", backdropFilter: "blur(1.5px) saturate(1.6)", WebkitBackdropFilter: "blur(1.5px) saturate(1.6)" }}
+          <div
+            ref={trackRef}
+            className="flex items-start gap-3 sm:gap-4 sm:w-max"
+            style={isDesktop ? { transform: `translateX(${translateRef.current}px)` } : undefined}
+          >
+            <div className="shrink-0 sm:hidden" style={{ width: 6 }} aria-hidden="true" />
+            {items.map((item, i) => (
+              <div key={item.slug} className="shrink-0 flex flex-col gap-3 sm:w-[420px]">
+                <Link
+                  ref={(el) => { cardRefs.current[i] = el; }}
+                  href={`/work#project-${item.slug}`}
+                  draggable={false}
+                  onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
+                  className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:hover:scale-[1.02] sm:cursor-grab"
+                  style={{
+                    aspectRatio: "4 / 5",
+                    transition: "transform 200ms cubic-bezier(0.4,0,0.2,1), box-shadow 200ms cubic-bezier(0.4,0,0.2,1)",
+                    ...(activeIndex === i ? { transform: "scale(1.05)", boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
+                  onMouseLeave={(e) => { if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
                 >
-                  View project
-                </span>
+                  <Image
+                    src={item.image}
+                    alt={item.client}
+                    fill
+                    loading="lazy"
+                    quality={90}
+                    sizes="(max-width: 640px) 480px, 840px"
+                    className="object-cover"
+                    draggable={false}
+                  />
+                </Link>
+                <Link
+                  href={`/work#project-${item.slug}`}
+                  draggable={false}
+                  onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
+                  className="flex flex-col gap-1.5 w-[300px] sm:w-[420px] group/cta"
+                >
+                  <span className="flex items-center justify-between gap-2 pt-3 sm:pt-0">
+                    <p className="text-[15px] tracking-tight" style={{ color: "rgb(var(--fg))" }}>{item.client}</p>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform duration-200 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" style={{ color: "rgb(var(--muted))" }}>
+                      <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
+                    </svg>
+                  </span>
+                  {item.blurb && (
+                    <div className="max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+                      <p
+                        className="text-[14px] leading-relaxed tracking-tight w-full"
+                        style={{ color: "rgb(var(--muted))" }}
+                      >
+                        {item.blurb}
+                      </p>
+                    </div>
+                  )}
+                </Link>
               </div>
-            </Link>
-          ))}
+            ))}
+          </div>
         </div>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-16 transition-opacity duration-200"
-          style={{ background: "linear-gradient(to right, rgb(var(--bg)) 0%, rgb(var(--bg) / 0.8) 40%, transparent 100%)", opacity: canScrollLeft ? 1 : 0 }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-12 transition-opacity duration-200"
-          style={{ background: "linear-gradient(to left, rgb(var(--bg)), transparent)", opacity: canScrollRight ? 1 : 0 }} />
+      </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 mt-5 pl-1.5 sm:pl-8 pr-1 sm:pr-3">
+      <div className="flex sm:hidden items-center justify-end gap-3 mt-5 pl-1.5 pr-1">
         <button type="button" aria-label="Scroll left" onClick={() => scroll("left")} className={arrowClass} style={arrowStyle} disabled={!canScrollLeft}>
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
@@ -1078,7 +1272,7 @@ function VisualLayout() {
 
       <VercelHero accentColor={accentColor} accentTrigger={accentTrigger} />
 
-      <div className="py-10 sm:py-6" />
+      <div className="py-6 sm:py-6" />
 
       <WorkThumbnails onActiveAccent={(c) => { setAccentColor(c); setAccentTrigger((n) => n + 1); }} />
 

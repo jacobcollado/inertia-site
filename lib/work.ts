@@ -13,6 +13,7 @@ export type WorkMeta = {
   service?: string;
   year?: string;
   summary?: string;
+  blurb?: string;
   order?: number;
   cover?: string;
   preview?: string;
@@ -41,6 +42,7 @@ export function getAllWork(): WorkMeta[] {
       service: data.service,
       year: data.year,
       summary: data.summary,
+      blurb: data.blurb,
       order: typeof data.order === "number" ? data.order : 999,
       cover: data.cover,
       preview: data.preview,
