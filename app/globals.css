@@ -220,7 +220,11 @@ html {
    (black), including under the browser's bottom bar. <html> stays solid black
    as a fallback for anything body doesn't cover. */
 html.home-dark-root {
-  background: rgb(10 10 10);
+  /* Transparent so <body>'s background propagates to the canvas and paints
+     BOTH overscroll ends. If <html> has its own non-transparent background,
+     it wins the canvas paint and body only fills its own box — which is why
+     the top overscroll kept reading black. */
+  background: transparent;
 }
 html.home-dark-root body {
   background-color: rgb(10 10 10);
