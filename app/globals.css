@@ -220,13 +220,13 @@ html {
    (black), including under the browser's bottom bar. <html> stays solid black
    as a fallback for anything body doesn't cover. */
 html.home-dark-root {
-  /* Transparent so <body>'s background propagates to the canvas and paints
-     BOTH overscroll ends. If <html> has its own non-transparent background,
-     it wins the canvas paint and body only fills its own box — which is why
-     the top overscroll kept reading black. */
-  background: transparent;
-}
-html.home-dark-root body {
+  /* Viewport-fixed 50/50 split on <html> itself (the canvas painter for iOS
+     overscroll), with min-height:100vh so the fixed attachment has a full
+     viewport box to anchor to — Lenis sets html/body height:auto, which left
+     the html box too short for the gradient to resolve correctly and made the
+     top read black. White top half → top overscroll white; black bottom half
+     → bottom overscroll (under the browser bar) black. */
+  min-height: 100vh;
   background-color: rgb(10 10 10);
   background-image: linear-gradient(
     to bottom,
@@ -237,6 +237,9 @@ html.home-dark-root body {
   );
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+html.home-dark-root body {
+  background: transparent;
 }
 
 @keyframes theme-fade-in {
