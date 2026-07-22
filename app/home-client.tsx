@@ -622,7 +622,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   const [paused, setPaused] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
-  const [navigating, setNavigating] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const widthRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -797,7 +796,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                     role="link"
                     draggable={false}
                     onDragStart={(e) => e.preventDefault()}
-                    onClick={() => { if (Math.abs(dragState.current?.dx ?? 0) <= 6) { setNavigating(true); setTimeout(() => router.push("/work"), 300); } }}
+                    onClick={() => { if (Math.abs(dragState.current?.dx ?? 0) <= 6) router.push("/work"); }}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
                     className="relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
                     style={{ width: `${slideWidth}%`, cursor: "none", WebkitUserDrag: "none" } as React.CSSProperties}
@@ -839,15 +838,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
               })}
             </div>
           </div>
-
-          {navigating && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.25)" }}>
-              <div
-                className="size-6 rounded-full animate-spin"
-                style={{ border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff" }}
-              />
-            </div>
-          )}
         </div>
       </FollowerPointerCard>
     </section>
@@ -1105,25 +1095,30 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
     if (!isDesktop || e.button !== 0) return;
     const viewport = scrollRef.current;
     if (!viewport) return;
-    // Only arm the gesture here — don't touch isDragging/isExpanded or the
-    // padding yet. A plain click is a pointerdown with no movement at all,
-    // and flipping those on every down (even one that never becomes a real
-    // drag) was visibly bouncing the padding/cards out and back on every
-    // single card click. They only flip once real movement is confirmed, in
-    // onPointerMoveDrag below.
+    // Only arm the gesture here — don't touch isDragging/isExpanded, the
+    // padding, or pointer capture yet. A plain click is a pointerdown with
+    // no movement at all, and flipping those on every down (even one that
+    // never becomes a real drag) was visibly bouncing the padding/cards out
+    // and back on every single card click. Capturing the pointer here was
+    // worse: browsers can fail to dispatch the resulting click event to the
+    // original target (a card's <Link>) once an ancestor has taken pointer
+    // capture, even if the capture only lasted a few milliseconds — which
+    // is exactly why cards stopped being clickable. All of this now only
+    // happens once real movement is confirmed, in onPointerMoveDrag below.
     dragRef.current = { startX: e.clientX, startTranslate: translateRef.current, dragging: true, moved: false };
-    viewport.setPointerCapture(e.pointerId);
   };
   const onPointerMoveDrag = (e: React.PointerEvent) => {
     const d = dragRef.current;
     const track = trackRef.current;
     const pad = padRef.current;
+    const viewport = scrollRef.current;
     if (!d?.dragging || !track || !pad) return;
     const dx = e.clientX - d.startX;
     if (!d.moved) {
       if (Math.abs(dx) <= 3) return;
       d.moved = true;
       e.preventDefault();
+      viewport?.setPointerCapture(e.pointerId);
       // First confirmed movement — now it's a real drag. Pin the padding to
       // its current rendered value before flipping state, same reasoning as
       // before: isDragging/isExpanded swap the wrapper's class to its

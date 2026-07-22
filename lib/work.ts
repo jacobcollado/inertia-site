@@ -3,8 +3,10 @@ import path from "node:path";
 import matter from "gray-matter";
 import { remark } from "remark";
 import html from "remark-html";
+import sharp from "sharp";
 
 const WORK_DIR = path.join(process.cwd(), "content", "work");
+const PUBLIC_DIR = path.join(process.cwd(), "public");
 
 export type WorkMeta = {
   slug: string;
@@ -100,4 +102,31 @@ export function getWork(slug: string): WorkPiece | null {
 export async function renderWorkMarkdown(md: string): Promise<string> {
   const processed = await remark().use(html).process(md);
   return processed.toString();
+}
+
+export type SizedImage = { src: string; width: number; height: number };
+
+// Reading each image's real dimensions server-side lets the gallery reserve
+// the right amount of space before the <img> tag ever loads, instead of
+// collapsing to 0 height and shifting everything below it into place as
+// images finish fetching. That shift was the root cause behind the /work
+// scroll-to-project links (from the homepage carousel) consistently landing
+// short on projects with several unsized images above their section.
+async function sizeImage(src: string): Promise<SizedImage> {
+  try {
+    const buf = fs.readFileSync(path.join(PUBLIC_DIR, src));
+    const meta = await sharp(buf).metadata();
+    return { src, width: meta.width ?? 1, height: meta.height ?? 1 };
+  } catch {
+    return { src, width: 1, height: 1 };
+  }
+}
+
+export async function getWorkGalleryImages(w: WorkMeta): Promise<SizedImage[]> {
+  const paths = [
+    ...(w.cover ? [w.cover] : []),
+    ...(w.preview ? [w.preview] : []),
+    ...(w.images ?? []),
+  ];
+  return Promise.all(paths.map(sizeImage));
 }
