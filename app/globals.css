@@ -205,6 +205,23 @@ html {
   animation: theme-fade-in 400ms ease both;
 }
 
+/* Homepage overscroll: the page reads light at the top (hero) and dark at
+   the bottom (footer/dark zone), but the <html> background paints the
+   rubber-band overscroll area at BOTH ends. A viewport-pinned hard-stop
+   gradient — light on the top half, dark on the bottom half — anchors each
+   half so pulling down at the top reveals light and pulling up past the
+   footer reveals dark, matching whichever end you're overscrolling. */
+html.home-dark-root {
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255) 0%,
+    rgb(255 255 255) 50%,
+    rgb(10 10 10) 50%,
+    rgb(10 10 10) 100%
+  );
+  background-attachment: fixed;
+}
+
 @keyframes theme-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
