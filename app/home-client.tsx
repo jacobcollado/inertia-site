@@ -474,8 +474,8 @@ function CalEmbed() {
 const WORK_ITEMS = [
   { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app", accent: "#6a6dff" },
   { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff" },
-  { src: "/work/aether-2.webp", title: "Aether Theme", category: "Cart design", accent: "#5b7496" },
   { src: "/work/aether-1.webp", title: "Aether Theme", category: "Shopify theme", accent: "#39637e" },
+  { src: "/work/aether-2.webp", title: "Aether Theme", category: "Cart design", accent: "#5b7496" },
   { src: "/work/ellora-la/1.webp", title: "Ellora LA", category: "Shopify storefront", accent: "#cb591b" },
   { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page", accent: "#1a1a1a" },
   { src: "/work/inertia-site.png", title: "Inertia", category: "Web design", accent: "#154365" },
@@ -756,7 +756,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
             top: -260,
             transform: "translateX(-50%)",
             width: "100vw",
-            height: "calc(100% + 520px)",
+            height: "calc(100% + 400px)",
             pointerEvents: "none",
             ["--work-beam-color" as string]: hexToRgba(activeAccent, isDimAccent ? 0.5 : 0.32),
             ["--work-beam-core" as string]: hexToRgba(activeAccent, isDimAccent ? 0.7 : 0.5),

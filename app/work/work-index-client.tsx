@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import type { WorkMeta, SizedImage } from "@/lib/work";
 
 type WorkMetaWithGallery = WorkMeta & { gallery: SizedImage[] };
@@ -9,10 +10,6 @@ type WorkMetaWithGallery = WorkMeta & { gallery: SizedImage[] };
 function serviceShort(s: string | undefined): string {
   if (!s) return "";
   return s.trim();
-}
-
-function slugAnchor(slug: string) {
-  return `project-${slug}`;
 }
 
 // Live link + status overrides for the /work index, keyed by slug. Kept here
@@ -30,6 +27,48 @@ const WORK_LINKS: Record<string, { url?: string; status?: string; year?: string;
   "subtle-goods": { url: "https://subtlegoods.shop", year: "June 2026" },
 };
 
+// Per-project dialog logo overrides. Logos ship in varied colors and natural
+// proportions; the dialog sits on a light surface, so some need forcing to
+// solid black, a couple read better with the wordmark text alone (logo
+// hidden), and a few need a nudged height so they don't read too small/large
+// against the others. `tone`: "black" forces the artwork to pure black via
+// filter, "hide" drops the image entirely. `height`: pixel height overriding
+// the default 28px (kept as an inline number rather than a Tailwind class so
+// it doesn't depend on the JIT scanner picking up interpolated class names).
+const DIALOG_LOGO_OVERRIDE: Record<string, { tone?: "black" | "hide"; height?: number }> = {
+  "ellora-la": { tone: "black", height: 18 },
+  "inboundly": { tone: "black", height: 32 },
+  "subtle-goods": { tone: "black", height: 44 },
+  "ft-gioo": { height: 32 },
+  "aether": { tone: "hide" },
+  "samuel-norris": { tone: "hide" },
+};
+
+// Per-project thumbnail crop position (object-position). Default is "center
+// top"; a larger vertical value slides the crop window downward so more of the
+// image's lower portion shows.
+const THUMB_OBJECT_POSITION: Record<string, string> = {
+  "trippie-redd": "center 35%",
+  "allure-new-york": "center 50%",
+};
+
+// Card logos are forced white for legibility on any photo; these keep their
+// own multi-color artwork instead (same exception the homepage carousel makes).
+const CARD_LOGO_NATURAL_COLOR = new Set(["ft-gioo"]);
+
+// Per-project overlaid card logo tweaks. `hide` drops the logo entirely;
+// `height` overrides the shared default (64px, or 66px for natural-color
+// logos) since logos come in very different natural proportions. `maxW` raises
+// the shared 62% width cap for wide wordmarks that would otherwise hit it
+// before reaching their target height.
+const CARD_LOGO_OVERRIDE: Record<string, { hide?: boolean; height?: number; maxW?: string }> = {
+  "aether": { hide: true },
+  "ellora-la": { height: 44 },
+  "trippie-redd": { height: 74 },
+  "ft-gioo": { height: 104 },
+  "subtle-goods": { height: 150, maxW: "92%" },
+};
+
 // A loosely sketched back-arrow, as if drawn quickly by hand rather than a
 // precise geometric icon.
 function HandDrawnArrow() {
@@ -38,6 +77,266 @@ function HandDrawnArrow() {
       <path d="M13.2 8.4 C 9.8 8.7, 5.6 7.9, 2.7 8.2" />
       <path d="M6.8 4.3 C 5.3 5.6, 3.6 6.7, 2.6 8.1 C 3.8 9.3, 5.5 10.4, 6.9 11.6" />
     </svg>
+  );
+}
+
+function resolveLink(slug: string, w: WorkMeta) {
+  const override = WORK_LINKS[slug];
+  const url = override?.url ?? w.url;
+  const status = override?.status;
+  const year = override?.year ?? w.year;
+  const yearLabel = override?.yearLabel ?? year?.match(/\d{4}/)?.[0];
+  return { url, status, yearLabel };
+}
+
+function WorkDialog({
+  work,
+  onClose,
+}: {
+  work: WorkMetaWithGallery | null;
+  onClose: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  // Drive an enter/exit transition off `visible` so opening fades/rises in and
+  // closing plays out before the portal unmounts (kept simple: parent controls
+  // mount via `work`, this only animates the in/out state).
+  useEffect(() => {
+    if (work) {
+      const id = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(id);
+    }
+    setVisible(false);
+  }, [work]);
+
+  useEffect(() => {
+    if (!work) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+
+    // This site runs Lenis smooth-scroll (see app/lenis-provider.tsx), which
+    // hijacks wheel events globally with a non-passive preventDefault. That's
+    // why, without stopping it, the page still scrolled behind the dialog and
+    // the wheel wouldn't scroll the panel (only the scrollbar / middle-click
+    // autoscroll, which don't go through wheel events, worked). Lenis exposes a
+    // `lenis:lock` / `lenis:unlock` event pair that stops/starts it; stopping
+    // it releases the wheel so the panel (marked data-lenis-prevent below)
+    // scrolls natively and nothing behind moves.
+    window.dispatchEvent(new Event("lenis:lock"));
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+      window.dispatchEvent(new Event("lenis:unlock"));
+    };
+  }, [work, onClose]);
+
+  if (!mounted || !work) return null;
+
+  const { url, status, yearLabel } = resolveLink(work.slug, work);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      style={{
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 220ms ease",
+      }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        data-lenis-prevent
+        className="relative w-full sm:max-w-[560px] bg-[rgb(var(--bg))] border border-[rgb(var(--line))] rounded-t-2xl sm:rounded-b-none mx-0 sm:mx-4 overflow-y-auto overscroll-contain"
+        style={{
+          maxHeight: "92dvh",
+          transform: visible ? "translateY(0)" : "translateY(24px)",
+          opacity: visible ? 1 : 0,
+          transition: "transform 320ms cubic-bezier(0.22,1,0.36,1), opacity 220ms ease",
+        }}
+      >
+        {/* Mobile grabber */}
+        <div className="sm:hidden flex justify-center pt-3 pb-1 sticky top-0 z-20 bg-[rgb(var(--bg))]">
+          <div className="w-8 h-1 rounded-full bg-[rgb(var(--line))]" />
+        </div>
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-[rgb(var(--surface))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+          aria-label="Close"
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-4 h-4">
+            <path d="M3 3l10 10M13 3L3 13" />
+          </svg>
+        </button>
+
+        <div className="px-6 sm:px-8 pt-5 sm:pt-8 pb-8">
+          {/* Header */}
+          <div className="flex flex-col gap-3 pr-10">
+            {work.logo && DIALOG_LOGO_OVERRIDE[work.slug]?.tone !== "hide" && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={work.logo}
+                alt={work.client}
+                className="w-auto object-contain object-left"
+                style={{
+                  height: DIALOG_LOGO_OVERRIDE[work.slug]?.height ?? 28,
+                  filter: DIALOG_LOGO_OVERRIDE[work.slug]?.tone === "black" ? "brightness(0)" : "var(--logo-filter, none)",
+                }}
+              />
+            )}
+            <h2 className="text-[clamp(1.6rem,4vw,2.1rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
+              {work.client}
+            </h2>
+          </div>
+
+          {/* Meta row: service + year/status */}
+          <div className="flex items-center gap-2.5 flex-wrap mt-4">
+            {work.service && (
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] rounded-full px-2.5 pt-[3px] pb-[4px] leading-none">
+                {serviceShort(work.service)}
+              </span>
+            )}
+            {(status || yearLabel) && (
+              <span className="text-[11px] tabular-nums tracking-tight rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))" }}>
+                {status && yearLabel ? `${status} - ${yearLabel}` : status || yearLabel}
+              </span>
+            )}
+          </div>
+
+          {/* Summary */}
+          {work.summary && (
+            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mt-5">
+              {work.summary}
+            </p>
+          )}
+
+          {/* Live link */}
+          {url && (
+            <a
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 mt-6 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
+              style={{ background: "var(--accent-gradient)" }}
+            >
+              Visit site
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
+                <path d="M4 12L12 4M7 4h5v5" />
+              </svg>
+            </a>
+          )}
+
+          {/* Gallery */}
+          {work.gallery.length > 0 && (
+            <div className="flex flex-col gap-3 mt-7">
+              {work.gallery.map((img, i) => (
+                <div
+                  key={i}
+                  className="w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]"
+                  style={{ aspectRatio: `${img.width} / ${img.height}` }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img.src}
+                    alt={`${work.client} ${i + 1}`}
+                    width={img.width}
+                    height={img.height}
+                    className="w-full h-auto block"
+                    loading={i === 0 ? undefined : "lazy"}
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function WorkCard({
+  work,
+  onOpen,
+  wide,
+}: {
+  work: WorkMetaWithGallery;
+  onOpen: () => void;
+  // Spans both grid columns on desktop and uses a landscape aspect, so a
+  // wide/landscape thumbnail (e.g. FT.GIOO) isn't cropped down into a square.
+  wide?: boolean;
+}) {
+  const thumb = work.card ?? work.gallery[0]?.src;
+  // Per-project crop nudge. Thumbnails default to object-top; these sit lower
+  // in frame, so shifting object-position down reveals more of their lower
+  // portion.
+  const objectPosition = THUMB_OBJECT_POSITION[work.slug] ?? "center top";
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className={`group flex flex-col gap-3 text-left${wide ? " sm:col-span-2" : ""}`}
+      aria-label={`Open ${work.client}`}
+    >
+      <div
+        className="work-card-thumb relative w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]"
+        style={{ aspectRatio: wide ? "16 / 9" : "4 / 3" }}
+      >
+        {thumb ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={thumb}
+            alt={work.client}
+            className="w-full h-full object-cover"
+            style={{ objectPosition }}
+            draggable={false}
+          />
+        ) : null}
+        {/* Logo overlaid on the thumbnail, centered. Forced white (like the
+            homepage carousel) so it reads against any photo, with a soft scrim
+            behind it; a couple of logos keep their natural multi-color art. */}
+        {work.logo && !CARD_LOGO_OVERRIDE[work.slug]?.hide && (
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.28) 100%)" }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={work.logo}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="w-auto object-contain"
+              style={{
+                maxWidth: CARD_LOGO_OVERRIDE[work.slug]?.maxW ?? "62%",
+                height: CARD_LOGO_OVERRIDE[work.slug]?.height ?? (CARD_LOGO_NATURAL_COLOR.has(work.slug) ? 66 : 64),
+                filter: CARD_LOGO_NATURAL_COLOR.has(work.slug)
+                  ? "drop-shadow(0 1px 6px rgba(0,0,0,0.45))"
+                  : "brightness(0) invert(1) drop-shadow(0 1px 6px rgba(0,0,0,0.5))",
+              }}
+            />
+          </div>
+        )}
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">
+          {work.client}
+        </span>
+        {work.service && (
+          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] shrink-0 rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))" }}>
+            {serviceShort(work.service)}
+          </span>
+        )}
+      </div>
+    </button>
   );
 }
 
@@ -77,32 +376,13 @@ function FloatingBackToTop() {
 
 export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWithGallery[] }) {
   const [work] = useState<WorkMetaWithGallery[]>(initialWork);
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (work.length === 0) return;
-    const sections = work
-      .map((w) => document.getElementById(slugAnchor(w.slug)))
-      .filter((el): el is HTMLElement => !!el);
-    if (sections.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
-        if (visible.length === 0) return;
-        const topMost = visible.reduce((a, b) => (a.boundingClientRect.top < b.boundingClientRect.top ? a : b));
-        const slug = topMost.target.id.replace(/^project-/, "");
-        setActiveSlug(slug);
-      },
-      { rootMargin: "-15% 0px -70% 0px", threshold: 0 }
-    );
-
-    sections.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [work]);
+  const close = useCallback(() => setOpenSlug(null), []);
+  const openWork = openSlug ? work.find((w) => w.slug === openSlug) ?? null : null;
 
   return (
-    <main className="mx-auto w-full pt-10 pb-24 px-6 sm:px-8" style={{ maxWidth: "52rem" }}>
+    <main className="mx-auto w-full pt-10 pb-24 px-6 sm:px-8" style={{ maxWidth: "64rem" }}>
 
       <Link
         href="/"
@@ -113,104 +393,21 @@ export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWi
         Index
       </Link>
 
-      {/* TOC */}
-      <div className="mb-10 p-6 rounded-xl bg-[rgb(var(--surface))]">
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mb-4">Contents</p>
-        <nav className="flex flex-col gap-1.5" aria-label="Projects">
-          {work.map((w) => {
-            const active = activeSlug === w.slug;
-            return (
-              <a
-                key={w.slug}
-                href={`#${slugAnchor(w.slug)}`}
-                className="text-[16px] tracking-tight transition-colors py-0.5"
-                style={{
-                  color: active ? "rgb(var(--fg))" : "rgb(var(--muted))",
-                  fontWeight: active ? 500 : 400,
-                }}
-              >
-                {w.client}
-              </a>
-            );
-          })}
-        </nav>
+      {/* Intro */}
+      <div className="mb-10 text-center">
+        <h1 className="text-[clamp(1.8rem,4vw,2.4rem)] font-normal tracking-[-0.03em] text-[rgb(var(--fg))]">
+          Work
+        </h1>
       </div>
 
-      {/* Project list */}
-      <div className="flex flex-col gap-20">
-        {work.map((w) => {
-          const override = WORK_LINKS[w.slug];
-          const url = override?.url;
-          const status = override?.status;
-          const year = override?.year ?? w.year;
-          const yearLabel = override?.yearLabel ?? year?.match(/\d{4}/)?.[0];
-
-          return (
-            <div key={w.slug} id={slugAnchor(w.slug)} className="flex flex-col gap-5 scroll-mt-24">
-
-              {/* Header */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  {url ? (
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] hover:opacity-70 transition-opacity underline underline-offset-4 decoration-[rgb(var(--line))] hover:decoration-[rgb(var(--fg))]"
-                    >
-                      {w.client}
-                    </a>
-                  ) : (
-                    <span className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))]">{w.client}</span>
-                  )}
-                  {w.service && (
-                    <span className="text-[16px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-                      {serviceShort(w.service)}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {(status || yearLabel) && (
-                    <span className="text-[11px] tabular-nums tracking-tight rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))" }}>
-                      {status && yearLabel ? `${status} - ${yearLabel}` : status || yearLabel}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Stacked images — aspect-ratio reserved from server-read
-                  dimensions so each block holds its final height before the
-                  image itself has loaded. Without this, unsized images
-                  collapse to 0px and everything below shifts into place as
-                  they load, which threw off #project-slug scroll targets. */}
-              <div className="flex flex-col gap-3">
-                {w.gallery.map((img, i) => (
-                  <div
-                    key={i}
-                    className="w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]"
-                    style={{ aspectRatio: `${img.width} / ${img.height}` }}
-                  >
-                    <img
-                      src={img.src}
-                      alt={`${w.client} ${i + 1}`}
-                      width={img.width}
-                      height={img.height}
-                      className="w-full h-auto block"
-                      draggable={false}
-                    />
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          );
-        })}
-
-        <p className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.75 }}>
-          And 950+ others. We just chose these to showcase.
-        </p>
+      {/* Thumbnail grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-10">
+        {work.map((w) => (
+          <WorkCard key={w.slug} work={w} onOpen={() => setOpenSlug(w.slug)} wide={w.slug === "ft-gioo"} />
+        ))}
       </div>
 
+      <WorkDialog work={openWork} onClose={close} />
       <FloatingBackToTop />
 
     </main>
