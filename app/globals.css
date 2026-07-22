@@ -212,28 +212,25 @@ html {
    page sits under, e.g. Safari's toolbar or an in-app browser like TikTok —
    to reveal black (matching the footer/dark zone).
 
-   On mobile Safari the top rubber-band overscroll is painted from the BODY
-   background (the root background propagates from <body>), while the bottom
-   overscroll past the footer follows the <html> background. So we split them:
-   <html> stays solid black (bottom overscroll = black, under any browser
-   bottom bar), and <body> carries a document-anchored background that's white
-   for a short band at the very top (top overscroll = white, matching the
-   hero) then transparent below so the black <html> shows through everywhere
-   else. */
+   A VIEWPORT-fixed gradient (background-attachment: fixed) with white only in
+   a thin strip at the very top of the viewport and black below. When scrolled
+   to the top, that white strip sits at the viewport's top edge, so pulling
+   down reveals white. When scrolled to the bottom, the white strip is still
+   pinned near the viewport top — far from the bottom bar — so the overscroll
+   area below the footer falls in the black region and reveals black. This
+   avoids the CSS background-propagation and document-anchoring pitfalls that
+   made document-anchored/body backgrounds read black at the top. */
 html.home-dark-root {
-  background: rgb(10 10 10);
-}
-html.home-dark-root body {
-  background-color: transparent;
+  background-color: rgb(10 10 10);
   background-image: linear-gradient(
     to bottom,
     rgb(255 255 255) 0,
-    rgb(255 255 255) 220px,
-    transparent 220px,
-    transparent 100%
+    rgb(255 255 255) 130px,
+    rgb(10 10 10) 130px,
+    rgb(10 10 10) 100%
   );
   background-repeat: no-repeat;
-  background-attachment: scroll;
+  background-attachment: fixed;
 }
 
 @keyframes theme-fade-in {
