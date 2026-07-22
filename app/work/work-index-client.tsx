@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta, SizedImage } from "@/lib/work";
 
@@ -69,17 +68,6 @@ const CARD_LOGO_OVERRIDE: Record<string, { hide?: boolean; height?: number; maxW
   "subtle-goods": { height: 150, maxW: "92%" },
 };
 
-// A loosely sketched back-arrow, as if drawn quickly by hand rather than a
-// precise geometric icon.
-function HandDrawnArrow() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
-      <path d="M13.2 8.4 C 9.8 8.7, 5.6 7.9, 2.7 8.2" />
-      <path d="M6.8 4.3 C 5.3 5.6, 3.6 6.7, 2.6 8.1 C 3.8 9.3, 5.5 10.4, 6.9 11.6" />
-    </svg>
-  );
-}
-
 function resolveLink(slug: string, w: WorkMeta) {
   const override = WORK_LINKS[slug];
   const url = override?.url ?? w.url;
@@ -98,6 +86,14 @@ function WorkDialog({
 }) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // Swipe-down-to-close (mobile). dragY is the live downward offset while
+  // dragging; dragging tracks whether a close-drag is actually in progress
+  // (only started when the panel is scrolled to the top and the finger pulls
+  // down, so it never fights normal content scrolling).
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const touchState = useRef<{ startY: number; active: boolean } | null>(null);
   useEffect(() => setMounted(true), []);
 
   // Drive an enter/exit transition off `visible` so opening fades/rises in and
@@ -105,11 +101,49 @@ function WorkDialog({
   // mount via `work`, this only animates the in/out state).
   useEffect(() => {
     if (work) {
+      setDragY(0);
+      setDragging(false);
       const id = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(id);
     }
     setVisible(false);
   }, [work]);
+
+  // Swipe-down-to-close handlers. A close-drag only begins when the panel is
+  // scrolled to the very top and the finger moves downward; up to that point
+  // (and any time the panel isn't at the top) touches fall through to native
+  // scrolling untouched.
+  const CLOSE_THRESHOLD = 110; // px dragged to dismiss on release
+  const onTouchStart = (e: React.TouchEvent) => {
+    const panel = panelRef.current;
+    if (!panel || panel.scrollTop > 0) { touchState.current = null; return; }
+    touchState.current = { startY: e.touches[0].clientY, active: false };
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const st = touchState.current;
+    const panel = panelRef.current;
+    if (!st || !panel) return;
+    const dy = e.touches[0].clientY - st.startY;
+    // Only engage on a downward pull from the top. If the panel has since
+    // scrolled (shouldn't, at top) or the pull is upward, bail out.
+    if (!st.active) {
+      if (dy > 6 && panel.scrollTop <= 0) { st.active = true; setDragging(true); }
+      else return;
+    }
+    if (dy <= 0) { setDragY(0); return; }
+    setDragY(dy);
+  };
+  const onTouchEnd = () => {
+    const st = touchState.current;
+    touchState.current = null;
+    if (!st?.active) return;
+    setDragging(false);
+    if (dragY > CLOSE_THRESHOLD) {
+      onClose();
+    } else {
+      setDragY(0);
+    }
+  };
 
   useEffect(() => {
     if (!work) return;
@@ -146,18 +180,28 @@ function WorkDialog({
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
         opacity: visible ? 1 : 0,
-        transition: "opacity 220ms ease",
+        transition: "opacity 360ms ease",
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
+        ref={panelRef}
         data-lenis-prevent
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
         className="relative w-full sm:max-w-[560px] bg-[rgb(var(--bg))] border border-[rgb(var(--line))] rounded-t-2xl sm:rounded-b-none mx-0 sm:mx-4 overflow-y-auto overscroll-contain"
         style={{
           maxHeight: "92dvh",
-          transform: visible ? "translateY(0)" : "translateY(24px)",
+          transform: visible ? `translateY(${dragY}px)` : "translateY(24px)",
           opacity: visible ? 1 : 0,
-          transition: "transform 320ms cubic-bezier(0.22,1,0.36,1), opacity 220ms ease",
+          // No transition while actively dragging so the panel tracks the
+          // finger 1:1; restore a slow, fluid ease for the enter/exit and the
+          // snap-back so the release settles gently rather than snapping.
+          transition: dragging
+            ? "opacity 220ms ease"
+            : "transform 560ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease",
         }}
       >
         {/* Mobile grabber */}
@@ -374,35 +418,67 @@ function FloatingBackToTop() {
   );
 }
 
+const ALL_FILTER = "All";
+
 export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWithGallery[] }) {
   const [work] = useState<WorkMetaWithGallery[]>(initialWork);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [filter, setFilter] = useState<string>(ALL_FILTER);
 
   const close = useCallback(() => setOpenSlug(null), []);
   const openWork = openSlug ? work.find((w) => w.slug === openSlug) ?? null : null;
 
+  // Distinct services, in the order they first appear, with an "All" option
+  // up front. Derived from the data so the pills stay in sync with content.
+  const filters = [
+    ALL_FILTER,
+    ...work.reduce<string[]>((acc, w) => {
+      const s = serviceShort(w.service);
+      if (s && !acc.includes(s)) acc.push(s);
+      return acc;
+    }, []),
+  ];
+
+  const visibleWork = filter === ALL_FILTER
+    ? work
+    : work.filter((w) => serviceShort(w.service) === filter);
+
   return (
     <main className="mx-auto w-full pt-10 pb-24 px-6 sm:px-8" style={{ maxWidth: "64rem" }}>
 
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors mb-8"
-        style={{ opacity: 0.75 }}
-      >
-        <HandDrawnArrow />
-        Index
-      </Link>
-
       {/* Intro */}
-      <div className="mb-10 text-center">
+      <div className="mb-8 text-center">
         <h1 className="text-[clamp(1.8rem,4vw,2.4rem)] font-normal tracking-[-0.03em] text-[rgb(var(--fg))]">
           Work
         </h1>
       </div>
 
+      {/* Service filter pills */}
+      <div className="flex flex-wrap items-center gap-2 mb-8">
+        {filters.map((f) => {
+          const active = filter === f;
+          return (
+            <button
+              key={f}
+              type="button"
+              onClick={() => setFilter(f)}
+              className="text-[13px] tracking-tight rounded-full px-3.5 pt-[5px] pb-[6px] leading-none border transition-colors duration-200"
+              style={{
+                background: active ? "rgb(var(--fg))" : "rgb(var(--surface))",
+                color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
+                borderColor: active ? "rgb(var(--fg))" : "transparent",
+              }}
+              aria-pressed={active}
+            >
+              {f}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Thumbnail grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-10">
-        {work.map((w) => (
+        {visibleWork.map((w) => (
           <WorkCard key={w.slug} work={w} onOpen={() => setOpenSlug(w.slug)} wide={w.slug === "ft-gioo"} />
         ))}
       </div>

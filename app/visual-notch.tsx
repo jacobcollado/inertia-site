@@ -729,13 +729,10 @@ export function VisualNotch() {
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
-  const isWorkIndex = pathname === "/work";
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
   const isBlog = pathname.startsWith("/blog");
-  const useMinimalHeader = isHome || isPolicies || isAether || (isWork && !isWorkIndex) || isComponents || isBlog;
-
-  if (isWorkIndex) return null;
+  const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
   if (useMinimalHeader) {
     return (
