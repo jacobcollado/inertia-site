@@ -205,21 +205,43 @@ html {
   animation: theme-fade-in 400ms ease both;
 }
 
-/* Homepage overscroll: the page reads light at the top (hero) and dark at
-   the bottom (footer/dark zone), but the <html> background paints the
-   rubber-band overscroll area at BOTH ends. A viewport-pinned hard-stop
-   gradient — light on the top half, dark on the bottom half — anchors each
-   half so pulling down at the top reveals light and pulling up past the
-   footer reveals dark, matching whichever end you're overscrolling. */
-html.home-dark-root {
-  background: linear-gradient(
-    to bottom,
-    rgb(255 255 255) 0%,
-    rgb(255 255 255) 50%,
-    rgb(10 10 10) 50%,
-    rgb(10 10 10) 100%
-  );
-  background-attachment: fixed;
+/* Homepage top/bottom mobile-browser toolbar colors (iOS 26 Safari).
+   iOS 26 ignores <meta theme-color> and instead tints each toolbar from the
+   page background: it samples fixed/sticky elements near that viewport edge,
+   falling back to the <body> background. A single static background can't be
+   white at the top (hero) and black at the bottom (footer) at once — BUT the
+   overscroll rubber-band is the one place that samples the LIVE body
+   background as it changes. So we scroll-drive the body background from light
+   to dark: at the top of the page it's white (top rubber-band reads white),
+   and by the very bottom it's black (bottom rubber-band, under the toolbar,
+   reads black). The background only shows through in the overscroll areas —
+   page content (white LightCard on top, dark zones below) is opaque — so this
+   never tints the actual page.
+   Technique: https://nasedk.in/blog/ios26-safari-toolbar-colors/ */
+@supports (animation-timeline: scroll()) {
+  html.home-dark-root,
+  html.home-dark-root body {
+    animation: home-overscroll-base linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes home-overscroll-base {
+  0%, 88% { background-color: rgb(255 255 255); }
+  100%    { background-color: rgb(10 10 10); }
+}
+/* Fallback for engines without scroll-driven animations: a viewport-fixed
+   hard-stop gradient, light top half / dark bottom half. */
+@supports not (animation-timeline: scroll()) {
+  html.home-dark-root {
+    background: linear-gradient(
+      to bottom,
+      rgb(255 255 255) 0%,
+      rgb(255 255 255) 50%,
+      rgb(10 10 10) 50%,
+      rgb(10 10 10) 100%
+    );
+    background-attachment: fixed;
+  }
 }
 
 @keyframes theme-fade-in {

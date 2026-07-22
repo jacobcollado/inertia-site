@@ -24,14 +24,15 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // dark footer. Tag <html> on the homepage so the root background can go
   // dark to match, closing that gap.
   //
-  // No <meta theme-color> is set on the homepage on purpose: a single
-  // theme-color value tints BOTH the top status-bar strip and the bottom
-  // toolbar, so it can never be white-at-top (hero) and black-at-bottom
-  // (footer) at once. Without it, iOS Safari samples the page's own top and
-  // bottom edges instead — white hero at the top, dark footer at the bottom —
-  // giving the correct color at each end independently. (The manifest's
-  // theme_color is also set to white so it can't force the strip dark as a
-  // fallback.)
+  // iOS 26 Safari ignores <meta theme-color> and instead tints its top/bottom
+  // toolbars from the page's background: it samples fixed/sticky elements near
+  // each viewport edge, falling back to the <body> background. The homepage
+  // needs white at the top (hero) and black at the bottom (footer), which one
+  // static background can't do. The technique (see .home-dark-root in
+  // globals.css) is a scroll-driven background animation on html/body — light
+  // at the start, dark at the end — because overscroll uniquely samples the
+  // live body background, so the top rubber-band reads the light keyframe and
+  // the bottom reads the dark one. This class just scopes that to the homepage.
   useEffect(() => {
     const root = document.documentElement;
     const on = isHome && !bare;
@@ -52,25 +53,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       {noFooter ? null : isHome ? (
         <div className="homepage-dark-zone" style={{ background: "rgb(var(--bg))" }}>
           <MinimalFooter />
-          {/* Dark backstop pinned to the very bottom of the viewport, behind
-              everything. iOS Safari samples the page's bottom edge to tint the
-              bottom toolbar; the document's root/body background is white, so
-              past the footer the toolbar read white. This fixed black strip at
-              the bottom edge gives Safari a dark color to sample there without
-              affecting page layout or scroll. */}
-          <div
-            aria-hidden="true"
-            style={{
-              position: "fixed",
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: "40vh",
-              background: "#0a0a0a",
-              zIndex: -1,
-              pointerEvents: "none",
-            }}
-          />
         </div>
       ) : (
         <MinimalFooter />
