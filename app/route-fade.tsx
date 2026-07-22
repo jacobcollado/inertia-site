@@ -12,6 +12,12 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const ref = useRef<HTMLDivElement>(null);
   const first = useRef(true);
+  // Lives in RouteFade's own (stable) scope, not the key={pathname} child
+  // below — RouteFade itself never remounts on navigation, only that child
+  // does, so this correctly survives across route changes while still being
+  // false during the true first render on both server and client (avoiding
+  // any SSR/CSR className mismatch that module-level state would cause).
+  const isInitialLoad = useRef(true);
   const isComponents = pathname.startsWith("/components");
   const isPersistentShell = PERSISTENT_SHELL_PREFIXES.some(p => pathname === p || pathname.startsWith(p + "/"));
 
@@ -20,6 +26,7 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
       first.current = false;
       return;
     }
+    isInitialLoad.current = false;
     const el = ref.current;
     if (!el) return;
 
@@ -41,7 +48,7 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div ref={ref} className={isComponents ? undefined : "route-enter"} key={pathname}>
+    <div ref={ref} className={isComponents || isInitialLoad.current ? undefined : "route-enter"} key={pathname}>
       {children}
     </div>
   );
