@@ -365,18 +365,19 @@ function VercelHero({ accentColor }: { accentColor: string }) {
       <div
         className="relative flex items-center"
       >
-        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-16 sm:pt-24 pb-10 pb-[34dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
+        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-16 sm:pt-24 pb-10 pb-[34dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:justify-start">
+          {false && (
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
             style={{
               ...fade(0),
-              background: hexToRgba(accentColor, 0.12),
-              color: hexToRgba(accentColor, 0.85),
-              transition: `${fade(0).transition}, background 700ms ease, color 700ms ease`,
+              background: "rgba(26,26,26,0.06)",
+              color: "rgba(26,26,26,0.7)",
             }}
           >
             900+ clients served since 2022
           </span>
+          )}
 
           <h1
             className="font-normal tracking-tight leading-[0.88] max-w-xl"
@@ -386,6 +387,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
             <ShimmerWord>speed</ShimmerWord>
           </h1>
 
+          {false && (
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
             <p
               className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-right"
@@ -394,7 +396,9 @@ function VercelHero({ accentColor }: { accentColor: string }) {
               We do design and development ourselves, so you're not stuck explaining your vision twice.
             </p>
           </div>
+          )}
 
+          {false && (
           <div className="flex flex-col gap-5 max-w-lg sm:hidden">
             <p
               className="text-[16.5px] leading-relaxed tracking-tight"
@@ -403,19 +407,23 @@ function VercelHero({ accentColor }: { accentColor: string }) {
               We do design and development ourselves, so you're not stuck explaining your vision twice.
             </p>
           </div>
+          )}
 
           <div className="flex items-center gap-3">
             <a
               href="https://cal.com/jacob-c-99otvp/15min"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
               style={{ ...fade(660), background: "#1a1a1a", color: "#fff" }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
               Book a call
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
             </a>
             <a
               href="https://t.me/kayzxyz"
@@ -468,19 +476,19 @@ const WORK_ITEMS = [
   { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff" },
   { src: "/work/aether-2.webp", title: "Aether Theme", category: "Cart design", accent: "#5b7496" },
   { src: "/work/aether-1.webp", title: "Aether Theme", category: "Shopify theme", accent: "#39637e" },
-  { src: "/work/ellora-la/1.webp", title: "Ellora La", category: "Shopify storefront", accent: "#cb591b" },
+  { src: "/work/ellora-la/1.webp", title: "Ellora LA", category: "Shopify storefront", accent: "#cb591b" },
   { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page", accent: "#1a1a1a" },
   { src: "/work/inertia-site.png", title: "Inertia", category: "Web design", accent: "#154365" },
-  { src: "/work/ftgioo-1.png", title: "Ft. Gioo", category: "Shopify storefront", accent: "#b8433a" },
-  { src: "/work/ftgioo-2.png", title: "Ft. Gioo", category: "Shop page", accent: "#b8433a" },
-  { src: "/work/ftgioo-3.png", title: "Ft. Gioo", category: "Collection page", accent: "#b8433a" },
+  { src: "/work/ftgioo-1.png", title: "FT.GIOO", category: "Shopify storefront", accent: "#b8433a" },
+  { src: "/work/ftgioo-2.png", title: "FT.GIOO", category: "Shop page", accent: "#b8433a" },
+  { src: "/work/ftgioo-3.png", title: "FT.GIOO", category: "Collection page", accent: "#b8433a" },
   { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront", accent: "#3a627c" },
   { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page", accent: "#4a5a2c" },
   { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store", accent: "#9c0000" },
   { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page", accent: "#0d1b3e" },
   { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page", accent: "#a50000" },
-  { src: "/work/ellora-la/2.png", title: "Ellora La", category: "Collection page", accent: "#6f283c" },
-  { src: "/work/ellora-la/3.png", title: "Ellora La", category: "Product page", accent: "#5f696f" },
+  { src: "/work/ellora-la/2.png", title: "Ellora LA", category: "Collection page", accent: "#6f283c" },
+  { src: "/work/ellora-la/3.png", title: "Ellora LA", category: "Product page", accent: "#5f696f" },
 ];
 
 // Fluid, seamless carousel: a real horizontal track (not a crossfade) with a
@@ -578,6 +586,10 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   const [paused, setPaused] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
+  // Which slide (track index) the pointer is currently hovering, so the
+  // follower tooltip can reflect the peeking prev/next card, not just the
+  // centered one. null falls back to the active slide.
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const widthRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -622,7 +634,25 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
 
   // index runs 1..total inside the [last-clone, ...items, first-clone] track,
   // wrapping via onTransitionEnd, so map back to the real (non-clone) item.
-  const activeAccent = WORK_ITEMS[((index - 1) % total + total) % total].accent;
+  const activeItem = WORK_ITEMS[((index - 1) % total + total) % total];
+  const activeAccent = activeItem.accent;
+
+  // Pointer tooltip reflects whichever card is hovered (including the peeking
+  // prev/next slides), falling back to the centered slide when the pointer
+  // isn't over any specific card. hoveredIndex is a track index into the
+  // [last-clone, ...items, first-clone] track, so map it back to a real item.
+  const tooltipItem =
+    hoveredIndex != null
+      ? WORK_ITEMS[((hoveredIndex - 1) % total + total) % total]
+      : activeItem;
+  const pointerTitle = (
+    <span className="flex items-center gap-2">
+      <span className="relative block h-7 w-7 shrink-0 overflow-hidden rounded-full">
+        <Image src={tooltipItem.src} alt="" fill sizes="28px" className="object-cover object-top" />
+      </span>
+      <span className="whitespace-nowrap">{tooltipItem.title}</span>
+    </span>
+  );
   // Dark blue/green accents read dimmer than warm ones at the same alpha, so
   // give the glow a boost specifically for those slides (Aether, Inertia,
   // Subtle Goods' olive green).
@@ -711,7 +741,30 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
           zIndex: 0,
         }}
       />
-      <FollowerPointerCard title="View project" className="w-full">
+      {/* Mobile-only vertical light beam: a tall, soft column tinted with the
+          active slide's accent that passes down through the thumbnail —
+          brightest along the center axis, feathering out to the sides and
+          extending above/below the card so the card reads as sitting inside a
+          shaft of light rather than just glowing. */}
+      {!isDesktop && (
+        <div
+          aria-hidden="true"
+          className="work-beam"
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: -260,
+            transform: "translateX(-50%)",
+            width: "100vw",
+            height: "calc(100% + 520px)",
+            pointerEvents: "none",
+            ["--work-beam-color" as string]: hexToRgba(activeAccent, isDimAccent ? 0.5 : 0.32),
+            ["--work-beam-core" as string]: hexToRgba(activeAccent, isDimAccent ? 0.7 : 0.5),
+            zIndex: 0,
+          }}
+        />
+      )}
+      <FollowerPointerCard title={pointerTitle} titleKey={tooltipItem.title} className="w-full">
         <div
           className="relative w-full select-none"
           style={{
@@ -753,6 +806,8 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                     draggable={false}
                     onDragStart={(e) => e.preventDefault()}
                     onClick={() => { if (Math.abs(dragState.current?.dx ?? 0) <= 6) router.push("/work"); }}
+                    onMouseEnter={() => setHoveredIndex(i)}
+                    onMouseLeave={() => setHoveredIndex((prev) => (prev === i ? null : prev))}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
                     className="relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
                     style={{ width: `${slideWidth}%`, cursor: "none", WebkitUserDrag: "none" } as React.CSSProperties}
