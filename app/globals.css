@@ -205,41 +205,17 @@ html {
   animation: theme-fade-in 400ms ease both;
 }
 
-/* Homepage overscroll: the page reads light at the top (hero) and dark
-   everywhere below, but the <html> background paints the rubber-band
-   overscroll area at BOTH ends. We want the top overscroll to reveal white
-   (matching the hero) and the bottom — including any browser bottom bar the
-   page sits under, e.g. Safari's toolbar or an in-app browser like TikTok —
-   to reveal black (matching the footer/dark zone).
+/* Homepage bottom overscroll: the footer's dark zone only covers page
+   content, not <html> itself, so rubber-banding past the bottom (Safari, or
+   any browser without a fixed bottom bar) would otherwise reveal the light
+   root background beneath the dark footer. A dark <html> background closes
+   that gap so the bottom overscroll stays black to match the footer.
 
-   On mobile Safari the TOP rubber-band overscroll is painted from the <body>
-   background, while the bottom follows <html>. So the split lives on <body>:
-   a VIEWPORT-fixed 50/50 gradient — white on the top half of the viewport,
-   black on the bottom half. Pulling down at the top exposes the top half
-   (white); pulling up past the footer at the bottom exposes the bottom half
-   (black), including under the browser's bottom bar. <html> stays solid black
-   as a fallback for anything body doesn't cover. */
+   (The top of the page reads white; the black bar that appeared above the
+   hero was the browser's status-bar chrome tinted by theme-color, handled in
+   site-shell.tsx / manifest.ts, NOT a background/overscroll issue.) */
 html.home-dark-root {
-  /* Viewport-fixed 50/50 split on <html> itself (the canvas painter for iOS
-     overscroll), with min-height:100vh so the fixed attachment has a full
-     viewport box to anchor to — Lenis sets html/body height:auto, which left
-     the html box too short for the gradient to resolve correctly and made the
-     top read black. White top half → top overscroll white; black bottom half
-     → bottom overscroll (under the browser bar) black. */
-  min-height: 100vh;
-  background-color: rgb(10 10 10);
-  background-image: linear-gradient(
-    to bottom,
-    rgb(255 255 255) 0,
-    rgb(255 255 255) 50%,
-    rgb(10 10 10) 50%,
-    rgb(10 10 10) 100%
-  );
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-html.home-dark-root body {
-  background: transparent;
+  background: rgb(10 10 10);
 }
 
 @keyframes theme-fade-in {

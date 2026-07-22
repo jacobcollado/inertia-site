@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Inertia builds Shopify storefronts, brand identities, and digital products for independent brands.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0e0e0e",
-    theme_color: "#0e0e0e",
+    background_color: "#ffffff",
+    theme_color: "#ffffff",
     icons: [
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
       { src: "/apple-icon.png", sizes: "180x180", type: "image/png" },
