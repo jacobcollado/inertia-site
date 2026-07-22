@@ -24,32 +24,22 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // dark footer. Tag <html> on the homepage so the root background can go
   // dark to match, closing that gap.
   //
-  // The mobile browser's chrome (iOS Safari's top status-bar strip) is tinted
-  // by <meta theme-color>. The homepage's top reads white (hero), so pin it
-  // WHITE here — a dark theme-color showed as a black bar above the hero at
-  // rest. Removed elsewhere so other routes fall back to the browser default.
+  // No <meta theme-color> is set on the homepage on purpose: a single
+  // theme-color value tints BOTH the top status-bar strip and the bottom
+  // toolbar, so it can never be white-at-top (hero) and black-at-bottom
+  // (footer) at once. Without it, iOS Safari samples the page's own top and
+  // bottom edges instead — white hero at the top, dark footer at the bottom —
+  // giving the correct color at each end independently. (The manifest's
+  // theme_color is also set to white so it can't force the strip dark as a
+  // fallback.)
   useEffect(() => {
     const root = document.documentElement;
     const on = isHome && !bare;
     root.classList.toggle("home-dark-root", on);
-
-    const META_ID = "home-theme-color";
-    let meta = document.getElementById(META_ID) as HTMLMetaElement | null;
-    if (on) {
-      if (!meta) {
-        meta = document.createElement("meta");
-        meta.id = META_ID;
-        meta.name = "theme-color";
-        document.head.appendChild(meta);
-      }
-      meta.content = "#ffffff";
-    } else {
-      meta?.remove();
-    }
-
+    // Clear any stale homepage theme-color meta left by an earlier version.
+    document.getElementById("home-theme-color")?.remove();
     return () => {
       root.classList.remove("home-dark-root");
-      document.getElementById(META_ID)?.remove();
     };
   }, [isHome, bare]);
 
