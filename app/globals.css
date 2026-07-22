@@ -205,21 +205,30 @@ html {
   animation: theme-fade-in 400ms ease both;
 }
 
-/* Homepage overscroll: the page reads light at the top (hero) and dark at
-   the bottom (footer/dark zone), but the <html> background paints the
-   rubber-band overscroll area at BOTH ends. A viewport-pinned hard-stop
-   gradient — light on the top half, dark on the bottom half — anchors each
-   half so pulling down at the top reveals light and pulling up past the
-   footer reveals dark, matching whichever end you're overscrolling. */
+/* Homepage overscroll: the page reads light at the top (hero) and dark
+   everywhere below, but the <html> background paints the rubber-band
+   overscroll area at BOTH ends. We want the top overscroll to reveal white
+   (matching the hero) and the bottom — including any browser bottom bar the
+   page sits under, e.g. Safari's toolbar or an in-app browser like TikTok —
+   to reveal black (matching the footer/dark zone).
+
+   The background is anchored to the DOCUMENT (not the viewport): a short
+   white band pinned to the very top, then black for the entire rest of the
+   scroll height. Because it scrolls with content rather than being viewport-
+   fixed, pulling up past the footer at the bottom always exposes the black
+   region, closing the gap where a viewport-fixed 50/50 split could land its
+   light half over the bottom bar. */
 html.home-dark-root {
-  background: linear-gradient(
+  background-color: rgb(10 10 10);
+  background-image: linear-gradient(
     to bottom,
-    rgb(255 255 255) 0%,
-    rgb(255 255 255) 50%,
-    rgb(10 10 10) 50%,
+    rgb(255 255 255) 0,
+    rgb(255 255 255) 220px,
+    rgb(10 10 10) 220px,
     rgb(10 10 10) 100%
   );
-  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
 }
 
 @keyframes theme-fade-in {
