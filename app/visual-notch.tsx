@@ -702,6 +702,13 @@ export function VisualNotch() {
   }, [mobileOpen]);
 
   useEffect(() => {
+    // The homepage scrolls from a white section into a black one (the AI
+    // section onward) — this frosted-glass blur tints toward the global
+    // (light) --bg regardless of what's actually behind it, so past that
+    // point it reads as a stray translucent white bar over black content.
+    // Simplest fix: skip the effect entirely on "/" and leave the header
+    // at its plain static background there.
+    if (pathname === "/") return;
     const onScroll = () => {
       if (mobileOpen) return;
       const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
@@ -717,7 +724,7 @@ export function VisualNotch() {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [mobileOpen]);
+  }, [mobileOpen, pathname]);
 
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");

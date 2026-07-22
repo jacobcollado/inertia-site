@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePostHog } from "./posthog-provider";
 
-function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
-  const id = "analytics-toggle";
+function Toggle({ id, checked, onChange, disabled }: { id: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <label
       htmlFor={id}
@@ -82,31 +81,70 @@ export function CookieBanner() {
     <>
       {cookieVisible && (
         <div
-          className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-0 z-[100] px-4 pb-4 sm:px-6 sm:pb-6 sm:max-w-lg"
+          className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-0 z-[100] px-4 pb-4 sm:px-6 sm:pb-6 sm:max-w-2xl"
           style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}
         >
           <div
             className="mx-auto max-w-2xl rounded-xl"
-            style={{ background: "rgb(var(--surface-elevated))", boxShadow: "0 8px 32px rgb(0 0 0 / 0.18)" }}
+            style={{
+              background: "#f1f1f1",
+              boxShadow: [
+                "0 2px 6px rgb(0 0 0 / 0.06)",
+                "0 10px 20px rgb(0 0 0 / 0.10)",
+                "inset 0 1px 0 rgb(255 255 255 / 0.6)",
+                "inset 0 -1px 0 rgb(0 0 0 / 0.06)",
+                "inset 0 0 24px rgb(0 0 0 / 0.03)",
+              ].join(", "),
+            }}
           >
             {/* Default row */}
-            <div className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4">
-              <p className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))] flex-1">
+            <div className="px-5 py-4 sm:px-7 sm:py-4 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+              <p className="text-[13px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] flex-1">
                 We use cookies to understand how people use this site and to make it better. Nothing is sold or shared.{" "}
-                <Link href="/policies/privacy-policy" style={{ color: "#0a84ff" }} className="underline underline-offset-2 transition-colors">
+                <Link
+                  href="/policies/privacy-policy"
+                  className="underline underline-offset-2 text-[rgb(var(--fg))] decoration-[rgb(var(--line))] hover:decoration-[rgb(var(--fg))] transition-colors"
+                >
                   Privacy policy
                 </Link>
               </p>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
                 <button
                   onClick={() => setExpanded((v) => !v)}
-                  className="rounded-full px-4 py-2 text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] hover:border-[rgb(var(--fg))] hover:text-[rgb(var(--fg))] transition-colors"
+                  className="relative rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium border border-[rgb(var(--fg))] text-[rgb(var(--fg))] hover:opacity-70 overflow-hidden"
+                  style={{ boxShadow: "inset 0 1px 2px rgb(0 0 0 / 0.08), inset 0 -1px 0 rgb(0 0 0 / 0.04)" }}
                 >
-                  {expanded ? "Close" : "Customize"}
+                  <span
+                    aria-hidden={expanded}
+                    style={{
+                      display: "inline-block",
+                      opacity: expanded ? 0 : 1,
+                      transform: expanded ? "translateY(-6px)" : "translateY(0)",
+                      transition: "opacity 450ms cubic-bezier(0.16,1,0.3,1), transform 450ms cubic-bezier(0.16,1,0.3,1)",
+                    }}
+                  >
+                    Customize
+                  </span>
+                  <span
+                    aria-hidden={!expanded}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: expanded ? 1 : 0,
+                      transform: expanded ? "translateY(0)" : "translateY(6px)",
+                      transition: "opacity 450ms cubic-bezier(0.16,1,0.3,1), transform 450ms cubic-bezier(0.16,1,0.3,1)",
+                    }}
+                  >
+                    Close
+                  </span>
                 </button>
                 <button
                   onClick={acceptAll}
-                  className="rounded-full px-4 py-2 text-[12px] tracking-tight font-medium bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-85 transition-opacity"
+                  className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
+                  style={{ boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -2px 3px rgb(0 0 0 / 0.35)" }}
                 >
                   Accept all
                 </button>
@@ -118,45 +156,55 @@ export function CookieBanner() {
               style={{
                 display: "grid",
                 gridTemplateRows: expanded ? "1fr" : "0fr",
-                transition: "grid-template-rows 260ms cubic-bezier(0.22,1,0.36,1)",
+                transition: "grid-template-rows 750ms cubic-bezier(0.16,1,0.3,1)",
               }}
             >
               <div style={{ overflow: "hidden" }}>
-                <div className="border-t border-[rgb(var(--line))] px-5 py-4 flex flex-col gap-3">
+                <div
+                  className="border-t border-[rgb(var(--line))] px-5 py-4 sm:px-7 sm:py-4 flex flex-col gap-3 sm:gap-3"
+                  style={{
+                    transform: expanded ? "scale(1)" : "scale(0.97)",
+                    transformOrigin: "top center",
+                    opacity: expanded ? 1 : 0,
+                    transition: "transform 750ms cubic-bezier(0.16,1,0.3,1), opacity 550ms ease",
+                  }}
+                >
 
                   {/* Essential */}
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[13px] tracking-tight text-[rgb(var(--fg))]">Essential</p>
-                      <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mt-0.5">
+                      <p className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--fg))]">Essential</p>
+                      <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] mt-0.5">
                         Sign-in, preferences, site functionality. Always on.
                       </p>
                     </div>
-                    <Toggle checked={true} onChange={() => {}} disabled />
+                    <Toggle id="essential-toggle" checked={true} onChange={() => {}} disabled />
                   </div>
 
                   {/* Analytics */}
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[13px] tracking-tight text-[rgb(var(--fg))]">Analytics</p>
-                      <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] mt-0.5">
+                      <p className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--fg))]">Analytics</p>
+                      <p className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))] mt-0.5">
                         Anonymous usage data to help us improve the site.
                       </p>
                     </div>
-                    <Toggle checked={analytics} onChange={setAnalytics} />
+                    <Toggle id="analytics-toggle" checked={analytics} onChange={setAnalytics} />
                   </div>
 
                   {/* Confirm row */}
-                  <div className="flex items-center justify-end gap-2 pt-1">
+                  <div className="flex items-center justify-end gap-2 sm:gap-3 pt-1">
                     <button
                       onClick={decline}
-                      className="rounded-full px-4 py-2 text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))] transition-colors"
+                      className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium border border-[rgb(var(--fg))] text-[rgb(var(--fg))] hover:opacity-70 transition-opacity"
+                      style={{ boxShadow: "inset 0 1px 2px rgb(0 0 0 / 0.08), inset 0 -1px 0 rgb(0 0 0 / 0.04)" }}
                     >
                       Decline all
                     </button>
                     <button
                       onClick={confirm}
-                      className="rounded-full px-4 py-2 text-[12px] tracking-tight font-medium bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-85 transition-opacity"
+                      className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
+                      style={{ boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -2px 3px rgb(0 0 0 / 0.35)" }}
                     >
                       Confirm
                     </button>

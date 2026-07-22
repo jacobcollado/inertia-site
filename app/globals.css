@@ -52,6 +52,26 @@
   color-scheme: light;
 }
 
+/* Scroll-triggered black section on the homepage, from the AI paragraph
+   down through the FAQ and booking section (and the footer, applied
+   separately in SiteShell for the "/" route only). Every component in that
+   range already consumes rgb(var(--x)) tokens rather than hardcoded hex, so
+   overriding the tokens here is enough to re-color them with no per-
+   component edits. */
+.homepage-dark-zone {
+  --bg: 10 10 10;
+  --surface: 24 24 24;
+  --surface-elevated: 34 34 34;
+  --fg: 245 245 245;
+  --muted: 150 150 150;
+  --line: 55 55 55;
+  --btn-bg: rgb(var(--fg) / 0.92);
+  --btn-fg: rgb(var(--bg));
+  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
+  color-scheme: dark;
+  background: rgb(var(--bg));
+}
+
 
 /* Bento grid: neutral grey in light mode */
 :root:not(.dark) .bento-light-invert {
@@ -2046,4 +2066,15 @@ h1:hover .redact > span.redact-inner,
   -webkit-text-fill-color: transparent;
   color: transparent;
   animation: placeholder-shimmer 3s linear infinite;
+}
+
+/* The Cal.com embed SDK injects its own iframe into #my-cal-inline-15min;
+   the container's own background (rgb(var(--surface))) is invisible once
+   that iframe covers it, since theme: "dark" in the JS config only affects
+   the widget's internal UI colors, not the iframe element's own background —
+   this styles the iframe itself so no white shows through around/before the
+   widget content on the homepage's black section. */
+#my-cal-inline-15min iframe {
+  background: rgb(var(--surface)) !important;
+  color-scheme: dark;
 }

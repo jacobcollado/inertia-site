@@ -359,7 +359,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
     <section
       ref={ref}
       className="relative"
-      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#fff", color: "#1a1a1a", overflow: "visible" }}
+      style={{ color: "#1a1a1a" }}
     >
       <div
         className="relative flex items-center"
@@ -454,15 +454,26 @@ function CalEmbed() {
     Cal.config.forwardQueryParams = true;
     Cal.ns["15min"]("inline", {
       elementOrSelector: "#my-cal-inline-15min",
-      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "light" },
+      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "dark" },
       calLink: "jacob-c-99otvp/15min",
     });
-    Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view", theme: "light" });
+    Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view", theme: "dark" });
   }, []);
 
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div id="my-cal-inline-15min" style={{ width: "100%", height: "auto", minHeight: "500px", overflow: "visible", border: "1px solid rgb(var(--line))", borderRadius: "12px" }} />
+      <div
+        id="my-cal-inline-15min"
+        style={{
+          width: "100%",
+          height: "auto",
+          minHeight: "500px",
+          overflow: "visible",
+          border: "1px solid rgb(var(--line))",
+          borderRadius: "12px",
+          background: "rgb(var(--surface))",
+        }}
+      />
     </section>
   );
 }
@@ -851,6 +862,104 @@ function AiApproach() {
         </p>
       </div>
     </section>
+  );
+}
+
+// Wraps everything from the hero through AiApproach in a white "card" that
+// sits on the page's true (black) canvas. As the card's own bottom edge
+// approaches and crosses into the viewport, it eases into a slightly
+// smaller, more tightly rounded shape — like it's settling back and away —
+// instead of just cutting to black the instant its flow position ends.
+// Tracks scroll position directly (same pattern as WorkThumbnails'
+// scrollScale effect) rather than a fixed-duration animation, so the motion
+// stays tied 1:1 to how far the user has scrolled and reverses cleanly.
+function LightCard({ children }: { children: React.ReactNode }) {
+  // Measured on a sentinel at the very end of the card's content, not the
+  // scaling element itself — reading getBoundingClientRect() off an element
+  // whose own transform you're about to update from that same read creates
+  // a feedback loop (the scaled position feeds back into the next scroll
+  // tick's measurement instead of tracking real scroll distance).
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const card = cardRef.current;
+    if (!sentinel || !card) return;
+
+    // Polled every animation frame rather than driven off scroll events —
+    // Lenis (this site's smooth-scroll library) advances the real scroll
+    // position through its own RAF loop, not in lockstep with native
+    // `scroll` events, so an event-driven listener here was reading a
+    // position that lagged behind what was actually on screen, which is
+    // what read as snapping instead of tracking the wheel/swipe input.
+    // Polling directly every frame keeps this locked to the exact position
+    // Lenis is rendering right now.
+    const apply = () => {
+      const rect = sentinel.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // Ramps across a full viewport height of scrolling, starting the
+      // instant the sentinel (end of the card's content) crosses the
+      // bottom of the viewport, finishing once it's scrolled a full
+      // viewport height past that — a wide, generous window so the motion
+      // reads as continuous rather than resolving over a few px of scroll.
+      let progress = Math.min(1, Math.max(0, (vh - rect.bottom) / vh));
+      // Below this, the visual difference is imperceptible but a non-zero
+      // scale() value still forces the card onto its own GPU-composited
+      // layer — which is what caused a faint line to reappear right at the
+      // resting (should-be-untransformed) state: floating-point noise from
+      // getBoundingClientRect() rarely lands on exactly 0, so the `=== 1`
+      // check below almost never actually held even when nothing should be
+      // visually scaling yet. Snapping the whole low end to 0 first means
+      // the transform is genuinely omitted, not just visually close to it.
+      if (progress < 0.01) progress = 0;
+      const scale = 1 - progress * 0.08;
+      const radius = 32 + progress * 28;
+      card.style.transform = progress === 0 ? "" : `scale(${scale})`;
+      card.style.borderBottomLeftRadius = `${radius}px`;
+      card.style.borderBottomRightRadius = `${radius}px`;
+      rafRef.current = requestAnimationFrame(apply);
+    };
+    rafRef.current = requestAnimationFrame(apply);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  return (
+    // The wrapper is the black backdrop the card scales away from. The card
+    // itself is normal document flow (its natural height determines the
+    // wrapper's height) but visually pinned flush to the wrapper via a
+    // second, absolutely-positioned "top pad" strip that always stays
+    // exactly full-width/full-black-free at the top — see below — so
+    // nothing at the very top edge (where the card never actually needs to
+    // shrink) can ever expose the black wrapper behind it, regardless of
+    // any sub-pixel rounding the scale()'d bottom edge introduces.
+    <div
+      className="relative"
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#0a0a0a" }}
+    >
+      <div
+        ref={cardRef}
+        className="relative"
+        style={{
+          background: "#fff",
+          borderBottomLeftRadius: 32,
+          borderBottomRightRadius: 32,
+          overflow: "hidden",
+          transformOrigin: "center top",
+        }}
+      >
+        {children}
+        <div ref={sentinelRef} />
+      </div>
+      {/* Covers exactly the sliver a scale()'d box can expose right at its
+          own top edge from sub-pixel rounding — a fixed-height white strip
+          that never moves or scales, so there's nothing dynamic left to
+          misalign against the wrapper's black background. */}
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: 6, background: "#fff", zIndex: 1 }} />
+    </div>
   );
 }
 
@@ -1375,33 +1484,43 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
 
-      <VercelHero accentColor={accentColor} />
+      <LightCard>
+        <div className="mx-auto w-full max-w-[88rem] flex flex-col">
+          <VercelHero accentColor={accentColor} />
 
-      <div className="py-6 sm:py-6" />
+          <div className="py-6 sm:py-6" />
 
-      <WorkThumbnails onActiveAccent={(c) => setAccentColor(c)} />
+          <WorkThumbnails onActiveAccent={(c) => setAccentColor(c)} />
 
-      <div className="py-7 sm:py-12" />
+          <div className="py-7 sm:py-12" />
 
-      <DesignPhilosophy />
+          <DesignPhilosophy />
 
-      <div className="py-10 sm:py-8" />
+          <div className="py-10 sm:py-8" />
 
-      <ClientCarousel initialItems={initialWork} />
+          <ClientCarousel initialItems={initialWork} />
 
-      <div className="py-10 sm:py-8" />
+          <div className="py-10 sm:py-8" />
 
-      <AiApproach />
+          <AiApproach />
 
-      <div className="py-20 sm:py-14" />
+          <div className="py-16 sm:py-14" />
+        </div>
+      </LightCard>
 
-      <IndexFaq />
+      <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))", marginTop: -2 }}>
+        <div className="mx-auto w-full max-w-[88rem] flex flex-col">
+          <div className="py-4 sm:py-6" />
 
-      <div className="py-14 sm:py-20" />
+          <IndexFaq />
 
-      <CalEmbed />
+          <div className="py-14 sm:py-20" />
 
-      <div className="py-20 sm:py-20" />
+          <CalEmbed />
+
+          <div className="py-20 sm:py-20" />
+        </div>
+      </div>
 
     </main>
     </>
