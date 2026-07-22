@@ -205,17 +205,21 @@ html {
   animation: theme-fade-in 400ms ease both;
 }
 
-/* Homepage bottom overscroll: the footer's dark zone only covers page
-   content, not <html> itself, so rubber-banding past the bottom (Safari, or
-   any browser without a fixed bottom bar) would otherwise reveal the light
-   root background beneath the dark footer. A dark <html> background closes
-   that gap so the bottom overscroll stays black to match the footer.
-
-   (The top of the page reads white; the black bar that appeared above the
-   hero was the browser's status-bar chrome tinted by theme-color, handled in
-   site-shell.tsx / manifest.ts, NOT a background/overscroll issue.) */
+/* Homepage overscroll: the page reads light at the top (hero) and dark at
+   the bottom (footer/dark zone), but the <html> background paints the
+   rubber-band overscroll area at BOTH ends. A viewport-pinned hard-stop
+   gradient — light on the top half, dark on the bottom half — anchors each
+   half so pulling down at the top reveals light and pulling up past the
+   footer reveals dark, matching whichever end you're overscrolling. */
 html.home-dark-root {
-  background: rgb(10 10 10);
+  background: linear-gradient(
+    to bottom,
+    rgb(255 255 255) 0%,
+    rgb(255 255 255) 50%,
+    rgb(10 10 10) 50%,
+    rgb(10 10 10) 100%
+  );
+  background-attachment: fixed;
 }
 
 @keyframes theme-fade-in {

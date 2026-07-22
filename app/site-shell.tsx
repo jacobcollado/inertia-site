@@ -24,14 +24,10 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // dark footer. Tag <html> on the homepage so the root background can go
   // dark to match, closing that gap.
   //
-  // The top of the mobile browser chrome (iOS Safari status-bar strip) is
-  // tinted by <meta theme-color>. The homepage reads white at the very top
-  // (hero), so pin theme-color WHITE there — otherwise the status strip shows
-  // the dark default/manifest color as a black bar above the hero. One
-  // theme-color value colors both top and bottom chrome; the bottom sits over
-  // the dark footer, but white there is an acceptable tradeoff versus a black
-  // bar over the white hero at the top, which is what's actually visible at
-  // rest. Removed elsewhere so other routes fall back to the browser default.
+  // The mobile browser's own bottom toolbar is tinted by <meta theme-color>,
+  // not the page background — so set it dark on the homepage (matching the
+  // dark footer the toolbar sits over) and remove it elsewhere so other
+  // routes fall back to the browser default.
   useEffect(() => {
     const root = document.documentElement;
     const on = isHome && !bare;
@@ -46,7 +42,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         meta.name = "theme-color";
         document.head.appendChild(meta);
       }
-      meta.content = "#ffffff";
+      meta.content = "#0a0a0a";
     } else {
       meta?.remove();
     }
