@@ -52,6 +52,25 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       {noFooter ? null : isHome ? (
         <div className="homepage-dark-zone" style={{ background: "rgb(var(--bg))" }}>
           <MinimalFooter />
+          {/* Dark backstop pinned to the very bottom of the viewport, behind
+              everything. iOS Safari samples the page's bottom edge to tint the
+              bottom toolbar; the document's root/body background is white, so
+              past the footer the toolbar read white. This fixed black strip at
+              the bottom edge gives Safari a dark color to sample there without
+              affecting page layout or scroll. */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "fixed",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: "40vh",
+              background: "#0a0a0a",
+              zIndex: -1,
+              pointerEvents: "none",
+            }}
+          />
         </div>
       ) : (
         <MinimalFooter />
