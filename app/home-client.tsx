@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { FollowerPointerCard } from "@/components/ui/following-pointer";
+import Cal, { getCalApi } from "@calcom/embed-react";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string; palette?: string[]; card?: string };
 
@@ -437,43 +438,27 @@ function VercelHero({ accentColor }: { accentColor: string }) {
 
 function CalEmbed() {
   useEffect(() => {
-    // Set up the Cal queue function before the script loads
-    (function (C: any, A: string, L: string) {
-      let p = function (a: any, ar: any) { a.q.push(ar); };
-      let d = document;
-      C.Cal = C.Cal || function () {
-        let cal = C.Cal; let ar = arguments;
-        if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; (d.head.appendChild(d.createElement("script")) as HTMLScriptElement).src = A; cal.loaded = true; }
-        if (ar[0] === L) { let api: any = function () { p(api, arguments); }; let namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar);
-      };
-    })(window, "https://app.cal.com/embed/embed.js", "init");
-
-    const Cal = (window as any).Cal;
-    Cal("init", "15min", { origin: "https://app.cal.com" });
-    Cal.config = Cal.config || {};
-    Cal.config.forwardQueryParams = true;
-    Cal.ns["15min"]("inline", {
-      elementOrSelector: "#my-cal-inline-15min",
-      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "dark" },
-      calLink: "jacob-c-99otvp/15min",
-    });
-    Cal.ns["15min"]("ui", { hideEventTypeDetails: false, layout: "month_view", theme: "dark" });
+    (async function () {
+      const cal = await getCalApi({ namespace: "15min" });
+      cal("ui", {
+        theme: "dark",
+        hideEventTypeDetails: false,
+        layout: "month_view",
+        styles: { body: { background: "#0a0a0a" } },
+      });
+    })();
   }, []);
 
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div
-        id="my-cal-inline-15min"
-        style={{
-          width: "100%",
-          height: "auto",
-          minHeight: "500px",
-          overflow: "visible",
-          border: "1px solid rgb(var(--line))",
-          borderRadius: "12px",
-          background: "rgb(var(--surface))",
-        }}
-      />
+      <div className="min-h-[820px] sm:min-h-[560px]" style={{ borderRadius: "12px", background: "rgb(var(--bg))", overflow: "hidden" }}>
+        <Cal
+          namespace="15min"
+          calLink="jacob-c-99otvp/15min"
+          style={{ width: "100%", height: "100%", overflow: "scroll" }}
+          config={{ layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "dark" }}
+        />
+      </div>
     </section>
   );
 }
@@ -915,7 +900,11 @@ function LightCard({ children }: { children: React.ReactNode }) {
       // the transform is genuinely omitted, not just visually close to it.
       if (progress < 0.01) progress = 0;
       const scale = 1 - progress * 0.08;
-      const radius = 32 + progress * 28;
+      // On mobile the corner radius reads too large against the narrow
+      // viewport, so keep its ramp under 25px; desktop keeps the fuller
+      // 32→60 ramp.
+      const isMobile = window.innerWidth < 640;
+      const radius = isMobile ? 12 + progress * 13 : 32 + progress * 28;
       card.style.transform = progress === 0 ? "" : `scale(${scale})`;
       card.style.borderBottomLeftRadius = `${radius}px`;
       card.style.borderBottomRightRadius = `${radius}px`;

@@ -2068,13 +2068,3 @@ h1:hover .redact > span.redact-inner,
   animation: placeholder-shimmer 3s linear infinite;
 }
 
-/* The Cal.com embed SDK injects its own iframe into #my-cal-inline-15min;
-   the container's own background (rgb(var(--surface))) is invisible once
-   that iframe covers it, since theme: "dark" in the JS config only affects
-   the widget's internal UI colors, not the iframe element's own background —
-   this styles the iframe itself so no white shows through around/before the
-   widget content on the homepage's black section. */
-#my-cal-inline-15min iframe {
-  background: rgb(var(--surface)) !important;
-  color-scheme: dark;
-}
