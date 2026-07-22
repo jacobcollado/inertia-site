@@ -313,68 +313,28 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
   return createPortal(modal, document.body);
 }
 
-function GradientWord({ children, color = "#0a84ff", trigger, italic }: { children: string; color?: string; trigger?: number; italic?: boolean }) {
-  const chars = children.split("");
-  const isFirstRun = useRef(true);
-  const [cycleId, setCycleId] = useState(0);
-  const [displayColor, setDisplayColor] = useState(color);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  // Starts deterministic (all "fill") so server and client render identically
-  // on first paint — randomization only happens client-side, inside the
-  // color-change effect below, avoiding a hydration mismatch.
-  const variantsRef = useRef<("fill" | "outline" | "ghost")[]>(chars.map(() => "fill"));
-
-  // Re-plays the ripple whenever `trigger` changes (falls back to `color`
-  // if no trigger is passed) — driven by an always-incrementing value
-  // rather than color equality, so it still fires when two consecutive
-  // slides happen to share the same accent color.
-  useEffect(() => {
-    if (isFirstRun.current) { isFirstRun.current = false; return; }
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
-    setCycleId((n) => n + 1);
-    // Re-roll which characters flash filled / outlined / unfilled this cycle.
-    variantsRef.current = chars.map(() => (["fill", "outline", "ghost"] as const)[Math.floor(Math.random() * 3)]);
-    // Swap the settled color roughly mid-ripple so the last chars land in
-    // the new hue rather than snapping the whole word instantly.
-    const t = setTimeout(() => setDisplayColor(color), 260);
-    timersRef.current.push(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trigger ?? color]);
-
-  const bloom = `0 0 8px ${hexToRgba(displayColor, 0.55)}, 0 0 18px ${hexToRgba(displayColor, 0.3)}`;
-
+// A continuous, fluid light sweep across neutral text — no color cycling,
+// just a soft diagonal band of brightness drifting left to right on a loop.
+// Runs purely on CSS (background-position animation on a background-clip:
+// text gradient), so it's smooth and consistent regardless of anything else
+// happening on the page, unlike the old per-character ripple this replaced.
+function ShimmerWord({ children, italic }: { children: string; italic?: boolean }) {
   return (
-    <span className="inline-flex" aria-label={children} style={{ textShadow: bloom, transition: "text-shadow 400ms ease" }}>
-      {chars.map((ch, i) => (
-        <span
-          key={`${cycleId}-${i}`}
-          aria-hidden="true"
-          className={`typer-char typer-char--${variantsRef.current[i]}`}
-          style={{
-            display: "inline-block",
-            color: displayColor,
-            fontWeight: 500,
-            fontStyle: italic ? "italic" : undefined,
-            letterSpacing: "-0.03em",
-            marginRight: ch === " " ? undefined : "-0.04em",
-            ["--ripple-color" as string]: color,
-            animationDuration: "420ms",
-            animationTimingFunction: "steps(1, jump-end)",
-            animationFillMode: "both",
-            animationDelay: `${i * 35}ms`,
-            whiteSpace: ch === " " ? "pre" : "normal",
-          }}
-        >
-          {ch}
-        </span>
-      ))}
+    <span
+      aria-label={children}
+      className="shimmer-word"
+      style={{
+        fontWeight: 500,
+        fontStyle: italic ? "italic" : undefined,
+        letterSpacing: "-0.03em",
+      }}
+    >
+      {children}
     </span>
   );
 }
 
-function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accentTrigger?: number }) {
+function VercelHero({ accentColor }: { accentColor: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -422,7 +382,7 @@ function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accen
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             Design that moves at your{" "}
-            <GradientWord color={accentColor} trigger={accentTrigger}>speed</GradientWord>
+            <ShimmerWord>speed</ShimmerWord>
           </h1>
 
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
@@ -1410,17 +1370,16 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
 function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   const [accentColor, setAccentColor] = useState(WORK_ITEMS[0].accent);
-  const [accentTrigger, setAccentTrigger] = useState(0);
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
 
-      <VercelHero accentColor={accentColor} accentTrigger={accentTrigger} />
+      <VercelHero accentColor={accentColor} />
 
       <div className="py-6 sm:py-6" />
 
-      <WorkThumbnails onActiveAccent={(c) => { setAccentColor(c); setAccentTrigger((n) => n + 1); }} />
+      <WorkThumbnails onActiveAccent={(c) => setAccentColor(c)} />
 
       <div className="py-7 sm:py-12" />
 
