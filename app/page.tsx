@@ -1288,7 +1288,7 @@ function ClientCarousel() {
           onPointerMove={onPointerMoveDrag}
           onPointerUp={endDragDesktop}
           onPointerCancel={endDragDesktop}
-          className={`overflow-x-auto sm:overflow-x-hidden touch-pan-x snap-x snap-mandatory sm:snap-none scroll-smooth py-6 sm:pb-10 sm:-ml-5 sm:pl-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]${isDragging ? " select-none" : ""}`}
+          className={`overflow-x-auto sm:overflow-x-hidden touch-pan-x touch-pan-y snap-x snap-mandatory sm:snap-none scroll-smooth py-6 sm:pb-10 sm:-ml-5 sm:pl-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]${isDragging ? " select-none" : ""}`}
           style={{ cursor: isDragging ? "grabbing" : undefined }}
         >
           <div

@@ -16,12 +16,16 @@ export async function GET(request: NextRequest) {
         .eq("id", data.user.id)
         .single();
 
-      // Sync Google name into clients table on first sign-in
-      const googleName = data.user.user_metadata?.full_name as string | undefined;
-      if (googleName) {
+      // Sync name (from Google or email signup) into clients table on first sign-in.
+      // Google supplies given_name/family_name separately, so prefer combining
+      // those directly over full_name/name in case either is just a nickname.
+      const meta = data.user.user_metadata ?? {};
+      const googleName = [meta.given_name, meta.family_name].filter(Boolean).join(" ").trim();
+      const providerName = (googleName || meta.full_name || meta.name) as string | undefined;
+      if (providerName) {
         await supabase
           .from("clients")
-          .update({ name: googleName })
+          .update({ name: providerName })
           .eq("id", data.user.id)
           .is("name", null);
       }

@@ -71,13 +71,15 @@ function EmailForm({
 }: {
   mode: "signin" | "signup";
   loading: boolean;
-  onSubmit: (email: string, password: string) => void;
+  onSubmit: (email: string, password: string, firstName?: string, lastName?: string) => void;
   onBack: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [capsLock, setCapsLock] = useState(false);
-  const inputBase = "w-full px-4 py-3 text-[14px] tracking-tight rounded-xl outline-none transition-colors bg-transparent";
+  const inputBase = "w-full px-4 py-3 text-[14px] tracking-tight rounded-xl outline-none transition-colors bg-[rgb(var(--fg)/0.035)] placeholder:text-[rgb(var(--muted))] placeholder:opacity-70";
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (typeof e.getModifierState === "function") setCapsLock(e.getModifierState("CapsLock"));
@@ -120,9 +122,36 @@ function EmailForm({
       </div>
 
       <form
-        onSubmit={(e) => { e.preventDefault(); onSubmit(email, password); }}
+        onSubmit={(e) => { e.preventDefault(); onSubmit(email, password, firstName, lastName); }}
         className="flex flex-col gap-3"
       >
+        {mode === "signup" && (
+          <div className="flex gap-3">
+            <input
+              type="text"
+              required
+              autoComplete="given-name"
+              placeholder="First name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className={inputBase}
+              style={{ border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)")}
+            />
+            <input
+              type="text"
+              autoComplete="family-name"
+              placeholder="Last name (optional)"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className={inputBase}
+              style={{ border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)")}
+            />
+          </div>
+        )}
         <input
           type="email"
           required
@@ -131,9 +160,9 @@ function EmailForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputBase}
-          style={{ border: "1.5px solid rgb(var(--line))", color: "rgb(var(--fg))" }}
+          style={{ border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" }}
           onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
-          onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--line))")}
+          onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)")}
         />
         <div className="relative">
           <input
@@ -148,12 +177,12 @@ function EmailForm({
             onKeyDown={checkCapsLock}
             className={inputBase}
             style={{
-              border: "1.5px solid rgb(var(--line))",
+              border: "1.5px solid rgb(var(--fg) / 0.14)",
               color: "rgb(var(--fg))",
               paddingRight: capsLock && mode === "signup" && strength ? 68 : capsLock || (mode === "signup" && strength) ? 44 : undefined,
             }}
             onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "rgb(var(--line))"; setCapsLock(false); }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)"; setCapsLock(false); }}
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             {capsLock && (
@@ -350,13 +379,21 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     });
   };
 
-  const onEmailSubmit = async (t: "signin" | "signup", email: string, password: string) => {
+  const onEmailSubmit = async (t: "signin" | "signup", email: string, password: string, firstName?: string, lastName?: string) => {
     setLoading(true);
     setError("");
     const supabase = createClient();
+    const name = [firstName, lastName].filter(Boolean).join(" ").trim();
     const { error: authError } = t === "signin"
       ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
+      : await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: name ? { name } : undefined,
+          },
+        });
 
     if (authError) {
       setError(authError.message);
@@ -413,7 +450,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
       <EmailForm
         mode={t}
         loading={loading}
-        onSubmit={(email, password) => onEmailSubmit(t, email, password)}
+        onSubmit={(email, password, firstName, lastName) => onEmailSubmit(t, email, password, firstName, lastName)}
         onBack={() => switchView(t, "auth")}
       />
       {error && <ErrorMessage msg={error} />}
@@ -486,16 +523,16 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             <div
               className="flex justify-center overflow-hidden"
               style={{
-                height: displayedView === "auth" ? 32 : 0,
+                height: displayedView === "auth" ? 40 : 0,
                 opacity: displayedView === "auth" ? 1 : 0,
                 transition: "height 280ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease",
               }}
             >
-              <div className="relative flex items-center gap-1 rounded-full p-[3px]" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+              <div className="relative flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                 {pillRect && (
                   <div
                     aria-hidden="true"
-                    className="absolute top-[3px] bottom-[3px] rounded-full"
+                    className="absolute top-1 bottom-1 rounded-full"
                     style={{
                       left: pillRect.left,
                       width: pillRect.width,
@@ -509,7 +546,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                     key={t}
                     ref={(el) => { tabRefs.current[t] = el; }}
                     onClick={() => switchTab(t)}
-                    className="relative px-4 py-1.5 text-[12px] tracking-tight rounded-full transition-colors duration-200"
+                    className="relative px-5 py-2 text-[13.5px] tracking-tight rounded-full transition-colors duration-200"
                     style={{ color: tab === t ? "rgb(var(--bg))" : "rgb(var(--muted))" }}
                   >
                     {t === "signin" ? "Sign in" : "Create account"}
