@@ -404,7 +404,7 @@ function VercelHero({ accentColor, accentTrigger }: { accentColor: string; accen
       >
         <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:pl-3 sm:pr-4 pt-16 sm:pt-24 pb-10 pb-[34dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:items-start sm:text-left sm:justify-start">
           <span
-            className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[12px] tracking-tight"
+            className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
             style={{
               ...fade(0),
               background: hexToRgba(accentColor, 0.12),
@@ -1333,9 +1333,10 @@ function ClientCarousel() {
                       src={item.card}
                       alt={item.client}
                       fill
-                      loading="lazy"
+                      priority={i < 2}
+                      loading={i < 2 ? undefined : "lazy"}
                       quality={90}
-                      sizes="(max-width: 640px) 480px, 840px"
+                      sizes="(max-width: 640px) 300px, 420px"
                       className="object-cover"
                       draggable={false}
                     />
@@ -1361,6 +1362,9 @@ function ClientCarousel() {
                         alt={item.client}
                         width={180}
                         height={180}
+                        priority={i < 2}
+                        loading={i < 2 ? undefined : "lazy"}
+                        sizes="230px"
                         className="h-auto object-contain"
                         style={{
                           width: `${55 * (CLIENT_CARD_LOGO_SCALE[item.slug] ?? 1)}%`,
