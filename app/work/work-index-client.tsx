@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta, SizedImage } from "@/lib/work";
@@ -223,13 +224,17 @@ function WorkDialog({
           {/* Header */}
           <div className="flex flex-col gap-3 pr-10">
             {work.logo && DIALOG_LOGO_OVERRIDE[work.slug]?.tone !== "hide" && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
+              <Image
                 src={work.logo}
                 alt={work.client}
+                width={160}
+                height={160}
+                sizes="160px"
+                quality={78}
                 className="w-auto object-contain object-left"
                 style={{
                   height: DIALOG_LOGO_OVERRIDE[work.slug]?.height ?? 28,
+                  width: "auto",
                   filter: DIALOG_LOGO_OVERRIDE[work.slug]?.tone === "black" ? "brightness(0)" : "var(--logo-filter, none)",
                 }}
               />
@@ -285,12 +290,13 @@ function WorkDialog({
                   className="w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]"
                   style={{ aspectRatio: `${img.width} / ${img.height}` }}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={img.src}
                     alt={`${work.client} ${i + 1}`}
                     width={img.width}
                     height={img.height}
+                    sizes="(max-width: 640px) 100vw, 560px"
+                    quality={78}
                     className="w-full h-auto block"
                     loading={i === 0 ? undefined : "lazy"}
                     draggable={false}
@@ -335,11 +341,13 @@ function WorkCard({
         style={{ aspectRatio: wide ? "16 / 9" : "4 / 3" }}
       >
         {thumb ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
+          <Image
             src={thumb}
             alt={work.client}
-            className="w-full h-full object-cover"
+            fill
+            sizes={wide ? "(max-width: 640px) 100vw, 1024px" : "(max-width: 640px) 100vw, 512px"}
+            quality={78}
+            className="object-cover"
             style={{ objectPosition }}
             draggable={false}
           />
@@ -352,15 +360,19 @@ function WorkCard({
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
             style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.28) 100%)" }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={work.logo}
               alt=""
               aria-hidden="true"
               draggable={false}
+              width={260}
+              height={260}
+              sizes="260px"
+              quality={78}
               className="w-auto object-contain"
               style={{
                 maxWidth: CARD_LOGO_OVERRIDE[work.slug]?.maxW ?? "62%",
+                width: "auto",
                 height: CARD_LOGO_OVERRIDE[work.slug]?.height ?? (CARD_LOGO_NATURAL_COLOR.has(work.slug) ? 66 : 64),
                 filter: CARD_LOGO_NATURAL_COLOR.has(work.slug)
                   ? "drop-shadow(0 1px 6px rgba(0,0,0,0.45))"

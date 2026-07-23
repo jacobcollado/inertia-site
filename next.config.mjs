@@ -51,7 +51,7 @@ const nextConfig = {
   },
   skipTrailingSlashRedirect: true,
   images: {
-    qualities: [75, 90],
+    qualities: [70, 75, 78, 90],
   },
   turbopack: {
     root: path.resolve("."),
