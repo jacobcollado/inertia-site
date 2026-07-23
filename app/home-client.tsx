@@ -317,7 +317,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
 // The "anti [!] slow" eyebrow's centre mark: a small squared, outline-only
 // container holding a warning sign rendered as dots — a dotted triangle
 // outline with a dotted exclamation inside. Sits inline between the two words.
-function AntiSlowMark() {
+function AntiSlowMark({ color }: { color: string }) {
   // Build an equilateral-ish warning triangle (apex at top) from three
   // corners, then place dots at EVEN intervals along each edge so the outline
   // is symmetric and correctly aligned. Corner dots are shared between edges
@@ -365,12 +365,33 @@ function AntiSlowMark() {
         boxSizing: "border-box",
       }}
     >
-      <svg viewBox="0 0 24 24" width="76%" height="76%" style={{ display: "block" }}>
+      {/* The danger icon dots take the active thumbnail's accent color; the
+          pill outline stays currentColor. Each dot runs a gentle scale/opacity
+          pulse, staggered by its position so a fluid wave travels through the
+          sign — the outline ripples clockwise from the apex, then the
+          exclamation follows. */}
+      <svg viewBox="0 0 24 24" width="76%" height="76%" style={{ display: "block", color, transition: "color 700ms ease" }}>
         {outline.map(([cx, cy], i) => (
-          <circle key={`o${i}`} cx={cx} cy={cy} r={R} fill="currentColor" />
+          <circle
+            key={`o${i}`}
+            cx={cx}
+            cy={cy}
+            r={R}
+            fill="currentColor"
+            className="antislow-dot"
+            style={{ animationDelay: `${i * 130}ms`, transformOrigin: "center" }}
+          />
         ))}
         {bang.map(([cx, cy], i) => (
-          <circle key={`b${i}`} cx={cx} cy={cy} r={R} fill="currentColor" />
+          <circle
+            key={`b${i}`}
+            cx={cx}
+            cy={cy}
+            r={R}
+            fill="currentColor"
+            className="antislow-dot"
+            style={{ animationDelay: `${(outline.length + i) * 130}ms`, transformOrigin: "center" }}
+          />
         ))}
       </svg>
     </span>
@@ -446,7 +467,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
             className="inline-flex items-center text-[17px] sm:text-[19px] tracking-tight -mb-4 sm:-mb-6"
             style={{ ...fade(60), color: "#1a1a1a" }}
           >
-            anti<AntiSlowMark />slow
+            anti<AntiSlowMark color={accentColor} />slow
           </p>
 
           <h1

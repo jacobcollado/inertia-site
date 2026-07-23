@@ -747,6 +747,21 @@ h1:hover .redact > span.redact-inner,
   to { stroke-dashoffset: -80; }
 }
 
+/* Hero "anti slow" warning mark: each dot gently pulses; a per-dot delay set
+   inline makes a fluid wave travel through the sign on a continuous loop. */
+.antislow-dot {
+  transform-box: fill-box;
+  animation: antislow-dot-wave 2.8s ease-in-out infinite;
+}
+@keyframes antislow-dot-wave {
+  0%, 100% { transform: scale(0.7); opacity: 0.45; }
+  22%      { transform: scale(1.15); opacity: 1; }
+  55%      { transform: scale(0.9); opacity: 0.8; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .antislow-dot { animation: none; opacity: 1; }
+}
+
 
 @keyframes rise-in {
   from {
