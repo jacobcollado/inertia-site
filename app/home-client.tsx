@@ -428,7 +428,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
       <div
         className="relative flex items-center"
       >
-        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-16 sm:pt-24 pb-10 pb-[34dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:justify-start">
+        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-16 sm:pt-24 pb-10 pb-[22dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:justify-start">
           {false && (
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
@@ -1710,7 +1710,7 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
         <div className="mx-auto w-full max-w-[88rem] flex flex-col">
           <VercelHero accentColor={accentColor} />
 
-          <div className="py-6 sm:py-6" />
+          <div className="py-1 sm:py-6" />
 
           <WorkThumbnails onActiveAccent={(c) => setAccentColor(c)} />
 
