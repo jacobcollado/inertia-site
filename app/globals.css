@@ -747,6 +747,7 @@ h1:hover .redact > span.redact-inner,
   to { stroke-dashoffset: -80; }
 }
 
+
 @keyframes rise-in {
   from {
     opacity: 0;

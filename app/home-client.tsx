@@ -314,6 +314,47 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
   return createPortal(modal, document.body);
 }
 
+// A small circular pill holding a bespoke "inertia" dot mark: a compact
+// 2-wide vertical column of dots, reading as a vertical motion line. Sits
+// inline in the hero heading, just before "speed". Sized in em so it scales
+// with the heading; the dots pulse subtly top-to-bottom so it feels alive.
+function InertiaDotPill() {
+  // 2 columns x 4 rows, symmetric about the 12,12 center of the viewBox so the
+  // grid sits dead-centre in the pill.
+  // Evenly spaced 2x4 grid, symmetric about the 12,12 center. Equal column and
+  // row gaps (6px) so nothing favors the middle.
+  const cols = [9, 15]; // avg 12, 6px apart
+  const rows = [3, 9, 15, 21]; // avg 12, 6px apart
+  const dots: { cx: number; cy: number; i: number }[] = [];
+  rows.forEach((cy, r) => cols.forEach((cx, c) => dots.push({ cx, cy, i: r * 2 + c })));
+
+  return (
+    <span
+      aria-hidden="true"
+      className="inertia-dot-pill"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "1.02em",
+        height: "0.96em",
+        borderRadius: "0.2em",
+        background: "transparent",
+        border: "0.055em solid #1a1a1a",
+        verticalAlign: "-0.02em",
+        marginRight: "0.16em",
+        boxSizing: "border-box",
+      }}
+    >
+      <svg viewBox="0 0 24 24" width="60%" height="60%" style={{ display: "block", margin: "auto" }}>
+        {dots.map((d) => (
+          <circle key={d.i} cx={d.cx} cy={d.cy} r={2.9} fill="#1a1a1a" />
+        ))}
+      </svg>
+    </span>
+  );
+}
+
 // A continuous, fluid light sweep across neutral text — no color cycling,
 // just a soft diagonal band of brightness drifting left to right on a loop.
 // Runs purely on CSS (background-position animation on a background-clip:
@@ -384,6 +425,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             Design that moves at your{" "}
+            <InertiaDotPill />
             <ShimmerWord>speed</ShimmerWord>
           </h1>
 
@@ -472,23 +514,21 @@ function CalEmbed() {
 }
 
 const WORK_ITEMS = [
-  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app", accent: "#6a6dff" },
-  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff" },
-  { src: "/work/aether-1.webp", title: "Aether Theme", category: "Shopify theme", accent: "#39637e" },
-  { src: "/work/aether-2.webp", title: "Aether Theme", category: "Cart design", accent: "#5b7496" },
-  { src: "/work/ellora-la/1.webp", title: "Ellora LA", category: "Shopify storefront", accent: "#cb591b" },
-  { src: "/work/aether-3.png", title: "Aether Theme", category: "Product page", accent: "#1a1a1a" },
+  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app", accent: "#6a6dff", logo: "/work-logos/inboundly.png" },
+  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff", logo: "/work-logos/inboundly.png" },
+  { src: "/work/aether-1.webp", title: "Aether Theme", category: "Shopify theme", accent: "#39637e", logo: "/work-logos/aether.png" },
+  { src: "/work/aether-2.webp", title: "Aether Theme", category: "Cart design", accent: "#5b7496", logo: "/work-logos/aether.png" },
+  { src: "/work/ellora-la/1.webp", title: "Ellora LA", category: "Shopify storefront", accent: "#cb591b", logo: "/work-logos/ellora-la.png" },
   { src: "/work/inertia-site.png", title: "Inertia", category: "Web design", accent: "#154365" },
-  { src: "/work/ftgioo-1.png", title: "FT.GIOO", category: "Shopify storefront", accent: "#b8433a" },
-  { src: "/work/ftgioo-2.png", title: "FT.GIOO", category: "Shop page", accent: "#b8433a" },
-  { src: "/work/ftgioo-3.png", title: "FT.GIOO", category: "Collection page", accent: "#b8433a" },
-  { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront", accent: "#3a627c" },
-  { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page", accent: "#4a5a2c" },
-  { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store", accent: "#9c0000" },
-  { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page", accent: "#0d1b3e" },
-  { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page", accent: "#a50000" },
-  { src: "/work/ellora-la/2.png", title: "Ellora LA", category: "Collection page", accent: "#6f283c" },
-  { src: "/work/ellora-la/3.png", title: "Ellora LA", category: "Product page", accent: "#5f696f" },
+  { src: "/work/ftgioo-1.png", title: "FT.GIOO", category: "Shopify storefront", accent: "#b8433a", logo: "/work-logos/ft-gioo.png" },
+  { src: "/work/ftgioo-2.png", title: "FT.GIOO", category: "Shop page", accent: "#b8433a", logo: "/work-logos/ft-gioo.png" },
+  { src: "/work/ftgioo-3.png", title: "FT.GIOO", category: "Collection page", accent: "#b8433a", logo: "/work-logos/ft-gioo.png" },
+  { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront", accent: "#3a627c", logo: "/work-logos/subtle-goods.png" },
+  { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page", accent: "#4a5a2c", logo: "/work-logos/subtle-goods.png" },
+  { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store", accent: "#9c0000", logo: "/work-logos/1400.png" },
+  { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page", accent: "#0d1b3e", logo: "/work-logos/1400.png" },
+  { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page", accent: "#a50000", logo: "/work-logos/1400.png" },
+  { src: "/work/ellora-la/2.png", title: "Ellora LA", category: "Collection page", accent: "#6f283c", logo: "/work-logos/ellora-la.png" },
 ];
 
 // Fluid, seamless carousel: a real horizontal track (not a crossfade) with a
@@ -580,8 +620,15 @@ function clientCardGradient(palette: string[] | undefined) {
 function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
   const router = useRouter();
   const total = WORK_ITEMS.length;
-  // index runs 1..total inside a [last-clone, ...items, first-clone] track
-  const [index, setIndex] = useState(1);
+  // The track is [..CLONES tail items, ...items, ..CLONES head items]. Two
+  // clones on each end (not one) so that on desktop — where the active slide
+  // peeks its left AND right neighbors — both peek positions are still
+  // populated at the wrap boundary. With a single clone, advancing onto the
+  // wrap slide left the far-side peek empty for one step, which is what made
+  // the last→first transition visibly jump instead of staying fluid.
+  const CLONES = 2;
+  // Real items occupy track indices CLONES .. CLONES+total-1.
+  const [index, setIndex] = useState(CLONES);
   const [animate, setAnimate] = useState(true);
   const [paused, setPaused] = useState(false);
   const [dragX, setDragX] = useState(0);
@@ -590,6 +637,9 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // follower tooltip can reflect the peeking prev/next card, not just the
   // centered one. null falls back to the active slide.
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  // Staggered entrance: each slide fades/rises in with a per-slide delay on
+  // load, instead of the whole track sliding in from the right.
+  const [entered, setEntered] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const widthRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -617,7 +667,12 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const slides = [WORK_ITEMS[total - 1], ...WORK_ITEMS, WORK_ITEMS[0]];
+  // CLONES tail items prepended + CLONES head items appended.
+  const slides = [
+    ...WORK_ITEMS.slice(total - CLONES),
+    ...WORK_ITEMS,
+    ...WORK_ITEMS.slice(0, CLONES),
+  ];
   const slideWidth = isDesktop ? WORK_PEEK_PCT : 100;
   // center the active slide within the track when it's narrower than 100%
   const centerOffset = (100 - slideWidth) / 2;
@@ -632,9 +687,9 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, paused]);
 
-  // index runs 1..total inside the [last-clone, ...items, first-clone] track,
-  // wrapping via onTransitionEnd, so map back to the real (non-clone) item.
-  const activeItem = WORK_ITEMS[((index - 1) % total + total) % total];
+  // Track indices wrap via onTransitionEnd; map any track index (real or
+  // clone) back to the real (non-clone) item. Real items start at CLONES.
+  const activeItem = WORK_ITEMS[((index - CLONES) % total + total) % total];
   const activeAccent = activeItem.accent;
 
   // Pointer tooltip reflects whichever card is hovered (including the peeking
@@ -643,13 +698,35 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // [last-clone, ...items, first-clone] track, so map it back to a real item.
   const tooltipItem =
     hoveredIndex != null
-      ? WORK_ITEMS[((hoveredIndex - 1) % total + total) % total]
+      ? WORK_ITEMS[((hoveredIndex - CLONES) % total + total) % total]
       : activeItem;
+  // Tooltip logo tweaks. Logos are forced black (they sit on the white pill)
+  // except FT.GIOO, which keeps its own multi-color artwork. Aether reads
+  // small at the shared size, so it gets a larger height.
+  const tooltipLogoNaturalColor = tooltipItem.logo === "/work-logos/ft-gioo.png";
+  const tooltipLogoSize = tooltipItem.logo === "/work-logos/aether.png" ? 20 : 15;
   const pointerTitle = (
     <span className="flex items-center gap-2">
-      <span className="relative block h-7 w-7 shrink-0 overflow-hidden rounded-full">
-        <Image src={tooltipItem.src} alt="" fill sizes="28px" className="object-cover object-top" />
-      </span>
+      {tooltipItem.logo && (
+        // Logo centered on a neutral white circular pill so it reads
+        // regardless of the logo's own color, in place of the old thumbnail.
+        <span
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white"
+          style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.25)" }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={tooltipItem.logo}
+            alt=""
+            className="object-contain"
+            style={{
+              height: tooltipLogoSize,
+              width: tooltipLogoSize,
+              filter: tooltipLogoNaturalColor ? undefined : "brightness(0)",
+            }}
+          />
+        </span>
+      )}
       <span className="whitespace-nowrap">{tooltipItem.title}</span>
     </span>
   );
@@ -678,11 +755,25 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // After the wrap-slide finishes animating, jump instantly (no transition)
-  // back to the real slide at the opposite end so the loop never runs out.
-  const onTransitionEnd = () => {
-    if (index === 0) { setAnimate(false); setIndex(total); }
-    else if (index === total + 1) { setAnimate(false); setIndex(1); }
+  // Kick off the staggered entrance one frame after mount so the from-state
+  // (faded/offset) paints first and the transition actually runs.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  // After a wrap-slide finishes animating, jump instantly (no transition) to
+  // the equivalent real slide at the opposite end so the loop never runs out.
+  // Real items span CLONES .. CLONES+total-1; anything outside that lands on a
+  // clone and gets re-homed to its real counterpart.
+  const onTransitionEnd = (e: React.TransitionEvent) => {
+    // Only the track's own transform transition should trigger the re-home.
+    // Child slides transition their height/filter/transform on the same
+    // duration, and those events bubble up to this handler — acting on them
+    // re-homed mid-animation (or on the wrong element), which read as a snap.
+    if (e.target !== trackRef.current || e.propertyName !== "transform") return;
+    if (index < CLONES) { setAnimate(false); setIndex(index + total); }
+    else if (index >= CLONES + total) { setAnimate(false); setIndex(index - total); }
   };
   useEffect(() => {
     if (!animate) {
@@ -691,7 +782,14 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     }
   }, [animate]);
 
+  // Desktop-only click-and-drag. Uses pointer capture so every move/up event
+  // routes back to the track once a drag begins — without it, dragging faster
+  // than the element (or off its edge) dropped the pointer stream, leaving the
+  // drag orphaned (dragX frozen, dragging stuck true) which is what broke the
+  // carousel and lost focus. Only the primary mouse button starts a drag.
   const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     dragState.current = { startX: e.clientX, dragging: true, dx: 0 };
     setPaused(true);
   };
@@ -701,14 +799,19 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     dragState.current.dx = dx;
     setDragX(dx);
   };
-  const endDrag = () => {
+  const endDrag = (e?: React.PointerEvent) => {
     if (!dragState.current?.dragging) return;
+    const dx = dragState.current.dx;
     dragState.current.dragging = false;
-    const w = widthRef.current || 1;
-    const threshold = w * 0.12;
+    if (e) (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+    // Advance one slide per drag past a fraction of the visible slide width
+    // (measured off the actual slide, not the whole track), so the throw
+    // distance needed matches how far a slide is.
+    const slidePx = (widthRef.current || 1) * (slideWidth / 100);
+    const threshold = slidePx * 0.2;
     setAnimate(true);
-    if (dragX < -threshold) setIndex(i => i + 1);
-    else if (dragX > threshold) setIndex(i => i - 1);
+    if (dx < -threshold) setIndex(i => i + 1);
+    else if (dx > threshold) setIndex(i => i - 1);
     setDragX(0);
     setPaused(false);
   };
@@ -724,7 +827,11 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
       className="relative sm:mt-10"
       style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
       onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => { setPaused(false); dragState.current = null; }}
+      onMouseLeave={() => {
+        // Don't clear an in-progress drag here — pointer capture keeps it
+        // alive off-element, and nulling it mid-drag orphaned the gesture.
+        if (!dragState.current?.dragging) { setPaused(false); dragState.current = null; }
+      }}
     >
       <div
         aria-hidden="true"
@@ -784,7 +891,11 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
               onPointerCancel={endDrag}
               style={{
                 transform: `translateX(${trackOffset}%)`,
-                transition: animate ? `transform ${WORK_DURATION}ms ${WORK_EASE}` : "none",
+                // No transform transition until the entrance has run — the
+                // track sits at its resting offset from the first paint, so
+                // the slides stagger in (per-slide fade/rise below) instead of
+                // the whole track sliding in from the right.
+                transition: animate && entered ? `transform ${WORK_DURATION}ms ${WORK_EASE}` : "none",
                 touchAction: "pan-y",
               }}
               onTransitionEnd={onTransitionEnd}
@@ -799,6 +910,14 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                 // slide into the active center; centered vertically so both
                 // edges ease in/out together rather than pinning to the top.
                 const heightPct = on || !isDesktop ? 100 : 84;
+                // Staggered load-in: cascade the visible slides left→right off
+                // the leftmost peeking slide, so they fade/rise in one after
+                // another rather than all at once. Off-screen slides just
+                // start in place (no visible entrance).
+                const leftmostVisible = index - 1;
+                const stagger = Math.max(0, i - leftmostVisible);
+                const entranceDelay = entered ? stagger * 90 : 0;
+                const nearViewport = Math.abs(i - index) <= 2;
                 return (
                   <div
                     key={`${w.src}-${i}`}
@@ -810,14 +929,32 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                     onMouseLeave={() => setHoveredIndex((prev) => (prev === i ? null : prev))}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
                     className="relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
-                    style={{ width: `${slideWidth}%`, cursor: "none", WebkitUserDrag: "none" } as React.CSSProperties}
+                    style={{
+                      width: `${slideWidth}%`,
+                      cursor: "none",
+                      WebkitUserDrag: "none",
+                      // Entrance: fade + slight rise/scale, staggered per slide.
+                      // Only near-viewport slides bother animating (the rest
+                      // are off-screen anyway); once entered, everything rests
+                      // at its natural state so nothing lingers.
+                      opacity: entered || !nearViewport ? 1 : 0,
+                      transform: entered || !nearViewport ? "none" : "translateY(16px) scale(0.96)",
+                      transition: `opacity 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms, transform 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms`,
+                    } as React.CSSProperties}
                     tabIndex={on ? 0 : -1}
                   >
                     <div
                       className="relative w-full rounded-2xl overflow-hidden"
                       style={{
                         height: `${heightPct}%`,
-                        transition: `height ${WORK_DURATION}ms ${WORK_EASE}`,
+                        // Gate the height ramp on `animate` too. During the
+                        // instant re-home at the loop seam (animate=false), the
+                        // just-active clone would otherwise animate its
+                        // height/blur back to the inactive state while the
+                        // identical real slide animates up — that crossfade is
+                        // exactly the "snap." Making these instant during the
+                        // re-home keeps the handoff invisible.
+                        transition: animate ? `height ${WORK_DURATION}ms ${WORK_EASE}` : "none",
                       }}
                     >
                       <Image
@@ -833,7 +970,9 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         style={{
                           filter: on || !isDesktop ? "none" : "brightness(0.55) blur(3px)",
                           transform: on || !isDesktop ? "scale(1)" : "scale(1.06)",
-                          transition: "filter 500ms ease, transform 500ms ease",
+                          transition: animate
+                            ? "filter 500ms ease, transform 500ms ease"
+                            : "none",
                         }}
                       />
                       {/* Bottom fade + label — scoped to this slide so it never overhangs into neighbors */}
@@ -1014,6 +1153,11 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   const padRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  // Desktop hover index. The card's transform is driven inline (for the mobile
+  // active state and live swipe), and an inline transform overrides a Tailwind
+  // `sm:hover:scale` class, so the desktop hover lift has to be folded into the
+  // same inline transform rather than relying on CSS :hover.
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Mirrors isTouching in a ref too — the scroll listener's closure below is
   // set up once (deps: [items]) rather than re-subscribing on every touch
@@ -1403,10 +1547,10 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
               <div key={item.slug} className="shrink-0 flex flex-col gap-3 sm:w-[420px]">
                 <Link
                   ref={(el) => { cardRefs.current[i] = el; }}
-                  href={`/work#project-${item.slug}`}
+                  href="/work"
                   draggable={false}
                   onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
-                  className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:hover:scale-[1.02] sm:cursor-grab"
+                  className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:cursor-grab"
                   style={{
                     aspectRatio: "4 / 5",
                     // While actively swiping, applyLiveCardScale writes
@@ -1420,15 +1564,21 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                     transition: isTouching
                       ? "none"
                       : "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 750ms cubic-bezier(0.4,0,0.2,1)",
+                    // Mobile settled state (activeIndex) and desktop hover
+                    // (hoveredIndex) both drive the lift via this one inline
+                    // transform, since an inline transform overrides a CSS
+                    // :hover scale class.
                     transform: activeIndex === i
                       ? "translateY(-6px) scale(1.05)"
                       : activeIndex !== null
                         ? "translateY(6px) scale(1)"
-                        : "translateY(0) scale(1)",
+                        : hoveredIndex === i
+                          ? "translateY(-4px) scale(1.02)"
+                          : "translateY(0) scale(1)",
                     ...(activeIndex === i ? { boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
-                  onMouseLeave={(e) => { if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
+                  onMouseEnter={(e) => { setHoveredIndex(i); e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
+                  onMouseLeave={(e) => { setHoveredIndex((prev) => (prev === i ? null : prev)); if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
                 >
                   {item.card ? (
                     <Image
@@ -1488,7 +1638,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                 </Link>
                 <div className="flex flex-col gap-1.5 w-[300px] sm:w-[420px]">
                   <Link
-                    href={`/work#project-${item.slug}`}
+                    href="/work"
                     draggable={false}
                     onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
                     className="flex items-center justify-between gap-2 pt-3 sm:pt-0 group/cta"

@@ -420,6 +420,16 @@ function FloatingBackToTop() {
 
 const ALL_FILTER = "All";
 
+// Shortened display labels for the filter pills. The filter value stays the
+// full service string (so matching against each project's service still
+// works); only the pill text is shortened.
+const FILTER_LABEL: Record<string, string> = {
+  "Shopify storefront": "Storefront",
+  "Shopify theme": "Theme",
+  "Web development": "Web dev",
+  "UI/UX design": "UI/UX",
+};
+
 export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWithGallery[] }) {
   const [work] = useState<WorkMetaWithGallery[]>(initialWork);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
@@ -446,13 +456,6 @@ export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWi
   return (
     <main className="mx-auto w-full pt-10 pb-24 px-6 sm:px-8" style={{ maxWidth: "64rem" }}>
 
-      {/* Intro */}
-      <div className="mb-8 text-center">
-        <h1 className="text-[clamp(1.8rem,4vw,2.4rem)] font-normal tracking-[-0.03em] text-[rgb(var(--fg))]">
-          Work
-        </h1>
-      </div>
-
       {/* Service filter pills */}
       <div className="flex flex-wrap items-center gap-2 mb-8">
         {filters.map((f) => {
@@ -470,7 +473,7 @@ export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWi
               }}
               aria-pressed={active}
             >
-              {f}
+              {FILTER_LABEL[f] ?? f}
             </button>
           );
         })}
