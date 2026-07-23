@@ -464,7 +464,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
           )}
 
           <p
-            className="inline-flex items-center text-[17px] sm:text-[19px] tracking-tight -mb-4 sm:-mb-6"
+            className="inline-flex items-center text-[19px] sm:text-[22px] tracking-tight -mb-4 sm:-mb-6"
             style={{ ...fade(60), color: "#1a1a1a" }}
           >
             anti<AntiSlowMark color={accentColor} />slow
