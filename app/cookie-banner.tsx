@@ -4,6 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePostHog } from "./posthog-provider";
 
+// Shared hover/press behaviour matching the hero CTA buttons: a small lift and
+// slight fade on hover, settling on press.
+const hoverLift = (e: React.MouseEvent<HTMLElement>) => {
+  e.currentTarget.style.opacity = "0.85";
+  e.currentTarget.style.transform = "translateY(-1px)";
+};
+const hoverReset = (e: React.MouseEvent<HTMLElement>) => {
+  e.currentTarget.style.opacity = "1";
+  e.currentTarget.style.transform = "translateY(0)";
+};
+const hoverPress = (e: React.MouseEvent<HTMLElement>) => {
+  e.currentTarget.style.transform = "translateY(0px)";
+};
+
 function Toggle({ id, checked, onChange, disabled }: { id: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <label
@@ -82,19 +96,22 @@ export function CookieBanner() {
       {cookieVisible && (
         <div
           className="fixed bottom-0 left-0 right-0 sm:left-auto sm:right-0 z-[100] px-4 pb-4 sm:px-6 sm:pb-6 sm:max-w-2xl"
-          style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}
+          style={{
+            animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both",
+            // Isolate the banner on its own compositor layer so its entrance
+            // (and the expensive shadow paint) doesn't thrash the homepage's
+            // scroll-driven animations running at the same time.
+            willChange: "transform, opacity",
+            transform: "translateZ(0)",
+          }}
         >
           <div
             className="mx-auto max-w-2xl rounded-xl"
             style={{
-              background: "#f1f1f1",
-              boxShadow: [
-                "0 2px 6px rgb(0 0 0 / 0.06)",
-                "0 10px 20px rgb(0 0 0 / 0.10)",
-                "inset 0 1px 0 rgb(255 255 255 / 0.6)",
-                "inset 0 -1px 0 rgb(0 0 0 / 0.06)",
-                "inset 0 0 24px rgb(0 0 0 / 0.03)",
-              ].join(", "),
+              background: "#ffffff",
+              // Single, cheap drop shadow — the old 5-layer stack (with a 24px
+              // inset blur) was costly to repaint on appearance.
+              boxShadow: "0 8px 24px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.06)",
             }}
           >
             {/* Default row */}
@@ -111,8 +128,11 @@ export function CookieBanner() {
               <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
                 <button
                   onClick={() => setExpanded((v) => !v)}
-                  className="relative rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium border border-[rgb(var(--fg))] text-[rgb(var(--fg))] hover:opacity-70 overflow-hidden"
-                  style={{ boxShadow: "inset 0 1px 2px rgb(0 0 0 / 0.08), inset 0 -1px 0 rgb(0 0 0 / 0.04)" }}
+                  className="relative inline-flex items-center rounded-full px-4 py-2 text-[13px] sm:text-[14px] tracking-tight font-medium overflow-hidden"
+                  style={{ background: "#e2e2e2", color: "#1a1a1a", transition: "opacity 150ms ease, transform 150ms ease" }}
+                  onMouseEnter={hoverLift}
+                  onMouseLeave={hoverReset}
+                  onMouseDown={hoverPress}
                 >
                   <span
                     aria-hidden={expanded}
@@ -143,8 +163,11 @@ export function CookieBanner() {
                 </button>
                 <button
                   onClick={acceptAll}
-                  className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
-                  style={{ boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -2px 3px rgb(0 0 0 / 0.35)" }}
+                  className="inline-flex items-center rounded-full px-4 py-2 text-[13px] sm:text-[14px] tracking-tight font-medium"
+                  style={{ background: "#1a1a1a", color: "#fff", transition: "opacity 150ms ease, transform 150ms ease" }}
+                  onMouseEnter={hoverLift}
+                  onMouseLeave={hoverReset}
+                  onMouseDown={hoverPress}
                 >
                   Accept all
                 </button>
@@ -196,15 +219,21 @@ export function CookieBanner() {
                   <div className="flex items-center justify-end gap-2 sm:gap-3 pt-1">
                     <button
                       onClick={decline}
-                      className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium border border-[rgb(var(--fg))] text-[rgb(var(--fg))] hover:opacity-70 transition-opacity"
-                      style={{ boxShadow: "inset 0 1px 2px rgb(0 0 0 / 0.08), inset 0 -1px 0 rgb(0 0 0 / 0.04)" }}
+                      className="inline-flex items-center rounded-full px-4 py-2 text-[13px] sm:text-[14px] tracking-tight font-medium"
+                      style={{ background: "#e2e2e2", color: "#1a1a1a", transition: "opacity 150ms ease, transform 150ms ease" }}
+                      onMouseEnter={hoverLift}
+                      onMouseLeave={hoverReset}
+                      onMouseDown={hoverPress}
                     >
                       Decline all
                     </button>
                     <button
                       onClick={confirm}
-                      className="rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13px] tracking-tight font-medium bg-[rgb(var(--fg))] text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
-                      style={{ boxShadow: "inset 0 1px 0 rgb(255 255 255 / 0.18), inset 0 -2px 3px rgb(0 0 0 / 0.35)" }}
+                      className="inline-flex items-center rounded-full px-4 py-2 text-[13px] sm:text-[14px] tracking-tight font-medium"
+                      style={{ background: "#1a1a1a", color: "#fff", transition: "opacity 150ms ease, transform 150ms ease" }}
+                      onMouseEnter={hoverLift}
+                      onMouseLeave={hoverReset}
+                      onMouseDown={hoverPress}
                     >
                       Confirm
                     </button>
