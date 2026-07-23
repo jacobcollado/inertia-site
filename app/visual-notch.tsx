@@ -580,7 +580,7 @@ function InertiaLogo() {
 function MergedCTA({ compact = false }: { compact?: boolean }) {
   const h = compact ? 40 : 44;
   const iconSize = compact ? 16 : 18;
-  const gap = 2;
+  const gap = 3;
   return (
     <div className="relative inline-flex items-center" style={{ height: h, gap: 0 }}>
       <a
@@ -614,8 +614,8 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
         aria-hidden="true"
         style={{
           width: gap + 6,
-          marginLeft: -3,
-          marginRight: -3,
+          marginLeft: -5,
+          marginRight: -5,
           height: 16,
           background: "rgb(var(--fg))",
           zIndex: 0,
