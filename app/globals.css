@@ -780,16 +780,12 @@ h1:hover .redact > span.redact-inner,
 }
 
 /* ── Cookie banner ─────────────────────────────────────────────────────────
-   The mobile hero has two large, continuously-animating blurred overlays
-   behind the /work thumbnail: .hero-glow (huge radial gradient) and .work-beam
-   (100vw column behind blur(26px)). On a real phone, keeping the fixed banner
-   on top of those animating blurred layers forces Safari to re-composite the
-   overlap every frame, dropping frames the whole time the banner is up and
-   recovering the instant it's dismissed. The real fix is to PAUSE those two
-   decorative animations while the banner is open (see the [data-cookie-
-   banner-open] rule below), which removes the per-frame GPU cost entirely.
-   The banner itself is then cheap: a one-shot CSS entrance, contain to keep
-   its paints local, and pure-CSS interaction states. */
+   Deliberately cheap: a one-shot CSS entrance, `contain` to keep its paints
+   local, and pure-CSS interaction states (no JS mutates style on hover/press).
+   NB: the mobile frame drops previously blamed on this banner were actually
+   PostHog session recording (rrweb) starting before consent and serializing
+   the animating hero DOM every frame — fixed in posthog-provider.tsx by not
+   capturing/recording until opt-in. This banner does no per-frame work. */
 .cb-root {
   position: fixed;
   bottom: 0;
@@ -799,14 +795,6 @@ h1:hover .redact > span.redact-inner,
   padding: 1rem;
   contain: layout paint;
   animation: rise-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-/* Freeze the expensive hero ambiance while the banner is visible. These
-   animations are purely decorative, so pausing them for the few seconds the
-   banner shows is imperceptible and stops the frame drops. */
-:root[data-cookie-banner-open] .hero-glow,
-:root[data-cookie-banner-open] .work-beam {
-  animation-play-state: paused;
 }
 @media (min-width: 640px) {
   .cb-root {

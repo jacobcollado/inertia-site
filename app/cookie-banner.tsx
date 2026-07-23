@@ -39,19 +39,6 @@ export function CookieBanner() {
     } catch {}
   }, []);
 
-  // While the banner is up, flag the document so the hero's continuously
-  // animating blurred overlays (.hero-glow, .work-beam) pause. On mobile those
-  // large blurred layers, re-composited every frame underneath the fixed
-  // banner, are what dropped frames until the banner was dismissed. Pausing
-  // purely decorative ambiance for the few seconds the banner shows is
-  // imperceptible and removes the per-frame GPU cost entirely.
-  useEffect(() => {
-    const root = document.documentElement;
-    if (visible) root.setAttribute("data-cookie-banner-open", "");
-    else root.removeAttribute("data-cookie-banner-open");
-    return () => root.removeAttribute("data-cookie-banner-open");
-  }, [visible]);
-
   const applyConsent = (analyticsAllowed: boolean) => {
     try { localStorage.setItem("cookie_consent", analyticsAllowed ? "accepted" : "declined"); } catch {}
     setConsent(analyticsAllowed);
