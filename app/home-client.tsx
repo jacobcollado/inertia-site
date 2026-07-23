@@ -1025,7 +1025,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         draggable={false}
                         priority={inViewport}
                         loading={inViewport ? undefined : "lazy"}
-                        quality={78}
+                        quality={70}
                         sizes={isDesktop ? `${WORK_PEEK_PCT}vw` : "calc(100vw - 12px)"}
                         className="object-cover object-top"
                         style={{
@@ -1648,7 +1648,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                       fill
                       priority={i < 2}
                       loading={i < 2 ? undefined : "lazy"}
-                      quality={78}
+                      quality={75}
                       sizes="(max-width: 640px) 300px, 420px"
                       className="object-cover"
                       draggable={false}
@@ -1677,6 +1677,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                         height={180}
                         priority={i < 2}
                         loading={i < 2 ? undefined : "lazy"}
+                        quality={70}
                         sizes="230px"
                         className="h-auto object-contain"
                         style={{
