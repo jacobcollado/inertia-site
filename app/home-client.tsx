@@ -763,10 +763,13 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white"
           style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.25)" }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={tooltipItem.logo}
             alt=""
+            width={40}
+            height={40}
+            sizes="40px"
+            quality={70}
             className="object-contain"
             style={{
               height: tooltipLogoSize,
@@ -1022,7 +1025,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         draggable={false}
                         priority={inViewport}
                         loading={inViewport ? undefined : "lazy"}
-                        quality={90}
+                        quality={78}
                         sizes={isDesktop ? `${WORK_PEEK_PCT}vw` : "calc(100vw - 12px)"}
                         className="object-cover object-top"
                         style={{
@@ -1645,7 +1648,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                       fill
                       priority={i < 2}
                       loading={i < 2 ? undefined : "lazy"}
-                      quality={90}
+                      quality={78}
                       sizes="(max-width: 640px) 300px, 420px"
                       className="object-cover"
                       draggable={false}
