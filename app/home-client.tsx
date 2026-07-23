@@ -314,41 +314,63 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
   return createPortal(modal, document.body);
 }
 
-// A small circular pill holding a bespoke "inertia" dot mark: a compact
-// 2-wide vertical column of dots, reading as a vertical motion line. Sits
-// inline in the hero heading, just before "speed". Sized in em so it scales
-// with the heading; the dots pulse subtly top-to-bottom so it feels alive.
-function InertiaDotPill() {
-  // 2 columns x 4 rows, symmetric about the 12,12 center of the viewBox so the
-  // grid sits dead-centre in the pill.
-  // Evenly spaced 2x4 grid, symmetric about the 12,12 center. Equal column and
-  // row gaps (6px) so nothing favors the middle.
-  const cols = [9, 15]; // avg 12, 6px apart
-  const rows = [3, 9, 15, 21]; // avg 12, 6px apart
-  const dots: { cx: number; cy: number; i: number }[] = [];
-  rows.forEach((cy, r) => cols.forEach((cx, c) => dots.push({ cx, cy, i: r * 2 + c })));
+// The "anti [!] slow" eyebrow's centre mark: a small squared, outline-only
+// container holding a warning sign rendered as dots — a dotted triangle
+// outline with a dotted exclamation inside. Sits inline between the two words.
+function AntiSlowMark() {
+  // Build an equilateral-ish warning triangle (apex at top) from three
+  // corners, then place dots at EVEN intervals along each edge so the outline
+  // is symmetric and correctly aligned. Corner dots are shared between edges
+  // (deduped) so they aren't doubled up.
+  const apex: [number, number] = [12, 4];
+  const left: [number, number] = [4.5, 19];
+  const right: [number, number] = [19.5, 19];
+  const perEdge = 4; // dots per edge including both endpoints
+
+  const edge = (a: [number, number], b: [number, number]) =>
+    Array.from({ length: perEdge }, (_, i) => {
+      const t = i / (perEdge - 1);
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t] as [number, number];
+    });
+
+  const raw = [...edge(apex, right), ...edge(right, left), ...edge(left, apex)];
+  // Dedupe shared corner points.
+  const outline = raw.filter(
+    ([x, y], i) => raw.findIndex(([px, py]) => Math.abs(px - x) < 0.01 && Math.abs(py - y) < 0.01) === i
+  );
+
+  // Exclamation, centred on x=12, within the triangle's vertical span. Stem of
+  // two dots plus a gapped point below.
+  const bang: [number, number][] = [
+    [12, 11],
+    [12, 14],
+    [12, 16.8],
+  ];
+  const R = 1.05;
 
   return (
     <span
       aria-hidden="true"
-      className="inertia-dot-pill"
       style={{
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        width: "1.02em",
-        height: "0.96em",
-        borderRadius: "0.2em",
+        width: "1.5em",
+        height: "1.5em",
+        borderRadius: "0.28em",
         background: "transparent",
-        border: "0.055em solid #1a1a1a",
-        verticalAlign: "-0.02em",
-        marginRight: "0.16em",
+        border: "0.09em solid currentColor",
+        verticalAlign: "-0.34em",
+        margin: "0 0.34em",
         boxSizing: "border-box",
       }}
     >
-      <svg viewBox="0 0 24 24" width="60%" height="60%" style={{ display: "block", margin: "auto" }}>
-        {dots.map((d) => (
-          <circle key={d.i} cx={d.cx} cy={d.cy} r={2.9} fill="#1a1a1a" />
+      <svg viewBox="0 0 24 24" width="76%" height="76%" style={{ display: "block" }}>
+        {outline.map(([cx, cy], i) => (
+          <circle key={`o${i}`} cx={cx} cy={cy} r={R} fill="currentColor" />
+        ))}
+        {bang.map(([cx, cy], i) => (
+          <circle key={`b${i}`} cx={cx} cy={cy} r={R} fill="currentColor" />
         ))}
       </svg>
     </span>
@@ -420,12 +442,18 @@ function VercelHero({ accentColor }: { accentColor: string }) {
           </span>
           )}
 
+          <p
+            className="inline-flex items-center text-[17px] sm:text-[19px] tracking-tight -mb-4 sm:-mb-6"
+            style={{ ...fade(60), color: "#5c5c5c" }}
+          >
+            anti<AntiSlowMark />slow
+          </p>
+
           <h1
             className="font-normal tracking-tight leading-[0.88] max-w-xl"
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             Design that moves at your{" "}
-            <InertiaDotPill />
             <ShimmerWord>speed</ShimmerWord>
           </h1>
 
