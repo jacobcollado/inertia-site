@@ -1023,10 +1023,21 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         alt={w.title}
                         fill
                         draggable={false}
-                        priority={inViewport}
-                        loading={inViewport ? undefined : "lazy"}
+                        // Only the centered slide is the LCP candidate, so give
+                        // it fetchpriority=high. The peeking neighbors load
+                        // eagerly (not lazy) but without competing for high
+                        // priority on cold load — three high-priority full-size
+                        // images at once was slowing LCP.
+                        priority={on}
+                        loading={on ? undefined : inViewport ? "eager" : "lazy"}
                         quality={70}
-                        sizes={isDesktop ? `${WORK_PEEK_PCT}vw` : "calc(100vw - 12px)"}
+                        // Cap the fetched width: the slide never exceeds ~817px
+                        // CSS wide (58% of the max-w-[88rem] track), so a raw
+                        // 58vw made retina screens pull the 1920px variant for a
+                        // ~1090px display. Cap at ~700px so the browser lands on
+                        // the 1200 srcset bucket instead of 1920 — big byte
+                        // savings on the LCP image, negligible visible change.
+                        sizes={isDesktop ? "min(58vw, 700px)" : "calc(100vw - 12px)"}
                         className="object-cover object-top"
                         style={{
                           filter: on || !isDesktop ? "none" : "brightness(0.55) blur(3px)",
@@ -1675,9 +1686,8 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                         alt={item.client}
                         width={180}
                         height={180}
-                        priority={i < 2}
-                        loading={i < 2 ? undefined : "lazy"}
-                        quality={70}
+                        loading="lazy"
+                        quality={75}
                         sizes="230px"
                         className="h-auto object-contain"
                         style={{
