@@ -779,6 +779,106 @@ h1:hover .redact > span.redact-inner,
   to   { transform: translateY(-3px); }
 }
 
+/* ── Cookie banner ─────────────────────────────────────────────────────────
+   Kept deliberately cheap for mobile. The banner is position:fixed above the
+   Lenis smooth-scroll surface, so it must not stay promoted to its own
+   compositor layer (that repaints its overlap region on every scroll frame).
+   `contain` isolates its paints; there is no `will-change`/translateZ, and the
+   only animation is a one-shot CSS entrance. Interaction states are pure CSS —
+   no JS mutates styles on hover/press. */
+.cb-root {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 1rem;
+  contain: layout paint;
+  animation: rise-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (min-width: 640px) {
+  .cb-root {
+    left: auto;
+    max-width: 42rem;
+    padding: 1.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cb-root { animation: none; }
+}
+
+.cb-card {
+  margin-inline: auto;
+  max-width: 42rem;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  /* Single cheap drop shadow. */
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12), 0 2px 6px rgb(0 0 0 / 0.06);
+}
+
+.cb-btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+@media (min-width: 640px) {
+  .cb-btn { font-size: 14px; }
+}
+.cb-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+.cb-btn:active { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .cb-btn { transition: none; }
+  .cb-btn:hover, .cb-btn:active { transform: none; }
+}
+.cb-btn-primary { background: #1a1a1a; color: #fff; }
+.cb-btn-secondary { background: #e2e2e2; color: #1a1a1a; }
+
+.cb-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.cb-toggle[data-disabled] { cursor: not-allowed; opacity: 0.4; }
+.cb-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.cb-toggle-track {
+  display: inline-flex;
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  background: rgb(var(--line));
+  position: relative;
+  transition: background 200ms ease;
+}
+.cb-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgb(var(--muted));
+  transition: left 200ms cubic-bezier(0.22, 1, 0.36, 1), background 200ms ease;
+}
+.cb-toggle-input:checked + .cb-toggle-track { background: rgb(var(--fg)); }
+.cb-toggle-input:checked + .cb-toggle-track .cb-toggle-thumb {
+  left: 16px;
+  background: rgb(var(--bg));
+}
+@media (prefers-reduced-motion: reduce) {
+  .cb-toggle-track, .cb-toggle-thumb { transition: none; }
+}
+
 .hero-glow {
   background: radial-gradient(ellipse 100% 35% at center, var(--hero-glow-color, rgba(10,132,255,0.20)), transparent 72%);
   animation: hero-glow-drift 26s ease-in-out infinite;
