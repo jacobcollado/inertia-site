@@ -692,7 +692,7 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   const trackRef = useRef<HTMLDivElement>(null);
   const widthRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dragState = useRef<{ startX: number; dragging: boolean; dx: number } | null>(null);
+  const dragState = useRef<{ startX: number; dragging: boolean; dx: number; captured: boolean } | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const [scrollScale, setScrollScale] = useState(1);
 
@@ -838,21 +838,30 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // carousel and lost focus. Only the primary mouse button starts a drag.
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
-    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-    dragState.current = { startX: e.clientX, dragging: true, dx: 0 };
+    // Don't capture the pointer yet — capturing on a plain click (no movement)
+    // swallows the ensuing `click` event, so the thumbnail never navigated to
+    // /work. Capture is deferred to onPointerMove, once an actual drag begins.
+    dragState.current = { startX: e.clientX, dragging: true, dx: 0, captured: false };
     setPaused(true);
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragState.current?.dragging) return;
     const dx = e.clientX - dragState.current.startX;
     dragState.current.dx = dx;
+    // Once the pointer has moved enough to count as a drag, capture it so the
+    // rest of the gesture keeps routing here even off-element.
+    if (!dragState.current.captured && Math.abs(dx) > 6) {
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+      dragState.current.captured = true;
+    }
     setDragX(dx);
   };
   const endDrag = (e?: React.PointerEvent) => {
     if (!dragState.current?.dragging) return;
     const dx = dragState.current.dx;
+    const wasCaptured = dragState.current.captured;
     dragState.current.dragging = false;
-    if (e) (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
+    if (e && wasCaptured) (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
     // Advance one slide per drag past a fraction of the visible slide width
     // (measured off the actual slide, not the whole track), so the throw
     // distance needed matches how far a slide is.
