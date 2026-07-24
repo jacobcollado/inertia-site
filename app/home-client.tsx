@@ -563,8 +563,9 @@ function CalEmbed() {
 }
 
 const WORK_ITEMS = [
-  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Web app", accent: "#6a6dff", logo: "/work-logos/inboundly.png" },
-  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Product design", accent: "#6f72ff", logo: "/work-logos/inboundly.png" },
+  { src: "/work/inboundly-1.png", title: "Inboundly", category: "Landing page", accent: "#6a6dff", logo: "/work-logos/inboundly.png" },
+  { src: "/work/inboundly-2.png", title: "Inboundly", category: "Pricing", accent: "#6f72ff", logo: "/work-logos/inboundly.png" },
+  { src: "/work/inboundly-3.png", title: "Inboundly", category: "Product design", accent: "#6a6dff", logo: "/work-logos/inboundly.png" },
   { src: "/work/aether-1.webp", title: "Aether Theme", category: "Shopify theme", accent: "#39637e", logo: "/work-logos/aether.png" },
   { src: "/work/aether-2.webp", title: "Aether Theme", category: "Cart design", accent: "#5b7496", logo: "/work-logos/aether.png" },
   { src: "/work/ellora-la/1.webp", title: "Ellora LA", category: "Shopify storefront", accent: "#cb591b", logo: "/work-logos/ellora-la.png" },
