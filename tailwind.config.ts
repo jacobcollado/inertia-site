@@ -27,6 +27,13 @@ const config: Config = {
         muted: { DEFAULT: "var(--sh-muted)", foreground: "var(--sh-muted-foreground)" },
         accent: { DEFAULT: "var(--sh-accent)", foreground: "var(--sh-accent-foreground)" },
         destructive: "var(--sh-destructive)",
+        // Row hover wash used by ask-user-questions' morphing hover indicator.
+        // Not a stock shadcn token — that component assumes a `hover` colour,
+        // so bg-hover resolved to nothing and the indicator was invisible.
+        hover: "var(--sh-hover)",
+        // Filled/selected wash, the settled counterpart to `hover`. Same story:
+        // ask-user-questions assumes it, stock shadcn has no such token.
+        active: "var(--sh-active)",
         border: "var(--sh-border)",
         input: "var(--sh-input)",
         ring: "var(--sh-ring)",

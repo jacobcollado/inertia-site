@@ -6,8 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 import { FollowerPointerCard } from "@/components/ui/following-pointer";
-import Cal, { getCalApi } from "@calcom/embed-react";
+import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string; palette?: string[]; card?: string };
 
@@ -535,28 +536,535 @@ function VercelHero({ accentColor }: { accentColor: string }) {
   );
 }
 
-function CalEmbed() {
+// A short, opinionated questionnaire that replaces the old Cal.com embed at
+// the foot of the homepage. It's not a real qualifier — it's a tone check.
+// The questions surface how someone thinks about design so the visitor either
+// nods along (and reaches for the CTA) or realizes we're not their studio. The
+// stepped flow itself is the shadcn `ask-user-questions` component; no data is
+// stored — onComplete just reflects the first answer back and offers the CTA
+// that opens the existing contact modal.
+// NB: `skippable` defaults to true in the component (`skippable !== false`), so
+// each question opts out explicitly — it's a three-question tone check, and a
+// skipped first answer would leave the result with nothing to reflect back.
+const QUIZ_QUESTIONS: AskUserQuestion[] = [
+  {
+    id: "ownership",
+    title: "Your product ships something ugly. Whose problem is it?",
+    skippable: false,
+    options: [
+      { id: "designer", title: "The designer's. They signed off on it." },
+      { id: "team", title: "Everyone's. Ugly is a team failure." },
+      { id: "ship", title: "Nobody's. Ship it, fix it later." },
+    ],
+  },
+  {
+    id: "detail",
+    title: "A detail nobody will notice is off by two pixels. You...",
+    skippable: false,
+    options: [
+      { id: "fix", title: "Fix it. Someone always notices." },
+      { id: "leave", title: "Leave it. Two pixels isn't a business." },
+      { id: "depends", title: "Depends what else is on fire." },
+    ],
+  },
+  {
+    id: "taste",
+    title: "What makes a site actually good?",
+    skippable: false,
+    options: [
+      { id: "convert", title: "It converts. The rest is decoration." },
+      { id: "feel", title: "It feels effortless to the person using it." },
+      { id: "different", title: "It looks nothing like everyone else's." },
+    ],
+  },
+];
+
+// Result copy keyed off the first answer — enough to feel like it read you,
+// without pretending to be a real assessment.
+const QUIZ_RESULTS: Record<string, { title: string; body: string }> = {
+  designer: {
+    title: "So you'd want someone to own the outcome.",
+    body: "So would we. When something ships under our name, it's ours to answer for. We're on the same page.",
+  },
+  team: {
+    title: "So you treat quality as a shared standard.",
+    body: "We agree, though someone still has to hold the line. That's usually what we're brought in for.",
+  },
+  ship: {
+    title: "So you'd rather move than polish.",
+    body: "Speed matters and we move fast too. We just don't ship ugly to get there. Both, or it isn't done.",
+  },
+};
+
+const QUIZ_RESULT_FALLBACK = {
+  title: "Sounds like we'd get along.",
+  body: "The way you think about the work lines up with how we approach it.",
+};
+
+// Stage two: once the tone-check questions are answered, the same component
+// collects the details we actually need. Free-text where the answer is theirs
+// to write, single-select where we're qualifying.
+const INTAKE_QUESTIONS: AskUserQuestion[] = [
+  {
+    id: "name",
+    title: "First, what's your name?",
+    skippable: false,
+    freeText: true,
+    freeTextMultiline: false,
+    freeTextPlaceholder: "Your name",
+    freeTextValidate: (v) => (v.trim().length < 2 ? "Please enter your name." : null),
+  },
+  {
+    id: "email",
+    title: "Where can we reach you?",
+    skippable: false,
+    freeText: true,
+    freeTextMultiline: false,
+    freeTextPlaceholder: "you@company.com",
+    freeTextValidate: (v) =>
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : "Please enter a valid email.",
+  },
+  {
+    id: "referral_source",
+    title: "How did you find us?",
+    skippable: false,
+    // allowOther appends a free-text row beneath the options, so "somewhere
+    // else" is typed rather than picked.
+    allowOther: true,
+    otherPlaceholder: "Somewhere else...",
+    options: [
+      { id: "twitter", title: "X (Twitter)" },
+      { id: "recommendation", title: "Someone recommended us" },
+      { id: "search", title: "Google or search" },
+      { id: "instagram", title: "Instagram" },
+    ],
+  },
+  {
+    id: "role",
+    title: "What's your role?",
+    skippable: false,
+    options: [
+      { id: "founder", title: "Founder or co-founder" },
+      { id: "exec", title: "Exec or department lead" },
+      { id: "product", title: "Product or engineering" },
+      { id: "other", title: "Something else" },
+    ],
+  },
+  {
+    id: "company_stage",
+    title: "Where's the company right now?",
+    skippable: false,
+    options: [
+      { id: "idea", title: "Pre-seed or idea stage" },
+      { id: "bootstrapped", title: "Bootstrapped" },
+      { id: "funded", title: "Funded" },
+      { id: "established", title: "Established" },
+    ],
+  },
+  {
+    id: "website",
+    title: "Do you have a site today?",
+    skippable: false,
+    freeText: true,
+    freeTextMultiline: false,
+    freeTextPlaceholder: "yoursite.com, or 'none yet'",
+  },
+  {
+    id: "goals",
+    title: "What do you want to be true when we're done?",
+    skippable: false,
+    freeText: true,
+    freeTextPlaceholder: "The outcome you're actually after, not just the deliverable.",
+  },
+  {
+    id: "readiness",
+    title: "Which sounds most like you?",
+    skippable: false,
+    options: [
+      { id: "allocated", title: "Budget's allocated and I'm ready to move" },
+      { id: "unlockable", title: "I'm serious and can unlock a budget" },
+      { id: "exploring", title: "Exploring what this would take" },
+    ],
+  },
+];
+
+// The three steps between landing here and starting work, shown as a timeline
+// under the heading in place of a subheading.
+const PROCESS_STEPS = [
+  {
+    title: "You answer a few questions",
+    body: "Right below. A few on how you think about the work, then the details we need.",
+  },
+  {
+    title: "We talk",
+    body: "A real conversation, both directions. You're deciding about us just as much.",
+  },
+  {
+    title: "If it clicks, we start",
+    body: "No pitch deck, no drawn-out proposal. We scope the work and get going.",
+  },
+];
+
+// Turn the component's {questionId: {selectedIds, otherText}} answer map into
+// readable "question -> answer" pairs for the transcript and the emailed
+// payload, resolving option ids back to their labels.
+function readableAnswers(
+  questions: AskUserQuestion[],
+  answers: Record<string, AskUserAnswer>
+): { question: string; answer: string }[] {
+  return questions
+    .map((q) => {
+      const a = answers[q.id ?? ""];
+      if (!a) return null;
+      const labels = a.selectedIds
+        .map((id) => q.options?.find((o) => o.id === id)?.title)
+        .filter(Boolean) as string[];
+      const answer = a.otherText?.trim() || labels.join(", ");
+      return answer ? { question: q.title, answer } : null;
+    })
+    .filter(Boolean) as { question: string; answer: string }[];
+}
+
+// Types `text` out character by character once `active` flips true. Steps on a
+// timer rather than per-frame so the pace stays the same regardless of refresh
+// rate, and honours prefers-reduced-motion by landing on the full string.
+function useTypewriter(text: string, active: boolean, speed = 18) {
+  const [shown, setShown] = useState("");
+  const doneRef = useRef(false);
+
   useEffect(() => {
-    (async function () {
-      const cal = await getCalApi({ namespace: "15min" });
-      cal("ui", {
-        theme: "dark",
-        hideEventTypeDetails: false,
-        layout: "month_view",
-        styles: { body: { background: "#0a0a0a" } },
+    if (!active || !text) return;
+    const reduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setShown(text);
+      doneRef.current = true;
+      return;
+    }
+    setShown("");
+    doneRef.current = false;
+    let i = 0;
+    const id = setInterval(() => {
+      i += 1;
+      setShown(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(id);
+        doneRef.current = true;
+      }
+    }, speed);
+    return () => clearInterval(id);
+  }, [text, active, speed]);
+
+  return { shown, done: shown.length >= text.length && text.length > 0 };
+}
+
+// "typing" sits between the quiz and the intake questions: the transcript has
+// collapsed, the response is typing itself out, and the input below is a inert
+// chat box that becomes the real question component once the text lands.
+type Stage = "quiz" | "typing" | "intake" | "done";
+
+function Questionnaire({ onStartConversation }: { onStartConversation: () => void }) {
+  const [stage, setStage] = useState<Stage>("quiz");
+  const [result, setResult] = useState<{ title: string; body: string } | null>(null);
+  const [transcript, setTranscript] = useState<{ question: string; answer: string }[]>([]);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [resetKey, setResetKey] = useState(0);
+
+  const onQuizComplete = (answers: Record<string, AskUserAnswer>) => {
+    const first = answers["ownership"]?.selectedIds[0];
+    setResult((first && QUIZ_RESULTS[first]) || QUIZ_RESULT_FALLBACK);
+    const pairs = readableAnswers(QUIZ_QUESTIONS, answers);
+    setTranscript(pairs);
+    setQuizAnswers(
+      Object.fromEntries(pairs.map((p) => [p.question, p.answer]))
+    );
+    setStage("typing");
+  };
+
+  // Full response text, typed out during the "typing" stage.
+  const responseText = result
+    ? `${result.title} ${result.body} A few quick questions so we can tell if we're a fit.`
+    : "";
+  const { shown: typedResponse, done: typingDone } = useTypewriter(
+    responseText,
+    stage === "typing"
+  );
+
+  // Hand off to the real questions once the response has finished typing.
+  useEffect(() => {
+    if (stage !== "typing" || !typingDone) return;
+    const t = setTimeout(() => setStage("intake"), 450);
+    return () => clearTimeout(t);
+  }, [stage, typingDone]);
+
+  const onIntakeComplete = async (answers: Record<string, AskUserAnswer>) => {
+    // Flatten to the API's field names. Free-text (and allowOther's typed row)
+    // lands in otherText; picked options land in selectedIds, which are option
+    // IDs — resolve those back to their labels so the stored/emailed value is
+    // readable ("X (Twitter)", not "twitter").
+    const value = (id: string) => {
+      const a = answers[id];
+      if (!a) return "";
+      const typed = a.otherText?.trim();
+      if (typed) return typed;
+      const q = INTAKE_QUESTIONS.find((x) => x.id === id);
+      return a.selectedIds
+        .map((sid) => q?.options?.find((o) => o.id === sid)?.title ?? sid)
+        .join(", ");
+    };
+
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: value("name"),
+          email: value("email"),
+          role: value("role"),
+          company_stage: value("company_stage"),
+          website: value("website"),
+          goals: value("goals"),
+          readiness: value("readiness"),
+          referral_source: value("referral_source"),
+          quiz_answers: quizAnswers,
+        }),
       });
-    })();
-  }, []);
+      if (!res.ok) throw new Error(String(res.status));
+      setStage("done");
+    } catch {
+      setSubmitError("Something went wrong. Try again, or email us directly.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const reset = () => {
+    setStage("quiz");
+    setResult(null);
+    setTranscript([]);
+    setQuizAnswers({});
+    setSubmitError("");
+    setResetKey((k) => k + 1);
+  };
 
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div className="min-h-[820px] sm:min-h-[560px]" style={{ borderRadius: "12px", background: "rgb(var(--bg))", overflow: "hidden" }}>
-        <Cal
-          namespace="15min"
-          calLink="jacob-c-99otvp/15min"
-          style={{ width: "100%", height: "100%", overflow: "scroll" }}
-          config={{ layout: "month_view", useSlotsViewOnSmallScreen: "true", theme: "dark" }}
-        />
+      {/* Left on mobile so it shares an edge with the timeline's rows there;
+          centred from sm up, where the timeline becomes a centred block. */}
+      <div className="max-w-2xl mx-auto text-left sm:text-center">
+        <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight">
+          Quality and speed both take attention.
+          <br />
+          <span className="text-[rgb(var(--muted))]">So we&rsquo;re deliberate about who we take on.</span>
+        </h2>
+      </div>
+
+      {/* How it works, as a short timeline rather than a subheading. Each step
+          is a row with a marker on a connecting rail, so it reads as a
+          sequence at a glance. */}
+      {/* Desktop: a narrower column centred as a block under the centred
+          heading, so the steps sit in the middle of the section instead of
+          spanning its full width. Text inside stays left-aligned at every
+          size — mobile is unchanged. */}
+      <ol className="mt-8 sm:mt-10 w-full max-w-2xl sm:max-w-md mx-auto flex flex-col text-left">
+        {PROCESS_STEPS.map((s, i) => (
+          <li key={s.title} className="relative flex gap-4 pb-6 last:pb-0">
+            {/* Rail: drawn per-item so it stops cleanly at the last step. */}
+            {i < PROCESS_STEPS.length - 1 && (
+              <span
+                aria-hidden
+                className="absolute left-[11px] top-[26px] bottom-0 w-px"
+                style={{ background: "rgb(var(--line))" }}
+              />
+            )}
+            <span
+              aria-hidden
+              className="relative z-10 shrink-0 mt-1 inline-flex h-[22px] w-[22px] items-center justify-center rounded-full text-[11px] tabular-nums"
+              style={{
+                background: "rgb(var(--bg))",
+                border: "1px solid rgb(var(--line))",
+                color: "rgb(var(--muted))",
+              }}
+            >
+              {i + 1}
+            </span>
+            <div className="min-w-0 pt-0.5">
+              <p className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))] leading-snug">
+                {s.title}
+              </p>
+              <p className="mt-1 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+                {s.body}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      {/* Cue that the quiz below is where the process actually starts. Shares
+          the timeline's column and its left edge at every size, so it lines up
+          under the steps rather than floating centred. */}
+      <div className="mt-10 sm:mt-12 w-full max-w-2xl sm:max-w-md mx-auto flex items-center gap-2 justify-start pl-[38px]">
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">
+          Start a project
+        </span>
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-3.5 w-3.5 text-[rgb(var(--muted))]"
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <polyline points="19 12 12 19 5 12" />
+        </svg>
+      </div>
+
+      {/* Narrower than the heading/timeline above so the exchange reads like a
+          chat thread rather than a full-width form. */}
+      {/* The quiz sits in a narrow column while it's asking questions; once
+          answered the thread widens to the heading's width so the exchange can
+          hug both edges like a chat (answers right, our reply left). */}
+      <div
+        className={cn(
+          "quiz-dark mt-20 sm:mt-24 w-full mx-auto transition-[max-width] duration-500 ease-out",
+          stage === "quiz" ? "max-w-md" : "max-w-2xl"
+        )}
+      >
+        {/* Answered questions collapse into one card pinned to the RIGHT edge,
+            reading as the visitor's sent message. */}
+        {stage !== "quiz" && (
+          <div className="flex justify-end" style={{ animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}>
+            <div
+              className="max-w-[85%] sm:max-w-[80%] rounded-3xl px-5 py-5 sm:px-6 sm:py-6 flex flex-col gap-4"
+              style={{ background: "var(--sh-card)" }}
+            >
+              {transcript.map((t) => (
+                <div key={t.question}>
+                  <p className="text-[14.5px] sm:text-[15px] tracking-tight text-foreground leading-snug">
+                    {t.question}
+                  </p>
+                  <p className="mt-1 text-[14.5px] sm:text-[15px] tracking-tight text-muted-foreground leading-snug">
+                    {t.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Our reply, aligned to the LEFT edge. During "typing" it fills in a
+            character at a time with a caret; afterwards it just sits there. */}
+        {stage !== "quiz" && result && (
+          <div className="flex justify-start">
+            <p className="mt-6 sm:mt-7 max-w-[92%] sm:max-w-[85%] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-foreground">
+              {stage === "typing" ? typedResponse : responseText}
+              {stage === "typing" && !typingDone && (
+                <span
+                  aria-hidden
+                  className="inline-block w-[2px] h-[1em] align-text-bottom ml-0.5"
+                  style={{ background: "currentColor", opacity: 0.6 }}
+                />
+              )}
+            </p>
+          </div>
+        )}
+
+        {stage === "quiz" && (
+          // max-w-none lets the component fill the narrow wrapper above instead
+          // of its own max-w-[520px] (cn uses tailwind-merge, so this wins).
+          <AskUserQuestions
+            key={`quiz-${resetKey}`}
+            questions={QUIZ_QUESTIONS}
+            onComplete={onQuizComplete}
+            className="mx-auto max-w-none border-transparent"
+          />
+        )}
+
+        {/* Inert chat input while the reply types: it holds the space the real
+            questions are about to occupy, so the swap doesn't jump. */}
+        {stage === "typing" && (
+          <div
+            aria-hidden
+            className="mt-8 sm:mt-10 w-full rounded-2xl border border-border px-4 py-3 flex items-center gap-3"
+            style={{ background: "var(--sh-card)", opacity: 0.55 }}
+          >
+            <span className="text-[14px] tracking-tight text-muted-foreground flex-1">
+              Type your answer...
+            </span>
+            <span
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full shrink-0"
+              style={{ background: "var(--sh-muted)" }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-muted-foreground">
+                <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
+              </svg>
+            </span>
+          </div>
+        )}
+
+        {stage === "intake" && (
+          <div className="mt-8 sm:mt-10" style={{ animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}>
+            <AskUserQuestions
+              key={`intake-${resetKey}`}
+              questions={INTAKE_QUESTIONS}
+              onComplete={onIntakeComplete}
+              className="mx-auto max-w-none border-transparent"
+            />
+            {submitting && (
+              <p className="mt-4 text-[13px] tracking-tight text-muted-foreground text-center">
+                Sending...
+              </p>
+            )}
+            {submitError && (
+              <p className="mt-4 text-[13px] tracking-tight text-center" style={{ color: "var(--sh-destructive)" }}>
+                {submitError}
+              </p>
+            )}
+          </div>
+        )}
+
+        {stage === "done" && (
+          <div
+            className="mt-8 sm:mt-10 w-full rounded-3xl border border-border px-6 py-8 sm:px-8 sm:py-9"
+            style={{ background: "var(--sh-card)", animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}
+          >
+            <p className="text-[20px] sm:text-[22px] font-normal tracking-tight text-foreground leading-snug mb-2.5">
+              That&rsquo;s everything. Thanks.
+            </p>
+            <p className="text-[14.5px] sm:text-[15px] tracking-tight text-muted-foreground leading-relaxed mb-7">
+              We read every one of these ourselves. If it looks like a fit you&rsquo;ll
+              hear from us within a couple of days to set up a call.
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <button
+                type="button"
+                onClick={onStartConversation}
+                className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[15px] tracking-tight font-medium transition-opacity duration-200 hover:opacity-90"
+                style={{ background: "var(--sh-primary)", color: "var(--sh-primary-foreground)" }}
+              >
+                Start the conversation
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={reset}
+                className="text-[13px] tracking-tight text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto"
+              >
+                Start over
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -1786,7 +2294,7 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
 
           <div className="py-14 sm:py-20" />
 
-          <CalEmbed />
+          <Questionnaire onStartConversation={() => setDashboardModalOpen(true)} />
 
           <div className="py-20 sm:py-20" />
         </div>

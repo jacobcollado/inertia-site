@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -72,7 +72,6 @@
   background: rgb(var(--bg));
 }
 
-
 /* Bento grid: neutral grey in light mode */
 :root:not(.dark) .bento-light-invert {
   --fg: 18 18 18;
@@ -138,6 +137,8 @@
   --sh-accent: #f2f2f2;
   --sh-accent-foreground: #121212;
   --sh-destructive: #ef4444;
+  --sh-hover: #f2f2f2;
+  --sh-active: #e8e8e8;
   --sh-border: #e1e1e1;
   --sh-input: #e1e1e1;
   --sh-ring: #0a84ff;
@@ -175,6 +176,8 @@
   --sh-accent: #1f1f1f;
   --sh-accent-foreground: #ededed;
   --sh-destructive: #ef4444;
+  --sh-hover: #1f1f1f;
+  --sh-active: #2b2b2b;
   --sh-border: #262626;
   --sh-input: #262626;
   --sh-ring: #0a84ff;
@@ -195,6 +198,35 @@
 }
 
 .admin-dark { background: var(--sh-background); }
+
+/* Dark scope for the homepage questionnaire (ask-user-questions). The component
+   uses shadcn tokens (bg-card, text-foreground, border-border, bg-accent...)
+   which map to --sh-* — light by default. The quiz sits in the homepage's dark
+   zone, so override those tokens to dark values here rather than site-wide. The
+   round shape comes from the component's default "pill" ShapeProvider. */
+.quiz-dark {
+  --sh-background: #0a0a0a;
+  --sh-foreground: #ededed;
+  --sh-card: #141414;
+  --sh-card-foreground: #ededed;
+  --sh-muted: #1f1f1f;
+  --sh-muted-foreground: #9a9a9a;
+  --sh-accent: #1f1f1f;
+  --sh-accent-foreground: #ededed;
+  --sh-secondary: #1f1f1f;
+  --sh-secondary-foreground: #ededed;
+  --sh-primary: #ededed;
+  --sh-primary-foreground: #0a0a0a;
+  /* Row hover wash. Sits a step above the #141414 card so the morphing
+     indicator reads clearly without competing with a selected row. */
+  --sh-hover: #232323;
+  /* Settled fill for a selected row / filled input, a step above hover. */
+  --sh-active: #2e2e2e;
+  --sh-border: #2a2a2a;
+  --sh-input: #2a2a2a;
+  --sh-ring: #ededed;
+  color-scheme: dark;
+}
 
 html {
   background: rgb(var(--bg));
@@ -761,7 +793,6 @@ h1:hover .redact > span.redact-inner,
 @media (prefers-reduced-motion: reduce) {
   .antislow-dot { animation: none; opacity: 1; }
 }
-
 
 @keyframes rise-in {
   from {
@@ -1684,7 +1715,6 @@ h1:hover .redact > span.redact-inner,
   transition: background 160ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-
 .site-header__dropdown-item:hover {
   background: rgb(var(--fg) / 0.06);
 }
@@ -2019,7 +2049,6 @@ h1:hover .redact > span.redact-inner,
   transform: scale(1.04);
 }
 
-
 .masonry-card__placeholder {
   position: absolute;
   inset: 0;
@@ -2096,7 +2125,6 @@ h1:hover .redact > span.redact-inner,
   animation: marquee-rev 42s linear infinite;
 }
 
-
 .marquee-item {
   display: flex;
   align-items: center;
@@ -2150,7 +2178,6 @@ h1:hover .redact > span.redact-inner,
 .marquee-item--far:hover {
   color: rgb(var(--fg) / 0.65);
 }
-
 
 @keyframes marquee-fwd {
   from { transform: translateX(0); }
@@ -2280,3 +2307,13 @@ h1:hover .redact > span.redact-inner,
   animation: placeholder-shimmer 3s linear infinite;
 }
 
+/* Spinner keyframes used by the ask-user-questions component. The registry
+   emitted these inside an `@theme inline {}` block (Tailwind v4 syntax); this
+   project is Tailwind v3, so they're kept as plain top-level @keyframes. */
+@keyframes spinner-move {
+  to { stroke-dashoffset: -100; }
+}
+@keyframes spinner-dash {
+  0%, 100% { stroke-dasharray: 15 85; }
+  50% { stroke-dasharray: 40 60; }
+}
