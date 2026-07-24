@@ -772,6 +772,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [resetKey, setResetKey] = useState(0);
+  const intakeRef = useRef<HTMLDivElement>(null);
 
   const onQuizComplete = (answers: Record<string, AskUserAnswer>) => {
     const first = answers["ownership"]?.selectedIds[0];
@@ -799,6 +800,26 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     const t = setTimeout(() => setStage("intake"), 450);
     return () => clearTimeout(t);
   }, [stage, typingDone]);
+
+  // When the intake questions appear, bring them into view if they landed below
+  // the fold (common on mobile, where the transcript + reply push them down).
+  // Uses Lenis if present so it matches the site's smooth scrolling, and only
+  // scrolls when the block's top actually sits past the viewport bottom.
+  useEffect(() => {
+    if (stage !== "intake") return;
+    const el = intakeRef.current;
+    if (!el) return;
+    const raf = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const belowFold = rect.top > window.innerHeight - 120;
+      if (!belowFold) return;
+      const targetY = window.scrollY + rect.top - 80; // leave a little headroom
+      const lenis = window.__lenis;
+      if (lenis) lenis.scrollTo(targetY, { duration: 0.9 });
+      else window.scrollTo({ top: targetY, behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [stage]);
 
   const onIntakeComplete = async (answers: Record<string, AskUserAnswer>) => {
     // Flatten to the API's field names. Free-text (and allowOther's typed row)
@@ -1011,7 +1032,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         )}
 
         {stage === "intake" && (
-          <div className="mt-8 sm:mt-10" style={{ animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div ref={intakeRef} className="mt-8 sm:mt-10" style={{ animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}>
             <AskUserQuestions
               key={`intake-${resetKey}`}
               questions={INTAKE_QUESTIONS}

@@ -1212,7 +1212,9 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                   // input it replaces — no border, no padding, no
                   // resize handle, no scrollbars (height is JS-driven,
                   // see the auto-resize effect above).
-                  "col-start-1 row-start-1 block w-full bg-transparent border-0 p-0 m-0 outline-none resize-none overflow-hidden text-[13px] leading-snug text-foreground placeholder:text-muted-foreground"
+                  // 16px on mobile to stop iOS Safari zooming on focus, 13px
+                  // from sm up (see the freeText textarea for the same fix).
+                  "col-start-1 row-start-1 block w-full bg-transparent border-0 p-0 m-0 outline-none resize-none overflow-hidden text-[16px] sm:text-[13px] leading-snug text-foreground placeholder:text-muted-foreground"
                 )}
                 style={{ fontVariationSettings: fontWeights.medium }}
               />
@@ -1364,7 +1366,10 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                             handleOtherSubmit();
                           }
                         }}
-                        className="block w-full bg-transparent border-0 p-0 m-0 outline-none resize-none overflow-hidden text-[13px] leading-snug text-foreground placeholder:text-muted-foreground"
+                        // 16px on mobile so iOS Safari doesn't zoom the viewport
+                        // on focus (it zooms any focused input under 16px);
+                        // back to the intended 13px from sm up.
+                        className="block w-full bg-transparent border-0 p-0 m-0 outline-none resize-none overflow-hidden text-[16px] sm:text-[13px] leading-snug text-foreground placeholder:text-muted-foreground"
                         style={{ fontVariationSettings: fontWeights.medium }}
                       />
                     }
