@@ -1512,8 +1512,11 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                 const on = i === index;
                 // Desktop peeks the adjacent slides too, so they're visible
                 // (and can paint as the LCP element) on first load, not just
-                // the centered one.
-                const inViewport = on || Math.abs(i - index) === 1;
+                // the centered one. Mobile shows ONE slide at 100vw, so the
+                // neighbours are off-screen: loading them eagerly there put two
+                // extra full-width images in front of the LCP image on a cold
+                // mobile connection. Let them lazy-load instead.
+                const inViewport = on || (isDesktop && Math.abs(i - index) === 1);
                 // peeking slides sit shorter and grow to full height as they
                 // slide into the active center; centered vertically so both
                 // edges ease in/out together rather than pinning to the top.
@@ -1575,7 +1578,17 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         // eagerly (not lazy) but without competing for high
                         // priority on cold load — three high-priority full-size
                         // images at once was slowing LCP.
-                        priority={on}
+                        //
+                        // Pinned to the FIRST slide rather than to `on`. With
+                        // priority={on}, autoplay moved it to a new image every
+                        // 4.2s and each move injected a fresh <link rel=preload>
+                        // the browser never used in time — the "preloaded but
+                        // not used" console spam. After the initial paint the
+                        // active slide is needed immediately anyway, so a
+                        // preload hint buys nothing. `slides` also carries two
+                        // clones of each end item, so gate on the real one to
+                        // avoid preloading the same URL twice.
+                        priority={i === CLONES}
                         loading={on ? undefined : inViewport ? "eager" : "lazy"}
                         quality={70}
                         // Cap the fetched width: the slide never exceeds ~817px
