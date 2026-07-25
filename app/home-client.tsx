@@ -473,12 +473,17 @@ function VercelHero({ accentColor }: { accentColor: string }) {
           </span>
           )}
 
+          {/* Hidden for now — flip to `true` to bring the eyebrow back. The
+              negative bottom margin only exists to pull the heading up under
+              it, so it comes along with the toggle. */}
+          {false && (
           <p
             className="inline-flex items-center text-[19px] sm:text-[22px] tracking-tight -mb-4 sm:-mb-6"
             style={{ ...fade(60), color: "#1a1a1a" }}
           >
             anti<AntiSlowMark color={accentColor} />slow
           </p>
+          )}
 
           <h1
             className="font-normal tracking-tight leading-[0.88] max-w-xl"
@@ -912,12 +917,15 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
                 style={{ background: "rgb(var(--line))" }}
               />
             )}
+            {/* Number sits bare on the rail — no ring. Keeps the 22px box so
+                the rail's left-[11px] still threads through its centre and the
+                text column stays aligned; the bg fill masks the rail behind
+                the digit. */}
             <span
               aria-hidden
-              className="relative z-10 shrink-0 mt-1 inline-flex h-[22px] w-[22px] items-center justify-center rounded-full text-[11px] tabular-nums"
+              className="relative z-10 shrink-0 mt-1 inline-flex h-[22px] w-[22px] items-center justify-center text-[11px] tabular-nums"
               style={{
                 background: "rgb(var(--bg))",
-                border: "1px solid rgb(var(--line))",
                 color: "rgb(var(--muted))",
               }}
             >
