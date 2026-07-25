@@ -74,7 +74,18 @@
       "Bash(powershell.exe *)",
       "Bash(npx shadcn@latest add textarea --yes)",
       "Bash(netstat -ano)",
-      "mcp__claude_ai_PostHog__exec"
+      "mcp__claude_ai_PostHog__exec",
+      "WebFetch(domain:posthog.com)",
+      "Bash(npx shadcn@latest add https://www.fluidfunctionalism.com/r/ask-user-questions.json)",
+      "WebFetch(domain:paper.design)",
+      "mcp__plugin_paper-desktop_paper__get_guide",
+      "mcp__plugin_paper-desktop_paper__get_font_family_info",
+      "mcp__plugin_paper-desktop_paper__create_tokens",
+      "mcp__plugin_paper-desktop_paper__create_artboard",
+      "mcp__plugin_paper-desktop_paper__write_html",
+      "mcp__plugin_paper-desktop_paper__get_screenshot",
+      "mcp__plugin_paper-desktop_paper__update_styles",
+      "PowerShell(Set-Location \"C:\\\\Users\\\\Jacob\\\\Jacob personal site\"; npx --yes react-doctor@latest --staged --blocking error 2>&1 | Select-Object -Last 12; Write-Output \"=== exit: $LASTEXITCODE ===\")"
     ]
   },
   "enabledMcpjsonServers": [
