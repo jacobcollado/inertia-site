@@ -148,12 +148,21 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
+    // The reset is deferred so the form doesn't visibly clear mid close
+    // animation. Track the timer so it's cancelled on unmount — otherwise it
+    // fires setState on an unmounted component when the modal closes and the
+    // tree tears down inside the 300ms window.
+    let resetTimer: ReturnType<typeof setTimeout> | null = null;
     if (!open) {
-      setTimeout(() => { setDone(false); setError(""); setEmail(""); setName(""); setPlan("free"); }, 300);
+      resetTimer = setTimeout(() => { setDone(false); setError(""); setEmail(""); setName(""); setPlan("free"); }, 300);
     }
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     if (open) { document.addEventListener("keydown", onKey); document.body.style.overflow = "hidden"; }
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+    return () => {
+      if (resetTimer) clearTimeout(resetTimer);
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [open, onClose]);
 
   const onSubmit = async (e: React.FormEvent) => {
