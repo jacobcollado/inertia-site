@@ -264,6 +264,12 @@ function SharedDropdown({
       setContentKey(k => k + 1);
       setContentPhase("enter");
     }, 230);
+
+    // The ref is cleared on the next run and on close, but neither happens if
+    // the header unmounts mid transition — so own it here too.
+    return () => {
+      if (phaseTimerRef.current) clearTimeout(phaseTimerRef.current);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openIndex]);
 
@@ -709,21 +715,46 @@ export function VisualNotch() {
     // Simplest fix: skip the effect entirely on "/" and leave the header
     // at its plain static background there.
     if (pathname === "/") return;
-    const onScroll = () => {
+
+    // backdrop-filter is one of the most expensive properties to recompute, so
+    // this must not run per scroll event. Coalesce to one write per frame via
+    // rAF, and skip the write entirely once `progress` has settled (it clamps
+    // at 1 after 120px, so most of a long scroll would otherwise re-apply an
+    // identical blur every event).
+    const bgEl = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
+    if (!bgEl) return;
+
+    let frame: number | null = null;
+    let lastProgress = -1;
+
+    const apply = () => {
+      frame = null;
       if (mobileOpen) return;
-      const bg = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
-      if (!bg) return;
-      const y = window.scrollY;
-      const progress = Math.min(y / 120, 1);
-      const blur = progress * 20;
-      const alpha = 1 - progress * 0.55;
-      bg.style.transition = "";
-      bg.style.backdropFilter = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
-      (bg.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = `blur(${blur}px) saturate(${1 + progress * 0.8})`;
-      bg.style.background = `rgb(var(--bg) / ${alpha})`;
+      const progress = Math.min(window.scrollY / 120, 1);
+      // Quantize to 2dp: sub-pixel blur changes aren't visible but each write
+      // forces the compositor to redo the backdrop.
+      const rounded = Math.round(progress * 100) / 100;
+      if (rounded === lastProgress) return;
+      lastProgress = rounded;
+
+      const filter = `blur(${rounded * 20}px) saturate(${1 + rounded * 0.8})`;
+      bgEl.style.transition = "";
+      bgEl.style.backdropFilter = filter;
+      (bgEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = filter;
+      bgEl.style.background = `rgb(var(--bg) / ${1 - rounded * 0.55})`;
     };
+
+    const onScroll = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(apply);
+    };
+
+    apply();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
   }, [mobileOpen, pathname]);
 
   const isHome = pathname === "/";

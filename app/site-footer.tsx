@@ -18,17 +18,24 @@ function DrawnSmiley() {
 
   useEffect(() => {
     if (!visible) return;
+    // Two timers to own: the recursive scheduler and the short blink-off. The
+    // latter was previously untracked, so unmounting mid blink left it to fire
+    // setState on a dead component.
     let timeout: ReturnType<typeof setTimeout>;
+    let blinkOff: ReturnType<typeof setTimeout>;
     const schedule = () => {
       const delay = 2200 + Math.random() * 2600;
       timeout = setTimeout(() => {
         setBlinking(true);
-        setTimeout(() => setBlinking(false), 160);
+        blinkOff = setTimeout(() => setBlinking(false), 160);
         schedule();
       }, delay);
     };
     schedule();
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(blinkOff);
+    };
   }, [visible]);
 
   return (
