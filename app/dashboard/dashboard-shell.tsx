@@ -956,7 +956,7 @@ function MessagesTab({ clientId, messages, setMessages }: { clientId: string; me
 
   const markRead = () => {
     setMessages(prev => prev.map(m => m.sender === "admin" && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m));
-    markAdminMessagesRead(clientId);
+    markAdminMessagesRead();
   };
 
   useEffect(() => {
