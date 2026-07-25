@@ -1,11 +1,48 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+
+/* ── Auth guard ───────────────────────────────────────────────────── */
+
+/* Every action below drives a service-role Supabase client, which bypasses RLS
+   entirely — so the database offers no backstop and each action must check the
+   caller itself.
+
+   The `/admin` middleware check is NOT sufficient: server actions POST to the
+   route of the page that imported them, and these are imported by "use client"
+   components, so their action IDs ship in the public bundle. A crafted POST
+   invokes them without ever loading an /admin page. Without this guard, any
+   unauthenticated visitor could delete accounts, reset passwords, or mint a
+   magic link for any email.
+
+   Mirrors the role check in proxy.ts: a valid session, then profiles.role
+   === "admin". Uses the cookie-scoped anon client (not the admin client) so
+   the identity comes from the caller's own session rather than being assumed.
+   getUser() revalidates against the auth server rather than trusting the
+   cookie's contents. */
+async function requireAdmin() {
+  const supabase = await createClient();
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) throw new Error("Unauthorized");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin") throw new Error("Unauthorized");
+
+  return user;
+}
 
 /* ── Clients ──────────────────────────────────────────────────────── */
 
 export async function inviteClient(formData: FormData) {
+  await requireAdmin();
   const email = formData.get("email") as string;
   const name = formData.get("name") as string;
   const company = formData.get("company") as string;
@@ -25,6 +62,7 @@ export async function inviteClient(formData: FormData) {
 }
 
 export async function updateClient(clientId: string, email: string, formData: FormData) {
+  await requireAdmin();
   const admin = createAdminClient();
   await admin.from("clients").upsert({
     id: clientId,
@@ -52,6 +90,7 @@ async function ensureClientRow(clientId: string) {
 }
 
 export async function createProject(clientId: string, formData: FormData) {
+  await requireAdmin();
   const admin = createAdminClient();
   await ensureClientRow(clientId);
   const { error } = await admin.from("projects").insert({
@@ -70,6 +109,7 @@ export async function createProject(clientId: string, formData: FormData) {
 }
 
 export async function updateProject(projectId: string, clientId: string, formData: FormData) {
+  await requireAdmin();
   const admin = createAdminClient();
   await admin.from("projects").update({
     title: formData.get("title") as string,
@@ -85,6 +125,7 @@ export async function updateProject(projectId: string, clientId: string, formDat
 }
 
 export async function deleteProject(projectId: string, clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   await admin.from("projects").delete().eq("id", projectId);
   revalidatePath(`/admin/clients/${clientId}`);
@@ -92,6 +133,7 @@ export async function deleteProject(projectId: string, clientId: string) {
 }
 
 export async function addProjectUpdate(projectId: string, clientId: string, status: string, note: string | null) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("project_updates").insert({
     project_id: projectId,
@@ -106,6 +148,7 @@ export async function addProjectUpdate(projectId: string, clientId: string, stat
 }
 
 export async function getProjectUpdates(projectId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { data } = await admin
     .from("project_updates")
@@ -118,6 +161,7 @@ export async function getProjectUpdates(projectId: string) {
 /* ── Invoices ─────────────────────────────────────────────────────── */
 
 export async function createInvoice(clientId: string, formData: FormData) {
+  await requireAdmin();
   const admin = createAdminClient();
   const amountRaw = formData.get("amount") as string;
 
@@ -137,6 +181,7 @@ export async function createInvoice(clientId: string, formData: FormData) {
 }
 
 export async function updateInvoiceStatus(invoiceId: string, clientId: string, status: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const update: Record<string, unknown> = { status };
   if (status === "paid") update.paid_at = new Date().toISOString();
@@ -147,6 +192,7 @@ export async function updateInvoiceStatus(invoiceId: string, clientId: string, s
 }
 
 export async function deleteInvoice(invoiceId: string, clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   await admin.from("invoices").delete().eq("id", invoiceId);
   revalidatePath(`/admin/clients/${clientId}`);
@@ -163,6 +209,7 @@ async function logAction(clientId: string, action: string, detail?: string) {
 /* ── Account management ───────────────────────────────────────────── */
 
 export async function suspendAccount(clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.updateUserById(clientId, { ban_duration: "876600h" });
   if (error) return { error: error.message };
@@ -173,6 +220,7 @@ export async function suspendAccount(clientId: string) {
 }
 
 export async function unsuspendAccount(clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.updateUserById(clientId, { ban_duration: "none" });
   if (error) return { error: error.message };
@@ -183,6 +231,7 @@ export async function unsuspendAccount(clientId: string) {
 }
 
 export async function deleteAccount(clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.deleteUser(clientId);
   if (error) return { error: error.message };
@@ -191,6 +240,7 @@ export async function deleteAccount(clientId: string) {
 }
 
 export async function updateAccountEmail(clientId: string, email: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.updateUserById(clientId, { email });
   if (error) return { error: error.message };
@@ -201,6 +251,7 @@ export async function updateAccountEmail(clientId: string, email: string) {
 }
 
 export async function updateAccountPassword(clientId: string, password: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.updateUserById(clientId, { password });
   if (error) return { error: error.message };
@@ -209,6 +260,7 @@ export async function updateAccountPassword(clientId: string, password: string) 
 }
 
 export async function resendInvite(clientId: string, email: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.inviteUserByEmail(email);
   if (error) return { error: error.message };
@@ -217,6 +269,7 @@ export async function resendInvite(clientId: string, email: string) {
 }
 
 export async function forceSignOut(clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.signOut(clientId, "others");
   if (error) return { error: error.message };
@@ -225,6 +278,7 @@ export async function forceSignOut(clientId: string) {
 }
 
 export async function generateMagicLink(clientId: string, email: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { data, error } = await admin.auth.admin.generateLink({
     type: "magiclink",
@@ -236,6 +290,7 @@ export async function generateMagicLink(clientId: string, email: string) {
 }
 
 export async function updateClientNotes(clientId: string, notes: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.from("clients").update({ notes: notes || null }).eq("id", clientId);
   if (error) return { error: error.message };
@@ -244,6 +299,7 @@ export async function updateClientNotes(clientId: string, notes: string) {
 }
 
 export async function getAdminLog(clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const { data } = await admin
     .from("admin_log")
@@ -257,6 +313,7 @@ export async function getAdminLog(clientId: string) {
 /* ── Messages ─────────────────────────────────────────────────────── */
 
 export async function sendAdminMessage(clientId: string, body: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   await ensureClientRow(clientId);
   const { error } = await admin.from("messages").insert({ client_id: clientId, sender: "admin", body });
@@ -266,6 +323,7 @@ export async function sendAdminMessage(clientId: string, body: string) {
 }
 
 export async function markMessagesRead(clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   await admin.from("messages")
     .update({ read_at: new Date().toISOString() })
@@ -278,6 +336,7 @@ export async function markMessagesRead(clientId: string) {
 /* ── Files ────────────────────────────────────────────────────────── */
 
 export async function addFile(clientId: string, formData: FormData) {
+  await requireAdmin();
   const admin = createAdminClient();
   await ensureClientRow(clientId);
 
@@ -302,6 +361,7 @@ export async function addFile(clientId: string, formData: FormData) {
 }
 
 export async function getSignedFileUrl(storagePath: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   const isStoragePath = !storagePath.startsWith("http");
   if (!isStoragePath) return { url: storagePath };
@@ -313,6 +373,7 @@ export async function getSignedFileUrl(storagePath: string) {
 }
 
 export async function addFileFromUrl(clientId: string, formData: FormData) {
+  await requireAdmin();
   const admin = createAdminClient();
   await ensureClientRow(clientId);
   const { error } = await admin.from("files").insert({
@@ -326,6 +387,7 @@ export async function addFileFromUrl(clientId: string, formData: FormData) {
 }
 
 export async function deleteFile(fileId: string, clientId: string) {
+  await requireAdmin();
   const admin = createAdminClient();
   await admin.from("files").delete().eq("id", fileId);
   revalidatePath(`/admin/clients/${clientId}`);
