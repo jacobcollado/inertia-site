@@ -1386,12 +1386,9 @@ function WorkStackDesktop({
                 sizes="min(92vw, 1408px)"
                 className="object-cover object-top"
               />
-              {/* Bottom fade + label */}
+              {/* Bottom label */}
               <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none">
-                <div
-                  className="p-6"
-                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)" }}
-                >
+                <div className="p-6">
                   <p className="text-[20px] tracking-tight text-white font-normal">{w.title}</p>
                   <p className="text-[14px] tracking-tight" style={{ color: "rgba(255,255,255,0.5)" }}>{w.category}</p>
                 </div>
@@ -1807,15 +1804,24 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
             width: "100vw",
             height: "calc(100% + 400px)",
             pointerEvents: "none",
-            // Widened: the tint now starts at 12% (was 30%) on each side and
-            // the radial core spans 62% (was 34%), so the beam spreads most of
-            // the screen instead of a narrow column down the middle.
+            // Widened: the tint starts at 12% (was 30%) on each side and the
+            // radial spans 62% (was 34%), so it spreads most of the screen
+            // rather than a narrow column down the middle.
             ["--work-beam-edge" as string]: "12%",
             ["--work-beam-ellipse" as string]: "62%",
-            // Intensity eased back a little to compensate — the same alpha
-            // over a much larger area reads as brighter overall.
-            ["--work-beam-color" as string]: hexToRgba(activeAccent, isDimAccent ? 0.4 : 0.25),
-            ["--work-beam-core" as string]: hexToRgba(activeAccent, isDimAccent ? 0.56 : 0.4),
+            // Flattened. `core` is now only a hair above `color`, so the
+            // linear layer is close to even across its width instead of
+            // peaking at 50%, and the radial is pushed well below both so it
+            // stops stacking a second bright spot on that same centre point.
+            // The two peaks landing together is what read as centre-focused;
+            // widening alone didn't fix it because both still peaked dead
+            // centre.
+            ["--work-beam-color" as string]: hexToRgba(activeAccent, isDimAccent ? 0.26 : 0.16),
+            ["--work-beam-core" as string]: hexToRgba(activeAccent, isDimAccent ? 0.3 : 0.19),
+            ["--work-beam-hotspot" as string]: hexToRgba(activeAccent, isDimAccent ? 0.16 : 0.1),
+            // Longer falloff so the radial dissolves gradually rather than
+            // ending in a visible edge.
+            ["--work-beam-hotspot-stop" as string]: "85%",
             zIndex: 0,
           }}
         />
@@ -1997,9 +2003,9 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                             : "none",
                         }}
                       />
-                      {/* Bottom fade + label — scoped to this slide so it never overhangs into neighbors */}
+                      {/* Bottom label — scoped to this slide so it never overhangs into neighbors */}
                       <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none">
-                        <div className="p-4" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)" }}>
+                        <div className="p-4">
                           <p className="text-[14px] sm:text-[18px] tracking-tight text-white font-normal">{w.title}</p>
                           <p className="text-[11px] sm:text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{w.category}</p>
                         </div>

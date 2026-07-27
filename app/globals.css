@@ -958,8 +958,12 @@ h1:hover .redact > span.redact-inner,
     ),
     radial-gradient(
       ellipse var(--work-beam-ellipse, 34%) 60% at center,
-      var(--work-beam-core, rgba(10,132,255,0.5)) 0%,
-      transparent 70%
+      /* --work-beam-hotspot is this layer's own colour. It defaults to the
+         core so existing callers are unchanged, but it can be set weaker (or
+         transparent) to stop the radial stacking on top of the linear's 50%
+         peak — that doubling at dead centre is what reads as a hotspot. */
+      var(--work-beam-hotspot, var(--work-beam-core, rgba(10,132,255,0.5))) 0%,
+      transparent var(--work-beam-hotspot-stop, 70%)
     );
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 68%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 68%, transparent 100%);
