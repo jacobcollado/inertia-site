@@ -459,7 +459,26 @@ function VercelHero({ accentColor }: { accentColor: string }) {
       <div
         className="relative flex items-center"
       >
-        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 pt-16 sm:pt-24 pb-10 pb-[40dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-0 sm:pb-10 sm:justify-start">
+        {/* Vertically centered in the space BELOW the header.
+            .site-header is `position: static` — it sits in normal flow and is
+            72px tall — so a plain 100dvh box here starts 72px down and its
+            centre lands ~36px below the viewport's true centre. That offset
+            is what read as "not nicely centered"; the flex centering itself
+            was always working. Subtracting the header height makes the box
+            occupy exactly the visible area under it.
+
+            Desktop padding is deliberately ASYMMETRIC (pt-0 / pb-18dvh): in a
+            justify-center box, extra bottom padding lifts the visible content
+            above the geometric centre. Dead centre read as too low here, which
+            is the usual optical-centring result — a headline sits better a bit
+            above the true middle. Raise sm:pb-[18dvh] to lift it further.
+
+            max-sm:pb-[40dvh] scopes the large mobile bottom pad to
+            mobile only — as a bare pb-[40dvh] it applied at every width and
+            pulled desktop content off centre, and a later sm:pb-10 does not
+            reliably beat it (Tailwind orders utilities itself, so arbitrary
+            value vs. responsive variant is not settled by source order). */}
+        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 max-sm:pt-16 sm:pt-0 max-sm:pb-[40dvh] sm:pb-[18dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-[calc(100dvh-72px)] sm:justify-center">
           {false && (
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
@@ -1213,6 +1232,116 @@ function clientCardGradient(palette: string[] | undefined) {
   };
 }
 
+// Desktop work viewer. One thumbnail in a fixed frame, crossfading to the
+// next on a timer. Deliberately NOT scroll-driven: the section is normal
+// height and takes no more of the page than a single card, so nobody has to
+// scroll through all 16 shots to get past it.
+//
+// (An earlier version pinned the section and mapped scroll onto the index.
+// That could not work here — an ancestor sets `overflow: hidden` plus a
+// scale() transform, which confines `position: sticky` to that container, and
+// Lenis smooth-scroll fires no native scroll events for a JS fallback to read.
+// A timed crossfade sidesteps both.)
+
+const WORK_FADE_MS = 3600; // dwell per image
+const WORK_CROSSFADE_MS = 900;
+
+function WorkStackDesktop({
+  onActiveAccent,
+  onHoverIndex,
+}: {
+  onActiveAccent?: (color: string) => void;
+  onHoverIndex?: (index: number | null) => void;
+}) {
+  const router = useRouter();
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  // Advance on a timer. Pauses on hover so a card can be read (and clicked)
+  // without it changing underneath the pointer.
+  useEffect(() => {
+    if (paused) return;
+    const id = setTimeout(
+      () => setActive((i) => (i + 1) % WORK_ITEMS.length),
+      WORK_FADE_MS,
+    );
+    return () => clearTimeout(id);
+  }, [active, paused]);
+
+  // Report the visible image's accent + index upward: the hero tint and the
+  // follower tooltip both track whatever is currently on screen. With one
+  // card at a time there's no hover ambiguity — visible IS active.
+  useEffect(() => {
+    onActiveAccent?.(WORK_ITEMS[active].accent);
+    onHoverIndex?.(active);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+
+  return (
+    <div className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+      <div
+        role="link"
+        tabIndex={0}
+        onClick={() => router.push("/work")}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        className="relative w-full rounded-2xl overflow-hidden"
+        style={{
+          aspectRatio: "16 / 9",
+          maxHeight: 620,
+          cursor: "none",
+          boxShadow: `0 24px 60px ${hexToRgba(WORK_ITEMS[active].accent, 0.28)}, 0 0 0 1px rgba(255,255,255,0.06)`,
+          transition: `box-shadow ${WORK_CROSSFADE_MS}ms ease`,
+        }}
+      >
+        {WORK_ITEMS.map((w, i) => {
+          const isActive = i === active;
+          return (
+            <div
+              key={w.src}
+              aria-hidden={!isActive}
+              className="absolute inset-0"
+              style={{
+                opacity: isActive ? 1 : 0,
+                transition: `opacity ${WORK_CROSSFADE_MS}ms ease`,
+                zIndex: isActive ? 2 : 1,
+                pointerEvents: isActive ? "auto" : "none",
+              }}
+            >
+              <Image
+                src={w.src}
+                alt={w.title}
+                fill
+                draggable={false}
+                // Only the first image is the LCP candidate and the only one
+                // that gets a preload hint. The rest load lazily as the fade
+                // reaches them. Never set both `priority` and `loading` on one
+                // image — Next throws.
+                priority={i === 0}
+                loading={i === 0 ? undefined : "lazy"}
+                quality={75}
+                sizes="min(92vw, 1408px)"
+                className="object-cover object-top"
+              />
+              {/* Bottom fade + label */}
+              <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none">
+                <div
+                  className="p-6"
+                  style={{ background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)" }}
+                >
+                  <p className="text-[20px] tracking-tight text-white font-normal">{w.title}</p>
+                  <p className="text-[14px] tracking-tight" style={{ color: "rgba(255,255,255,0.5)" }}>{w.category}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
   const router = useRouter();
   const total = WORK_ITEMS.length;
@@ -1241,26 +1370,50 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dragState = useRef<{ startX: number; dragging: boolean; dx: number; captured: boolean } | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  // Desktop and mobile render as two separate sections (one is display:none),
+  // so the parallax has to measure whichever one is actually laid out —
+  // getBoundingClientRect on the hidden one returns all zeros.
+  const desktopSectionRef = useRef<HTMLElement>(null);
   const [scrollScale, setScrollScale] = useState(1);
 
-  // Mobile-only parallax: as the carousel scrolls up into view, scale it
-  // from a shrunken start up to its natural size, tracking scroll position
-  // directly rather than a one-shot reveal. Desktop stays at scale 1.
+  // Scroll parallax, now on BOTH breakpoints: as the section scrolls up into
+  // view it scales from a shrunken start up to its natural size, tracking
+  // scroll position directly rather than running a one-shot reveal.
+  //
+  // Polled on rAF rather than driven off a `scroll` listener. Lenis (this
+  // site's smooth-scroll library) advances the real scroll position itself
+  // and fires no native scroll events, so a listener here never runs — the
+  // same reason LightCard below polls. The old mobile-only version worked
+  // purely because touch scrolling bypasses Lenis's wheel handling.
   useEffect(() => {
-    if (window.innerWidth >= 640) return;
-    const el = sectionRef.current;
-    if (!el) return;
-    const onScroll = () => {
+    let raf = 0;
+    let last = -1;
+    const tick = () => {
+      // Pick the section that's actually rendered at this breakpoint. offsetParent
+      // is null for a display:none element, which is the cheap visibility test.
+      const el =
+        desktopSectionRef.current?.offsetParent != null
+          ? desktopSectionRef.current
+          : sectionRef.current;
+      if (!el) { raf = requestAnimationFrame(tick); return; }
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight;
       // progress 0 when the section's top is at the bottom of the viewport,
       // 1 once its top has scrolled up to the viewport's vertical center
       const progress = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.65)));
-      setScrollScale(0.82 + progress * 0.18);
+      const next = 0.82 + progress * 0.18;
+      // Only re-render when the value actually moves a visible amount —
+      // setState every frame re-renders this component (and its parent via
+      // onActiveAccent) continuously, which is heavy enough to stall the
+      // main thread.
+      if (Math.abs(next - last) > 0.002) {
+        last = next;
+        setScrollScale(next);
+      }
+      raf = requestAnimationFrame(tick);
     };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   // CLONES tail items prepended + CLONES head items appended.
@@ -1276,12 +1429,15 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   const goTo = (i: number) => { setAnimate(true); setIndex(i); };
   const advance = () => goTo(index + 1);
 
+  // Autoplay is mobile-only now. On desktop the track isn't rendered at all,
+  // so leaving the timer running would just churn state (and re-report accents)
+  // for a carousel nobody can see.
   useEffect(() => {
-    if (paused) return;
+    if (paused || isDesktop) return;
     timerRef.current = setTimeout(advance, WORK_SLIDE_MS);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, paused]);
+  }, [index, paused, isDesktop]);
 
   // Track indices wrap via onTransitionEnd; map any track index (real or
   // clone) back to the real (non-clone) item. Real items start at CLONES.
@@ -1296,6 +1452,17 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     hoveredIndex != null
       ? WORK_ITEMS[((hoveredIndex - CLONES) % total + total) % total]
       : activeItem;
+
+  // Accent for the DESKTOP glow/beam. It must not use `activeAccent`: that is
+  // derived from the mobile carousel's `index`, and desktop disables that
+  // carousel's autoplay — so it stays frozen on WORK_ITEMS[0] (Inboundly's
+  // purple) no matter which shot is actually on screen. WorkStackDesktop
+  // reports its current shot through onHoverIndex, so read that instead and
+  // the gradient tracks the crossfade, not just the pointer.
+  const desktopItem = tooltipItem;
+  const desktopAccent = desktopItem.accent;
+  const isDimDesktopAccent = ["#39637e", "#5b7496", "#154365", "#4a5a2c"].includes(desktopAccent);
+  const desktopGlowOpacity = isDimDesktopAccent ? 0.34 : 0.20;
   // Tooltip logo tweaks. Logos are forced black (they sit on the white pill)
   // except FT.GIOO, which keeps its own multi-color artwork. Aether reads
   // small at the shared size, so it gets a larger height.
@@ -1340,9 +1507,13 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // ripple re-plays on every slide change, even when two consecutive slides
   // happen to share the same accent.
   useEffect(() => {
+    // On desktop WorkStackDesktop owns accent reporting (driven by hover);
+    // letting the carousel's index also report would overwrite the hovered
+    // color with the stale autoplay one.
+    if (isDesktop) return;
     onActiveAccent?.(activeAccent);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index]);
+  }, [index, isDesktop]);
 
   useEffect(() => {
     const measure = () => {
@@ -1429,10 +1600,95 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
   // the centering offset so the active slide sits in the middle on desktop
   const trackOffset = -index * slideWidth + centerOffset + dragPct;
 
+  // Desktop is no longer a carousel — it's a vertical stack of full-width
+  // rows. All the track machinery above (autoplay, clones, drag, wrap) is
+  // mobile-only now.
+  //
+  // Both trees render and CSS picks one (`hidden sm:block` / `sm:hidden`)
+  // rather than branching on the measured `isDesktop`. That measurement only
+  // lands after mount, so a JS branch made the server and first client paint
+  // emit the MOBILE carousel on desktop — a visible layout swap on load, and
+  // an LCP preload pointing at the wrong image. Breakpoint classes put the
+  // right layout in the server HTML from the first byte.
+  const desktopStack = (
+    // Negative top margin pulls the section up into the hero's bottom padding,
+    // the same trick mobile uses with -mt-[14dvh]. The hero carries an
+    // sm:pb-[18dvh] that exists to lift its headline above centre; that pad is
+    // empty space sitting directly above this section, so reclaiming most of
+    // it is what actually closes the gap. A plain smaller mt- cannot, since
+    // the space isn't this section's margin to begin with.
+    <section ref={desktopSectionRef} className="relative hidden sm:block sm:-mt-[11dvh]">
+      <div
+        aria-hidden="true"
+        className="hero-glow"
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: -500,
+          transform: "translateX(-50%)",
+          width: "100vw",
+          height: 900,
+          pointerEvents: "none",
+          ["--hero-glow-color" as string]: hexToRgba(desktopAccent, desktopGlowOpacity),
+          zIndex: 0,
+        }}
+      />
+      {/* Spotlight beam, same treatment mobile has: a tall soft column tinted
+          with the active accent that passes down through the card — brightest
+          along the center axis, feathering out to the sides and extending
+          above/below so the card reads as sitting inside a shaft of light.
+          Widened and shortened relative to mobile: on a wide viewport the
+          mobile geometry (100vw wide, 400px of overhang) reads as a vague
+          full-width wash rather than a beam, so this is capped to roughly the
+          card's own width so the falloff to either side stays visible. */}
+      <div
+        aria-hidden="true"
+        className="work-beam"
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: -180,
+          transform: "translateX(-50%)",
+          width: "min(96vw, 1500px)",
+          height: "calc(100% + 300px)",
+          pointerEvents: "none",
+          ["--work-beam-color" as string]: hexToRgba(desktopAccent, isDimDesktopAccent ? 0.42 : 0.26),
+          ["--work-beam-core" as string]: hexToRgba(desktopAccent, isDimDesktopAccent ? 0.6 : 0.42),
+          zIndex: 0,
+        }}
+      />
+      <FollowerPointerCard title={pointerTitle} titleKey={tooltipItem.title} className="w-full">
+        {/* Same scroll parallax as mobile: scales up into place as it enters
+            the viewport. transformOrigin center so it grows from its middle. */}
+        <div
+          className="relative"
+          style={{
+            transform: `scale(${scrollScale})`,
+            transformOrigin: "center center",
+            willChange: "transform",
+            // Above the beam, which sits at zIndex 0 behind it.
+            zIndex: 1,
+          }}
+        >
+        <WorkStackDesktop
+          onActiveAccent={onActiveAccent}
+          // Report the hovered row by index, not by accent — several items
+          // share an accent, so a reverse lookup by color would label the
+          // tooltip with the wrong project. Offset by CLONES to match the
+          // track-index space `hoveredIndex` is read in.
+          onHoverIndex={(i) => setHoveredIndex(i == null ? null : i + CLONES)}
+        />
+        </div>
+      </FollowerPointerCard>
+    </section>
+  );
+
   return (
+    <>
+      {desktopStack}
     <section
       ref={sectionRef}
-      className="relative sm:mt-10"
+      className="relative sm:hidden"
       style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => {
@@ -1588,8 +1844,13 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                         // preload hint buys nothing. `slides` also carries two
                         // clones of each end item, so gate on the real one to
                         // avoid preloading the same URL twice.
+                        // `loading` must be gated on the SAME condition as
+                        // `priority` — Next throws if one image gets both, and
+                        // `on` moves with autoplay while `priority` stays
+                        // pinned to the first slide, so gating on `on` made
+                        // the two disagree as soon as the carousel advanced.
                         priority={i === CLONES}
-                        loading={on ? undefined : inViewport ? "eager" : "lazy"}
+                        loading={i === CLONES ? undefined : inViewport ? "eager" : "lazy"}
                         quality={70}
                         // Cap the fetched width: the slide never exceeds ~817px
                         // CSS wide (58% of the max-w-[88rem] track), so a raw
@@ -1623,19 +1884,92 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
         </div>
       </FollowerPointerCard>
     </section>
+    </>
   );
 }
 
+// Neutral-toned pill for emphasising a phrase inline in body copy. Grey on a
+// soft grey wash rather than an accent colour, so it reads as a highlight
+// without competing with the work thumbnails' accent tinting.
+//
+// Inline-block with a tight negative vertical margin: the padding would
+// otherwise push the pill's line taller than its neighbours and make the
+// paragraph's leading uneven.
+// Apple emoji artwork, extracted from the source SVGs (which were really
+// 72x72 PNGs in an <image> wrapper) into public/emoji. Served as images
+// rather than as native emoji characters so every visitor sees the SAME
+// glyphs — a native "✨" renders as Apple's on macOS, Segoe's on Windows and
+// Noto's on Android, and Apple's font can't be embedded to fix that.
+//
+// Keys are the short names used in copy: [[sparkles|effortless]].
+const PILL_EMOJI: Record<string, string> = {
+  "shopping-bags": "/emoji/shopping-bags.png",
+  palette: "/emoji/palette.png",
+  laptop: "/emoji/laptop.png",
+  magnifier: "/emoji/magnifier.png",
+  sparkles: "/emoji/sparkles.png",
+  "hammer-wrench": "/emoji/hammer-wrench.png",
+  bolt: "/emoji/bolt.png",
+};
+
+function Pill({ emoji, children }: { emoji?: string; children: React.ReactNode }) {
+  const src = emoji ? PILL_EMOJI[emoji] : undefined;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2 py-[1px] -my-[1px] whitespace-nowrap align-middle"
+      style={{ background: "rgba(26,26,26,0.06)", color: "#1a1a1a" }}
+    >
+      {src && (
+        // Decorative: the pill's own text already carries the meaning, so an
+        // alt would just be announced twice. Source art is 72x72, drawn at
+        // 18px, so it stays crisp even on 3x displays.
+        <Image
+          src={src}
+          alt=""
+          aria-hidden="true"
+          width={72}
+          height={72}
+          quality={75}
+          sizes="18px"
+          className="inline-block shrink-0"
+          style={{ width: 18, height: 18 }}
+        />
+      )}
+      {children}
+    </span>
+  );
+}
+
+// Splits copy on [[double brackets]] and wraps those spans in a Pill, so the
+// source text stays readable as a sentence instead of being broken up into
+// JSX fragments. An optional leading "name|" inside the brackets attaches an
+// icon from PILL_EMOJI: [[sparkles|effortless]].
+function withPills(text: string) {
+  return text.split(/\[\[(.+?)\]\]/g).map((part, i) => {
+    // Even indices are plain copy between the markers.
+    if (i % 2 === 0) return <span key={i}>{part}</span>;
+    const split = part.indexOf("|");
+    if (split === -1) return <Pill key={i}>{part}</Pill>;
+    return (
+      <Pill key={i} emoji={part.slice(0, split)}>
+        {part.slice(split + 1)}
+      </Pill>
+    );
+  });
+}
+
 function DesignPhilosophy() {
+  const intro =
+    "The brands we work with already have something worth buying. Often [[shopping-bags|the product sells itself]], and sometimes it needs help doing that. Either way, the experience someone moves through on the way to it is the part we own, whether we're taking [[palette|design to code]] or [[laptop|code to design]].";
   const points = [
-    "We design around how real people move through a site, not around trends that'll date the brand in a year.",
-    "The best design disappears. It should feel effortless to the customer, even when the work behind it wasn't.",
+    "[[magnifier|Every detail matters]], whether the visitor consciously notices it or not. Most of them never will. They'll just feel that it worked.",
+    "The best design disappears. It should feel [[sparkles|effortless]] to the person using it, even when the work behind it wasn't.",
   ];
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:mx-auto">
         <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
-          Design isn't something we add at the end. It's how we think about a brand from the first conversation. We build for people who'll actually spend time with the site, not for what looks good in a case study, and that shift in focus is usually what separates a site that converts from one that just looks nice.
+          {withPills(intro)}
         </p>
         <div className="flex flex-col gap-4 mt-8">
           {points.map((text, i) => (
@@ -1644,7 +1978,7 @@ function DesignPhilosophy() {
                 {i + 1}.
               </span>
               <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
-                {text}
+                {withPills(text)}
               </p>
             </div>
           ))}
@@ -1662,14 +1996,18 @@ function easeInOutCubic(t: number) {
 }
 
 function AiApproach() {
+  const first =
+    "We treat AI as [[hammer-wrench|a frontier tool, not a shortcut]]. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed [[bolt|how fast we can work]], not what we're willing to ship.";
+  const second =
+    "We've been fortunate to work alongside people building genuinely great things, and every project has added to how we think about the work. Along the way we've built a deep understanding of [[the fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and the details that make a product actually resonate with the people using it.";
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:mx-auto">
         <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
-          We treat AI as a frontier tool, not a shortcut. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed how fast we can work, not what we're willing to ship.
+          {withPills(first)}
         </p>
         <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5" style={{ color: "#5c5c5c" }}>
-          We've been fortunate to work alongside people building genuinely great things, and every project has added to how we think about the work. Along the way we've built a deep understanding of the fundamentals: design systems that hold up as a brand grows, infrastructure that stays out of the way, and the details that make a product actually resonate with the people using it.
+          {withPills(second)}
         </p>
       </div>
     </section>
@@ -2314,7 +2652,10 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
         <div className="mx-auto w-full max-w-[88rem] flex flex-col">
           <VercelHero accentColor={accentColor} />
 
-          <div className="py-1 sm:py-6" />
+          {/* sm:py-0 — this spacer sat between the hero and the work section
+              and its desktop py-6 stacked on top of the section's own top
+              margin. Mobile keeps its py-1. */}
+          <div className="py-1 sm:py-0" />
 
           {/* Pull the carousel up on mobile into the hero's bottom padding. */}
           <div className="-mt-[14dvh] sm:mt-0">
