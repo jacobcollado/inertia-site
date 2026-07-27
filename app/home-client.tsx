@@ -564,19 +564,33 @@ function VercelHero({ accentColor }: { accentColor: string }) {
           )}
 
           <div className="flex items-center gap-3">
+            {/* Points at the quiz at the foot of the page rather than straight
+                to Cal: answering a few questions is a lower commitment than
+                putting a meeting on the calendar, and the quiz hands off to
+                booking itself once it knows what the project is. Stays a real
+                href so it still works without JS and offers a normal link
+                context menu; the handler only takes over to match the site's
+                Lenis smooth scrolling. */}
             <a
-              href="https://cal.com/jacob-c-99otvp/15min"
-              target="_blank"
-              rel="noreferrer"
+              href="#start"
+              onClick={e => {
+                const el = document.getElementById("start");
+                if (!el) return; // let the browser handle the hash
+                e.preventDefault();
+                const targetY = window.scrollY + el.getBoundingClientRect().top - 40;
+                const lenis = window.__lenis;
+                if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
+                else window.scrollTo({ top: targetY, behavior: "smooth" });
+              }}
               className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
               style={{ ...fade(660), background: "#1a1a1a", color: "#fff" }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
-              Book a call
+              Start a project
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
               </svg>
             </a>
             <a
@@ -936,7 +950,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   };
 
   return (
-    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section id="start" className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       {/* Left on mobile so it shares an edge with the timeline's rows there;
           centred from sm up, where the timeline becomes a centred block. */}
       <div className="max-w-2xl mx-auto text-left sm:text-center">
@@ -1924,16 +1938,15 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
 // Apple emoji artwork, extracted from the source SVGs (which were really
 // 72x72 PNGs in an <image> wrapper) into public/emoji. Served as images
 // rather than as native emoji characters so every visitor sees the SAME
-// glyphs — a native "✨" renders as Apple's on macOS, Segoe's on Windows and
+// glyphs — a native "🍃" renders as Apple's on macOS, Segoe's on Windows and
 // Noto's on Android, and Apple's font can't be embedded to fix that.
 //
-// Keys are the short names used in copy: [[sparkles|effortless]].
+// Keys are the short names used in copy: [[leaf|effortless]].
 const PILL_EMOJI: Record<string, string> = {
-  "shopping-bags": "/emoji/shopping-bags.png",
   palette: "/emoji/palette.png",
   laptop: "/emoji/laptop.png",
   magnifier: "/emoji/magnifier.png",
-  sparkles: "/emoji/sparkles.png",
+  leaf: "/emoji/leaf.png",
   "hammer-wrench": "/emoji/hammer-wrench.png",
   bolt: "/emoji/bolt.png",
 };
@@ -1969,7 +1982,7 @@ function Pill({ emoji, children }: { emoji?: string; children: React.ReactNode }
 // Splits copy on [[double brackets]] and wraps those spans in a Pill, so the
 // source text stays readable as a sentence instead of being broken up into
 // JSX fragments. An optional leading "name|" inside the brackets attaches an
-// icon from PILL_EMOJI: [[sparkles|effortless]].
+// icon from PILL_EMOJI: [[leaf|effortless]].
 function withPills(text: string) {
   return text.split(/\[\[(.+?)\]\]/g).map((part, i) => {
     // Even indices are plain copy between the markers.
@@ -1986,10 +1999,10 @@ function withPills(text: string) {
 
 function DesignPhilosophy() {
   const intro =
-    "The brands we work with already have something worth buying. Often [[shopping-bags|the product sells itself]], and sometimes it needs help doing that. Either way, the experience someone moves through on the way to it is the part we own, whether we're taking [[palette|design to code]] or [[laptop|code to design]].";
+    "The brands we work with already have something worth buying. Often [[the product sells itself]], and sometimes it needs help doing that. Either way, the experience someone moves through on the way to it is the part we own, whether we're taking [[palette|design to code]] or [[laptop|code to design]].";
   const points = [
     "[[magnifier|Every detail matters]], whether the visitor consciously notices it or not. Most of them never will. They'll just feel that it worked.",
-    "The best design disappears. It should feel [[sparkles|effortless]] to the person using it, even when the work behind it wasn't.",
+    "The best design disappears. It should feel [[leaf|effortless]] to the person using it, even when the work behind it wasn't.",
   ];
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">

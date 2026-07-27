@@ -6,3 +6,9 @@ out
 .DS_Store
 *.log
 .env.local
+
+# Local-only OG card editor: dev tooling that drives a headless browser to
+# write files into public/. Never intended to ship.
+/app/og-lab/
+/app/api/og-draft/
+.og-lab-draft.html
