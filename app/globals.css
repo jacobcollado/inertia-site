@@ -910,13 +910,6 @@ h1:hover .redact > span.redact-inner,
   .cb-toggle-track, .cb-toggle-thumb { transition: none; }
 }
 
-.hero-glow {
-  background: radial-gradient(ellipse 100% 35% at center, var(--hero-glow-color, rgba(10,132,255,0.20)), transparent 72%);
-  animation: hero-glow-drift 26s ease-in-out infinite;
-  transition: background 600ms ease;
-  will-change: transform;
-}
-
 /* /work card thumbnail hover: a slow, fluid lift. Transition lives here
    (rather than an arbitrary Tailwind duration class, which Tailwind flags as
    ambiguous and doesn't reliably emit) so the timing always applies. */
@@ -933,53 +926,6 @@ h1:hover .redact > span.redact-inner,
 }
 @media (prefers-reduced-motion: reduce) {
   .work-card-thumb { transition: none; }
-}
-
-/* Mobile work-thumbnail light shaft. Layered so it reads as a real beam:
-   a narrow, very-bright core stripe down the center axis (the horizontal
-   linear-gradient falls off fast to each side), a wider soft halo around it
-   for the outer bleed, and a vertical mask that fades the whole column out
-   at the very top and bottom so the shaft dissolves into the dark rather
-   than ending in a hard edge. Colors come from the active slide's accent via
-   the CSS vars set inline, and transition so a slide change re-tints it. */
-.work-beam {
-  /* Spread is variable so the mobile and desktop beams can differ without
-     forking the whole rule. --work-beam-edge is where the tint starts on each
-     side and --work-beam-ellipse is the radial core's width; lower edge % and
-     higher ellipse % both read as a wider beam. */
-  background:
-    linear-gradient(
-      to right,
-      transparent 0%,
-      var(--work-beam-color, rgba(10,132,255,0.3)) var(--work-beam-edge, 30%),
-      var(--work-beam-core, rgba(10,132,255,0.5)) 50%,
-      var(--work-beam-color, rgba(10,132,255,0.3)) calc(100% - var(--work-beam-edge, 30%)),
-      transparent 100%
-    ),
-    radial-gradient(
-      ellipse var(--work-beam-ellipse, 34%) 60% at center,
-      /* --work-beam-hotspot is this layer's own colour. It defaults to the
-         core so existing callers are unchanged, but it can be set weaker (or
-         transparent) to stop the radial stacking on top of the linear's 50%
-         peak — that doubling at dead centre is what reads as a hotspot. */
-      var(--work-beam-hotspot, var(--work-beam-core, rgba(10,132,255,0.5))) 0%,
-      transparent var(--work-beam-hotspot-stop, 70%)
-    );
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 68%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 26%, #000 68%, transparent 100%);
-  filter: blur(26px);
-  transition: background 600ms ease;
-  animation: work-beam-breathe 8s ease-in-out infinite;
-  will-change: opacity, transform;
-}
-
-@keyframes work-beam-breathe {
-  0%, 100% { opacity: 0.85; transform: translateX(-50%) scaleY(1); }
-  50%      { opacity: 1;    transform: translateX(-50%) scaleY(1.04); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .work-beam { animation: none; }
 }
 
 /* A soft, neutral-grey light band drifting continuously across the word.
@@ -1018,11 +964,6 @@ h1:hover .redact > span.redact-inner,
 @keyframes shimmer-sweep {
   0%   { background-position: 100% 0%; }
   100% { background-position: 0% 0%; }
-}
-
-@keyframes hero-glow-drift {
-  0%, 100% { transform: translateX(-50%) scale(1); }
-  50% { transform: translateX(-48%) scale(1.05); }
 }
 
 @keyframes char-in {

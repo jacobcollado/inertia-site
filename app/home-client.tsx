@@ -1512,16 +1512,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
       ? WORK_ITEMS[((hoveredIndex - CLONES) % total + total) % total]
       : activeItem;
 
-  // Accent for the DESKTOP glow/beam. It must not use `activeAccent`: that is
-  // derived from the mobile carousel's `index`, and desktop disables that
-  // carousel's autoplay — so it stays frozen on WORK_ITEMS[0] (Inboundly's
-  // purple) no matter which shot is actually on screen. WorkStackDesktop
-  // reports its current shot through onHoverIndex, so read that instead and
-  // the gradient tracks the crossfade, not just the pointer.
-  const desktopItem = tooltipItem;
-  const desktopAccent = desktopItem.accent;
-  const isDimDesktopAccent = ["#39637e", "#5b7496", "#154365", "#4a5a2c"].includes(desktopAccent);
-  const desktopGlowOpacity = isDimDesktopAccent ? 0.34 : 0.20;
   // Tooltip logo tweaks. Logos are forced black (they sit on the white pill)
   // except FT.GIOO, which keeps its own multi-color artwork. Aether reads
   // small at the shared size, so it gets a larger height.
@@ -1555,12 +1545,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
       <span className="whitespace-nowrap">{tooltipItem.title}</span>
     </span>
   );
-  // Dark blue/green accents read dimmer than warm ones at the same alpha, so
-  // give the glow a boost specifically for those slides (Aether, Inertia,
-  // Subtle Goods' olive green).
-  const isDimAccent = ["#39637e", "#5b7496", "#154365", "#4a5a2c"].includes(activeAccent);
-  const glowOpacity = isDimAccent ? 0.34 : 0.20;
-
   // Report the active slide's accent color upward so the hero can tint
   // itself to match. Keyed on `index` (not the derived color) so the hero's
   // ripple re-plays on every slide change, even when two consecutive slides
@@ -1693,45 +1677,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     // it is what actually closes the gap. A plain smaller mt- cannot, since
     // the space isn't this section's margin to begin with.
     <section ref={desktopSectionRef} className="relative hidden sm:block sm:-mt-[11dvh]">
-      <div
-        aria-hidden="true"
-        className="hero-glow"
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: -500,
-          transform: "translateX(-50%)",
-          width: "100vw",
-          height: 900,
-          pointerEvents: "none",
-          ["--hero-glow-color" as string]: hexToRgba(desktopAccent, desktopGlowOpacity),
-          zIndex: 0,
-        }}
-      />
-      {/* Spotlight beam, same treatment mobile has: a tall soft column tinted
-          with the active accent that passes down through the card — brightest
-          along the center axis, feathering out to the sides and extending
-          above/below so the card reads as sitting inside a shaft of light.
-          Widened and shortened relative to mobile: on a wide viewport the
-          mobile geometry (100vw wide, 400px of overhang) reads as a vague
-          full-width wash rather than a beam, so this is capped to roughly the
-          card's own width so the falloff to either side stays visible. */}
-      <div
-        aria-hidden="true"
-        className="work-beam"
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: -180,
-          transform: "translateX(-50%)",
-          width: "min(96vw, 1500px)",
-          height: "calc(100% + 300px)",
-          pointerEvents: "none",
-          ["--work-beam-color" as string]: hexToRgba(desktopAccent, isDimDesktopAccent ? 0.42 : 0.26),
-          ["--work-beam-core" as string]: hexToRgba(desktopAccent, isDimDesktopAccent ? 0.6 : 0.42),
-          zIndex: 0,
-        }}
-      />
       <FollowerPointerCard title={pointerTitle} titleKey={tooltipItem.title} className="w-full">
         {/* Same scroll parallax as mobile: scales up into place as it enters
             the viewport. transformOrigin center so it grows from its middle. */}
@@ -1772,60 +1717,6 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
         if (!dragState.current?.dragging) { setPaused(false); dragState.current = null; }
       }}
     >
-      <div
-        aria-hidden="true"
-        className="hero-glow"
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: isDesktop ? -500 : -900,
-          transform: "translateX(-50%)",
-          width: "100vw",
-          height: isDesktop ? 900 : 1500,
-          pointerEvents: "none",
-          ["--hero-glow-color" as string]: hexToRgba(activeAccent, glowOpacity),
-          zIndex: 0,
-        }}
-      />
-      {/* Mobile-only vertical light beam: a tall, soft column tinted with the
-          active slide's accent that passes down through the thumbnail —
-          brightest along the center axis, feathering out to the sides and
-          extending above/below the card so the card reads as sitting inside a
-          shaft of light rather than just glowing. */}
-      {!isDesktop && (
-        <div
-          aria-hidden="true"
-          className="work-beam"
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: -260,
-            transform: "translateX(-50%)",
-            width: "100vw",
-            height: "calc(100% + 400px)",
-            pointerEvents: "none",
-            // Widened: the tint starts at 12% (was 30%) on each side and the
-            // radial spans 62% (was 34%), so it spreads most of the screen
-            // rather than a narrow column down the middle.
-            ["--work-beam-edge" as string]: "12%",
-            ["--work-beam-ellipse" as string]: "62%",
-            // Flattened. `core` is now only a hair above `color`, so the
-            // linear layer is close to even across its width instead of
-            // peaking at 50%, and the radial is pushed well below both so it
-            // stops stacking a second bright spot on that same centre point.
-            // The two peaks landing together is what read as centre-focused;
-            // widening alone didn't fix it because both still peaked dead
-            // centre.
-            ["--work-beam-color" as string]: hexToRgba(activeAccent, isDimAccent ? 0.26 : 0.16),
-            ["--work-beam-core" as string]: hexToRgba(activeAccent, isDimAccent ? 0.3 : 0.19),
-            ["--work-beam-hotspot" as string]: hexToRgba(activeAccent, isDimAccent ? 0.16 : 0.1),
-            // Longer falloff so the radial dissolves gradually rather than
-            // ending in a visible edge.
-            ["--work-beam-hotspot-stop" as string]: "85%",
-            zIndex: 0,
-          }}
-        />
-      )}
       <FollowerPointerCard title={pointerTitle} titleKey={tooltipItem.title} className="w-full">
         <div
           className="relative w-full select-none"
