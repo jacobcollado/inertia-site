@@ -3,6 +3,7 @@
 import Link from "next/link";
 import React, { useEffect, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
 import { signOut } from "./actions";
 
 function WaveLink({ href, words, className, style }: { href: string; words: string[]; className?: string; style?: React.CSSProperties }) {
@@ -79,12 +80,14 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
         >
           Sign in
         </Link>
-        <WaveLink
-          href="/login?tab=signup"
-          words={["Create", "account"]}
-          className="px-3.5 py-1.5 text-[13px]"
-          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
-        />
+        {SIGNUPS_ENABLED && (
+          <WaveLink
+            href="/login?tab=signup"
+            words={["Create", "account"]}
+            className="px-3.5 py-1.5 text-[13px]"
+            style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
+          />
+        )}
       </div>
     );
   }
@@ -161,23 +164,25 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
         >
           Sign in
         </Link>
-        <WaveLink
-          href="/login?tab=signup"
-          words={["Request", "access"]}
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            height: "36px",
-            borderRadius: "100px",
-            background: "var(--btn-bg)",
-            fontSize: "13px",
-            fontWeight: 500,
-            letterSpacing: "-0.02em",
-            color: "var(--btn-fg)",
-            textDecoration: "none",
-            border: "3px solid var(--btn-border)",
-          }}
-        />
+        {SIGNUPS_ENABLED && (
+          <WaveLink
+            href="/login?tab=signup"
+            words={["Request", "access"]}
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              height: "36px",
+              borderRadius: "100px",
+              background: "var(--btn-bg)",
+              fontSize: "13px",
+              fontWeight: 500,
+              letterSpacing: "-0.02em",
+              color: "var(--btn-fg)",
+              textDecoration: "none",
+              border: "3px solid var(--btn-border)",
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -210,12 +215,14 @@ export function HeaderAuth({ mobile = false, mobileInline = false }: { mobile?: 
       >
         Sign in
       </Link>
-      <WaveLink
-        href="/login?tab=signup"
-        words={["Create", "account"]}
-        className="px-4 py-2 text-[15px] font-medium"
-        style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
-      />
+      {SIGNUPS_ENABLED && (
+        <WaveLink
+          href="/login?tab=signup"
+          words={["Create", "account"]}
+          className="px-4 py-2 text-[15px] font-medium"
+          style={{ background: "var(--btn-bg)", color: "var(--btn-fg)", border: "3px solid var(--btn-border)" }}
+        />
+      )}
     </div>
   );
 }

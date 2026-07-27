@@ -93,7 +93,36 @@ function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNod
           aria-expanded={open}
           className="w-full flex items-center justify-between gap-6 py-5 px-5"
         >
-          <span className="flex-1 text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--fg))] text-left sm:text-center">{q}</span>
+          {/* Label sits on its own black pill once the item is open, so the
+              active question reads as a distinct chip against the lighter
+              --surface panel behind it. Closed items stay bare — a pill on
+              every row would flatten the open/closed distinction.
+              The wrapper keeps flex-1 and the text alignment; the inner span
+              is inline-block so the pill hugs the text instead of spanning
+              the full row. */}
+          <span className="flex-1 text-left sm:text-center">
+            <span
+              className="inline-block text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--fg))]"
+              style={{
+                background: open ? "rgb(var(--bg))" : "transparent",
+                borderRadius: 999,
+                // Vertical padding is constant and cancelled by an equal
+                // negative margin, so the pill's height never changes the
+                // button's own row height — only the horizontal padding
+                // animates in. Without this the open row grows 12px taller
+                // than the closed ones and the list jumps on toggle.
+                padding: "6px 14px",
+                marginTop: -6,
+                marginBottom: -6,
+                marginLeft: open ? 0 : -14,
+                marginRight: open ? 0 : -14,
+                transition:
+                  "background 350ms cubic-bezier(0.22,1,0.36,1), margin-left 350ms cubic-bezier(0.22,1,0.36,1), margin-right 350ms cubic-bezier(0.22,1,0.36,1)",
+              }}
+            >
+              {q}
+            </span>
+          </span>
         </button>
         <div
           style={{
@@ -927,37 +956,64 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
           size — mobile is unchanged. */}
       <ol className="mt-8 sm:mt-10 w-full max-w-2xl sm:max-w-md mx-auto flex flex-col text-left">
         {PROCESS_STEPS.map((s, i) => (
-          <li key={s.title} className="relative flex gap-4 pb-6 last:pb-0">
-            {/* Rail: drawn per-item so it stops cleanly at the last step. */}
+          <li key={s.title} className="relative flex flex-col pb-6 last:pb-0">
+            {/* Rail: drawn per-item so it stops cleanly at the last step.
+                left-[17px] puts it dead centre under the number — the pill's
+                pl-1.5 (6px) plus half the number's 22px box. It was at 11px,
+                which centred on the pill's own left edge instead and read as
+                off-kilter. */}
             {i < PROCESS_STEPS.length - 1 && (
               <span
                 aria-hidden
-                className="absolute left-[11px] top-[26px] bottom-0 w-px"
-                style={{ background: "rgb(var(--line))" }}
+                className="absolute left-[17px] top-[34px] bottom-0 w-px"
+                style={{
+                  // Dashed via a repeating gradient rather than a dashed
+                  // border: a 1px-wide element with border-left:dashed renders
+                  // the dash pattern inconsistently across browsers, and this
+                  // gives exact control over the 3px dash / 4px gap.
+                  backgroundImage:
+                    "repeating-linear-gradient(to bottom, rgb(var(--line)) 0 3px, transparent 3px 7px)",
+                }}
               />
             )}
-            {/* Number sits bare on the rail — no ring. Keeps the 22px box so
-                the rail's left-[11px] still threads through its centre and the
-                text column stays aligned; the bg fill masks the rail behind
-                the digit. */}
+            {/* Number and label share one pill. The fill is the SOLID
+                equivalent of the old rgb(var(--fg) / 0.06) rather than the
+                translucent value itself — same colour to the eye, but the rail
+                running behind no longer shows through it. color-mix keeps that
+                true in both themes instead of hardcoding one. */}
             <span
-              aria-hidden
-              className="relative z-10 shrink-0 mt-1 inline-flex h-[22px] w-[22px] items-center justify-center text-[11px] tabular-nums"
-              style={{
-                background: "rgb(var(--bg))",
-                color: "rgb(var(--muted))",
-              }}
+              className="relative z-10 inline-flex w-fit items-center gap-2.5 rounded-full pl-1.5 pr-3.5 py-1.5"
+              style={{ background: "color-mix(in srgb, rgb(var(--fg)) 6%, rgb(var(--bg)))" }}
             >
-              {i + 1}
-            </span>
-            <div className="min-w-0 pt-0.5">
-              <p className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))] leading-snug">
+              {/* Dark disc behind the number, matching the section's own black
+                  canvas (--bg is 10 10 10 in the homepage dark zone). Gives
+                  the digit its own ground inside the lighter pill and reads as
+                  the marker the rail connects to. */}
+              <span
+                aria-hidden
+                className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-[11px] tabular-nums leading-none"
+                style={{
+                  background: "rgb(var(--bg))",
+                  color: "rgb(var(--fg))",
+                  // Kill the tracking inherited from the section. Letter
+                  // spacing is applied AFTER the last glyph too, so inside a
+                  // centred box it shifts the digit visibly left — worst on
+                  // "3", whose right side bearing is already tighter than 1
+                  // or 2 in this face.
+                  letterSpacing: "normal",
+                }}
+              >
+                {i + 1}
+              </span>
+              <span className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))] leading-snug">
                 {s.title}
-              </p>
-              <p className="mt-1 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-                {s.body}
-              </p>
-            </div>
+              </span>
+            </span>
+            {/* Body indents to the pill's text column so it lines up under the
+                title rather than under the number. */}
+            <p className="mt-1.5 ml-[38px] text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+              {s.body}
+            </p>
           </li>
         ))}
       </ol>
@@ -1156,6 +1212,12 @@ const WORK_SLIDE_MS = 4200;
 const WORK_EASE = "cubic-bezier(0.65,0,0.35,1)";
 const WORK_DURATION = 900;
 const WORK_PEEK_PCT = 58; // desktop slide width as % of track
+// Mobile crossfade, staged so the transition passes through black: the
+// outgoing slide fades out first, then the incoming one fades in over the
+// black underlay. Overlapping them symmetrically would leave two half-opaque
+// photos on screen at the midpoint, which reads muddy rather than fluid.
+const WORK_FADE_OUT_MS = 420;
+const WORK_FADE_IN_MS = 520;
 
 function hexToRgba(hex: string, alpha: number) {
   const n = parseInt(hex.slice(1), 16);
@@ -1552,6 +1614,22 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     }
   }, [animate]);
 
+  // Mobile re-home. The wrap above is driven by the track's transform
+  // transition ending, but mobile crossfades instead — the track never
+  // transforms, so onTransitionEnd never fires and the index would walk off
+  // the end of the clones. Re-home on a timer matched to the fade instead.
+  useEffect(() => {
+    if (isDesktop) return;
+    if (index >= CLONES && index < CLONES + total) return;
+    const id = setTimeout(() => {
+      setAnimate(false);
+      setIndex((v) => (v < CLONES ? v + total : v - total));
+      // Wait out the full staged fade (out, then in) before re-homing, so the
+      // index swap lands while the new slide is already settled.
+    }, WORK_FADE_OUT_MS + WORK_FADE_IN_MS);
+    return () => clearTimeout(id);
+  }, [index, isDesktop, total]);
+
   // Desktop-only click-and-drag. Uses pointer capture so every move/up event
   // routes back to the track once a drag begins — without it, dragging faster
   // than the element (or off its edge) dropped the pointer stream, leaving the
@@ -1729,8 +1807,15 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
             width: "100vw",
             height: "calc(100% + 400px)",
             pointerEvents: "none",
-            ["--work-beam-color" as string]: hexToRgba(activeAccent, isDimAccent ? 0.5 : 0.32),
-            ["--work-beam-core" as string]: hexToRgba(activeAccent, isDimAccent ? 0.7 : 0.5),
+            // Widened: the tint now starts at 12% (was 30%) on each side and
+            // the radial core spans 62% (was 34%), so the beam spreads most of
+            // the screen instead of a narrow column down the middle.
+            ["--work-beam-edge" as string]: "12%",
+            ["--work-beam-ellipse" as string]: "62%",
+            // Intensity eased back a little to compensate — the same alpha
+            // over a much larger area reads as brighter overall.
+            ["--work-beam-color" as string]: hexToRgba(activeAccent, isDimAccent ? 0.4 : 0.25),
+            ["--work-beam-core" as string]: hexToRgba(activeAccent, isDimAccent ? 0.56 : 0.4),
             zIndex: 0,
           }}
         />
@@ -1746,6 +1831,17 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
           }}
         >
           <div className="absolute inset-0 overflow-hidden">
+            {/* Black ground for the mobile crossfade. Inset to match the
+                slides' own px-1.5 gutter and rounded to match their corners,
+                so what shows through mid-fade is a black card rather than a
+                black rectangle behind a rounded one. */}
+            {!isDesktop && (
+              <div
+                aria-hidden="true"
+                className="absolute inset-y-0 left-1.5 right-1.5 rounded-2xl"
+                style={{ background: "#000", zIndex: 0 }}
+              />
+            )}
             <div
               ref={trackRef}
               className="flex h-full"
@@ -1754,12 +1850,15 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
               style={{
-                transform: `translateX(${trackOffset}%)`,
+                // Mobile stacks its slides and crossfades between them, so the
+                // track itself never translates there. Desktop keeps the
+                // sliding track (peeking neighbours depend on it).
+                transform: isDesktop ? `translateX(${trackOffset}%)` : "none",
                 // No transform transition until the entrance has run — the
                 // track sits at its resting offset from the first paint, so
                 // the slides stagger in (per-slide fade/rise below) instead of
                 // the whole track sliding in from the right.
-                transition: animate && entered ? `transform ${WORK_DURATION}ms ${WORK_EASE}` : "none",
+                transition: isDesktop && animate && entered ? `transform ${WORK_DURATION}ms ${WORK_EASE}` : "none",
                 touchAction: "pan-y",
               }}
               onTransitionEnd={onTransitionEnd}
@@ -1795,19 +1894,49 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                     onMouseEnter={() => setHoveredIndex(i)}
                     onMouseLeave={() => setHoveredIndex((prev) => (prev === i ? null : prev))}
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
-                    className="relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
-                    style={{
-                      width: `${slideWidth}%`,
-                      cursor: "none",
-                      WebkitUserDrag: "none",
-                      // Entrance: fade + slight rise/scale, staggered per slide.
-                      // Only near-viewport slides bother animating (the rest
-                      // are off-screen anyway); once entered, everything rests
-                      // at its natural state so nothing lingers.
-                      opacity: entered || !nearViewport ? 1 : 0,
-                      transform: entered || !nearViewport ? "none" : "translateY(16px) scale(0.96)",
-                      transition: `opacity 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms, transform 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms`,
-                    } as React.CSSProperties}
+                    className={
+                      isDesktop
+                        ? "relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
+                        : "absolute inset-0 h-full px-1.5 flex items-center"
+                    }
+                    style={
+                      isDesktop
+                        ? ({
+                            width: `${slideWidth}%`,
+                            cursor: "none",
+                            WebkitUserDrag: "none",
+                            // Entrance: fade + slight rise/scale, staggered per
+                            // slide. Only near-viewport slides bother animating
+                            // (the rest are off-screen anyway); once entered,
+                            // everything rests at its natural state.
+                            opacity: entered || !nearViewport ? 1 : 0,
+                            transform: entered || !nearViewport ? "none" : "translateY(16px) scale(0.96)",
+                            transition: `opacity 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms, transform 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms`,
+                          } as React.CSSProperties)
+                        : ({
+                            // Mobile: every slide is stacked in the same box and
+                            // only the active one is opaque, so advancing is a
+                            // crossfade rather than a horizontal slide. Swipe
+                            // still changes `index` — it just no longer drags
+                            // the track with the finger.
+                            //
+                            // The fade runs THROUGH BLACK: a black underlay
+                            // sits behind the stack, the outgoing slide fades
+                            // out faster than the incoming fades in (ease-in on
+                            // the way out, ease-out on the way back), so the
+                            // black shows through at the midpoint instead of
+                            // two half-opaque photos muddying together.
+                            width: "100%",
+                            cursor: "none",
+                            WebkitUserDrag: "none",
+                            opacity: on ? 1 : 0,
+                            transition: on
+                              ? `opacity ${WORK_FADE_IN_MS}ms cubic-bezier(0.33,0,0.67,1) ${WORK_FADE_OUT_MS}ms`
+                              : `opacity ${WORK_FADE_OUT_MS}ms cubic-bezier(0.33,0,0.67,1)`,
+                            zIndex: on ? 2 : 1,
+                            pointerEvents: on ? "auto" : "none",
+                          } as React.CSSProperties)
+                    }
                     tabIndex={on ? 0 : -1}
                   >
                     <div

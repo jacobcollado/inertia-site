@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
+import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
 import { ThemeToggle } from "@/app/theme-toggle";
 
 function Spinner() {
@@ -268,10 +270,14 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
 const EXIT_MS = 180;
 const ENTER_MS = 380;
 
+
 export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<"signin" | "signup">(initialTab);
-  const [displayedTab, setDisplayedTab] = useState<"signin" | "signup">(initialTab);
+  // With sign-ups closed, ?tab=signup must not open a tab that no longer
+  // renders — fall back to signin.
+  const startTab = SIGNUPS_ENABLED ? initialTab : "signin";
+  const [tab, setTab] = useState<"signin" | "signup">(startTab);
+  const [displayedTab, setDisplayedTab] = useState<"signin" | "signup">(startTab);
   const [view, setView] = useState<Record<"signin" | "signup", "auth" | "email">>({ signin: "auth", signup: "auth" });
   const [displayedView, setDisplayedView] = useState<"auth" | "email">("auth");
   const [phase, setPhase] = useState<"idle" | "exit" | "enter">("idle");
@@ -280,6 +286,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const [loading, setLoading] = useState(false);
   const [oauthProvider, setOauthProvider] = useState<"google" | null>(null);
   const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
+  // Tallest of all variants. No longer used to size the card (that tracks the
+  // current view), but kept as the pre-hydration fallback so the first paint
+  // doesn't clip taller content before the observer reports.
+  const [maxCardHeight, setMaxCardHeight] = useState<number | undefined>(undefined);
   const signinSizerRef = useRef<HTMLDivElement>(null);
   const signupSizerRef = useRef<HTMLDivElement>(null);
   const signinEmailSizerRef = useRef<HTMLDivElement>(null);
@@ -293,29 +303,43 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   // so switching tabs or swapping to the email card never reflows it.
   useEffect(() => {
     const measure = () => {
+      // Only measure the tabs that can actually be shown. Including the
+      // signup sizers while sign-ups are closed would lock the card to the
+      // taller signup layout and leave dead space under the signin form.
       const heights = [
         signinSizerRef.current?.offsetHeight ?? 0,
-        signupSizerRef.current?.offsetHeight ?? 0,
         signinEmailSizerRef.current?.offsetHeight ?? 0,
-        signupEmailSizerRef.current?.offsetHeight ?? 0,
+        ...(SIGNUPS_ENABLED
+          ? [
+              signupSizerRef.current?.offsetHeight ?? 0,
+              signupEmailSizerRef.current?.offsetHeight ?? 0,
+            ]
+          : []),
       ];
       const tallest = Math.max(...heights);
-      if (tallest > 0) setCardHeight(tallest);
+      if (tallest > 0) setMaxCardHeight(tallest);
     };
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [error, checkEmail]);
 
-  // Also track the live content's real height — typing into the password
-  // field can grow it beyond the static sizer baseline (caps lock warning,
-  // strength meter), so the card should grow to fit rather than clip it.
+  // The card tracks the CURRENT view's height rather than the tallest of all
+  // of them. Locking to the max meant the short OAuth view carried the email
+  // form's height as dead space at the bottom. The height is a transitioned
+  // property, so switching views grows/shrinks the card fluidly instead of
+  // jumping.
+  //
+  // This must not clamp with Math.max against the previous value: that
+  // ratchets the card upward and it never comes back down after a tall view.
+  // Growth from within a view (caps-lock warning, password strength meter) is
+  // handled naturally because the observer reports the new height directly.
   useEffect(() => {
     const el = liveContentRef.current;
     if (!el) return;
     const obs = new ResizeObserver(([entry]) => {
       const h = entry.contentRect.height;
-      setCardHeight((prev) => (prev === undefined ? h : Math.max(prev, h)));
+      if (h > 0) setCardHeight(h);
     });
     obs.observe(el);
     return () => obs.disconnect();
@@ -380,6 +404,12 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   };
 
   const onEmailSubmit = async (t: "signin" | "signup", email: string, password: string, firstName?: string, lastName?: string) => {
+    // Belt-and-braces: the signup tab isn't reachable while sign-ups are
+    // closed, but never fire signUp() if it somehow is.
+    if (t === "signup" && !SIGNUPS_ENABLED) {
+      setError("New accounts are temporarily unavailable. Please check back soon.");
+      return;
+    }
     setLoading(true);
     setError("");
     const supabase = createClient();
@@ -434,14 +464,17 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
       {error && <ErrorMessage msg={error} />}
 
-      {/* Switch tab link */}
-      <button
-        type="button"
-        onClick={() => switchTab(t === "signin" ? "signup" : "signin")}
-        className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center"
-      >
-        {t === "signin" ? "No account? Create one →" : "Already have an account? Sign in →"}
-      </button>
+      {/* Switch tab link — only meaningful while there's another tab to
+          switch to. The closed-sign-ups notice lives under the heading now. */}
+      {SIGNUPS_ENABLED && (
+        <button
+          type="button"
+          onClick={() => switchTab(t === "signin" ? "signup" : "signin")}
+          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center"
+        >
+          {t === "signin" ? "No account? Create one →" : "Already have an account? Sign in →"}
+        </button>
+      )}
     </>
   );
 
@@ -507,8 +540,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
       {/* Form — centered against full viewport */}
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
+        {/* Padding tightens while sign-ups are closed: with the tab notch gone
+            the card holds only a heading and two buttons. */}
         <div
-          className="w-full max-w-[420px] rounded-2xl border border-[rgb(var(--line))] p-8 sm:p-10"
+          className={`w-full max-w-[420px] rounded-2xl border border-[rgb(var(--line))] ${SIGNUPS_ENABLED ? "p-8 sm:p-10" : "p-7 sm:p-8"}`}
           style={{
             position: "relative",
             overflow: "hidden",
@@ -518,8 +553,12 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         >
           <div className="flex flex-col gap-6">
 
-            {/* Tab notch — hidden while on the dedicated email card, since
-                Back already covers navigation there */}
+            {/* Tab notch — collapses to 0 height while on the dedicated email
+                card, since Back already covers navigation there.
+                Not rendered AT ALL while sign-ups are closed: with one tab
+                left there's nothing to switch between, and a zero-height
+                child still costs a full gap-6 in this column. */}
+            {SIGNUPS_ENABLED && (
             <div
               className="flex justify-center overflow-hidden"
               style={{
@@ -541,7 +580,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                     }}
                   />
                 )}
-                {(["signin", "signup"] as const).map((t) => (
+                {(SIGNUPS_ENABLED ? (["signin", "signup"] as const) : (["signin"] as const)).map((t) => (
                   <button
                     key={t}
                     ref={(el) => { tabRefs.current[t] = el; }}
@@ -554,11 +593,12 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                 ))}
               </div>
             </div>
+            )}
 
             {/* Animated content — height locked to the taller of the two tabs
                 so switching never resizes the card. */}
-            <div style={{ height: cardHeight, transition: "height 280ms cubic-bezier(0.22,1,0.36,1)", overflow: "hidden" }}>
-              <div ref={liveContentRef} style={contentStyle} className="flex flex-col gap-6">
+            <div style={{ height: cardHeight ?? maxCardHeight, transition: "height 280ms cubic-bezier(0.22,1,0.36,1)", overflow: "hidden" }}>
+              <div ref={liveContentRef} style={contentStyle} className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}>
                 {renderBody(displayedTab, displayedView)}
               </div>
             </div>
@@ -568,22 +608,69 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
           {/* Hidden sizers — off-screen copies of every tab × view combo used
               only to measure natural height. Not visible, not interactive. */}
           <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, visibility: "hidden", pointerEvents: "none", zIndex: -1 }}>
-            <div ref={signinSizerRef} className="flex flex-col gap-6">
+            {/* Sizer gap MUST match the live content's gap above, or the card
+                locks to a height the real layout never uses. */}
+            <div ref={signinSizerRef} className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}>
               {renderBody("signin", "auth")}
             </div>
-            <div ref={signupSizerRef} className="flex flex-col gap-6">
-              {renderBody("signup", "auth")}
-            </div>
-            <div ref={signinEmailSizerRef} className="flex flex-col gap-6">
+            <div ref={signinEmailSizerRef} className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}>
               {renderBody("signin", "email")}
             </div>
-            <div ref={signupEmailSizerRef} className="flex flex-col gap-6">
-              {renderBody("signup", "email")}
-            </div>
+            {SIGNUPS_ENABLED && (
+              <>
+                <div ref={signupSizerRef} className="flex flex-col gap-6">
+                  {renderBody("signup", "auth")}
+                </div>
+                <div ref={signupEmailSizerRef} className="flex flex-col gap-6">
+                  {renderBody("signup", "email")}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        <p className="w-full max-w-[420px] text-[12px] tracking-tight text-[rgb(var(--muted))] text-center mt-6" style={{ opacity: 0.5 }}>
+        {/* Sign-ups closed notice. Sits OUTSIDE the card, so the card stays
+            focused on the one action it offers and this reads as page-level
+            context. Placed above the terms line, which occupies the same
+            below-card slot. */}
+        {!SIGNUPS_ENABLED && (
+          <div
+            className="flex items-center justify-center gap-2 pl-1 pr-3.5 py-1 rounded-full text-[13px] tracking-tight mt-6"
+            style={{ background: "rgb(var(--fg) / 0.05)", color: "rgb(var(--muted))" }}
+          >
+            {/* Icon on a white circular pill, same treatment as the work
+                tooltip's logos — it gives the emoji a consistent ground so it
+                reads on both light and dark surfaces instead of sitting
+                directly on the translucent grey.
+                Left padding is tighter than right so the pill doesn't look
+                inset; block + leading-none keep the row centred on each box
+                rather than the text baseline. */}
+            <span
+              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-white"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.18)" }}
+            >
+              <Image
+                src="/emoji/locked.png"
+                alt=""
+                aria-hidden="true"
+                width={72}
+                height={72}
+                quality={75}
+                sizes="16px"
+                className="block"
+                style={{ width: 15, height: 15 }}
+              />
+            </span>
+            <span className="leading-none">
+              New sign ups are <span style={{ color: "rgb(var(--fg))" }}>currently closed</span>
+            </span>
+          </div>
+        )}
+
+        <p
+          className={`w-full max-w-[420px] text-[12px] tracking-tight text-[rgb(var(--muted))] text-center ${SIGNUPS_ENABLED ? "mt-6" : "mt-4"}`}
+          style={{ opacity: 0.5 }}
+        >
           By continuing, you agree to our{" "}
           <Link href="/policies/terms-of-service" className="underline hover:text-[rgb(var(--fg))] transition-colors">
             Terms of service

@@ -943,17 +943,21 @@ h1:hover .redact > span.redact-inner,
    than ending in a hard edge. Colors come from the active slide's accent via
    the CSS vars set inline, and transition so a slide change re-tints it. */
 .work-beam {
+  /* Spread is variable so the mobile and desktop beams can differ without
+     forking the whole rule. --work-beam-edge is where the tint starts on each
+     side and --work-beam-ellipse is the radial core's width; lower edge % and
+     higher ellipse % both read as a wider beam. */
   background:
     linear-gradient(
       to right,
       transparent 0%,
-      var(--work-beam-color, rgba(10,132,255,0.3)) 30%,
+      var(--work-beam-color, rgba(10,132,255,0.3)) var(--work-beam-edge, 30%),
       var(--work-beam-core, rgba(10,132,255,0.5)) 50%,
-      var(--work-beam-color, rgba(10,132,255,0.3)) 70%,
+      var(--work-beam-color, rgba(10,132,255,0.3)) calc(100% - var(--work-beam-edge, 30%)),
       transparent 100%
     ),
     radial-gradient(
-      ellipse 34% 60% at center,
+      ellipse var(--work-beam-ellipse, 34%) 60% at center,
       var(--work-beam-core, rgba(10,132,255,0.5)) 0%,
       transparent 70%
     );
