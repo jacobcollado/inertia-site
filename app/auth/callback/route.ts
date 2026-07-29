@@ -4,12 +4,21 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const type = searchParams.get("type");
   const next = searchParams.get("next") ?? "/dashboard";
 
   if (code) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
+      // Password recovery links land here too (Supabase appends ?code= after
+      // verifying the emailed token) — send those to the reset-password
+      // screen instead of the dashboard, since the user hasn't set a new
+      // password yet.
+      if (type === "recovery") {
+        return NextResponse.redirect(`${origin}/reset-password`);
+      }
+
       const { data: profile } = await supabase
         .from("profiles")
         .select("role")

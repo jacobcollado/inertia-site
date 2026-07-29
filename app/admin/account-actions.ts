@@ -31,6 +31,7 @@ export async function uploadAvatar(formData: FormData) {
   if (dbError) return { error: dbError.message };
 
   revalidatePath("/admin");
+  revalidatePath("/dashboard");
   return { success: true, avatarUrl };
 }
 
@@ -43,5 +44,6 @@ export async function removeAvatar() {
   if (error) return { error: error.message };
 
   revalidatePath("/admin");
+  revalidatePath("/dashboard");
   return { success: true };
 }

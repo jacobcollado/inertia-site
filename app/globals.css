@@ -158,8 +158,50 @@
   --sh-radius: 0.625rem;
 }
 
-/* Admin dark mode: scoped to .admin-dark rather than the site-wide .dark,
-   which stays forced-light for the rest of the site. */
+/* Site-wide dark mode (the <html> element always carries .dark — the public
+   site has no light mode). Same dark --sh-* values as .admin-dark below, so
+   shadcn components (Sidebar, Card, Chart) render correctly dark anywhere on
+   the site, not just under /admin's separately-scoped class. */
+.dark {
+  --sh-background: #0a0a0a;
+  --sh-foreground: #ededed;
+  --sh-card: #141414;
+  --sh-card-foreground: #ededed;
+  --sh-popover: #141414;
+  --sh-popover-foreground: #ededed;
+  --sh-primary: #0a84ff;
+  --sh-primary-foreground: #ffffff;
+  --sh-secondary: #1f1f1f;
+  --sh-secondary-foreground: #ededed;
+  --sh-muted: #1f1f1f;
+  --sh-muted-foreground: #a1a1a1;
+  --sh-accent: #1f1f1f;
+  --sh-accent-foreground: #ededed;
+  --sh-destructive: #ef4444;
+  --sh-hover: #1f1f1f;
+  --sh-active: #2b2b2b;
+  --sh-border: #262626;
+  --sh-input: #262626;
+  --sh-ring: #0a84ff;
+  --sh-sidebar: #111111;
+  --sh-sidebar-foreground: #ededed;
+  --sh-sidebar-primary: #0a84ff;
+  --sh-sidebar-primary-foreground: #ffffff;
+  --sh-sidebar-accent: #232323;
+  --sh-sidebar-accent-foreground: #ededed;
+  --sh-sidebar-border: #262626;
+  --sh-sidebar-ring: #0a84ff;
+  --sh-chart-1: #0a84ff;
+  --sh-chart-2: #a1a1a1;
+  --sh-chart-3: #737373;
+  --sh-chart-4: #525252;
+  --sh-chart-5: #262626;
+  color-scheme: dark;
+}
+
+/* Admin dark mode: kept as its own scoped class (identical values to .dark
+   above) so /admin's isolated theme toggle continues to work independently
+   even though, today, .dark is also always present site-wide. */
 .admin-dark {
   --sh-background: #0a0a0a;
   --sh-foreground: #ededed;
@@ -439,7 +481,7 @@ html {
 }
 
 .route-enter {
-  animation: route-enter 250ms ease both;
+  animation: route-enter 100ms ease both;
   will-change: opacity;
 }
 

@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardShell } from "./dashboard-shell";
+import { OverviewView } from "./overview-view";
 
-export const revalidate = 30; // re-fetch at most every 30s
+export const revalidate = 30;
 
-export default async function DashboardPage() {
+export default async function DashboardOverviewPage() {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -12,58 +12,36 @@ export default async function DashboardPage() {
 
   const id = user.id;
 
-  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }, { data: messages }, { data: projectUpdates }, { data: licenses }] =
+  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }, { data: messages }, { data: projectUpdates }] =
     await Promise.all([
       supabase.from("clients")
         .select("id, email, name, company")
         .eq("id", id).single(),
       supabase.from("projects")
-        .select("id, title, status, phase, last_update, notes, created_at")
+        .select("id, title, status, phase, last_update, notes, start_date, target_date")
         .eq("client_id", id).order("created_at", { ascending: false }),
       supabase.from("invoices")
-        .select("id, label, amount, status, due_date")
+        .select("id, label, amount, status, due_date, paid_at, payment_url")
         .eq("client_id", id).order("created_at", { ascending: false }),
       supabase.from("files")
         .select("id, label, url, uploaded_at")
         .eq("client_id", id).order("uploaded_at", { ascending: false }),
       supabase.from("messages")
-        .select("id, client_id, sender, body, read_at, created_at")
+        .select("id, client_id, case_id, sender, body, read_at, created_at")
         .eq("client_id", id).order("created_at", { ascending: true }),
       supabase.from("project_updates")
         .select("id, project_id, status, note, created_at")
         .eq("client_id", id).order("created_at", { ascending: false }),
-      supabase.from("licenses")
-        .select("id, key, email, domain, tier, status, created_at, theme_file_path")
-        .eq("email", user.email!)
-        .order("created_at", { ascending: false }),
     ]);
 
-  // Fetch optional columns added in migration 003 separately so a missing
-  // column doesn't break the whole query before the migration is applied.
-  const [{ data: projectDates }, { data: invoicePayment }] = await Promise.all([
-    supabase.from("projects")
-      .select("id, start_date, target_date")
-      .eq("client_id", id),
-    supabase.from("invoices")
-      .select("id, payment_url")
-      .eq("client_id", id),
-  ]);
-
-  const projectDateMap = Object.fromEntries((projectDates ?? []).map(p => [p.id, { start_date: p.start_date ?? null, target_date: p.target_date ?? null }]));
-  const invoicePaymentMap = Object.fromEntries((invoicePayment ?? []).map(i => [i.id, { payment_url: i.payment_url ?? null }]));
-
-  const enrichedProjects = (projects ?? []).map(p => ({ ...p, ...( projectDateMap[p.id] ?? { start_date: null, target_date: null }) }));
-  const enrichedInvoices = (invoices ?? []).map(i => ({ ...i, ...( invoicePaymentMap[i.id] ?? { payment_url: null }) }));
-
   return (
-    <DashboardShell
+    <OverviewView
       client={client}
-      projects={enrichedProjects}
-      invoices={enrichedInvoices}
+      projects={projects ?? []}
+      invoices={invoices ?? []}
       files={files ?? []}
       messages={messages ?? []}
       projectUpdates={projectUpdates ?? []}
-      licenses={licenses ?? []}
     />
   );
 }

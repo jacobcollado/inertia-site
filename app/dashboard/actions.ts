@@ -11,12 +11,14 @@ export async function signOut() {
   redirect("/login");
 }
 
-export async function sendClientMessage(body: string) {
+export async function sendClientMessage(body: string, caseId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
-  const { error } = await supabase.from("messages").insert({ client_id: user.id, sender: "client", body });
+  const { error } = await supabase.from("messages").insert({ client_id: user.id, case_id: caseId, sender: "client", body });
   if (error) return { error: error.message };
+  revalidatePath(`/dashboard/messages/${caseId}`);
+  revalidatePath("/dashboard/messages");
   revalidatePath("/dashboard");
   return { success: true };
 }
@@ -25,16 +27,65 @@ export async function sendClientMessage(body: string) {
    ignored in favour of the session user: it arrives from the client, so
    trusting it would let anyone mark another account's messages read by passing
    a different id. */
-export async function markAdminMessagesRead() {
+export async function markAdminMessagesRead(caseId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
   await supabase.from("messages")
     .update({ read_at: new Date().toISOString() })
     .eq("client_id", user.id)
+    .eq("case_id", caseId)
     .eq("sender", "admin")
     .is("read_at", null);
   return { success: true };
+}
+
+export async function createCase(title: string, body: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  if (!title.trim()) return { error: "Title is required" };
+
+  const { data: caseNumber } = await supabase.rpc("generate_case_number");
+
+  const { data: newCase, error: caseError } = await supabase
+    .from("cases")
+    .insert({ client_id: user.id, title: title.trim(), case_number: caseNumber ?? "00000000" })
+    .select("id")
+    .single();
+  if (caseError || !newCase) return { error: caseError?.message ?? "Could not create case" };
+
+  if (body.trim()) {
+    const { error: msgError } = await supabase
+      .from("messages")
+      .insert({ client_id: user.id, case_id: newCase.id, sender: "client", body: body.trim() });
+    if (msgError) return { error: msgError.message };
+  }
+
+  revalidatePath("/dashboard/messages");
+  return { success: true, caseId: newCase.id as string };
+}
+
+/* "Create follow-up" on a closed case opens a new case rather than reopening
+   the old one: clients have no UPDATE policy on cases (status changes are
+   admin-only, set after triage), and a fresh case gives support a clean
+   thread instead of resurrecting a closed one. */
+export async function createFollowUpCase(fromCaseId: string, fromCaseTitle: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: caseNumber } = await supabase.rpc("generate_case_number");
+
+  const { data: newCase, error: caseError } = await supabase
+    .from("cases")
+    .insert({ client_id: user.id, title: `Follow-up: ${fromCaseTitle}`, case_number: caseNumber ?? "00000000" })
+    .select("id")
+    .single();
+  if (caseError || !newCase) return { error: caseError?.message ?? "Could not create case" };
+
+  revalidatePath("/dashboard/messages");
+  return { success: true, caseId: newCase.id as string };
 }
 
 export async function updateClientProfile(name: string) {
@@ -44,6 +95,7 @@ export async function updateClientProfile(name: string) {
   const { error } = await supabase.from("clients").update({ name }).eq("id", user.id);
   if (error) return { error: error.message };
   await supabase.auth.updateUser({ data: { name } });
+  revalidatePath("/dashboard/settings");
   revalidatePath("/dashboard");
   return { success: true };
 }

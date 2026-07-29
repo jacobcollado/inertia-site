@@ -339,7 +339,13 @@ export function FileManager({
                   )
                 })}
               </div>
-              <Button size="sm" onClick={() => setUploadOpen(true)}>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="border-0 text-primary hover:text-primary"
+                style={{ backgroundColor: "color-mix(in srgb, var(--sh-primary) 15%, transparent)" }}
+                onClick={() => setUploadOpen(true)}
+              >
                 <UploadCloud />
                 Upload
               </Button>
@@ -706,7 +712,7 @@ function FileManagerRow({
         <div className="min-w-0">
           <div className="truncate text-sm font-medium">{file.name}</div>
           <div className="mt-1 text-xs text-muted-foreground">
-            {isFolder ? "Folder" : file.size} · {file.modified}
+            {[isFolder ? "Folder" : file.size, file.modified].filter(Boolean).join(" · ")}
           </div>
         </div>
       </button>

@@ -1,0 +1,46 @@
+"use client";
+
+import { useMemo } from "react";
+import { FileManager, type FileManagerItem } from "@/components/file-manager";
+import { getSignedFileUrl } from "../actions";
+import { fmtDate, type DFile } from "../types";
+
+export function FilesView({ files }: { files: DFile[] }) {
+  const items: FileManagerItem[] = useMemo(
+    () =>
+      files.map((f) => ({
+        id: f.id,
+        name: f.label,
+        kind: "file",
+        path: "/",
+        modified: fmtDate(f.uploaded_at) ?? "",
+      })),
+    [files]
+  );
+
+  const fileMap = useMemo(() => new Map(files.map((f) => [f.id, f])), [files]);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Files</h1>
+        <p className="text-sm text-muted-foreground mt-1">{files.length} {files.length === 1 ? "file" : "files"} shared with you</p>
+      </div>
+
+      {files.length === 0 ? (
+        <p className="text-sm text-muted-foreground py-8">No files yet.</p>
+      ) : (
+        <FileManager
+          files={items}
+          mobileMode="list"
+          onOpen={async (file) => {
+            const f = fileMap.get(file.id);
+            if (!f) return;
+            const res = await getSignedFileUrl(f.url);
+            if (res.url) window.open(res.url, "_blank", "noreferrer");
+          }}
+        />
+      )}
+    </div>
+  );
+}

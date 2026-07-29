@@ -15,7 +15,7 @@ import { FilesTab } from "./tabs/files-tab";
 import { MessagesTab } from "./tabs/messages-tab";
 import { AccountTab } from "./tabs/account-tab";
 import { HistoryTab } from "./tabs/history-tab";
-import type { Client, Project, ProjectUpdate, Invoice, DFile, Message, AuditEntry } from "./types";
+import type { Client, Project, ProjectUpdate, Invoice, DFile, Message, AuditEntry, Case } from "./types";
 
 function ClientHeader({ client }: { client: Client }) {
   const [editing, setEditing] = useState(false);
@@ -84,12 +84,13 @@ function ClientHeader({ client }: { client: Client }) {
   );
 }
 
-export function ClientDetailShell({ client, projects, invoices, files, messages: initialMessages, adminLog, projectUpdates }: {
+export function ClientDetailShell({ client, projects, invoices, files, messages: initialMessages, cases, adminLog, projectUpdates }: {
   client: Client;
   projects: Project[];
   invoices: Invoice[];
   files: DFile[];
   messages: Message[];
+  cases: Case[];
   adminLog: AuditEntry[];
   projectUpdates: ProjectUpdate[];
 }) {
@@ -133,7 +134,7 @@ export function ClientDetailShell({ client, projects, invoices, files, messages:
           <FilesTab clientId={client.id} files={files} />
         </TabsContent>
         <TabsContent value="messages">
-          <MessagesTab clientId={client.id} messages={messages} setMessages={setMessages} />
+          <MessagesTab clientId={client.id} messages={messages} setMessages={setMessages} cases={cases} />
         </TabsContent>
         <TabsContent value="account">
           <AccountTab client={client} />

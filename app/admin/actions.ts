@@ -312,24 +312,46 @@ export async function getAdminLog(clientId: string) {
 
 /* ── Messages ─────────────────────────────────────────────────────── */
 
-export async function sendAdminMessage(clientId: string, body: string) {
+export async function sendAdminMessage(clientId: string, body: string, caseId: string | null) {
   await requireAdmin();
   const admin = createAdminClient();
   await ensureClientRow(clientId);
-  const { error } = await admin.from("messages").insert({ client_id: clientId, sender: "admin", body });
+  const { error } = await admin.from("messages").insert({ client_id: clientId, case_id: caseId, sender: "admin", body });
   if (error) return { error: error.message };
   revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
 }
 
-export async function markMessagesRead(clientId: string) {
+export async function markMessagesRead(clientId: string, caseId: string | null) {
   await requireAdmin();
   const admin = createAdminClient();
-  await admin.from("messages")
+  let query = admin.from("messages")
     .update({ read_at: new Date().toISOString() })
     .eq("client_id", clientId)
     .eq("sender", "client")
     .is("read_at", null);
+  if (caseId) query = query.eq("case_id", caseId);
+  await query;
+  return { success: true };
+}
+
+/* ── Cases ────────────────────────────────────────────────────────── */
+
+export async function updateCaseSeverity(caseId: string, clientId: string, severity: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("cases").update({ severity, updated_at: new Date().toISOString() }).eq("id", caseId);
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
+  return { success: true };
+}
+
+export async function updateCaseStatus(caseId: string, clientId: string, status: string) {
+  await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin.from("cases").update({ status, updated_at: new Date().toISOString() }).eq("id", caseId);
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
 }
 

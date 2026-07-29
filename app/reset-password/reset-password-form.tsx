@@ -1,27 +1,93 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { ThemeToggle } from "@/app/theme-toggle";
+
+type Phase = "checking" | "request" | "sent" | "verifying" | "expired" | "set-password" | "done";
+
+function Spinner() {
+  return (
+    <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 animate-spin" aria-hidden="true" fill="none">
+      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
+      <path d="M14 8a6 6 0 0 0-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ErrorMessage({ msg }: { msg: string }) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-2.5 rounded-full text-[13px] tracking-tight" style={{ background: "rgb(239 68 68 / 0.08)", color: "rgb(220 38 38)" }}>
+      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="8" cy="8" r="6.5" />
+        <line x1="8" y1="5" x2="8" y2="8.5" />
+        <circle cx="8" cy="11" r="0.5" fill="currentColor" stroke="none" />
+      </svg>
+      {msg}
+    </div>
+  );
+}
+
+const EyeIcon = ({ crossed }: { crossed: boolean }) => (
+  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]" aria-hidden="true">
+    <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" />
+    <circle cx="10" cy="10" r="2.5" />
+    {crossed && <line x1="3" y1="3" x2="17" y2="17" />}
+  </svg>
+);
 
 export function ResetPasswordForm() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [phase, setPhase] = useState<Phase>("checking");
+  const phaseRef = useRef<Phase>("checking");
+
+  const setPhaseTracked = (p: Phase) => { phaseRef.current = p; setPhase(p); };
 
   useEffect(() => {
     const supabase = createClient();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") setReady(true);
+    const hasRecoveryParams = typeof window !== "undefined" && /type=recovery|code=/.test(window.location.search + window.location.hash);
+
+    // The recovery session is established server-side by /auth/callback
+    // before this page loads (PKCE flow), so the PASSWORD_RECOVERY event
+    // from onAuthStateChange never fires client-side. Check for the
+    // resulting session directly instead.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) { setPhaseTracked("set-password"); return; }
+      if (!hasRecoveryParams) { setPhaseTracked("request"); return; }
+      setPhaseTracked("verifying");
     });
-    return () => subscription.unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setPhaseTracked("set-password");
+    });
+    const timeout = setTimeout(() => {
+      if (phaseRef.current === "verifying") setPhaseTracked("expired");
+    }, 5000);
+    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
+
+  const onRequestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    setError("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+    });
+    setLoading(false);
+    // Always show success, even on error, so this can't be used to enumerate
+    // which emails have accounts.
+    if (error) console.error(error);
+    setPhaseTracked("sent");
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,109 +99,172 @@ export function ResetPasswordForm() {
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (error) { setError(error.message); return; }
-    setDone(true);
+    setPhaseTracked("done");
     setTimeout(() => router.push("/dashboard"), 2000);
   };
 
-  const inputClass =
-    "w-full bg-transparent border-b border-[rgb(var(--line))] py-4 text-[16px] tracking-tight text-[rgb(var(--fg))] placeholder:text-[rgb(var(--muted))] placeholder:opacity-35 focus:outline-none focus:border-[rgb(var(--fg))] transition-colors duration-200";
+  const inputClass = "w-full px-4 py-3 text-[14px] tracking-tight rounded-xl outline-none transition-colors bg-[rgb(var(--fg)/0.035)] placeholder:text-[rgb(var(--muted))] placeholder:opacity-70";
+  const inputStyle: React.CSSProperties = { border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" };
+  const onInputFocus = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)");
+  const onInputBlur = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)");
 
-  const EyeIcon = ({ crossed }: { crossed: boolean }) => (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]" aria-hidden="true">
-      <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" />
-      <circle cx="10" cy="10" r="2.5" />
-      {crossed && <line x1="3" y1="3" x2="17" y2="17" />}
-    </svg>
-  );
+  const submitButtonClass = "flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed";
+  const submitButtonStyle: React.CSSProperties = { background: "rgb(var(--fg))", color: "rgb(var(--bg))" };
 
   return (
-    <div className="w-full min-h-screen flex flex-col">
-      <div className="flex items-center justify-between px-6 sm:px-12 h-14 border-b border-[rgb(var(--line))] shrink-0">
-        <Link href="/" className="opacity-80 hover:opacity-100 transition-opacity">
-          <img src="/logo.png" alt="Inertia" className="h-4 w-auto dark:invert invert-0" />
-        </Link>
+    <div className="w-full min-h-screen">
+      <div className="fixed top-0 inset-x-0 z-10 px-6" style={{ height: 72 }}>
+        <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "88rem" }}>
+          <Link href="/">
+            <img src="/logo.png" alt="Inertia" className="h-6 w-auto" style={{ display: "block" }} />
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-[380px]" style={{ animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both" }}>
-          {done ? (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
+        <div
+          className="w-full max-w-[420px] rounded-2xl border border-[rgb(var(--line))] p-8 sm:p-10"
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            background: "rgb(var(--surface-elevated))",
+            animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
+          }}
+        >
+          {phase === "checking" ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-70">Loading…</p>
+            </div>
+          ) : phase === "request" ? (
             <div className="flex flex-col gap-6">
-              <h1 className="text-[2.2rem] font-medium tracking-[-0.04em] leading-tight text-[rgb(var(--fg))]">
-                Password updated.
+              <div className="flex flex-col text-center">
+                <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">Inertia</p>
+                <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+                  Reset your password
+                </h1>
+              </div>
+              <form onSubmit={onRequestSubmit} className="flex flex-col gap-3">
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className={inputClass}
+                  style={inputStyle}
+                  onFocus={onInputFocus}
+                  onBlur={onInputBlur}
+                />
+                <button type="submit" disabled={loading || !email.trim()} className={submitButtonClass} style={submitButtonStyle}>
+                  {loading ? <Spinner /> : null}
+                  {loading ? "Sending…" : "Send reset link"}
+                </button>
+              </form>
+              <Link href="/login" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center">
+                Back to sign in
+              </Link>
+            </div>
+          ) : phase === "sent" ? (
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col text-center">
+                <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+                  Check your email
+                </h1>
+                <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mt-3">
+                  If an account exists for {email}, we've sent a link to reset your password.
+                </p>
+              </div>
+              <Link href="/login" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center">
+                Back to sign in
+              </Link>
+            </div>
+          ) : phase === "done" ? (
+            <div className="flex flex-col text-center gap-3">
+              <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+                Password updated
               </h1>
               <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
                 Taking you to your dashboard…
               </p>
             </div>
-          ) : !ready ? (
-            <div className="flex flex-col gap-4">
-              <p className="text-[16px] tracking-tight text-[rgb(var(--muted))]">Verifying your link…</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-10">
-              <div className="flex flex-col gap-2">
-                <h1 className="text-[2.2rem] font-medium tracking-[-0.04em] leading-tight text-[rgb(var(--fg))]">
-                  Set a new password.
+          ) : phase === "expired" ? (
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col text-center">
+                <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+                  Link expired
                 </h1>
-                <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
-                  Choose something you'll remember.
+                <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mt-3">
+                  This reset link is no longer valid. Request a new one from the login page.
                 </p>
               </div>
-              <form onSubmit={onSubmit} className="flex flex-col gap-8" noValidate>
-                <div className="flex flex-col gap-5">
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="New password"
-                      autoComplete="new-password"
-                      className={`${inputClass} pr-10`}
-                    />
-                    <button type="button" onClick={() => setShowPassword(v => !v)}
-                      className="absolute right-0 inset-y-0 flex items-center text-[rgb(var(--muted))] opacity-40 hover:opacity-80 transition-opacity"
-                      aria-label={showPassword ? "Hide password" : "Show password"}>
-                      <EyeIcon crossed={showPassword} />
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={confirm}
-                      onChange={(e) => setConfirm(e.target.value)}
-                      placeholder="Confirm password"
-                      autoComplete="new-password"
-                      className={`${inputClass} pr-10`}
-                    />
-                    <button type="button" onClick={() => setShowPassword(v => !v)}
-                      className="absolute right-0 inset-y-0 flex items-center text-[rgb(var(--muted))] opacity-40 hover:opacity-80 transition-opacity"
-                      aria-label={showPassword ? "Hide password" : "Show password"}>
-                      <EyeIcon crossed={showPassword} />
-                    </button>
-                  </div>
+              <Link href="/login" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center">
+                Back to sign in
+              </Link>
+            </div>
+          ) : phase === "verifying" ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-70">Verifying your link…</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col text-center">
+                <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">Inertia</p>
+                <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+                  Set a new password
+                </h1>
+              </div>
+              <form onSubmit={onSubmit} className="flex flex-col gap-3">
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="New password"
+                    autoComplete="new-password"
+                    className={inputClass}
+                    style={{ ...inputStyle, paddingRight: 44 }}
+                    onFocus={onInputFocus}
+                    onBlur={onInputBlur}
+                  />
+                  <button type="button" onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-[rgb(var(--muted))] opacity-50 hover:opacity-90 transition-opacity"
+                    aria-label={showPassword ? "Hide password" : "Show password"}>
+                    <EyeIcon crossed={showPassword} />
+                  </button>
                 </div>
-                {error && <p className="text-[13px] tracking-tight text-red-500 -mt-4">{error}</p>}
-                <button type="submit" disabled={loading || !password || !confirm}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[13.5px] tracking-tight font-medium bg-[var(--btn-bg)] text-[var(--btn-fg)] hover:opacity-80 transition-opacity duration-150 disabled:opacity-20 disabled:cursor-not-allowed self-start">
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    placeholder="Confirm password"
+                    autoComplete="new-password"
+                    className={inputClass}
+                    style={{ ...inputStyle, paddingRight: 44 }}
+                    onFocus={onInputFocus}
+                    onBlur={onInputBlur}
+                  />
+                  <button type="button" onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-[rgb(var(--muted))] opacity-50 hover:opacity-90 transition-opacity"
+                    aria-label={showPassword ? "Hide password" : "Show password"}>
+                    <EyeIcon crossed={showPassword} />
+                  </button>
+                </div>
+                {error && <ErrorMessage msg={error} />}
+                <button type="submit" disabled={loading || !password || !confirm} className={submitButtonClass} style={submitButtonStyle}>
+                  {loading ? <Spinner /> : null}
                   {loading ? "Saving…" : "Set password"}
-                  {!loading && (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
-                      <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                    </svg>
-                  )}
                 </button>
               </form>
             </div>
           )}
         </div>
-      </div>
-
-      <div className="shrink-0 px-6 sm:px-12 h-12 border-t border-[rgb(var(--line))] flex items-center">
-        <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] opacity-30">
-          Built for clients who care about their build.
-        </span>
       </div>
     </div>
   );
