@@ -166,7 +166,9 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const onScroll = () => {
+    let ticking = false;
+    const measure = () => {
+      ticking = false;
       const mid = window.innerHeight / 2;
       let closest = 0;
       let closestDist = Infinity;
@@ -179,8 +181,13 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
       });
       setActive(closest);
     };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(measure);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    measure();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 

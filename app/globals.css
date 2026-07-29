@@ -946,6 +946,9 @@ h1:hover .redact > span.redact-inner,
    just the bright stripe with nowhere dark left to reveal). */
 .shimmer-word {
   display: inline-block;
+  line-height: normal;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
   margin-right: -0.03em;
   padding-right: 0.05em;
   background-image: linear-gradient(

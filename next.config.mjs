@@ -58,7 +58,7 @@ const nextConfig = {
   },
   productionBrowserSourceMaps: false,
   experimental: {
-    optimizePackageImports: ["@supabase/supabase-js", "@supabase/ssr"],
+    optimizePackageImports: ["@supabase/supabase-js", "@supabase/ssr", "lucide-react", "react-icons"],
   },
 };
 export default nextConfig;

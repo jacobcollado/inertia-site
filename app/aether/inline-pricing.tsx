@@ -173,7 +173,7 @@ export function InlinePricing() {
 
       <div className="flex items-center justify-center gap-2 rounded-full px-3 py-1.5 mx-auto w-fit" style={{ background: "rgb(var(--fg) / 0.06)" }}>
         <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>Powered and secured by</span>
-        <img src="/stripe-wordmark.svg" alt="Stripe" className="h-5 w-auto" draggable={false} style={{ filter: "grayscale(1) brightness(0) invert(0.45)" }} />
+        <img src="/stripe-wordmark.svg" alt="Stripe" width={60} height={20} className="h-5 w-auto" draggable={false} style={{ filter: "grayscale(1) brightness(0) invert(0.45)" }} />
       </div>
 
       <p className="text-center text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>

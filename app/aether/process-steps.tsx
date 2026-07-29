@@ -29,6 +29,8 @@ export function ProcessSteps() {
   const [centers, setCenters] = useState<number[]>([]);
 
   useLayoutEffect(() => {
+    if (window.matchMedia("(min-width: 640px)").matches) return;
+
     const measure = () => {
       const container = containerRef.current;
       if (!container) return;
@@ -114,11 +116,12 @@ export function ProcessSteps() {
               </p>
               <div
                 style={{
-                  maxHeight: isOpen ? 220 : 0,
-                  overflow: "hidden",
-                  transition: "max-height 550ms cubic-bezier(0.22,1,0.36,1)",
+                  display: "grid",
+                  gridTemplateRows: isOpen ? "1fr" : "0fr",
+                  transition: "grid-template-rows 550ms cubic-bezier(0.22,1,0.36,1)",
                 }}
               >
+                <div style={{ overflow: "hidden", minHeight: 0 }}>
                 <p
                   className="text-[13px] leading-relaxed tracking-tight text-[rgb(var(--muted))]"
                   style={{
@@ -141,6 +144,7 @@ export function ProcessSteps() {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                   </Link>
                 )}
+                </div>
               </div>
             </button>
             </div>

@@ -72,22 +72,6 @@ const SECONDARY_FEATURES = [
   { name: "FAQs", desc: "Accordion answers wherever the doubts show up", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><path key="b" d="M6 6a2 2 0 1 1 2 2v1"/><circle key="c" cx="8" cy="12" r="0.5" fill="currentColor"/></svg> },
 ];
 
-const TIERS = [
-  { name: "Core", price: "$85",       term: "1 year / single store",   badge: "",           color: "#6b8cff" },
-  { name: "Forever", price: "$105",      term: "One-time / single store",  badge: "Best value", color: "#50b8a0" },
-  { name: "Studio", price: "From $59", term: "Per store or unlimited",  badge: "",           color: "#c084fc" },
-];
-
-const PRICING_ROWS: { label: string; standard: boolean | string; lifetime: boolean | string; enterprise: boolean | string }[] = [
-  { label: "Full Aether theme",          standard: true,        lifetime: true,       enterprise: true          },
-  { label: "All 41 sections",            standard: true,        lifetime: true,       enterprise: true          },
-  { label: "Updates",                    standard: "1 year",    lifetime: "Forever",  enterprise: "Forever"     },
-  { label: "Store license",              standard: "Single",    lifetime: "Single",   enterprise: "Multi-store" },
-  { label: "Support via client portal",  standard: true,        lifetime: true,       enterprise: true          },
-  { label: "Priority support",           standard: false,       lifetime: true,       enterprise: true          },
-  { label: "Commercial deployment",      standard: false,       lifetime: false,      enterprise: true          },
-];
-
 const DEMO_URL = "https://aether-starter.myshopify.com";
 
 
