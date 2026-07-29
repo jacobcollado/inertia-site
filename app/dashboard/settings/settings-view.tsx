@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useWebHaptics } from "web-haptics/react";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ function SettingsSection({ label, children }: { label: string; children: React.R
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs font-medium text-muted-foreground px-1">{label}</p>
-      <Card className="py-0 divide-y overflow-hidden">{children}</Card>
+      <div className="rounded-sm border bg-sidebar overflow-hidden">{children}</div>
     </div>
   );
 }
@@ -57,10 +56,8 @@ export function SettingsView({ client, avatarUrl: initialAvatarUrl }: { client: 
   const displayName = client?.company ?? client?.name ?? "Client";
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-
-      <Card className="flex-row items-center gap-4 p-5">
+    <div className="flex flex-col gap-6 w-full lg:max-w-[58%] mx-auto">
+      <div className="flex items-center gap-4 rounded-sm border bg-sidebar p-5">
         <button type="button" onClick={() => setAccountOpen(true)} className="shrink-0">
           <Avatar className="h-12 w-12">
             {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
@@ -74,7 +71,7 @@ export function SettingsView({ client, avatarUrl: initialAvatarUrl }: { client: 
         <Button variant="outline" size="sm" onClick={() => setAccountOpen(true)} className="shrink-0">
           Change photo
         </Button>
-      </Card>
+      </div>
 
       <AccountDialog
         open={accountOpen}
@@ -98,11 +95,19 @@ export function SettingsView({ client, avatarUrl: initialAvatarUrl }: { client: 
           </div>
           <div className="px-5 py-4 border-b">
             <Label className="text-xs text-muted-foreground mb-2">Email</Label>
-            <p className="text-[15px] opacity-60">{client?.email}</p>
-            <p className="text-xs text-muted-foreground mt-1">To change your email, message us.</p>
+            <div className="rounded-md border bg-muted/40 px-3 py-2">
+              <p className="text-[15px] text-muted-foreground">{client?.email}</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">To change your email, message us.</p>
           </div>
           <div className="px-5 py-4 flex items-center gap-3">
-            <Button type="submit" disabled={pending || !name.trim() || name.trim() === (client?.name ?? "")}>
+            <Button
+              type="submit"
+              variant="ghost"
+              className="text-foreground hover:text-foreground"
+              style={{ backgroundColor: "color-mix(in srgb, var(--sh-foreground) 10%, transparent)" }}
+              disabled={pending || !name.trim() || name.trim() === (client?.name ?? "")}
+            >
               {pending ? "Saving…" : "Save changes"}
             </Button>
             {saved && <span className="text-sm text-emerald-600 dark:text-emerald-400">Saved.</span>}

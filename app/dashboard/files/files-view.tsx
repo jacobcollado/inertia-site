@@ -21,12 +21,7 @@ export function FilesView({ files }: { files: DFile[] }) {
   const fileMap = useMemo(() => new Map(files.map((f) => [f.id, f])), [files]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Files</h1>
-        <p className="text-sm text-muted-foreground mt-1">{files.length} {files.length === 1 ? "file" : "files"} shared with you</p>
-      </div>
-
+    <div className="flex flex-col gap-6 w-full lg:max-w-[58%] mx-auto">
       {files.length === 0 ? (
         <p className="text-sm text-muted-foreground py-8">No files yet.</p>
       ) : (

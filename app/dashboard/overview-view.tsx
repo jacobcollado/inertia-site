@@ -85,7 +85,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
     "activity";
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pb-12 sm:pb-0">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{greeting}</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -95,7 +95,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/dashboard/projects">
-          <Card className="gap-4 hover:bg-sidebar-accent/40 transition-colors">
+          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
             <CardHeader>
               <CardDescription>Projects</CardDescription>
               <CardTitle className="text-2xl font-semibold tabular-nums">{projects.length}</CardTitle>
@@ -109,7 +109,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
         </Link>
 
         <Link href="/dashboard/invoices">
-          <Card className="gap-4 hover:bg-sidebar-accent/40 transition-colors">
+          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
             <CardHeader>
               <CardDescription>Outstanding</CardDescription>
               <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -125,7 +125,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
         </Link>
 
         <Link href="/dashboard/files">
-          <Card className="gap-4 hover:bg-sidebar-accent/40 transition-colors">
+          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
             <CardHeader>
               <CardDescription>Files</CardDescription>
               <CardTitle className="text-2xl font-semibold tabular-nums">{files.length}</CardTitle>
@@ -139,7 +139,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
         </Link>
 
         <Link href="/dashboard/messages">
-          <Card className="gap-4 hover:bg-sidebar-accent/40 transition-colors">
+          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
             <CardHeader>
               <CardDescription>Messages</CardDescription>
               <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -156,29 +156,31 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
       </div>
 
       {(activeProjects.length > 0 || unpaidInvoices.length > 0 || latestAdminMsg || activity.length > 0) && (
-        <Tabs defaultValue={defaultOverviewTab}>
-          <TabsList className="bg-sidebar rounded-full">
-            {activeProjects.length > 0 && (
-              <TabsTrigger value="projects" className="rounded-full data-[active]:rounded-full data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
-                {activeProjects.length === 1 ? "Active project" : "Active projects"}
-              </TabsTrigger>
-            )}
-            {unpaidInvoices.length > 0 && (
-              <TabsTrigger value="invoices" className="rounded-full data-[active]:rounded-full data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
-                {unpaidInvoices.length === 1 ? "Pending invoice" : "Pending invoices"}
-              </TabsTrigger>
-            )}
-            {latestAdminMsg && (
-              <TabsTrigger value="message" className="rounded-full data-[active]:rounded-full data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
-                Latest message
-              </TabsTrigger>
-            )}
-            {activity.length > 0 && (
-              <TabsTrigger value="activity" className="rounded-full data-[active]:rounded-full data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
-                Recent activity
-              </TabsTrigger>
-            )}
-          </TabsList>
+        <Tabs defaultValue={defaultOverviewTab} className="gap-1">
+          <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
+            <TabsList className="bg-sidebar rounded-lg border w-max sm:w-fit">
+              {activeProjects.length > 0 && (
+                <TabsTrigger value="projects" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                  {activeProjects.length === 1 ? "Active project" : "Active projects"}
+                </TabsTrigger>
+              )}
+              {unpaidInvoices.length > 0 && (
+                <TabsTrigger value="invoices" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                  {unpaidInvoices.length === 1 ? "Pending invoice" : "Pending invoices"}
+                </TabsTrigger>
+              )}
+              {latestAdminMsg && (
+                <TabsTrigger value="message" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                  Latest message
+                </TabsTrigger>
+              )}
+              {activity.length > 0 && (
+                <TabsTrigger value="activity" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                  Recent activity
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
 
           {activeProjects.length > 0 && (
             <TabsContent value="projects">
@@ -188,7 +190,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
                     <Link href="/dashboard/projects" className="text-sm text-muted-foreground hover:text-foreground transition-colors">See all →</Link>
                   )}
                 </div>
-                <Card className="overflow-hidden py-0">
+                <Card className="overflow-hidden py-0 rounded-sm border">
                   {activeProjects.map((p, i) => {
                     const updates = projectUpdates.filter(u => u.project_id === p.id);
                     const latestUpdate = updates[0] ?? null;
@@ -220,7 +222,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
                 <div className="flex items-center justify-end px-1">
                   <Link href="/dashboard/invoices" className="text-sm text-muted-foreground hover:text-foreground transition-colors">See all →</Link>
                 </div>
-                <Card className="overflow-hidden py-0">
+                <Card className="overflow-hidden py-0 rounded-sm border">
                   {unpaidInvoices.slice(0, 3).map((inv, i) => (
                     <div
                       key={inv.id}
@@ -259,7 +261,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
                   <Link href="/dashboard/messages" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Open thread →</Link>
                 </div>
                 <Link href="/dashboard/messages">
-                  <Card className="overflow-hidden py-0 hover:bg-sidebar-accent/40 transition-colors">
+                  <Card className="overflow-hidden py-0 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
                     <div className="px-5 py-4">
                       <p className="text-[15px] leading-relaxed line-clamp-2">{latestAdminMsg.body}</p>
                     </div>
@@ -278,7 +280,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
           {activity.length > 0 && (
             <TabsContent value="activity">
               <div className="flex flex-col gap-3">
-                <Card className="overflow-hidden py-0">
+                <Card className="overflow-hidden py-0 rounded-sm border">
                   {activity.map((a, i) => (
                     <Link
                       key={i}
@@ -304,7 +306,7 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
       )}
 
       {empty && (
-        <Card className="gap-3 px-6 py-6">
+        <Card className="gap-3 px-6 py-6 rounded-sm">
           <p className="text-[16px] font-medium tracking-tight">Your project is being set up.</p>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
             We're getting everything ready. You'll see your project details, files, and invoices here once we kick things off.
