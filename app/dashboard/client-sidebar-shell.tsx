@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -149,6 +150,18 @@ function SiteHeader() {
 }
 
 export function ClientSidebarShell({ children, unreadMessages = 0 }: { children: React.ReactNode; unreadMessages?: number }) {
+  // iOS Safari tints its top/bottom toolbars (and the overscroll rubber-band)
+  // from <html>'s background, not <meta theme-color>. The dashboard is
+  // uniformly dark, so pin <html>'s background to the dashboard's dark token
+  // — see .dashboard-dark in globals.css. Removed on unmount so leaving
+  // /dashboard doesn't leave the dark background on other routes.
+  useEffect(() => {
+    document.documentElement.classList.add("dashboard-dark");
+    return () => {
+      document.documentElement.classList.remove("dashboard-dark");
+    };
+  }, []);
+
   return (
     <SidebarProvider
       className="bg-sidebar text-foreground min-h-svh"

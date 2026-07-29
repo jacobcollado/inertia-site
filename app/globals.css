@@ -241,6 +241,16 @@
 
 .admin-dark { background: var(--sh-background); }
 
+/* Client dashboard toolbar color (iOS Safari). Same gap as .admin-dark above:
+   <html> always carries .dark, which sets --sh-background correctly, but
+   .dark itself can't set a literal `background` because it's also applied
+   site-wide (the homepage needs its own scroll-driven light-to-dark
+   gradient, not a flat dark fill). The dashboard is uniformly dark
+   top-to-bottom, so it just needs <html>'s background pinned to
+   --sh-background — Safari samples that for the top/bottom toolbars and
+   overscroll rubber-band instead of falling back to white. */
+.dashboard-dark { background: var(--sh-background); }
+
 /* Dark scope for the homepage questionnaire (ask-user-questions). The component
    uses shadcn tokens (bg-card, text-foreground, border-border, bg-accent...)
    which map to --sh-* — light by default. The quiz sits in the homepage's dark

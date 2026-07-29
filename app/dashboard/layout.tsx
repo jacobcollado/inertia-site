@@ -2,6 +2,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ClientSidebarShell } from "./client-sidebar-shell";
 
+// Applied synchronously before first paint so there's no white flash before
+// ClientSidebarShell's effect runs — see .dashboard-dark in globals.css.
+const SET_DASHBOARD_DARK_SCRIPT = `
+(function () {
+  try { document.documentElement.classList.add("dashboard-dark"); } catch (e) {}
+})();
+`;
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -14,5 +22,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
     .eq("sender", "admin")
     .is("read_at", null);
 
-  return <ClientSidebarShell unreadMessages={count ?? 0}>{children}</ClientSidebarShell>;
+  return (
+    <>
+      <script dangerouslySetInnerHTML={{ __html: SET_DASHBOARD_DARK_SCRIPT }} />
+      <ClientSidebarShell unreadMessages={count ?? 0}>{children}</ClientSidebarShell>
+    </>
+  );
 }
