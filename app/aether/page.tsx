@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { DemoButton } from "./demo-button";
 import { HeroRule } from "./hero-rule";
@@ -72,9 +73,9 @@ const SECONDARY_FEATURES = [
 ];
 
 const TIERS = [
-  { name: "Standard", price: "$85",       term: "1 year / single store",   badge: "",           color: "#6b8cff" },
-  { name: "Lifetime", price: "$105",      term: "One-time / single store",  badge: "Best value", color: "#50b8a0" },
-  { name: "Enterprise", price: "From $59", term: "Per store or unlimited",  badge: "",           color: "#c084fc" },
+  { name: "Core", price: "$85",       term: "1 year / single store",   badge: "",           color: "#6b8cff" },
+  { name: "Forever", price: "$105",      term: "One-time / single store",  badge: "Best value", color: "#50b8a0" },
+  { name: "Studio", price: "From $59", term: "Per store or unlimited",  badge: "",           color: "#c084fc" },
 ];
 
 const PRICING_ROWS: { label: string; standard: boolean | string; lifetime: boolean | string; enterprise: boolean | string }[] = [
@@ -97,11 +98,18 @@ export default function AetherPage() {
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center rise pt-12 sm:pt-20" style={{ minHeight: 480, paddingBottom: 40 }}>
-        <p className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] tracking-tight text-[rgb(var(--fg))] -mt-4" style={{ background: "rgb(var(--fg) / 0.06)" }}>
-          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] tracking-tight leading-none text-[rgb(var(--bg))]" style={{ background: "rgb(var(--fg) / 0.5)" }}>Aether</span>
-          Aether, a Shopify theme by Inertia
+        <p className="inline-flex items-center rounded-full px-3 py-1.5 -mt-4" style={{ background: "rgb(var(--fg) / 0.5)" }}>
+          <Image
+            src="/work-logos/aether.png"
+            alt="Aether"
+            width={220}
+            height={55}
+            className="h-[15px] w-auto"
+            style={{ filter: "brightness(0) invert(1)" }}
+            priority
+          />
         </p>
-        <h1 className="text-[clamp(2.2rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
+        <h1 className="text-[clamp(2.6rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
           Design is the product
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
@@ -157,18 +165,17 @@ export default function AetherPage() {
 
       <div className="grid-rule" aria-hidden="true" />
 
-      {/* Pricing */}
-      <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16 max-w-2xl mx-auto w-full">
-        <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-4 text-center">One price, the whole theme</p>
-        <p className="text-[clamp(1rem,1.6vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 text-center max-w-sm mx-auto" style={{ opacity: 0.6 }}>There is no cut-down version of Aether. Standard and Lifetime ship the same theme, every section included, nothing sold separately.</p>
-
-        <InlinePricing />
-      </div>
+      {/* FAQ */}
+      <AetherFaq />
 
       <div className="grid-rule" aria-hidden="true" />
 
-      {/* FAQ */}
-      <AetherFaq />
+      {/* Pricing */}
+      <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16 max-w-2xl mx-auto w-full">
+        <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-10 text-center">One <span className="shimmer-word shimmer-word--warm">price,</span><br />the whole theme</p>
+
+        <InlinePricing />
+      </div>
 
     </main>
   );

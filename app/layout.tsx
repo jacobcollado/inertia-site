@@ -9,6 +9,7 @@ import { ViewModeProvider } from "./view-mode-context";
 import { SiteShell } from "./site-shell";
 import { CookieBanner } from "./cookie-banner";
 import { ScrollReveal } from "./scroll-reveal";
+import { ClickSound } from "./click-sound";
 import { cn } from "@/lib/utils";
 import { PostHogProvider } from "./posthog-provider";
 
@@ -136,6 +137,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans antialiased">
+        <ClickSound />
         <PostHogProvider>
         <ThemeProvider>
           <ViewModeProvider>

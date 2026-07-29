@@ -1935,45 +1935,12 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
 // Inline-block with a tight negative vertical margin: the padding would
 // otherwise push the pill's line taller than its neighbours and make the
 // paragraph's leading uneven.
-// Apple emoji artwork, extracted from the source SVGs (which were really
-// 72x72 PNGs in an <image> wrapper) into public/emoji. Served as images
-// rather than as native emoji characters so every visitor sees the SAME
-// glyphs — a native "🍃" renders as Apple's on macOS, Segoe's on Windows and
-// Noto's on Android, and Apple's font can't be embedded to fix that.
-//
-// Keys are the short names used in copy: [[leaf|effortless]].
-const PILL_EMOJI: Record<string, string> = {
-  palette: "/emoji/palette.png",
-  laptop: "/emoji/laptop.png",
-  magnifier: "/emoji/magnifier.png",
-  leaf: "/emoji/leaf.png",
-  "hammer-wrench": "/emoji/hammer-wrench.png",
-  bolt: "/emoji/bolt.png",
-};
-
-function Pill({ emoji, children }: { emoji?: string; children: React.ReactNode }) {
-  const src = emoji ? PILL_EMOJI[emoji] : undefined;
+function Pill({ children }: { children: React.ReactNode }) {
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2 py-[1px] -my-[1px] whitespace-nowrap align-middle"
       style={{ background: "rgba(26,26,26,0.06)", color: "#1a1a1a" }}
     >
-      {src && (
-        // Decorative: the pill's own text already carries the meaning, so an
-        // alt would just be announced twice. Source art is 72x72, drawn at
-        // 18px, so it stays crisp even on 3x displays.
-        <Image
-          src={src}
-          alt=""
-          aria-hidden="true"
-          width={72}
-          height={72}
-          quality={75}
-          sizes="18px"
-          className="inline-block shrink-0"
-          style={{ width: 18, height: 18 }}
-        />
-      )}
       {children}
     </span>
   );
@@ -1981,28 +1948,21 @@ function Pill({ emoji, children }: { emoji?: string; children: React.ReactNode }
 
 // Splits copy on [[double brackets]] and wraps those spans in a Pill, so the
 // source text stays readable as a sentence instead of being broken up into
-// JSX fragments. An optional leading "name|" inside the brackets attaches an
-// icon from PILL_EMOJI: [[leaf|effortless]].
+// JSX fragments.
 function withPills(text: string) {
   return text.split(/\[\[(.+?)\]\]/g).map((part, i) => {
     // Even indices are plain copy between the markers.
     if (i % 2 === 0) return <span key={i}>{part}</span>;
-    const split = part.indexOf("|");
-    if (split === -1) return <Pill key={i}>{part}</Pill>;
-    return (
-      <Pill key={i} emoji={part.slice(0, split)}>
-        {part.slice(split + 1)}
-      </Pill>
-    );
+    return <Pill key={i}>{part}</Pill>;
   });
 }
 
 function DesignPhilosophy() {
   const intro =
-    "The brands we work with already have something worth buying. Often [[the product sells itself]], and sometimes it needs help doing that. Either way, the experience someone moves through on the way to it is the part we own, whether we're taking [[palette|design to code]] or [[laptop|code to design]].";
+    "The brands we work with already have something worth buying. Often [[the product sells itself]], and sometimes it needs help doing that. Either way, the experience someone moves through on the way to it is the part we own, whether we're taking [[design to code]] or [[code to design]].";
   const points = [
-    "[[magnifier|Every detail matters]], whether the visitor consciously notices it or not. Most of them never will. They'll just feel that it worked.",
-    "The best design disappears. It should feel [[leaf|effortless]] to the person using it, even when the work behind it wasn't.",
+    "[[Every detail matters]], whether the visitor consciously notices it or not. Most of them never will. They'll just feel that it worked.",
+    "The best design disappears. It should feel [[effortless]] to the person using it, even when the work behind it wasn't.",
   ];
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
@@ -2036,7 +1996,7 @@ function easeInOutCubic(t: number) {
 
 function AiApproach() {
   const first =
-    "We treat AI as [[hammer-wrench|a frontier tool, not a shortcut]]. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed [[bolt|how fast we can work]], not what we're willing to ship.";
+    "We treat AI as [[a frontier tool, not a shortcut]]. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed [[how fast we can work]], not what we're willing to ship.";
   const second =
     "We've been fortunate to work alongside people building genuinely great things, and every project has added to how we think about the work. Along the way we've built a deep understanding of [[the fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and the details that make a product actually resonate with the people using it.";
   return (

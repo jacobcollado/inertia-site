@@ -4,7 +4,7 @@ import { BuyForm } from "./buy-form";
 
 export const metadata: Metadata = {
   title: "Get Aether",
-  description: "Pick a license for Aether. Standard from $85/yr or Lifetime for $105. One purchase, one store, live in under an hour.",
+  description: "Pick a license for Aether. Core from $85/yr or Forever for $105. One purchase, one store, live in under an hour.",
 };
 
 type Search = { tier?: string };

@@ -1205,7 +1205,7 @@ function LicensesTab({ licenses }: { licenses: License[] }) {
         <div className="flex flex-col gap-3">
           {licenses.map((l) => {
             const s = LICENSE_STATUS[l.status] ?? LICENSE_STATUS.active;
-            const tierLabel = l.tier === "lifetime" ? "Lifetime" : "Standard";
+            const tierLabel = l.tier === "lifetime" ? "Forever" : "Core";
             return (
               <div key={l.id} className="rounded-2xl overflow-hidden" style={{ border: "1px solid rgb(var(--line))", background: "rgb(var(--line) / 0.2)" }}>
                 <div className="flex items-start justify-between gap-4 px-5 pt-5 pb-4 flex-wrap">

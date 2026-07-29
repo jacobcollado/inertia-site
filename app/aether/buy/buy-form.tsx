@@ -9,7 +9,7 @@ type Status = "idle" | "submitting" | "sent" | "error";
 const TIERS = [
   {
     id: "standard",
-    label: "Standard",
+    label: "Core",
     price: "$85",
     term: "per year, single store",
     tagline: "Everything you need to launch. Renews when you're ready.",
@@ -23,7 +23,7 @@ const TIERS = [
   },
   {
     id: "lifetime",
-    label: "Lifetime",
+    label: "Forever",
     price: "$105",
     term: "one-time, single store",
     tagline: "Pay once, own it forever. Every update we ever ship, included.",

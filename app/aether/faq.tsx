@@ -12,8 +12,8 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
     a: "No. Every section is built for the Shopify theme editor, so you can build and rearrange pages without touching a line of code. If you do want to customize further, the theme is clean and well organized for developers too.",
   },
   {
-    q: "What's the difference between Standard and Lifetime?",
-    a: "Standard is $85 for a single store with a year of updates. Lifetime is $105 for a single store with updates forever and priority support.",
+    q: "What's the difference between Core and Forever?",
+    a: "Core is $85 for a single store with a year of updates. Forever is $105 for a single store with updates forever and priority support.",
   },
   {
     q: "How long does setup take?",
@@ -25,11 +25,11 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "What happens after my year of updates ends?",
-    a: "On the Standard license, the theme keeps working exactly as installed. You just won't receive new sections or updates until you renew. The Lifetime license includes updates for as long as you use it.",
+    a: "On the Core license, the theme keeps working exactly as installed. You just won't receive new sections or updates until you renew. The Forever license includes updates for as long as you use it.",
   },
   {
     q: "Do you offer support?",
-    a: <>Yes, through the client portal for every tier, with priority support on Lifetime. You can also reach us directly at <a href="mailto:hello@byinertia.com" style={{ color: "#0a84ff", textDecoration: "none" }}>hello@byinertia.com</a>.</>,
+    a: <>Yes, through the client portal for every tier, with priority support on Forever. You can also reach us directly at <a href="mailto:hello@byinertia.com" style={{ color: "#0a84ff", textDecoration: "none" }}>hello@byinertia.com</a>.</>,
   },
 ];
 
@@ -80,7 +80,7 @@ export function AetherFaq() {
   return (
     <section className="px-3 py-16 sm:py-24">
       <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center">
-        Questions, answered
+        FAQ
       </p>
       <div className="max-w-2xl mx-auto">
         {FAQ_ITEMS.map((item, i) => (

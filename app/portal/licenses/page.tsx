@@ -60,7 +60,7 @@ function CopyButton({ value }: { value: string }) {
 }
 
 function LicenseCard({ license }: { license: License }) {
-  const tierLabel = license.tier === "lifetime" ? "Lifetime" : "Standard";
+  const tierLabel = license.tier === "lifetime" ? "Forever" : "Core";
 
   return (
     <div

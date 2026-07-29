@@ -586,10 +586,10 @@ const AETHER_DOCS: DocSection[] = [
             "Paste your key and save.",
             "The store reloads and the lock overlay disappears. Your store domain is assigned to the key automatically on first activation.",
           ]},
-          { type: "h3", text: "Standard vs Lifetime" },
+          { type: "h3", text: "Core vs Forever" },
           { type: "ul", items: [
-            "Standard: 1 year of updates, single store. The theme keeps working after the year ends — you just won't receive new releases.",
-            "Lifetime: updates for life on a single store, no renewals ever.",
+            "Core: 1 year of updates, single store. The theme keeps working after the year ends — you just won't receive new releases.",
+            "Forever: updates for life on a single store, no renewals ever.",
             "Custom: a bespoke version built around your brand. Includes direct access throughout.",
           ]},
           { type: "note", accent: AETHER_ACCENT, text: "Need to move the license to a different store? Reply to your purchase email and we'll handle it." },

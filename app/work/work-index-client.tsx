@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useLayoutEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta, SizedImage } from "@/lib/work";
 
@@ -316,12 +316,32 @@ function WorkCard({
   work,
   onOpen,
   wide,
+  cardRef,
+  carousel,
+  onPointerEnter,
+  onPointerLeave,
+  suppressThumbTransition,
+  cardWidthCss,
 }: {
   work: WorkMetaWithGallery;
   onOpen: () => void;
   // Spans both grid columns on desktop and uses a landscape aspect, so a
   // wide/landscape thumbnail (e.g. FT.GIOO) isn't cropped down into a square.
   wide?: boolean;
+  // Carousel mode (desktop only): the parent measures and drives each card's
+  // scale/lift, so it needs a handle on the thumbnail element and the card
+  // drops its grid-column span in favor of a fixed track width.
+  cardRef?: (el: HTMLDivElement | null) => void;
+  carousel?: boolean;
+  onPointerEnter?: () => void;
+  onPointerLeave?: () => void;
+  // While a drag is live the parent writes transform/box-shadow to the thumb
+  // every frame; a CSS transition would chase each of those targets and never
+  // catch up, so it's disabled for the duration of the gesture.
+  suppressThumbTransition?: boolean;
+  // Resolved CSS width for carousel mode, computed by the parent from the
+  // measured header height so the card never exceeds the space below it.
+  cardWidthCss?: string;
 }) {
   const thumb = work.card ?? work.gallery[0]?.src;
   // Per-project crop nudge. Thumbnails default to object-top; these sit lower
@@ -333,20 +353,40 @@ function WorkCard({
     <button
       type="button"
       onClick={onOpen}
-      className={`group flex flex-col gap-3 text-left${wide ? " sm:col-span-2" : ""}`}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+      className={`group flex flex-col gap-3 text-left${wide && !carousel ? " sm:col-span-2" : ""}${carousel ? " shrink-0" : ""}`}
+      // Carousel cards are as wide as CAROUSEL_CARD_WIDTH allows, but never so
+      // tall that the card plus its label row overflows the frame. Capping the
+      // width by the available height (times the 4/3 aspect) means a short
+      // laptop viewport gets a proportionally narrower card instead of one
+      // clipped at the top and bottom.
+      style={carousel && cardWidthCss ? { width: cardWidthCss } : undefined}
       aria-label={`Open ${work.client}`}
     >
       <div
-        className="work-card-thumb relative w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]"
-        style={{ aspectRatio: wide ? "16 / 9" : "4 / 3" }}
+        ref={cardRef}
+        className={`work-card-thumb relative w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]${carousel ? " work-card-thumb--carousel" : ""}`}
+        style={{
+          aspectRatio: carousel
+            ? `${CAROUSEL_AR_W} / ${CAROUSEL_AR_H}`
+            : wide
+              ? "16 / 9"
+              : "4 / 3",
+          ...(suppressThumbTransition ? { transition: "none" } : {}),
+        }}
       >
         {thumb ? (
           <Image
             src={thumb}
             alt={work.client}
             fill
-            sizes={wide ? "(max-width: 640px) 100vw, 1024px" : "(max-width: 640px) 100vw, 512px"}
-            quality={78}
+            // Carousel cards render up to 760px CSS, so request the largest
+            // candidate available. An earlier 512px cap here meant Next served a
+            // half-size image the browser then upscaled, which is what made
+            // these read as low-resolution once the cards got bigger.
+            sizes={carousel ? "1536px" : wide ? "(max-width: 640px) 100vw, 1024px" : "(max-width: 640px) 100vw, 512px"}
+            quality={90}
             className="object-cover"
             style={{ objectPosition }}
             draggable={false}
@@ -396,6 +436,435 @@ function WorkCard({
   );
 }
 
+// Progressive resistance past a boundary. Inside [min, max] the value passes
+// through untouched (so dragging tracks the cursor exactly); beyond it, the
+// overshoot is compressed by a curve that gives less and less the further you
+// pull, which is what makes the ends feel elastic instead of walled off.
+const RUBBER_RESISTANCE = 0.55;
+function rubberBand(value: number, min: number, max: number) {
+  if (value > max) {
+    const over = value - max;
+    return max + over / (1 + over * RUBBER_RESISTANCE * 0.01);
+  }
+  if (value < min) {
+    const over = min - value;
+    return min - over / (1 + over * RUBBER_RESISTANCE * 0.01);
+  }
+  return value;
+}
+
+// Under-damped spring for the settle after a drag or flick, integrated per frame
+// as `v += dist * stiffness - v * damping` (damping acts as a force, not as a
+// blanket multiplier on velocity: multiplying the whole velocity let it build up
+// over a long travel and overshoot by ~150px, well over a tenth of a card).
+// Tuned for a slow, smooth ease into place (~780ms) with only a light ~30px
+// overshoot right at the end, a soft settle rather than a visible snap. An
+// earlier, stiffer tuning (k=0.16, c=0.44) settled in ~420ms with ~80px of
+// overshoot, which read as abrupt rather than fluid. Because position is
+// integrated rather than driven by a fixed-duration curve, a hard flick and a
+// gentle nudge settle with the same physics instead of the same clock.
+const SPRING_STIFFNESS = 0.05;
+const SPRING_DAMPING = 0.3;
+const SPRING_REST_EPSILON = 0.35;
+
+// Target card width. This is meant to be the binding constraint on a normal
+// desktop viewport, the height cap below only takes over on genuinely short
+// screens, so widening this number actually widens the card.
+const CAROUSEL_CARD_WIDTH = 940;
+const CAROUSEL_GAP = 32;
+// Everything in the frame that isn't the thumbnail itself: the label row under
+// each card, the track's vertical padding, and headroom for the shadow.
+// Subtracted in absolute pixels rather than folded into a dvh percentage,
+// because the share of the viewport this chrome occupies changes with viewport
+// height, a fixed percentage that fit a 1080px screen overflowed an 800px one.
+const CAROUSEL_CHROME_PX = 148;
+// The centered card scales up from its own center, so the height budget has to
+// be divided by this before converting to a width, or the grown card overflows.
+const CAROUSEL_FOCUS_SCALE = 1.045;
+// Card aspect, as width/height. Wider than the 4/3 the grid thumbnails use: at
+// carousel widths 4/3 made a very tall card that ate the whole viewport. Both
+// the CSS aspect-ratio and the height-budget math below read from this, so they
+// can't drift apart.
+const CAROUSEL_AR_W = 16;
+const CAROUSEL_AR_H = 10;
+// Single source of truth for a card's rendered width: the pixel cap, or the
+// width implied by the height cap at 4/3, whichever is smaller. Both the cards
+// and the centering spacers derive from this so they can never disagree (the
+// spacers have to be exactly half a card wide to center the first/last one).
+// Single source of truth for a card's rendered width: the target width, or the
+// width implied by the height that actually fits below the header, whichever is
+// smaller. `headerPx` is the measured height of everything above the carousel, // leaving it out of this budget is what made the card overflow (and get clipped)
+// on shorter windows. Cards and the centering spacers both derive from this, so
+// they can never disagree; the spacers must be exactly half a card wide for the
+// first and last card to reach center.
+function carouselCardWidthCss(headerPx: number) {
+  const budget = `calc(100dvh - ${headerPx}px - ${CAROUSEL_CHROME_PX}px)`;
+  return `min(${CAROUSEL_CARD_WIDTH}px, calc(${budget} / ${CAROUSEL_FOCUS_SCALE} * ${CAROUSEL_AR_W} / ${CAROUSEL_AR_H}))`;
+}
+
+// Desktop-only carousel for the /work index. Same interaction model as the
+// homepage client carousel: a real horizontal track positioned with a plain
+// translateX and dragged directly (no native overflow scrolling), with each
+// card's scale/lift a continuous function of its distance from the viewport
+// center rather than a binary hover flip. Writes transform/box-shadow straight
+// to each thumbnail's DOM node during a drag so frames never wait on a React
+// render, then hands off to a CSS transition once the drag settles.
+function WorkCarousel({
+  items,
+  onOpen,
+  headerPx,
+}: {
+  items: WorkMetaWithGallery[];
+  onOpen: (slug: string) => void;
+  // Height of everything above the carousel, so card sizing can subtract it.
+  headerPx: number;
+}) {
+  const cardWidthCss = carouselCardWidthCss(headerPx);
+  const spacerWidthCss = `calc(50vw - ${cardWidthCss} * 0.5)`;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const thumbRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const leadRef = useRef<HTMLDivElement>(null);
+  const translateRef = useRef(0);
+  const dragRef = useRef<{
+    startX: number;
+    startTranslate: number;
+    moved: boolean;
+    lastX: number;
+    lastTime: number;
+    velocity: number;
+  } | null>(null);
+  // Cancels an in-flight settle animation. A new grab mid-flight has to stop the
+  // old spring, or the two fight over track.style.transform every frame.
+  const settleRafRef = useRef<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const rafRef = useRef<number | null>(null);
+  // The track's leading inset, so the first card starts aligned with the page's
+  // content column instead of hard against the viewport edge. Lives inside the
+  // track (as a spacer) rather than as padding on the viewport, because the
+  // viewport has to span the full window width for the center-proximity math to
+  // measure against the real visual center. Measured from the DOM so it always
+  // matches whatever the CSS resolved.
+  const leadInsetRef = useRef(0);
+  // Cards are sized by a CSS min() of a pixel cap and an aspect-derived height
+  // cap, so their rendered width depends on the viewport and can be narrower
+  // than CAROUSEL_CARD_WIDTH. All the geometry below (proximity, snapping,
+  // spacers) has to agree with what actually got laid out, so the real width is
+  // measured rather than assumed, using the constant here would drift the
+  // focus and snap targets off-center on any short viewport.
+  const cardWidthRef = useRef(CAROUSEL_CARD_WIDTH);
+
+  const measureGeometry = useCallback(() => {
+    const spacer = leadRef.current;
+    leadInsetRef.current = spacer?.getBoundingClientRect().width ?? 0;
+    const firstCard = thumbRefs.current.find(Boolean);
+    if (firstCard) {
+      const w = firstCard.getBoundingClientRect().width;
+      // getBoundingClientRect reflects any active scale transform, so fall back
+      // to offsetWidth (layout width, transform-independent) to stay accurate
+      // while a card is scaled up.
+      cardWidthRef.current = firstCard.offsetWidth || w || CAROUSEL_CARD_WIDTH;
+    }
+  }, []);
+
+  const minTranslate = useCallback(() => {
+    const track = trackRef.current;
+    const viewport = viewportRef.current;
+    if (!track || !viewport) return 0;
+    return Math.min(0, viewport.clientWidth - track.scrollWidth);
+  }, []);
+
+  // Continuous center-proximity focus. Each card's own live distance from the
+  // viewport's center drives its scale and lift, so the outgoing card visibly
+  // shrinks while the incoming one grows, the whole way between them, instead
+  // of snapping once some threshold is crossed. Pure arithmetic off the cached
+  // slot width and the current translate, no per-card layout reads.
+  // `hovered` adds a small extra lift on top of the card's proximity focus. It
+  // is not a separate state: the centered card stays scaled whether or not a
+  // drag is in progress, so this same function drives both the live gesture and
+  // the at-rest look, and the focus never drops out from under the cursor.
+  const applyProximity = useCallback((hovered: number | null = null) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const viewportCenter = viewport.clientWidth / 2;
+    const cardWidth = cardWidthRef.current;
+    const slot = cardWidth + CAROUSEL_GAP;
+    thumbRefs.current.forEach((thumb, i) => {
+      if (!thumb) return;
+      const cardCenter = translateRef.current + leadInsetRef.current + i * slot + cardWidth / 2;
+      const dist = Math.abs(cardCenter - viewportCenter);
+      const proximity = Math.max(0, 1 - dist / slot);
+      const hoverBoost = i === hovered ? 1 : 0;
+      const scale = 1 + 0.045 * proximity + 0.015 * hoverBoost;
+      const translateY = 4 - 12 * proximity - 3 * hoverBoost;
+      const lift = Math.max(proximity, hoverBoost * 0.7);
+      thumb.style.transform = `translateY(${translateY}px) scale(${scale})`;
+      thumb.style.boxShadow = lift > 0.01
+        ? `0 ${16 * lift}px ${40 * lift}px -10px rgba(0,0,0,${0.24 * lift})`
+        : "0 0 0 rgba(0,0,0,0)";
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isDragging) applyProximity(hoveredIndex);
+  }, [hoveredIndex, isDragging, applyProximity]);
+
+  // Re-clamp on resize: a wider viewport can leave the track dragged further
+  // than its content now allows, which would otherwise strand empty space.
+  // Open on the middle card rather than the first. The lead spacer centers card
+  // 0 at translateX(0), so each further card is one slot more negative. Applied
+  // in a layout effect (before paint) so the carousel renders already positioned
+  // instead of visibly jumping from the first card on mount.
+  useLayoutEffect(() => {
+    measureGeometry();
+    const track = trackRef.current;
+    if (!track || items.length === 0) return;
+    const slot = cardWidthRef.current + CAROUSEL_GAP;
+    const middle = Math.floor((items.length - 1) / 2);
+    const next = Math.max(minTranslate(), -(middle * slot));
+    translateRef.current = next;
+    track.style.transform = `translateX(${next}px)`;
+    // Focus the opening (middle) card straight away, so the carousel comes up
+    // with a card already scaled rather than flat until first interaction.
+    applyProximity(null);
+  // Runs once per mount (and per filter-keyed remount) to set the opening
+  // position; re-running on every dep change would yank a dragged track back.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    measureGeometry();
+    const onResize = () => {
+      measureGeometry();
+      const track = trackRef.current;
+      if (!track) return;
+      const min = minTranslate();
+      if (translateRef.current < min) {
+        translateRef.current = min;
+        track.style.transform = `translateX(${min}px)`;
+      }
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [minTranslate, measureGeometry]);
+
+  // `headerPx` feeds the cards' CSS width, so when it resolves (it starts at 0
+  // and lands after the parent measures) every card's layout width changes
+  // without a resize event to trigger the listener above. Re-measure and re-center
+  // on the current card, otherwise the proximity focus and snap targets stay
+  // pinned to the stale width and sit visibly off-center.
+  useLayoutEffect(() => {
+    measureGeometry();
+    const track = trackRef.current;
+    if (!track || items.length === 0) return;
+    const slot = cardWidthRef.current + CAROUSEL_GAP;
+    const viewportWidth = viewportRef.current?.clientWidth ?? 0;
+    const nearest = Math.max(0, Math.min(items.length - 1, Math.round(
+      (viewportWidth / 2 - cardWidthRef.current / 2 - leadInsetRef.current - translateRef.current) / slot
+    )));
+    const next = Math.max(
+      minTranslate(),
+      Math.min(0, viewportWidth / 2 - cardWidthRef.current / 2 - leadInsetRef.current - nearest * slot)
+    );
+    translateRef.current = next;
+    track.style.transform = `translateX(${next}px)`;
+    applyProximity(hoveredIndex);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [headerPx, measureGeometry, minTranslate]);
+
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    if (settleRafRef.current !== null) cancelAnimationFrame(settleRafRef.current);
+  }, []);
+
+  // Only arm the gesture on pointerdown, don't flip isDragging or take pointer
+  // capture yet. A plain click is a pointerdown with no movement, and capturing
+  // an ancestor's pointer can stop the browser dispatching the resulting click
+  // to the card's <button>, which would make cards unopenable. Both wait for
+  // confirmed movement below.
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    // Grabbing mid-settle takes over from the spring rather than fighting it for
+    // control of the transform, and starts from wherever the track actually is.
+    if (settleRafRef.current !== null) {
+      cancelAnimationFrame(settleRafRef.current);
+      settleRafRef.current = null;
+    }
+    dragRef.current = {
+      startX: e.clientX,
+      startTranslate: translateRef.current,
+      moved: false,
+      lastX: e.clientX,
+      lastTime: performance.now(),
+      velocity: 0,
+    };
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    const track = trackRef.current;
+    if (!d || !track) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved) {
+      if (Math.abs(dx) <= 3) return;
+      d.moved = true;
+      viewportRef.current?.setPointerCapture(e.pointerId);
+      setIsDragging(true);
+    }
+    e.preventDefault();
+    // Track pointer velocity (px/ms) with light smoothing, so a flick can carry
+    // the track past where the finger stopped instead of dying on release.
+    const now = performance.now();
+    const dt = now - d.lastTime;
+    if (dt > 0) {
+      const instant = (e.clientX - d.lastX) / dt;
+      d.velocity = d.velocity * 0.7 + instant * 0.3;
+      d.lastX = e.clientX;
+      d.lastTime = now;
+    }
+    // 1:1 with the cursor inside the bounds, then rubber-banded past them: the
+    // further you pull beyond an edge, the less it gives, so the ends feel
+    // elastic rather than hitting a wall.
+    translateRef.current = rubberBand(d.startTranslate + dx, minTranslate(), 0);
+    track.style.transform = `translateX(${translateRef.current}px)`;
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        applyProximity();
+      });
+    }
+  };
+
+  const endDrag = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    dragRef.current = null;
+    const viewport = viewportRef.current;
+    if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+    if (!d?.moved) return;
+    // Snap the nearest card to center so the track always comes to rest with
+    // one card in focus rather than stranded between two. Animated here rather
+    // than left to a CSS transition on the track, since the drag has been
+    // writing transform inline every frame and needs to continue from exactly
+    // where it left off.
+    const viewportWidth = viewport?.clientWidth ?? 0;
+    const cardWidth = cardWidthRef.current;
+    const slot = cardWidth + CAROUSEL_GAP;
+    // Translate that would sit card `i` dead center, solved from the same
+    // cardCenter expression applyProximity uses, then rounded to the nearest
+    // whole card and clamped back into the track's real bounds.
+    const centeredTranslateFor = (i: number) =>
+      viewportWidth / 2 - cardWidth / 2 - leadInsetRef.current - i * slot;
+    const nearest = Math.round(
+      (viewportWidth / 2 - cardWidth / 2 - leadInsetRef.current - translateRef.current) / slot
+    );
+    // A flick carries past the nearest card. Release velocity is converted into
+    // a card-count bias, so a quick flick advances one or more cards while a slow
+    // release just settles on whatever is closest. Capped so a violent flick
+    // can't skip the whole track.
+    const FLICK_MIN_VELOCITY = 0.25; // px/ms below which release counts as a nudge
+    const velocity = d.velocity;
+    let biased = nearest;
+    if (Math.abs(velocity) > FLICK_MIN_VELOCITY) {
+      const extra = Math.min(2, Math.max(1, Math.round(Math.abs(velocity) * 1.4)));
+      // Dragging left (negative velocity) moves toward higher indices.
+      biased = nearest + (velocity < 0 ? extra : -extra);
+    }
+    const target = Math.max(
+      minTranslate(),
+      Math.min(0, centeredTranslateFor(Math.max(0, Math.min(items.length - 1, biased))))
+    );
+    const track = trackRef.current;
+
+    // Spring settle. Velocity carries over from the gesture (converted from
+    // px/ms to px/frame) so the release feels continuous with the drag, and the
+    // under-damped spring overshoots the target slightly before swinging back,
+    // which reads as the bounce. Runs until it is both close enough and slow
+    // enough, rather than for a fixed duration.
+    if (settleRafRef.current !== null) cancelAnimationFrame(settleRafRef.current);
+    let v = velocity * 16;
+    const step = () => {
+      const distance = target - translateRef.current;
+      v += distance * SPRING_STIFFNESS - v * SPRING_DAMPING;
+      // The overshoot is what makes this bounce, but at the very first or last
+      // card there is no track left to overshoot into, and letting it swing past
+      // would flash empty space beside the end card. Rubber-banding the position
+      // compresses the bounce against the edge instead of hiding it, so the ends
+      // still feel springy without exposing the gap.
+      translateRef.current = rubberBand(translateRef.current + v, minTranslate(), 0);
+      if (track) track.style.transform = `translateX(${translateRef.current}px)`;
+      applyProximity(hoveredIndex);
+      if (Math.abs(distance) > SPRING_REST_EPSILON || Math.abs(v) > SPRING_REST_EPSILON) {
+        settleRafRef.current = requestAnimationFrame(step);
+      } else {
+        // Land exactly on target so repeated drags can't accumulate sub-pixel drift.
+        translateRef.current = target;
+        if (track) track.style.transform = `translateX(${target}px)`;
+        settleRafRef.current = null;
+        setIsDragging(false);
+        applyProximity(hoveredIndex);
+      }
+    };
+    settleRafRef.current = requestAnimationFrame(step);
+  };
+
+  if (items.length === 0) return null;
+
+  return (
+    <div
+      ref={viewportRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      // Clipping is horizontal only. `overflow-hidden` clips both axes, which cut
+      // the top off the centered card: it scales up from its own center, so it
+      // grows past the track's box by half the scale delta at top and bottom,
+      // plus its drop shadow. `overflow-x-clip` with `overflow-y-visible` keeps
+      // cards hidden as they run off the sides while letting the focused one
+      // grow vertically. `py` still reserves layout room so the grown card has
+      // somewhere to go inside the frame.
+      className={`relative w-full overflow-x-clip overflow-y-visible py-10${isDragging ? " select-none" : ""}`}
+      style={{ cursor: isDragging ? "grabbing" : "grab" }}
+    >
+      <div
+        ref={trackRef}
+        className="flex items-start w-max"
+        style={{ gap: CAROUSEL_GAP, transform: `translateX(${translateRef.current}px)` }}
+      >
+        {/* Centers the first card in the viewport at rest (translateX 0), so
+            the carousel opens focused on one card rather than flush left. */}
+        <div
+          ref={leadRef}
+          aria-hidden="true"
+          className="shrink-0"
+          style={{ width: spacerWidthCss }}
+        />
+        {items.map((w, i) => (
+          <WorkCard
+            key={w.slug}
+            work={w}
+            carousel
+            cardRef={(el) => { thumbRefs.current[i] = el; }}
+            suppressThumbTransition={isDragging}
+            cardWidthCss={cardWidthCss}
+            onPointerEnter={() => setHoveredIndex(i)}
+            onPointerLeave={() => setHoveredIndex((prev) => (prev === i ? null : prev))}
+            onOpen={() => { if (!dragRef.current?.moved) onOpen(w.slug); }}
+          />
+        ))}
+        {/* Mirror of the lead spacer, so the last card can be dragged all the
+            way to center instead of stopping at the track's trailing edge. */}
+        <div
+          aria-hidden="true"
+          className="shrink-0"
+          style={{ width: spacerWidthCss }}
+        />
+      </div>
+    </div>
+  );
+}
+
 const BACK_TO_TOP_THRESHOLD = 900;
 
 function FloatingBackToTop() {
@@ -434,7 +903,8 @@ const ALL_FILTER = "All";
 
 // Shortened display labels for the filter pills. The filter value stays the
 // full service string (so matching against each project's service still
-// works); only the pill text is shortened.
+// works); only the pill text is shortened. Currently unreferenced, the pills
+// are temporarily removed from the render; kept for the restore.
 const FILTER_LABEL: Record<string, string> = {
   "Shopify storefront": "Storefront",
   "Shopify theme": "Theme",
@@ -445,58 +915,109 @@ const FILTER_LABEL: Record<string, string> = {
 export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWithGallery[] }) {
   const [work] = useState<WorkMetaWithGallery[]>(initialWork);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>(ALL_FILTER);
+  // Filter pills are temporarily removed from the render, so this stays fixed
+  // at "All" and its setter is unused for now (kept, along with the `filters`
+  // derivation below, so restoring the pills is a single-block change).
+  const [filter] = useState<string>(ALL_FILTER);
+  // Desktop gets the carousel, mobile keeps the vertical grid. Resolved from a
+  // measurement rather than rendering both behind responsive classes, since the
+  // carousel drives its own layout imperatively (fixed-width track, inline
+  // transforms) and mounting it on mobile would leave it measuring a hidden
+  // element. Starts null so neither variant renders until measured, rendering
+  // one and swapping would be a visible layout jump on load.
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
+  // Distance from the top of the viewport to the carousel frame, i.e. the height
+  // of everything above it (the in-flow header). Subtracted from 100dvh so the
+  // carousel fills exactly the remaining space.
+  const carouselFrameRef = useRef<HTMLDivElement>(null);
+  const [frameTop, setFrameTop] = useState(0);
+
+  useEffect(() => {
+    const measure = () => setIsDesktop(window.innerWidth >= 640);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isDesktop) return;
+    const measure = () => {
+      const el = carouselFrameRef.current;
+      if (!el) return;
+      // Offset from the document top, not the viewport, so a page that happens
+      // to be scrolled when this runs still measures the header, not whatever
+      // the scroll position makes the frame's viewport-relative top.
+      setFrameTop(el.getBoundingClientRect().top + window.scrollY);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [isDesktop]);
 
   const close = useCallback(() => setOpenSlug(null), []);
   const openWork = openSlug ? work.find((w) => w.slug === openSlug) ?? null : null;
 
   // Distinct services, in the order they first appear, with an "All" option
   // up front. Derived from the data so the pills stay in sync with content.
-  const filters = [
-    ALL_FILTER,
-    ...work.reduce<string[]>((acc, w) => {
-      const s = serviceShort(w.service);
-      if (s && !acc.includes(s)) acc.push(s);
-      return acc;
-    }, []),
-  ];
+  // Commented out (not deleted) alongside the pills themselves, an unused
+  // local would fail the build's lint.
+  // const filters = [
+  //   ALL_FILTER,
+  //   ...work.reduce<string[]>((acc, w) => {
+  //     const s = serviceShort(w.service);
+  //     if (s && !acc.includes(s)) acc.push(s);
+  //     return acc;
+  //   }, []),
+  // ];
 
   const visibleWork = filter === ALL_FILTER
     ? work
     : work.filter((w) => serviceShort(w.service) === filter);
 
   return (
-    <main className="mx-auto w-full pt-10 pb-24 px-6 sm:px-8" style={{ maxWidth: "64rem" }}>
+    <main
+      className={`mx-auto w-full px-6 sm:px-8 ${isDesktop ? "pt-0 pb-0" : "pt-10 pb-24"}`}
+      style={{ maxWidth: "64rem" }}
+    >
 
-      {/* Service filter pills */}
-      <div className="flex flex-wrap items-center gap-2 mb-8">
-        {filters.map((f) => {
-          const active = filter === f;
-          return (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFilter(f)}
-              className="text-[13px] tracking-tight rounded-full px-3.5 pt-[5px] pb-[6px] leading-none border transition-colors duration-200"
-              style={{
-                background: active ? "rgb(var(--fg))" : "rgb(var(--surface))",
-                color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
-                borderColor: active ? "rgb(var(--fg))" : "transparent",
-              }}
-              aria-pressed={active}
-            >
-              {FILTER_LABEL[f] ?? f}
-            </button>
-          );
-        })}
-      </div>
+      {/* Service filter pills temporarily removed. The filter state and the
+          derived `filters` list below are intentionally left in place so this
+          is a single-block restore. */}
 
-      {/* Thumbnail grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-10">
-        {visibleWork.map((w) => (
-          <WorkCard key={w.slug} work={w} onOpen={() => setOpenSlug(w.slug)} wide={w.slug === "ft-gioo"} />
-        ))}
-      </div>
+      {/* Desktop: horizontal carousel, breaking out of this container's max
+          width to full-bleed so cards can run off both edges. Mobile: the
+          original vertical thumbnail grid. */}
+      {isDesktop === true ? (
+        <div
+          // Fills the space left below the in-flow header and centers the track
+          // in it, so the carousel reads as full-screen and the footer sits just
+          // below the fold.
+          //
+          // `frameTop` is the frame's own distance from the document top, i.e.
+          // the height of the header above it. Subtracting it is what keeps the
+          // frame's BOTTOM at the fold: the box starts at frameTop and is
+          // (100dvh - frameTop) tall, so it ends exactly at 100dvh. An earlier
+          // version used a flat 100dvh here, which overflowed by the header's
+          // height, and because the track is vertically centered in this box,
+          // that overflow split evenly and clipped the cards' top half off the
+          // screen rather than just spilling past the bottom.
+          ref={carouselFrameRef}
+          className="w-[100vw] ml-[calc(50%-50vw)] flex items-center justify-start"
+          style={{ height: `calc(100dvh - ${frameTop}px)` }}
+          // Keys the carousel to the active filter so switching filters
+          // remounts it at translateX(0) instead of keeping a scroll offset
+          // that may now exceed the shorter track's bounds.
+          key={filter}
+        >
+          <WorkCarousel items={visibleWork} onOpen={(slug) => setOpenSlug(slug)} headerPx={frameTop} />
+        </div>
+      ) : isDesktop === false ? (
+        <div className="grid grid-cols-1 gap-x-6 gap-y-10">
+          {visibleWork.map((w) => (
+            <WorkCard key={w.slug} work={w} onOpen={() => setOpenSlug(w.slug)} wide={w.slug === "ft-gioo"} />
+          ))}
+        </div>
+      ) : null}
 
       <WorkDialog work={openWork} onClose={close} />
       <FloatingBackToTop />

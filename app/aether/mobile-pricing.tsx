@@ -19,9 +19,9 @@ type Tier = {
 };
 
 const TAGLINES: Record<string, string> = {
-  Standard: "Everything you need to launch. Renews when you're ready.",
-  Lifetime: "Pay once, own it forever. Every update we ever ship, included.",
-  Enterprise: "Multi-store or custom deployment. Built around your operation.",
+  Core: "Everything you need to launch. Renews when you're ready.",
+  Forever: "Pay once, own it forever. Every update we ever ship, included.",
+  Studio: "Multi-store or custom deployment. Built around your operation.",
 };
 
 export function MobilePricing({
@@ -112,11 +112,11 @@ export function MobilePricing({
 
         {/* CTA */}
         <Link
-          href={tier.name === "Enterprise" ? "/aether/commercial" : "/aether/buy"}
+          href={tier.name === "Studio" ? "/aether/commercial" : "/aether/buy"}
           className="flex items-center justify-center gap-1.5 rounded-full py-3 text-[14px] font-medium tracking-tight transition-opacity hover:opacity-80 text-[rgb(var(--bg))]"
           style={{ background: "var(--accent-gradient)" }}
         >
-          {tier.name === "Enterprise" ? "Contact us" : `Get ${tier.name}`}
+          {tier.name === "Studio" ? "Contact us" : `Get ${tier.name}`}
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9 4 13 8 9 12"/></svg>
         </Link>
       </div>

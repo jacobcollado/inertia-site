@@ -6,7 +6,7 @@ import Link from "next/link";
 const TIERS = [
   {
     id: "standard",
-    label: "Standard",
+    label: "Core",
     price: "$85",
     term: "per year / single store",
     tagline: "Everything you need to launch. Renews when you're ready.",
@@ -19,7 +19,7 @@ const TIERS = [
   },
   {
     id: "lifetime",
-    label: "Lifetime",
+    label: "Forever",
     price: "$105",
     term: "one-time / single store",
     tagline: "Pay once, own it forever. Every update we ever ship, included.",
@@ -155,8 +155,8 @@ export function InlinePricing() {
       <button
         onClick={handleCheckout}
         disabled={status === "submitting"}
-        className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
-        style={{ background: "var(--accent-gradient)" }}
+        className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+        style={{ background: "#1a1a1a", color: "#ededed" }}
       >
         {status === "submitting" ? <Spinner /> : null}
         {status === "submitting" ? "Redirecting…" : "Continue to checkout"}
@@ -171,8 +171,8 @@ export function InlinePricing() {
         <span className="text-[13px] tracking-tight text-red-500 text-center">{error || "Something went wrong."}</span>
       )}
 
-      <div className="flex items-center justify-center gap-2" style={{ opacity: 0.4 }}>
-        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Powered and secured by</span>
+      <div className="flex items-center justify-center gap-2 rounded-full px-3 py-1.5 mx-auto w-fit" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+        <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>Powered and secured by</span>
         <img src="/stripe-wordmark.svg" alt="Stripe" className="h-5 w-auto" draggable={false} style={{ filter: "grayscale(1) brightness(0) invert(0.45)" }} />
       </div>
 

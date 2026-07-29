@@ -924,6 +924,15 @@ h1:hover .redact > span.redact-inner,
   transform: scale(1.025);
   box-shadow: 0 14px 36px -10px rgba(0, 0, 0, 0.2);
 }
+/* In the desktop carousel the parent owns transform/box-shadow entirely: it
+   folds center-proximity focus and the hover lift into one inline value, on
+   every card, at rest as well as mid-drag. Inline styles already beat the
+   :hover rule above, but opting out explicitly keeps the parent the single
+   source of truth rather than relying on specificity alone. */
+.group:hover .work-card-thumb--carousel {
+  transform: none;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
 @media (prefers-reduced-motion: reduce) {
   .work-card-thumb { transition: none; }
 }
@@ -936,6 +945,9 @@ h1:hover .redact > span.redact-inner,
    top of the text (what a too-narrow background-size looked like: mostly
    just the bright stripe with nowhere dark left to reveal). */
 .shimmer-word {
+  display: inline-block;
+  margin-right: -0.03em;
+  padding-right: 0.05em;
   background-image: linear-gradient(
     100deg,
     #1a1a1a 0%,
@@ -952,6 +964,20 @@ h1:hover .redact > span.redact-inner,
   background-clip: text;
   color: transparent;
   animation: shimmer-sweep 4.5s linear infinite;
+}
+
+/* Same sweep, warmed with neutral stone/taupe tones instead of pure greyscale. */
+.shimmer-word--warm {
+  background-image: linear-gradient(
+    100deg,
+    #4a4640 0%,
+    #4a4640 42%,
+    #b8ada0 48%,
+    #ded2c2 50%,
+    #b8ada0 52%,
+    #4a4640 58%,
+    #4a4640 100%
+  );
 }
 
 @media (prefers-reduced-motion: reduce) {
