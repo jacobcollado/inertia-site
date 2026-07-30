@@ -103,6 +103,19 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
     markAdminMessagesRead(caseData.id);
   };
 
+  // Locks page-level scroll while a case thread is open — the container is
+  // meant to fit the viewport exactly (see the dvh calc below) with only the
+  // message list scrolling internally, but if it's ever briefly taller than
+  // the viewport (font/layout timing, keyboard opening), the page itself
+  // would otherwise scroll instead. Restored on unmount for every other page.
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
   useEffect(() => {
     if (!clientId) return;
     const supabase = createBrowserClient();
