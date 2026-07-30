@@ -147,7 +147,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   }, [clientId, caseData.id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
   }, [messages, adminTyping, sending]);
 
   const onDraftChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

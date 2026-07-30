@@ -115,15 +115,22 @@ const BARRED_REPLY_BODY =
    ai_barred_until (it isn't exposed anywhere in the client-facing schema),
    so there's no RLS policy for it and the check has to bypass RLS. Safe here
    because the id being read/written is always the caller's own verified
-   user.id, never an argument. */
+   user.id, never an argument.
+
+   ai_rate_limit_exempt permanently skips this whole check (used for the
+   demo account, which gets hammered with test messages). */
 async function checkAndApplyRateLimit(userId: string): Promise<{ barred: boolean; barredUntil: string | null }> {
   const admin = createAdminClient();
 
   const { data: clientRow } = await admin
     .from("clients")
-    .select("ai_barred_until")
+    .select("ai_barred_until, ai_rate_limit_exempt")
     .eq("id", userId)
     .single();
+
+  if (clientRow?.ai_rate_limit_exempt) {
+    return { barred: false, barredUntil: null };
+  }
 
   const existingBar = clientRow?.ai_barred_until as string | null | undefined;
   if (existingBar && new Date(existingBar).getTime() > Date.now()) {
