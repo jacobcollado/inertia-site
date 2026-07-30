@@ -28,6 +28,8 @@ export function FilesView({ files }: { files: DFile[] }) {
         <FileManager
           files={items}
           mobileMode="list"
+          showBackButton={false}
+          className="bg-sidebar"
           onOpen={async (file) => {
             const f = fileMap.get(file.id);
             if (!f) return;

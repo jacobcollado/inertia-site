@@ -1308,108 +1308,118 @@ function clientCardGradient(palette: string[] | undefined) {
   };
 }
 
-// Desktop work viewer. One thumbnail in a fixed frame, crossfading to the
-// next on a timer. Deliberately NOT scroll-driven: the section is normal
-// height and takes no more of the page than a single card, so nobody has to
-// scroll through all 16 shots to get past it.
-//
-// (An earlier version pinned the section and mapped scroll onto the index.
-// That could not work here — an ancestor sets `overflow: hidden` plus a
-// scale() transform, which confines `position: sticky` to that container, and
-// Lenis smooth-scroll fires no native scroll events for a JS fallback to read.
-// A timed crossfade sidesteps both.)
+// One representative shot per client, in WORK_ITEMS order, with the /work/[slug]
+// case-study route resolved from content/work/*.mdx filenames. "Inertia" has no
+// case-study file (it's the site itself), so it falls back to the /work index.
+const WORK_CLIENT_SLUGS: Record<string, string> = {
+  "Inboundly": "inboundly",
+  "Aether Theme": "aether",
+  "Ellora LA": "ellora-la",
+  "FT.GIOO": "ft-gioo",
+  "Subtle Goods": "subtle-goods",
+  "Trippie Redd": "trippie-redd",
+};
 
-const WORK_FADE_MS = 3600; // dwell per image
-const WORK_CROSSFADE_MS = 900;
+const WORK_CLIENTS = (() => {
+  const seen = new Set<string>();
+  return WORK_ITEMS.filter((w) => {
+    if (seen.has(w.title)) return false;
+    seen.add(w.title);
+    return true;
+  }).map((w) => ({
+    ...w,
+    href: WORK_CLIENT_SLUGS[w.title] ? `/work/${WORK_CLIENT_SLUGS[w.title]}` : "/work",
+  }));
+})();
 
-function WorkStackDesktop({
-  onActiveAccent,
-  onHoverIndex,
-}: {
-  onActiveAccent?: (color: string) => void;
-  onHoverIndex?: (index: number | null) => void;
-}) {
+// Desktop work display: one soft-shadow rounded tile per client, laid out in
+// a 3-col grid with the odd 7th tile spanning the full row. Every tile is
+// visible and static — no timer, no crossfade — with the lift/caption-reveal
+// on hover carrying the same radius/shadow/easing language as the site's own
+// bento cards (see --radius-lg, --shadow-raised in globals.css).
+// Desktop work display: a single large frame showing one client at a time,
+// switched with plain prev/next arrows — never more than one photo on screen.
+// Deliberately not a grid: showing all clients' thumbnails together read as
+// cluttered, so this keeps every transition to exactly one image, one name.
+function WorkFrameSwitcher({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
   const router = useRouter();
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const total = WORK_CLIENTS.length;
+  const current = WORK_CLIENTS[active];
 
-  // Advance on a timer. Pauses on hover so a card can be read (and clicked)
-  // without it changing underneath the pointer.
   useEffect(() => {
-    if (paused) return;
-    const id = setTimeout(
-      () => setActive((i) => (i + 1) % WORK_ITEMS.length),
-      WORK_FADE_MS,
-    );
-    return () => clearTimeout(id);
-  }, [active, paused]);
-
-  // Report the visible image's accent + index upward: the hero tint and the
-  // follower tooltip both track whatever is currently on screen. With one
-  // card at a time there's no hover ambiguity — visible IS active.
-  useEffect(() => {
-    onActiveAccent?.(WORK_ITEMS[active].accent);
-    onHoverIndex?.(active);
+    onActiveAccent?.(current.accent);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
+  const go = (delta: number) => setActive((i) => (i + delta + total) % total);
+
   return (
-    <div className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <div className="w-full max-w-[88rem] mx-auto px-6 sm:px-8 flex flex-col items-center gap-5">
       <div
         role="link"
         tabIndex={0}
-        onClick={() => router.push("/work")}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-        className="relative w-full rounded-2xl overflow-hidden"
+        onClick={() => router.push(current.href)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(current.href); } }}
+        className="relative w-full overflow-hidden cursor-pointer"
         style={{
-          aspectRatio: "16 / 9",
+          borderRadius: 20,
+          aspectRatio: "16 / 10",
           maxHeight: 620,
-          cursor: "none",
-          boxShadow: `0 24px 60px ${hexToRgba(WORK_ITEMS[active].accent, 0.28)}, 0 0 0 1px rgba(255,255,255,0.06)`,
-          transition: `box-shadow ${WORK_CROSSFADE_MS}ms ease`,
+          boxShadow: "0 1px 1px rgba(0,0,0,0.04), 0 24px 54px -16px rgba(0,0,0,0.22)",
         }}
       >
-        {WORK_ITEMS.map((w, i) => {
-          const isActive = i === active;
-          return (
-            <div
-              key={w.src}
-              aria-hidden={!isActive}
-              className="absolute inset-0"
-              style={{
-                opacity: isActive ? 1 : 0,
-                transition: `opacity ${WORK_CROSSFADE_MS}ms ease`,
-                zIndex: isActive ? 2 : 1,
-                pointerEvents: isActive ? "auto" : "none",
-              }}
-            >
-              <Image
-                src={w.src}
-                alt={w.title}
-                fill
-                draggable={false}
-                // Only the first image is the LCP candidate and the only one
-                // that gets a preload hint. The rest load lazily as the fade
-                // reaches them. Never set both `priority` and `loading` on one
-                // image — Next throws.
-                priority={i === 0}
-                loading={i === 0 ? undefined : "lazy"}
-                quality={75}
-                sizes="min(92vw, 1408px)"
-                className="object-cover object-top"
-              />
-              {/* Bottom label */}
-              <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none">
-                <div className="p-6">
-                  <p className="text-[20px] tracking-tight text-white font-normal">{w.title}</p>
-                  <p className="text-[14px] tracking-tight" style={{ color: "rgba(255,255,255,0.5)" }}>{w.category}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {WORK_CLIENTS.map((w, i) => (
+          <div
+            key={w.title}
+            aria-hidden={i !== active}
+            className="absolute inset-0"
+            style={{
+              opacity: i === active ? 1 : 0,
+              transition: "opacity 480ms cubic-bezier(0.22,1,0.36,1)",
+              pointerEvents: i === active ? "auto" : "none",
+            }}
+          >
+            <Image
+              src={w.src}
+              alt={w.title}
+              fill
+              draggable={false}
+              priority={i === 0}
+              loading={i === 0 ? undefined : "lazy"}
+              quality={75}
+              sizes="min(92vw, 1408px)"
+              className="object-cover object-top"
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-5">
+        <button
+          type="button"
+          aria-label="Previous"
+          onClick={(e) => { e.stopPropagation(); go(-1); }}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors duration-200 hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--surface))]"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <div className="text-center min-w-[180px]">
+          <p className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{current.title}</p>
+          <p className="mt-0.5 text-[12.5px] tracking-tight text-[rgb(var(--muted))]">{current.category}</p>
+        </div>
+        <button
+          type="button"
+          aria-label="Next"
+          onClick={(e) => { e.stopPropagation(); go(1); }}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors duration-200 hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--surface))]"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
@@ -1691,29 +1701,20 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
     // it is what actually closes the gap. A plain smaller mt- cannot, since
     // the space isn't this section's margin to begin with.
     <section ref={desktopSectionRef} className="relative hidden sm:block sm:-mt-[11dvh]">
-      <FollowerPointerCard title={pointerTitle} titleKey={tooltipItem.title} className="w-full">
-        {/* Same scroll parallax as mobile: scales up into place as it enters
-            the viewport. transformOrigin center so it grows from its middle. */}
-        <div
-          className="relative"
-          style={{
-            transform: `scale(${scrollScale})`,
-            transformOrigin: "center center",
-            willChange: "transform",
-            // Above the beam, which sits at zIndex 0 behind it.
-            zIndex: 1,
-          }}
-        >
-        <WorkStackDesktop
-          onActiveAccent={onActiveAccent}
-          // Report the hovered row by index, not by accent — several items
-          // share an accent, so a reverse lookup by color would label the
-          // tooltip with the wrong project. Offset by CLONES to match the
-          // track-index space `hoveredIndex` is read in.
-          onHoverIndex={(i) => setHoveredIndex(i == null ? null : i + CLONES)}
-        />
-        </div>
-      </FollowerPointerCard>
+      {/* Same scroll parallax as mobile: scales up into place as it enters
+          the viewport. transformOrigin center so it grows from its middle. */}
+      <div
+        className="relative"
+        style={{
+          transform: `scale(${scrollScale})`,
+          transformOrigin: "center center",
+          willChange: "transform",
+          // Above the beam, which sits at zIndex 0 behind it.
+          zIndex: 1,
+        }}
+      >
+        <WorkFrameSwitcher onActiveAccent={onActiveAccent} />
+      </div>
     </section>
   );
 
@@ -1908,11 +1909,12 @@ function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) =
                             : "none",
                         }}
                       />
-                      {/* Bottom label — scoped to this slide so it never overhangs into neighbors */}
-                      <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none">
+                      {/* Bottom label — hidden on mobile (this whole section is mobile-only),
+                          shown from sm: up for when the track is ever visible at wider widths. */}
+                      <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none hidden sm:block">
                         <div className="p-4">
-                          <p className="text-[14px] sm:text-[18px] tracking-tight text-white font-normal">{w.title}</p>
-                          <p className="text-[11px] sm:text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{w.category}</p>
+                          <p className="text-[18px] tracking-tight text-white font-normal">{w.title}</p>
+                          <p className="text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{w.category}</p>
                         </div>
                       </div>
                     </div>

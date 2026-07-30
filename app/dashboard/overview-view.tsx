@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { ArrowUpRightIcon } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent, TabsIndicator } from "@/components/ui/tabs";
 import { StatusPill } from "./status-pill";
@@ -43,6 +44,35 @@ function QuickActionPill({ label, badge, badgeUrgent, onClick, href }: {
     <button type="button" onClick={onClick} className={className}>
       {content}
     </button>
+  );
+}
+
+/* One of the four overview stat cards. The whole card is a link to its
+   section — clicking anywhere navigates away. The arrow in the bottom right
+   corner is a plain visual affordance signalling that (not a control of its
+   own); it's a decorative sibling of the link rather than nested inside it,
+   so it doesn't turn into a second, redundant tab stop. Fixed min-height
+   gives the arrow real breathing room below the header content instead of
+   sitting flush against it. */
+function SummaryCard({ href, description, title, action }: {
+  href: string;
+  description: string;
+  title: React.ReactNode;
+  action: React.ReactNode;
+}) {
+  return (
+    <Card className="relative gap-4 rounded-sm border overflow-hidden">
+      <Link href={href} className="flex flex-col hover:bg-sidebar-accent/40 transition-colors min-h-[132px]">
+        <CardHeader>
+          <CardDescription>{description}</CardDescription>
+          <CardTitle className="text-2xl font-semibold tabular-nums">{title}</CardTitle>
+          <CardAction className="text-sm text-muted-foreground">{action}</CardAction>
+        </CardHeader>
+      </Link>
+      <span aria-hidden className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full border bg-sidebar text-muted-foreground pointer-events-none">
+        <ArrowUpRightIcon className="size-5" />
+      </span>
+    </Card>
   );
 }
 
@@ -161,65 +191,33 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Link href="/dashboard/projects">
-          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
-            <CardHeader>
-              <CardDescription>Projects</CardDescription>
-              <CardTitle className="text-2xl font-semibold tabular-nums">{projects.length}</CardTitle>
-            </CardHeader>
-            <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent p-0 px-6 text-sm">
-              <div className="text-muted-foreground">
-                {completedCount > 0 ? `${completedCount} completed` : activeProjects.length > 0 ? `${activeProjects.length} active` : "None yet"}
-              </div>
-            </CardFooter>
-          </Card>
-        </Link>
+        <SummaryCard
+          href="/dashboard/projects"
+          description="Projects"
+          title={projects.length}
+          action={completedCount > 0 ? `${completedCount} completed` : activeProjects.length > 0 ? `${activeProjects.length} active` : "None yet"}
+        />
 
-        <Link href="/dashboard/invoices">
-          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
-            <CardHeader>
-              <CardDescription>Outstanding</CardDescription>
-              <CardTitle className="text-2xl font-semibold tabular-nums">
-                {totalOwed > 0 ? fmt$(totalOwed) : "All clear"}
-              </CardTitle>
-            </CardHeader>
-            <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent p-0 px-6 text-sm">
-              <div className="text-muted-foreground">
-                {nextDue?.due_date ? `Due ${fmtDate(nextDue.due_date)}` : totalOwed === 0 ? "No open invoices" : ""}
-              </div>
-            </CardFooter>
-          </Card>
-        </Link>
+        <SummaryCard
+          href="/dashboard/invoices"
+          description="Outstanding"
+          title={totalOwed > 0 ? fmt$(totalOwed) : "All clear"}
+          action={nextDue?.due_date ? `Due ${fmtDate(nextDue.due_date)}` : totalOwed === 0 ? "No open invoices" : ""}
+        />
 
-        <Link href="/dashboard/files">
-          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
-            <CardHeader>
-              <CardDescription>Files</CardDescription>
-              <CardTitle className="text-2xl font-semibold tabular-nums">{files.length}</CardTitle>
-            </CardHeader>
-            <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent p-0 px-6 text-sm">
-              <div className="text-muted-foreground">
-                {files.length > 0 ? `Last added ${fmtDate(files[0].uploaded_at)}` : "None yet"}
-              </div>
-            </CardFooter>
-          </Card>
-        </Link>
+        <SummaryCard
+          href="/dashboard/files"
+          description="Files"
+          title={files.length}
+          action={files.length > 0 ? `Last added ${fmtDate(files[0].uploaded_at)}` : "None yet"}
+        />
 
-        <Link href="/dashboard/messages">
-          <Card className="gap-4 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
-            <CardHeader>
-              <CardDescription>Messages</CardDescription>
-              <CardTitle className="text-2xl font-semibold tabular-nums">
-                {unreadFromAdmin.length > 0 ? `${unreadFromAdmin.length} new` : messages.length > 0 ? "Up to date" : "No messages"}
-              </CardTitle>
-            </CardHeader>
-            <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent p-0 px-6 text-sm">
-              <div className="text-muted-foreground">
-                {latestAdminMsg ? `Last: ${fmtDate(latestAdminMsg.created_at)}` : "Say hello"}
-              </div>
-            </CardFooter>
-          </Card>
-        </Link>
+        <SummaryCard
+          href="/dashboard/messages"
+          description="Messages"
+          title={unreadFromAdmin.length > 0 ? `${unreadFromAdmin.length} new` : messages.length > 0 ? "Up to date" : "No messages"}
+          action={latestAdminMsg ? `Last: ${fmtDate(latestAdminMsg.created_at)}` : "Say hello"}
+        />
       </div>
 
       {(activeProjects.length > 0 || unpaidInvoices.length > 0 || latestAdminMsg || activity.length > 0) && (
@@ -275,14 +273,6 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
                     );
                   })}
                 </Card>
-                {projects.length > activeProjects.length && (
-                  <Link
-                    href="/dashboard/projects"
-                    className="self-center rounded-full border bg-sidebar px-4 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
-                  >
-                    View more
-                  </Link>
-                )}
               </div>
             </TabsContent>
           )}
@@ -318,12 +308,6 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
                     </div>
                   ))}
                 </Card>
-                <Link
-                  href="/dashboard/invoices"
-                  className="self-center rounded-full border bg-sidebar px-4 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
-                >
-                  View more
-                </Link>
               </div>
             </TabsContent>
           )}
@@ -343,12 +327,6 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
                       )}
                     </div>
                   </Card>
-                </Link>
-                <Link
-                  href="/dashboard/messages"
-                  className="self-center rounded-full border bg-sidebar px-4 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
-                >
-                  View more
                 </Link>
               </div>
             </TabsContent>

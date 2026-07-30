@@ -134,6 +134,7 @@ export function FileManager({
   onOpen,
   onMove,
   mobileMode = "auto",
+  showBackButton = true,
   className,
 }: {
   files: FileManagerItem[]
@@ -146,6 +147,10 @@ export function FileManager({
   onDelete?: (file: FileManagerItem) => void
   onOpen?: (file: FileManagerItem) => void
   onMove?: (file: FileManagerItem, targetPath: string) => void
+  // Hides the back-navigation arrow in the toolbar. Only meaningful for
+  // callers whose files are always flat (no folder nesting) — those with real
+  // folders (e.g. admin's per-client documents) should leave this on.
+  showBackButton?: boolean
   className?: string
 }) {
   const [internalPath, setInternalPath] = React.useState(defaultPath)
@@ -265,16 +270,18 @@ export function FileManager({
         <div className="border-b p-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                disabled={currentPath === "/"}
-                onClick={() => setPath(getParentPath(currentPath))}
-              >
-                <ArrowLeft />
-                <span className="sr-only">Go back</span>
-              </Button>
+              {showBackButton && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={currentPath === "/"}
+                  onClick={() => setPath(getParentPath(currentPath))}
+                >
+                  <ArrowLeft />
+                  <span className="sr-only">Go back</span>
+                </Button>
+              )}
               {compactFolderNavigation ? (
                 <FileManagerPathMenu
                   folders={folders}
@@ -351,7 +358,7 @@ export function FileManager({
               </Button>
             </div>
           </div>
-          <div className="mt-2 pl-10 text-xs text-muted-foreground">
+          <div className={cn("mt-2 text-xs text-muted-foreground", showBackButton ? "pl-10" : "pl-1")}>
             {visibleFiles.length}{" "}
             {visibleFiles.length === 1 ? "item" : "items"}
             {compactFolderNavigation ? null : " in this folder"}

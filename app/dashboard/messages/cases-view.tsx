@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PlusIcon, ChevronDownIcon, SearchIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { createCase } from "../actions";
 import { CASE_STATUS_VARIANT, CASE_SEVERITY_LABEL, fmtDate, type Case, type CaseStatus, type CaseSeverity, type Message } from "../types";
 
 const STATUS_FILTERS: { value: CaseStatus | "all"; label: string }[] = [
@@ -30,7 +28,6 @@ const SEVERITY_FILTERS: { value: CaseSeverity | "all"; label: string }[] = [
 ];
 
 export function CasesView({ cases, messages }: { cases: Case[]; messages: Message[] }) {
-  const router = useRouter();
   const lastSenderByCase = useMemo(() => {
     const map = new Map<string, Message["sender"]>();
     for (const m of messages) {
@@ -41,10 +38,6 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "all">("all");
   const [severityFilter, setSeverityFilter] = useState<CaseSeverity | "all">("all");
-  const [creating, setCreating] = useState(false);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [submitting, setSubmitting] = useState(false);
 
   const filtered = useMemo(() => {
     return cases.filter(c => {
@@ -58,19 +51,9 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
   const statusLabel = STATUS_FILTERS.find(f => f.value === statusFilter)?.label ?? "All statuses";
   const severityLabel = SEVERITY_FILTERS.find(f => f.value === severityFilter)?.label ?? "All severities";
 
-  const submitCase = async () => {
-    if (!title.trim() || submitting) return;
-    setSubmitting(true);
-    const result = await createCase(title, body);
-    setSubmitting(false);
-    if (result.success && result.caseId) {
-      router.push(`/dashboard/messages/${result.caseId}`);
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-4 w-full lg:max-w-[65%] mx-auto">
-      <div className="flex items-center justify-between gap-3">
+    <div className="flex flex-col gap-4 w-full lg:max-w-[55%] mx-auto">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
@@ -80,14 +63,13 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
             className="w-full rounded-md border bg-sidebar pl-9 pr-4 py-2 text-sm tracking-tight placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
-        <button
-          type="button"
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3.5 py-2 text-sm font-medium tracking-tight hover:bg-primary/90 transition-colors shrink-0"
+        <Link
+          href="/dashboard/messages/new"
+          className="flex items-center justify-center gap-1.5 rounded-md border bg-sidebar text-foreground px-3.5 py-2 text-sm font-medium tracking-tight hover:bg-sidebar-accent/40 transition-colors shrink-0"
         >
           <PlusIcon className="size-4" />
           New case
-        </button>
+        </Link>
       </div>
 
       <div className="flex items-center gap-2">
@@ -170,46 +152,6 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
             </Link>
             );
           })}
-        </div>
-      )}
-
-      {creating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !submitting && setCreating(false)}>
-          <div className="w-full max-w-md rounded-xl border bg-sidebar p-5 flex flex-col gap-4" onClick={e => e.stopPropagation()}>
-            <h2 className="text-lg font-semibold tracking-tight">New case</h2>
-            <input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="What's the issue?"
-              autoFocus
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm tracking-tight placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-            <textarea
-              value={body}
-              onChange={e => setBody(e.target.value)}
-              placeholder="Describe what's going on..."
-              rows={4}
-              className="w-full resize-none rounded-md border bg-background px-3 py-2 text-sm tracking-tight leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setCreating(false)}
-                disabled={submitting}
-                className="px-3.5 py-1.5 rounded-md text-sm font-medium tracking-tight hover:bg-sidebar-accent/40 transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={submitCase}
-                disabled={!title.trim() || submitting}
-                className="px-3.5 py-1.5 rounded-md text-sm font-medium tracking-tight bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                {submitting ? "Creating..." : "Create case"}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

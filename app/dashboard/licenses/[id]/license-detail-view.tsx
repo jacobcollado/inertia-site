@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getSignedFileUrl } from "../../actions";
 import { StatusPill } from "../../status-pill";
 import { fmtDate, type License } from "../../types";
+import { useSetPageCrumb } from "../../page-crumb-context";
 
 function ThemeDownloadButton({ path }: { path: string }) {
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,7 @@ function ThemeDownloadButton({ path }: { path: string }) {
 export function LicenseDetailView({ license }: { license: License }) {
   const [copied, setCopied] = useState(false);
   const tierLabel = license.tier === "lifetime" ? "Forever" : "Core";
+  useSetPageCrumb(license.key);
 
   const copy = () => {
     navigator.clipboard.writeText(license.key);

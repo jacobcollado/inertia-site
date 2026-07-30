@@ -40,29 +40,62 @@ export async function markAdminMessagesRead(caseId: string) {
   return { success: true };
 }
 
-export async function createCase(title: string, body: string) {
+/* Derives a short case title from the client's opening message, since the
+   "New case" flow no longer asks for a title up front — the chat itself is
+   the intake form. Falls back to a generic title for a blank/whitespace-only
+   first message (shouldn't happen — the composer requires text — but keeps
+   this safe to call standalone). */
+function titleFromMessage(body: string) {
+  const firstLine = body.trim().split("\n")[0];
+  if (!firstLine) return "New case";
+  return firstLine.length > 60 ? `${firstLine.slice(0, 60).trimEnd()}…` : firstLine;
+}
+
+/* Placeholder auto-reply standing in for a real support agent. Scoped to be
+   swapped for an actual LLM call later without touching the chat UI — the
+   thread already renders any "admin" message identically regardless of who
+   (or what) produced it. */
+const AUTO_REPLY_BODY =
+  "Thanks for reaching out — this has been logged and one of us will follow up shortly. Feel free to add any more details in the meantime.";
+
+/* Client-initiated cases skip the old title/body form entirely: the client's
+   first chat message becomes both the case's title (derived) and its first
+   message, and an auto-reply follows immediately as the case's "admin"
+   sender. The auto-reply requires the service-role client — clients have no
+   insert policy for sender:"admin", which is intentional (only admins or
+   this trusted server action should be able to post as support). */
+export async function createCaseWithMessage(body: string) {
+  const trimmed = body.trim();
+  if (!trimmed) return { error: "Message is required" };
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
-  if (!title.trim()) return { error: "Title is required" };
 
   const { data: caseNumber } = await supabase.rpc("generate_case_number");
 
   const { data: newCase, error: caseError } = await supabase
     .from("cases")
-    .insert({ client_id: user.id, title: title.trim(), case_number: caseNumber ?? "00000000" })
+    .insert({ client_id: user.id, title: titleFromMessage(trimmed), case_number: caseNumber ?? "00000000" })
     .select("id")
     .single();
   if (caseError || !newCase) return { error: caseError?.message ?? "Could not create case" };
 
-  if (body.trim()) {
-    const { error: msgError } = await supabase
-      .from("messages")
-      .insert({ client_id: user.id, case_id: newCase.id, sender: "client", body: body.trim() });
-    if (msgError) return { error: msgError.message };
-  }
+  const { error: msgError } = await supabase
+    .from("messages")
+    .insert({ client_id: user.id, case_id: newCase.id, sender: "client", body: trimmed });
+  if (msgError) return { error: msgError.message };
+
+  const admin = createAdminClient();
+  await admin.from("messages").insert({
+    client_id: user.id,
+    case_id: newCase.id,
+    sender: "admin",
+    body: AUTO_REPLY_BODY,
+  });
 
   revalidatePath("/dashboard/messages");
+  revalidatePath(`/dashboard/messages/${newCase.id}`);
   return { success: true, caseId: newCase.id as string };
 }
 

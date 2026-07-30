@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeftIcon, MoreHorizontalIcon } from "lucide-react";
+import { MoreHorizontalIcon, PaperclipIcon, ArrowUpIcon } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import {
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { sendClientMessage, markAdminMessagesRead, createFollowUpCase } from "../../actions";
 import { CASE_STATUS_VARIANT, CASE_SEVERITY_LABEL, fmtDate, type Case, type Message } from "../../types";
+import { useSetPageCrumb, useSetPageSubtitle, useSetPageActions } from "../../page-crumb-context";
 
 function initials(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -133,43 +134,41 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
     }
   };
 
-  return (
-    <div className="flex flex-col gap-0" style={{ height: "calc(100vh - 56px)", minHeight: 400 }}>
-      <div className="shrink-0 flex items-center justify-between gap-4 px-1 py-3 border-b">
-        <div className="flex items-center gap-3 min-w-0">
-          <Link href="/dashboard/messages" className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-            <ArrowLeftIcon className="size-4" />
-          </Link>
-          <span className="text-[15px] font-medium tracking-tight truncate">{caseData.title}</span>
-          <span className="text-[13px] text-muted-foreground shrink-0">updated {fmtDate(caseData.updated_at)}</span>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {waitingOnClient && (
-            <Badge variant="outline" className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400 hidden sm:inline-flex">
-              We need your response
-            </Badge>
-          )}
-          <Badge variant="outline" className="border-transparent bg-muted text-muted-foreground">
-            {CASE_SEVERITY_LABEL[caseData.severity]}
-          </Badge>
-          <Badge variant="outline" className={`border-transparent capitalize ${CASE_STATUS_VARIANT[caseData.status]}`}>
-            {caseData.status}
-          </Badge>
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
-              <MoreHorizontalIcon />
-              <span className="sr-only">Case actions</span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem render={<Link href="/dashboard/messages" />}>
-                All cases
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+  // Publishes this page's own header content — title, "updated X", status
+  // badges, the case-actions menu — up into the shared topbar (SiteHeader),
+  // instead of rendering a second header row inside the page itself.
+  useSetPageCrumb(caseData.title);
+  useSetPageSubtitle(`updated ${fmtDate(caseData.updated_at)}`);
+  useSetPageActions(
+    <>
+      {waitingOnClient && (
+        <Badge variant="outline" className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400 hidden sm:inline-flex">
+          We need your response
+        </Badge>
+      )}
+      <Badge variant="outline" className="border-transparent bg-muted text-muted-foreground">
+        {CASE_SEVERITY_LABEL[caseData.severity]}
+      </Badge>
+      <Badge variant="outline" className={`border-transparent capitalize ${CASE_STATUS_VARIANT[caseData.status]}`}>
+        {caseData.status}
+      </Badge>
+      <DropdownMenu>
+        <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
+          <MoreHorizontalIcon />
+          <span className="sr-only">Case actions</span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem render={<Link href="/dashboard/messages" />}>
+            All cases
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
 
-      <div className="flex-1 overflow-y-auto flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[65%] mx-auto">
+  return (
+    <div className="flex flex-col gap-0 h-[calc(100vh-56px-7rem)] md:h-[calc(100vh-56px-2rem)] lg:h-[calc(100vh-56px-3rem)]" style={{ minHeight: 400 }}>
+      <div className="flex-1 overflow-y-auto flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16 opacity-60">
             <p className="text-sm text-muted-foreground">No messages yet.</p>
@@ -210,7 +209,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
         <div ref={bottomRef} />
       </div>
 
-      <div className="shrink-0 flex flex-col gap-2 pt-2 w-full lg:max-w-[65%] mx-auto">
+      <div className="shrink-0 flex flex-col gap-2 pt-2 w-full lg:max-w-[55%] mx-auto">
         {isClosed && (
           <div className="flex items-center justify-between gap-3 rounded-t-xl border border-b-0 bg-sidebar px-4 py-3">
             <span className="text-sm text-muted-foreground">Need further help with this case?</span>
@@ -221,8 +220,16 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
         )}
         <form
           onSubmit={e => { e.preventDefault(); send(); }}
-          className={`flex items-end gap-2 px-3 py-2 border bg-muted/30 focus-within:border-ring transition-colors ${isClosed ? "rounded-b-xl" : "rounded-2xl"}`}
+          className={`flex flex-col gap-2.5 px-3 py-3 border bg-muted/30 focus-within:border-ring transition-colors ${isClosed ? "rounded-b-xl" : "rounded-2xl"}`}
+          style={{ minHeight: 120 }}
         >
+          <div className="inline-flex items-center gap-2 self-start rounded-full border bg-background pl-1 pr-3.5 py-1">
+            <Avatar className="h-6 w-6 shrink-0">
+              {clientAvatarUrl && <AvatarImage src={clientAvatarUrl} alt={clientName} />}
+              <AvatarFallback>{initials(clientName)}</AvatarFallback>
+            </Avatar>
+            <span className="text-[13px] font-medium tracking-tight">{clientName}</span>
+          </div>
           <textarea
             rows={1}
             value={draft}
@@ -232,15 +239,25 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
             className="w-full resize-none tracking-tight placeholder:text-muted-foreground focus:outline-none leading-relaxed bg-transparent"
             style={{ maxHeight: 100, overflowY: "auto", fontSize: 16 }}
           />
-          {draft.trim() && (
+          <div className="flex items-center justify-between mt-auto">
+            {/* Attachments aren't wired up yet — see the matching placeholder
+                on /messages/new; swap both for a real file picker together. */}
+            <button
+              type="button"
+              disabled
+              title="Attachments coming soon"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground opacity-40 cursor-not-allowed"
+            >
+              <PaperclipIcon className="size-4" />
+            </button>
             <button
               type="submit"
-              disabled={sending}
-              className="shrink-0 px-4 py-1.5 rounded-full text-[13px] font-medium bg-primary text-primary-foreground transition-opacity disabled:opacity-25"
+              disabled={!draft.trim() || sending}
+              className="flex h-8 w-8 items-center justify-center rounded-full border bg-background text-foreground transition-opacity hover:bg-sidebar-accent/40 disabled:opacity-40 disabled:hover:bg-background"
             >
-              {sending ? "Sending..." : "Send"}
+              <ArrowUpIcon className="size-4" />
             </button>
-          )}
+          </div>
         </form>
       </div>
     </div>

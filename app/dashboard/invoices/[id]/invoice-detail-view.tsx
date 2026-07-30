@@ -5,11 +5,15 @@ import { ArrowLeftIcon, DownloadIcon, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "../../status-pill";
 import { fmt$, fmtDate, type Invoice } from "../../types";
+import { useSetPageCrumb } from "../../page-crumb-context";
 
 const monthFmt = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
 
 export function InvoiceDetailView({ invoice }: { invoice: Invoice }) {
   const monthLabel = invoice.due_date ? monthFmt.format(new Date(invoice.due_date)) : invoice.label;
+  // No dedicated invoice-number column exists — a short uppercase slice of the
+  // UUID stands in as a human-scannable number, same idea as a short commit hash.
+  useSetPageCrumb(`#${invoice.id.slice(0, 8).toUpperCase()}`);
 
   return (
     <div className="flex flex-col gap-6 w-full lg:max-w-[58%] mx-auto">

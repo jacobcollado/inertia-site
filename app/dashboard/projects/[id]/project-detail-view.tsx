@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { StatusPill } from "../../status-pill";
 import { fmtDate, type Project, type ProjectUpdate } from "../../types";
 import { ProjectTimeline } from "../project-timeline";
+import { useSetPageCrumb } from "../../page-crumb-context";
 
 export function ProjectDetailView({ project, updates }: { project: Project; updates: ProjectUpdate[] }) {
   const latestStatus = updates[0]?.status ?? project.status;
+  useSetPageCrumb(project.title);
 
   return (
     <div className="flex flex-col gap-6 w-full lg:max-w-[58%] mx-auto">
