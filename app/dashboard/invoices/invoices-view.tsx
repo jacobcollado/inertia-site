@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpRightIcon, MoreHorizontalIcon, ChevronDownIcon } from "lucide-react";
+import { ArrowUpRightIcon, MoreHorizontalIcon, ChevronDownIcon, ReceiptIcon } from "lucide-react";
 import { WhopCheckoutModal } from "./whop-checkout-modal";
 import { StatusPill } from "../status-pill";
 import { fmt$, fmtDate, type Invoice } from "../types";
@@ -61,7 +61,24 @@ export function InvoicesView({ invoices, clientEmail }: { invoices: Invoice[]; c
       </DropdownMenu>
 
       {filteredInvoices.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8">No invoices yet.</p>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <ReceiptIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">
+              {filter === "all" ? "No invoices yet" : "No matching invoices"}
+            </p>
+            <p className="text-[13px] text-muted-foreground">
+              {filter === "all" ? "Invoices from us will show up here when they're issued." : "Try a different filter to see other invoices."}
+            </p>
+          </div>
+          {filter === "all" && (
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/messages/new" />}>
+              Ask about billing
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {filteredInvoices.map((inv, i) => {

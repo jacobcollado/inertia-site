@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontalIcon, ChevronDownIcon } from "lucide-react";
+import { MoreHorizontalIcon, ChevronDownIcon, FolderIcon } from "lucide-react";
 import { StatusPill } from "../status-pill";
 import { fmtDate, type Project, type ProjectUpdate } from "../types";
 
@@ -63,7 +63,24 @@ export function ProjectsView({ projects, projectUpdates }: { projects: Project[]
       </DropdownMenu>
 
       {sorted.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8">No projects yet.</p>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <FolderIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">
+              {filter === "all" ? "No projects yet" : `No ${filter} projects`}
+            </p>
+            <p className="text-[13px] text-muted-foreground">
+              {filter === "all" ? "Projects you're working on with us will show up here." : "Try a different filter to see other projects."}
+            </p>
+          </div>
+          {filter === "all" && (
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/messages/new" />}>
+              Start a project
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {sorted.map((p, i) => {

@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CheckIcon, CopyIcon, MoreHorizontalIcon, ChevronDownIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, MoreHorizontalIcon, ChevronDownIcon, KeyRoundIcon } from "lucide-react";
 import { StatusPill } from "../status-pill";
 import { fmtDate, type License } from "../types";
 
@@ -63,7 +63,24 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
       </DropdownMenu>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8">No licenses yet.</p>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <KeyRoundIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">
+              {filter === "all" ? "No licenses yet" : "No matching licenses"}
+            </p>
+            <p className="text-[13px] text-muted-foreground">
+              {filter === "all" ? "Licenses you purchase will show up here." : "Try a different filter to see other licenses."}
+            </p>
+          </div>
+          {filter === "all" && (
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/aether/buy" />}>
+              Get a license
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {filtered.map((l, i) => {

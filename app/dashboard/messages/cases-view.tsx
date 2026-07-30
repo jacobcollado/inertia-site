@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { PlusIcon, ChevronDownIcon, SearchIcon } from "lucide-react";
+import { PlusIcon, ChevronDownIcon, SearchIcon, MessageCircleIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -123,9 +124,24 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-sm text-muted-foreground py-8">
-          {cases.length === 0 ? "No cases yet. Start a new one if you need help." : "No cases match your filters."}
-        </p>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <MessageCircleIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">
+              {cases.length === 0 ? "No cases yet" : "No matching cases"}
+            </p>
+            <p className="text-[13px] text-muted-foreground">
+              {cases.length === 0 ? "Start a new one if you need help with anything." : "Try different filters to see other cases."}
+            </p>
+          </div>
+          {cases.length === 0 && (
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/messages/new" />}>
+              New case
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {filtered.map((c, i) => {
