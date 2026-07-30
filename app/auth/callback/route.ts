@@ -25,18 +25,31 @@ export async function GET(request: NextRequest) {
         .eq("id", data.user.id)
         .single();
 
-      // Sync name (from Google or email signup) into clients table on first sign-in.
-      // Google supplies given_name/family_name separately, so prefer combining
-      // those directly over full_name/name in case either is just a nickname.
+      // Sync name into clients table. Google supplies given_name/family_name
+      // separately, so prefer combining those directly over full_name/name in
+      // case either is just a nickname.
       const meta = data.user.user_metadata ?? {};
       const googleName = [meta.given_name, meta.family_name].filter(Boolean).join(" ").trim();
       const providerName = (googleName || meta.full_name || meta.name) as string | undefined;
+      // Google is authoritative once it's the sign-in method, so overwrite on
+      // every login rather than only filling a blank — otherwise a stale or
+      // wrong name set before Google was linked (or Google's own metadata
+      // lagging right after consent on the very first login) sticks forever.
+      // Email signups still only fill a blank, since that name is
+      // self-reported and shouldn't be silently overwritten each login.
+      const isGoogleSignIn = data.user.app_metadata?.provider === "google";
       if (providerName) {
-        await supabase
-          .from("clients")
-          .update({ name: providerName })
-          .eq("id", data.user.id)
-          .is("name", null);
+        const query = supabase.from("clients").update({ name: providerName }).eq("id", data.user.id);
+        await (isGoogleSignIn ? query : query.is("name", null));
+      }
+
+      // Same idea for the profile picture — Supabase maps Google's photo to
+      // either avatar_url or picture depending on the provider response, so
+      // check both.
+      const providerAvatar = (meta.avatar_url || meta.picture) as string | undefined;
+      if (providerAvatar) {
+        const query = supabase.from("profiles").update({ avatar_url: providerAvatar }).eq("id", data.user.id);
+        await (isGoogleSignIn ? query : query.is("avatar_url", null));
       }
 
       const isAdmin = profile?.role === "admin";
