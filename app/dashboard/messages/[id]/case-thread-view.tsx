@@ -289,7 +289,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
 
   return (
     <div className="relative flex flex-col gap-0 h-[calc(100dvh-56px-3rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
-      <div ref={listRef} className="flex-1 overflow-y-auto flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
+      <div ref={listRef} className="flex-1 overflow-y-auto overscroll-contain flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16 opacity-60">
             <p className="text-sm text-muted-foreground">No messages yet.</p>
