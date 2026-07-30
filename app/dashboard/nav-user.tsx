@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   LogOutIcon,
@@ -28,36 +28,19 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { signOut } from "./actions";
-import { createClient } from "@/lib/supabase/client";
 import { AccountDialog } from "./account-dialog";
 
 function initials(name: string) {
   return name.slice(0, 2).toUpperCase();
 }
 
-export function NavUser() {
+export function NavUser({ email, initialDisplayName, initialAvatarUrl }: { email: string; initialDisplayName: string; initialAvatarUrl: string | null }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [accountOpen, setAccountOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [displayName, setDisplayName] = useState("Client");
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data }) => {
-      const user = data.user;
-      if (!user) return;
-      setEmail(user.email ?? "");
-      const [{ data: client }, { data: profile }] = await Promise.all([
-        supabase.from("clients").select("name, company").eq("id", user.id).single(),
-        supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
-      ]);
-      setDisplayName(client?.company ?? client?.name ?? user.email ?? "Client");
-      setAvatarUrl((profile?.avatar_url as string | null) ?? null);
-    });
-  }, []);
+  const [displayName, setDisplayName] = useState(initialDisplayName);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
 
   return (
     <>

@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboardIcon,
   FolderIcon,
-  ReceiptIcon,
+  LayersIcon,
   FileIcon,
-  MessageSquareIcon,
+  LifeBuoyIcon,
   KeyRoundIcon,
   SettingsIcon,
 } from "lucide-react";
@@ -29,7 +29,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/app/theme-toggle";
 import { NavUser } from "./nav-user";
 import { cn } from "@/lib/utils";
 
@@ -39,13 +38,13 @@ const OVERVIEW_NAV_ITEMS = [
 
 const WORKSPACE_NAV_ITEMS = [
   { href: "/dashboard/projects", label: "Projects", icon: FolderIcon },
-  { href: "/dashboard/invoices", label: "Invoices", icon: ReceiptIcon },
-  { href: "/dashboard/files", label: "Files", icon: FileIcon },
-  { href: "/dashboard/messages", label: "Messages", icon: MessageSquareIcon },
+  { href: "/dashboard/messages", label: "Support", icon: LifeBuoyIcon },
   { href: "/dashboard/licenses", label: "Licenses", icon: KeyRoundIcon },
 ];
 
 const SETTINGS_NAV_ITEMS = [
+  { href: "/dashboard/invoices", label: "Invoices", icon: LayersIcon },
+  { href: "/dashboard/files", label: "Files", icon: FileIcon },
   { href: "/dashboard/settings", label: "Settings", icon: SettingsIcon },
 ];
 
@@ -55,7 +54,7 @@ function NavItems({ items, pathname, unreadMessages }: { items: typeof WORKSPACE
     <SidebarMenu>
       {items.map(({ href, label, icon: Icon }) => {
         const active = href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
-        const badge = label === "Messages" ? unreadMessages : undefined;
+        const badge = label === "Support" ? unreadMessages : undefined;
         return (
           <SidebarMenuItem key={href}>
             <SidebarMenuButton
@@ -80,7 +79,7 @@ function NavItems({ items, pathname, unreadMessages }: { items: typeof WORKSPACE
   );
 }
 
-function AppSidebar({ unreadMessages }: { unreadMessages: number }) {
+function AppSidebar({ unreadMessages, email, displayName, avatarUrl }: { unreadMessages: number; email: string; displayName: string; avatarUrl: string | null }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   return (
@@ -114,7 +113,7 @@ function AppSidebar({ unreadMessages }: { unreadMessages: number }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser email={email} initialDisplayName={displayName} initialAvatarUrl={avatarUrl} />
       </SidebarFooter>
     </Sidebar>
   );
@@ -125,7 +124,7 @@ const TITLES: Record<string, string> = {
   "/dashboard/projects": "Projects",
   "/dashboard/invoices": "Invoices",
   "/dashboard/files": "Files",
-  "/dashboard/messages": "Messages",
+  "/dashboard/messages": "Support",
   "/dashboard/licenses": "Licenses",
   "/dashboard/settings": "Settings",
 };
@@ -137,19 +136,26 @@ function SiteHeader() {
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border md:rounded-t-xl">
       <div className="relative flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
-        <h1 className="absolute left-1/2 -translate-x-1/2 text-[15px] font-medium tracking-tight">{title}</h1>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 lg:px-6">
+          <div className="w-full lg:max-w-[58%] flex justify-center">
+            <h1 className="text-[15px] font-medium tracking-tight">{title}</h1>
+          </div>
+        </div>
         <div className="ml-auto flex items-center gap-3">
-          <Link href="/" className="text-[13px] tracking-tight text-muted-foreground opacity-60 hover:opacity-100 transition-opacity">
-            ← Site
-          </Link>
-          <ThemeToggle />
+          <SidebarTrigger className="invisible pointer-events-none" />
         </div>
       </div>
     </header>
   );
 }
 
-export function ClientSidebarShell({ children, unreadMessages = 0 }: { children: React.ReactNode; unreadMessages?: number }) {
+export function ClientSidebarShell({ children, unreadMessages = 0, email, displayName, avatarUrl }: {
+  children: React.ReactNode;
+  unreadMessages?: number;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+}) {
   // iOS Safari tints its top/bottom toolbars (and the overscroll rubber-band)
   // from <html>'s background, not <meta theme-color>. The dashboard is
   // uniformly dark, so pin <html>'s background to the dashboard's dark token
@@ -167,7 +173,7 @@ export function ClientSidebarShell({ children, unreadMessages = 0 }: { children:
       className="bg-sidebar text-foreground min-h-svh"
       style={{ "--sidebar-width": "16rem" } as React.CSSProperties}
     >
-      <AppSidebar unreadMessages={unreadMessages} />
+      <AppSidebar unreadMessages={unreadMessages} email={email} displayName={displayName} avatarUrl={avatarUrl} />
       <SidebarInset>
         <SiteHeader />
         <main className="flex flex-1 flex-col gap-6 p-4 lg:p-6">

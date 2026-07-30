@@ -37,6 +37,7 @@ export default async function DashboardOverviewPage() {
   return (
     <OverviewView
       client={client}
+      clientEmail={client?.email ?? user.email ?? ""}
       projects={projects ?? []}
       invoices={invoices ?? []}
       files={files ?? []}

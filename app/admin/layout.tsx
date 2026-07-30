@@ -1,3 +1,4 @@
+import Script from "next/script";
 import { AdminSidebarShell } from "./admin-sidebar-shell";
 
 const SET_THEME_SCRIPT = `
@@ -13,7 +14,7 @@ const SET_THEME_SCRIPT = `
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <script dangerouslySetInnerHTML={{ __html: SET_THEME_SCRIPT }} />
+      <Script id="set-admin-theme" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: SET_THEME_SCRIPT }} />
       <AdminSidebarShell>{children}</AdminSidebarShell>
     </>
   );

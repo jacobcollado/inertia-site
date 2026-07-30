@@ -1,22 +1,61 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent, TabsIndicator } from "@/components/ui/tabs";
 import { StatusPill } from "./status-pill";
+import { getSignedFileUrl } from "./actions";
+import { WhopCheckoutModal } from "./invoices/whop-checkout-modal";
 import { fmt$, fmtDate, type Client, type Project, type ProjectUpdate, type Invoice, type DFile, type Message } from "./types";
 
-export function OverviewView({ client, projects, invoices, files, messages, projectUpdates }: {
+function QuickActionPill({ label, badge, badgeUrgent, onClick, href }: {
+  label: string;
+  badge?: string;
+  badgeUrgent?: boolean;
+  onClick?: () => void;
+  href?: string;
+}) {
+  const className = "flex items-center gap-1.5 rounded-full border bg-sidebar px-3.5 py-1.5 text-[13px] font-medium tracking-tight hover:bg-sidebar-accent/40 transition-colors shrink-0";
+  const content = (
+    <>
+      {label}
+      {badge && (
+        <Badge
+          variant="outline"
+          className={`justify-center text-center leading-none border-transparent font-normal ${badgeUrgent ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}
+          style={{ backgroundColor: "color-mix(in srgb, var(--sh-foreground) 10%, transparent)" }}
+        >
+          {badge}
+        </Badge>
+      )}
+    </>
+  );
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
+  );
+}
+
+export function OverviewView({ client, clientEmail, projects, invoices, files, messages, projectUpdates }: {
   client: Client | null;
+  clientEmail: string;
   projects: Project[];
   invoices: Invoice[];
   files: DFile[];
   messages: Message[];
   projectUpdates: ProjectUpdate[];
 }) {
-  const firstName = client?.name?.split(" ")[0] ?? null;
-  const greeting = client?.company ?? (firstName ? `Hey, ${firstName}.` : "Hey.");
+  const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
 
   const activeProjects = projects.filter(p => p.status === "active");
   const completedCount = projects.filter(p => p.status === "completed").length;
@@ -78,6 +117,8 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
     message: "Message",
   };
 
+  const latestFile = files[0] ?? null;
+
   const defaultOverviewTab =
     activeProjects.length > 0 ? "projects" :
     unpaidInvoices.length > 0 ? "invoices" :
@@ -86,11 +127,37 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
 
   return (
     <div className="flex flex-col gap-8 pb-12 sm:pb-0">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{greeting}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {client?.company ? `Hey${firstName ? `, ${firstName}` : ""}. Here's where everything stands.` : "Here's where everything stands."}
-        </p>
+      <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] sm:[mask-image:none]">
+        <div className="flex items-center gap-2 w-max sm:w-fit sm:flex-wrap">
+          {unpaidInvoices.length > 0 && (
+            <QuickActionPill
+              label="Pay now"
+              badge={fmt$(totalOwed)}
+              badgeUrgent={unpaidInvoices.some(i => i.status === "overdue")}
+              onClick={() => {
+                const payable = unpaidInvoices.find(i => i.payment_url);
+                if (!payable?.payment_url) return;
+                if (payable.payment_url.startsWith("http")) window.open(payable.payment_url, "_blank", "noreferrer");
+                else setCheckoutPlanId(payable.payment_url);
+              }}
+            />
+          )}
+          <QuickActionPill
+            label="Message support"
+            badge={unreadFromAdmin.length > 0 ? `${unreadFromAdmin.length} new` : undefined}
+            href="/dashboard/messages"
+          />
+          {latestFile && (
+            <QuickActionPill
+              label="Download latest file"
+              onClick={async () => {
+                const res = await getSignedFileUrl(latestFile.url);
+                if (res.url) window.open(res.url, "_blank", "noreferrer");
+              }}
+            />
+          )}
+          <QuickActionPill label="New case" href="/dashboard/messages" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -156,26 +223,27 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
       </div>
 
       {(activeProjects.length > 0 || unpaidInvoices.length > 0 || latestAdminMsg || activity.length > 0) && (
-        <Tabs defaultValue={defaultOverviewTab} className="gap-1">
+        <Tabs defaultValue={defaultOverviewTab} className="gap-4">
           <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
-            <TabsList className="bg-sidebar rounded-lg border w-max sm:w-fit">
+            <TabsList className="relative bg-sidebar rounded-lg border w-max sm:w-fit">
+              <TabsIndicator />
               {activeProjects.length > 0 && (
-                <TabsTrigger value="projects" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                <TabsTrigger value="projects" className="relative z-10 flex-none rounded-md data-[active]:bg-transparent data-[active]:shadow-none">
                   {activeProjects.length === 1 ? "Active project" : "Active projects"}
                 </TabsTrigger>
               )}
               {unpaidInvoices.length > 0 && (
-                <TabsTrigger value="invoices" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                <TabsTrigger value="invoices" className="relative z-10 flex-none rounded-md data-[active]:bg-transparent data-[active]:shadow-none">
                   {unpaidInvoices.length === 1 ? "Pending invoice" : "Pending invoices"}
                 </TabsTrigger>
               )}
               {latestAdminMsg && (
-                <TabsTrigger value="message" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                <TabsTrigger value="message" className="relative z-10 flex-none rounded-md data-[active]:bg-transparent data-[active]:shadow-none">
                   Latest message
                 </TabsTrigger>
               )}
               {activity.length > 0 && (
-                <TabsTrigger value="activity" className="flex-none rounded-md data-[active]:rounded-md data-[active]:bg-background data-[active]:border-border data-[active]:shadow-sm">
+                <TabsTrigger value="activity" className="relative z-10 flex-none rounded-md data-[active]:bg-transparent data-[active]:shadow-none">
                   Recent activity
                 </TabsTrigger>
               )}
@@ -185,11 +253,6 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
           {activeProjects.length > 0 && (
             <TabsContent value="projects">
               <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-end px-1">
-                  {projects.length > activeProjects.length && (
-                    <Link href="/dashboard/projects" className="text-sm text-muted-foreground hover:text-foreground transition-colors">See all →</Link>
-                  )}
-                </div>
                 <Card className="overflow-hidden py-0 rounded-sm border">
                   {activeProjects.map((p, i) => {
                     const updates = projectUpdates.filter(u => u.project_id === p.id);
@@ -212,6 +275,14 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
                     );
                   })}
                 </Card>
+                {projects.length > activeProjects.length && (
+                  <Link
+                    href="/dashboard/projects"
+                    className="self-center rounded-full border bg-sidebar px-4 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
+                  >
+                    View more
+                  </Link>
+                )}
               </div>
             </TabsContent>
           )}
@@ -219,9 +290,6 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
           {unpaidInvoices.length > 0 && (
             <TabsContent value="invoices">
               <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-end px-1">
-                  <Link href="/dashboard/invoices" className="text-sm text-muted-foreground hover:text-foreground transition-colors">See all →</Link>
-                </div>
                 <Card className="overflow-hidden py-0 rounded-sm border">
                   {unpaidInvoices.slice(0, 3).map((inv, i) => (
                     <div
@@ -250,6 +318,12 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
                     </div>
                   ))}
                 </Card>
+                <Link
+                  href="/dashboard/invoices"
+                  className="self-center rounded-full border bg-sidebar px-4 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
+                >
+                  View more
+                </Link>
               </div>
             </TabsContent>
           )}
@@ -257,9 +331,6 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
           {latestAdminMsg && (
             <TabsContent value="message">
               <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-end px-1">
-                  <Link href="/dashboard/messages" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Open thread →</Link>
-                </div>
                 <Link href="/dashboard/messages">
                   <Card className="overflow-hidden py-0 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
                     <div className="px-5 py-4">
@@ -272,6 +343,12 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
                       )}
                     </div>
                   </Card>
+                </Link>
+                <Link
+                  href="/dashboard/messages"
+                  className="self-center rounded-full border bg-sidebar px-4 py-1.5 text-[13px] text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/40 transition-colors"
+                >
+                  View more
                 </Link>
               </div>
             </TabsContent>
@@ -319,6 +396,10 @@ export function OverviewView({ client, projects, invoices, files, messages, proj
 
       {allClear && (
         <p className="text-sm text-muted-foreground py-4">Nothing needs your attention right now.</p>
+      )}
+
+      {checkoutPlanId && (
+        <WhopCheckoutModal planId={checkoutPlanId} clientEmail={clientEmail} onClose={() => setCheckoutPlanId(null)} />
       )}
     </div>
   );

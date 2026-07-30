@@ -75,7 +75,7 @@ function TabsContent({ className, keepMounted = true, ...props }: TabsPrimitive.
       data-slot="tabs-content"
       keepMounted={keepMounted}
       className={cn(
-        "flex-1 text-sm outline-none transition-opacity duration-150 ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0",
+        "flex-1 text-sm outline-none",
         className
       )}
       {...props}
@@ -83,4 +83,17 @@ function TabsContent({ className, keepMounted = true, ...props }: TabsPrimitive.
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants }
+function TabsIndicator({ className, ...props }: TabsPrimitive.Indicator.Props) {
+  return (
+    <TabsPrimitive.Indicator
+      data-slot="tabs-indicator"
+      className={cn(
+        "absolute top-(--active-tab-top) left-(--active-tab-left) h-(--active-tab-height) w-(--active-tab-width) rounded-md bg-background shadow-sm transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsIndicator, tabsListVariants }
