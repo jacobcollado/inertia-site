@@ -105,20 +105,34 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   // keyboard opens/closes or Safari's toolbar collapses. visualViewport
   // fires continuously through that transition, so setting the container's
   // height directly from it tracks the real viewport far more fluidly.
+  // Mirrors the same bottom clearance as the mobile dvh calc below (6rem, for
+  // the nav dock + gap off the home-indicator/notch) — without it the input
+  // sits flush against the bottom edge instead of clear of it. rAF-batches
+  // the updates since resize/scroll can fire many times per gesture; without
+  // batching, writing style.height synchronously on every event is what read
+  // as choppy instead of a smooth follow.
   useEffect(() => {
     const vv = window.visualViewport;
     const el = containerRef.current;
     if (!vv || !el) return;
+    const BOTTOM_CLEARANCE = window.innerWidth >= 768 ? 32 : 96; // md:2rem / mobile 6rem
+    let rafId: number | null = null;
     const applyHeight = () => {
+      rafId = null;
       const top = el.getBoundingClientRect().top;
-      el.style.height = `${Math.max(vv.height - top, 320)}px`;
+      el.style.height = `${Math.max(vv.height - top - BOTTOM_CLEARANCE, 320)}px`;
+    };
+    const schedule = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(applyHeight);
     };
     applyHeight();
-    vv.addEventListener("resize", applyHeight);
-    vv.addEventListener("scroll", applyHeight);
+    vv.addEventListener("resize", schedule);
+    vv.addEventListener("scroll", schedule);
     return () => {
-      vv.removeEventListener("resize", applyHeight);
-      vv.removeEventListener("scroll", applyHeight);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      vv.removeEventListener("resize", schedule);
+      vv.removeEventListener("scroll", schedule);
     };
   }, []);
 
