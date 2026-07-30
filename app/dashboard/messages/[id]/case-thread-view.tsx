@@ -96,8 +96,31 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   const bottomRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 100dvh only updates once the browser's own resize/scroll gesture has
+  // fully settled, which reads as a visible catch-up delay whenever the
+  // keyboard opens/closes or Safari's toolbar collapses. visualViewport
+  // fires continuously through that transition, so setting the container's
+  // height directly from it tracks the real viewport far more fluidly.
+  useEffect(() => {
+    const vv = window.visualViewport;
+    const el = containerRef.current;
+    if (!vv || !el) return;
+    const applyHeight = () => {
+      const top = el.getBoundingClientRect().top;
+      el.style.height = `${Math.max(vv.height - top, 320)}px`;
+    };
+    applyHeight();
+    vv.addEventListener("resize", applyHeight);
+    vv.addEventListener("scroll", applyHeight);
+    return () => {
+      vv.removeEventListener("resize", applyHeight);
+      vv.removeEventListener("scroll", applyHeight);
+    };
+  }, []);
 
   const markRead = () => {
     setMessages(prev => prev.map(m => m.sender === "admin" && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m));
@@ -293,7 +316,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   );
 
   return (
-    <div className="relative flex flex-col gap-0 h-[calc(100dvh-56px-6rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
+    <div ref={containerRef} className="relative flex flex-col gap-0 h-[calc(100dvh-56px-6rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
       <div ref={listRef} className="flex-1 overflow-y-auto overscroll-contain flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16 opacity-60">
