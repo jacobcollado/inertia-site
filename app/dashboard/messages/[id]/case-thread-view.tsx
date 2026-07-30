@@ -369,11 +369,13 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
         <div ref={bottomRef} />
       </div>
 
-      <div className="shrink-0 relative flex flex-col pt-2 w-full lg:max-w-[55%] mx-auto">
+      <div className="shrink-0 mt-2 relative flex flex-col w-full lg:max-w-[55%] mx-auto">
         {/* Fades scrolled-past message content out under the input instead
             of it cutting off hard against the input's own background.
-            Positioned against the pt-2 content div (not the outer wrapper),
-            so it sits flush against the bar/form's own top edge with no gap. */}
+            Positioned directly against this wrapper (no padding on it, so
+            bottom-full sits flush against the bar/form with no gap) — the
+            gap above the wrapper itself now comes from its own margin-top
+            instead, which the fade isn't measured against. */}
         <div className="flex flex-col relative">
         <div className={`pointer-events-none absolute inset-x-0 bottom-full h-10 bg-gradient-to-t from-background to-transparent ${(isClosed || isAiBarred) ? "" : "rounded-t-2xl"}`} />
         {isClosed && (
