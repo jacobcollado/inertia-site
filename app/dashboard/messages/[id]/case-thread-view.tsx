@@ -116,11 +116,18 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
     const el = containerRef.current;
     if (!vv || !el) return;
     const BOTTOM_CLEARANCE = window.innerWidth >= 768 ? 32 : 96; // md:2rem / mobile 6rem
+    const HEADER_HEIGHT = 56;
+    // Measuring el.getBoundingClientRect().top live caused the jump-then-
+    // settle on focus: opening the keyboard makes mobile Safari auto-scroll
+    // the focused input into view, which shifts `top` on its own, slightly
+    // out of sync with visualViewport's own resize event — one bad
+    // intermediate frame lands before both catch up. The container always
+    // sits directly below the fixed header, so top is a known constant, not
+    // something that needs to be re-measured from a scroll-affected DOM read.
     let rafId: number | null = null;
     const applyHeight = () => {
       rafId = null;
-      const top = el.getBoundingClientRect().top;
-      el.style.height = `${Math.max(vv.height - top - BOTTOM_CLEARANCE, 320)}px`;
+      el.style.height = `${Math.max(vv.height - HEADER_HEIGHT - BOTTOM_CLEARANCE, 320)}px`;
     };
     const schedule = () => {
       if (rafId !== null) return;
