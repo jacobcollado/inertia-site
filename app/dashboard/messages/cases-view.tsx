@@ -41,6 +41,11 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
 
   const filtered = useMemo(() => {
     return cases.filter(c => {
+      // Closed cases are archived out of the default view — they only
+      // surface once the status filter explicitly asks for them, so "All
+      // statuses" reads as "all active statuses" rather than the full
+      // (ever-growing) history of every case that's ever existed.
+      if (statusFilter === "all" && c.status === "closed") return false;
       if (statusFilter !== "all" && c.status !== statusFilter) return false;
       if (severityFilter !== "all" && c.severity !== severityFilter) return false;
       if (search.trim() && !c.title.toLowerCase().includes(search.trim().toLowerCase()) && !c.case_number.includes(search.trim())) return false;
@@ -61,6 +66,7 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
             onChange={e => setSearch(e.target.value)}
             placeholder="Search cases..."
             className="w-full rounded-md border bg-sidebar pl-9 pr-4 py-2 text-sm tracking-tight placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            style={{ "--sh-ring": "var(--sh-muted-foreground)" } as React.CSSProperties}
           />
         </div>
         <Link

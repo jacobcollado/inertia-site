@@ -62,7 +62,7 @@ function SummaryCard({ href, description, title, action }: {
 }) {
   return (
     <Card className="relative gap-4 rounded-sm border overflow-hidden">
-      <Link href={href} className="flex flex-col hover:bg-sidebar-accent/40 transition-colors min-h-[132px]">
+      <Link href={href} className="flex flex-col hover:bg-sidebar-accent/40 transition-colors min-h-[118px]">
         <CardHeader>
           <CardDescription>{description}</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums">{title}</CardTitle>

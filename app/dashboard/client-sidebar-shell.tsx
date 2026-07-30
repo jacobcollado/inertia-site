@@ -208,8 +208,18 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
           <DialogHeader>
             <DialogTitle>Menu</DialogTitle>
           </DialogHeader>
-          <nav className="flex flex-col gap-0.5">
-            {ALL_NAV_ITEMS.map(item => renderRow(item, () => setNavOpen(false)))}
+          <nav className="flex flex-col gap-3">
+            <div className="flex flex-col gap-0.5">
+              {OVERVIEW_NAV_ITEMS.map(item => renderRow(item, () => setNavOpen(false)))}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <p className="px-3 pb-1 text-[11px] font-medium text-muted-foreground">Workspace</p>
+              {WORKSPACE_NAV_ITEMS.map(item => renderRow(item, () => setNavOpen(false)))}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <p className="px-3 pb-1 text-[11px] font-medium text-muted-foreground">Account</p>
+              {SETTINGS_NAV_ITEMS.map(item => renderRow(item, () => setNavOpen(false)))}
+            </div>
           </nav>
         </DialogContent>
       </Dialog>
@@ -224,7 +234,8 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
             onChange={e => setQuery(e.target.value)}
             placeholder="Search sections..."
             autoFocus
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm tracking-tight placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="w-full rounded-md border bg-background px-3 py-2 text-sm tracking-tight placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground/40 transition-colors"
+            style={{ fontSize: 16 }}
           />
           <nav className="flex flex-col gap-0.5">
             {filtered.length === 0 ? (
@@ -262,7 +273,7 @@ const CRUMB_SECTIONS: { prefix: string; base: string }[] = [
 
 function SiteHeader() {
   const pathname = usePathname();
-  const { crumb, subtitle, actions } = usePageCrumbValues();
+  const { crumb, actions } = usePageCrumbValues();
 
   const section = CRUMB_SECTIONS.find(s => pathname !== s.prefix && pathname.startsWith(`${s.prefix}/`));
   const title = TITLES[pathname] ?? section?.base ?? "Dashboard";
@@ -272,24 +283,39 @@ function SiteHeader() {
     : null;
 
   // Pages that publish `actions` (currently just the case thread) render
-  // their own full header row — back arrow, title, subtitle, badges/menu —
+  // their own full header row — back arrow, centered crumb, badges/menu —
   // in place of the usual centered "Section / crumb" breadcrumb, since that
   // row used to live duplicated inside the page content instead of the
-  // shared topbar.
-  if (actions) {
+  // shared topbar. /messages/new has no actions of its own, but needs the
+  // same bare "back arrow only" treatment (its old in-page header — arrow +
+  // "New case" label — was removed in favor of this).
+  const isNewCase = pathname === "/dashboard/messages/new";
+  if (actions || isNewCase) {
     return (
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border md:rounded-t-xl px-4 lg:px-6">
-        {titleHref && (
-          <Link href={titleHref} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-            <ArrowLeftIcon className="size-4" />
-            <span className="sr-only">{title}</span>
-          </Link>
-        )}
-        <div className="flex items-baseline gap-2 min-w-0">
-          <span className="text-[15px] font-medium tracking-tight truncate">{trailingLabel ?? title}</span>
-          {subtitle && <span className="text-[13px] text-muted-foreground shrink-0">{subtitle}</span>}
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border md:rounded-t-xl">
+        <div className="relative flex w-full items-center gap-2 px-4 lg:px-6">
+          {titleHref && (
+            <Link href={titleHref} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
+              <ArrowLeftIcon className="size-4" />
+              <span className="sr-only">{title}</span>
+            </Link>
+          )}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 lg:px-6">
+            {isNewCase ? (
+              <span className="flex items-center gap-1.5 text-[15px] font-medium tracking-tight">
+                <span className="text-muted-foreground">{title}</span>
+                <span className="text-muted-foreground">/</span>
+                <span>{trailingLabel}</span>
+              </span>
+            ) : crumb && (
+              <span className="text-[13px] tabular-nums text-muted-foreground">{crumb}</span>
+            )}
+          </div>
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+            {actions}
+            {!actions && <ArrowLeftIcon className="size-4 invisible" aria-hidden />}
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-2 shrink-0">{actions}</div>
       </header>
     );
   }
@@ -298,8 +324,16 @@ function SiteHeader() {
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border md:rounded-t-xl">
       <div className="relative flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1 hidden md:flex" />
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 lg:px-6">
-          <div className="w-full lg:max-w-[58%] flex items-center justify-center gap-1.5">
+        <div className="pointer-events-none absolute inset-0 flex items-center px-4 lg:px-6">
+          {/* The content column below (e.g. licenses-view.tsx) is itself
+              perfectly centered — but individual rows inside it (like the
+              license row's [1fr_auto_1fr_auto] grid) place their own
+              "center" column left of that true center, since the trailing
+              actions column has no mirrored spacer on the left. Rather than
+              rework every row's grid, the topbar's label is nudged left by
+              the same amount so it visually lines up with what users
+              actually see as centered in the row below. */}
+          <div className="w-full lg:max-w-[58%] mx-auto lg:-translate-x-5 flex items-center justify-center gap-1.5">
             {titleHref ? (
               <Link href={titleHref} className="pointer-events-auto text-[15px] font-medium tracking-tight text-muted-foreground hover:text-foreground transition-colors">
                 {title}

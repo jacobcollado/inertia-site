@@ -17,11 +17,11 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       .single(),
     supabase
       .from("messages")
-      .select("id, client_id, case_id, sender, body, read_at, created_at")
+      .select("id, client_id, case_id, sender, body, read_at, created_at, suggest_close")
       .eq("client_id", user.id)
       .eq("case_id", id)
       .order("created_at", { ascending: true }),
-    supabase.from("clients").select("name, company").eq("id", user.id).single(),
+    supabase.from("clients").select("name, company, ai_barred_until").eq("id", user.id).single(),
     supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
   ]);
 
@@ -36,6 +36,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       messages={messages ?? []}
       clientName={displayName}
       clientAvatarUrl={(profile?.avatar_url as string | null) ?? null}
+      aiBarredUntil={(client?.ai_barred_until as string | null) ?? null}
     />
   );
 }

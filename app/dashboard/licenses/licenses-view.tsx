@@ -87,7 +87,7 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
                     <span className="text-[15px] font-medium truncate max-w-40">{l.domain ?? "Not assigned"}</span>
                   </div>
 
-                  <div className="hidden sm:flex flex-col gap-1 items-end pr-6">
+                  <div className="hidden sm:flex flex-col gap-1 items-end">
                     <span className="text-[13px] text-muted-foreground">
                       Purchased {fmtDate(l.created_at)}
                     </span>
