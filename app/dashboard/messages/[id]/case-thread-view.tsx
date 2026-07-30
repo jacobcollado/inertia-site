@@ -108,11 +108,30 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   // message list scrolling internally, but if it's ever briefly taller than
   // the viewport (font/layout timing, keyboard opening), the page itself
   // would otherwise scroll instead. Restored on unmount for every other page.
+  //
+  // overflow: hidden alone only blocks wheel/programmatic scroll — mobile
+  // Safari/Chrome still let a touch drag rubber-band the page (or the whole
+  // viewport shift when the input focuses) since that's a touchmove default
+  // action, not governed by CSS overflow. touch-action: none plus a
+  // touchmove listener that only lets drags through when they originate
+  // inside the message list closes that gap.
   useEffect(() => {
     const prevOverflow = document.body.style.overflow;
+    const prevTouchAction = document.body.style.touchAction;
     document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+
+    const blockOutsideList = (e: TouchEvent) => {
+      const list = listRef.current;
+      if (list && e.target instanceof Node && list.contains(e.target)) return;
+      e.preventDefault();
+    };
+    document.body.addEventListener("touchmove", blockOutsideList, { passive: false });
+
     return () => {
       document.body.style.overflow = prevOverflow;
+      document.body.style.touchAction = prevTouchAction;
+      document.body.removeEventListener("touchmove", blockOutsideList);
     };
   }, []);
 
