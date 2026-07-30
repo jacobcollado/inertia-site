@@ -96,32 +96,6 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   const bottomRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // The h-[calc(100dvh-...)] fallback below assumes the header, page padding,
-  // and mobile nav dock always add up to a fixed number of pixels — true most
-  // of the time, but mobile Safari's collapsing URL bar changes the visible
-  // viewport height without firing a resize at a predictable moment, so that
-  // calc can still be briefly wrong and force a whole-page scroll instead of
-  // just the message list scrolling internally. Measuring the container's
-  // actual position against the live visualViewport height is exact instead
-  // of assumed, so the message list is always the only thing that scrolls.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || typeof window === "undefined" || !window.visualViewport) return;
-    const vv = window.visualViewport;
-    const resize = () => {
-      const top = el.getBoundingClientRect().top;
-      el.style.height = `${Math.max(vv.height - top, 320)}px`;
-    };
-    resize();
-    vv.addEventListener("resize", resize);
-    window.addEventListener("orientationchange", resize);
-    return () => {
-      vv.removeEventListener("resize", resize);
-      window.removeEventListener("orientationchange", resize);
-    };
-  }, []);
 
   const markRead = () => {
     setMessages(prev => prev.map(m => m.sender === "admin" && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m));
@@ -277,7 +251,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   );
 
   return (
-    <div ref={containerRef} className="relative flex flex-col gap-0 h-[calc(100dvh-56px-7rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
+    <div className="relative flex flex-col gap-0 h-[calc(100dvh-56px-7rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
       <div className="flex-1 overflow-y-auto flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16 opacity-60">
@@ -358,10 +332,15 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
         <div ref={bottomRef} />
       </div>
 
-      <div className="shrink-0 relative flex flex-col pt-2 w-full lg:max-w-[55%] mx-auto">
+      <div className="shrink-0 relative flex flex-col w-full lg:max-w-[55%] mx-auto">
         {/* Fades scrolled-past message content out under the input instead
-            of it cutting off hard against the input's own background. */}
+            of it cutting off hard against the input's own background.
+            The wrapper's own top padding used to sit below this (bottom-full
+            positions relative to the padding box), leaving a visible gap
+            before the bar — moved the pt-2 onto the content below instead so
+            the fade sits flush against it. */}
         <div className={`pointer-events-none absolute inset-x-0 bottom-full h-10 bg-gradient-to-t from-background to-transparent ${(isClosed || isAiBarred) ? "" : "rounded-t-2xl"}`} />
+        <div className="flex flex-col pt-2">
         {isClosed && (
           <div className="flex items-center justify-between gap-3 rounded-t-xl border border-b-0 bg-sidebar px-4 py-3">
             <span className="text-sm text-muted-foreground">Need further help with this case?</span>
@@ -422,6 +401,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
             </button>
           </div>
         </form>
+        </div>
       </div>
 
       <Dialog open={confirmingClose} onOpenChange={setConfirmingClose}>
