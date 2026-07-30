@@ -94,6 +94,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   const [closing, setClosing] = useState(false);
   const [aiBarredUntil, setAiBarredUntil] = useState(initialAiBarredUntil);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -147,7 +148,11 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   }, [clientId, caseData.id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "instant" as ScrollBehavior });
+    // Scrolls only the message list itself (never scrollIntoView, which can
+    // scroll the whole page if the list's height is briefly taller than the
+    // viewport on load — landing the page at the bottom instead of the top).
+    const list = listRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
   }, [messages, adminTyping, sending]);
 
   const onDraftChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -251,8 +256,8 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   );
 
   return (
-    <div className="relative flex flex-col gap-0 h-[calc(100dvh-56px-7rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
-      <div className="flex-1 overflow-y-auto flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
+    <div className="relative flex flex-col gap-0 h-[calc(100dvh-56px-3rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
+      <div ref={listRef} className="flex-1 overflow-y-auto flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16 opacity-60">
             <p className="text-sm text-muted-foreground">No messages yet.</p>
@@ -332,15 +337,13 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
         <div ref={bottomRef} />
       </div>
 
-      <div className="shrink-0 relative flex flex-col w-full lg:max-w-[55%] mx-auto">
+      <div className="shrink-0 relative flex flex-col pt-2 w-full lg:max-w-[55%] mx-auto">
         {/* Fades scrolled-past message content out under the input instead
             of it cutting off hard against the input's own background.
-            The wrapper's own top padding used to sit below this (bottom-full
-            positions relative to the padding box), leaving a visible gap
-            before the bar — moved the pt-2 onto the content below instead so
-            the fade sits flush against it. */}
+            Positioned against the pt-2 content div (not the outer wrapper),
+            so it sits flush against the bar/form's own top edge with no gap. */}
+        <div className="flex flex-col relative">
         <div className={`pointer-events-none absolute inset-x-0 bottom-full h-10 bg-gradient-to-t from-background to-transparent ${(isClosed || isAiBarred) ? "" : "rounded-t-2xl"}`} />
-        <div className="flex flex-col pt-2">
         {isClosed && (
           <div className="flex items-center justify-between gap-3 rounded-t-xl border border-b-0 bg-sidebar px-4 py-3">
             <span className="text-sm text-muted-foreground">Need further help with this case?</span>
