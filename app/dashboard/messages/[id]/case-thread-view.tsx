@@ -96,52 +96,9 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   const bottomRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 100dvh only updates once the browser's own resize/scroll gesture has
-  // fully settled, which reads as a visible catch-up delay whenever the
-  // keyboard opens/closes or Safari's toolbar collapses. visualViewport
-  // fires continuously through that transition, so setting the container's
-  // height directly from it tracks the real viewport far more fluidly.
-  // Mirrors the same bottom clearance as the mobile dvh calc below (6rem, for
-  // the nav dock + gap off the home-indicator/notch) — without it the input
-  // sits flush against the bottom edge instead of clear of it. rAF-batches
-  // the updates since resize/scroll can fire many times per gesture; without
-  // batching, writing style.height synchronously on every event is what read
-  // as choppy instead of a smooth follow.
-  useEffect(() => {
-    const vv = window.visualViewport;
-    const el = containerRef.current;
-    if (!vv || !el) return;
-    const BOTTOM_CLEARANCE = window.innerWidth >= 768 ? 32 : 96; // md:2rem / mobile 6rem
-    const HEADER_HEIGHT = 56;
-    // Measuring el.getBoundingClientRect().top live caused the jump-then-
-    // settle on focus: opening the keyboard makes mobile Safari auto-scroll
-    // the focused input into view, which shifts `top` on its own, slightly
-    // out of sync with visualViewport's own resize event — one bad
-    // intermediate frame lands before both catch up. The container always
-    // sits directly below the fixed header, so top is a known constant, not
-    // something that needs to be re-measured from a scroll-affected DOM read.
-    let rafId: number | null = null;
-    const applyHeight = () => {
-      rafId = null;
-      el.style.height = `${Math.max(vv.height - HEADER_HEIGHT - BOTTOM_CLEARANCE, 320)}px`;
-    };
-    const schedule = () => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(applyHeight);
-    };
-    applyHeight();
-    vv.addEventListener("resize", schedule);
-    vv.addEventListener("scroll", schedule);
-    return () => {
-      if (rafId !== null) cancelAnimationFrame(rafId);
-      vv.removeEventListener("resize", schedule);
-      vv.removeEventListener("scroll", schedule);
-    };
-  }, []);
 
   const markRead = () => {
     setMessages(prev => prev.map(m => m.sender === "admin" && !m.read_at ? { ...m, read_at: new Date().toISOString() } : m));
@@ -337,7 +294,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   );
 
   return (
-    <div ref={containerRef} className="relative flex flex-col gap-0 h-[calc(100dvh-56px-6rem)] md:h-[calc(100dvh-56px-2rem)] lg:h-[calc(100dvh-56px-3rem)]" style={{ minHeight: 400 }}>
+    <div className="relative flex flex-col gap-0 h-[calc(100svh-56px-6rem)] md:h-[calc(100svh-56px-2rem)] lg:h-[calc(100svh-56px-3rem)]" style={{ minHeight: 400 }}>
       <div ref={listRef} className="flex-1 overflow-y-auto overscroll-contain flex flex-col gap-6 px-1 py-6 w-full lg:max-w-[55%] mx-auto">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16 opacity-60">
