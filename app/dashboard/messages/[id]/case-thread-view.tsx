@@ -95,6 +95,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   const [aiBarredUntil, setAiBarredUntil] = useState(initialAiBarredUntil);
   const bottomRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -198,6 +199,10 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
     trigger("light");
     setSending(true);
     setDraft("");
+    // Dismisses the mobile keyboard on send, so the layout (shifted up while
+    // the input was focused) drops back to its resting position against the
+    // notch instead of staying shifted after the message goes out.
+    textareaRef.current?.blur();
     const optimistic: Message = {
       id: `optimistic-${Date.now()}`,
       client_id: clientId,
@@ -410,6 +415,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
             <span className="text-[13px] font-medium tracking-tight">{clientName}</span>
           </div>
           <textarea
+            ref={textareaRef}
             rows={1}
             value={draft}
             onChange={onDraftChange}
