@@ -204,6 +204,12 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
     // the input was focused) drops back to its resting position against the
     // notch instead of staying shifted after the message goes out.
     textareaRef.current?.blur();
+    // iOS can leave the page's scroll position slightly offset after the
+    // keyboard closes even though 100svh itself never changes — the visible
+    // symptom is the gap above the input growing a bit after a focus+send
+    // round trip. Forcing scroll back to 0 clears that residual offset.
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
     const optimistic: Message = {
       id: `optimistic-${Date.now()}`,
       client_id: clientId,
