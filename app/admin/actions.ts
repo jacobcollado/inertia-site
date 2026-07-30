@@ -3,6 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { sendEmail } from "@/lib/email";
 
 /* ── Auth guard ───────────────────────────────────────────────────── */
 
@@ -142,8 +143,15 @@ export async function addProjectUpdate(projectId: string, clientId: string, stat
     note: note || null,
   });
   if (error) return { error: error.message };
+  const { data: project } = await admin.from("projects").select("title").eq("id", projectId).single();
   await admin.from("projects").update({ status }).eq("id", projectId);
   revalidatePath(`/admin/clients/${clientId}`);
+  await notifyClient(
+    clientId,
+    "project_update",
+    `Update on ${project?.title ?? "your project"}`,
+    `Status changed to "${status.replace("_", " ")}".${note ? `\n\n${note}` : ""}`
+  );
   return { success: true };
 }
 
@@ -164,19 +172,28 @@ export async function createInvoice(clientId: string, formData: FormData) {
   await requireAdmin();
   const admin = createAdminClient();
   const amountRaw = formData.get("amount") as string;
+  const label = formData.get("label") as string;
+  const dueDate = formData.get("due_date") as string || null;
 
   await ensureClientRow(clientId);
 
   const { error } = await admin.from("invoices").insert({
     client_id: clientId,
-    label: formData.get("label") as string,
+    label,
     amount: Math.round(parseFloat(amountRaw) * 100),
     status: formData.get("status") as string || "pending",
-    due_date: formData.get("due_date") as string || null,
+    due_date: dueDate,
     payment_url: formData.get("payment_url") as string || null,
   });
   if (error) return { error: error.message };
   revalidatePath(`/admin/clients/${clientId}`);
+  const amountDisplay = (parseFloat(amountRaw) || 0).toFixed(2);
+  await notifyClient(
+    clientId,
+    "invoice_due",
+    "New invoice from Inertia",
+    `A new invoice "${label}" for $${amountDisplay} has been added to your account.${dueDate ? ` Due ${dueDate}.` : ""}`
+  );
   return { success: true };
 }
 
@@ -204,6 +221,31 @@ export async function deleteInvoice(invoiceId: string, clientId: string) {
 async function logAction(clientId: string, action: string, detail?: string) {
   const admin = createAdminClient();
   await admin.from("admin_log").insert({ client_id: clientId, action, detail: detail ?? null });
+}
+
+/* ── Notifications ────────────────────────────────────────────────── */
+
+type NotificationKind = "new_message" | "invoice_due" | "project_update";
+
+/* Looks up the client's email + notification_prefs and sends only if that
+   kind is enabled (defaults to on if the client predates the prefs column).
+   Never throws — a failed notification shouldn't roll back or block the
+   action that triggered it. */
+async function notifyClient(clientId: string, kind: NotificationKind, subject: string, text: string) {
+  try {
+    const admin = createAdminClient();
+    const { data: client } = await admin
+      .from("clients")
+      .select("email, notification_prefs")
+      .eq("id", clientId)
+      .single();
+    if (!client?.email) return;
+    const prefs = (client.notification_prefs as Record<string, boolean> | null) ?? {};
+    if (prefs[kind] === false) return;
+    await sendEmail({ to: client.email, subject, text });
+  } catch (err) {
+    console.error("[notifyClient] failed:", err);
+  }
 }
 
 /* ── Account management ───────────────────────────────────────────── */
@@ -319,6 +361,7 @@ export async function sendAdminMessage(clientId: string, body: string, caseId: s
   const { error } = await admin.from("messages").insert({ client_id: clientId, case_id: caseId, sender: "admin", body });
   if (error) return { error: error.message };
   revalidatePath(`/admin/clients/${clientId}`);
+  await notifyClient(clientId, "new_message", "New message from Inertia support", body);
   return { success: true };
 }
 

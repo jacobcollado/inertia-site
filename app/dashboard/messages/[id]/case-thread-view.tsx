@@ -121,6 +121,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
     new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
   const isClosed = caseData.status === "closed";
+  const waitingOnClient = !isClosed && messages.length > 0 && messages[messages.length - 1].sender === "admin";
 
   const onCreateFollowUp = async () => {
     if (creatingFollowUp) return;
@@ -143,6 +144,11 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
           <span className="text-[13px] text-muted-foreground shrink-0">updated {fmtDate(caseData.updated_at)}</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {waitingOnClient && (
+            <Badge variant="outline" className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400 hidden sm:inline-flex">
+              We need your response
+            </Badge>
+          )}
           <Badge variant="outline" className="border-transparent bg-muted text-muted-foreground">
             {CASE_SEVERITY_LABEL[caseData.severity]}
           </Badge>

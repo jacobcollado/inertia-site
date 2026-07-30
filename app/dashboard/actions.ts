@@ -100,6 +100,33 @@ export async function updateClientProfile(name: string) {
   return { success: true };
 }
 
+export async function updateNotificationPrefs(prefs: { new_message: boolean; invoice_due: boolean; project_update: boolean }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  const { error } = await supabase.from("clients").update({ notification_prefs: prefs }).eq("id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+}
+
+/* Self-service account deletion. Uses the admin client (service role) only
+   to perform the actual auth.users delete, which requires it — but the
+   target id always comes from the caller's own verified session, never from
+   an argument, so this can only ever delete the caller's own account. */
+export async function deleteOwnAccount() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) return { error: error.message };
+
+  await supabase.auth.signOut();
+  return { success: true };
+}
+
 /* Mints a short-lived signed URL for a private client file. Uses the service
    role client (which bypasses RLS), so it must verify the caller itself — and
    must confirm the path belongs to them, since storage keys are

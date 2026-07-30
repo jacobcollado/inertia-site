@@ -1,4 +1,5 @@
-export type Client = { id: string; email: string; name: string | null; company: string | null };
+export type NotificationPrefs = { new_message: boolean; invoice_due: boolean; project_update: boolean };
+export type Client = { id: string; email: string; name: string | null; company: string | null; notification_prefs?: NotificationPrefs };
 export type Project = { id: string; title: string; status: string; phase: string | null; last_update: string | null; notes: string | null; start_date: string | null; target_date: string | null };
 export type ProjectUpdate = { id: string; project_id: string; status: string; note: string | null; created_at: string };
 export type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null; payment_url: string | null };

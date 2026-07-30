@@ -39,6 +39,19 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
     [messages, selectedCaseId]
   );
 
+  // A case is "waiting on the client" once admin has sent the last message
+  // and the client hasn't replied yet (and the case isn't closed).
+  const waitingOnClientById = useMemo(() => {
+    const map = new Map<string, boolean>();
+    for (const c of cases) {
+      if (c.status === "closed") { map.set(c.id, false); continue; }
+      const forCase = messages.filter(m => m.case_id === c.id);
+      const last = forCase[forCase.length - 1];
+      map.set(c.id, last?.sender === "admin");
+    }
+    return map;
+  }, [cases, messages]);
+
   useEffect(() => {
     if (!selectedCaseId) return;
     markMessagesRead(clientId, selectedCaseId);
@@ -171,17 +184,23 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
     <div className="flex gap-6" style={{ height: "calc(100vh - 280px)", minHeight: 360 }}>
       <div className="w-64 shrink-0 flex flex-col gap-1 overflow-y-auto pr-2">
         <h2 className="text-[1.1rem] font-semibold tracking-[-0.02em] text-foreground mb-2">Cases</h2>
-        {cases.map(c => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => setSelectedCaseId(c.id)}
-            className={`text-left rounded-lg px-3 py-2.5 transition-colors ${c.id === selectedCaseId ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"}`}
-          >
-            <div className="text-[13px] font-medium tracking-tight truncate">{c.title}</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">#{c.case_number}</div>
-          </button>
-        ))}
+        {cases.map(c => {
+          const waiting = waitingOnClientById.get(c.id);
+          return (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setSelectedCaseId(c.id)}
+              className={`flex items-center justify-between gap-2 text-left rounded-lg px-3 py-2.5 transition-colors ${c.id === selectedCaseId ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"}`}
+            >
+              <div className="min-w-0">
+                <div className="text-[13px] font-medium tracking-tight truncate">{c.title}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">#{c.case_number}</div>
+              </div>
+              {waiting && <span className="size-1.5 rounded-full bg-amber-500 shrink-0" title="Waiting on client response" />}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex-1 min-w-0 flex flex-col gap-0">
@@ -192,6 +211,11 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
               <span className="text-[12px] text-muted-foreground">#{selectedCase.case_number}</span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              {waitingOnClientById.get(selectedCase.id) && (
+                <Badge variant="outline" className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                  Waiting on client
+                </Badge>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={

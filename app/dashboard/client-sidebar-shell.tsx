@@ -48,13 +48,14 @@ const SETTINGS_NAV_ITEMS = [
   { href: "/dashboard/settings", label: "Settings", icon: SettingsIcon },
 ];
 
-function NavItems({ items, pathname, unreadMessages }: { items: typeof WORKSPACE_NAV_ITEMS; pathname: string; unreadMessages?: number }) {
+function NavItems({ items, pathname, unreadMessages, needsResponse }: { items: typeof WORKSPACE_NAV_ITEMS; pathname: string; unreadMessages?: number; needsResponse?: boolean }) {
   const { setOpenMobile } = useSidebar();
   return (
     <SidebarMenu>
       {items.map(({ href, label, icon: Icon }) => {
         const active = href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
         const badge = label === "Support" ? unreadMessages : undefined;
+        const showDot = label === "Support" && needsResponse && !badge;
         return (
           <SidebarMenuItem key={href}>
             <SidebarMenuButton
@@ -70,6 +71,7 @@ function NavItems({ items, pathname, unreadMessages }: { items: typeof WORKSPACE
             >
               <Icon />
               <span>{label}</span>
+              {showDot && <span className="ml-auto size-1.5 rounded-full bg-amber-500 shrink-0" />}
             </SidebarMenuButton>
             {!!badge && badge > 0 && <SidebarMenuBadge>{badge > 9 ? "9+" : badge}</SidebarMenuBadge>}
           </SidebarMenuItem>
@@ -79,7 +81,7 @@ function NavItems({ items, pathname, unreadMessages }: { items: typeof WORKSPACE
   );
 }
 
-function AppSidebar({ unreadMessages, email, displayName, avatarUrl }: { unreadMessages: number; email: string; displayName: string; avatarUrl: string | null }) {
+function AppSidebar({ unreadMessages, needsResponse, email, displayName, avatarUrl }: { unreadMessages: number; needsResponse?: boolean; email: string; displayName: string; avatarUrl: string | null }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   return (
@@ -102,7 +104,7 @@ function AppSidebar({ unreadMessages, email, displayName, avatarUrl }: { unreadM
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
-            <NavItems items={WORKSPACE_NAV_ITEMS} pathname={pathname} unreadMessages={unreadMessages} />
+            <NavItems items={WORKSPACE_NAV_ITEMS} pathname={pathname} unreadMessages={unreadMessages} needsResponse={needsResponse} />
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
@@ -149,9 +151,10 @@ function SiteHeader() {
   );
 }
 
-export function ClientSidebarShell({ children, unreadMessages = 0, email, displayName, avatarUrl }: {
+export function ClientSidebarShell({ children, unreadMessages = 0, needsResponse = false, email, displayName, avatarUrl }: {
   children: React.ReactNode;
   unreadMessages?: number;
+  needsResponse?: boolean;
   email: string;
   displayName: string;
   avatarUrl: string | null;
@@ -173,7 +176,7 @@ export function ClientSidebarShell({ children, unreadMessages = 0, email, displa
       className="bg-sidebar text-foreground min-h-svh"
       style={{ "--sidebar-width": "16rem" } as React.CSSProperties}
     >
-      <AppSidebar unreadMessages={unreadMessages} email={email} displayName={displayName} avatarUrl={avatarUrl} />
+      <AppSidebar unreadMessages={unreadMessages} needsResponse={needsResponse} email={email} displayName={displayName} avatarUrl={avatarUrl} />
       <SidebarInset>
         <SiteHeader />
         <main className="flex flex-1 flex-col gap-6 p-4 lg:p-6">

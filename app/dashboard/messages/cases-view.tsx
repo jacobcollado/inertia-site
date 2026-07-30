@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createCase } from "../actions";
-import { CASE_STATUS_VARIANT, CASE_SEVERITY_LABEL, fmtDate, type Case, type CaseStatus, type CaseSeverity } from "../types";
+import { CASE_STATUS_VARIANT, CASE_SEVERITY_LABEL, fmtDate, type Case, type CaseStatus, type CaseSeverity, type Message } from "../types";
 
 const STATUS_FILTERS: { value: CaseStatus | "all"; label: string }[] = [
   { value: "all", label: "All statuses" },
@@ -29,8 +29,15 @@ const SEVERITY_FILTERS: { value: CaseSeverity | "all"; label: string }[] = [
   { value: "severity_4", label: "Severity 4" },
 ];
 
-export function CasesView({ cases }: { cases: Case[] }) {
+export function CasesView({ cases, messages }: { cases: Case[]; messages: Message[] }) {
   const router = useRouter();
+  const lastSenderByCase = useMemo(() => {
+    const map = new Map<string, Message["sender"]>();
+    for (const m of messages) {
+      if (m.case_id) map.set(m.case_id, m.sender);
+    }
+    return map;
+  }, [messages]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "all">("all");
   const [severityFilter, setSeverityFilter] = useState<CaseSeverity | "all">("all");
@@ -133,7 +140,9 @@ export function CasesView({ cases }: { cases: Case[] }) {
         </p>
       ) : (
         <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
-          {filtered.map((c, i) => (
+          {filtered.map((c, i) => {
+            const waitingOnClient = c.status !== "closed" && lastSenderByCase.get(c.id) === "admin";
+            return (
             <Link
               key={c.id}
               href={`/dashboard/messages/${c.id}`}
@@ -146,6 +155,11 @@ export function CasesView({ cases }: { cases: Case[] }) {
                 <span className="text-[13px] text-muted-foreground">Last updated {fmtDate(c.updated_at)}</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                {waitingOnClient && (
+                  <Badge variant="outline" className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400 hidden sm:inline-flex">
+                    We need your response
+                  </Badge>
+                )}
                 <Badge variant="outline" className="border-transparent bg-muted text-muted-foreground">
                   {CASE_SEVERITY_LABEL[c.severity]}
                 </Badge>
@@ -154,7 +168,8 @@ export function CasesView({ cases }: { cases: Case[] }) {
                 </Badge>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
 
