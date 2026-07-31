@@ -3,6 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logAiUsage } from "@/lib/ai-usage";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -43,7 +44,7 @@ export async function sendClientMessage(body: string, caseId: string) {
       .select("sender, body")
       .eq("case_id", caseId)
       .order("created_at", { ascending: true });
-    reply = await generateAutoReply(history ?? [{ sender: "client", body }]);
+    reply = await generateAutoReply(history ?? [{ sender: "client", body }], user.id);
   }
 
   const { data: replyRow, error: replyError } = await admin
@@ -186,20 +187,28 @@ const SUPPORT_AGENT_SYSTEM_PROMPT =
    stripped from the visible body — so the caller can render an inline
    "Close case" confirm button on this message instead of the client having
    to find the close action buried in the case's own "⋯" menu. */
-async function generateAutoReply(history: { sender: string; body: string }[]): Promise<{ body: string; suggestClose: boolean }> {
+async function generateAutoReply(history: { sender: string; body: string }[], clientId?: string): Promise<{ body: string; suggestClose: boolean }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || history.length === 0) return { body: FALLBACK_AUTO_REPLY_BODY, suggestClose: false };
 
+  const MODEL = "claude-sonnet-5";
   try {
     const anthropic = new Anthropic({ apiKey });
     const response = await anthropic.messages.create({
-      model: "claude-sonnet-5",
+      model: MODEL,
       max_tokens: 300,
       system: SUPPORT_AGENT_SYSTEM_PROMPT,
       messages: history.map(m => ({
         role: m.sender === "admin" ? "assistant" as const : "user" as const,
         content: m.body,
       })),
+    });
+    logAiUsage({
+      model: MODEL,
+      feature: "client-auto-reply",
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      clientId,
     });
     const raw = response.content.find(b => b.type === "text")?.text?.trim();
     if (!raw) return { body: FALLBACK_AUTO_REPLY_BODY, suggestClose: false };
@@ -249,7 +258,7 @@ export async function createCaseWithMessage(body: string) {
   const admin = createAdminClient();
   const reply = rateLimit.barred
     ? { body: BARRED_REPLY_BODY, suggestClose: false }
-    : await generateAutoReply([{ sender: "client", body: trimmed }]);
+    : await generateAutoReply([{ sender: "client", body: trimmed }], user.id);
   const { error: replyError } = await admin.from("messages").insert({
     client_id: user.id,
     case_id: newCase.id,

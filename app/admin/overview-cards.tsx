@@ -346,7 +346,7 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="gap-4">
+        <Card className="gap-4 border">
           <CardHeader>
             <CardDescription>Revenue collected</CardDescription>
             <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -371,7 +371,7 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
           </CardFooter>
         </Card>
 
-        <Card className="gap-4">
+        <Card className="gap-4 border">
           <CardHeader>
             <CardDescription>Outstanding</CardDescription>
             <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -388,7 +388,7 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
           </CardFooter>
         </Card>
 
-        <Card className="gap-4">
+        <Card className="gap-4 border">
           <CardHeader>
             <CardDescription>Growth rate</CardDescription>
             <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -405,7 +405,7 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
           </CardFooter>
         </Card>
 
-        <Card className="gap-4">
+        <Card className="gap-4 border">
           <CardHeader>
             <CardDescription>Active projects</CardDescription>
             <CardTitle className="text-2xl font-semibold tabular-nums">

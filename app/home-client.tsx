@@ -534,7 +534,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
           )}
 
           <h1
-            className="font-normal tracking-tight leading-[0.88] max-w-xl"
+            className="font-normal tracking-tight leading-[0.6] max-w-xl"
             style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             Design that moves at your{" "}
@@ -593,6 +593,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
                 <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
               </svg>
             </a>
+            {false && (
             <a
               href="https://t.me/kayzxyz"
               target="_blank"
@@ -605,6 +606,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
             >
               Send a message
             </a>
+            )}
           </div>
         </div>
       </div>

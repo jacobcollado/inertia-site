@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { PlusIcon, TrashIcon, UploadCloudIcon } from "lucide-react";
+import { PlusIcon, TrashIcon, UploadCloudIcon, FolderOpenIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -124,7 +123,7 @@ export function FilesTab({ clientId, files }: { clientId: string; files: DFile[]
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 w-full lg:max-w-[58%] mx-auto">
       <div className="flex items-center justify-between">
         <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">Files</h2>
         <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
@@ -134,28 +133,43 @@ export function FilesTab({ clientId, files }: { clientId: string; files: DFile[]
       </div>
 
       {data.length === 0 ? (
-        <p className="text-[14px] tracking-tight text-muted-foreground py-4">No files yet.</p>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <FolderOpenIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">No files yet</p>
+            <p className="text-[13px] text-muted-foreground">Upload one to share it with this client.</p>
+          </div>
+          <Button variant="outline" size="sm" className="mt-1" onClick={() => setAdding(true)}>
+            <PlusIcon />
+            Upload file
+          </Button>
+        </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {data.map((f) => (
-            <Card key={f.id} className="flex-row items-center justify-between gap-4 px-4 py-4 group">
+        <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
+          {data.map((f, i) => (
+            <div
+              key={f.id}
+              className={`flex items-center justify-between gap-4 rounded-md border bg-sidebar px-5 py-4 sm:rounded-none sm:border-0 sm:border-b group ${i === data.length - 1 ? "sm:border-b-0" : ""}`}
+            >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[10px] font-bold tracking-wider bg-sidebar-accent text-muted-foreground">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[10px] font-bold tracking-wider bg-muted text-muted-foreground">
                   {(f.label.match(/\.([a-zA-Z0-9]+)$/) ?? ["", ""])[1].toUpperCase().slice(0, 4) || "FILE"}
                 </div>
                 <div className="min-w-0">
-                  <span className="text-[15px] font-medium tracking-tight text-foreground truncate block">{f.label}</span>
-                  <span className="text-[12px] tracking-tight text-muted-foreground">{fmtDate(f.uploaded_at)}</span>
+                  <span className="text-[15px] font-medium tracking-tight truncate block">{f.label}</span>
+                  <span className="text-[13px] text-muted-foreground">{fmtDate(f.uploaded_at)}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <OpenFileButton url={f.url} />
-                <Button variant="ghost" size="icon" className="size-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity" disabled={pending} onClick={() => onDelete(f.id)}>
+                <Button variant="ghost" size="icon-sm" className="text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive transition-opacity" disabled={pending} onClick={() => onDelete(f.id)}>
                   <TrashIcon />
                   <span className="sr-only">Delete</span>
                 </Button>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}

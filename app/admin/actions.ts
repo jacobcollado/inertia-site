@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { sendEmail } from "@/lib/email";
+import { logAiUsage } from "@/lib/ai-usage";
 
 /* ── Auth guard ───────────────────────────────────────────────────── */
 
@@ -363,6 +364,49 @@ export async function sendAdminMessage(clientId: string, body: string, caseId: s
   revalidatePath(`/admin/clients/${clientId}`);
   await notifyClient(clientId, "new_message", "New message from Inertia support", body);
   return { success: true };
+}
+
+/* Suggests one short reply for the admin to send, based on the case's recent
+   message history — a much cheaper/faster model than the client-facing
+   auto-reply (Haiku vs Sonnet) since this is just a starting-point
+   suggestion the admin can edit or discard, not a reply sent unprompted.
+   Returns null (no suggestion) rather than throwing when the key is
+   missing, the thread is empty, or the call fails — the composer already
+   has static quick-reply chips as a fallback. */
+export async function suggestAdminReply(history: { sender: string; body: string }[]): Promise<{ suggestion: string } | { suggestion: null }> {
+  await requireAdmin();
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || history.length === 0) return { suggestion: null };
+
+  const MODEL = "claude-haiku-4-5-20251001";
+  try {
+    const { default: Anthropic } = await import("@anthropic-ai/sdk");
+    const anthropic = new Anthropic({ apiKey });
+    const response = await anthropic.messages.create({
+      model: MODEL,
+      max_tokens: 120,
+      system:
+        "You are drafting a short reply for a human support agent at a design/dev studio (Inertia) to send to a client, " +
+        "based on the conversation so far. Write ONE short, natural reply (1-3 sentences) in the agent's voice, " +
+        "as if you were them replying directly. Do not add a greeting or sign-off. Do not explain your reasoning. " +
+        "Output only the reply text itself, nothing else.",
+      messages: history.map(m => ({
+        role: m.sender === "admin" ? "assistant" as const : "user" as const,
+        content: m.body,
+      })),
+    });
+    logAiUsage({
+      model: MODEL,
+      feature: "admin-quick-reply",
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+    });
+    const raw = response.content.find(b => b.type === "text")?.text?.trim();
+    return raw ? { suggestion: raw } : { suggestion: null };
+  } catch (err) {
+    console.error("suggestAdminReply failed:", err instanceof Error ? err.message : err);
+    return { suggestion: null };
+  }
 }
 
 export async function markMessagesRead(clientId: string, caseId: string | null) {

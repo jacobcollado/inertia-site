@@ -27,6 +27,7 @@ import {
 
 import { inviteClient, deleteAccount, suspendAccount, unsuspendAccount } from "../actions";
 import type { Client } from "../data";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -181,9 +182,10 @@ function buildColumns(onDeleted: (id: string) => void): ColumnDef<Client>[] {
         const initials = (c.name ?? c.email).slice(0, 2).toUpperCase();
         return (
           <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-3 min-w-0 hover:opacity-75 transition-opacity">
-            <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center text-[11px] font-medium tracking-tight text-muted-foreground bg-sidebar-accent">
-              {initials}
-            </div>
+            <Avatar className="h-8 w-8 shrink-0">
+              {c.avatar_url && <AvatarImage src={c.avatar_url} alt={displayName} />}
+              <AvatarFallback className="text-[11px]">{initials}</AvatarFallback>
+            </Avatar>
             <div className="flex flex-col min-w-0">
               <span className="text-[14px] font-medium tracking-tight text-foreground truncate leading-snug">{displayName}</span>
               <span className="text-[12px] tracking-tight text-muted-foreground truncate">{c.email}</span>
@@ -264,7 +266,7 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full mx-auto" style={{ maxWidth: 1100 }}>
       {toast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full text-[13px] tracking-tight font-medium bg-foreground text-background shadow-lg" style={{ animation: "rise-in 300ms cubic-bezier(0.22,1,0.36,1) both" }}>
           {toast}

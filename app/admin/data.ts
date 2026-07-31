@@ -7,6 +7,7 @@ export type Client = {
   email: string;
   name: string | null;
   company: string | null;
+  avatar_url: string | null;
   created_at: string;
   last_sign_in_at: string | null;
   confirmed_at: string | null;
@@ -25,14 +26,14 @@ export async function getClients(): Promise<Client[]> {
   ] = await Promise.all([
     admin.auth.admin.listUsers(),
     admin.from("clients").select("*, projects(id, status)"),
-    admin.from("profiles").select("id, role"),
+    admin.from("profiles").select("id, role, avatar_url"),
   ]);
 
   const clientMap = new Map((clientRows ?? []).map((c: Record<string, unknown>) => [c.id, c]));
-  const profileMap = new Map((profileRows ?? []).map((p: { id: string; role: string }) => [p.id, p.role]));
+  const profileMap = new Map((profileRows ?? []).map((p: { id: string; role: string; avatar_url: string | null }) => [p.id, p]));
 
   return (authUsers ?? [])
-    .filter(u => profileMap.get(u.id) !== "admin")
+    .filter(u => profileMap.get(u.id)?.role !== "admin")
     .map(u => {
       const row = clientMap.get(u.id) as Record<string, unknown> | undefined;
       const metaName = (u.user_metadata?.name as string | null) ?? null;
@@ -41,6 +42,7 @@ export async function getClients(): Promise<Client[]> {
         email: u.email ?? "",
         name: (row?.name as string | null) ?? metaName,
         company: (row?.company as string | null) ?? null,
+        avatar_url: profileMap.get(u.id)?.avatar_url ?? null,
         created_at: u.created_at,
         last_sign_in_at: u.last_sign_in_at ?? null,
         confirmed_at: u.confirmed_at ?? null,
@@ -342,4 +344,133 @@ export async function getDocuments(clients: Client[]): Promise<{ invoices: Docum
     }));
 
   return { invoices, files };
+}
+
+export type AiUsageDay = { date: string; sonnetCents: number; haikuCents: number; otherCents: number };
+export type AiUsage = {
+  totalCostCents: number;
+  totalCalls: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  byModel: { model: string; label: string; costCents: number; calls: number }[];
+  byFeature: { feature: string; costCents: number; calls: number }[];
+  daily: AiUsageDay[];
+  isDemo: boolean;
+};
+
+const MODEL_LABELS: Record<string, string> = {
+  "claude-sonnet-5": "Sonnet 5",
+  "claude-haiku-4-5-20251001": "Haiku 4.5",
+};
+
+// Deterministic placeholder rows so the usage dashboard has something to show
+// before real ai_usage rows accumulate. Seeded on the day index (not Math.random)
+// so the chart looks the same on every render instead of reshuffling on refresh.
+function demoAiUsageRows(days: number) {
+  const features = ["client-auto-reply", "admin-quick-reply"];
+  const rows: { model: string; feature: string; input_tokens: number; output_tokens: number; cost_cents: number; created_at: string }[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const wave = Math.sin(i / 3.5) * 0.5 + 0.5;
+    const sonnetCalls = Math.round(2 + wave * 6);
+    const haikuCalls = Math.round(3 + (1 - wave) * 9);
+    for (let c = 0; c < sonnetCalls; c++) {
+      const inputTokens = 800 + Math.round(wave * 1400);
+      const outputTokens = 200 + Math.round(wave * 500);
+      rows.push({
+        model: "claude-sonnet-5",
+        feature: features[c % features.length],
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cost_cents: (inputTokens / 1_000_000) * 2 * 100 + (outputTokens / 1_000_000) * 10 * 100,
+        created_at: d.toISOString(),
+      });
+    }
+    for (let c = 0; c < haikuCalls; c++) {
+      const inputTokens = 500 + Math.round((1 - wave) * 900);
+      const outputTokens = 150 + Math.round((1 - wave) * 350);
+      rows.push({
+        model: "claude-haiku-4-5-20251001",
+        feature: features[c % features.length],
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        cost_cents: (inputTokens / 1_000_000) * 1 * 100 + (outputTokens / 1_000_000) * 5 * 100,
+        created_at: d.toISOString(),
+      });
+    }
+  }
+  return rows;
+}
+
+export async function getAiUsage(days = 30): Promise<AiUsage> {
+  const admin = createAdminClient();
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: rows } = await admin
+    .from("ai_usage")
+    .select("model, feature, input_tokens, output_tokens, cost_cents, created_at")
+    .gte("created_at", since)
+    .order("created_at", { ascending: true });
+
+  const isDemo = !rows || rows.length === 0;
+  const usage = isDemo
+    ? demoAiUsageRows(days)
+    : (rows as { model: string; feature: string; input_tokens: number; output_tokens: number; cost_cents: number; created_at: string }[]);
+
+  const totalCostCents = usage.reduce((s, r) => s + r.cost_cents, 0);
+  const totalInputTokens = usage.reduce((s, r) => s + r.input_tokens, 0);
+  const totalOutputTokens = usage.reduce((s, r) => s + r.output_tokens, 0);
+
+  const modelTotals = new Map<string, { costCents: number; calls: number }>();
+  for (const r of usage) {
+    const cur = modelTotals.get(r.model) ?? { costCents: 0, calls: 0 };
+    cur.costCents += r.cost_cents;
+    cur.calls += 1;
+    modelTotals.set(r.model, cur);
+  }
+  const byModel = Array.from(modelTotals.entries())
+    .map(([model, v]) => ({ model, label: MODEL_LABELS[model] ?? model, ...v }))
+    .sort((a, b) => b.costCents - a.costCents);
+
+  const featureTotals = new Map<string, { costCents: number; calls: number }>();
+  for (const r of usage) {
+    const cur = featureTotals.get(r.feature) ?? { costCents: 0, calls: 0 };
+    cur.costCents += r.cost_cents;
+    cur.calls += 1;
+    featureTotals.set(r.feature, cur);
+  }
+  const byFeature = Array.from(featureTotals.entries())
+    .map(([feature, v]) => ({ feature, ...v }))
+    .sort((a, b) => b.costCents - a.costCents);
+
+  // Daily breakdown split by model bucket (sonnet / haiku / other) so the
+  // chart can stack them — matches the two models actually in use today
+  // without hardcoding a per-model series list that'd need updating for
+  // every future model added to MODEL_LABELS.
+  const dailyMap = new Map<string, AiUsageDay>();
+  const dayKey = (iso: string) => iso.slice(0, 10);
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    const key = d.toISOString().slice(0, 10);
+    dailyMap.set(key, { date: key, sonnetCents: 0, haikuCents: 0, otherCents: 0 });
+  }
+  for (const r of usage) {
+    const key = dayKey(r.created_at);
+    const entry = dailyMap.get(key);
+    if (!entry) continue;
+    if (r.model === "claude-sonnet-5") entry.sonnetCents += r.cost_cents;
+    else if (r.model === "claude-haiku-4-5-20251001") entry.haikuCents += r.cost_cents;
+    else entry.otherCents += r.cost_cents;
+  }
+
+  return {
+    totalCostCents,
+    totalCalls: usage.length,
+    totalInputTokens,
+    totalOutputTokens,
+    byModel,
+    byFeature,
+    daily: Array.from(dailyMap.values()),
+    isDemo,
+  };
 }

@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { SendIcon, ChevronDownIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronDownIcon, ArrowUpIcon, MessageCircleIcon, CheckIcon, AlertTriangleIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,28 +11,61 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
-import { sendAdminMessage, markMessagesRead, updateCaseSeverity, updateCaseStatus } from "../../../actions";
+import { sendAdminMessage, markMessagesRead, updateCaseSeverity, updateCaseStatus, suggestAdminReply } from "../../../actions";
 import { CASE_STATUS_VARIANT, CASE_SEVERITY_LABEL, type Message, type Case, type CaseStatus, type CaseSeverity } from "../types";
 
 const STATUS_OPTIONS: CaseStatus[] = ["open", "pending", "closed"];
 const SEVERITY_OPTIONS: CaseSeverity[] = ["severity_1", "severity_2", "severity_3", "severity_4"];
+const STATUS_FILTERS: { value: "all" | CaseStatus; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "open", label: "Open" },
+  { value: "pending", label: "Pending" },
+  { value: "closed", label: "Closed" },
+];
 
-export function MessagesTab({ clientId, messages, setMessages, cases: initialCases }: {
+
+function initials(name: string) {
+  return name.slice(0, 2).toUpperCase();
+}
+
+// Admin's own badge, mirroring the client dashboard's AgentBadge — square and
+// distinct from the client's circular Avatar, sized to the same h-8 w-8
+// footprint, initials instead of the dots since this is a real person, not
+// the AI agent.
+function AdminBadge() {
+  return (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background text-[12px] font-semibold">
+      A
+    </span>
+  );
+}
+
+export function MessagesTab({ clientId, messages, setMessages, cases: initialCases, clientName, clientAvatarUrl }: {
   clientId: string;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   cases: Case[];
+  clientName: string;
+  clientAvatarUrl: string | null;
 }) {
   const [cases, setCases] = useState<Case[]>(initialCases);
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(initialCases[0]?.id ?? null);
+  const [statusFilter, setStatusFilter] = useState<"all" | CaseStatus>("all");
   const [body, setBody] = useState("");
   const [pending, startTransition] = useTransition();
   const [clientTyping, setClientTyping] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const [dismissedFor, setDismissedFor] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createBrowserClient>["channel"]> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const selectedCase = cases.find(c => c.id === selectedCaseId) ?? null;
+  const filteredCases = useMemo(
+    () => statusFilter === "all" ? cases : cases.filter(c => c.status === statusFilter),
+    [cases, statusFilter]
+  );
   const caseMessages = useMemo(
     () => messages.filter(m => m.case_id === selectedCaseId),
     [messages, selectedCaseId]
@@ -51,6 +83,32 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
     }
     return map;
   }, [cases, messages]);
+
+  const lastCaseMessage = caseMessages[caseMessages.length - 1];
+
+  // Fetches a suggested reply whenever the client's latest message changes —
+  // only worth asking for when the client sent last (no point suggesting a
+  // reply to something the admin just said) and the case is still open.
+  // Keyed by message id, not just case id, so a fresh client message
+  // re-triggers a fresh suggestion instead of reusing a stale one.
+  useEffect(() => {
+    setSuggestion(null);
+    if (!selectedCase || selectedCase.status === "closed") return;
+    if (!lastCaseMessage || lastCaseMessage.sender !== "client") return;
+    if (dismissedFor === lastCaseMessage.id) return;
+
+    let cancelled = false;
+    setSuggestionLoading(true);
+    suggestAdminReply(caseMessages.map(m => ({ sender: m.sender, body: m.body })))
+      .then(res => {
+        if (!cancelled && res.suggestion) setSuggestion(res.suggestion);
+      })
+      .finally(() => {
+        if (!cancelled) setSuggestionLoading(false);
+      });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastCaseMessage?.id, selectedCase?.id, selectedCase?.status]);
 
   useEffect(() => {
     if (!selectedCaseId) return;
@@ -71,6 +129,10 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
       }, (payload) => {
         const incoming = payload.new as Message;
         setMessages(prev => {
+          // Already have this exact row — e.g. onSend's own optimistic
+          // append already resolved into the real row, and Realtime is now
+          // delivering the same INSERT. Skip it rather than duplicating.
+          if (prev.some(m => m.id === incoming.id)) return prev;
           const idx = prev.findIndex(m =>
             m.id.startsWith("optimistic-") &&
             m.sender === incoming.sender &&
@@ -115,7 +177,10 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
   }, [clientId, selectedCaseId]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Scrolls only the message list itself, not the whole page — same fix as
+    // the client dashboard's own thread view (case-thread-view.tsx).
+    const list = listRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
   }, [caseMessages, clientTyping]);
 
   const onBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -141,6 +206,10 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
     startTransition(async () => {
       await sendAdminMessage(clientId, text, selectedCaseId);
     });
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(e as unknown as React.FormEvent); }
   };
 
   const onSeverityChange = (severity: CaseSeverity) => {
@@ -173,37 +242,126 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
 
   if (cases.length === 0) {
     return (
-      <div className="flex flex-col gap-0">
-        <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground mb-6">Messages</h2>
-        <p className="text-[14px] tracking-tight text-muted-foreground py-6">No cases yet.</p>
+      <div className="flex flex-col gap-4">
+        <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">Messages</h2>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <MessageCircleIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">No cases yet</p>
+            <p className="text-[13px] text-muted-foreground">Cases this client opens will show up here.</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex gap-6" style={{ height: "calc(100vh - 280px)", minHeight: 360 }}>
-      <div className="w-64 shrink-0 flex flex-col gap-1 overflow-y-auto pr-2">
-        <h2 className="text-[1.1rem] font-semibold tracking-[-0.02em] text-foreground mb-2">Cases</h2>
-        {cases.map(c => {
-          const waiting = waitingOnClientById.get(c.id);
-          return (
+    <div className="flex flex-col md:flex-row gap-4 md:gap-6 h-[calc(100dvh-19rem)] md:h-[calc(100dvh-16rem)]" style={{ minHeight: 360 }}>
+      {/* Desktop: full case list as a left rail. Mobile: replaced by the
+          dropdown below (a fixed-width sidebar next to a narrow chat pane
+          doesn't fit a phone screen), so this whole block is desktop-only. */}
+      <div className="hidden md:flex w-64 shrink-0 flex-col gap-4 overflow-y-auto pr-2">
+        <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">Messages</h2>
+        <div className="flex flex-wrap gap-1">
+          {STATUS_FILTERS.map(f => (
             <button
-              key={c.id}
+              key={f.value}
               type="button"
-              onClick={() => setSelectedCaseId(c.id)}
-              className={`flex items-center justify-between gap-2 text-left rounded-lg px-3 py-2.5 transition-colors ${c.id === selectedCaseId ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"}`}
+              onClick={() => setStatusFilter(f.value)}
+              className={`rounded-full px-2.5 py-1 text-[12px] font-medium tracking-tight transition-colors ${statusFilter === f.value ? "bg-foreground text-background" : "bg-sidebar-accent text-muted-foreground hover:text-foreground"}`}
             >
-              <div className="min-w-0">
-                <div className="text-[13px] font-medium tracking-tight truncate">{c.title}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">#{c.case_number}</div>
-              </div>
-              {waiting && <span className="size-1.5 rounded-full bg-amber-500 shrink-0" title="Waiting on client response" />}
+              {f.label}
             </button>
-          );
-        })}
+          ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          {filteredCases.length === 0 ? (
+            <p className="px-3 py-2 text-[13px] text-muted-foreground">No cases match this filter.</p>
+          ) : filteredCases.map(c => {
+            const waiting = waitingOnClientById.get(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setSelectedCaseId(c.id)}
+                className={`flex items-center justify-between gap-2 text-left rounded-md px-3 py-2.5 transition-colors ${c.id === selectedCaseId ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"}`}
+              >
+                <div className="min-w-0">
+                  <div className="text-[13px] font-medium tracking-tight truncate">{c.title}</div>
+                  <div className="text-[12px] text-muted-foreground mt-0.5">#{c.case_number}</div>
+                </div>
+                {waiting && <span className="size-1.5 rounded-full bg-amber-500 shrink-0" title="Waiting on client response" />}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0 flex flex-col gap-0">
+      <div className="md:hidden flex flex-col gap-2">
+        <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">Messages</h2>
+        <div className="flex flex-wrap gap-1">
+          {STATUS_FILTERS.map(f => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setStatusFilter(f.value)}
+              className={`rounded-full px-2.5 py-1 text-[12px] font-medium tracking-tight transition-colors ${statusFilter === f.value ? "bg-foreground text-background" : "bg-sidebar-accent text-muted-foreground hover:text-foreground"}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        {filteredCases.length === 0 ? (
+          <p className="rounded-md border bg-sidebar px-4 py-2.5 text-[13px] text-muted-foreground">No cases match this filter.</p>
+        ) : filteredCases.length > 1 ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  className="flex items-center justify-between gap-2 w-full rounded-md border bg-sidebar px-4 py-2.5 text-sm font-medium tracking-tight hover:bg-sidebar-accent/40 transition-colors"
+                />
+              }
+            >
+              <span className="flex items-center gap-2 min-w-0">
+                <span className="truncate">{selectedCase && filteredCases.some(c => c.id === selectedCase.id) ? selectedCase.title : "Select a case"}</span>
+                {selectedCase && waitingOnClientById.get(selectedCase.id) && (
+                  <span className="size-1.5 rounded-full bg-amber-500 shrink-0" title="Waiting on client response" />
+                )}
+              </span>
+              <ChevronDownIcon className="size-4 text-muted-foreground shrink-0" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-64">
+              {filteredCases.map(c => (
+                <DropdownMenuItem key={c.id} onClick={() => setSelectedCaseId(c.id)}>
+                  <div className="flex items-center justify-between gap-2 w-full min-w-0">
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-medium tracking-tight truncate">{c.title}</div>
+                      <div className="text-[12px] text-muted-foreground">#{c.case_number}</div>
+                    </div>
+                    {waitingOnClientById.get(c.id) && (
+                      <span className="size-1.5 rounded-full bg-amber-500 shrink-0" title="Waiting on client response" />
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSelectedCaseId(filteredCases[0].id)}
+            className="rounded-md border bg-sidebar px-4 py-2.5 text-left"
+          >
+            <div className="text-[14px] font-medium tracking-tight truncate">{filteredCases[0].title}</div>
+            <div className="text-[12px] text-muted-foreground">#{filteredCases[0].case_number}</div>
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0 relative flex flex-col gap-0 rounded-sm border bg-sidebar px-5 pt-5">
         {selectedCase && (
           <div className="flex items-center justify-between gap-3 mb-4 pb-4 border-b border-sidebar-border">
             <div className="min-w-0">
@@ -215,6 +373,28 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
                 <Badge variant="outline" className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400">
                   Waiting on client
                 </Badge>
+              )}
+              {/* One-tap shortcuts for the two most common actions, instead
+                  of always going through the status/severity dropdowns. */}
+              {selectedCase.status !== "closed" && (
+                <button
+                  type="button"
+                  onClick={() => onStatusChange("closed")}
+                  title="Mark resolved"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  <CheckIcon className="size-4" />
+                </button>
+              )}
+              {selectedCase.severity !== "severity_1" && (
+                <button
+                  type="button"
+                  onClick={() => onSeverityChange("severity_1")}
+                  title="Escalate to Severity 1"
+                  className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-sidebar-accent hover:text-destructive transition-colors"
+                >
+                  <AlertTriangleIcon className="size-4" />
+                </button>
               )}
               <DropdownMenu>
                 <DropdownMenuTrigger
@@ -259,9 +439,11 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 pb-4">
+        <div ref={listRef} className="flex-1 overflow-y-auto overscroll-contain flex flex-col gap-6 pr-1 pb-4">
           {caseMessages.length === 0 && (
-            <p className="text-[14px] tracking-tight text-muted-foreground py-6">No messages yet.</p>
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 py-16 opacity-60">
+              <p className="text-sm text-muted-foreground">No messages yet.</p>
+            </div>
           )}
           {caseMessages.map((m) => {
             const day = fmtDay(m.created_at);
@@ -271,60 +453,109 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
             return (
               <div key={m.id}>
                 {showDay && (
-                  <div className="flex items-center gap-3 my-3">
+                  <div className="flex items-center gap-3 mb-6">
                     <div className="flex-1 h-px bg-sidebar-border" />
                     <span className="text-[11px] tracking-tight text-muted-foreground shrink-0">{day}</span>
                     <div className="flex-1 h-px bg-sidebar-border" />
                   </div>
                 )}
-                <div className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[75%] flex flex-col gap-1 ${isAdmin ? "items-end" : "items-start"}`}>
-                    <div className={`px-4 py-2.5 text-[15px] tracking-tight leading-relaxed ${
-                      isAdmin
-                        ? "bg-primary text-white"
-                        : "bg-sidebar-accent text-foreground"
-                    }`} style={{ borderRadius: isAdmin ? "16px 16px 4px 16px" : "16px 16px 16px 4px" }}>
-                      {m.body}
+                <div className={`flex items-start gap-3 ${isAdmin ? "flex-row-reverse" : ""}`}>
+                  <div className="-mt-1.5">
+                    {isAdmin ? <AdminBadge /> : (
+                      <Avatar className="h-8 w-8 shrink-0">
+                        {clientAvatarUrl && <AvatarImage src={clientAvatarUrl} alt={clientName} />}
+                        <AvatarFallback>{initials(clientName)}</AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                  <div className={`flex flex-col gap-1 min-w-0 flex-1 ${isAdmin ? "items-end" : "items-start"}`}>
+                    <div className={`flex items-baseline gap-2 ${isAdmin ? "flex-row-reverse" : ""}`}>
+                      <span className="text-[14px] font-semibold tracking-tight">{isAdmin ? "You" : clientName}</span>
+                      <span className="text-xs text-muted-foreground">{fmtTime(m.created_at)}{isAdmin && m.read_at && " · Read"}</span>
                     </div>
-                    <span className="text-[11px] tracking-tight text-muted-foreground px-1">
-                      {fmtTime(m.created_at)}
-                      {isAdmin && m.read_at && " · Read"}
-                    </span>
+                    <p className="max-w-[85%] sm:max-w-[75%] text-[15px] leading-relaxed whitespace-pre-wrap text-left">{m.body}</p>
                   </div>
                 </div>
               </div>
             );
           })}
           {clientTyping && (
-            <div className="flex justify-start">
-              <div className="px-4 py-3 rounded-[16px_16px_16px_4px] flex items-center gap-1 bg-sidebar-accent">
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+            <div className="flex items-start gap-3">
+              <div className="-mt-1.5">
+                <Avatar className="h-8 w-8 shrink-0">
+                  {clientAvatarUrl && <AvatarImage src={clientAvatarUrl} alt={clientName} />}
+                  <AvatarFallback>{initials(clientName)}</AvatarFallback>
+                </Avatar>
+              </div>
+              <div className="flex items-center gap-1 pt-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground opacity-60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground opacity-60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground opacity-60 animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           )}
-
-          <div ref={bottomRef} />
         </div>
 
-        <form onSubmit={onSend} className="flex flex-col gap-2 p-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/40 focus-within:border-foreground/20 transition-colors">
-          <Textarea
-            value={body}
-            onChange={onBodyChange}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSend(e as unknown as React.FormEvent); } }}
-            placeholder="Send a message..."
-            rows={1}
-            className="w-full resize-none border-0 bg-transparent px-0 py-0 shadow-none focus-visible:ring-0"
-            style={{ maxHeight: 160, overflowY: "auto" }}
-          />
-          <div className="flex justify-end">
-            <Button type="submit" size="sm" disabled={pending || !body.trim()}>
-              <SendIcon />
-              {pending ? "Sending..." : "Send"}
-            </Button>
-          </div>
-        </form>
+        <div className="shrink-0 relative flex flex-col">
+          {/* Fades scrolled-past message content out under the input instead
+              of it cutting off hard — same treatment as the client
+              dashboard's own thread view. */}
+          <div className={`pointer-events-none absolute inset-x-0 bottom-full h-10 bg-gradient-to-t from-sidebar to-transparent ${(suggestion || suggestionLoading) ? "" : "rounded-t-2xl"}`} />
+          {suggestionLoading && (
+            <div className="flex items-center gap-2.5 rounded-t-xl border border-b-0 bg-sidebar px-4 py-3">
+              <img src="/claude-logo.svg" alt="" className="size-4 shrink-0 rounded-full opacity-60" />
+              <span className="text-sm text-muted-foreground">Thinking of a reply&hellip;</span>
+            </div>
+          )}
+          {suggestion && !suggestionLoading && (
+            <div className="flex items-start gap-2.5 rounded-t-xl border border-b-0 bg-sidebar px-4 py-3">
+              <img src="/claude-logo.svg" alt="" className="size-4 shrink-0 rounded-full mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-foreground leading-relaxed">{suggestion}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => { setBody(suggestion); setDismissedFor(lastCaseMessage?.id ?? null); setSuggestion(null); }}
+                    className="rounded-full bg-foreground text-background px-3 py-1 text-[12px] font-medium tracking-tight hover:opacity-85 transition-opacity"
+                  >
+                    Use this
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setDismissedFor(lastCaseMessage?.id ?? null); setSuggestion(null); }}
+                    className="rounded-full px-3 py-1 text-[12px] font-medium tracking-tight text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          <form
+            onSubmit={onSend}
+            className={`flex flex-col gap-2.5 px-3 py-3 mb-5 border bg-muted/30 focus-within:border-ring transition-colors ${(suggestion || suggestionLoading) ? "rounded-b-xl" : "rounded-2xl"}`}
+            style={{ minHeight: 100, "--sh-ring": "var(--sh-muted-foreground)" } as React.CSSProperties}
+          >
+            <textarea
+              value={body}
+              onChange={onBodyChange}
+              onKeyDown={onKeyDown}
+              placeholder="Send a message..."
+              rows={1}
+              className="w-full resize-none tracking-tight placeholder:text-muted-foreground focus:outline-none leading-relaxed bg-transparent"
+              style={{ maxHeight: 100, overflowY: "auto", fontSize: 16 }}
+            />
+            <div className="flex items-center justify-end mt-auto">
+              <button
+                type="submit"
+                disabled={pending || !body.trim()}
+                className="flex h-8 w-8 items-center justify-center rounded-full border bg-background text-foreground transition-opacity hover:bg-sidebar-accent/40 disabled:opacity-40 disabled:hover:bg-background"
+              >
+                <ArrowUpIcon className="size-4" />
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

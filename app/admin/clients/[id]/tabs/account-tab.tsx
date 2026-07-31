@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,9 +23,9 @@ import type { Client } from "../types";
 
 function AccountRow({ label, hint, children, last = false }: { label: string; hint?: string; children: React.ReactNode; last?: boolean }) {
   return (
-    <div className={`flex items-center justify-between gap-4 px-5 py-4 ${!last ? "border-b border-sidebar-border" : ""}`}>
+    <div className={`flex items-center justify-between gap-4 px-5 py-4 ${!last ? "border-b" : ""}`}>
       <div className="min-w-0">
-        <p className="text-[15px] tracking-tight text-foreground">{label}</p>
+        <p className="text-[15px] tracking-tight">{label}</p>
         {hint && <p className="text-[13px] tracking-tight text-muted-foreground mt-0.5">{hint}</p>}
       </div>
       <div className="shrink-0">{children}</div>
@@ -38,7 +37,7 @@ function AccountSection({ label, children }: { label: string; children: React.Re
   return (
     <div className="flex flex-col gap-2">
       <p className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">{label}</p>
-      <Card className="overflow-hidden py-0">{children}</Card>
+      <div className="rounded-sm border bg-sidebar overflow-hidden">{children}</div>
     </div>
   );
 }
@@ -128,7 +127,7 @@ export function AccountTab({ client }: { client: Client }) {
     : "Never";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full lg:max-w-[58%] mx-auto">
 
       {(msg || error) && (
         <p className={`text-[13px] tracking-tight px-1 ${error ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}`}>
@@ -174,13 +173,13 @@ export function AccountTab({ client }: { client: Client }) {
       </AccountSection>
 
       {magicLink && (
-        <div className="px-4 py-3 rounded-xl text-[12px] tracking-tight text-muted-foreground break-all bg-sidebar-accent border border-sidebar-border">
+        <div className="px-4 py-3 rounded-xl text-[12px] tracking-tight text-muted-foreground break-all bg-muted border">
           {magicLink}
         </div>
       )}
 
       <AccountSection label="Credentials">
-        <div className="px-5 py-4 border-b border-sidebar-border">
+        <div className="px-5 py-4 border-b">
           <Label className="text-[12px] text-muted-foreground mb-2 block">Email</Label>
           <div className="flex items-center gap-3">
             <Input value={email} onChange={e => setEmail(e.target.value)} type="email" className="flex-1" />
@@ -205,7 +204,7 @@ export function AccountTab({ client }: { client: Client }) {
             rows={4}
             className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 resize-none"
           />
-          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-sidebar-border">
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t">
             <Button size="sm" disabled={pending} onClick={onSaveNotes}>Save notes</Button>
             {notesSaved && <span className="text-[13px] tracking-tight text-emerald-600 dark:text-emerald-400">Saved.</span>}
           </div>

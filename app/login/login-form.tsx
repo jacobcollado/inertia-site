@@ -17,29 +17,45 @@ function Spinner() {
   );
 }
 
-function ErrorMessage({ msg }: { msg: string }) {
+function Alert({ msg, tone }: { msg: string; tone: "error" | "info" }) {
+  const color = tone === "error" ? "rgb(220 38 38)" : "#0a84ff";
+  const cardBg = tone === "error" ? "rgb(220 38 38 / 0.06)" : "rgb(10 132 255 / 0.06)";
+  const border = tone === "error" ? "rgb(220 38 38 / 0.16)" : "rgb(10 132 255 / 0.16)";
   return (
-    <div className="flex items-center gap-2 px-3 py-2.5 rounded-full text-[13px] tracking-tight" style={{ background: "rgb(239 68 68 / 0.08)", color: "rgb(220 38 38)" }}>
-      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <circle cx="8" cy="8" r="6.5" />
-        <line x1="8" y1="5" x2="8" y2="8.5" />
-        <circle cx="8" cy="11" r="0.5" fill="currentColor" stroke="none" />
-      </svg>
-      {msg}
+    <div
+      className="flex items-start gap-2.5 rounded-xl px-3.5 py-3 text-left"
+      style={{ background: cardBg, border: `1px solid ${border}` }}
+    >
+      <span
+        className="flex h-6 w-6 shrink-0 items-center justify-center"
+        style={{ color }}
+      >
+        {tone === "error" ? (
+          <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="6.5" />
+            <line x1="8" y1="5" x2="8" y2="8.5" />
+            <circle cx="8" cy="11" r="0.5" fill="currentColor" stroke="none" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="1.5" y="3" width="13" height="10" rx="1.5" />
+            <path d="M2 4l6 4.5L14 4" />
+          </svg>
+        )}
+      </span>
+      <p className="text-[13px] leading-snug tracking-tight pt-0.5" style={{ color: "rgb(var(--fg))" }}>
+        {msg}
+      </p>
     </div>
   );
 }
 
+function ErrorMessage({ msg }: { msg: string }) {
+  return <Alert msg={msg} tone="error" />;
+}
+
 function InfoMessage({ msg }: { msg: string }) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-2.5 rounded-full text-[13px] tracking-tight" style={{ background: "rgb(10 132 255 / 0.08)", color: "#0a84ff" }}>
-      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <rect x="1.5" y="3" width="13" height="10" rx="1.5" />
-        <path d="M2 4l6 4.5L14 4" />
-      </svg>
-      {msg}
-    </div>
-  );
+  return <Alert msg={msg} tone="info" />;
 }
 
 function Divider() {

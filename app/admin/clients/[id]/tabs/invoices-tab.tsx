@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon, ReceiptIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,15 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { StatusBadge } from "../status-badge";
 import { createInvoice, updateInvoiceStatus, deleteInvoice } from "../../../actions";
 import { fmt$, fmtDate, type Invoice } from "../types";
 
@@ -119,7 +110,7 @@ export function InvoicesTab({ clientId, invoices }: { clientId: string; invoices
   const totalOwed = data.filter(i => i.status !== "paid").reduce((s, i) => s + i.amount, 0);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 w-full lg:max-w-[58%] mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">Invoices</h2>
@@ -132,59 +123,84 @@ export function InvoicesTab({ clientId, invoices }: { clientId: string; invoices
       </div>
 
       {data.length === 0 ? (
-        <p className="text-[14px] tracking-tight text-muted-foreground py-4">No invoices yet.</p>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <ReceiptIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">No invoices yet</p>
+            <p className="text-[13px] text-muted-foreground">Add one to start billing this client.</p>
+          </div>
+          <Button variant="outline" size="sm" className="mt-1" onClick={() => setAdding(true)}>
+            <PlusIcon />
+            Add invoice
+          </Button>
+        </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-sidebar-border">
-          <Table>
-            <TableHeader className="bg-sidebar-accent">
-              <TableRow>
-                <TableHead>Invoice</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((inv) => {
-                const overdue = inv.status === "overdue";
-                return (
-                  <TableRow key={inv.id} className={overdue ? "bg-destructive/5" : ""}>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-[14px] font-medium tracking-tight text-foreground">{inv.label}</span>
-                        {inv.paid_at
-                          ? <span className="text-[12px] tracking-tight text-muted-foreground">Paid {fmtDate(inv.paid_at)}</span>
-                          : inv.due_date
-                            ? <span className={`text-[12px] tracking-tight ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
-                                {overdue ? "Overdue " : "Due "}{fmtDate(inv.due_date)}
-                              </span>
-                            : null}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Select value={inv.status} onValueChange={(v) => v && onStatusChange(inv.id, v)}>
-                        <SelectTrigger size="sm" className="w-28">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {INVOICE_STATUSES.map(s => (
-                            <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums font-medium text-foreground">{fmt$(inv.amount)}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-destructive" disabled={pending} onClick={() => onDelete(inv.id)}>
-                        <TrashIcon />
-                        <span className="sr-only">Delete</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+        <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
+          {data.map((inv, i) => {
+            const overdue = inv.status === "overdue";
+            return (
+              <div
+                key={inv.id}
+                className={`rounded-md border bg-sidebar px-5 py-4 sm:rounded-none sm:border-0 sm:border-b ${i === data.length - 1 ? "sm:border-b-0" : ""} ${overdue ? "sm:bg-destructive/5" : ""}`}
+              >
+                <div className="flex items-center justify-between gap-2 sm:grid sm:grid-cols-[1fr_auto_1fr_auto] sm:items-center sm:gap-4">
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-[15px] font-medium tracking-tight truncate">{inv.label}</span>
+                    {inv.paid_at
+                      ? <span className="text-[13px] text-muted-foreground truncate">Paid {fmtDate(inv.paid_at)}</span>
+                      : inv.due_date
+                        ? <span className={`text-[13px] truncate ${overdue ? "text-destructive" : "text-muted-foreground"}`}>
+                            {overdue ? "Overdue " : "Due "}{fmtDate(inv.due_date)}
+                          </span>
+                        : null}
+                  </div>
+
+                  <div className="hidden sm:flex flex-col gap-1 items-center">
+                    <span className="text-[13px] text-muted-foreground">Status</span>
+                    <Select value={inv.status} onValueChange={(v) => v && onStatusChange(inv.id, v)}>
+                      <SelectTrigger size="sm" className="w-28">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INVOICE_STATUSES.map(s => (
+                          <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="hidden sm:flex flex-col gap-1 items-end pr-6">
+                    <span className="text-[13px] text-muted-foreground">Amount</span>
+                    <span className="text-[15px] font-semibold tabular-nums">{fmt$(inv.amount)}</span>
+                  </div>
+
+                  <Button variant="ghost" size="icon-sm" className="shrink-0 text-muted-foreground hover:text-destructive" disabled={pending} onClick={() => onDelete(inv.id)}>
+                    <TrashIcon />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+
+                <div className="sm:hidden border-t mt-3 pt-3 flex items-end justify-between gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[13px] text-muted-foreground">Amount</span>
+                    <span className="text-[15px] font-semibold tabular-nums">{fmt$(inv.amount)}</span>
+                  </div>
+                  <Select value={inv.status} onValueChange={(v) => v && onStatusChange(inv.id, v)}>
+                    <SelectTrigger size="sm" className="w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {INVOICE_STATUSES.map(s => (
+                        <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

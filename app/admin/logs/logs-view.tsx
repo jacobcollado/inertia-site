@@ -174,7 +174,7 @@ export function LogsView() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 w-full mx-auto" style={{ maxWidth: 1100 }}>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">API Logs</h1>

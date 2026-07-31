@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, FolderKanbanIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -163,7 +162,7 @@ function UpdateStatusDialog({
   );
 }
 
-function ProjectCard({ project, updates, clientId }: { project: Project; updates: ProjectUpdate[]; clientId: string }) {
+function ProjectRow({ project, updates, clientId, isLast }: { project: Project; updates: ProjectUpdate[]; clientId: string; isLast: boolean }) {
   const [open, setOpen] = useState(false);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [localUpdates, setLocalUpdates] = useState(updates);
@@ -172,8 +171,8 @@ function ProjectCard({ project, updates, clientId }: { project: Project; updates
     new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <Card className="gap-0 py-0">
-      <div className="flex items-start justify-between gap-4 px-5 py-4 group">
+    <div className={`rounded-md border bg-sidebar px-5 py-4 sm:rounded-none sm:border-0 sm:border-b ${isLast ? "sm:border-b-0" : ""}`}>
+      <div className="flex items-start justify-between gap-4 group">
         <button onClick={() => setOpen(o => !o)} className="flex flex-col gap-1 min-w-0 text-left">
           <span className="text-[15px] font-medium tracking-tight text-foreground hover:opacity-70 transition-opacity">{project.title}</span>
           {project.phase && <span className="text-[13px] tracking-tight text-muted-foreground">{project.phase}</span>}
@@ -188,7 +187,7 @@ function ProjectCard({ project, updates, clientId }: { project: Project; updates
       </div>
 
       {open && (
-        <div className="px-5 pb-5 flex flex-col gap-4 border-t border-sidebar-border pt-4">
+        <div className="pt-4 mt-4 flex flex-col gap-4 border-t">
           {localUpdates.length === 0 ? (
             <p className="text-[13px] tracking-tight text-muted-foreground">No updates yet.</p>
           ) : (
@@ -214,7 +213,7 @@ function ProjectCard({ project, updates, clientId }: { project: Project; updates
         onOpenChange={setUpdateOpen}
         onPosted={(entry) => { setLocalUpdates(prev => [entry, ...prev]); setOpen(true); }}
       />
-    </Card>
+    </div>
   );
 }
 
@@ -222,7 +221,7 @@ export function ProjectsTab({ clientId, projects, projectUpdates }: { clientId: 
   const [adding, setAdding] = useState(false);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 w-full lg:max-w-[58%] mx-auto">
       <div className="flex items-center justify-between">
         <h2 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">Projects</h2>
         <Button variant="outline" size="sm" onClick={() => setAdding(true)}>
@@ -232,11 +231,23 @@ export function ProjectsTab({ clientId, projects, projectUpdates }: { clientId: 
       </div>
 
       {projects.length === 0 ? (
-        <p className="text-[14px] tracking-tight text-muted-foreground py-4">No projects yet.</p>
+        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+            <FolderKanbanIcon className="size-5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-[15px] font-medium tracking-tight">No projects yet</p>
+            <p className="text-[13px] text-muted-foreground">Add one to start tracking work for this client.</p>
+          </div>
+          <Button variant="outline" size="sm" className="mt-1" onClick={() => setAdding(true)}>
+            <PlusIcon />
+            Add project
+          </Button>
+        </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} updates={projectUpdates.filter(u => u.project_id === p.id)} clientId={clientId} />
+        <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
+          {projects.map((p, i) => (
+            <ProjectRow key={p.id} project={p} updates={projectUpdates.filter(u => u.project_id === p.id)} clientId={clientId} isLast={i === projects.length - 1} />
           ))}
         </div>
       )}

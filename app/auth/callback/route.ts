@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -24,6 +25,31 @@ export async function GET(request: NextRequest) {
         .select("role")
         .eq("id", data.user.id)
         .single();
+
+      // Sign-ups are closed publicly, but the login page (and the Google
+      // button on it) still has to stay reachable for existing clients — so
+      // the gate has to happen here, not by hiding UI. profiles isn't a
+      // useful signal on its own: a DB trigger (handle_new_user) auto-inserts
+      // a profiles row for every brand-new auth user regardless of whether
+      // they were invited. clients has no such trigger — it's only ever
+      // populated explicitly by inviteClient, at the same id, before the
+      // client ever completes OAuth. So an admin exists (profile.role ===
+      // "admin", no clients row expected) or a genuine client has a matching
+      // clients row; anyone with neither just had Google auto-create them a
+      // fresh account with no invite behind it — delete it and bounce.
+      const isAdmin = profile?.role === "admin";
+      if (!isAdmin) {
+        const { data: clientRow } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("id", data.user.id)
+          .single();
+        if (!clientRow) {
+          const admin = createAdminClient();
+          await admin.auth.admin.deleteUser(data.user.id);
+          return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent("This account hasn't been invited. Contact us if you think this is a mistake.")}`);
+        }
+      }
 
       // Sync name into clients table. Google supplies given_name/family_name
       // separately, so prefer combining those directly over full_name/name in
@@ -52,7 +78,6 @@ export async function GET(request: NextRequest) {
         await (isGoogleSignIn ? query : query.is("avatar_url", null));
       }
 
-      const isAdmin = profile?.role === "admin";
       const defaultDest = isAdmin ? "/admin" : "/dashboard";
       const dest = (!isAdmin && next.startsWith("/")) ? next : defaultDest;
       return NextResponse.redirect(`${origin}${dest}`);

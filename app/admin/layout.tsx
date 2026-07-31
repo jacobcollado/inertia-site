@@ -14,7 +14,7 @@ const SET_THEME_SCRIPT = `
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Script id="set-admin-theme" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: SET_THEME_SCRIPT }} />
+      <Script id="set-admin-theme" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: SET_THEME_SCRIPT }} />
       <AdminSidebarShell>{children}</AdminSidebarShell>
     </>
   );
