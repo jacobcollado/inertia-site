@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 import type { YAxisTickContentProps } from "recharts/types/util/types";
-import { TrendingUpIcon, TrendingDownIcon, TriangleAlertIcon } from "lucide-react";
+import { ArrowUpRightIcon, TrendingUpIcon, TrendingDownIcon, TriangleAlertIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -26,6 +26,17 @@ import type { Overview, Client } from "./data";
 
 function fmt$(cents: number) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(cents / 100);
+}
+
+/* Decorative "go to" affordance matching the client dashboard's SummaryCard —
+   a sibling of the card's Link, not nested inside it, so it doesn't add a
+   redundant tab stop. */
+function LinkArrow() {
+  return (
+    <span aria-hidden className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full border bg-sidebar text-muted-foreground pointer-events-none">
+      <ArrowUpRightIcon className="size-5" />
+    </span>
+  );
 }
 
 function ChangeBadge({ pct }: { pct: number | null }) {
@@ -148,7 +159,7 @@ function ClientsCard({ overview }: { overview: Overview }) {
   const data = useMemo(() => bucketDailyClients(overview.dailyClients, range), [overview.dailyClients, range]);
 
   return (
-    <Card className="gap-4">
+    <Card className="gap-4 border rounded-md sm:rounded-sm">
       <CardHeader>
         <CardDescription>Clients</CardDescription>
         <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -254,7 +265,7 @@ function OutstandingInvoicesCard({ overview }: { overview: Overview }) {
   return (
     <div className="flex flex-1 flex-col gap-3 min-w-0">
       <span className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">Outstanding invoices</span>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden border rounded-md sm:rounded-sm">
         {rows.length > 0 ? (
           <ChartContainer
             config={outstandingChartConfig}
@@ -316,7 +327,7 @@ function NeedsAttentionCard({ overview }: { overview: Overview }) {
   return (
     <div className="flex flex-1 flex-col gap-3 min-w-0">
       <span className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">Needs attention</span>
-      <Card className="overflow-hidden py-0">
+      <Card className="overflow-hidden py-0 border rounded-md sm:rounded-sm">
         {rows.length > 0 ? (
           rows.map((item, i) => (
             <Link
@@ -346,18 +357,22 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="gap-4 border">
-          <CardHeader>
-            <CardDescription>Revenue collected</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums">
-              {fmt$(overview.totalRevenue)}
-            </CardTitle>
-            <CardAction>
-              <ChangeBadge pct={overview.change.revenue} />
-            </CardAction>
-          </CardHeader>
-          <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent p-0 px-6 text-sm">
-            <TrendInsight pct={overview.change.revenue} label="Revenue for the last 6 months" />
+        <Card className="gap-4 border rounded-md sm:rounded-sm overflow-hidden">
+          <Link href="/admin/clients" className="hover:bg-sidebar-accent/40 transition-colors">
+            <CardHeader>
+              <CardDescription>Revenue collected</CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums">
+                {fmt$(overview.totalRevenue)}
+              </CardTitle>
+              <CardAction>
+                <ChangeBadge pct={overview.change.revenue} />
+              </CardAction>
+            </CardHeader>
+          </Link>
+          <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent p-0 text-sm">
+            <div className="px-6">
+              <TrendInsight pct={overview.change.revenue} label="Revenue for the last 6 months" />
+            </div>
             {hasRevChart ? (
               <MiniAreaChart
                 data={overview.monthlyRevenue}
@@ -366,55 +381,63 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
                 formatter={fmt$}
               />
             ) : (
-              <div className="flex h-20 w-full items-center text-xs text-muted-foreground">No revenue yet</div>
+              <div className="flex h-20 w-full items-center text-xs text-muted-foreground px-6">No revenue yet</div>
             )}
           </CardFooter>
         </Card>
 
-        <Card className="gap-4 border">
-          <CardHeader>
-            <CardDescription>Outstanding</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums">
-              {fmt$(overview.outstanding)}
-            </CardTitle>
-            <CardAction>
-              <ChangeBadge pct={overview.change.outstanding} />
-            </CardAction>
-          </CardHeader>
+        <Card className="relative gap-4 border rounded-md sm:rounded-sm overflow-hidden">
+          <Link href="/admin/clients" className="hover:bg-sidebar-accent/40 transition-colors">
+            <CardHeader>
+              <CardDescription>Outstanding</CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums">
+                {fmt$(overview.outstanding)}
+              </CardTitle>
+              <CardAction>
+                <ChangeBadge pct={overview.change.outstanding} />
+              </CardAction>
+            </CardHeader>
+          </Link>
           <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent text-sm">
             <TrendInsight pct={overview.change.outstanding} label="Outstanding balance for the last 6 months" />
             <div className="text-muted-foreground">{fmt$(overview.totalRevenue)} collected</div>
             <div className="text-muted-foreground">{fmt$(overview.outstanding)} owed</div>
           </CardFooter>
+          <LinkArrow />
         </Card>
 
-        <Card className="gap-4 border">
-          <CardHeader>
-            <CardDescription>Growth rate</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums">
-              {overview.change.clients === null ? "—" : `${overview.change.clients >= 0 ? "+" : ""}${overview.change.clients}%`}
-            </CardTitle>
-            <CardAction>
-              <ChangeBadge pct={overview.change.clients} />
-            </CardAction>
-          </CardHeader>
+        <Card className="relative gap-4 border rounded-md sm:rounded-sm overflow-hidden">
+          <Link href="/admin/clients" className="hover:bg-sidebar-accent/40 transition-colors">
+            <CardHeader>
+              <CardDescription>Growth rate</CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums">
+                {overview.change.clients === null ? "—" : `${overview.change.clients >= 0 ? "+" : ""}${overview.change.clients}%`}
+              </CardTitle>
+              <CardAction>
+                <ChangeBadge pct={overview.change.clients} />
+              </CardAction>
+            </CardHeader>
+          </Link>
           <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent text-sm">
             <TrendInsight pct={overview.change.clients} label="Clients for the last 6 months" />
             <div className="text-muted-foreground">{overview.totalClients} total clients</div>
             <div className="text-muted-foreground">vs. previous 30 days</div>
           </CardFooter>
+          <LinkArrow />
         </Card>
 
-        <Card className="gap-4 border">
-          <CardHeader>
-            <CardDescription>Active projects</CardDescription>
-            <CardTitle className="text-2xl font-semibold tabular-nums">
-              {overview.activeProjects}
-            </CardTitle>
-            <CardAction>
-              <ChangeBadge pct={overview.change.activeProjects} />
-            </CardAction>
-          </CardHeader>
+        <Card className="relative gap-4 border rounded-md sm:rounded-sm overflow-hidden">
+          <Link href="/admin/clients" className="hover:bg-sidebar-accent/40 transition-colors">
+            <CardHeader>
+              <CardDescription>Active projects</CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums">
+                {overview.activeProjects}
+              </CardTitle>
+              <CardAction>
+                <ChangeBadge pct={overview.change.activeProjects} />
+              </CardAction>
+            </CardHeader>
+          </Link>
           <CardFooter className="flex-col items-start gap-1.5 border-0 bg-transparent text-sm">
             <TrendInsight pct={overview.change.activeProjects} label="Active projects for the last 6 months" />
             <div className="text-muted-foreground">{overview.activeProjects} active out of {totalProjects} total projects</div>
@@ -423,6 +446,7 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
               {suspended > 0 && <span className="text-destructive">, {suspended} suspended</span>}
             </div>
           </CardFooter>
+          <LinkArrow />
         </Card>
       </div>
 
@@ -432,7 +456,7 @@ export function OverviewCards({ overview, clients }: { overview: Overview; clien
         {overview.recentActivity.length > 0 && (
           <div className="flex flex-1 flex-col gap-3 min-w-0">
             <span className="text-[12px] font-medium tracking-tight text-muted-foreground px-1">Recent activity</span>
-            <Card className="overflow-hidden py-0">
+            <Card className="overflow-hidden py-0 border rounded-md sm:rounded-sm">
               {overview.recentActivity.map((item, i) => (
                 <Link
                   key={i}

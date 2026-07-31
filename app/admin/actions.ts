@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { sendEmail } from "@/lib/email";
 import { logAiUsage } from "@/lib/ai-usage";
+import { getAiUsage, type AiUsageGranularity } from "./data";
 
 /* ── Auth guard ───────────────────────────────────────────────────── */
 
@@ -353,6 +354,14 @@ export async function updateClientNotes(clientId: string, notes: string) {
   if (error) return { error: error.message };
   revalidatePath(`/admin/clients/${clientId}`);
   return { success: true };
+}
+
+/* ── Usage ────────────────────────────────────────────────────────── */
+
+export async function getUsageForRange(granularity: AiUsageGranularity) {
+  await requireAdmin();
+  const days = granularity === "hour" ? 2 : 30;
+  return getAiUsage(days, granularity);
 }
 
 export async function getAdminLog(clientId: string) {

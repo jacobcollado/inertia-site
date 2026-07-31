@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
@@ -7,7 +8,9 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import type { AiUsage } from "../data";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { AiUsage, AiUsageGranularity } from "../data";
+import { getUsageForRange } from "../actions";
 
 function fmt$(cents: number) {
   if (cents < 100) return `$${(cents / 100).toFixed(2)}`;
@@ -15,6 +18,20 @@ function fmt$(cents: number) {
 }
 
 const dayFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+const hourFmt = new Intl.DateTimeFormat("en-US", { hour: "numeric" });
+const weekFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+
+const GRANULARITY_LABEL: Record<AiUsageGranularity, string> = {
+  hour: "Hourly",
+  day: "Daily",
+  week: "Weekly",
+};
+
+function formatBucketLabel(date: string, granularity: AiUsageGranularity) {
+  if (granularity === "hour") return hourFmt.format(new Date(date));
+  if (granularity === "week") return weekFmt.format(new Date(date));
+  return dayFmt.format(new Date(date));
+}
 
 const chartConfig = {
   sonnetCents: { label: "Sonnet 5", color: "var(--sh-chart-1)" },
@@ -51,19 +68,44 @@ function SummaryTile({ label, value, sub }: { label: string; value: string; sub?
   );
 }
 
-export function UsageView({ usage }: { usage: AiUsage }) {
+export function UsageView({ usage: initialUsage }: { usage: AiUsage }) {
+  const [usage, setUsage] = useState(initialUsage);
+  const [granularity, setGranularity] = useState<AiUsageGranularity>("day");
+  const [isPending, startTransition] = useTransition();
+
   const hasData = usage.totalCalls > 0;
-  const data = usage.daily.map(d => ({ ...d, label: dayFmt.format(new Date(d.date)) }));
+  const data = usage.daily.map(d => ({ ...d, label: formatBucketLabel(d.date, granularity) }));
+
+  function handleGranularityChange(next: AiUsageGranularity) {
+    setGranularity(next);
+    startTransition(async () => {
+      const next_ = await getUsageForRange(next);
+      setUsage(next_);
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4 w-full lg:max-w-[58%] mx-auto">
-      <div className="inline-flex items-center gap-2 self-start rounded-full border bg-sidebar py-1.5 pl-1.5 pr-4">
-        <img src="/claude-logo.svg" alt="Claude" className="size-6 rounded-full" />
-        <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Usage</h2>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="inline-flex items-center gap-2 rounded-full border bg-sidebar py-1.5 pl-1.5 pr-4">
+          <img src="/claude-logo.svg" alt="Claude" className="size-6 rounded-full" />
+          <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Usage</h2>
+        </div>
+        <ToggleGroup
+          multiple={false}
+          value={[granularity]}
+          onValueChange={(v) => v[0] && handleGranularityChange(v[0] as AiUsageGranularity)}
+          variant="outline"
+          className={isPending ? "opacity-60" : undefined}
+        >
+          <ToggleGroupItem value="hour" className="data-[state=on]:bg-primary data-[state=on]:text-white">Hourly</ToggleGroupItem>
+          <ToggleGroupItem value="day" className="data-[state=on]:bg-primary data-[state=on]:text-white">Daily</ToggleGroupItem>
+          <ToggleGroupItem value="week" className="data-[state=on]:bg-primary data-[state=on]:text-white">Weekly</ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <SummaryTile label="Total cost" value={fmt$(usage.totalCostCents)} sub="Last 30 days" />
+        <SummaryTile label="Total cost" value={fmt$(usage.totalCostCents)} sub={granularity === "hour" ? "Last 48 hours" : "Last 30 days"} />
         <SummaryTile label="API calls" value={usage.totalCalls.toLocaleString()} />
         <SummaryTile label="Input tokens" value={usage.totalInputTokens.toLocaleString()} />
         <SummaryTile label="Output tokens" value={usage.totalOutputTokens.toLocaleString()} />
@@ -71,7 +113,7 @@ export function UsageView({ usage }: { usage: AiUsage }) {
 
       <div className="rounded-md border bg-sidebar sm:rounded-sm overflow-hidden">
         <div className="px-5 pt-4 pb-3 flex flex-col gap-0.5">
-          <span className="text-[13px] tracking-tight text-muted-foreground">Daily cost by model</span>
+          <span className="text-[13px] tracking-tight text-muted-foreground">{GRANULARITY_LABEL[granularity]} cost by model</span>
           <span className="text-xl font-semibold tabular-nums text-foreground">{fmt$(usage.totalCostCents)}</span>
         </div>
         <ClaudeLegend />

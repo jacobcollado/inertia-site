@@ -346,7 +346,8 @@ export async function getDocuments(clients: Client[]): Promise<{ invoices: Docum
   return { invoices, files };
 }
 
-export type AiUsageDay = { date: string; sonnetCents: number; haikuCents: number; otherCents: number };
+export type AiUsageBucket = { date: string; sonnetCents: number; haikuCents: number; otherCents: number };
+export type AiUsageGranularity = "hour" | "day" | "week";
 export type AiUsage = {
   totalCostCents: number;
   totalCalls: number;
@@ -354,7 +355,7 @@ export type AiUsage = {
   totalOutputTokens: number;
   byModel: { model: string; label: string; costCents: number; calls: number }[];
   byFeature: { feature: string; costCents: number; calls: number }[];
-  daily: AiUsageDay[];
+  daily: AiUsageBucket[];
   isDemo: boolean;
 };
 
@@ -369,40 +370,42 @@ const MODEL_LABELS: Record<string, string> = {
 function demoAiUsageRows(days: number) {
   const features = ["client-auto-reply", "admin-quick-reply"];
   const rows: { model: string; feature: string; input_tokens: number; output_tokens: number; cost_cents: number; created_at: string }[] = [];
+  const dayStart = (i: number) => Date.now() - i * 24 * 60 * 60 * 1000;
   for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
     const wave = Math.sin(i / 3.5) * 0.5 + 0.5;
     const sonnetCalls = Math.round(2 + wave * 6);
     const haikuCalls = Math.round(3 + (1 - wave) * 9);
     for (let c = 0; c < sonnetCalls; c++) {
       const inputTokens = 800 + Math.round(wave * 1400);
       const outputTokens = 200 + Math.round(wave * 500);
+      const hourOffset = ((c * 7 + 1) % 24) * 60 * 60 * 1000;
       rows.push({
         model: "claude-sonnet-5",
         feature: features[c % features.length],
         input_tokens: inputTokens,
         output_tokens: outputTokens,
         cost_cents: (inputTokens / 1_000_000) * 2 * 100 + (outputTokens / 1_000_000) * 10 * 100,
-        created_at: d.toISOString(),
+        created_at: new Date(dayStart(i) + hourOffset).toISOString(),
       });
     }
     for (let c = 0; c < haikuCalls; c++) {
       const inputTokens = 500 + Math.round((1 - wave) * 900);
       const outputTokens = 150 + Math.round((1 - wave) * 350);
+      const hourOffset = ((c * 5 + 3) % 24) * 60 * 60 * 1000;
       rows.push({
         model: "claude-haiku-4-5-20251001",
         feature: features[c % features.length],
         input_tokens: inputTokens,
         output_tokens: outputTokens,
         cost_cents: (inputTokens / 1_000_000) * 1 * 100 + (outputTokens / 1_000_000) * 5 * 100,
-        created_at: d.toISOString(),
+        created_at: new Date(dayStart(i) + hourOffset).toISOString(),
       });
     }
   }
   return rows;
 }
 
-export async function getAiUsage(days = 30): Promise<AiUsage> {
+export async function getAiUsage(days = 30, granularity: AiUsageGranularity = "day"): Promise<AiUsage> {
   const admin = createAdminClient();
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -443,19 +446,62 @@ export async function getAiUsage(days = 30): Promise<AiUsage> {
     .map(([feature, v]) => ({ feature, ...v }))
     .sort((a, b) => b.costCents - a.costCents);
 
-  // Daily breakdown split by model bucket (sonnet / haiku / other) so the
-  // chart can stack them — matches the two models actually in use today
-  // without hardcoding a per-model series list that'd need updating for
-  // every future model added to MODEL_LABELS.
-  const dailyMap = new Map<string, AiUsageDay>();
-  const dayKey = (iso: string) => iso.slice(0, 10);
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-    const key = d.toISOString().slice(0, 10);
-    dailyMap.set(key, { date: key, sonnetCents: 0, haikuCents: 0, otherCents: 0 });
+  // Breakdown split by model bucket (sonnet / haiku / other) so the chart
+  // can stack them — matches the two models actually in use today without
+  // hardcoding a per-model series list that'd need updating for every
+  // future model added to MODEL_LABELS.
+  //
+  // Bucket key/step depend on granularity: hourly buckets truncate to the
+  // hour, daily to the day (existing behavior), weekly to the Monday that
+  // starts each ISO week — so the same aggregation loop below works for all three.
+  const MS_HOUR = 60 * 60 * 1000;
+  const MS_DAY = 24 * MS_HOUR;
+  const startOfWeek = (d: Date) => {
+    const day = d.getUTCDay(); // 0 = Sunday
+    const mondayOffset = (day + 6) % 7;
+    const monday = new Date(d);
+    monday.setUTCDate(d.getUTCDate() - mondayOffset);
+    monday.setUTCHours(0, 0, 0, 0);
+    return monday;
+  };
+  const bucketKey = (iso: string): string => {
+    const d = new Date(iso);
+    if (granularity === "hour") {
+      d.setUTCMinutes(0, 0, 0);
+      return d.toISOString();
+    }
+    if (granularity === "week") {
+      return startOfWeek(d).toISOString();
+    }
+    return iso.slice(0, 10);
+  };
+
+  const dailyMap = new Map<string, AiUsageBucket>();
+  if (granularity === "hour") {
+    const hours = Math.min(days * 24, 48);
+    for (let i = hours - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * MS_HOUR);
+      d.setUTCMinutes(0, 0, 0);
+      const key = d.toISOString();
+      dailyMap.set(key, { date: key, sonnetCents: 0, haikuCents: 0, otherCents: 0 });
+    }
+  } else if (granularity === "week") {
+    const weeks = Math.max(1, Math.ceil(days / 7));
+    for (let i = weeks - 1; i >= 0; i--) {
+      const key = startOfWeek(new Date(Date.now() - i * 7 * MS_DAY)).toISOString();
+      dailyMap.set(key, { date: key, sonnetCents: 0, haikuCents: 0, otherCents: 0 });
+    }
+  } else {
+    for (let i = days - 1; i >= 0; i--) {
+      const key = new Date(Date.now() - i * MS_DAY).toISOString().slice(0, 10);
+      dailyMap.set(key, { date: key, sonnetCents: 0, haikuCents: 0, otherCents: 0 });
+    }
   }
+
+  const bucketWindowStart = granularity === "hour" ? Date.now() - Math.min(days * 24, 48) * MS_HOUR : null;
   for (const r of usage) {
-    const key = dayKey(r.created_at);
+    if (bucketWindowStart !== null && new Date(r.created_at).getTime() < bucketWindowStart) continue;
+    const key = bucketKey(r.created_at);
     const entry = dailyMap.get(key);
     if (!entry) continue;
     if (r.model === "claude-sonnet-5") entry.sonnetCents += r.cost_cents;

@@ -7,6 +7,7 @@ import {
   ChevronRightIcon,
   ChevronsLeftIcon,
   ChevronsRightIcon,
+  FilterIcon,
   LayoutGridIcon,
 } from "lucide-react";
 import {
@@ -29,6 +30,10 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -46,8 +51,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-
 type ApiLog = {
   id: string;
   route: string;
@@ -176,19 +179,26 @@ export function LogsView() {
   return (
     <div className="flex flex-col gap-6 w-full mx-auto" style={{ maxWidth: 1100 }}>
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">API Logs</h1>
-          <p className="text-[14px] tracking-tight text-muted-foreground mt-0.5">{filtered.length} entries</p>
-        </div>
+        <p className="text-[14px] tracking-tight text-muted-foreground">{filtered.length} entries</p>
         <div className="flex items-center gap-2">
-          <ToggleGroup multiple={false} value={[route]} onValueChange={(v) => setRoute(v[0] ?? "all")} variant="outline">
-            <ToggleGroupItem value="all" className="data-[state=on]:bg-primary data-[state=on]:text-white">All</ToggleGroupItem>
-            {routes.map(r => (
-              <ToggleGroupItem key={r} value={r} className="data-[state=on]:bg-primary data-[state=on]:text-white">
-                {ROUTE_LABELS[r] ?? r}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
+              <FilterIcon />
+              <span className="hidden lg:inline">{route === "all" ? "All routes" : ROUTE_LABELS[route] ?? route}</span>
+              <ChevronDownIcon />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Filter by route</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={route} onValueChange={(v) => setRoute(v ?? "all")}>
+                  <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                  {routes.map(r => (
+                    <DropdownMenuRadioItem key={r} value={r}>{ROUTE_LABELS[r] ?? r}</DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
               <LayoutGridIcon />
@@ -212,7 +222,7 @@ export function LogsView() {
       </div>
 
       {loading ? (
-        <div className="overflow-hidden rounded-lg border border-sidebar-border">
+        <div className="overflow-hidden rounded-md border border-sidebar-border sm:rounded-sm">
           <Table>
             <TableHeader className="bg-sidebar-accent">
               <TableRow>
@@ -237,7 +247,7 @@ export function LogsView() {
         </div>
       ) : (
         <>
-          <div className="overflow-hidden rounded-lg border border-sidebar-border">
+          <div className="overflow-hidden rounded-md border border-sidebar-border sm:rounded-sm">
             <Table>
               <TableHeader className="bg-sidebar-accent">
                 {table.getHeaderGroups().map((headerGroup) => (

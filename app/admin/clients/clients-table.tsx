@@ -10,6 +10,7 @@ import {
   ChevronsLeftIcon,
   ChevronsRightIcon,
   EllipsisVerticalIcon,
+  FilterIcon,
   LayoutGridIcon,
   PlusIcon,
 } from "lucide-react";
@@ -25,7 +26,7 @@ import {
   type VisibilityState,
 } from "@tanstack/react-table";
 
-import { inviteClient, deleteAccount, suspendAccount, unsuspendAccount } from "../actions";
+import { inviteClient, deleteAccount, suspendAccount, unsuspendAccount, resendInvite } from "../actions";
 import type { Client } from "../data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +38,11 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -56,6 +61,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 function InviteForm({ onDone }: { onDone: () => void }) {
   const [pending, startTransition] = useTransition();
@@ -73,49 +86,73 @@ function InviteForm({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col">
-      {[
-        { name: "email", type: "email", placeholder: "Client email", required: true },
-        { name: "name", type: "text", placeholder: "Name (optional)" },
-        { name: "company", type: "text", placeholder: "Company (optional)" },
-      ].map(f => (
-        <div key={f.name} className="px-5 py-4 border-t border-sidebar-border">
-          <input name={f.name} type={f.type} required={f.required} placeholder={f.placeholder}
-            className="w-full bg-transparent text-[15px] tracking-tight text-foreground placeholder:text-muted-foreground focus:outline-none" />
-        </div>
-      ))}
-      {error && <p className="px-5 pt-2 text-[13px] text-destructive tracking-tight">{error}</p>}
-      <div className="flex items-center gap-3 px-5 py-4 border-t border-sidebar-border">
-        <Button type="submit" disabled={pending} size="sm">
-          {pending ? "Sending..." : "Send invite"}
-        </Button>
+    <form onSubmit={onSubmit} className="flex flex-col gap-4" style={{ "--sh-ring": "var(--sh-muted-foreground)" } as React.CSSProperties}>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="invite-email" className="text-[12px] text-muted-foreground">Email</Label>
+        <Input id="invite-email" name="email" type="email" placeholder="client@company.com" required autoFocus style={{ fontSize: 16 }} />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="invite-name" className="text-[12px] text-muted-foreground">Name (optional)</Label>
+        <Input id="invite-name" name="name" type="text" placeholder="Jane Smith" style={{ fontSize: 16 }} />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="invite-company" className="text-[12px] text-muted-foreground">Company (optional)</Label>
+        <Input id="invite-company" name="company" type="text" placeholder="Acme Inc." style={{ fontSize: 16 }} />
+      </div>
+      {error && <p className="text-[13px] text-destructive tracking-tight">{error}</p>}
+      <div className="flex items-center justify-end gap-2 pt-1">
         <Button type="button" variant="ghost" size="sm" onClick={onDone}>
           Cancel
+        </Button>
+        <Button type="submit" variant="outline" disabled={pending} size="sm">
+          {pending ? "Sending..." : "Send invite"}
         </Button>
       </div>
     </form>
   );
 }
 
+type StatusFilter = "all" | "active" | "pending" | "suspended";
+
+// Supabase marks invited users as email-confirmed the moment the invite is
+// sent, not when they actually finish the accept-invite flow — so
+// confirmed_at can't distinguish "invited" from "onboarded." last_sign_in_at
+// only gets set once a client completes accept-invite and lands a real
+// session, so its absence is the correct "hasn't accepted yet" signal.
+function clientStatus(c: Client): Exclude<StatusFilter, "all"> {
+  if (c.banned) return "suspended";
+  if (!c.last_sign_in_at) return "pending";
+  return "active";
+}
+
 function StatusBadge({ client }: { client: Client }) {
-  if (client.banned) {
+  const status = clientStatus(client);
+  if (status === "suspended") {
     return <Badge variant="outline" className="border-transparent bg-destructive/15 text-destructive">Suspended</Badge>;
   }
-  if (!client.confirmed_at) {
+  if (status === "pending") {
     return <Badge variant="outline" className="border-transparent bg-amber-500/15 text-amber-600 dark:text-amber-400">Pending</Badge>;
   }
   return <Badge variant="outline" className="border-transparent bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Active</Badge>;
 }
 
-function RowActions({ client, onDeleted }: { client: Client; onDeleted: (id: string) => void }) {
+function RowActions({ client, onDeleted, onToast }: { client: Client; onDeleted: (id: string) => void; onToast: (message: string) => void }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  const isPending = clientStatus(client) === "pending";
 
   const onToggleSuspend = () => {
     startTransition(async () => {
       if (client.banned) await unsuspendAccount(client.id);
       else await suspendAccount(client.id);
       router.refresh();
+    });
+  };
+
+  const onResend = () => {
+    startTransition(async () => {
+      const res = await resendInvite(client.id, client.email);
+      onToast(res.error ? `Couldn't resend invite: ${res.error}` : "Invite resent.");
     });
   };
 
@@ -138,6 +175,7 @@ function RowActions({ client, onDeleted }: { client: Client; onDeleted: (id: str
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuItem onClick={() => router.push(`/admin/clients/${client.id}`)}>View details</DropdownMenuItem>
+        {isPending && <DropdownMenuItem onClick={onResend}>Resend invite</DropdownMenuItem>}
         <DropdownMenuItem onClick={onToggleSuspend}>{client.banned ? "Unsuspend" : "Suspend"}</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={onDelete}>Delete</DropdownMenuItem>
@@ -146,7 +184,7 @@ function RowActions({ client, onDeleted }: { client: Client; onDeleted: (id: str
   );
 }
 
-function buildColumns(onDeleted: (id: string) => void): ColumnDef<Client>[] {
+function buildColumns(onDeleted: (id: string) => void, onToast: (message: string) => void): ColumnDef<Client>[] {
   return [
     {
       id: "select",
@@ -197,7 +235,7 @@ function buildColumns(onDeleted: (id: string) => void): ColumnDef<Client>[] {
     },
     {
       id: "status",
-      accessorFn: (c) => (c.banned ? "Suspended" : !c.confirmed_at ? "Pending" : "Active"),
+      accessorFn: (c) => clientStatus(c),
       header: "Status",
       cell: ({ row }) => <StatusBadge client={row.original} />,
     },
@@ -222,11 +260,18 @@ function buildColumns(onDeleted: (id: string) => void): ColumnDef<Client>[] {
     },
     {
       id: "actions",
-      cell: ({ row }) => <RowActions client={row.original} onDeleted={onDeleted} />,
+      cell: ({ row }) => <RowActions client={row.original} onDeleted={onDeleted} onToast={onToast} />,
       enableHiding: false,
     },
   ];
 }
+
+const STATUS_LABEL: Record<StatusFilter, string> = {
+  all: "All statuses",
+  active: "Active",
+  pending: "Pending",
+  suspended: "Suspended",
+};
 
 export function ClientsTable({ clients }: { clients: Client[] }) {
   const [data, setData] = useState(clients);
@@ -236,21 +281,35 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const searchParams = useSearchParams();
+
+  const filteredData = useMemo(
+    () => statusFilter === "all" ? data : data.filter(c => clientStatus(c) === statusFilter),
+    [data, statusFilter]
+  );
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(""), 3000);
+  };
 
   useEffect(() => {
     if (searchParams.get("deleted") === "1") {
-      setToast("Account deleted.");
-      const t = setTimeout(() => setToast(""), 3000);
-      return () => clearTimeout(t);
+      showToast("Account deleted.");
     }
   }, [searchParams]);
 
   const onDeleted = (id: string) => setData(prev => prev.filter(c => c.id !== id));
-  const columns = useMemo(() => buildColumns(onDeleted), []);
+  const columns = useMemo(() => buildColumns(onDeleted, showToast), []);
+
+  const onStatusFilterChange = (next: StatusFilter) => {
+    setStatusFilter(next);
+    setPagination(p => ({ ...p, pageIndex: 0 }));
+  };
 
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     state: { sorting, columnVisibility, rowSelection, pagination },
     getRowId: (row) => row.id,
@@ -274,13 +333,28 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
       )}
 
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">Clients</h1>
-          <p className="text-[14px] tracking-tight text-muted-foreground mt-0.5">
-            {data.length} {data.length === 1 ? "client" : "clients"}
-          </p>
-        </div>
+        <p className="text-[14px] tracking-tight text-muted-foreground">
+          {filteredData.length} {filteredData.length === 1 ? "client" : "clients"}
+        </p>
         <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
+              <FilterIcon />
+              <span className="hidden lg:inline">{STATUS_LABEL[statusFilter]}</span>
+              <ChevronDownIcon />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={statusFilter} onValueChange={(v) => onStatusFilterChange(v as StatusFilter)}>
+                  <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="active">Active</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="pending">Pending</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="suspended">Suspended</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>
               <LayoutGridIcon />
@@ -300,21 +374,21 @@ export function ClientsTable({ clients }: { clients: Client[] }) {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          {!inviting && (
-            <Button size="sm" onClick={() => setInviting(true)}>
+          <Dialog open={inviting} onOpenChange={setInviting}>
+            <DialogTrigger render={<Button variant="outline" size="sm" />}>
               <PlusIcon />
               Invite client
-            </Button>
-          )}
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite a client</DialogTitle>
+                <DialogDescription>They&apos;ll get an email to set up their account.</DialogDescription>
+              </DialogHeader>
+              <InviteForm onDone={() => setInviting(false)} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
-
-      {inviting && (
-        <div className="rounded-2xl overflow-hidden border border-sidebar-border bg-sidebar">
-          <p className="text-[12px] font-medium tracking-tight text-muted-foreground px-5 pt-4 pb-2">Invite a client</p>
-          <InviteForm onDone={() => setInviting(false)} />
-        </div>
-      )}
 
       <div className="overflow-hidden rounded-lg border border-sidebar-border">
         <Table>

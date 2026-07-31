@@ -40,7 +40,7 @@ export function ClientHeader({ client, avatarUrl }: { client: Client; avatarUrl?
     );
   }
 
-  const neverSignedIn = !client.confirmed_at;
+  const neverSignedIn = !client.last_sign_in_at;
   const lastSeen = client.last_sign_in_at
     ? new Date(client.last_sign_in_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : null;
