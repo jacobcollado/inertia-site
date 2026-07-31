@@ -16,7 +16,7 @@ export type Message = { id: string; client_id: string; case_id: string | null; s
 export type AuditEntry = { id: string; action: string; detail: string | null; created_at: string };
 export type CaseStatus = "open" | "pending" | "closed";
 export type CaseSeverity = "severity_1" | "severity_2" | "severity_3" | "severity_4";
-export type Case = { id: string; client_id: string; case_number: string; title: string; status: CaseStatus; severity: CaseSeverity; created_at: string; updated_at: string };
+export type Case = { id: string; client_id: string; case_number: string; title: string; status: CaseStatus; severity: CaseSeverity; created_at: string; updated_at: string; human_requested: boolean };
 
 export const CASE_STATUS_VARIANT: Record<CaseStatus, string> = {
   open:    "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",

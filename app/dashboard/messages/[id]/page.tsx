@@ -11,13 +11,13 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   const [{ data: caseRow }, { data: messages }, { data: client }, { data: profile }] = await Promise.all([
     supabase
       .from("cases")
-      .select("id, client_id, case_number, title, status, severity, created_at, updated_at")
+      .select("id, client_id, case_number, title, status, severity, created_at, updated_at, human_requested")
       .eq("client_id", user.id)
       .eq("id", id)
       .single(),
     supabase
       .from("messages")
-      .select("id, client_id, case_id, sender, body, read_at, created_at, suggest_close")
+      .select("id, client_id, case_id, sender, body, read_at, created_at, suggest_close, suggest_human")
       .eq("client_id", user.id)
       .eq("case_id", id)
       .order("created_at", { ascending: true }),

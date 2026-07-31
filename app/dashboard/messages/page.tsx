@@ -10,7 +10,7 @@ export default async function MessagesPage() {
   const [{ data: cases }, { data: messages }] = await Promise.all([
     supabase
       .from("cases")
-      .select("id, client_id, case_number, title, status, severity, created_at, updated_at")
+      .select("id, client_id, case_number, title, status, severity, created_at, updated_at, human_requested")
       .eq("client_id", user.id)
       .order("updated_at", { ascending: false }),
     supabase

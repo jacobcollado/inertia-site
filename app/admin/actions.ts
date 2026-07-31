@@ -375,6 +375,10 @@ export async function sendAdminMessage(clientId: string, body: string, caseId: s
   await ensureClientRow(clientId);
   const { error } = await admin.from("messages").insert({ client_id: clientId, case_id: caseId, sender: "admin", body });
   if (error) return { error: error.message };
+  // A real admin reply is exactly what "Request a human" was waiting on —
+  // clear the flag so the client's input re-enables and future messages in
+  // this case go back to the AI agent, until they ask for a human again.
+  if (caseId) await admin.from("cases").update({ human_requested: false }).eq("id", caseId);
   revalidatePath(`/admin/clients/${clientId}`);
   await notifyClient(clientId, "new_message", "New message from Inertia support", body);
   return { success: true };

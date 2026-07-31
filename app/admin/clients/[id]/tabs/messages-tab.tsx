@@ -292,7 +292,8 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
                   <div className="text-[13px] font-medium tracking-tight truncate">{c.title}</div>
                   <div className="text-[12px] text-muted-foreground mt-0.5">#{c.case_number}</div>
                 </div>
-                {waiting && <span className="size-1.5 rounded-full bg-amber-500 shrink-0" title="Waiting on client response" />}
+                {c.human_requested && <span className="size-1.5 rounded-full bg-blue-500 shrink-0" title="Client requested a person" />}
+                {!c.human_requested && waiting && <span className="size-1.5 rounded-full bg-amber-500 shrink-0" title="Waiting on client response" />}
               </button>
             );
           })}
@@ -376,6 +377,11 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
               )}
               {/* One-tap shortcuts for the two most common actions, instead
                   of always going through the status/severity dropdowns. */}
+              {selectedCase.human_requested && (
+                <Badge variant="outline" className="border-transparent bg-blue-500/15 text-blue-600 dark:text-blue-400">
+                  Person requested
+                </Badge>
+              )}
               {selectedCase.status !== "closed" && (
                 <button
                   type="button"

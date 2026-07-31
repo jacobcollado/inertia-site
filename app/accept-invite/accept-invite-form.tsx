@@ -120,7 +120,7 @@ export function AcceptInviteForm() {
     setLoading(false);
     if (profileRes.error) { setError(profileRes.error); return; }
     setPhase("done");
-    setTimeout(() => router.push("/dashboard"), 2000);
+    setTimeout(() => router.push("/dashboard?welcome=1"), 2000);
   };
 
   const onPasswordKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -138,7 +138,7 @@ export function AcceptInviteForm() {
     // Google's name/avatar into clients/profiles and lands on /dashboard.
     const { error } = await supabase.auth.linkIdentity({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/dashboard?welcome=1")}` },
     });
     if (error) { setGoogleLoading(false); setError(error.message); }
   };
