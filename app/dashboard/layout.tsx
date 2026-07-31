@@ -44,7 +44,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <>
-      <Script id="set-dashboard-dark" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: SET_DASHBOARD_DARK_SCRIPT }} />
+      <Script id="set-dashboard-dark" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: SET_DASHBOARD_DARK_SCRIPT }} />
       <ClientSidebarShell
         unreadMessages={count ?? 0}
         needsResponse={needsResponse}

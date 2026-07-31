@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { ThemeToggle } from "@/app/theme-toggle";
+import { updateClientProfile } from "@/app/dashboard/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-type Phase = "checking" | "verifying" | "expired" | "set-password" | "done";
+type Phase = "checking" | "expired" | "set-password" | "done";
 
 function Spinner() {
   return (
@@ -18,37 +22,29 @@ function Spinner() {
 }
 
 function ErrorMessage({ msg }: { msg: string }) {
-  return (
-    <div className="flex items-center gap-2 px-3 py-2.5 rounded-full text-[13px] tracking-tight" style={{ background: "rgb(239 68 68 / 0.08)", color: "rgb(220 38 38)" }}>
-      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <circle cx="8" cy="8" r="6.5" />
-        <line x1="8" y1="5" x2="8" y2="8.5" />
-        <circle cx="8" cy="11" r="0.5" fill="currentColor" stroke="none" />
-      </svg>
-      {msg}
-    </div>
-  );
+  return <p className="text-[13px] tracking-tight text-destructive">{msg}</p>;
 }
-
-const EyeIcon = ({ crossed }: { crossed: boolean }) => (
-  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px]" aria-hidden="true">
-    <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" />
-    <circle cx="10" cy="10" r="2.5" />
-    {crossed && <line x1="3" y1="3" x2="17" y2="17" />}
-  </svg>
-);
 
 export function AcceptInviteForm() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [phase, setPhase] = useState<Phase>("checking");
-  const phaseRef = useRef<Phase>("checking");
 
-  const setPhaseTracked = (p: Phase) => { phaseRef.current = p; setPhase(p); };
+  // Dashboard routes render uniformly dark — iOS Safari tints its top/bottom
+  // toolbars (and the overscroll rubber-band) from <html>'s background, so
+  // this pins it to the dashboard's dark token to match, same as
+  // ClientSidebarShell does for the rest of /dashboard.
+  useEffect(() => {
+    document.documentElement.classList.add("dashboard-dark");
+    return () => {
+      document.documentElement.classList.remove("dashboard-dark");
+    };
+  }, []);
 
   useEffect(() => {
     const supabase = createClient();
@@ -56,126 +52,132 @@ export function AcceptInviteForm() {
     // Unlike password recovery, Supabase's invite link uses the implicit
     // flow — the tokens arrive in the URL hash fragment (#access_token=...),
     // which never reaches the server, so there's no /auth/callback exchange
-    // step here. createClient() auto-detects and consumes that fragment on
-    // construction, so by the time this runs the session may already exist;
-    // if not yet, onAuthStateChange below catches it once detection finishes.
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) { setPhaseTracked("set-password"); return; }
-      setPhaseTracked("verifying");
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) setPhaseTracked("set-password");
-    });
-    const timeout = setTimeout(() => {
-      if (phaseRef.current === "verifying") setPhaseTracked("expired");
-    }, 5000);
-    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
+    // step. @supabase/ssr's browser client defaults to the PKCE flow and does
+    // NOT auto-detect/consume implicit-flow hash fragments the way the plain
+    // supabase-js client does, so the tokens have to be parsed out of the
+    // hash and applied manually via setSession — getSession() alone never
+    // picks them up.
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const access_token = hash.get("access_token");
+    const refresh_token = hash.get("refresh_token");
+
+    if (access_token && refresh_token) {
+      supabase.auth.setSession({ access_token, refresh_token }).then(({ data, error }) => {
+        // Clear the tokens from the URL regardless of outcome so they don't
+        // linger in browser history or get resubmitted on refresh.
+        window.history.replaceState(null, "", window.location.pathname);
+        if (!error && data.session) setPhase("set-password");
+        else setPhase("expired");
+      });
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) { setPhase("set-password"); return; }
+        setPhase("expired");
+      });
+    }
   }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) { setError("Name is required."); return; }
     if (password !== confirm) { setError("Passwords don't match."); return; }
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     setLoading(true);
     setError("");
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
+    if (error) { setLoading(false); setError(error.message); return; }
+    const profileRes = await updateClientProfile(name.trim());
     setLoading(false);
-    if (error) { setError(error.message); return; }
-    setPhaseTracked("done");
+    if (profileRes.error) { setError(profileRes.error); return; }
+    setPhase("done");
     setTimeout(() => router.push("/dashboard"), 2000);
   };
 
-  const inputClass = "w-full px-4 py-3 text-[14px] tracking-tight rounded-xl outline-none transition-colors bg-[rgb(var(--fg)/0.035)] placeholder:text-[rgb(var(--muted))] placeholder:opacity-70";
-  const inputStyle: React.CSSProperties = { border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" };
-  const onInputFocus = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)");
-  const onInputBlur = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)");
-
-  const submitButtonClass = "flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed";
-  const submitButtonStyle: React.CSSProperties = { background: "rgb(var(--fg))", color: "rgb(var(--bg))" };
-
   return (
-    <div className="w-full min-h-screen">
-      <div className="fixed top-0 inset-x-0 z-10 px-6" style={{ height: 72 }}>
-        <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "88rem" }}>
-          <Link href="/">
-            <img src="/logo.png" alt="Inertia" className="h-6 w-auto" style={{ display: "block" }} />
-          </Link>
-          <ThemeToggle />
-        </div>
-      </div>
-
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
-        <div
-          className="w-full max-w-[420px] rounded-2xl border border-[rgb(var(--line))] p-8 sm:p-10"
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            background: "rgb(var(--surface-elevated))",
-            animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
-          }}
-        >
-          {phase === "checking" || phase === "verifying" ? (
-            <div className="flex flex-col gap-4">
-              <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-70">Verifying your invite…</p>
-            </div>
-          ) : phase === "done" ? (
-            <div className="flex flex-col text-center gap-3">
-              <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
-                You&rsquo;re all set
+    <div className="min-h-svh w-full flex items-center justify-center bg-sidebar px-6 py-8">
+      <div className="w-full max-w-[380px] rounded-xl border bg-background p-8">
+        {phase === "checking" ? (
+          <div className="flex flex-col gap-4">
+            <p className="text-[14px] tracking-tight text-muted-foreground">Verifying your invite…</p>
+          </div>
+        ) : phase === "done" ? (
+          <div className="flex flex-col text-center gap-2">
+            <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">
+              You&rsquo;re all set
+            </h1>
+            <p className="text-[13px] tracking-tight text-muted-foreground">
+              Taking you to your dashboard…
+            </p>
+          </div>
+        ) : phase === "expired" ? (
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col text-center gap-2">
+              <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">
+                Link expired
               </h1>
-              <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed">
-                Taking you to your dashboard…
+              <p className="text-[13px] tracking-tight text-muted-foreground">
+                This invite link is no longer valid. Contact us for a new one.
               </p>
             </div>
-          ) : phase === "expired" ? (
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col text-center">
-                <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
-                  Link expired
-                </h1>
-                <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mt-3">
-                  This invite link is no longer valid. Contact us for a new one.
-                </p>
-              </div>
-              <Link href="/login" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center">
-                Back to sign in
-              </Link>
+            <Link href="/login" className="text-[13px] tracking-tight text-muted-foreground hover:text-foreground transition-colors text-center">
+              Back to sign in
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col text-center gap-2">
+              <p className="text-[13px] tracking-tight text-muted-foreground">Welcome to Inertia</p>
+              <h1 className="text-[1.6rem] font-semibold tracking-[-0.04em] leading-snug text-foreground">
+                Set a password
+              </h1>
+              <p className="text-[13px] tracking-tight text-muted-foreground">
+                Tell us your name and choose a password to finish setting up your client portal.
+              </p>
             </div>
-          ) : (
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col text-center">
-                <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">Inertia</p>
-                <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
-                  Welcome. Set a password
-                </h1>
-                <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] leading-relaxed mt-3">
-                  Choose a password to finish setting up your client portal.
-                </p>
+            <form onSubmit={onSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="name" className="text-muted-foreground">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  autoComplete="name"
+                  className="h-9 text-foreground transition-[color,box-shadow] placeholder:transition-opacity placeholder:duration-200 focus:placeholder:opacity-0 focus-visible:border-foreground/30 focus-visible:ring-foreground/15"
+                />
               </div>
-              <form onSubmit={onSubmit} className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password" className="text-muted-foreground">Password</Label>
                 <div className="relative">
-                  <input
+                  <Input
+                    id="password"
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={6}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder="Min. 6 characters"
                     autoComplete="new-password"
-                    className={inputClass}
-                    style={{ ...inputStyle, paddingRight: 44 }}
-                    onFocus={onInputFocus}
-                    onBlur={onInputBlur}
+                    className="h-9 pr-9 text-foreground transition-[color,box-shadow] placeholder:transition-opacity placeholder:duration-200 focus:placeholder:opacity-0 focus-visible:border-foreground/30 focus-visible:ring-foreground/15"
                   />
-                  <button type="button" onClick={() => setShowPassword(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-[rgb(var(--muted))] opacity-50 hover:opacity-90 transition-opacity"
-                    aria-label={showPassword ? "Hide password" : "Show password"}>
-                    <EyeIcon crossed={showPassword} />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOffIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
                   </button>
                 </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="confirm-password" className="text-muted-foreground">Confirm password</Label>
                 <div className="relative">
-                  <input
+                  <Input
+                    id="confirm-password"
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={6}
@@ -183,26 +185,26 @@ export function AcceptInviteForm() {
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Confirm password"
                     autoComplete="new-password"
-                    className={inputClass}
-                    style={{ ...inputStyle, paddingRight: 44 }}
-                    onFocus={onInputFocus}
-                    onBlur={onInputBlur}
+                    className="h-9 pr-9 text-foreground transition-[color,box-shadow] placeholder:transition-opacity placeholder:duration-200 focus:placeholder:opacity-0 focus-visible:border-foreground/30 focus-visible:ring-foreground/15"
                   />
-                  <button type="button" onClick={() => setShowPassword(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-[rgb(var(--muted))] opacity-50 hover:opacity-90 transition-opacity"
-                    aria-label={showPassword ? "Hide password" : "Show password"}>
-                    <EyeIcon crossed={showPassword} />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(v => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOffIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
                   </button>
                 </div>
-                {error && <ErrorMessage msg={error} />}
-                <button type="submit" disabled={loading || !password || !confirm} className={submitButtonClass} style={submitButtonStyle}>
-                  {loading ? <Spinner /> : null}
-                  {loading ? "Saving…" : "Set password"}
-                </button>
-              </form>
-            </div>
-          )}
-        </div>
+              </div>
+              {error && <ErrorMessage msg={error} />}
+              <Button type="submit" variant="secondary" disabled={loading || !name.trim() || !password || !confirm} className="w-full h-10">
+                {loading ? <Spinner /> : null}
+                {loading ? "Saving…" : "Set password"}
+              </Button>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
