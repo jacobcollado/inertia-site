@@ -213,6 +213,7 @@ export function AcceptInviteForm() {
                   placeholder="Your name"
                   autoComplete="name"
                   className="h-9 text-foreground transition-[color,box-shadow] placeholder:text-[12px] placeholder:transition-opacity placeholder:duration-200 focus:placeholder:opacity-0 focus-visible:border-foreground/30 focus-visible:ring-foreground/15"
+                  style={{ fontSize: 16 }}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -230,6 +231,7 @@ export function AcceptInviteForm() {
                     placeholder="6+ characters"
                     autoComplete="new-password"
                     className="h-9 pr-14 text-foreground transition-[color,box-shadow] placeholder:text-[12px] placeholder:transition-opacity placeholder:duration-200 focus:placeholder:opacity-0 focus-visible:border-foreground/30 focus-visible:ring-foreground/15"
+                    style={{ fontSize: 16 }}
                   />
                   {capsLockOn && (
                     <span
@@ -265,6 +267,7 @@ export function AcceptInviteForm() {
                     placeholder="Confirm password"
                     autoComplete="new-password"
                     className="h-9 pr-14 text-foreground transition-[color,box-shadow] placeholder:text-[12px] placeholder:transition-opacity placeholder:duration-200 focus:placeholder:opacity-0 focus-visible:border-foreground/30 focus-visible:ring-foreground/15"
+                    style={{ fontSize: 16 }}
                   />
                   {capsLockOn && (
                     <span
