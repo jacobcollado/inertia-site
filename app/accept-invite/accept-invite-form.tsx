@@ -25,7 +25,12 @@ function ErrorMessage({ msg }: { msg: string }) {
   return (
     <p
       className="w-full text-[13px] tracking-tight rounded-lg px-3 py-1.5 text-center"
-      style={{ color: "#ef4444", background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)" }}
+      style={{
+        color: "#ef4444",
+        background: "rgba(239, 68, 68, 0.15)",
+        border: "1px solid rgba(239, 68, 68, 0.3)",
+        animation: "rise-in 200ms cubic-bezier(0.22,1,0.36,1) both",
+      }}
     >
       {msg}
     </p>
@@ -34,7 +39,10 @@ function ErrorMessage({ msg }: { msg: string }) {
 
 function HintMessage({ msg }: { msg: string }) {
   return (
-    <p className="w-full text-[13px] tracking-tight text-muted-foreground bg-muted/40 border border-border rounded-lg px-3 py-1.5 text-center">
+    <p
+      className="w-full text-[13px] tracking-tight text-muted-foreground bg-muted/40 border border-border rounded-lg px-3 py-1.5 text-center"
+      style={{ animation: "rise-in 200ms cubic-bezier(0.22,1,0.36,1) both" }}
+    >
       {msg}
     </p>
   );
@@ -98,13 +106,13 @@ export function AcceptInviteForm() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setHint("");
+    setError("");
     if (!name.trim()) { setError("Name is required."); return; }
     if (password !== confirm) { setError("Passwords don't match."); return; }
     if (password.length < 6) { setHint("Password must be at least 6 characters."); return; }
     if (!/\d/.test(password)) { setHint("Password must include a number."); return; }
     if (!/[^A-Za-z0-9]/.test(password)) { setHint("Password must include a symbol."); return; }
     setLoading(true);
-    setError("");
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
     if (error) { setLoading(false); setError(error.message); return; }
@@ -208,6 +216,7 @@ export function AcceptInviteForm() {
                   id="name"
                   type="text"
                   required
+                  disabled={loading}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
@@ -224,6 +233,7 @@ export function AcceptInviteForm() {
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={6}
+                    disabled={loading}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyUp={onPasswordKey}
@@ -260,6 +270,7 @@ export function AcceptInviteForm() {
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={6}
+                    disabled={loading}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     onKeyUp={onPasswordKey}
@@ -290,10 +301,16 @@ export function AcceptInviteForm() {
               </div>
               {hint && <HintMessage msg={hint} />}
               {error && <ErrorMessage msg={error} />}
-              <Button type="submit" variant="secondary" disabled={loading || !name.trim() || !password || !confirm} className="w-full h-10">
+              <Button type="submit" variant="secondary" disabled={loading || !name.trim() || !password || !confirm} className="w-full h-10 transition-opacity">
                 {loading ? <Spinner /> : null}
                 {loading ? "Saving…" : "Set password"}
               </Button>
+              <p className="text-[12px] tracking-tight text-muted-foreground text-center leading-relaxed">
+                By creating an account, you agree to our{" "}
+                <Link href="/policies/terms-of-service" className="underline hover:text-foreground transition-colors">Terms of Service</Link>
+                {" "}and{" "}
+                <Link href="/policies/privacy-policy" className="underline hover:text-foreground transition-colors">Privacy Policy</Link>.
+              </p>
             </form>
           </div>
         )}
