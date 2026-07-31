@@ -52,7 +52,12 @@ export async function inviteClient(formData: FormData) {
   const admin = createAdminClient();
 
   const { data: authData, error: authError } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/auth/callback?type=invite`,
+    // Invite links use Supabase's implicit flow (tokens land in the URL hash
+    // fragment, never a ?code= query param), unlike recovery — so this must
+    // point straight at the page that consumes the hash client-side, not at
+    // /auth/callback, which only handles the PKCE ?code= exchange server-side
+    // and would never see a fragment (fragments never reach the server).
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/accept-invite`,
   });
   if (authError) return { error: authError.message };
 
@@ -308,7 +313,12 @@ export async function resendInvite(clientId: string, email: string) {
   await requireAdmin();
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/auth/callback?type=invite`,
+    // Invite links use Supabase's implicit flow (tokens land in the URL hash
+    // fragment, never a ?code= query param), unlike recovery — so this must
+    // point straight at the page that consumes the hash client-side, not at
+    // /auth/callback, which only handles the PKCE ?code= exchange server-side
+    // and would never see a fragment (fragments never reach the server).
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/accept-invite`,
   });
   if (error) return { error: error.message };
   await logAction(clientId, "invite_sent", email);

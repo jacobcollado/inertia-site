@@ -53,10 +53,12 @@ export function AcceptInviteForm() {
   useEffect(() => {
     const supabase = createClient();
 
-    // The invite session is established server-side by /auth/callback
-    // (PKCE flow) before this page loads, same as password recovery — so
-    // just check for the resulting session directly instead of waiting on
-    // an auth event.
+    // Unlike password recovery, Supabase's invite link uses the implicit
+    // flow — the tokens arrive in the URL hash fragment (#access_token=...),
+    // which never reaches the server, so there's no /auth/callback exchange
+    // step here. createClient() auto-detects and consumes that fragment on
+    // construction, so by the time this runs the session may already exist;
+    // if not yet, onAuthStateChange below catches it once detection finishes.
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) { setPhaseTracked("set-password"); return; }
       setPhaseTracked("verifying");
