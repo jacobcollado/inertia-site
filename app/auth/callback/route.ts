@@ -12,12 +12,15 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error && data.user) {
-      // Password recovery links land here too (Supabase appends ?code= after
-      // verifying the emailed token) — send those to the reset-password
-      // screen instead of the dashboard, since the user hasn't set a new
-      // password yet.
+      // Password recovery and invite links land here too (Supabase appends
+      // ?code= after verifying the emailed token) — send those to their own
+      // password-setting screens instead of the dashboard, since the user
+      // hasn't set a password yet.
       if (type === "recovery") {
         return NextResponse.redirect(`${origin}/reset-password`);
+      }
+      if (type === "invite") {
+        return NextResponse.redirect(`${origin}/accept-invite`);
       }
 
       const { data: profile } = await supabase

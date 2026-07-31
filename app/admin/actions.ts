@@ -51,7 +51,9 @@ export async function inviteClient(formData: FormData) {
 
   const admin = createAdminClient();
 
-  const { data: authData, error: authError } = await admin.auth.admin.inviteUserByEmail(email);
+  const { data: authData, error: authError } = await admin.auth.admin.inviteUserByEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/auth/callback?type=invite`,
+  });
   if (authError) return { error: authError.message };
 
   const userId = authData.user.id;
@@ -305,7 +307,9 @@ export async function updateAccountPassword(clientId: string, password: string) 
 export async function resendInvite(clientId: string, email: string) {
   await requireAdmin();
   const admin = createAdminClient();
-  const { error } = await admin.auth.admin.inviteUserByEmail(email);
+  const { error } = await admin.auth.admin.inviteUserByEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/auth/callback?type=invite`,
+  });
   if (error) return { error: error.message };
   await logAction(clientId, "invite_sent", email);
   return { success: true };
