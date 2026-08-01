@@ -624,6 +624,16 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                   "radial-gradient(120% 90% at 80% 120%, rgba(59,110,163,0.5) 0%, transparent 55%)," +
                   "linear-gradient(180deg, #b8b8b8 0%, #949494 60%)",
                 color: "#fff",
+                // Same fall palette as the inner bottom glow, echoed outside the
+                // pill as three offset box-shadows blooming from the bottom
+                // edge — amber left, green center, blue right — so the light
+                // reads as spilling out from underneath rather than stopping
+                // at the button's own edge.
+                boxShadow:
+                  "-6px 9px 7px -6px rgba(217,119,6,0.6)," +
+                  "0px 13px 8px -6px rgba(74,124,89,0.55)," +
+                  "3px 9px 7px -6px rgba(59,110,163,0.65)," +
+                  "6px 9px 7px -6px rgba(59,110,163,0.5)",
               }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
@@ -2477,16 +2487,108 @@ function HeroToIntroLine({
             // size instead.
             const turnY = geo.splitY + (geo.armEndY - geo.splitY) * 0.2;
             return (
-              <g key={i}>
-                <DashedGrowLine x1={geo.trunkX} y1={geo.splitY} x2={geo.trunkX} y2={turnY} drawn={drawn} delayMs={450} />
-                <DashedGrowLine x1={geo.trunkX} y1={turnY} x2={x} y2={turnY} drawn={drawn} delayMs={650} />
-                <DashedGrowLine x1={x} y1={turnY} x2={x} y2={geo.armEndY} drawn={drawn} delayMs={850} />
-              </g>
+              <RoundedElbow
+                key={i}
+                trunkX={geo.trunkX}
+                splitY={geo.splitY}
+                turnY={turnY}
+                armX={x}
+                armEndY={geo.armEndY}
+                drawn={drawn}
+              />
             );
           })}
         </svg>
       )}
     </div>
+  );
+}
+
+// One outer elbow arm — down, rounded corner, across, rounded corner, down —
+// drawn as three straight DashedGrowLine legs (each shortened by the corner
+// radius so they stop short of the joint) plus two quarter-circle arcs
+// filling the corners. The arcs use their own stroke-dashoffset grow-in
+// rather than DashedGrowLine's clip-rect approach, since a curved segment's
+// bounding-box scale trick doesn't apply.
+function RoundedElbow({
+  trunkX,
+  splitY,
+  turnY,
+  armX,
+  armEndY,
+  drawn,
+}: {
+  trunkX: number;
+  splitY: number;
+  turnY: number;
+  armX: number;
+  armEndY: number;
+  drawn: boolean;
+}) {
+  const dir = armX > trunkX ? 1 : -1; // which way the horizontal leg travels
+  // Corner radius scaled to the smaller of the two legs it sits between, so
+  // a short mobile turn never lets the arc overshoot past the leg's own
+  // start/end and invert the curve.
+  const vertLeg1 = turnY - splitY;
+  const vertLeg2 = armEndY - turnY;
+  const horizLeg = Math.abs(armX - trunkX);
+  const radius = Math.max(0, Math.min(14, vertLeg1 * 0.9, vertLeg2 * 0.9, horizLeg * 0.4));
+
+  // First corner: vertical leg (down) → horizontal leg. Arc sweeps from
+  // straight-down travel into horizontal travel.
+  const c1StartY = turnY - radius;
+  const c1EndX = trunkX + dir * radius;
+  // Second corner: horizontal leg → vertical leg (down) again.
+  const c2StartX = armX - dir * radius;
+  const c2EndY = turnY + radius;
+
+  const sweep1 = dir > 0 ? 0 : 1;
+  const sweep2 = dir > 0 ? 1 : 0;
+
+  return (
+    <g>
+      <DashedGrowLine x1={trunkX} y1={splitY} x2={trunkX} y2={c1StartY} drawn={drawn} delayMs={450} />
+      <ArcGrowSegment
+        d={`M ${trunkX} ${c1StartY} A ${radius} ${radius} 0 0 ${sweep1} ${c1EndX} ${turnY}`}
+        drawn={drawn}
+        delayMs={560}
+      />
+      <DashedGrowLine x1={c1EndX} y1={turnY} x2={c2StartX} y2={turnY} drawn={drawn} delayMs={650} />
+      <ArcGrowSegment
+        d={`M ${c2StartX} ${turnY} A ${radius} ${radius} 0 0 ${sweep2} ${armX} ${c2EndY}`}
+        drawn={drawn}
+        delayMs={760}
+      />
+      <DashedGrowLine x1={armX} y1={c2EndY} x2={armX} y2={armEndY} drawn={drawn} delayMs={850} />
+    </g>
+  );
+}
+
+// A curved corner segment (SVG arc path) that grows in via stroke-dashoffset
+// over its own measured length — mirrors DashedGrowLine's straight-segment
+// grow-in, but a clip-rect scale can't express a curve, so this animates the
+// dash offset directly instead.
+function ArcGrowSegment({ d, drawn, delayMs }: { d: string; drawn: boolean; delayMs: number }) {
+  const ref = useRef<SVGPathElement>(null);
+  const [length, setLength] = useState(0);
+
+  useEffect(() => {
+    if (ref.current) setLength(ref.current.getTotalLength());
+  }, [d]);
+
+  return (
+    <path
+      ref={ref}
+      d={d}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeDasharray="3 4"
+      style={{
+        strokeDashoffset: drawn ? 0 : -length,
+        transition: `stroke-dashoffset 220ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
+      }}
+    />
   );
 }
 
@@ -2514,6 +2616,33 @@ function DashedGrowLine({
   delayMs: number;
 }) {
   const id = useId().replace(/:/g, "");
+  const axisAligned = x1 === x2 || y1 === y2;
+
+  if (!axisAligned) {
+    // Diagonal segment — the clip-rect scale trick below only grows along a
+    // single axis, which is all an axis-aligned segment ever needs, but a
+    // diagonal has extent on both axes at once so that approach would just
+    // snap the unanimated axis to full size immediately. Grow it instead via
+    // stroke-dashoffset over the line's own real length, which works
+    // regardless of the segment's angle.
+    const length = Math.hypot(x2 - x1, y2 - y1);
+    return (
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeDasharray="3 4"
+        style={{
+          strokeDashoffset: drawn ? 0 : -length,
+          transition: `stroke-dashoffset 320ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
+        }}
+      />
+    );
+  }
+
   const horizontal = y1 === y2;
   const left = Math.min(x1, x2);
   const top = Math.min(y1, y2);
