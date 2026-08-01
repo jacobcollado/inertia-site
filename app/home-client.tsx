@@ -2175,14 +2175,19 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                     className="flex items-center justify-between gap-2 pt-3 sm:pt-0 group/cta"
                   >
                     <p className="text-[18px] tracking-tight" style={{ color: "rgb(var(--fg))" }}>{item.client}</p>
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform duration-200 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" style={{ color: "#0071e3" }}>
-                      <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
-                    </svg>
+                    <span
+                      className="flex items-center justify-center w-7 h-7 sm:w-6 sm:h-6 rounded-full shrink-0"
+                      style={{ background: "rgb(var(--fg) / 0.06)" }}
+                    >
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 sm:w-3 sm:h-3 shrink-0 transition-transform duration-200 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" style={{ color: "rgb(var(--muted))" }}>
+                        <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
+                      </svg>
+                    </span>
                   </Link>
                   {item.blurb && (
                     <div className="max-w-[85%] sm:max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                       <p
-                        className="text-[16px] leading-relaxed tracking-tight w-full"
+                        className="text-[16px] leading-snug tracking-tight w-full"
                         style={{ color: "rgb(var(--muted))" }}
                       >
                         {item.blurb}
