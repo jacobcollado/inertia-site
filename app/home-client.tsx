@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { FollowerPointerCard } from "@/components/ui/following-pointer";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string; palette?: string[]; card?: string };
@@ -1218,23 +1217,6 @@ const WORK_ITEMS = [
   { src: "/work/ellora-la/2.png", title: "Ellora LA", category: "Collection page", accent: "#6f283c", logo: "/work-logos/ellora-la.png" },
 ];
 
-// Fluid, seamless carousel: a real horizontal track (not a crossfade) with a
-// slide cloned on each end so it can wrap without ever snapping backward.
-// Autoplay, drag/swipe, dot nav, and arrows all move the same `index` state;
-// the only special case is the wrap jump, which turns transitions off for one
-// frame. On desktop each slide is sized to ~78% of the track so the next (and,
-// once you've moved, previous) slide peeks in at the edges.
-const WORK_SLIDE_MS = 4200;
-const WORK_EASE = "cubic-bezier(0.65,0,0.35,1)";
-const WORK_DURATION = 900;
-const WORK_PEEK_PCT = 58; // desktop slide width as % of track
-// Mobile crossfade, staged so the transition passes through black: the
-// outgoing slide fades out first, then the incoming one fades in over the
-// black underlay. Overlapping them symmetrically would leave two half-opaque
-// photos on screen at the midpoint, which reads muddy rather than fluid.
-const WORK_FADE_OUT_MS = 420;
-const WORK_FADE_IN_MS = 520;
-
 function hexToRgba(hex: string, alpha: number) {
   const n = parseInt(hex.slice(1), 16);
   const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
@@ -1322,6 +1304,24 @@ const WORK_CLIENT_SLUGS: Record<string, string> = {
   "Trippie Redd": "trippie-redd",
 };
 
+// Launch month per client, kept in sync with the year/month overrides on
+// /work (see WORK_LINKS in work-index-client.tsx) so the two surfaces agree.
+// Month is 1-12; "Early 2026" (Ellora LA) reads as January. Drives the
+// timeline's month rail; "Inertia" has none (it's the site itself, not a
+// dated engagement) and sits at the end unpinned to a date.
+const WORK_CLIENT_DATES: Record<string, { year: number; month: number }> = {
+  "Aether Theme": { year: 2023, month: 1 },
+  "FT.GIOO": { year: 2025, month: 6 },
+  "Trippie Redd": { year: 2025, month: 6 },
+  "Ellora LA": { year: 2026, month: 1 },
+  "Inboundly": { year: 2026, month: 5 },
+  "Subtle Goods": { year: 2026, month: 6 },
+};
+
+function dateKey(year: number, month: number) {
+  return year * 12 + month;
+}
+
 const WORK_CLIENTS = (() => {
   const seen = new Set<string>();
   return WORK_ITEMS.filter((w) => {
@@ -1331,603 +1331,161 @@ const WORK_CLIENTS = (() => {
   }).map((w) => ({
     ...w,
     href: WORK_CLIENT_SLUGS[w.title] ? `/work/${WORK_CLIENT_SLUGS[w.title]}` : "/work",
-  }));
+    date: WORK_CLIENT_DATES[w.title],
+    // Undated (Inertia, the site itself) sorts to the end rather than the
+    // front, so the timeline reads oldest-to-newest left to right with the
+    // one undated entry trailing rather than jumping the queue.
+  })).sort((a, b) => {
+    const ak = a.date ? dateKey(a.date.year, a.date.month) : Infinity;
+    const bk = b.date ? dateKey(b.date.year, b.date.month) : Infinity;
+    return ak - bk;
+  });
 })();
 
-// Desktop work display: one soft-shadow rounded tile per client, laid out in
-// a 3-col grid with the odd 7th tile spanning the full row. Every tile is
-// visible and static — no timer, no crossfade — with the lift/caption-reveal
-// on hover carrying the same radius/shadow/easing language as the site's own
-// bento cards (see --radius-lg, --shadow-raised in globals.css).
-// Desktop work display: a single large frame showing one client at a time,
-// switched with plain prev/next arrows — never more than one photo on screen.
-// Deliberately not a grid: showing all clients' thumbnails together read as
-// cluttered, so this keeps every transition to exactly one image, one name.
-function WorkFrameSwitcher({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
-  const router = useRouter();
-  const [active, setActive] = useState(0);
+// Scroll-jacked horizontal gallery, styled after Apple's product pages
+// (AirPods Pro, Vision Pro): the section is tall and its inner frame sticks
+// to the viewport while scrolling through it, and that vertical scroll
+// distance is read as progress and mapped onto a horizontal translateX
+// across the panel track. No wheel/touch interception anywhere - native
+// scroll produces the horizontal motion purely through the sticky frame, the
+// same trick Apple's own pages use, which is why trackpad momentum and
+// scrollbar dragging both keep working here instead of behaving like a
+// separate captured input mode.
+//
+// Progress is polled on rAF against the section's own bounding rect rather
+// than driven by scroll or resize events, matching LightCard's scrollScale
+// effect elsewhere in this file: Lenis (this site's smooth-scroll library)
+// advances scroll through its own rAF loop and never fires native `scroll`
+// events, so an event listener here would just never fire.
+const GALLERY_VH_PER_PANEL = 60; // scroll budget per panel, in vh - "short and snappy"
+
+function WorkScrollGallery({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
   const total = WORK_CLIENTS.length;
-  const current = WORK_CLIENTS[active];
+  const lastActiveRef = useRef(-1);
 
   useEffect(() => {
-    onActiveAccent?.(current.accent);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track) return;
 
-  const go = (delta: number) => setActive((i) => (i + delta + total) % total);
+    const apply = () => {
+      const rect = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // The section is (total panels worth of scroll budget) + one extra
+      // viewport tall; progress 0 the instant its top reaches the top of the
+      // viewport, progress 1 once it's scrolled up by its own scrollable
+      // range (own height minus one viewport, since the sticky frame holds
+      // the last viewport-height in place).
+      const scrollRange = rect.height - vh;
+      const progress = scrollRange > 0
+        ? Math.min(1, Math.max(0, -rect.top / scrollRange))
+        : 0;
+      const maxTranslate = track.scrollWidth - (track.parentElement?.clientWidth ?? 0);
+      track.style.transform = `translateX(-${progress * Math.max(0, maxTranslate)}px)`;
+
+      const active = Math.min(total - 1, Math.floor(progress * total));
+      if (active !== lastActiveRef.current) {
+        lastActiveRef.current = active;
+        onActiveAccent?.(WORK_CLIENTS[active].accent);
+      }
+      rafRef.current = requestAnimationFrame(apply);
+    };
+    rafRef.current = requestAnimationFrame(apply);
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <div className="w-full max-w-[88rem] mx-auto px-6 sm:px-8 flex flex-col items-center gap-5">
-      <div
-        role="link"
-        tabIndex={0}
-        onClick={() => router.push(current.href)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(current.href); } }}
-        className="relative w-full overflow-hidden cursor-pointer"
-        style={{
-          borderRadius: 20,
-          aspectRatio: "16 / 10",
-          maxHeight: 620,
-          boxShadow: "0 1px 1px rgba(0,0,0,0.04), 0 24px 54px -16px rgba(0,0,0,0.22)",
-        }}
+    <>
+      {/* Desktop: the scroll-jacked sticky gallery. Mobile drops it for a
+          plain swipeable row below - a sticky-frame scrollytelling effect
+          depends on precise scroll-distance math that touch scrolling (with
+          its own momentum/rubber-banding) doesn't reproduce reliably, and
+          native horizontal swipe is the more honest mobile pattern anyway. */}
+      <section
+        ref={sectionRef}
+        className="relative hidden sm:block"
+        style={{ height: `${100 + GALLERY_VH_PER_PANEL * total}vh` }}
       >
-        {WORK_CLIENTS.map((w, i) => (
-          <div
+        <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
+          <div ref={trackRef} className="flex" style={{ willChange: "transform" }}>
+            {WORK_CLIENTS.map((w) => (
+              <Link
+                key={w.title}
+                href={w.href}
+                className="relative shrink-0 w-screen h-screen flex items-center justify-center px-6 sm:px-10"
+              >
+                <div
+                  className="relative w-full h-full overflow-hidden"
+                  style={{ borderRadius: 24, maxHeight: "82vh", margin: "auto" }}
+                >
+                  <Image
+                    src={w.src}
+                    alt={w.title}
+                    fill
+                    draggable={false}
+                    quality={85}
+                    sizes="100vw"
+                    className="object-cover object-top"
+                  />
+                  {/* Minimal caption, bottom-left - the image does the work,
+                      this just names it. */}
+                  <div className="absolute inset-x-0 bottom-0 px-6 sm:px-10 py-6 sm:py-8 pointer-events-none">
+                    <p className="text-[22px] sm:text-[28px] font-medium tracking-tight text-white leading-none">
+                      {w.title}
+                    </p>
+                    <p className="mt-1.5 text-[13px] sm:text-[14px] tracking-tight text-white/70">
+                      {w.category}
+                    </p>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-x-0 bottom-0 h-1/3 pointer-events-none"
+                    style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55), transparent)" }}
+                  />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile: plain native horizontal swipe, snap-to-panel. */}
+      <div className="sm:hidden flex gap-3 overflow-x-auto px-6 pb-2 snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
+        {WORK_CLIENTS.map((w) => (
+          <Link
             key={w.title}
-            aria-hidden={i !== active}
-            className="absolute inset-0"
-            style={{
-              opacity: i === active ? 1 : 0,
-              transition: "opacity 480ms cubic-bezier(0.22,1,0.36,1)",
-              pointerEvents: i === active ? "auto" : "none",
-            }}
+            href={w.href}
+            className="relative shrink-0 snap-start overflow-hidden"
+            style={{ width: "82vw", aspectRatio: "4 / 3", borderRadius: 18 }}
+            onClick={() => onActiveAccent?.(w.accent)}
           >
             <Image
               src={w.src}
               alt={w.title}
               fill
               draggable={false}
-              priority={i === 0}
-              loading={i === 0 ? undefined : "lazy"}
               quality={75}
-              sizes="min(92vw, 1408px)"
+              sizes="82vw"
               className="object-cover object-top"
             />
-          </div>
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none"
+              style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55), transparent)" }}
+            />
+            <div className="absolute inset-x-0 bottom-0 px-4 py-4 pointer-events-none">
+              <p className="text-[18px] font-medium tracking-tight text-white leading-none">{w.title}</p>
+              <p className="mt-1 text-[12.5px] tracking-tight text-white/70">{w.category}</p>
+            </div>
+          </Link>
         ))}
       </div>
-
-      <div className="flex items-center gap-5">
-        <button
-          type="button"
-          aria-label="Previous"
-          onClick={(e) => { e.stopPropagation(); go(-1); }}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors duration-200 hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--surface))]"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <div className="text-center min-w-[180px]">
-          <p className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{current.title}</p>
-          <p className="mt-0.5 text-[12.5px] tracking-tight text-[rgb(var(--muted))]">{current.category}</p>
-        </div>
-        <button
-          type="button"
-          aria-label="Next"
-          onClick={(e) => { e.stopPropagation(); go(1); }}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-[rgb(var(--muted))] transition-colors duration-200 hover:text-[rgb(var(--fg))] hover:bg-[rgb(var(--surface))]"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function WorkThumbnails({ onActiveAccent }: { onActiveAccent?: (color: string) => void }) {
-  const router = useRouter();
-  const total = WORK_ITEMS.length;
-  // The track is [..CLONES tail items, ...items, ..CLONES head items]. Two
-  // clones on each end (not one) so that on desktop — where the active slide
-  // peeks its left AND right neighbors — both peek positions are still
-  // populated at the wrap boundary. With a single clone, advancing onto the
-  // wrap slide left the far-side peek empty for one step, which is what made
-  // the last→first transition visibly jump instead of staying fluid.
-  const CLONES = 2;
-  // Real items occupy track indices CLONES .. CLONES+total-1.
-  const [index, setIndex] = useState(CLONES);
-  const [animate, setAnimate] = useState(true);
-  const [paused, setPaused] = useState(false);
-  const [dragX, setDragX] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
-  // Which slide (track index) the pointer is currently hovering, so the
-  // follower tooltip can reflect the peeking prev/next card, not just the
-  // centered one. null falls back to the active slide.
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  // Staggered entrance: each slide fades/rises in with a per-slide delay on
-  // load, instead of the whole track sliding in from the right.
-  const [entered, setEntered] = useState(false);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const widthRef = useRef(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dragState = useRef<{ startX: number; dragging: boolean; dx: number; captured: boolean } | null>(null);
-  const sectionRef = useRef<HTMLElement>(null);
-  // Desktop and mobile render as two separate sections (one is display:none),
-  // so the parallax has to measure whichever one is actually laid out —
-  // getBoundingClientRect on the hidden one returns all zeros.
-  const desktopSectionRef = useRef<HTMLElement>(null);
-  const [scrollScale, setScrollScale] = useState(1);
-
-  // Scroll parallax, now on BOTH breakpoints: as the section scrolls up into
-  // view it scales from a shrunken start up to its natural size, tracking
-  // scroll position directly rather than running a one-shot reveal.
-  //
-  // Polled on rAF rather than driven off a `scroll` listener. Lenis (this
-  // site's smooth-scroll library) advances the real scroll position itself
-  // and fires no native scroll events, so a listener here never runs — the
-  // same reason LightCard below polls. The old mobile-only version worked
-  // purely because touch scrolling bypasses Lenis's wheel handling.
-  useEffect(() => {
-    let raf = 0;
-    let last = -1;
-    const tick = () => {
-      // Pick the section that's actually rendered at this breakpoint. offsetParent
-      // is null for a display:none element, which is the cheap visibility test.
-      const el =
-        desktopSectionRef.current?.offsetParent != null
-          ? desktopSectionRef.current
-          : sectionRef.current;
-      if (!el) { raf = requestAnimationFrame(tick); return; }
-      const rect = el.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // progress 0 when the section's top is at the bottom of the viewport,
-      // 1 once its top has scrolled up to the viewport's vertical center
-      const progress = Math.min(1, Math.max(0, (vh - rect.top) / (vh * 0.65)));
-      const next = 0.82 + progress * 0.18;
-      // Only re-render when the value actually moves a visible amount —
-      // setState every frame re-renders this component (and its parent via
-      // onActiveAccent) continuously, which is heavy enough to stall the
-      // main thread.
-      if (Math.abs(next - last) > 0.002) {
-        last = next;
-        setScrollScale(next);
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  // CLONES tail items prepended + CLONES head items appended.
-  const slides = [
-    ...WORK_ITEMS.slice(total - CLONES),
-    ...WORK_ITEMS,
-    ...WORK_ITEMS.slice(0, CLONES),
-  ];
-  const slideWidth = isDesktop ? WORK_PEEK_PCT : 100;
-  // center the active slide within the track when it's narrower than 100%
-  const centerOffset = (100 - slideWidth) / 2;
-
-  const goTo = (i: number) => { setAnimate(true); setIndex(i); };
-  const advance = () => goTo(index + 1);
-
-  // Autoplay is mobile-only now. On desktop the track isn't rendered at all,
-  // so leaving the timer running would just churn state (and re-report accents)
-  // for a carousel nobody can see.
-  useEffect(() => {
-    if (paused || isDesktop) return;
-    timerRef.current = setTimeout(advance, WORK_SLIDE_MS);
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, paused, isDesktop]);
-
-  // Track indices wrap via onTransitionEnd; map any track index (real or
-  // clone) back to the real (non-clone) item. Real items start at CLONES.
-  const activeItem = WORK_ITEMS[((index - CLONES) % total + total) % total];
-  const activeAccent = activeItem.accent;
-
-  // Pointer tooltip reflects whichever card is hovered (including the peeking
-  // prev/next slides), falling back to the centered slide when the pointer
-  // isn't over any specific card. hoveredIndex is a track index into the
-  // [last-clone, ...items, first-clone] track, so map it back to a real item.
-  const tooltipItem =
-    hoveredIndex != null
-      ? WORK_ITEMS[((hoveredIndex - CLONES) % total + total) % total]
-      : activeItem;
-
-  // Tooltip logo tweaks. Logos are forced black (they sit on the white pill)
-  // except FT.GIOO, which keeps its own multi-color artwork. Aether reads
-  // small at the shared size, so it gets a larger height.
-  const tooltipLogoNaturalColor = tooltipItem.logo === "/work-logos/ft-gioo.png";
-  const tooltipLogoSize = tooltipItem.logo === "/work-logos/aether.png" ? 20 : 15;
-  const pointerTitle = (
-    <span className="flex items-center gap-2">
-      {tooltipItem.logo && (
-        // Logo centered on a neutral white circular pill so it reads
-        // regardless of the logo's own color, in place of the old thumbnail.
-        <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white"
-          style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.25)" }}
-        >
-          <Image
-            src={tooltipItem.logo}
-            alt=""
-            width={40}
-            height={40}
-            sizes="40px"
-            quality={70}
-            className="object-contain"
-            style={{
-              height: tooltipLogoSize,
-              width: tooltipLogoSize,
-              filter: tooltipLogoNaturalColor ? undefined : "brightness(0)",
-            }}
-          />
-        </span>
-      )}
-      <span className="whitespace-nowrap">{tooltipItem.title}</span>
-    </span>
-  );
-  // Report the active slide's accent color upward so the hero can tint
-  // itself to match. Keyed on `index` (not the derived color) so the hero's
-  // ripple re-plays on every slide change, even when two consecutive slides
-  // happen to share the same accent.
-  useEffect(() => {
-    // On desktop WorkStackDesktop owns accent reporting (driven by hover);
-    // letting the carousel's index also report would overwrite the hovered
-    // color with the stale autoplay one.
-    if (isDesktop) return;
-    onActiveAccent?.(activeAccent);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, isDesktop]);
-
-  useEffect(() => {
-    const measure = () => {
-      if (trackRef.current) widthRef.current = trackRef.current.parentElement!.getBoundingClientRect().width;
-      setIsDesktop(window.innerWidth >= 640);
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  // Kick off the staggered entrance one frame after mount so the from-state
-  // (faded/offset) paints first and the transition actually runs.
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  // After a wrap-slide finishes animating, jump instantly (no transition) to
-  // the equivalent real slide at the opposite end so the loop never runs out.
-  // Real items span CLONES .. CLONES+total-1; anything outside that lands on a
-  // clone and gets re-homed to its real counterpart.
-  const onTransitionEnd = (e: React.TransitionEvent) => {
-    // Only the track's own transform transition should trigger the re-home.
-    // Child slides transition their height/filter/transform on the same
-    // duration, and those events bubble up to this handler — acting on them
-    // re-homed mid-animation (or on the wrong element), which read as a snap.
-    if (e.target !== trackRef.current || e.propertyName !== "transform") return;
-    if (index < CLONES) { setAnimate(false); setIndex(index + total); }
-    else if (index >= CLONES + total) { setAnimate(false); setIndex(index - total); }
-  };
-  useEffect(() => {
-    if (!animate) {
-      const id = requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
-      return () => cancelAnimationFrame(id);
-    }
-  }, [animate]);
-
-  // Mobile re-home. The wrap above is driven by the track's transform
-  // transition ending, but mobile crossfades instead — the track never
-  // transforms, so onTransitionEnd never fires and the index would walk off
-  // the end of the clones. Re-home on a timer matched to the fade instead.
-  useEffect(() => {
-    if (isDesktop) return;
-    if (index >= CLONES && index < CLONES + total) return;
-    const id = setTimeout(() => {
-      setAnimate(false);
-      setIndex((v) => (v < CLONES ? v + total : v - total));
-      // Wait out the full staged fade (out, then in) before re-homing, so the
-      // index swap lands while the new slide is already settled.
-    }, WORK_FADE_OUT_MS + WORK_FADE_IN_MS);
-    return () => clearTimeout(id);
-  }, [index, isDesktop, total]);
-
-  // Desktop-only click-and-drag. Uses pointer capture so every move/up event
-  // routes back to the track once a drag begins — without it, dragging faster
-  // than the element (or off its edge) dropped the pointer stream, leaving the
-  // drag orphaned (dragX frozen, dragging stuck true) which is what broke the
-  // carousel and lost focus. Only the primary mouse button starts a drag.
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    // Don't capture the pointer yet — capturing on a plain click (no movement)
-    // swallows the ensuing `click` event, so the thumbnail never navigated to
-    // /work. Capture is deferred to onPointerMove, once an actual drag begins.
-    dragState.current = { startX: e.clientX, dragging: true, dx: 0, captured: false };
-    setPaused(true);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    if (!dragState.current?.dragging) return;
-    const dx = e.clientX - dragState.current.startX;
-    dragState.current.dx = dx;
-    // Once the pointer has moved enough to count as a drag, capture it so the
-    // rest of the gesture keeps routing here even off-element.
-    if (!dragState.current.captured && Math.abs(dx) > 6) {
-      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-      dragState.current.captured = true;
-    }
-    setDragX(dx);
-  };
-  const endDrag = (e?: React.PointerEvent) => {
-    if (!dragState.current?.dragging) return;
-    const dx = dragState.current.dx;
-    const wasCaptured = dragState.current.captured;
-    dragState.current.dragging = false;
-    if (e && wasCaptured) (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId);
-    // Advance one slide per drag past a fraction of the visible slide width
-    // (measured off the actual slide, not the whole track), so the throw
-    // distance needed matches how far a slide is.
-    const slidePx = (widthRef.current || 1) * (slideWidth / 100);
-    const threshold = slidePx * 0.2;
-    setAnimate(true);
-    if (dx < -threshold) setIndex(i => i + 1);
-    else if (dx > threshold) setIndex(i => i - 1);
-    setDragX(0);
-    setPaused(false);
-  };
-
-  const dragPct = widthRef.current ? (dragX / widthRef.current) * 100 : 0;
-  // each slide occupies `slideWidth`%; shift left by index slides, then add
-  // the centering offset so the active slide sits in the middle on desktop
-  const trackOffset = -index * slideWidth + centerOffset + dragPct;
-
-  // Desktop is no longer a carousel — it's a vertical stack of full-width
-  // rows. All the track machinery above (autoplay, clones, drag, wrap) is
-  // mobile-only now.
-  //
-  // Both trees render and CSS picks one (`hidden sm:block` / `sm:hidden`)
-  // rather than branching on the measured `isDesktop`. That measurement only
-  // lands after mount, so a JS branch made the server and first client paint
-  // emit the MOBILE carousel on desktop — a visible layout swap on load, and
-  // an LCP preload pointing at the wrong image. Breakpoint classes put the
-  // right layout in the server HTML from the first byte.
-  const desktopStack = (
-    // Negative top margin pulls the section up into the hero's bottom padding,
-    // the same trick mobile uses with -mt-[14dvh]. The hero carries an
-    // sm:pb-[18dvh] that exists to lift its headline above centre; that pad is
-    // empty space sitting directly above this section, so reclaiming most of
-    // it is what actually closes the gap. A plain smaller mt- cannot, since
-    // the space isn't this section's margin to begin with.
-    <section ref={desktopSectionRef} className="relative hidden sm:block sm:-mt-[11dvh]">
-      {/* Same scroll parallax as mobile: scales up into place as it enters
-          the viewport. transformOrigin center so it grows from its middle. */}
-      <div
-        className="relative"
-        style={{
-          transform: `scale(${scrollScale})`,
-          transformOrigin: "center center",
-          willChange: "transform",
-          // Above the beam, which sits at zIndex 0 behind it.
-          zIndex: 1,
-        }}
-      >
-        <WorkFrameSwitcher onActiveAccent={onActiveAccent} />
-      </div>
-    </section>
-  );
-
-  return (
-    <>
-      {desktopStack}
-    <section
-      ref={sectionRef}
-      className="relative sm:hidden"
-      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => {
-        // Don't clear an in-progress drag here — pointer capture keeps it
-        // alive off-element, and nulling it mid-drag orphaned the gesture.
-        if (!dragState.current?.dragging) { setPaused(false); dragState.current = null; }
-      }}
-    >
-      <FollowerPointerCard title={pointerTitle} titleKey={tooltipItem.title} className="w-full">
-        <div
-          className="relative w-full select-none"
-          style={{
-            aspectRatio: "16 / 9",
-            maxHeight: 560,
-            transform: `scale(${scrollScale})`,
-            transformOrigin: "center center",
-          }}
-        >
-          <div className="absolute inset-0 overflow-hidden">
-            {/* Black ground for the mobile crossfade. Inset to match the
-                slides' own px-1.5 gutter and rounded to match their corners,
-                so what shows through mid-fade is a black card rather than a
-                black rectangle behind a rounded one. */}
-            {!isDesktop && (
-              <div
-                aria-hidden="true"
-                className="absolute inset-y-0 left-1.5 right-1.5 rounded-2xl"
-                style={{ background: "#000", zIndex: 0 }}
-              />
-            )}
-            <div
-              ref={trackRef}
-              className="flex h-full"
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={endDrag}
-              onPointerCancel={endDrag}
-              style={{
-                // Mobile stacks its slides and crossfades between them, so the
-                // track itself never translates there. Desktop keeps the
-                // sliding track (peeking neighbours depend on it).
-                transform: isDesktop ? `translateX(${trackOffset}%)` : "none",
-                // No transform transition until the entrance has run — the
-                // track sits at its resting offset from the first paint, so
-                // the slides stagger in (per-slide fade/rise below) instead of
-                // the whole track sliding in from the right.
-                transition: isDesktop && animate && entered ? `transform ${WORK_DURATION}ms ${WORK_EASE}` : "none",
-                touchAction: "pan-y",
-              }}
-              onTransitionEnd={onTransitionEnd}
-            >
-              {slides.map((w, i) => {
-                const on = i === index;
-                // Desktop peeks the adjacent slides too, so they're visible
-                // (and can paint as the LCP element) on first load, not just
-                // the centered one. Mobile shows ONE slide at 100vw, so the
-                // neighbours are off-screen: loading them eagerly there put two
-                // extra full-width images in front of the LCP image on a cold
-                // mobile connection. Let them lazy-load instead.
-                const inViewport = on || (isDesktop && Math.abs(i - index) === 1);
-                // peeking slides sit shorter and grow to full height as they
-                // slide into the active center; centered vertically so both
-                // edges ease in/out together rather than pinning to the top.
-                const heightPct = on || !isDesktop ? 100 : 84;
-                // Staggered load-in: cascade the visible slides left→right off
-                // the leftmost peeking slide, so they fade/rise in one after
-                // another rather than all at once. Off-screen slides just
-                // start in place (no visible entrance).
-                const leftmostVisible = index - 1;
-                const stagger = Math.max(0, i - leftmostVisible);
-                const entranceDelay = entered ? stagger * 90 : 0;
-                const nearViewport = Math.abs(i - index) <= 2;
-                return (
-                  <div
-                    key={`${w.src}-${i}`}
-                    role="link"
-                    draggable={false}
-                    onDragStart={(e) => e.preventDefault()}
-                    onClick={() => { if (Math.abs(dragState.current?.dx ?? 0) <= 6) router.push("/work"); }}
-                    onMouseEnter={() => setHoveredIndex(i)}
-                    onMouseLeave={() => setHoveredIndex((prev) => (prev === i ? null : prev))}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push("/work"); } }}
-                    className={
-                      isDesktop
-                        ? "relative h-full shrink-0 px-1.5 sm:px-3 flex items-center"
-                        : "absolute inset-0 h-full px-1.5 flex items-center"
-                    }
-                    style={
-                      isDesktop
-                        ? ({
-                            width: `${slideWidth}%`,
-                            cursor: "none",
-                            WebkitUserDrag: "none",
-                            // Entrance: fade + slight rise/scale, staggered per
-                            // slide. Only near-viewport slides bother animating
-                            // (the rest are off-screen anyway); once entered,
-                            // everything rests at its natural state.
-                            opacity: entered || !nearViewport ? 1 : 0,
-                            transform: entered || !nearViewport ? "none" : "translateY(16px) scale(0.96)",
-                            transition: `opacity 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms, transform 620ms cubic-bezier(0.22,1,0.36,1) ${entranceDelay}ms`,
-                          } as React.CSSProperties)
-                        : ({
-                            // Mobile: every slide is stacked in the same box and
-                            // only the active one is opaque, so advancing is a
-                            // crossfade rather than a horizontal slide. Swipe
-                            // still changes `index` — it just no longer drags
-                            // the track with the finger.
-                            //
-                            // The fade runs THROUGH BLACK: a black underlay
-                            // sits behind the stack, the outgoing slide fades
-                            // out faster than the incoming fades in (ease-in on
-                            // the way out, ease-out on the way back), so the
-                            // black shows through at the midpoint instead of
-                            // two half-opaque photos muddying together.
-                            width: "100%",
-                            cursor: "none",
-                            WebkitUserDrag: "none",
-                            opacity: on ? 1 : 0,
-                            transition: on
-                              ? `opacity ${WORK_FADE_IN_MS}ms cubic-bezier(0.33,0,0.67,1) ${WORK_FADE_OUT_MS}ms`
-                              : `opacity ${WORK_FADE_OUT_MS}ms cubic-bezier(0.33,0,0.67,1)`,
-                            zIndex: on ? 2 : 1,
-                            pointerEvents: on ? "auto" : "none",
-                          } as React.CSSProperties)
-                    }
-                    tabIndex={on ? 0 : -1}
-                  >
-                    <div
-                      className="relative w-full rounded-2xl overflow-hidden"
-                      style={{
-                        height: `${heightPct}%`,
-                        // Gate the height ramp on `animate` too. During the
-                        // instant re-home at the loop seam (animate=false), the
-                        // just-active clone would otherwise animate its
-                        // height/blur back to the inactive state while the
-                        // identical real slide animates up — that crossfade is
-                        // exactly the "snap." Making these instant during the
-                        // re-home keeps the handoff invisible.
-                        transition: animate ? `height ${WORK_DURATION}ms ${WORK_EASE}` : "none",
-                      }}
-                    >
-                      <Image
-                        src={w.src}
-                        alt={w.title}
-                        fill
-                        draggable={false}
-                        // Only the centered slide is the LCP candidate, so give
-                        // it fetchpriority=high. The peeking neighbors load
-                        // eagerly (not lazy) but without competing for high
-                        // priority on cold load — three high-priority full-size
-                        // images at once was slowing LCP.
-                        //
-                        // Pinned to the FIRST slide rather than to `on`. With
-                        // priority={on}, autoplay moved it to a new image every
-                        // 4.2s and each move injected a fresh <link rel=preload>
-                        // the browser never used in time — the "preloaded but
-                        // not used" console spam. After the initial paint the
-                        // active slide is needed immediately anyway, so a
-                        // preload hint buys nothing. `slides` also carries two
-                        // clones of each end item, so gate on the real one to
-                        // avoid preloading the same URL twice.
-                        // `loading` must be gated on the SAME condition as
-                        // `priority` — Next throws if one image gets both, and
-                        // `on` moves with autoplay while `priority` stays
-                        // pinned to the first slide, so gating on `on` made
-                        // the two disagree as soon as the carousel advanced.
-                        priority={i === CLONES}
-                        loading={i === CLONES ? undefined : inViewport ? "eager" : "lazy"}
-                        quality={70}
-                        // Cap the fetched width: the slide never exceeds ~817px
-                        // CSS wide (58% of the max-w-[88rem] track), so a raw
-                        // 58vw made retina screens pull the 1920px variant for a
-                        // ~1090px display. Cap at ~700px so the browser lands on
-                        // the 1200 srcset bucket instead of 1920 — big byte
-                        // savings on the LCP image, negligible visible change.
-                        sizes={isDesktop ? "min(58vw, 700px)" : "calc(100vw - 12px)"}
-                        className="object-cover object-top"
-                        style={{
-                          filter: on || !isDesktop ? "none" : "brightness(0.55) blur(3px)",
-                          transform: on || !isDesktop ? "scale(1)" : "scale(1.06)",
-                          transition: animate
-                            ? "filter 500ms ease, transform 500ms ease"
-                            : "none",
-                        }}
-                      />
-                      {/* Bottom label — hidden on mobile (this whole section is mobile-only),
-                          shown from sm: up for when the track is ever visible at wider widths. */}
-                      <div className="absolute inset-x-0 bottom-0 z-10 pointer-events-none hidden sm:block">
-                        <div className="p-4">
-                          <p className="text-[18px] tracking-tight text-white font-normal">{w.title}</p>
-                          <p className="text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.45)" }}>{w.category}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </FollowerPointerCard>
-    </section>
     </>
   );
 }
@@ -2655,15 +2213,12 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
         <div className="mx-auto w-full max-w-[88rem] flex flex-col">
           <VercelHero accentColor={accentColor} />
 
-          {/* sm:py-0 — this spacer sat between the hero and the work section
-              and its desktop py-6 stacked on top of the section's own top
-              margin. Mobile keeps its py-1. */}
-          <div className="py-1 sm:py-0" />
-
-          {/* Pull the carousel up on mobile into the hero's bottom padding. */}
-          <div className="-mt-[14dvh] sm:mt-0">
-            <WorkThumbnails onActiveAccent={(c) => setAccentColor(c)} />
-          </div>
+          {/* Work thumbnail section (WorkScrollGallery) temporarily hidden
+              while its format is still being decided. accentColor stays fed
+              by WORK_ITEMS[0] via its initial state below, so the hero tint
+              still has a value. Restore by uncommenting these two lines. */}
+          {/* <div className="py-1 sm:py-0" />
+          <WorkScrollGallery onActiveAccent={(c) => setAccentColor(c)} /> */}
 
           <div className="py-7 sm:py-12" />
 
