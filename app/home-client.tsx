@@ -2357,7 +2357,10 @@ function HeroToIntroLine({
       }
       const trunkTop = fromRect.bottom - containerRect.top;
       const trunkX = fromRect.left + fromRect.width / 2 - containerRect.left;
-      const armEndY = toRect.top - containerRect.top;
+      // A few px of clearance above the paragraph's true top rather than
+      // landing exactly on it — right on the edge, the stroke's own width
+      // could still visually touch the first line of text.
+      const armEndY = toRect.top - containerRect.top - 4;
       const paraLeft = toRect.left - containerRect.left;
       // The paragraph must sit below the CTA for this to make sense at all;
       // during the CTA's own fade/rise-in it's briefly offset, which could
@@ -2374,10 +2377,13 @@ function HeroToIntroLine({
       const gap = armEndY - trunkTop;
       const ARM_RISE = Math.min(60, Math.max(20, gap * 0.45));
       const splitY = Math.max(trunkTop, armEndY - ARM_RISE);
-      // 3 arms land at even sixths across the paragraph's width (1/6, 3/6,
-      // 5/6) rather than the literal edges, so the outer two don't point at
-      // the paragraph's corner.
-      const armTargets = [1 / 6, 3 / 6, 5 / 6].map((f) => paraLeft + toRect.width * f);
+      // 3 arms land at even fifths across the paragraph's width (1/5, 1/2,
+      // 4/5) rather than sixths, pulling the outer two in a bit further from
+      // the paragraph's actual left/right edges — at 1/6 and 5/6 the right
+      // arm in particular landed close enough to the edge that its final
+      // vertical drop visually crossed into the paragraph's own text instead
+      // of clearing it.
+      const armTargets = [1 / 5, 1 / 2, 4 / 5].map((f) => paraLeft + toRect.width * f);
       const height = Math.max(splitY, armEndY) + 1;
       // Only commit once the same height has been read on back-to-back
       // frames — a single matching frame could still be a coincidence mid
@@ -2390,7 +2396,23 @@ function HeroToIntroLine({
       lastHeight = height;
       setGeo({ trunkTop, splitY, trunkX, armEndY, armTargets, width: containerRect.width, height });
     };
-    const onResize = () => { stableFrames = 0; measure(); };
+    // Only a WIDTH change (real device rotation or a breakpoint change)
+    // should trigger a re-measure — a height-only change is almost always a
+    // mobile browser's toolbar/address bar collapsing or expanding on
+    // scroll, not a real layout change worth reacting to. The hero uses
+    // 100dvh, so that toolbar move does genuinely shift its real height and
+    // the paragraph's position along with it, but redrawing the connector to
+    // track that made it visibly slide down and overlap the paragraph while
+    // scrolling, then slide back on scrolling the other way — exactly the
+    // kind of viewport-chrome noise the line should just ignore and stay put
+    // through instead.
+    let lastWidth = window.innerWidth;
+    const onResize = () => {
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
+      stableFrames = 0;
+      measure();
+    };
     measure();
     window.addEventListener("resize", onResize);
     // The CTA only reaches its resting position once the hero's own
