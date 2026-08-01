@@ -2311,12 +2311,17 @@ function HeroToIntroLine({
   // transitionend rather than guessing a matching delay keeps this in sync
   // even if the hero's own timing changes later.
   const [drawn, setDrawn] = useState(false);
+  // Mirrors `drawn` for the measurement effect's long-lived poll loop below,
+  // which reads it every frame — a plain closure over the state variable
+  // would only ever see the value from when that effect last ran (mount),
+  // since drawn isn't (and shouldn't be) one of its own effect dependencies.
+  const drawnRef = useRef(false);
 
   useEffect(() => {
     const cta = fromRef.current;
     if (!cta) return;
     const onDone = (e: TransitionEvent) => {
-      if (e.propertyName === "opacity") setDrawn(true);
+      if (e.propertyName === "opacity") { drawnRef.current = true; setDrawn(true); }
     };
     cta.addEventListener("transitionend", onDone);
     return () => cta.removeEventListener("transitionend", onDone);
@@ -2324,12 +2329,13 @@ function HeroToIntroLine({
 
   useEffect(() => {
     // Tracks the last two committed heights so polling can stop once the
-    // measurement has genuinely settled (two matching frames in a row),
-    // rather than running for a fixed window regardless of what it's
-    // reading. A fixed-duration poll could commit a single bad frame (e.g.
-    // read mid-way through the CTA's own entrance transition, or while
-    // LightCard's independent scroll-driven transform is being applied to
-    // the same ancestor) right as the window ends and then never correct it.
+    // measurement has genuinely settled (two matching frames in a row) AND
+    // the CTA's own entrance transition has actually finished (`drawn`) —
+    // stability alone isn't enough, since two frames read back-to-back while
+    // the CTA sits mid-transition (or hasn't started animating yet) can look
+    // "stable" for a tick without being its true resting position. Without
+    // waiting on `drawn` too, the trunk could lock onto the CTA's pre-
+    // animation position and only ever correct itself on the next resize.
     let lastHeight: number | null = null;
     let stableFrames = 0;
 
@@ -2357,10 +2363,16 @@ function HeroToIntroLine({
       // during the CTA's own fade/rise-in it's briefly offset, which could
       // otherwise transiently invert this.
       if (armEndY <= trunkTop) { stableFrames = 0; return; }
-      // Split point sits a fixed distance above the paragraph's top rather
-      // than some fraction of the gap, so the fan-out reads the same size
-      // regardless of how tall the gap between hero and paragraph is.
-      const ARM_RISE = 28;
+      // Split point sits a fraction of the CTA-to-paragraph gap above the
+      // paragraph (clamped to a sane range), rather than a fixed pixel
+      // distance: a fixed offset either clamped away to nothing on a short
+      // mobile gap (leaving the split sitting right at the CTA with no room
+      // for the arms to fan out before turning) or sat too close to the
+      // paragraph on a tall desktop gap. Scaling with the gap keeps the split
+      // sitting a consistent, proportionally higher point in the middle of it
+      // at any gap size.
+      const gap = armEndY - trunkTop;
+      const ARM_RISE = Math.min(60, Math.max(20, gap * 0.45));
       const splitY = Math.max(trunkTop, armEndY - ARM_RISE);
       // 3 arms land at even sixths across the paragraph's width (1/6, 3/6,
       // 5/6) rather than the literal edges, so the outer two don't point at
@@ -2392,7 +2404,8 @@ function HeroToIntroLine({
     const start = performance.now();
     const poll = (now: number) => {
       measure();
-      if (stableFrames < 2 && now - start < 4000) raf = requestAnimationFrame(poll);
+      const settled = stableFrames >= 2 && drawnRef.current;
+      if (!settled && now - start < 4000) raf = requestAnimationFrame(poll);
     };
     raf = requestAnimationFrame(poll);
     return () => {
@@ -2410,26 +2423,42 @@ function HeroToIntroLine({
           height={geo.height}
           style={{ color: "rgb(var(--muted))" }}
         >
-          {/* Trunk draws first. */}
+          {/* Trunk draws first, all the way to the split point — the center
+              "arm" IS the trunk's own end, so there's nothing further to draw
+              there once it arrives. Only the outer two actually branch off
+              and continue down to the paragraph. */}
           <DashedGrowLine x1={geo.trunkX} y1={geo.trunkTop} x2={geo.trunkX} y2={geo.splitY} drawn={drawn} delayMs={0} />
           {geo.armTargets.map((x, i) => {
-            // Center arm sits at the trunk's own x (no horizontal offset
-            // needed), so it's a single straight drop. The outer two route as
-            // a right-angle elbow — down, across, down — split into 3
-            // separate straight sub-segments (rather than one multi-turn
-            // path) specifically so each leg can grow in on its own local
-            // axis and stagger in sequence, reading as the line flowing down
-            // then across then down rather than the whole elbow popping in
-            // at once.
-            if (x === geo.trunkX) {
-              return <DashedGrowLine key={i} x1={geo.trunkX} y1={geo.splitY} x2={x} y2={geo.armEndY} drawn={drawn} delayMs={450} />;
-            }
-            const midY = geo.splitY + (geo.armEndY - geo.splitY) / 2;
+            // The middle target (index 1 of the fixed [1/6, 3/6, 5/6] split)
+            // is the one meant to be skipped — the trunk's own end already
+            // covers that position. Skipping by index rather than checking
+            // x === geo.trunkX: the two are only coincidentally equal when
+            // the paragraph happens to be centered directly under the CTA
+            // (true on desktop's layout here, NOT guaranteed on mobile's
+            // different container widths), so the value check silently
+            // failed on mobile and rendered a near-zero-width "elbow" that
+            // looked like a plain line running straight down the middle.
+            if (i === 1) return null;
+            // Right-angle elbow — down, across, down — split into 3 separate
+            // straight sub-segments (rather than one multi-turn path)
+            // specifically so each leg can grow in on its own local axis and
+            // stagger in sequence, reading as the line flowing down then
+            // across then down rather than the whole elbow popping in at
+            // once. The turn sits a small FRACTION of the split-to-paragraph
+            // gap below the split point, not a fixed pixel offset — on a
+            // short mobile gap a fixed 14px could still be most of the
+            // remaining distance, leaving the two outer arms running straight
+            // down the center for nearly the whole gap before turning, which
+            // is what read as one line continuing down the middle there even
+            // though desktop's taller gap made the same fixed offset look
+            // fine. A proportional turn stays visually consistent at any gap
+            // size instead.
+            const turnY = geo.splitY + (geo.armEndY - geo.splitY) * 0.2;
             return (
               <g key={i}>
-                <DashedGrowLine x1={geo.trunkX} y1={geo.splitY} x2={geo.trunkX} y2={midY} drawn={drawn} delayMs={450} />
-                <DashedGrowLine x1={geo.trunkX} y1={midY} x2={x} y2={midY} drawn={drawn} delayMs={650} />
-                <DashedGrowLine x1={x} y1={midY} x2={x} y2={geo.armEndY} drawn={drawn} delayMs={850} />
+                <DashedGrowLine x1={geo.trunkX} y1={geo.splitY} x2={geo.trunkX} y2={turnY} drawn={drawn} delayMs={450} />
+                <DashedGrowLine x1={geo.trunkX} y1={turnY} x2={x} y2={turnY} drawn={drawn} delayMs={650} />
+                <DashedGrowLine x1={x} y1={turnY} x2={x} y2={geo.armEndY} drawn={drawn} delayMs={850} />
               </g>
             );
           })}
