@@ -2174,15 +2174,15 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                     onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
                     className="flex items-center justify-between gap-2 pt-3 sm:pt-0 group/cta"
                   >
-                    <p className="text-[15px] tracking-tight" style={{ color: "rgb(var(--fg))" }}>{item.client}</p>
-                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform duration-200 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" style={{ color: "rgb(var(--muted))" }}>
+                    <p className="text-[18px] tracking-tight" style={{ color: "rgb(var(--fg))" }}>{item.client}</p>
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform duration-200 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" style={{ color: "#0071e3" }}>
                       <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
                     </svg>
                   </Link>
                   {item.blurb && (
                     <div className="max-w-[85%] sm:max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                       <p
-                        className="text-[14px] leading-relaxed tracking-tight w-full"
+                        className="text-[16px] leading-relaxed tracking-tight w-full"
                         style={{ color: "rgb(var(--muted))" }}
                       >
                         {item.blurb}
@@ -2220,7 +2220,13 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
           {/* <div className="py-1 sm:py-0" />
           <WorkScrollGallery onActiveAccent={(c) => setAccentColor(c)} /> */}
 
-          <div className="py-7 sm:py-12" />
+          {/* The hero carries its own large bottom padding (pb-[18dvh]
+              desktop / pb-[40dvh] mobile) meant to be reclaimed by whatever
+              follows — the work gallery normally did that with its own
+              negative top margin. With it hidden, pull DesignPhilosophy back
+              up toward the hero, but not all the way — a full reclaim sat
+              too close underneath it. */}
+          <div className="py-7 sm:py-12 max-sm:-mt-[18dvh] sm:-mt-[7dvh]" />
 
           <DesignPhilosophy />
 

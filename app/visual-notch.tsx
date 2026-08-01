@@ -19,7 +19,7 @@ import {
   HiOutlineQuestionMarkCircle,
   HiOutlineShieldCheck,
   HiOutlineSwatch,
-  HiOutlineUser,
+  HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 
 const CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
@@ -644,7 +644,7 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
       >
-        <HiOutlineUser style={{ width: iconSize, height: iconSize }} />
+        <HiOutlineArrowRightOnRectangle style={{ width: iconSize, height: iconSize }} />
       </Link>
     </div>
   );
