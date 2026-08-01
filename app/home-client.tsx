@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -457,7 +457,7 @@ function ShimmerWord({ children, italic }: { children: string; italic?: boolean 
   );
 }
 
-function VercelHero({ accentColor }: { accentColor: string }) {
+function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: React.RefObject<HTMLAnchorElement | null> }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -477,6 +477,26 @@ function VercelHero({ accentColor }: { accentColor: string }) {
     transform: visible ? "translateY(0)" : "translateY(18px)",
     transition: `opacity 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
   });
+
+  // Heading words stagger in one after another rather than fading in as one
+  // flat block, so the reveal reads as fluid motion building toward "speed"
+  // instead of a single static pop. Each word gets a shorter, snappier
+  // transition than the section-level fade() above (420ms vs 750ms) so the
+  // stagger itself is what carries the motion, not each word's own long ease.
+  const HEADING_WORDS = ["Design", "that", "moves", "at", "your"];
+  const HEADING_WORD_STEP = 70; // ms between each word's start
+  const HEADING_START = 120;
+  const wordFade = (i: number) => ({
+    display: "inline-block",
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(14px)",
+    transition: `opacity 420ms cubic-bezier(0.22,1,0.36,1) ${HEADING_START + i * HEADING_WORD_STEP}ms, transform 420ms cubic-bezier(0.22,1,0.36,1) ${HEADING_START + i * HEADING_WORD_STEP}ms`,
+  });
+  // "speed" (the shimmer word) is treated as one more staggered word, landing
+  // right after "your". The CTA button's own delay is computed from this
+  // rather than hardcoded, so it always starts just after the last word
+  // settles even if the stagger timing above changes.
+  const headingLastWordDelay = HEADING_START + HEADING_WORDS.length * HEADING_WORD_STEP;
 
   return (
     <section
@@ -534,10 +554,16 @@ function VercelHero({ accentColor }: { accentColor: string }) {
 
           <h1
             className="font-normal tracking-tight leading-[0.6] max-w-xl"
-            style={{ ...fade(120), color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
+            style={{ color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
-            Design that moves at your{" "}
-            <ShimmerWord>speed</ShimmerWord>
+            {HEADING_WORDS.map((word, i) => (
+              <span key={word + i}>
+                <span style={wordFade(i)}>{word}</span>{" "}
+              </span>
+            ))}
+            <span style={wordFade(HEADING_WORDS.length)}>
+              <ShimmerWord>speed</ShimmerWord>
+            </span>
           </h1>
 
           {false && (
@@ -571,6 +597,7 @@ function VercelHero({ accentColor }: { accentColor: string }) {
                 context menu; the handler only takes over to match the site's
                 Lenis smooth scrolling. */}
             <a
+              ref={ctaRef}
               href="#start"
               onClick={e => {
                 const el = document.getElementById("start");
@@ -581,16 +608,57 @@ function VercelHero({ accentColor }: { accentColor: string }) {
                 if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                 else window.scrollTo({ top: targetY, behavior: "smooth" });
               }}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
-              style={{ ...fade(660), background: "#1a1a1a", color: "#fff" }}
+              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-2 text-[15px] sm:text-[16px] font-medium tracking-tight overflow-hidden"
+              style={{
+                // Follows the heading's own word stagger rather than a fixed
+                // 660ms, so the CTA always lands right after the last word
+                // settles instead of the two drifting out of sync if the
+                // stagger timing above changes.
+                ...fade(headingLastWordDelay + 180),
+                // Grey gradient base with fall-toned light (amber, green,
+                // blue) glowing up from the bottom edge, like it's lit from
+                // underneath, rather than a flat fill.
+                background:
+                  "radial-gradient(120% 90% at 20% 120%, rgba(217,119,6,0.55) 0%, transparent 55%)," +
+                  "radial-gradient(120% 90% at 50% 130%, rgba(74,124,89,0.5) 0%, transparent 55%)," +
+                  "radial-gradient(120% 90% at 80% 120%, rgba(59,110,163,0.5) 0%, transparent 55%)," +
+                  "linear-gradient(180deg, #b8b8b8 0%, #949494 60%)",
+                color: "#fff",
+              }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
             >
-              Start a project
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-                <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
-              </svg>
+              {/* Same feTurbulence grain used on the client carousel's
+                  fallback cards, layered here at a heavier opacity so it
+                  reads clearly against the gradient rather than as a subtle
+                  texture. */}
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                  backgroundSize: "180px 180px",
+                  mixBlendMode: "overlay",
+                  opacity: 0.3,
+                }}
+              />
+              <span className="relative">Start a project</span>
+              <span
+                className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0"
+                style={{
+                  background: "rgba(255,255,255,0.18)",
+                  // Inner depth: a dark inset shadow along the top reads as a
+                  // recessed well, and a thin light rim along the bottom
+                  // catches light like the far inside edge of that well.
+                  boxShadow:
+                    "inset 0 1.5px 2px rgba(0,0,0,0.35), inset 0 -1px 1px rgba(255,255,255,0.25)",
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="block h-3.5 w-3.5 sm:h-4 sm:w-4">
+                  <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
+                </svg>
+              </span>
             </a>
             {false && (
             <a
@@ -1519,7 +1587,7 @@ function withPills(text: string) {
   });
 }
 
-function DesignPhilosophy() {
+function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
   const intro =
     "The brands we work with already have something worth buying. Often [[the product sells itself]], and sometimes it needs help doing that. Either way, the experience someone moves through on the way to it is the part we own, whether we're taking [[design to code]] or [[code to design]].";
   const points = [
@@ -1528,8 +1596,8 @@ function DesignPhilosophy() {
   ];
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:mx-auto">
-        <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
+      <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
+        <p ref={introRef} className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
           {withPills(intro)}
         </p>
         <div className="flex flex-col gap-4 mt-8">
@@ -2206,17 +2274,253 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   );
 }
 
+// Dashed trunk-and-branches connector from the hero's CTA down to the intro
+// paragraph below it: a single vertical line drops from the CTA to a split
+// point just above the paragraph, then 3 arms fan out from that point to 3
+// evenly-spaced x-positions across the paragraph's width — the center arm a
+// straight drop, the outer two routed as right-angle elbows (down, across,
+// down). Each segment animates in via DashedGrowLine once the CTA's own
+// entrance transition finishes. The vertical gap and the paragraph's width
+// aren't fixed — the hero's own bottom padding differs mobile/desktop and
+// the paragraph reflows with viewport/copy — so this measures both
+// elements' actual position rather than assuming a distance. Coordinates
+// are relative to this component's own positioned container (measured via
+// containerRef): it renders as an absolutely-positioned child of <main>, so
+// its own top/left have to be subtracted rather than assuming main sits at
+// the document origin.
+function HeroToIntroLine({
+  fromRef,
+  toRef,
+}: {
+  fromRef: React.RefObject<HTMLElement | null>;
+  toRef: React.RefObject<HTMLElement | null>;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [geo, setGeo] = useState<{
+    trunkTop: number;
+    splitY: number;
+    trunkX: number;
+    armEndY: number;
+    armTargets: number[];
+    width: number;
+    height: number;
+  } | null>(null);
+  // Gates the draw-in animation. Starts false so the connector's first paint
+  // is fully undrawn, then flips once the CTA's own fade/rise-in transition
+  // (see VercelHero's fade()) actually finishes — listening for that
+  // transitionend rather than guessing a matching delay keeps this in sync
+  // even if the hero's own timing changes later.
+  const [drawn, setDrawn] = useState(false);
+
+  useEffect(() => {
+    const cta = fromRef.current;
+    if (!cta) return;
+    const onDone = (e: TransitionEvent) => {
+      if (e.propertyName === "opacity") setDrawn(true);
+    };
+    cta.addEventListener("transitionend", onDone);
+    return () => cta.removeEventListener("transitionend", onDone);
+  }, [fromRef]);
+
+  useEffect(() => {
+    // Tracks the last two committed heights so polling can stop once the
+    // measurement has genuinely settled (two matching frames in a row),
+    // rather than running for a fixed window regardless of what it's
+    // reading. A fixed-duration poll could commit a single bad frame (e.g.
+    // read mid-way through the CTA's own entrance transition, or while
+    // LightCard's independent scroll-driven transform is being applied to
+    // the same ancestor) right as the window ends and then never correct it.
+    let lastHeight: number | null = null;
+    let stableFrames = 0;
+
+    const measure = () => {
+      const from = fromRef.current;
+      const to = toRef.current;
+      const container = containerRef.current;
+      if (!from || !to || !container) return;
+      const fromRect = from.getBoundingClientRect();
+      const toRect = to.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      // Guard against a frame caught mid-layout (zero-size rects, e.g. before
+      // the element has painted, or between LightCard's own transform
+      // mutations): skip committing this frame rather than drawing off a
+      // nonsensical measurement, and let the next rAF tick try again.
+      if (fromRect.width === 0 || fromRect.height === 0 || toRect.width === 0 || toRect.height === 0) {
+        stableFrames = 0;
+        return;
+      }
+      const trunkTop = fromRect.bottom - containerRect.top;
+      const trunkX = fromRect.left + fromRect.width / 2 - containerRect.left;
+      const armEndY = toRect.top - containerRect.top;
+      const paraLeft = toRect.left - containerRect.left;
+      // The paragraph must sit below the CTA for this to make sense at all;
+      // during the CTA's own fade/rise-in it's briefly offset, which could
+      // otherwise transiently invert this.
+      if (armEndY <= trunkTop) { stableFrames = 0; return; }
+      // Split point sits a fixed distance above the paragraph's top rather
+      // than some fraction of the gap, so the fan-out reads the same size
+      // regardless of how tall the gap between hero and paragraph is.
+      const ARM_RISE = 28;
+      const splitY = Math.max(trunkTop, armEndY - ARM_RISE);
+      // 3 arms land at even sixths across the paragraph's width (1/6, 3/6,
+      // 5/6) rather than the literal edges, so the outer two don't point at
+      // the paragraph's corner.
+      const armTargets = [1 / 6, 3 / 6, 5 / 6].map((f) => paraLeft + toRect.width * f);
+      const height = Math.max(splitY, armEndY) + 1;
+      // Only commit once the same height has been read on back-to-back
+      // frames — a single matching frame could still be a coincidence mid
+      // transition, two in a row is a real settle.
+      if (lastHeight !== null && Math.abs(height - lastHeight) < 0.5) {
+        stableFrames++;
+      } else {
+        stableFrames = 0;
+      }
+      lastHeight = height;
+      setGeo({ trunkTop, splitY, trunkX, armEndY, armTargets, width: containerRect.width, height });
+    };
+    const onResize = () => { stableFrames = 0; measure(); };
+    measure();
+    window.addEventListener("resize", onResize);
+    // The CTA only reaches its resting position once the hero's own
+    // IntersectionObserver-driven entrance (opacity/translateY transition)
+    // finishes, which can land well after this component's first mount, and
+    // LightCard mutates the shared ancestor's transform on its own scroll-
+    // driven rAF loop independent of this one. Polling until two consecutive
+    // frames agree (capped at 4s so a genuinely never-settling layout doesn't
+    // spin forever) rides out both instead of trusting a single early read.
+    let raf = 0;
+    const start = performance.now();
+    const poll = (now: number) => {
+      measure();
+      if (stableFrames < 2 && now - start < 4000) raf = requestAnimationFrame(poll);
+    };
+    raf = requestAnimationFrame(poll);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(raf);
+    };
+  }, [fromRef, toRef]);
+
+  return (
+    <div ref={containerRef} className="absolute inset-0 pointer-events-none" aria-hidden="true">
+      {geo && geo.splitY > geo.trunkTop && (
+        <svg
+          className="absolute top-0 left-0 overflow-visible"
+          width={geo.width}
+          height={geo.height}
+          style={{ color: "rgb(var(--muted))" }}
+        >
+          {/* Trunk draws first. */}
+          <DashedGrowLine x1={geo.trunkX} y1={geo.trunkTop} x2={geo.trunkX} y2={geo.splitY} drawn={drawn} delayMs={0} />
+          {geo.armTargets.map((x, i) => {
+            // Center arm sits at the trunk's own x (no horizontal offset
+            // needed), so it's a single straight drop. The outer two route as
+            // a right-angle elbow — down, across, down — split into 3
+            // separate straight sub-segments (rather than one multi-turn
+            // path) specifically so each leg can grow in on its own local
+            // axis and stagger in sequence, reading as the line flowing down
+            // then across then down rather than the whole elbow popping in
+            // at once.
+            if (x === geo.trunkX) {
+              return <DashedGrowLine key={i} x1={geo.trunkX} y1={geo.splitY} x2={x} y2={geo.armEndY} drawn={drawn} delayMs={450} />;
+            }
+            const midY = geo.splitY + (geo.armEndY - geo.splitY) / 2;
+            return (
+              <g key={i}>
+                <DashedGrowLine x1={geo.trunkX} y1={geo.splitY} x2={geo.trunkX} y2={midY} drawn={drawn} delayMs={450} />
+                <DashedGrowLine x1={geo.trunkX} y1={midY} x2={x} y2={midY} drawn={drawn} delayMs={650} />
+                <DashedGrowLine x1={x} y1={midY} x2={x} y2={geo.armEndY} drawn={drawn} delayMs={850} />
+              </g>
+            );
+          })}
+        </svg>
+      )}
+    </div>
+  );
+}
+
+// A single straight (horizontal or vertical) dashed segment that grows in
+// from its start point to its end point, rather than simply fading in or
+// shifting its dash phase. Achieved with a clipPath rect, covering the
+// segment's full bounding box, that animates a scale transform (anchored at
+// the segment's own start point) from 0 to 1 on whichever axis the segment
+// actually runs along — the dash pattern itself (strokeDasharray) stays
+// constant throughout, so what's revealed is always "more of the same dashed
+// line," not a stretching solid stroke.
+function DashedGrowLine({
+  x1,
+  y1,
+  x2,
+  y2,
+  drawn,
+  delayMs,
+}: {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  drawn: boolean;
+  delayMs: number;
+}) {
+  const id = useId().replace(/:/g, "");
+  const horizontal = y1 === y2;
+  const left = Math.min(x1, x2);
+  const top = Math.min(y1, y2);
+  const w = Math.max(1, Math.abs(x2 - x1));
+  const h = Math.max(1, Math.abs(y2 - y1));
+  // The clip rect always covers the segment's full bounding box; what
+  // animates is a scale on the axis this segment runs along (the other axis
+  // stays at 1, since the segment has no extent there anyway), anchored via
+  // transformOrigin at the segment's OWN start point (x1,y1) rather than the
+  // box's left/top corner. Scaling from a fixed origin (rather than
+  // animating width/height, which can only ever grow from the rect's x/y
+  // corner) is what makes a segment grow toward its own end point regardless
+  // of whether its coordinates happen to run left-to-right, right-to-left,
+  // top-to-bottom, or bottom-to-top.
+  const scaleX = horizontal ? (drawn ? 1 : 0) : 1;
+  const scaleY = horizontal ? 1 : (drawn ? 1 : 0);
+
+  return (
+    <>
+      <clipPath id={`line-clip-${id}`}>
+        <rect
+          x={left}
+          y={top}
+          width={w}
+          height={h}
+          style={{
+            transform: `scale(${scaleX}, ${scaleY})`,
+            transformOrigin: `${x1}px ${y1}px`,
+            transition: `transform 320ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
+          }}
+        />
+      </clipPath>
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeDasharray="3 4"
+        clipPath={`url(#line-clip-${id})`}
+      />
+    </>
+  );
+}
+
 function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   const [accentColor, setAccentColor] = useState(WORK_ITEMS[0].accent);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  const introRef = useRef<HTMLParagraphElement>(null);
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
-    <main className="page-container mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
-
+    <main className="page-container relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
       <LightCard>
         <div className="mx-auto w-full max-w-[88rem] flex flex-col">
-          <VercelHero accentColor={accentColor} />
+          <VercelHero accentColor={accentColor} ctaRef={ctaRef} />
 
           {/* Work thumbnail section (WorkScrollGallery) temporarily hidden
               while its format is still being decided. accentColor stays fed
@@ -2233,7 +2537,7 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
               too close underneath it. */}
           <div className="py-7 sm:py-12 max-sm:-mt-[18dvh] sm:-mt-[7dvh]" />
 
-          <DesignPhilosophy />
+          <DesignPhilosophy introRef={introRef} />
 
           <div className="py-10 sm:py-8" />
 
@@ -2246,6 +2550,13 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
           <div className="py-16 sm:py-14" />
         </div>
       </LightCard>
+
+      {/* Rendered after LightCard (not before) so it paints on top of the
+          card's opaque white background rather than underneath it — same
+          stacking context, sibling elements paint in DOM order. main is the
+          positioned ancestor HeroToIntroLine measures itself against, so its
+          coordinates stay correct regardless of where main sits on the page. */}
+      <HeroToIntroLine fromRef={ctaRef} toRef={introRef} />
 
       <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))", marginTop: -2 }}>
         <div className="mx-auto w-full max-w-[88rem] flex flex-col">
