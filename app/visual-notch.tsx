@@ -683,6 +683,7 @@ export function VisualNotch() {
       el.querySelectorAll<HTMLElement>(".site-header__brand, .site-header__nav, .site-header__actions")
     );
     children.forEach((child) => {
+      child.style.willChange = "opacity, transform";
       child.style.opacity = "0";
       child.style.transform = "translateY(-8px)";
     });
@@ -705,6 +706,7 @@ export function VisualNotch() {
           child.style.transition = "";
           child.style.opacity = "";
           child.style.transform = "";
+          child.style.willChange = "";
         });
         el.style.opacity = "";
         el.style.pointerEvents = "";

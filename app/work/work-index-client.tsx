@@ -12,6 +12,13 @@ function serviceShort(s: string | undefined): string {
   return s.trim();
 }
 
+// Desktop-carousel-only thumbnail override, keyed by slug: swaps the default
+// `card` image for a specific gallery image on the desktop carousel while
+// mobile keeps the regular card/gallery[0] fallback.
+const CAROUSEL_THUMB_OVERRIDE: Record<string, string> = {
+  "inboundly": "/work/inboundly-1.png",
+};
+
 // Live link + status overrides for the /work index, keyed by slug. Kept here
 // rather than in each project's MDX since /work is the only surface these
 // still drive (individual /work/[slug] pages are no longer in active use).
@@ -50,23 +57,6 @@ const DIALOG_LOGO_OVERRIDE: Record<string, { tone?: "black" | "hide"; height?: n
 const THUMB_OBJECT_POSITION: Record<string, string> = {
   "trippie-redd": "center 35%",
   "allure-new-york": "center 50%",
-};
-
-// Card logos are forced white for legibility on any photo; these keep their
-// own multi-color artwork instead (same exception the homepage carousel makes).
-const CARD_LOGO_NATURAL_COLOR = new Set(["ft-gioo"]);
-
-// Per-project overlaid card logo tweaks. `hide` drops the logo entirely;
-// `height` overrides the shared default (64px, or 66px for natural-color
-// logos) since logos come in very different natural proportions. `maxW` raises
-// the shared 62% width cap for wide wordmarks that would otherwise hit it
-// before reaching their target height.
-const CARD_LOGO_OVERRIDE: Record<string, { hide?: boolean; height?: number; maxW?: string }> = {
-  "aether": { hide: true },
-  "ellora-la": { height: 44 },
-  "trippie-redd": { height: 74 },
-  "ft-gioo": { height: 104 },
-  "subtle-goods": { height: 150, maxW: "92%" },
 };
 
 function resolveLink(slug: string, w: WorkMeta) {
@@ -247,7 +237,7 @@ function WorkDialog({
           {/* Meta row: service + year/status */}
           <div className="flex items-center gap-2.5 flex-wrap mt-4">
             {work.service && (
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] rounded-full px-2.5 pt-[3px] pb-[4px] leading-none">
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                 {serviceShort(work.service)}
               </span>
             )}
@@ -271,13 +261,15 @@ function WorkDialog({
               href={url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 mt-6 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
-              style={{ background: "var(--accent-gradient)" }}
+              className="inline-flex items-center gap-2 rounded-full pl-4 pr-1.5 py-1.5 mt-6 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
+              style={{ background: "#000" }}
             >
-              Visit site
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-                <path d="M4 12L12 4M7 4h5v5" />
-              </svg>
+              Open live site
+              <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white/15">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+                  <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
+                </svg>
+              </span>
             </a>
           )}
 
@@ -343,7 +335,7 @@ function WorkCard({
   // measured header height so the card never exceeds the space below it.
   cardWidthCss?: string;
 }) {
-  const thumb = work.card ?? work.gallery[0]?.src;
+  const thumb = (carousel && CAROUSEL_THUMB_OVERRIDE[work.slug]) || work.card || work.gallery[0]?.src;
   // Per-project crop nudge. Thumbnails default to object-top; these sit lower
   // in frame, so shifting object-position down reveals more of their lower
   // portion.
@@ -392,37 +384,24 @@ function WorkCard({
             draggable={false}
           />
         ) : null}
-        {/* Logo overlaid on the thumbnail, centered. Forced white (like the
-            homepage carousel) so it reads against any photo, with a soft scrim
-            behind it; a couple of logos keep their natural multi-color art. */}
-        {work.logo && !CARD_LOGO_OVERRIDE[work.slug]?.hide && (
-          <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.28) 100%)" }}
-          >
-            <Image
-              src={work.logo}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-              width={260}
-              height={260}
-              sizes="260px"
-              quality={78}
-              className="w-auto object-contain"
-              style={{
-                maxWidth: CARD_LOGO_OVERRIDE[work.slug]?.maxW ?? "62%",
-                width: "auto",
-                height: CARD_LOGO_OVERRIDE[work.slug]?.height ?? (CARD_LOGO_NATURAL_COLOR.has(work.slug) ? 66 : 64),
-                filter: CARD_LOGO_NATURAL_COLOR.has(work.slug)
-                  ? "drop-shadow(0 1px 6px rgba(0,0,0,0.45))"
-                  : "brightness(0) invert(1) drop-shadow(0 1px 6px rgba(0,0,0,0.5))",
-              }}
-            />
-          </div>
-        )}
+        {/* Desktop: name + service badge sit inside the card as a scrim-backed
+            overlay instead of a row below it; mobile keeps the row below
+            since there's no room to overlay without crowding the photo. */}
+        <div
+          className="hidden sm:flex absolute inset-x-0 bottom-0 items-center justify-between gap-3 px-4 py-3 pointer-events-none"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 65%)" }}
+        >
+          <span className="text-[16px] font-medium tracking-tight text-white">
+            {work.client}
+          </span>
+          {work.service && (
+            <span className="text-[12px] tracking-tight text-white/80 shrink-0 rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgba(255,255,255,0.15)" }}>
+              {serviceShort(work.service)}
+            </span>
+          )}
+        </div>
       </div>
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex sm:hidden items-center justify-between gap-3">
         <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">
           {work.client}
         </span>
@@ -554,6 +533,13 @@ function WorkCarousel({
   // measured rather than assumed, using the constant here would drift the
   // focus and snap targets off-center on any short viewport.
   const cardWidthRef = useRef(CAROUSEL_CARD_WIDTH);
+  // The prev/next pill row is positioned in JS off the focused card's actual
+  // bounding rect rather than CSS calc()s derived from cardWidthCss, since
+  // that card is also scaled up by CAROUSEL_FOCUS_SCALE via transform and its
+  // container spans a raw 100vw (which drifts from the true visible width by
+  // the scrollbar's own width) — matching the real rect is the only way the
+  // row's edges land exactly on the card's rendered edges.
+  const pillRowRef = useRef<HTMLDivElement>(null);
 
   const measureGeometry = useCallback(() => {
     const spacer = leadRef.current;
@@ -590,10 +576,13 @@ function WorkCarousel({
     const viewportCenter = viewport.clientWidth / 2;
     const cardWidth = cardWidthRef.current;
     const slot = cardWidth + CAROUSEL_GAP;
+    let closestIndex = 0;
+    let closestDist = Infinity;
     thumbRefs.current.forEach((thumb, i) => {
       if (!thumb) return;
       const cardCenter = translateRef.current + leadInsetRef.current + i * slot + cardWidth / 2;
       const dist = Math.abs(cardCenter - viewportCenter);
+      if (dist < closestDist) { closestDist = dist; closestIndex = i; }
       const proximity = Math.max(0, 1 - dist / slot);
       const hoverBoost = i === hovered ? 1 : 0;
       const scale = 1 + 0.045 * proximity + 0.015 * hoverBoost;
@@ -604,6 +593,17 @@ function WorkCarousel({
         ? `0 ${16 * lift}px ${40 * lift}px -10px rgba(0,0,0,${0.24 * lift})`
         : "0 0 0 rgba(0,0,0,0)";
     });
+    // Snap the pill row to the focused card's real rendered edges (it's
+    // scaled up via transform, so its layout box alone isn't enough).
+    const focusedThumb = thumbRefs.current[closestIndex];
+    const pillRow = pillRowRef.current;
+    if (focusedThumb && pillRow) {
+      const cardRect = focusedThumb.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+      pillRow.style.left = `${cardRect.left - viewportRect.left}px`;
+      pillRow.style.width = `${cardRect.width}px`;
+      pillRow.style.top = `${cardRect.bottom - viewportRect.top + 28}px`;
+    }
   }, []);
 
   useEffect(() => {
@@ -736,43 +736,20 @@ function WorkCarousel({
     }
   };
 
-  const endDrag = (e: React.PointerEvent) => {
-    const d = dragRef.current;
-    dragRef.current = null;
+  // Spring-settles the track to whichever card index is passed, centering it
+  // in the viewport. Shared by drag release (which biases the target off
+  // release velocity) and the prev/next arrow buttons (which just step ±1
+  // from whatever's nearest center right now).
+  const settleToIndex = useCallback((index: number, initialVelocity = 0) => {
     const viewport = viewportRef.current;
-    if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
-    if (!d?.moved) return;
-    // Snap the nearest card to center so the track always comes to rest with
-    // one card in focus rather than stranded between two. Animated here rather
-    // than left to a CSS transition on the track, since the drag has been
-    // writing transform inline every frame and needs to continue from exactly
-    // where it left off.
     const viewportWidth = viewport?.clientWidth ?? 0;
     const cardWidth = cardWidthRef.current;
     const slot = cardWidth + CAROUSEL_GAP;
-    // Translate that would sit card `i` dead center, solved from the same
-    // cardCenter expression applyProximity uses, then rounded to the nearest
-    // whole card and clamped back into the track's real bounds.
     const centeredTranslateFor = (i: number) =>
       viewportWidth / 2 - cardWidth / 2 - leadInsetRef.current - i * slot;
-    const nearest = Math.round(
-      (viewportWidth / 2 - cardWidth / 2 - leadInsetRef.current - translateRef.current) / slot
-    );
-    // A flick carries past the nearest card. Release velocity is converted into
-    // a card-count bias, so a quick flick advances one or more cards while a slow
-    // release just settles on whatever is closest. Capped so a violent flick
-    // can't skip the whole track.
-    const FLICK_MIN_VELOCITY = 0.25; // px/ms below which release counts as a nudge
-    const velocity = d.velocity;
-    let biased = nearest;
-    if (Math.abs(velocity) > FLICK_MIN_VELOCITY) {
-      const extra = Math.min(2, Math.max(1, Math.round(Math.abs(velocity) * 1.4)));
-      // Dragging left (negative velocity) moves toward higher indices.
-      biased = nearest + (velocity < 0 ? extra : -extra);
-    }
     const target = Math.max(
       minTranslate(),
-      Math.min(0, centeredTranslateFor(Math.max(0, Math.min(items.length - 1, biased))))
+      Math.min(0, centeredTranslateFor(Math.max(0, Math.min(items.length - 1, index))))
     );
     const track = trackRef.current;
 
@@ -782,7 +759,7 @@ function WorkCarousel({
     // which reads as the bounce. Runs until it is both close enough and slow
     // enough, rather than for a fixed duration.
     if (settleRafRef.current !== null) cancelAnimationFrame(settleRafRef.current);
-    let v = velocity * 16;
+    let v = initialVelocity;
     const step = () => {
       const distance = target - translateRef.current;
       v += distance * SPRING_STIFFNESS - v * SPRING_DAMPING;
@@ -806,6 +783,45 @@ function WorkCarousel({
       }
     };
     settleRafRef.current = requestAnimationFrame(step);
+  }, [applyProximity, hoveredIndex, items.length, minTranslate]);
+
+  const nearestIndex = useCallback(() => {
+    const viewportWidth = viewportRef.current?.clientWidth ?? 0;
+    const cardWidth = cardWidthRef.current;
+    const slot = cardWidth + CAROUSEL_GAP;
+    return Math.round(
+      (viewportWidth / 2 - cardWidth / 2 - leadInsetRef.current - translateRef.current) / slot
+    );
+  }, []);
+
+  const step = useCallback((dir: 1 | -1) => {
+    if (settleRafRef.current !== null) cancelAnimationFrame(settleRafRef.current);
+    const next = Math.max(0, Math.min(items.length - 1, nearestIndex() + dir));
+    settleToIndex(next);
+  }, [items.length, nearestIndex, settleToIndex]);
+
+  const endDrag = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    dragRef.current = null;
+    const viewport = viewportRef.current;
+    if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+    if (!d?.moved) return;
+    // Snap the nearest card to center so the track always comes to rest with
+    // one card in focus rather than stranded between two.
+    const nearest = nearestIndex();
+    // A flick carries past the nearest card. Release velocity is converted into
+    // a card-count bias, so a quick flick advances one or more cards while a slow
+    // release just settles on whatever is closest. Capped so a violent flick
+    // can't skip the whole track.
+    const FLICK_MIN_VELOCITY = 0.25; // px/ms below which release counts as a nudge
+    const velocity = d.velocity;
+    let biased = nearest;
+    if (Math.abs(velocity) > FLICK_MIN_VELOCITY) {
+      const extra = Math.min(2, Math.max(1, Math.round(Math.abs(velocity) * 1.4)));
+      // Dragging left (negative velocity) moves toward higher indices.
+      biased = nearest + (velocity < 0 ? extra : -extra);
+    }
+    settleToIndex(biased, velocity * 16);
   };
 
   if (items.length === 0) return null;
@@ -827,6 +843,38 @@ function WorkCarousel({
       className={`relative w-full overflow-x-clip overflow-y-visible py-10${isDragging ? " select-none" : ""}`}
       style={{ cursor: isDragging ? "grabbing" : "grab" }}
     >
+      {/* Prev/next pill buttons, sitting in a row directly under the focused
+          card at the card's own left/right edges. Positioned imperatively in
+          applyProximity off the focused card's real getBoundingClientRect
+          (top/left start at 0 here as a placeholder before the first
+          measurement runs). */}
+      <div
+        ref={pillRowRef}
+        className="absolute top-0 left-0 z-10 flex items-center justify-between pointer-events-none"
+      >
+        <button
+          type="button"
+          onClick={() => step(-1)}
+          aria-label="Previous"
+          className="pointer-events-auto flex items-center justify-center w-11 h-11 rounded-full transition-opacity hover:opacity-80"
+          style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))", border: "1px solid rgb(var(--line))", boxShadow: "var(--shadow-popover)" }}
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+            <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => step(1)}
+          aria-label="Next"
+          className="pointer-events-auto flex items-center justify-center w-11 h-11 rounded-full transition-opacity hover:opacity-80"
+          style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))", border: "1px solid rgb(var(--line))", boxShadow: "var(--shadow-popover)" }}
+        >
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+            <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9 4 13 8 9 12" />
+          </svg>
+        </button>
+      </div>
       <div
         ref={trackRef}
         className="flex items-start w-max"

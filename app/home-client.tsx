@@ -493,6 +493,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
   }, []);
 
   const fade = (delay: number) => ({
+    willChange: "opacity, transform",
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(18px)",
     transition: `opacity 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
@@ -508,6 +509,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
   const HEADING_START = 120;
   const wordFade = (i: number) => ({
     display: "inline-block",
+    willChange: "opacity, transform",
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(14px)",
     transition: `opacity 420ms cubic-bezier(0.22,1,0.36,1) ${HEADING_START + i * HEADING_WORD_STEP}ms, transform 420ms cubic-bezier(0.22,1,0.36,1) ${HEADING_START + i * HEADING_WORD_STEP}ms`,
@@ -1630,22 +1632,24 @@ function tokenizeCopy(text: string): CopyToken[] {
   return tokens;
 }
 
-// Liquid, viscous word-by-word reveal: each word rises, sharpens out of a
-// blur, and settles with a slight scale change, cascading across the
-// paragraph rather than fading in as one flat block. The long, soft
-// cubic-bezier (no overshoot) plus the blur is what reads as "liquid" rather
-// than mechanical — words feel like they're condensing into place instead of
-// just sliding up.
+// Simple per-paragraph fade + rise, consistent with the site's .rise
+// language used elsewhere rather than a separate word-by-word effect. Each
+// block waits for its own scroll-into-view (or an explicit delayMs, so a
+// group of paragraphs/bullets under one heading can be sequenced to reveal
+// one after another instead of firing independently the instant each one
+// individually crosses into the viewport).
 function LiquidText({
   text,
   className,
   style,
   pRef,
+  delayMs = 0,
 }: {
   text: string;
   className?: string;
   style?: React.CSSProperties;
   pRef?: React.RefObject<HTMLParagraphElement | null>;
+  delayMs?: number;
 }) {
   const ownRef = useRef<HTMLParagraphElement>(null);
   const ref = pRef ?? ownRef;
@@ -1659,35 +1663,32 @@ function LiquidText({
       ([e]) => {
         if (!e.isIntersecting) return;
         obs.disconnect();
-        requestAnimationFrame(() => setVisible(true));
+        const id = setTimeout(() => setVisible(true), delayMs);
+        return () => clearTimeout(id);
       },
       { threshold: 0.06, rootMargin: "0px 0px -32px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, []);
+  }, [delayMs]);
 
-  const STEP = 22; // ms between each word's start — fast enough to read as one wave, not a typewriter
   const DURATION = 640;
 
   return (
-    <p ref={ref} className={className} style={style}>
+    <p
+      ref={ref}
+      className={className}
+      style={{
+        ...style,
+        willChange: "opacity, transform",
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(14px)",
+        transition: `opacity ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1), transform ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1)`,
+      }}
+    >
       {tokens.map((token, i) => (
         <React.Fragment key={token.key}>
-          <span
-            style={{
-              display: "inline-block",
-              willChange: "opacity, transform, filter",
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0) scale(1)" : "translateY(10px) scale(0.97)",
-              filter: visible ? "blur(0px)" : "blur(5px)",
-              transition: visible
-                ? `opacity ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1) ${i * STEP}ms, transform ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1) ${i * STEP}ms, filter ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1) ${i * STEP}ms`
-                : "none",
-            }}
-          >
-            {token.node}
-          </span>
+          {token.node}
           {i < tokens.length - 1 ? " " : ""}
         </React.Fragment>
       ))}
@@ -1719,6 +1720,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
               </span>
               <LiquidText
                 text={text}
+                delayMs={160 * (i + 1)}
                 className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
                 style={{ color: "#5c5c5c" }}
               />
@@ -1752,6 +1754,7 @@ function AiApproach() {
         />
         <LiquidText
           text={second}
+          delayMs={160}
           className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5"
           style={{ color: "#5c5c5c" }}
         />
