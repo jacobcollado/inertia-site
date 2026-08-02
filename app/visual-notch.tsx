@@ -689,28 +689,38 @@ export function VisualNotch() {
     });
 
     const STEP = 90;
+    // A brief pause before the header starts revealing at all, so it doesn't
+    // pop in the instant the CTA's own fade lands — there's a beat of
+    // stillness first, then the header eases in as its own soft fade rather
+    // than appearing at full opacity before its children even start.
+    const START_DELAY = 220;
+    const HEADER_FADE = 380;
     const runReveal = () => {
       if (headerHasAnimated) return;
       headerHasAnimated = true;
-      el.style.opacity = "1";
-      el.style.pointerEvents = "";
-      requestAnimationFrame(() => {
-        children.forEach((child, i) => {
-          child.style.transition = `opacity 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms, transform 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms`;
-          child.style.opacity = "1";
-          child.style.transform = "translateY(0)";
-        });
-      });
       window.setTimeout(() => {
-        children.forEach((child) => {
-          child.style.transition = "";
-          child.style.opacity = "";
-          child.style.transform = "";
-          child.style.willChange = "";
-        });
-        el.style.opacity = "";
+        el.style.transition = `opacity ${HEADER_FADE}ms cubic-bezier(0.16,1,0.3,1)`;
+        el.style.opacity = "1";
         el.style.pointerEvents = "";
-      }, STEP * children.length + 420);
+        requestAnimationFrame(() => {
+          children.forEach((child, i) => {
+            child.style.transition = `opacity 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms, transform 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms`;
+            child.style.opacity = "1";
+            child.style.transform = "translateY(0)";
+          });
+        });
+        window.setTimeout(() => {
+          el.style.transition = "";
+          children.forEach((child) => {
+            child.style.transition = "";
+            child.style.opacity = "";
+            child.style.transform = "";
+            child.style.willChange = "";
+          });
+          el.style.opacity = "";
+          el.style.pointerEvents = "";
+        }, STEP * children.length + 420);
+      }, START_DELAY);
     };
 
     window.addEventListener("hero-cta:revealed", runReveal, { once: true });
