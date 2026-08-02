@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useId } from "react";
+import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
+import { BorderBeam } from "border-beam";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string; palette?: string[]; card?: string };
 
@@ -460,12 +461,31 @@ function ShimmerWord({ children, italic }: { children: string; italic?: boolean 
 function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: React.RefObject<HTMLAnchorElement | null> }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  // BorderBeam defaults to active immediately on mount, which made the beam
+  // visible spinning around the CTA's pill before the CTA itself had even
+  // faded in — the beam has to wait for the CTA's own entrance transition to
+  // actually finish, same as HeroToIntroLine's connector does off this same
+  // opacity transitionend, rather than a guessed delay that could drift out
+  // of sync with the fade() timing below.
+  const [beamActive, setBeamActive] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        // Wrapping the CTA in BorderBeam added a heavy synchronous mount (its
+        // own <style> tag + @property registrations) that could land in the
+        // same paint as this observer firing — collapsing the opacity:0
+        // starting frame and the opacity:1 end state into one frame, so the
+        // "transition" completed instantly and both the connector line and
+        // the beam's own activation (gated on this same transitionend) fired
+        // immediately instead of after a real 750ms fade. Forcing setVisible
+        // onto its own rAF guarantees the hidden state actually paints first.
+        requestAnimationFrame(() => setVisible(true));
+      },
       { threshold: 0.05 }
     );
     obs.observe(el);
@@ -596,6 +616,13 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 href so it still works without JS and offers a normal link
                 context menu; the handler only takes over to match the site's
                 Lenis smooth scrolling. */}
+            <BorderBeam
+              size="sm"
+              colorVariant="sunset"
+              theme="light"
+              borderRadius={999}
+              active={beamActive}
+            >
             <a
               ref={ctaRef}
               href="#start"
@@ -608,6 +635,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                 else window.scrollTo({ top: targetY, behavior: "smooth" });
               }}
+              onTransitionEnd={e => { if (e.propertyName === "opacity") setBeamActive(true); }}
               className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-2 text-[15px] sm:text-[16px] font-medium tracking-tight overflow-hidden"
               style={{
                 // Follows the heading's own word stagger rather than a fixed
@@ -624,16 +652,6 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                   "radial-gradient(120% 90% at 80% 120%, rgba(59,110,163,0.5) 0%, transparent 55%)," +
                   "linear-gradient(180deg, #b8b8b8 0%, #949494 60%)",
                 color: "#fff",
-                // Same fall palette as the inner bottom glow, echoed outside the
-                // pill as three offset box-shadows blooming from the bottom
-                // edge — amber left, green center, blue right — so the light
-                // reads as spilling out from underneath rather than stopping
-                // at the button's own edge.
-                boxShadow:
-                  "-6px 9px 7px -6px rgba(217,119,6,0.6)," +
-                  "0px 13px 8px -6px rgba(74,124,89,0.55)," +
-                  "3px 9px 7px -6px rgba(59,110,163,0.65)," +
-                  "6px 9px 7px -6px rgba(59,110,163,0.5)",
               }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
@@ -670,6 +688,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 </svg>
               </span>
             </a>
+            </BorderBeam>
             {false && (
             <a
               href="https://t.me/kayzxyz"
@@ -2286,11 +2305,12 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
 
 // Dashed trunk-and-branches connector from the hero's CTA down to the intro
 // paragraph below it: a single vertical line drops from the CTA to a split
-// point just above the paragraph, then 3 arms fan out from that point to 3
-// evenly-spaced x-positions across the paragraph's width — the center arm a
-// straight drop, the outer two routed as right-angle elbows (down, across,
-// down). Each segment animates in via DashedGrowLine once the CTA's own
-// entrance transition finishes. The vertical gap and the paragraph's width
+// point just above the paragraph, then 2 outer arms curve away from that
+// same point to 2 of 3 evenly-spaced x-positions across the paragraph's
+// width (the center position is just the trunk's own straight end). The
+// whole shape — trunk + both arms — draws in as one single ConnectorPath
+// once the CTA's own entrance transition finishes. The vertical gap and the
+// paragraph's width
 // aren't fixed — the hero's own bottom padding differs mobile/desktop and
 // the paragraph reflows with viewport/copy — so this measures both
 // elements' actual position rather than assuming a distance. Coordinates
@@ -2455,90 +2475,33 @@ function HeroToIntroLine({
           height={geo.height}
           style={{ color: "rgb(var(--muted))" }}
         >
-          {/* Trunk draws first, all the way to the split point — the center
-              "arm" IS the trunk's own end, so there's nothing further to draw
-              there once it arrives. Only the outer two actually branch off
-              and continue down to the paragraph. */}
-          <DashedGrowLine x1={geo.trunkX} y1={geo.trunkTop} x2={geo.trunkX} y2={geo.splitY} drawn={drawn} delayMs={0} />
-          {geo.armTargets.map((x, i) => {
-            // The middle target (index 1 of the fixed [1/6, 3/6, 5/6] split)
-            // is the one meant to be skipped — the trunk's own end already
-            // covers that position. Skipping by index rather than checking
-            // x === geo.trunkX: the two are only coincidentally equal when
-            // the paragraph happens to be centered directly under the CTA
-            // (true on desktop's layout here, NOT guaranteed on mobile's
-            // different container widths), so the value check silently
-            // failed on mobile and rendered a near-zero-width "elbow" that
-            // looked like a plain line running straight down the middle.
-            if (i === 1) return null;
-            // Right-angle elbow — down, across, down — split into 3 separate
-            // straight sub-segments (rather than one multi-turn path)
-            // specifically so each leg can grow in on its own local axis and
-            // stagger in sequence, reading as the line flowing down then
-            // across then down rather than the whole elbow popping in at
-            // once. The turn sits a small FRACTION of the split-to-paragraph
-            // gap below the split point, not a fixed pixel offset — on a
-            // short mobile gap a fixed 14px could still be most of the
-            // remaining distance, leaving the two outer arms running straight
-            // down the center for nearly the whole gap before turning, which
-            // is what read as one line continuing down the middle there even
-            // though desktop's taller gap made the same fixed offset look
-            // fine. A proportional turn stays visually consistent at any gap
-            // size instead.
-            const turnY = geo.splitY + (geo.armEndY - geo.splitY) * 0.2;
-            return (
-              <RoundedElbow
-                key={i}
-                trunkX={geo.trunkX}
-                splitY={geo.splitY}
-                turnY={turnY}
-                armX={x}
-                armEndY={geo.armEndY}
-                drawn={drawn}
-              />
-            );
-          })}
+          {/* One single path: trunk straight down from the CTA to the split
+              point, then both outer arms curving away from that same split
+              point down to the paragraph — the center trunk IS the shared
+              start of both curves rather than a separate line the arms
+              happen to sit next to. Built as one `d` string (with `M` moves
+              back to the split point between arms) so the whole shape shares
+              one stroke-dasharray and one grow-in animation. */}
+          <ConnectorPath geo={geo} drawn={drawn} />
         </svg>
       )}
     </div>
   );
 }
 
-// One outer elbow arm — down, rounded corner, across, rounded corner, down —
-// drawn as three straight DashedGrowLine legs (each shortened by the corner
-// radius so they stop short of the joint) plus two quarter-circle arcs
-// filling the corners. The arcs use their own stroke-dashoffset grow-in
-// rather than DashedGrowLine's clip-rect approach, since a curved segment's
-// bounding-box scale trick doesn't apply.
-function RoundedElbow({
-  trunkX,
-  splitY,
-  turnY,
-  armX,
-  armEndY,
-  drawn,
-}: {
-  trunkX: number;
-  splitY: number;
-  turnY: number;
-  armX: number;
-  armEndY: number;
-  drawn: boolean;
-}) {
-  const dir = armX > trunkX ? 1 : -1; // which way the horizontal leg travels
-  // Corner radius scaled to the smaller of the two legs it sits between, so
-  // a short mobile turn never lets the arc overshoot past the leg's own
-  // start/end and invert the curve.
+// Builds one arm's sub-path — down from the split point, rounded corner,
+// across, rounded corner, down to the paragraph — as a string of path
+// commands to be appended after an `M` back to the split point. Shared by
+// ConnectorPath for both the left and right arm.
+function elbowSubpath(trunkX: number, splitY: number, turnY: number, armX: number, armEndY: number): string {
+  const dir = armX > trunkX ? 1 : -1;
   const vertLeg1 = turnY - splitY;
   const vertLeg2 = armEndY - turnY;
   const horizLeg = Math.abs(armX - trunkX);
   const radius = Math.max(0, Math.min(14, vertLeg1 * 0.9, vertLeg2 * 0.9, horizLeg * 0.4));
 
-  // First corner: vertical leg (down) → horizontal leg. Arc sweeps from
-  // straight-down travel into horizontal travel.
   const c1StartY = turnY - radius;
   const c1EndX = trunkX + dir * radius;
-  // Second corner: horizontal leg → vertical leg (down) again.
   const c2StartX = armX - dir * radius;
   const c2EndY = turnY + radius;
 
@@ -2546,35 +2509,87 @@ function RoundedElbow({
   const sweep2 = dir > 0 ? 1 : 0;
 
   return (
-    <g>
-      <DashedGrowLine x1={trunkX} y1={splitY} x2={trunkX} y2={c1StartY} drawn={drawn} delayMs={450} />
-      <ArcGrowSegment
-        d={`M ${trunkX} ${c1StartY} A ${radius} ${radius} 0 0 ${sweep1} ${c1EndX} ${turnY}`}
-        drawn={drawn}
-        delayMs={560}
-      />
-      <DashedGrowLine x1={c1EndX} y1={turnY} x2={c2StartX} y2={turnY} drawn={drawn} delayMs={650} />
-      <ArcGrowSegment
-        d={`M ${c2StartX} ${turnY} A ${radius} ${radius} 0 0 ${sweep2} ${armX} ${c2EndY}`}
-        drawn={drawn}
-        delayMs={760}
-      />
-      <DashedGrowLine x1={armX} y1={c2EndY} x2={armX} y2={armEndY} drawn={drawn} delayMs={850} />
-    </g>
+    `L ${trunkX} ${c1StartY} ` +
+    `A ${radius} ${radius} 0 0 ${sweep1} ${c1EndX} ${turnY} ` +
+    `L ${c2StartX} ${turnY} ` +
+    `A ${radius} ${radius} 0 0 ${sweep2} ${armX} ${c2EndY} ` +
+    `L ${armX} ${armEndY}`
   );
 }
 
-// A curved corner segment (SVG arc path) that grows in via stroke-dashoffset
-// over its own measured length — mirrors DashedGrowLine's straight-segment
-// grow-in, but a clip-rect scale can't express a curve, so this animates the
-// dash offset directly instead.
+// The whole connector — trunk straight down from the CTA to the split point,
+// then both outer arms curving away from that SAME split point — as one
+// single SVG path rather than a trunk line plus two separate arm paths that
+// only visually happened to share a start point. Built as one `d` string:
+// trunk down, then an `M` back to the split point before each arm's own
+// curve+drop. A single path means a single stroke-dasharray and a single
+// stroke-dashoffset grow-in animation for the ENTIRE shape — the trunk and
+// both arms all draw in together as one continuous stroke, rather than the
+// trunk and each arm being independently-timed pieces that could drift out
+// of sync or read as separate lines.
+function ConnectorPath({
+  geo,
+  drawn,
+}: {
+  geo: { trunkTop: number; splitY: number; trunkX: number; armEndY: number; armTargets: number[] };
+  drawn: boolean;
+}) {
+  const { trunkTop, splitY, trunkX, armEndY, armTargets } = geo;
+  const turnY = splitY + (armEndY - splitY) * 0.2;
+
+  let d = `M ${trunkX} ${trunkTop} L ${trunkX} ${splitY}`;
+  armTargets.forEach((x, i) => {
+    // Middle target (index 1) is the trunk's own end — already drawn above,
+    // nothing more to add there. See the caller for why index (not value)
+    // is what's checked.
+    if (i === 1) return;
+    d += ` M ${trunkX} ${splitY} ${elbowSubpath(trunkX, splitY, turnY, x, armEndY)}`;
+  });
+
+  return <ArcGrowSegment d={d} drawn={drawn} delayMs={0} />;
+}
+
+// An arbitrary SVG path (straight and/or curved segments combined) that
+// grows in as one continuous stroke via stroke-dashoffset over its own
+// measured total length. Used for ConnectorPath's whole trunk+arms shape as
+// a single path, rather than separate elements stitched together to look
+// like one line.
 function ArcGrowSegment({ d, drawn, delayMs }: { d: string; drawn: boolean; delayMs: number }) {
   const ref = useRef<SVGPathElement>(null);
-  const [length, setLength] = useState(0);
+  // Starts null rather than 0 — 0 is indistinguishable from "measured and
+  // genuinely zero-length," so on the very first render (before the
+  // useLayoutEffect below has run) strokeDashoffset would evaluate to
+  // -length = -0 = 0, the SAME value as the fully-drawn (drawn=true) state.
+  const [length, setLength] = useState<number | null>(null);
+  // stroke-dashoffset alone never actually hides a path — with a small fixed
+  // dasharray like "3 4", shifting the offset just cycles which pixels the
+  // existing dashes land on; the dashes stay visible everywhere along the
+  // path the whole time, which is why this read as "always visible"
+  // regardless of `drawn`. The real grow-in trick needs the dash pattern
+  // itself to be ONE dash the size of the entire path, paired with ONE gap
+  // the same size — offsetting by -length then pushes that single dash
+  // fully past the path's end (nothing on-path = fully hidden), and
+  // animating the offset back to 0 sweeps it back on as one solid reveal.
+  // Once that reveal finishes, swap to the real cosmetic "3 4" dasharray so
+  // it reads as a dashed line at rest instead of a solid one.
+  const [settled, setSettled] = useState(false);
 
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so the real length is measured and
+  // committed BEFORE the browser paints the first frame — with useEffect,
+  // that first paint briefly renders with length still null/unmeasured,
+  // which is exactly the gap that let the path render fully visible before
+  // it had a real length to animate its dashoffset from.
+  useLayoutEffect(() => {
     if (ref.current) setLength(ref.current.getTotalLength());
   }, [d]);
+
+  useEffect(() => {
+    if (!drawn || length === null) { setSettled(false); return; }
+    const t = setTimeout(() => setSettled(true), delayMs + 660);
+    return () => clearTimeout(t);
+  }, [drawn, length, delayMs]);
+
+  const revealDasharray = length === null ? "0 0" : `${length} ${length}`;
 
   return (
     <path
@@ -2583,109 +2598,12 @@ function ArcGrowSegment({ d, drawn, delayMs }: { d: string; drawn: boolean; dela
       fill="none"
       stroke="currentColor"
       strokeWidth={1.5}
-      strokeDasharray="3 4"
+      strokeDasharray={settled ? "3 4" : revealDasharray}
       style={{
-        strokeDashoffset: drawn ? 0 : -length,
-        transition: `stroke-dashoffset 220ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
+        strokeDashoffset: length === null ? 0 : drawn ? 0 : -length,
+        transition: length === null ? "none" : `stroke-dashoffset 640ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
       }}
     />
-  );
-}
-
-// A single straight (horizontal or vertical) dashed segment that grows in
-// from its start point to its end point, rather than simply fading in or
-// shifting its dash phase. Achieved with a clipPath rect, covering the
-// segment's full bounding box, that animates a scale transform (anchored at
-// the segment's own start point) from 0 to 1 on whichever axis the segment
-// actually runs along — the dash pattern itself (strokeDasharray) stays
-// constant throughout, so what's revealed is always "more of the same dashed
-// line," not a stretching solid stroke.
-function DashedGrowLine({
-  x1,
-  y1,
-  x2,
-  y2,
-  drawn,
-  delayMs,
-}: {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  drawn: boolean;
-  delayMs: number;
-}) {
-  const id = useId().replace(/:/g, "");
-  const axisAligned = x1 === x2 || y1 === y2;
-
-  if (!axisAligned) {
-    // Diagonal segment — the clip-rect scale trick below only grows along a
-    // single axis, which is all an axis-aligned segment ever needs, but a
-    // diagonal has extent on both axes at once so that approach would just
-    // snap the unanimated axis to full size immediately. Grow it instead via
-    // stroke-dashoffset over the line's own real length, which works
-    // regardless of the segment's angle.
-    const length = Math.hypot(x2 - x1, y2 - y1);
-    return (
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke="currentColor"
-        strokeWidth={1.5}
-        strokeDasharray="3 4"
-        style={{
-          strokeDashoffset: drawn ? 0 : -length,
-          transition: `stroke-dashoffset 320ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
-        }}
-      />
-    );
-  }
-
-  const horizontal = y1 === y2;
-  const left = Math.min(x1, x2);
-  const top = Math.min(y1, y2);
-  const w = Math.max(1, Math.abs(x2 - x1));
-  const h = Math.max(1, Math.abs(y2 - y1));
-  // The clip rect always covers the segment's full bounding box; what
-  // animates is a scale on the axis this segment runs along (the other axis
-  // stays at 1, since the segment has no extent there anyway), anchored via
-  // transformOrigin at the segment's OWN start point (x1,y1) rather than the
-  // box's left/top corner. Scaling from a fixed origin (rather than
-  // animating width/height, which can only ever grow from the rect's x/y
-  // corner) is what makes a segment grow toward its own end point regardless
-  // of whether its coordinates happen to run left-to-right, right-to-left,
-  // top-to-bottom, or bottom-to-top.
-  const scaleX = horizontal ? (drawn ? 1 : 0) : 1;
-  const scaleY = horizontal ? 1 : (drawn ? 1 : 0);
-
-  return (
-    <>
-      <clipPath id={`line-clip-${id}`}>
-        <rect
-          x={left}
-          y={top}
-          width={w}
-          height={h}
-          style={{
-            transform: `scale(${scaleX}, ${scaleY})`,
-            transformOrigin: `${x1}px ${y1}px`,
-            transition: `transform 320ms cubic-bezier(0.22,1,0.36,1) ${delayMs}ms`,
-          }}
-        />
-      </clipPath>
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x2}
-        y2={y2}
-        stroke="currentColor"
-        strokeWidth={1.5}
-        strokeDasharray="3 4"
-        clipPath={`url(#line-clip-${id})`}
-      />
-    </>
   );
 }
 
@@ -2735,8 +2653,9 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
           card's opaque white background rather than underneath it — same
           stacking context, sibling elements paint in DOM order. main is the
           positioned ancestor HeroToIntroLine measures itself against, so its
-          coordinates stay correct regardless of where main sits on the page. */}
-      <HeroToIntroLine fromRef={ctaRef} toRef={introRef} />
+          coordinates stay correct regardless of where main sits on the page.
+          Hidden for now — flip back on once the draw-in timing is right. */}
+      {false && <HeroToIntroLine fromRef={ctaRef} toRef={introRef} />}
 
       <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))", marginTop: -2 }}>
         <div className="mx-auto w-full max-w-[88rem] flex flex-col">
