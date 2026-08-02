@@ -688,12 +688,12 @@ export function VisualNotch() {
       child.style.transform = "translateY(-8px)";
     });
 
-    const STEP = 90;
+    const STEP = 160;
     // A brief pause before the header starts revealing at all, so it doesn't
     // pop in the instant the CTA's own fade lands — there's a beat of
     // stillness first, then the header eases in as its own soft fade rather
     // than appearing at full opacity before its children even start.
-    const START_DELAY = 220;
+    const START_DELAY = 120;
     const HEADER_FADE = 380;
     const runReveal = () => {
       if (headerHasAnimated) return;
