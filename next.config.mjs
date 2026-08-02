@@ -52,6 +52,11 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   images: {
     qualities: [70, 75, 78, 90],
+    // AVIF first: smaller than WebP at equivalent visual quality, which
+    // offsets the quality-90 card images' larger size. Next tries each
+    // format in order and falls back based on the browser's Accept header,
+    // so this doesn't drop WebP support anywhere.
+    formats: ["image/avif", "image/webp"],
   },
   turbopack: {
     root: path.resolve("."),
