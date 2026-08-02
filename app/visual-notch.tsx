@@ -668,23 +668,51 @@ export function VisualNotch() {
   useEffect(() => {
     if (headerHasAnimated) return;
     if (pathname !== "/") return;
-    headerHasAnimated = true;
     const el = headerRef.current;
     if (!el) return;
+
+    // Header stays fully hidden — not just faded, but pointer-events off too,
+    // so it can't be clicked or tabbed into — until the hero's own CTA has
+    // finished its entrance transition (see VercelHero's onTransitionEnd in
+    // home-client.tsx, which dispatches this once its fade lands). Firing on
+    // mount instead would show the header before any hero content has drawn.
     el.style.opacity = "0";
-    el.style.transform = "translateY(-8px)";
-    const raf = requestAnimationFrame(() => {
-      el.style.transition = "opacity 420ms cubic-bezier(0.16,1,0.3,1), transform 420ms cubic-bezier(0.16,1,0.3,1)";
-      el.style.opacity = "1";
-      el.style.transform = "translateY(0)";
-      const onEnd = () => {
-        el.style.transition = "";
-        el.style.opacity = "";
-        el.style.transform = "";
-      };
-      el.addEventListener("transitionend", onEnd, { once: true });
+    el.style.pointerEvents = "none";
+
+    const children = Array.from(
+      el.querySelectorAll<HTMLElement>(".site-header__brand, .site-header__nav, .site-header__actions")
+    );
+    children.forEach((child) => {
+      child.style.opacity = "0";
+      child.style.transform = "translateY(-8px)";
     });
-    return () => cancelAnimationFrame(raf);
+
+    const STEP = 90;
+    const runReveal = () => {
+      if (headerHasAnimated) return;
+      headerHasAnimated = true;
+      el.style.opacity = "1";
+      el.style.pointerEvents = "";
+      requestAnimationFrame(() => {
+        children.forEach((child, i) => {
+          child.style.transition = `opacity 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms, transform 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms`;
+          child.style.opacity = "1";
+          child.style.transform = "translateY(0)";
+        });
+      });
+      window.setTimeout(() => {
+        children.forEach((child) => {
+          child.style.transition = "";
+          child.style.opacity = "";
+          child.style.transform = "";
+        });
+        el.style.opacity = "";
+        el.style.pointerEvents = "";
+      }, STEP * children.length + 420);
+    };
+
+    window.addEventListener("hero-cta:revealed", runReveal, { once: true });
+    return () => window.removeEventListener("hero-cta:revealed", runReveal);
   }, [pathname]);
 
   const handleEnter = useCallback((i: number) => {

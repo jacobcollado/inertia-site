@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
 import { ThemeToggle } from "@/app/theme-toggle";
@@ -302,9 +301,11 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const [loading, setLoading] = useState(false);
   const [oauthProvider, setOauthProvider] = useState<"google" | null>(null);
   const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
-  // Tallest of all variants. No longer used to size the card (that tracks the
-  // current view), but kept as the pre-hydration fallback so the first paint
-  // doesn't clip taller content before the observer reports.
+  // Height of the initially-displayed view only (signin/auth), used purely as
+  // the pre-hydration fallback so the first paint doesn't flash at 0 height.
+  // This must NOT be the tallest of all variants — using the max meant the
+  // card opened at the (taller) email form's height and then shrank down to
+  // the auth view's height once the ResizeObserver reported in.
   const [maxCardHeight, setMaxCardHeight] = useState<number | undefined>(undefined);
   const signinSizerRef = useRef<HTMLDivElement>(null);
   const signupSizerRef = useRef<HTMLDivElement>(null);
@@ -315,25 +316,13 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const [pillRect, setPillRect] = useState<{ left: number; width: number } | null>(null);
   const checkEmail = searchParams.get("checkEmail") === "1";
 
-  // Measure every tab × view combination and lock the card to the tallest,
-  // so switching tabs or swapping to the email card never reflows it.
+  // Measure only the view shown on first paint (signin/auth), so the
+  // pre-hydration fallback height matches what's actually displayed instead
+  // of the tallest of every tab × view combination.
   useEffect(() => {
     const measure = () => {
-      // Only measure the tabs that can actually be shown. Including the
-      // signup sizers while sign-ups are closed would lock the card to the
-      // taller signup layout and leave dead space under the signin form.
-      const heights = [
-        signinSizerRef.current?.offsetHeight ?? 0,
-        signinEmailSizerRef.current?.offsetHeight ?? 0,
-        ...(SIGNUPS_ENABLED
-          ? [
-              signupSizerRef.current?.offsetHeight ?? 0,
-              signupEmailSizerRef.current?.offsetHeight ?? 0,
-            ]
-          : []),
-      ];
-      const tallest = Math.max(...heights);
-      if (tallest > 0) setMaxCardHeight(tallest);
+      const height = signinSizerRef.current?.offsetHeight ?? 0;
+      if (height > 0) setMaxCardHeight(height);
     };
     measure();
     window.addEventListener("resize", measure);
@@ -556,6 +545,27 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
       {/* Form — centered against full viewport */}
       <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
+        {/* Sign-ups closed notice. Sits above the card so it reads as
+            page-level context rather than something the card itself offers. */}
+        {!SIGNUPS_ENABLED && (
+          <div
+            className="flex items-center justify-center gap-2 pl-1 pr-3.5 py-1 rounded-full text-[13px] tracking-tight mb-6"
+            style={{ background: "rgb(var(--fg) / 0.05)", color: "rgb(var(--muted))" }}
+          >
+            <span
+              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-white"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.18), inset 0 1px 2px rgba(0,0,0,0.12), inset 0 -1px 1px rgba(255,255,255,0.8)" }}
+            >
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="#18181b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3.5" y="7.25" width="9" height="6.25" rx="1.25" />
+                <path d="M5.25 7.25V5a2.75 2.75 0 0 1 5.5 0v2.25" />
+              </svg>
+            </span>
+            <span className="leading-none">
+              New sign ups are <span style={{ color: "rgb(var(--fg))" }}>currently closed</span>
+            </span>
+          </div>
+        )}
         {/* Padding tightens while sign-ups are closed: with the tab notch gone
             the card holds only a heading and two buttons. */}
         <div
@@ -644,44 +654,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             )}
           </div>
         </div>
-
-        {/* Sign-ups closed notice. Sits OUTSIDE the card, so the card stays
-            focused on the one action it offers and this reads as page-level
-            context. Placed above the terms line, which occupies the same
-            below-card slot. */}
-        {!SIGNUPS_ENABLED && (
-          <div
-            className="flex items-center justify-center gap-2 pl-1 pr-3.5 py-1 rounded-full text-[13px] tracking-tight mt-6"
-            style={{ background: "rgb(var(--fg) / 0.05)", color: "rgb(var(--muted))" }}
-          >
-            {/* Icon on a white circular pill, same treatment as the work
-                tooltip's logos — it gives the emoji a consistent ground so it
-                reads on both light and dark surfaces instead of sitting
-                directly on the translucent grey.
-                Left padding is tighter than right so the pill doesn't look
-                inset; block + leading-none keep the row centred on each box
-                rather than the text baseline. */}
-            <span
-              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-white"
-              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.18)" }}
-            >
-              <Image
-                src="/emoji/locked.png"
-                alt=""
-                aria-hidden="true"
-                width={72}
-                height={72}
-                quality={75}
-                sizes="16px"
-                className="block"
-                style={{ width: 15, height: 15 }}
-              />
-            </span>
-            <span className="leading-none">
-              New sign ups are <span style={{ color: "rgb(var(--fg))" }}>currently closed</span>
-            </span>
-          </div>
-        )}
 
         <p
           className={`w-full max-w-[420px] text-[12px] tracking-tight text-[rgb(var(--muted))] text-center ${SIGNUPS_ENABLED ? "mt-6" : "mt-4"}`}

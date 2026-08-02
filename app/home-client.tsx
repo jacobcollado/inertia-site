@@ -635,7 +635,15 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                 else window.scrollTo({ top: targetY, behavior: "smooth" });
               }}
-              onTransitionEnd={e => { if (e.propertyName === "opacity") setBeamActive(true); }}
+              onTransitionEnd={e => {
+                if (e.propertyName !== "opacity") return;
+                setBeamActive(true);
+                // Tells the header (mounted separately in SiteShell, with no
+                // ref access to this CTA) that the hero's own reveal has
+                // landed, so it can wait to fade in until right after this
+                // instead of firing on mount ahead of any hero content.
+                window.dispatchEvent(new Event("hero-cta:revealed"));
+              }}
               className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-2 text-[15px] sm:text-[16px] font-medium tracking-tight overflow-hidden"
               style={{
                 // Follows the heading's own word stagger rather than a fixed
@@ -1605,15 +1613,92 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Splits copy on [[double brackets]] and wraps those spans in a Pill, so the
-// source text stays readable as a sentence instead of being broken up into
-// JSX fragments.
-function withPills(text: string) {
-  return text.split(/\[\[(.+?)\]\]/g).map((part, i) => {
-    // Even indices are plain copy between the markers.
-    if (i % 2 === 0) return <span key={i}>{part}</span>;
-    return <Pill key={i}>{part}</Pill>;
+// Splits copy on [[double brackets]] into word-level tokens, wrapping
+// bracketed phrases in a Pill. Pills stay as one atomic token (never split
+// across words) so a highlighted phrase reveals as a single unit rather than
+// word-by-word. Plain words are split on spaces so LiquidText can stagger
+// them individually.
+type CopyToken = { key: string; node: React.ReactNode };
+
+function tokenizeCopy(text: string): CopyToken[] {
+  const tokens: CopyToken[] = [];
+  const parts = text.split(/\[\[(.+?)\]\]/g);
+  parts.forEach((part, i) => {
+    if (i % 2 === 1) {
+      tokens.push({ key: `${i}`, node: <Pill>{part}</Pill> });
+      return;
+    }
+    part.split(/(\s+)/).forEach((word, j) => {
+      if (word === "" || /^\s+$/.test(word)) return;
+      tokens.push({ key: `${i}-${j}`, node: word });
+    });
   });
+  return tokens;
+}
+
+// Liquid, viscous word-by-word reveal: each word rises, sharpens out of a
+// blur, and settles with a slight scale change, cascading across the
+// paragraph rather than fading in as one flat block. The long, soft
+// cubic-bezier (no overshoot) plus the blur is what reads as "liquid" rather
+// than mechanical — words feel like they're condensing into place instead of
+// just sliding up.
+function LiquidText({
+  text,
+  className,
+  style,
+  pRef,
+}: {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+  pRef?: React.RefObject<HTMLParagraphElement | null>;
+}) {
+  const ownRef = useRef<HTMLParagraphElement>(null);
+  const ref = pRef ?? ownRef;
+  const [visible, setVisible] = useState(false);
+  const tokens = React.useMemo(() => tokenizeCopy(text), [text]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        requestAnimationFrame(() => setVisible(true));
+      },
+      { threshold: 0.06, rootMargin: "0px 0px -32px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const STEP = 22; // ms between each word's start — fast enough to read as one wave, not a typewriter
+  const DURATION = 640;
+
+  return (
+    <p ref={ref} className={className} style={style}>
+      {tokens.map((token, i) => (
+        <React.Fragment key={token.key}>
+          <span
+            style={{
+              display: "inline-block",
+              willChange: "opacity, transform, filter",
+              opacity: visible ? 1 : 0,
+              transform: visible ? "translateY(0) scale(1)" : "translateY(10px) scale(0.97)",
+              filter: visible ? "blur(0px)" : "blur(5px)",
+              transition: visible
+                ? `opacity ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1) ${i * STEP}ms, transform ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1) ${i * STEP}ms, filter ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1) ${i * STEP}ms`
+                : "none",
+            }}
+          >
+            {token.node}
+          </span>
+          {i < tokens.length - 1 ? " " : ""}
+        </React.Fragment>
+      ))}
+    </p>
+  );
 }
 
 function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
@@ -1626,18 +1711,23 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-        <p ref={introRef} className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
-          {withPills(intro)}
-        </p>
+        <LiquidText
+          pRef={introRef}
+          text={intro}
+          className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+          style={{ color: "#5c5c5c" }}
+        />
         <div className="flex flex-col gap-4 mt-8">
           {points.map((text, i) => (
             <div key={i} className="flex gap-3 sm:max-w-xl">
               <span className="text-[16.5px] sm:text-[19px] tracking-tight tabular-nums shrink-0" style={{ color: "#1a1a1a" }}>
                 {i + 1}.
               </span>
-              <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
-                {withPills(text)}
-              </p>
+              <LiquidText
+                text={text}
+                className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+                style={{ color: "#5c5c5c" }}
+              />
             </div>
           ))}
         </div>
@@ -1661,12 +1751,16 @@ function AiApproach() {
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:mx-auto">
-        <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left" style={{ color: "#5c5c5c" }}>
-          {withPills(first)}
-        </p>
-        <p className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5" style={{ color: "#5c5c5c" }}>
-          {withPills(second)}
-        </p>
+        <LiquidText
+          text={first}
+          className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+          style={{ color: "#5c5c5c" }}
+        />
+        <LiquidText
+          text={second}
+          className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5"
+          style={{ color: "#5c5c5c" }}
+        />
       </div>
     </section>
   );
@@ -1823,6 +1917,28 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   const dragRef = useRef<{ startX: number; startTranslate: number; dragging: boolean; moved: boolean } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Liquid entrance: cards cascade in left to right (same viscous blur/scale/
+  // rise language as LiquidText's word stagger) rather than popping in as one
+  // flat block with the section's own .rise fade. Gated on the section
+  // actually scrolling into view, same trigger point as .rise elsewhere.
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        requestAnimationFrame(() => setRevealed(true));
+      },
+      { threshold: 0.06, rootMargin: "0px 0px -32px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   useEffect(() => {
     const measure = () => setIsDesktop(window.innerWidth >= 640);
@@ -2147,7 +2263,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   if (items.length === 0) return null;
 
   return (
-    <section className="rise w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
+    <section ref={sectionRef} className="w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
       <div
         ref={padRef}
         className={`px-1.5 sm:pr-0 ${isDragging ? "" : "sm:transition-[padding-left] sm:duration-300 sm:ease-out"} ${isDragging || isExpanded ? "sm:pl-1.5" : "sm:pl-[calc(50vw-336px)]"}`}
@@ -2172,7 +2288,19 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
           >
             <div className="shrink-0 sm:hidden" style={{ width: 6 }} aria-hidden="true" />
             {items.map((item, i) => (
-              <div key={item.slug} className="shrink-0 flex flex-col gap-3 sm:w-[420px]">
+              <div
+                key={item.slug}
+                className="shrink-0 flex flex-col gap-3 sm:w-[420px]"
+                style={{
+                  willChange: "opacity, transform, filter",
+                  opacity: revealed ? 1 : 0,
+                  transform: revealed ? "translateY(0) scale(1)" : "translateY(22px) scale(0.94)",
+                  filter: revealed ? "blur(0px)" : "blur(10px)",
+                  transition: revealed
+                    ? `opacity 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, transform 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, filter 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms`
+                    : "none",
+                }}
+              >
                 <Link
                   ref={(el) => { cardRefs.current[i] = el; }}
                   href="/work"
