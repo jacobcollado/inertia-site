@@ -2335,8 +2335,8 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                       src={item.card}
                       alt={item.client}
                       fill
-                      priority={i < 2}
-                      loading={i < 2 ? undefined : "lazy"}
+                      priority={i < 3}
+                      loading={i < 3 ? undefined : "lazy"}
                       quality={90}
                       sizes="(max-width: 640px) 300px, 420px"
                       className="object-cover"
