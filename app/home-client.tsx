@@ -1330,19 +1330,13 @@ function hexToRgba(hex: string, alpha: number) {
 
 const CLIENT_CARD_FALLBACK_PALETTE = ["#39637e", "#5b7496", "#1a3a4a"];
 
-// Per-client logo size tweak — logos come in at wildly different natural
-// proportions (a wide wordmark vs. a compact mark), so a single fixed width
-// reads too small/large for some. Multiplies the shared base width below.
-const CLIENT_CARD_LOGO_SCALE: Record<string, number> = {
-  aether: 1.3,
-  inboundly: 0.8,
-  "ellora-la": 1.2,
+// Per-client crop offset for the carousel's card photo — object-cover
+// otherwise centers the crop, which for inboundly's portrait screenshot cut
+// off too much of the middle content (headline/CTA) in favor of the empty
+// top of the page. Shifting the focal point down reveals more of it.
+const CLIENT_CARD_OBJECT_POSITION: Record<string, string> = {
+  inboundly: "center 42%",
 };
-
-// Every other logo is forced white via filter so it reads clearly against
-// any card background — this one has its own multi-color artwork worth
-// keeping as-is.
-const CLIENT_CARD_NATURAL_COLOR_LOGO_SLUGS = new Set(["ft-gioo"]);
 
 function hexLuminance(hex: string) {
   const n = parseInt(hex.slice(1), 16);
@@ -2343,9 +2337,10 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                       fill
                       priority={i < 2}
                       loading={i < 2 ? undefined : "lazy"}
-                      quality={75}
+                      quality={90}
                       sizes="(max-width: 640px) 300px, 420px"
                       className="object-cover"
+                      style={{ objectPosition: CLIENT_CARD_OBJECT_POSITION[item.slug] }}
                       draggable={false}
                     />
                   ) : (
@@ -2363,8 +2358,12 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                       />
                     </>
                   )}
-                  <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
-                    {item.logo ? (
+                  {!item.card && item.slug === "aether" && item.logo ? (
+                    // Every other card's logo overlay was removed — aether
+                    // keeps it as a one-off exception since it has no card
+                    // photo and its wordmark reads better centered than the
+                    // plain client-name fallback.
+                    <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
                       <Image
                         src={item.logo}
                         alt={item.client}
@@ -2375,22 +2374,22 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                         sizes="230px"
                         className="h-auto object-contain"
                         style={{
-                          width: `${55 * (CLIENT_CARD_LOGO_SCALE[item.slug] ?? 1)}%`,
-                          filter: CLIENT_CARD_NATURAL_COLOR_LOGO_SLUGS.has(item.slug)
-                            ? "drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))"
-                            : "brightness(0) invert(1) drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))",
+                          width: "71.5%",
+                          filter: "brightness(0) invert(1) drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))",
                         }}
                         draggable={false}
                       />
-                    ) : !item.card ? (
+                    </div>
+                  ) : !item.card ? (
+                    <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
                       <p
                         className="text-[22px] sm:text-[26px] font-medium tracking-tight text-center leading-tight"
                         style={{ color: "#fff", textShadow: "0 2px 12px rgba(0,0,0,0.35)" }}
                       >
                         {item.client}
                       </p>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
                 </Link>
                 <div className="flex flex-col gap-1.5 w-[300px] sm:w-[420px]">
                   <Link
