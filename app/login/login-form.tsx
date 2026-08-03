@@ -379,8 +379,11 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
   // Swap the card between the Google/email-choice screen and the dedicated
   // email-form screen, reusing the same slide transition as tab switching.
+  // Unlike tab switching, both directions here use the same right-to-left
+  // motion (direction 1) rather than reversing on the way back — going back
+  // to the main card should slide the same way it slid in, not mirror it.
   const switchView = (t: "signin" | "signup", v: "auth" | "email") => {
-    setDirection(v === "email" ? 1 : -1);
+    setDirection(1);
     setError("");
     setView((s) => ({ ...s, [t]: v }));
     setPhase("exit");
