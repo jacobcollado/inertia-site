@@ -1698,9 +1698,9 @@ function LiquidText({
 
 function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
   const intro =
-    "The brands we work with already have something worth buying. Often [[the product sells itself]], and sometimes it needs help doing that. Either way, the experience someone moves through on the way to it is the part we own, whether we're taking [[design to code]] or [[code to design]].";
+    "The brands we work with already have something worth buying. Often the product sells itself, and sometimes it needs help doing that. Either way, the [[experience]] someone moves through on the way to it is the part we own, whether we're taking design to code or code to design.";
   const points = [
-    "[[Every detail matters]], whether the visitor consciously notices it or not. Most of them never will. They'll just feel that it worked.",
+    "Every [[detail]] matters, whether the visitor consciously notices it or not. Most of them never will. They'll just feel that it worked.",
     "The best design disappears. It should feel [[effortless]] to the person using it, even when the work behind it wasn't.",
   ];
   return (
@@ -1741,9 +1741,9 @@ function easeInOutCubic(t: number) {
 
 function AiApproach() {
   const first =
-    "We treat AI as [[a frontier tool, not a shortcut]]. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed [[how fast we can work]], not what we're willing to ship.";
+    "We treat AI as a [[frontier]] tool, not a shortcut. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed how fast we can work, not what we're willing to ship.";
   const second =
-    "We've been fortunate to work alongside people building genuinely great things, and every project has added to how we think about the work. Along the way we've built a deep understanding of [[the fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and the details that make a product actually resonate with the people using it.";
+    "We've been fortunate to work alongside people building genuinely great things, and every project has added to how we think about the work. Along the way we've built a deep understanding of the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and the details that make a product actually resonate with the people using it.";
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:mx-auto">
@@ -2263,7 +2263,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
     <section ref={sectionRef} className="w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
       <div
         ref={padRef}
-        className={`px-1.5 sm:pr-0 ${isDragging ? "" : "sm:transition-[padding-left] sm:duration-300 sm:ease-out"} ${isDragging || isExpanded ? "sm:pl-1.5" : "sm:pl-[calc(50vw-336px)]"}`}
+        className={`px-1.5 sm:pr-0 ${isDragging ? "" : "sm:transition-[padding-left] sm:duration-300 sm:ease-out"} ${isDragging || isExpanded ? "sm:pl-1.5" : "sm:pl-[calc(50vw-384px)]"}`}
       >
       <div className="relative">
         <div

@@ -356,25 +356,25 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
       {(activeProjects.length > 0 || unpaidInvoices.length > 0 || latestAdminMsg || activity.length > 0) && (
         <Tabs defaultValue={defaultOverviewTab} className="gap-4">
           <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar">
-            <TabsList className="relative bg-sidebar rounded-lg border w-max sm:w-fit h-10 p-1">
+            <TabsList className="relative bg-sidebar rounded-md border w-max sm:w-fit h-10 p-1">
               <TabsIndicator />
               {activeProjects.length > 0 && (
-                <TabsTrigger value="projects" className="relative z-10 flex-none rounded-md px-3 data-[active]:bg-transparent data-[active]:shadow-none">
+                <TabsTrigger value="projects" className="relative z-10 flex-none rounded-sm px-3 data-[active]:bg-transparent data-[active]:shadow-none">
                   {activeProjects.length === 1 ? "Active project" : "Active projects"}
                 </TabsTrigger>
               )}
               {unpaidInvoices.length > 0 && (
-                <TabsTrigger value="invoices" className="relative z-10 flex-none rounded-md px-3 data-[active]:bg-transparent data-[active]:shadow-none">
+                <TabsTrigger value="invoices" className="relative z-10 flex-none rounded-sm px-3 data-[active]:bg-transparent data-[active]:shadow-none">
                   {unpaidInvoices.length === 1 ? "Pending invoice" : "Pending invoices"}
                 </TabsTrigger>
               )}
               {latestAdminMsg && (
-                <TabsTrigger value="message" className="relative z-10 flex-none rounded-md px-3 data-[active]:bg-transparent data-[active]:shadow-none">
+                <TabsTrigger value="message" className="relative z-10 flex-none rounded-sm px-3 data-[active]:bg-transparent data-[active]:shadow-none">
                   Latest message
                 </TabsTrigger>
               )}
               {activity.length > 0 && (
-                <TabsTrigger value="activity" className="relative z-10 flex-none rounded-md px-3 data-[active]:bg-transparent data-[active]:shadow-none">
+                <TabsTrigger value="activity" className="relative z-10 flex-none rounded-sm px-3 data-[active]:bg-transparent data-[active]:shadow-none">
                   Recent activity
                 </TabsTrigger>
               )}

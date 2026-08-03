@@ -141,6 +141,7 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
   const [navOpen, setNavOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [showAll, setShowAll] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -148,9 +149,16 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
     return ALL_NAV_ITEMS.filter(item => item.label.toLowerCase().includes(q));
   }, [query]);
 
+  // Only the empty-query default list is capped — typed queries are already
+  // a deliberate narrowing, so they show every match with nothing hidden.
+  const isDefaultList = query.trim().length === 0;
+  const visible = isDefaultList && !showAll ? filtered.slice(0, 4) : filtered;
+  const hiddenCount = filtered.length - visible.length;
+
   const closeSearch = () => {
     setSearchOpen(false);
     setQuery("");
+    setShowAll(false);
   };
 
   const renderRow = (item: (typeof ALL_NAV_ITEMS)[number], onNavigate: () => void) => {
@@ -231,7 +239,7 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
           </DialogHeader>
           <input
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value); setShowAll(false); }}
             placeholder="Search sections..."
             autoFocus
             className="w-full rounded-md border bg-background px-3 py-2 text-sm tracking-tight placeholder:text-muted-foreground focus:outline-none focus:border-muted-foreground/40 transition-colors"
@@ -241,7 +249,18 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
             {filtered.length === 0 ? (
               <p className="px-3 py-2 text-sm text-muted-foreground">No matches.</p>
             ) : (
-              filtered.map(item => renderRow(item, closeSearch))
+              <>
+                {visible.map(item => renderRow(item, closeSearch))}
+                {hiddenCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAll(true)}
+                    className="flex items-center justify-center rounded-lg px-3 py-2.5 text-[14px] text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  >
+                    View {hiddenCount} more
+                  </button>
+                )}
+              </>
             )}
           </nav>
         </DialogContent>

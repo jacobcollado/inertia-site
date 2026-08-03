@@ -652,8 +652,6 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
 
 /* ── Root ────────────────────────────────────────────────────────── */
 
-let headerHasAnimated = false;
-
 export function VisualNotch() {
   const { trigger } = useWebHaptics();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -664,68 +662,6 @@ export function VisualNotch() {
   const triggerEls = useRef<(HTMLDivElement | null)[]>([]);
 
   const pathname = usePathname();
-
-  useEffect(() => {
-    if (headerHasAnimated) return;
-    if (pathname !== "/") return;
-    const el = headerRef.current;
-    if (!el) return;
-
-    // Header stays fully hidden — not just faded, but pointer-events off too,
-    // so it can't be clicked or tabbed into — until the hero's own CTA has
-    // finished its entrance transition (see VercelHero's onTransitionEnd in
-    // home-client.tsx, which dispatches this once its fade lands). Firing on
-    // mount instead would show the header before any hero content has drawn.
-    el.style.opacity = "0";
-    el.style.pointerEvents = "none";
-
-    const children = Array.from(
-      el.querySelectorAll<HTMLElement>(".site-header__brand, .site-header__nav, .site-header__actions")
-    );
-    children.forEach((child) => {
-      child.style.willChange = "opacity, transform";
-      child.style.opacity = "0";
-      child.style.transform = "translateY(-8px)";
-    });
-
-    const STEP = 160;
-    // A brief pause before the header starts revealing at all, so it doesn't
-    // pop in the instant the CTA's own fade lands — there's a beat of
-    // stillness first, then the header eases in as its own soft fade rather
-    // than appearing at full opacity before its children even start.
-    const START_DELAY = 120;
-    const HEADER_FADE = 380;
-    const runReveal = () => {
-      if (headerHasAnimated) return;
-      headerHasAnimated = true;
-      window.setTimeout(() => {
-        el.style.transition = `opacity ${HEADER_FADE}ms cubic-bezier(0.16,1,0.3,1)`;
-        el.style.opacity = "1";
-        el.style.pointerEvents = "";
-        requestAnimationFrame(() => {
-          children.forEach((child, i) => {
-            child.style.transition = `opacity 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms, transform 420ms cubic-bezier(0.16,1,0.3,1) ${i * STEP}ms`;
-            child.style.opacity = "1";
-            child.style.transform = "translateY(0)";
-          });
-        });
-        window.setTimeout(() => {
-          el.style.transition = "";
-          children.forEach((child) => {
-            child.style.transition = "";
-            child.style.opacity = "";
-            child.style.transform = "";
-            child.style.willChange = "";
-          });
-          el.style.opacity = "";
-          el.style.pointerEvents = "";
-        }, STEP * children.length + 420);
-      }, START_DELAY);
-    };
-
-    window.addEventListener("hero-cta:revealed", runReveal, { once: true });
-    return () => window.removeEventListener("hero-cta:revealed", runReveal);
-  }, [pathname]);
 
   const handleEnter = useCallback((i: number) => {
     if (leaveTimer.current) clearTimeout(leaveTimer.current);

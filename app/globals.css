@@ -485,22 +485,6 @@ html {
   to   { opacity: 0; transform: translateX(16px); }
 }
 
-@keyframes route-enter {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.route-enter {
-  animation: route-enter 100ms ease both;
-  will-change: opacity;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .route-enter {
-    animation: none;
-  }
-}
-
 ::selection {
   background: rgb(var(--fg));
   color: rgb(var(--bg));

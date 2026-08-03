@@ -353,6 +353,10 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
     }, []);
 
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+    const focusedIndexRef = useRef<number | null>(null);
+    useEffect(() => {
+      focusedIndexRef.current = focusedIndex;
+    }, [focusedIndex]);
     // Validation message for the current freeText question (null = valid).
     const [freeTextError, setFreeTextError] = useState<string | null>(null);
 
@@ -361,6 +365,14 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
       setActiveIndex(null);
       setFocusedIndex(null);
       setFreeTextError(null);
+      // Without this, a selected-row group id from the PREVIOUS question can
+      // get reused for the new question's own selected row (stableId lookup
+      // in selectedGroups above matches by row index, not by question), which
+      // reads to framer-motion as the same block continuing rather than a
+      // fresh one — so the highlighted background morphs/slides in from the
+      // old question's row position instead of appearing cleanly on the new
+      // one.
+      prevGroupMapRef.current = new Map();
     }, [safeIndex, setActiveIndex]);
 
     // ── Keyboard focus restoration across question changes ───────
@@ -370,9 +382,18 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
     // so focus-within is kept and arrows keep routing here instead of falling
     // through to page-level navigation.
     const restoreFocusRef = useRef(false);
+    // Whether the row being restored FROM was reached by keyboard — checked
+    // via focusedIndex (the ring's own state), not :focus-visible: per the
+    // comment in onFocus below, :focus-visible still matches after a
+    // programmatic .focus() from a prevented mousedown, so it can't
+    // distinguish a click from real keyboard navigation. focusedIndex is
+    // already the thing that decides whether THIS row is showing the ring,
+    // so it's the correct source of truth for whether the NEXT row should.
+    const restoreRingRef = useRef(false);
     const markFocusRestore = useCallback(() => {
       if (rowsContainerRef.current?.contains(document.activeElement)) {
         restoreFocusRef.current = true;
+        restoreRingRef.current = focusedIndexRef.current !== null;
       }
     }, []);
     useEffect(() => {
@@ -381,6 +402,10 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
       const firstRow = rowsContainerRef.current?.querySelector(
         '[data-proximity-index="0"]'
       ) as HTMLElement | null;
+      // Priming pointerFocusRef makes the row's own onFocus handler treat
+      // this programmatic focus the same as a mouse-driven one (no ring)
+      // when the row we're restoring FROM wasn't showing the ring either.
+      if (!restoreRingRef.current) pointerFocusRef.current = true;
       firstRow?.focus();
     }, [safeIndex]);
 

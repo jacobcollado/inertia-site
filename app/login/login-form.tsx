@@ -453,7 +453,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">
           {t === "signin" ? "Welcome back to Inertia" : "Welcome to Inertia"}
         </p>
-        <h1 className="text-[2.2rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+        <h1 className="text-[1.8rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
           {t === "signin" ? "Sign in to your portal" : "Create your account"}
         </h1>
       </div>
@@ -562,7 +562,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               </svg>
             </span>
             <span className="leading-none">
-              New sign ups are <span style={{ color: "rgb(var(--fg))" }}>currently closed</span>
+              Currently <span style={{ color: "rgb(var(--fg))" }}>invite only</span>
             </span>
           </div>
         )}

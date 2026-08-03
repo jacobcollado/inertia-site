@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { VisualNotch } from "./visual-notch";
 import { MinimalFooter } from "./site-footer";
@@ -33,12 +33,33 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // at the start, dark at the end — because overscroll uniquely samples the
   // live body background, so the top rubber-band reads the light keyframe and
   // the bottom reads the dark one. This class just scopes that to the homepage.
-  useEffect(() => {
+  // useLayoutEffect (not useEffect) so the class is added/removed before the
+  // browser paints the new route — otherwise leaving the homepage scrolled
+  // near the bottom (where the scroll-driven background above has animated
+  // close to black) briefly flashes that dark background on the next page
+  // before this cleanup catches up.
+  useLayoutEffect(() => {
     const root = document.documentElement;
     const on = isHome && !bare;
     root.classList.toggle("home-dark-root", on);
     // Clear any stale homepage theme-color meta left by an earlier version.
     document.getElementById("home-theme-color")?.remove();
+    if (!on) {
+      // Leaving the homepage (possibly scrolled near the bottom, where the
+      // scroll-driven animation above has animated body/html close to black)
+      // — removing the class alone isn't enough, since an in-flight
+      // scroll-timeline animation can take the browser a frame to relax back
+      // to its unanimated value, which is exactly the window where the next
+      // route flashes black. An inline background wins over the animation
+      // immediately, with no such gap.
+      root.style.background = "rgb(255 255 255)";
+      document.body.style.background = "rgb(255 255 255)";
+    } else {
+      // Back on the homepage — clear any inline override left by a previous
+      // visit elsewhere so the scroll-driven animation regains control.
+      root.style.background = "";
+      document.body.style.background = "";
+    }
     return () => {
       root.classList.remove("home-dark-root");
     };

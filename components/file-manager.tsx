@@ -135,6 +135,7 @@ export function FileManager({
   onMove,
   mobileMode = "auto",
   showBackButton = true,
+  allowUpload = true,
   className,
 }: {
   files: FileManagerItem[]
@@ -151,6 +152,10 @@ export function FileManager({
   // callers whose files are always flat (no folder nesting) — those with real
   // folders (e.g. admin's per-client documents) should leave this on.
   showBackButton?: boolean
+  // Hides the toolbar's Upload button and its dialog. Off for read-only
+  // callers (the client dashboard's Files tab, where clients can only
+  // download what admin has shared, not add their own).
+  allowUpload?: boolean
   className?: string
 }) {
   const [internalPath, setInternalPath] = React.useState(defaultPath)
@@ -346,16 +351,18 @@ export function FileManager({
                   )
                 })}
               </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="border-0 text-primary hover:text-primary"
-                style={{ backgroundColor: "color-mix(in srgb, var(--sh-primary) 15%, transparent)" }}
-                onClick={() => setUploadOpen(true)}
-              >
-                <UploadCloud />
-                Upload
-              </Button>
+              {allowUpload && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="border-0 text-primary hover:text-primary"
+                  style={{ backgroundColor: "color-mix(in srgb, var(--sh-primary) 15%, transparent)" }}
+                  onClick={() => setUploadOpen(true)}
+                >
+                  <UploadCloud />
+                  Upload
+                </Button>
+              )}
             </div>
           </div>
           <div className={cn("mt-2 text-xs text-muted-foreground", showBackButton ? "pl-10" : "pl-1")}>
@@ -501,45 +508,47 @@ export function FileManager({
           </DialogContent>
         </Dialog>
 
-        <Dialog
-          open={uploadOpen}
-          onOpenChange={(open) => {
-            setUploadOpen(open)
-            if (!open) setUploadFiles([])
-          }}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Upload files</DialogTitle>
-              <DialogDescription>
-                Add files to {currentPath === "/" ? "Files" : currentPath}.
-              </DialogDescription>
-            </DialogHeader>
-            <FileUploadDropzone
-              files={uploadFiles}
-              onFilesChange={setUploadFiles}
-              simulateUpload
-              label="Drop files to upload"
-              description="Uploads are added to the active directory"
-            />
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setUploadOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={submitUpload}
-                disabled={uploadableFiles.length === 0 || isUploading}
-              >
-                Upload files
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {allowUpload && (
+          <Dialog
+            open={uploadOpen}
+            onOpenChange={(open) => {
+              setUploadOpen(open)
+              if (!open) setUploadFiles([])
+            }}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Upload files</DialogTitle>
+                <DialogDescription>
+                  Add files to {currentPath === "/" ? "Files" : currentPath}.
+                </DialogDescription>
+              </DialogHeader>
+              <FileUploadDropzone
+                files={uploadFiles}
+                onFilesChange={setUploadFiles}
+                simulateUpload
+                label="Drop files to upload"
+                description="Uploads are added to the active directory"
+              />
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setUploadOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={submitUpload}
+                  disabled={uploadableFiles.length === 0 || isUploading}
+                >
+                  Upload files
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </DndContext>
   )

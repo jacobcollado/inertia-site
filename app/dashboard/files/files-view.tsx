@@ -43,6 +43,7 @@ export function FilesView({ files }: { files: DFile[] }) {
           files={items}
           mobileMode="list"
           showBackButton={false}
+          allowUpload={false}
           className="bg-sidebar"
           onOpen={async (file) => {
             const f = fileMap.get(file.id);

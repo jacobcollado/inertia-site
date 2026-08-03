@@ -52,7 +52,10 @@ export function ProjectDetailView({ project, updates }: { project: Project; upda
       </div>
 
       {project.notes && (
-        <p className="text-[13px] text-muted-foreground leading-relaxed border-t pt-6">{project.notes}</p>
+        <div className="border-t pt-6 flex flex-col gap-3">
+          <h2 className="text-lg font-semibold tracking-tight">Notes</h2>
+          <p className="text-[13px] text-muted-foreground leading-relaxed">{project.notes}</p>
+        </div>
       )}
 
       <div className="border-t pt-6 flex flex-col gap-3">

@@ -55,13 +55,6 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const ref = useRef<HTMLDivElement>(null);
   const first = useRef(true);
-  // Lives in RouteFade's own (stable) scope, not the key={pathname} child
-  // below — RouteFade itself never remounts on navigation, only that child
-  // does, so this correctly survives across route changes while still being
-  // false during the true first render on both server and client (avoiding
-  // any SSR/CSR className mismatch that module-level state would cause).
-  const isInitialLoad = useRef(true);
-  const isComponents = pathname.startsWith("/components");
   const isPersistentShell = PERSISTENT_SHELL_PREFIXES.some(p => pathname === p || pathname.startsWith(p + "/"));
 
   // Clicking between two /work#project-x cards without leaving /work never
@@ -80,29 +73,20 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
       first.current = false;
       return;
     }
-    isInitialLoad.current = false;
-    const el = ref.current;
-    if (!el) return;
 
     // A destination with a hash (e.g. /work#project-ellora-la) wants to land
     // on that section, not the top of the page. This covers the case where
     // pathname itself changed (e.g. arriving at /work#project-x from /) —
     // see the hashchange listener above for hash-only changes within /work.
     scrollToHash();
-
-    if (isComponents || isPersistentShell) return;
-
-    el.classList.remove("route-enter");
-    void el.offsetWidth;
-    el.classList.add("route-enter");
-  }, [pathname, isComponents, isPersistentShell]);
+  }, [pathname]);
 
   if (isPersistentShell) {
     return <div ref={ref}>{children}</div>;
   }
 
   return (
-    <div ref={ref} className={isComponents || isInitialLoad.current ? undefined : "route-enter"} key={pathname}>
+    <div ref={ref} key={pathname}>
       {children}
     </div>
   );

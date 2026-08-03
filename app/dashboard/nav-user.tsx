@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   LogOutIcon,
   SettingsIcon,
-  KeyRoundIcon,
   ArrowLeftIcon,
   EllipsisVerticalIcon,
   UserCircleIcon,
@@ -94,10 +93,6 @@ export function NavUser({ email, initialDisplayName, initialAvatarUrl }: { email
               <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
                 <SettingsIcon />
                 Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/reset-password")}>
-                <KeyRoundIcon />
-                Change password
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

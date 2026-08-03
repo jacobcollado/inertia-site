@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useWebHaptics } from "web-haptics/react";
+import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,93 @@ function SettingsRow({ label, hint, children }: { label: string; hint?: string; 
 
 const DEFAULT_PREFS: NotificationPrefs = { new_message: true, invoice_due: true, project_update: true };
 
+// Requires the current password before setting a new one — Supabase's
+// updateUser() alone doesn't check it, so without this a hijacked-but-still-
+// logged-in session could change the password with no verification at all.
+// Re-auth (signInWithPassword) runs client-side against the live session,
+// then updateUser() runs against that same freshly-confirmed session.
+function ChangePasswordDialog({ open, onOpenChange, email }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  email: string;
+}) {
+  const [current, setCurrent] = useState("");
+  const [next, setNext] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  const reset = () => {
+    setCurrent(""); setNext(""); setConfirm(""); setError(""); setDone(false);
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (next !== confirm) { setError("New passwords don't match."); return; }
+    if (next.length < 6) { setError("New password must be at least 6 characters."); return; }
+    setPending(true);
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password: current });
+    if (authError) {
+      setPending(false);
+      setError("Current password is incorrect.");
+      return;
+    }
+    const { error: updateError } = await supabase.auth.updateUser({ password: next });
+    setPending(false);
+    if (updateError) { setError(updateError.message); return; }
+    setDone(true);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) reset(); }}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Change password</DialogTitle>
+          <DialogDescription>
+            {done ? "Your password has been updated." : "Confirm your current password to set a new one."}
+          </DialogDescription>
+        </DialogHeader>
+        {done ? (
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Done</Button>
+          </DialogFooter>
+        ) : (
+          <form onSubmit={onSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="current-password" className="text-xs text-muted-foreground">Current password</Label>
+              <Input id="current-password" type="password" autoComplete="current-password" value={current} onChange={e => setCurrent(e.target.value)} required className="focus-visible:border-input focus-visible:ring-foreground/15" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="new-password" className="text-xs text-muted-foreground">New password</Label>
+              <Input id="new-password" type="password" autoComplete="new-password" minLength={6} value={next} onChange={e => setNext(e.target.value)} required className="focus-visible:border-input focus-visible:ring-foreground/15" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="confirm-password" className="text-xs text-muted-foreground">Confirm new password</Label>
+              <Input id="confirm-password" type="password" autoComplete="new-password" minLength={6} value={confirm} onChange={e => setConfirm(e.target.value)} required className="focus-visible:border-input focus-visible:ring-foreground/15" />
+            </div>
+            {error && <span className="text-sm text-destructive">{error}</span>}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+              <Button
+                type="submit"
+                variant="ghost"
+                className="text-foreground hover:text-foreground"
+                style={{ backgroundColor: "color-mix(in srgb, var(--sh-foreground) 10%, transparent)" }}
+                disabled={pending || !current || !next || !confirm}
+              >
+                {pending ? "Updating…" : "Update password"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const PROVIDER_LABEL: Record<string, string> = {
   email: "Email & password",
   google: "Google",
@@ -81,6 +169,8 @@ export function SettingsView({ client, avatarUrl: initialAvatarUrl, signInProvid
 
   const [prefs, setPrefs] = useState<NotificationPrefs>(client?.notification_prefs ?? DEFAULT_PREFS);
   const [prefsPending, startPrefsTransition] = useTransition();
+
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -226,7 +316,7 @@ export function SettingsView({ client, avatarUrl: initialAvatarUrl, signInProvid
       </SettingsSection>
 
       <SettingsSection label="Sign-in">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 px-5 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 px-5 py-4 border-b">
           <p className="text-[15px]">Connected sign-in methods</p>
           <div className="flex items-center gap-2 flex-wrap">
             {signInProviders.map(p => {
@@ -240,7 +330,20 @@ export function SettingsView({ client, avatarUrl: initialAvatarUrl, signInProvid
             })}
           </div>
         </div>
+        {signInProviders.includes("email") && (
+          <SettingsRow label="Password" hint="Requires your current password.">
+            <Button variant="outline" onClick={() => setChangePasswordOpen(true)}>
+              Change password
+            </Button>
+          </SettingsRow>
+        )}
       </SettingsSection>
+
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
+        email={client?.email ?? ""}
+      />
 
       <SettingsSection label="Account">
         <SettingsRow label="Sign out">
