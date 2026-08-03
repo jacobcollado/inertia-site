@@ -2371,6 +2371,20 @@ h1:hover .redact > span.redact-inner,
   animation: placeholder-shimmer 3s linear infinite;
 }
 
+/* Solid-block counterpart to .placeholder-shimmer, for image skeletons
+   (work dialog gallery/logo) rather than text — same sweep technique, just
+   painted as a background fill instead of clipped to glyphs. */
+.skeleton-shimmer {
+  background: linear-gradient(
+    100deg,
+    rgb(var(--surface)) 30%,
+    color-mix(in srgb, rgb(var(--surface)), rgb(var(--fg)) 6%) 50%,
+    rgb(var(--surface)) 70%
+  );
+  background-size: 250% 100%;
+  animation: placeholder-shimmer 1.8s ease-in-out infinite;
+}
+
 /* Spinner keyframes used by the ask-user-questions component. The registry
    emitted these inside an `@theme inline {}` block (Tailwind v4 syntax); this
    project is Tailwind v3, so they're kept as plain top-level @keyframes. */

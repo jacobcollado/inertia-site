@@ -85,7 +85,18 @@ function WorkDialog({
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const touchState = useRef<{ startY: number; active: boolean } | null>(null);
+  // Tracks which gallery images have finished loading, keyed by index, so
+  // each one can show a shimmering skeleton in its own aspect-ratio box
+  // until it paints rather than the flat static surface fill it had before.
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   useEffect(() => setMounted(true), []);
+
+  // Reset the loaded set when a new project opens — otherwise an index that
+  // was already marked loaded for the previous project's gallery would skip
+  // straight past the skeleton for the new one.
+  useEffect(() => {
+    setLoadedImages(new Set());
+  }, [work?.slug]);
 
   // Drive an enter/exit transition off `visible` so opening fades/rises in and
   // closing plays out before the portal unmounts (kept simple: parent controls
@@ -276,25 +287,43 @@ function WorkDialog({
           {/* Gallery */}
           {work.gallery.length > 0 && (
             <div className="flex flex-col gap-3 mt-7">
-              {work.gallery.map((img, i) => (
-                <div
-                  key={i}
-                  className="w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]"
-                  style={{ aspectRatio: `${img.width} / ${img.height}` }}
-                >
-                  <Image
-                    src={img.src}
-                    alt={`${work.client} ${i + 1}`}
-                    width={img.width}
-                    height={img.height}
-                    sizes="(max-width: 640px) 100vw, 560px"
-                    quality={78}
-                    className="w-full h-auto block"
-                    loading={i === 0 ? undefined : "lazy"}
-                    draggable={false}
-                  />
-                </div>
-              ))}
+              {work.gallery.map((img, i) => {
+                const loaded = loadedImages.has(i);
+                return (
+                  <div
+                    key={i}
+                    className="relative w-full overflow-hidden rounded-xl"
+                    style={{ aspectRatio: `${img.width} / ${img.height}` }}
+                  >
+                    {/* Shimmering skeleton — fades out once the image has
+                        loaded rather than being removed outright, so the
+                        handoff to the real photo is a soft cross-fade
+                        instead of a hard swap. */}
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 skeleton-shimmer"
+                      style={{
+                        opacity: loaded ? 0 : 1,
+                        transition: "opacity 400ms ease",
+                        pointerEvents: "none",
+                      }}
+                    />
+                    <Image
+                      src={img.src}
+                      alt={`${work.client} ${i + 1}`}
+                      width={img.width}
+                      height={img.height}
+                      sizes="(max-width: 640px) 100vw, 560px"
+                      quality={78}
+                      className="w-full h-auto block relative"
+                      style={{ opacity: loaded ? 1 : 0, transition: "opacity 400ms ease" }}
+                      loading={i === 0 ? undefined : "lazy"}
+                      draggable={false}
+                      onLoad={() => setLoadedImages((prev) => new Set(prev).add(i))}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
