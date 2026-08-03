@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TableOfContents } from "../table-of-contents";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -78,21 +79,7 @@ export default function TermsPage() {
   return (
     <main className="policy-body mx-auto w-full pt-6 pb-24 px-6 sm:px-8" style={{ maxWidth: "52rem" }}>
 
-      {/* TOC */}
-      <div className="mb-10 p-6 rounded-xl bg-[rgb(var(--surface))]">
-        <p className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60 mb-4">Contents</p>
-        <div className="flex flex-col gap-1.5">
-          {SECTIONS.map((s) => (
-            <a
-              key={s.id}
-              href={`#${s.id}`}
-              className="text-[16px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors py-0.5"
-            >
-              {s.title}
-            </a>
-          ))}
-        </div>
-      </div>
+      <TableOfContents sections={SECTIONS} />
 
       {/* Document header */}
       <div className="mb-10">
