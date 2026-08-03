@@ -751,6 +751,46 @@ h1:hover .redact > span.redact-inner,
   animation-delay: var(--rise-delay, 0ms);
 }
 
+/* Matches LiquidText's JS-driven fade+rise (used by the AI-approach
+   paragraphs above this stretch of the homepage) exactly — same duration,
+   easing, and travel distance — so the FAQ and "how it works" sections
+   right below it read as a continuation of the same motion instead of the
+   plainer, faster default .rise timing. */
+.rise--liquid {
+  transform: translateY(14px);
+}
+
+.rise--liquid.is-visible {
+  animation-name: rise-liquid;
+  animation-duration: 640ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@keyframes rise-liquid {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Opts a .rise/.rise--liquid element out of the translate entirely — used by
+   the process-timeline's rail, which should only blend in via its own
+   top-to-bottom mask fade rather than also sliding like the rows do. */
+.rise--fade-only,
+.rise--fade-only.is-visible {
+  transform: none;
+}
+
+.rise--fade-only.is-visible {
+  animation-name: fade-only;
+}
+
+@keyframes fade-only {
+  to {
+    opacity: 1;
+  }
+}
+
 .policy-body a {
   color: #0a84ff;
   text-decoration: none;

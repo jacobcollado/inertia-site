@@ -76,7 +76,7 @@ function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNod
 
   return (
     <div
-      className="rise"
+      className="rise rise--liquid"
       style={{ "--rise-delay": `${delay}ms` } as React.CSSProperties}
     >
       <div
@@ -1058,10 +1058,14 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   };
 
   return (
-    <section id="start" className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section id="start" className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       {/* Left on mobile so it shares an edge with the timeline's rows there;
-          centred from sm up, where the timeline becomes a centred block. */}
-      <div className="max-w-2xl mx-auto text-left sm:text-center">
+          centred from sm up, where the timeline becomes a centred block.
+          Shares LiquidText's exact fade+rise feel (640ms, same easing and
+          14px travel) rather than the flatter, faster .rise used elsewhere,
+          so this section reads as a continuation of AiApproach's motion
+          instead of a distinct, unrelated reveal style. */}
+      <div className="max-w-2xl mx-auto text-left sm:text-center rise rise--liquid">
         <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight">
           Quality and speed both take attention.
           <br />
@@ -1071,14 +1075,16 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
       {/* How it works, as a short timeline rather than a subheading. Each step
           is a row with a marker on a connecting rail, so it reads as a
-          sequence at a glance. */}
+          sequence at a glance. Staggers in per-step (like the FAQ rows below
+          it) rather than rising as one flat block — the two lists then read
+          as the same kind of motion instead of two different treatments. */}
       {/* Desktop: a narrower column centred as a block under the centred
           heading, so the steps sit in the middle of the section instead of
           spanning its full width. Text inside stays left-aligned at every
           size — mobile is unchanged. */}
       <ol className="mt-8 sm:mt-10 w-full max-w-2xl sm:max-w-md mx-auto flex flex-col text-left">
         {PROCESS_STEPS.map((s, i) => (
-          <li key={s.title} className="relative flex flex-col pb-6 last:pb-0">
+          <li key={s.title} className="relative flex flex-col pb-6 last:pb-0 rise rise--liquid" style={{ "--rise-delay": `${i * 90}ms` } as React.CSSProperties}>
             {/* Rail: drawn per-item so it stops cleanly at the last step.
                 left-[17px] puts it dead centre under the number — the pill's
                 pl-1.5 (6px) plus half the number's 22px box. It was at 11px,
@@ -1087,7 +1093,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
             {i < PROCESS_STEPS.length - 1 && (
               <span
                 aria-hidden
-                className="absolute left-[17px] top-[34px] bottom-0 w-px"
+                className="absolute left-[17px] top-[34px] bottom-0 w-px rise rise--liquid rise--fade-only"
                 style={{
                   // Dashed via a repeating gradient rather than a dashed
                   // border: a 1px-wide element with border-left:dashed renders
@@ -1095,7 +1101,17 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
                   // gives exact control over the 3px dash / 4px gap.
                   backgroundImage:
                     "repeating-linear-gradient(to bottom, rgb(var(--line)) 0 3px, transparent 3px 7px)",
-                }}
+                  // Fades in from its own top edge downward — a soft mask
+                  // rather than a hard clip — so each rail segment reads as
+                  // blending into place under its row instead of popping in
+                  // as a flat line. Follows just behind its row's own
+                  // fade+rise (see --rise-delay below) so the line trails
+                  // the node it connects from, like it's being drawn down
+                  // from the number above it.
+                  maskImage: "linear-gradient(to bottom, transparent 0%, black 60%)",
+                  WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 60%)",
+                  "--rise-delay": `${i * 90 + 160}ms`,
+                } as React.CSSProperties}
               />
             )}
             {/* Number and label share one pill. The fill is the SOLID
@@ -1142,8 +1158,13 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
       {/* Cue that the quiz below is where the process actually starts. Shares
           the timeline's column and its left edge at every size, so it lines up
-          under the steps rather than floating centred. */}
-      <div className="mt-10 sm:mt-12 w-full max-w-2xl sm:max-w-md mx-auto flex items-center gap-2 justify-start pl-[38px]">
+          under the steps rather than floating centred. Follows the timeline's
+          own stagger as its next beat, same as AiApproach's second paragraph
+          picking up right after the first. */}
+      <div
+        className="mt-10 sm:mt-12 w-full max-w-2xl sm:max-w-md mx-auto flex items-center gap-2 justify-start pl-[38px] rise rise--liquid"
+        style={{ "--rise-delay": `${PROCESS_STEPS.length * 90}ms` } as React.CSSProperties}
+      >
         <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">
           Start a project
         </span>
