@@ -1533,8 +1533,7 @@ h1:hover .redact > span.redact-inner,
 /* â”€â”€ Site header â€” grid-aligned bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .site-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 50;
   width: 100%;
 }
