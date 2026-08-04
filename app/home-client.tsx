@@ -442,18 +442,31 @@ function AntiSlowMark({ color }: { color: string }) {
 // Runs purely on CSS (background-position animation on a background-clip:
 // text gradient), so it's smooth and consistent regardless of anything else
 // happening on the page, unlike the old per-character ripple this replaced.
-function ShimmerWord({ children, italic }: { children: string; italic?: boolean }) {
+function ShimmerWord({ children, italic, variant }: { children: string; italic?: boolean; variant?: "warm" | "cta" }) {
+  // "Inertia" gets the "r" pulled into the "t" so they read as touching —
+  // a one-off tight-kern, not a general per-word behavior, so it's keyed
+  // off the exact string rather than a prop.
+  const isInertia = children === "Inertia";
   return (
     <span
       aria-label={children}
-      className="shimmer-word"
+      className={variant ? `shimmer-word shimmer-word--${variant}` : "shimmer-word"}
       style={{
-        fontWeight: 500,
+        fontWeight: 450,
         fontStyle: italic ? "italic" : undefined,
         letterSpacing: "-0.03em",
+        fontSize: isInertia ? "1.16em" : undefined,
       }}
     >
-      {children}
+      {isInertia ? (
+        <>
+          Ine
+          <span style={{ marginRight: "-0.05em" }}>r</span>
+          tia
+        </>
+      ) : (
+        children
+      )}
     </span>
   );
 }
@@ -504,7 +517,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
   // instead of a single static pop. Each word gets a shorter, snappier
   // transition than the section-level fade() above (420ms vs 750ms) so the
   // stagger itself is what carries the motion, not each word's own long ease.
-  const HEADING_WORDS = ["Design", "that", "moves", "at", "your"];
+  const HEADING_WORDS = ["Design", "with", "real"];
   const HEADING_WORD_STEP = 70; // ms between each word's start
   const HEADING_START = 120;
   const wordFade = (i: number) => ({
@@ -575,7 +588,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
           )}
 
           <h1
-            className="font-normal tracking-tight leading-[0.6] max-w-xl"
+            className="font-normal tracking-tight leading-[0.75] max-w-xl"
             style={{ color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
           >
             {HEADING_WORDS.map((word, i) => (
@@ -583,8 +596,9 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 <span style={wordFade(i)}>{word}</span>{" "}
               </span>
             ))}
+            <br />
             <span style={wordFade(HEADING_WORDS.length)}>
-              <ShimmerWord>speed</ShimmerWord>
+              <ShimmerWord variant="cta">Inertia</ShimmerWord>
             </span>
           </h1>
 
