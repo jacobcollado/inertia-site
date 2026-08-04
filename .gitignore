@@ -15,6 +15,12 @@ out
 
 tsconfig.tsbuildinfo
 
+# Schema/RLS policy history — some past migrations document real fixed
+# vulnerabilities (see 004, 006). Keeping the full policy surface private
+# reduces the chance of the same class of gap being probed for on client
+# data, even though current tables hold no client data themselves.
+/supabase/migrations/
+
 # Local-only OG card editor: dev tooling that drives a headless browser to
 # write files into public/. Never intended to ship.
 /app/og-lab/
