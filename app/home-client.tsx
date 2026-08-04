@@ -481,7 +481,7 @@ function ShimmerWord({ children, italic, variant }: { children: string; italic?:
       <span
         aria-hidden="true"
         className={className}
-        style={{ ...wordStyle, position: "absolute", inset: 0, filter: "blur(5px) saturate(1.6)", opacity: 0.85 }}
+        style={{ ...wordStyle, position: "absolute", inset: 0, filter: "blur(5px) saturate(1.6)", opacity: 0.5 }}
       >
         {content}
       </span>
