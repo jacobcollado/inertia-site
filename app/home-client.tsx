@@ -654,11 +654,15 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 context menu; the handler only takes over to match the site's
                 Lenis smooth scrolling. */}
             <BorderBeam
-              size="sm"
-              colorVariant="sunset"
-              theme="light"
+              size="md"
+              colorVariant="colorful"
+              theme="dark"
               borderRadius={999}
+              duration={2.6}
+              brightness={1.45}
+              saturation={1.35}
               active={beamActive}
+              className="inline-flex rounded-full"
             >
             <a
               ref={ctaRef}
@@ -688,14 +692,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 // settles instead of the two drifting out of sync if the
                 // stagger timing above changes.
                 ...fade(headingLastWordDelay + 180),
-                // Grey gradient base with fall-toned light (amber, green,
-                // blue) glowing up from the bottom edge, like it's lit from
-                // underneath, rather than a flat fill.
-                background:
-                  "radial-gradient(120% 90% at 20% 120%, rgba(217,119,6,0.55) 0%, transparent 55%)," +
-                  "radial-gradient(120% 90% at 50% 130%, rgba(74,124,89,0.5) 0%, transparent 55%)," +
-                  "radial-gradient(120% 90% at 80% 120%, rgba(59,110,163,0.5) 0%, transparent 55%)," +
-                  "linear-gradient(180deg, #b8b8b8 0%, #949494 60%)",
+                background: "#000000",
                 color: "#fff",
               }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}

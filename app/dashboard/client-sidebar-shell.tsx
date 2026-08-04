@@ -9,8 +9,9 @@ import {
   LayersIcon,
   FileIcon,
   LifeBuoyIcon,
-  KeyRoundIcon,
+  BadgeCheckIcon,
   SettingsIcon,
+  HistoryIcon,
   MenuIcon,
   SearchIcon,
   ArrowLeftIcon,
@@ -25,7 +26,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -33,6 +33,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { NavUser } from "./nav-user";
 import { cn } from "@/lib/utils";
 import { PageCrumbProvider, usePageCrumbValues } from "./page-crumb-context";
@@ -44,7 +45,8 @@ const OVERVIEW_NAV_ITEMS = [
 const WORKSPACE_NAV_ITEMS = [
   { href: "/dashboard/projects", label: "Projects", icon: FolderIcon },
   { href: "/dashboard/messages", label: "Support", icon: LifeBuoyIcon },
-  { href: "/dashboard/licenses", label: "Licenses", icon: KeyRoundIcon },
+  { href: "/dashboard/licenses", label: "Licenses", icon: BadgeCheckIcon },
+  { href: "/dashboard/changelog", label: "Changelog", icon: HistoryIcon },
 ];
 
 const SETTINGS_NAV_ITEMS = [
@@ -58,14 +60,13 @@ const SETTINGS_NAV_ITEMS = [
 // the desktop sidebar's grouped sections.
 const ALL_NAV_ITEMS = [...OVERVIEW_NAV_ITEMS, ...WORKSPACE_NAV_ITEMS, ...SETTINGS_NAV_ITEMS];
 
-function NavItems({ items, pathname, unreadMessages, needsResponse }: { items: typeof WORKSPACE_NAV_ITEMS; pathname: string; unreadMessages?: number; needsResponse?: boolean }) {
+function NavItems({ items, pathname, casesNeedingResponse }: { items: typeof WORKSPACE_NAV_ITEMS; pathname: string; casesNeedingResponse?: number }) {
   const { setOpenMobile } = useSidebar();
   return (
     <SidebarMenu>
       {items.map(({ href, label, icon: Icon }) => {
         const active = href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
-        const badge = label === "Support" ? unreadMessages : undefined;
-        const showDot = label === "Support" && needsResponse && !badge;
+        const badge = label === "Support" ? casesNeedingResponse : undefined;
         return (
           <SidebarMenuItem key={href}>
             <SidebarMenuButton
@@ -80,10 +81,16 @@ function NavItems({ items, pathname, unreadMessages, needsResponse }: { items: t
               )}
             >
               <Icon />
-              <span>{label}</span>
-              {showDot && <span className="ml-auto size-1.5 rounded-full bg-amber-500 shrink-0" />}
+              <span className="flex-1">{label}</span>
+              {!!badge && badge > 0 && (
+                <Badge
+                  variant="outline"
+                  className="ml-auto h-5 min-w-5 shrink-0 justify-center border-border/70 bg-background px-1.5 text-[11px] font-semibold tabular-nums text-foreground shadow-sm"
+                >
+                  {badge > 9 ? "9+" : badge}
+                </Badge>
+              )}
             </SidebarMenuButton>
-            {!!badge && badge > 0 && <SidebarMenuBadge>{badge > 9 ? "9+" : badge}</SidebarMenuBadge>}
           </SidebarMenuItem>
         );
       })}
@@ -91,7 +98,7 @@ function NavItems({ items, pathname, unreadMessages, needsResponse }: { items: t
   );
 }
 
-function AppSidebar({ unreadMessages, needsResponse, email, displayName, avatarUrl }: { unreadMessages: number; needsResponse?: boolean; email: string; displayName: string; avatarUrl: string | null }) {
+function AppSidebar({ casesNeedingResponse, email, displayName, avatarUrl }: { casesNeedingResponse: number; email: string; displayName: string; avatarUrl: string | null }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   return (
@@ -114,7 +121,7 @@ function AppSidebar({ unreadMessages, needsResponse, email, displayName, avatarU
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
-            <NavItems items={WORKSPACE_NAV_ITEMS} pathname={pathname} unreadMessages={unreadMessages} needsResponse={needsResponse} />
+            <NavItems items={WORKSPACE_NAV_ITEMS} pathname={pathname} casesNeedingResponse={casesNeedingResponse} />
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
@@ -136,7 +143,7 @@ function AppSidebar({ unreadMessages, needsResponse, email, displayName, avatarU
 // dialog rather than a side-sliding Sheet. Deliberately independent of
 // SidebarContext/useSidebar — this never mounts on desktop, where the real
 // Sidebar (with its own Sheet-based mobile fallback) still handles things.
-function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: number; needsResponse?: boolean }) {
+function MobileNavDock({ casesNeedingResponse }: { casesNeedingResponse: number }) {
   const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -163,8 +170,7 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
 
   const renderRow = (item: (typeof ALL_NAV_ITEMS)[number], onNavigate: () => void) => {
     const active = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
-    const badge = item.label === "Support" ? unreadMessages : undefined;
-    const showDot = item.label === "Support" && needsResponse && !badge;
+    const badge = item.label === "Support" ? casesNeedingResponse : undefined;
     const Icon = item.icon;
     return (
       <Link
@@ -178,11 +184,13 @@ function MobileNavDock({ unreadMessages, needsResponse }: { unreadMessages: numb
       >
         <Icon className="size-4 shrink-0" />
         <span className="flex-1">{item.label}</span>
-        {showDot && <span className="size-1.5 rounded-full bg-amber-500 shrink-0" />}
         {!!badge && badge > 0 && (
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-accent px-1.5 text-[11px] tabular-nums text-muted-foreground">
+          <Badge
+            variant="outline"
+            className="h-5 min-w-5 shrink-0 justify-center border-border/70 bg-background px-1.5 text-[11px] font-semibold tabular-nums text-foreground shadow-sm"
+          >
             {badge > 9 ? "9+" : badge}
-          </span>
+          </Badge>
         )}
       </Link>
     );
@@ -276,6 +284,7 @@ const TITLES: Record<string, string> = {
   "/dashboard/files": "Files",
   "/dashboard/messages": "Support",
   "/dashboard/licenses": "Licenses",
+  "/dashboard/changelog": "Changelog",
   "/dashboard/settings": "Settings",
 };
 
@@ -312,14 +321,16 @@ function SiteHeader() {
   if (actions || isNewCase) {
     return (
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border md:rounded-t-xl">
-        <div className="relative flex w-full items-center gap-2 px-4 lg:px-6">
-          {titleHref && (
-            <Link href={titleHref} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
-              <ArrowLeftIcon className="size-4" />
-              <span className="sr-only">{title}</span>
-            </Link>
-          )}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 lg:px-6">
+        <div className="flex w-full items-center gap-2 px-4 lg:px-6">
+          <div className="flex min-w-0 flex-1 items-center justify-start">
+            {titleHref && (
+              <Link href={titleHref} className="text-primary hover:text-primary/80 transition-colors shrink-0">
+                <ArrowLeftIcon className="size-4" />
+                <span className="sr-only">{title}</span>
+              </Link>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center justify-center">
             {isNewCase ? (
               <span className="flex items-center gap-1.5 text-[15px] font-medium tracking-tight">
                 <span className="text-muted-foreground">{title}</span>
@@ -330,9 +341,8 @@ function SiteHeader() {
               <span className="text-[13px] tabular-nums text-muted-foreground">{crumb}</span>
             )}
           </div>
-          <div className="ml-auto flex items-center gap-2 shrink-0">
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
             {actions}
-            {!actions && <ArrowLeftIcon className="size-4 invisible" aria-hidden />}
           </div>
         </div>
       </header>
@@ -376,10 +386,9 @@ function SiteHeader() {
   );
 }
 
-export function ClientSidebarShell({ children, unreadMessages = 0, needsResponse = false, email, displayName, avatarUrl }: {
+export function ClientSidebarShell({ children, casesNeedingResponse = 0, email, displayName, avatarUrl }: {
   children: React.ReactNode;
-  unreadMessages?: number;
-  needsResponse?: boolean;
+  casesNeedingResponse?: number;
   email: string;
   displayName: string;
   avatarUrl: string | null;
@@ -406,9 +415,9 @@ export function ClientSidebarShell({ children, unreadMessages = 0, needsResponse
           replaces entirely on this dashboard — so it's wrapped hidden md:contents
           rather than letting it mount its own mobile fallback. */}
       <div className="hidden md:contents">
-        <AppSidebar unreadMessages={unreadMessages} needsResponse={needsResponse} email={email} displayName={displayName} avatarUrl={avatarUrl} />
+        <AppSidebar casesNeedingResponse={casesNeedingResponse} email={email} displayName={displayName} avatarUrl={avatarUrl} />
       </div>
-      <MobileNavDock unreadMessages={unreadMessages} needsResponse={needsResponse} />
+      <MobileNavDock casesNeedingResponse={casesNeedingResponse} />
       <SidebarInset>
         <PageCrumbProvider>
           <SiteHeader />

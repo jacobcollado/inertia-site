@@ -12,7 +12,7 @@ export default async function DashboardOverviewPage() {
 
   const id = user.id;
 
-  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }, { data: messages }, { data: projectUpdates }] =
+  const [{ data: client }, { data: projects }, { data: invoices }, { data: files }, { data: messages }, { data: projectUpdates }, { data: cases }] =
     await Promise.all([
       supabase.from("clients")
         .select("id, email, name, company")
@@ -32,6 +32,10 @@ export default async function DashboardOverviewPage() {
       supabase.from("project_updates")
         .select("id, project_id, status, note, created_at")
         .eq("client_id", id).order("created_at", { ascending: false }),
+      supabase.from("cases")
+        .select("id, status")
+        .eq("client_id", id)
+        .neq("status", "closed"),
     ]);
 
   return (
@@ -43,6 +47,7 @@ export default async function DashboardOverviewPage() {
       files={files ?? []}
       messages={messages ?? []}
       projectUpdates={projectUpdates ?? []}
+      cases={cases ?? []}
     />
   );
 }

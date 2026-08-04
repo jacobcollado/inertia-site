@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getLastSenderByCase } from "../support-cases";
 import { CASE_STATUS_VARIANT, CASE_SEVERITY_LABEL, fmtDate, type Case, type CaseStatus, type CaseSeverity, type Message } from "../types";
 
 const STATUS_FILTERS: { value: CaseStatus | "all"; label: string }[] = [
@@ -29,13 +30,7 @@ const SEVERITY_FILTERS: { value: CaseSeverity | "all"; label: string }[] = [
 ];
 
 export function CasesView({ cases, messages }: { cases: Case[]; messages: Message[] }) {
-  const lastSenderByCase = useMemo(() => {
-    const map = new Map<string, Message["sender"]>();
-    for (const m of messages) {
-      if (m.case_id) map.set(m.case_id, m.sender);
-    }
-    return map;
-  }, [messages]);
+  const lastSenderByCase = useMemo(() => getLastSenderByCase(messages), [messages]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<CaseStatus | "all">("all");
   const [severityFilter, setSeverityFilter] = useState<CaseSeverity | "all">("all");

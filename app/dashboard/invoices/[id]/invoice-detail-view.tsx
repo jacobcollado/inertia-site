@@ -1,18 +1,72 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon, DownloadIcon, HeadphonesIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowUpRightIcon, HeadphonesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { StatusPill } from "../../status-pill";
 import { fmt$, fmtDate, type Invoice } from "../../types";
 import { useSetPageCrumb } from "../../page-crumb-context";
+import { WhopCheckoutModal } from "../whop-checkout-modal";
 
 const monthFmt = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
 
-export function InvoiceDetailView({ invoice }: { invoice: Invoice }) {
+function PayButton({
+  invoice,
+  onCheckout,
+  size = "sm",
+  className,
+  urgent = false,
+}: {
+  invoice: Invoice;
+  onCheckout: (planId: string) => void;
+  size?: "sm" | "default";
+  className?: string;
+  urgent?: boolean;
+}) {
+  const label = `Pay ${fmt$(invoice.amount)}`;
+  const buttonClass = cn(
+    "border-0 text-primary bg-[color-mix(in_srgb,var(--sh-primary)_15%,transparent)] hover:bg-[color-mix(in_srgb,var(--sh-primary)_25%,transparent)] hover:text-primary",
+    urgent && "gap-0.5",
+    className,
+  );
+
+  if (invoice.payment_url!.startsWith("http")) {
+    return (
+      <Button
+        variant="outline"
+        size={size}
+        className={buttonClass}
+        nativeButton={false}
+        render={<a href={invoice.payment_url!} target="_blank" rel="noreferrer" />}
+      >
+        {label}
+        {urgent && <ArrowUpRightIcon />}
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size={size}
+      className={buttonClass}
+      onClick={() => onCheckout(invoice.payment_url!)}
+    >
+      {label}
+      {urgent && <ArrowUpRightIcon />}
+    </Button>
+  );
+}
+
+export function InvoiceDetailView({ invoice, clientEmail }: { invoice: Invoice; clientEmail: string }) {
+  const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
   const monthLabel = invoice.due_date ? monthFmt.format(new Date(invoice.due_date)) : invoice.label;
-  // No dedicated invoice-number column exists — a short uppercase slice of the
-  // UUID stands in as a human-scannable number, same idea as a short commit hash.
+  const unpaid = invoice.status !== "paid" && invoice.status !== "draft";
+  const isOverdue = invoice.status === "overdue";
+  const canPay = unpaid && !!invoice.payment_url;
+
   useSetPageCrumb(`#${invoice.id.slice(0, 8).toUpperCase()}`);
 
   return (
@@ -23,30 +77,47 @@ export function InvoiceDetailView({ invoice }: { invoice: Invoice }) {
       </Link>
 
       <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight">
             {monthLabel}: {invoice.label}
           </h1>
           {invoice.due_date && (
-            <span className="text-sm text-muted-foreground">
-              {invoice.status === "overdue" ? "Overdue " : "Invoiced "}{fmtDate(invoice.due_date)}
+            <span className={`text-sm ${isOverdue ? "text-destructive" : "text-muted-foreground"}`}>
+              {isOverdue ? "Overdue " : "Invoiced "}{fmtDate(invoice.due_date)}
             </span>
           )}
         </div>
-        {invoice.payment_url && (
-          <Button variant="outline" size="sm" nativeButton={false} render={<a href={invoice.payment_url} target="_blank" rel="noreferrer" />}>
-            <DownloadIcon />
-            Download
-          </Button>
+        {canPay && (
+          <PayButton invoice={invoice} onCheckout={setCheckoutPlanId} urgent={isOverdue} className="shrink-0" />
         )}
       </div>
+
+      {isOverdue && canPay && (
+        <div className="flex flex-col gap-3 rounded-md border border-destructive/25 px-4 py-3 sm:flex-row sm:items-center sm:justify-between" style={{ backgroundColor: "color-mix(in srgb, var(--sh-destructive) 10%, transparent)" }}>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium text-destructive">Payment overdue</span>
+            <span className="text-[13px] text-muted-foreground">
+              This invoice was due {fmtDate(invoice.due_date)}. Pay {fmt$(invoice.amount)} to bring your account current.
+            </span>
+          </div>
+          <PayButton
+            invoice={invoice}
+            onCheckout={setCheckoutPlanId}
+            urgent
+            className="w-full shrink-0 sm:w-auto"
+          />
+        </div>
+      )}
 
       <div className="border-t pt-6 flex items-start justify-between gap-4 flex-wrap">
         <div className="flex flex-col gap-1">
           <span className="text-[13px] text-muted-foreground">Total due</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-2xl font-semibold tabular-nums">{fmt$(invoice.amount)}</span>
             <StatusPill status={invoice.status} />
+            {canPay && !isOverdue && (
+              <PayButton invoice={invoice} onCheckout={setCheckoutPlanId} className="sm:hidden" />
+            )}
           </div>
         </div>
 
@@ -78,6 +149,10 @@ export function InvoiceDetailView({ invoice }: { invoice: Invoice }) {
           </div>
         </div>
       </div>
+
+      {checkoutPlanId && (
+        <WhopCheckoutModal planId={checkoutPlanId} clientEmail={clientEmail} onClose={() => setCheckoutPlanId(null)} />
+      )}
     </div>
   );
 }

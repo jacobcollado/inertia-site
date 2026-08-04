@@ -10,14 +10,22 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: invoice } = await supabase
-    .from("invoices")
-    .select("id, label, amount, status, due_date, paid_at, payment_url")
-    .eq("client_id", user.id)
-    .eq("id", id)
-    .single();
+  const [{ data: invoice }, { data: client }] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select("id, label, amount, status, due_date, paid_at, payment_url")
+      .eq("client_id", user.id)
+      .eq("id", id)
+      .single(),
+    supabase.from("clients").select("email").eq("id", user.id).single(),
+  ]);
 
   if (!invoice) notFound();
 
-  return <InvoiceDetailView invoice={invoice} />;
+  return (
+    <InvoiceDetailView
+      invoice={invoice}
+      clientEmail={client?.email ?? user.email ?? ""}
+    />
+  );
 }

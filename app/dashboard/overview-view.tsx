@@ -11,24 +11,32 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { StatusPill } from "./status-pill";
 import { getSignedFileUrl } from "./actions";
 import { WhopCheckoutModal } from "./invoices/whop-checkout-modal";
-import { fmt$, fmtDate, type Client, type Project, type ProjectUpdate, type Invoice, type DFile, type Message } from "./types";
+import { countCasesNeedingResponse } from "./support-cases";
+import { fmt$, fmtDate, type Case, type Client, type Project, type ProjectUpdate, type Invoice, type DFile, type Message } from "./types";
 
-function QuickActionPill({ label, badge, badgeUrgent, onClick, href }: {
+function QuickActionPill({ label, badge, badgeCount, badgeUrgent, onClick, href }: {
   label: string;
   badge?: string;
+  badgeCount?: number;
   badgeUrgent?: boolean;
   onClick?: () => void;
   href?: string;
 }) {
   const className = "flex items-center gap-1.5 rounded-full border bg-sidebar px-3.5 py-1.5 text-[13px] font-medium tracking-tight hover:bg-sidebar-accent/40 transition-colors shrink-0";
+  const countBadgeClass =
+    "h-5 min-w-5 shrink-0 justify-center border-border/70 bg-background px-1.5 text-[11px] font-semibold tabular-nums shadow-sm";
   const content = (
     <>
       {label}
+      {!!badgeCount && badgeCount > 0 && (
+        <Badge variant="outline" className={`${countBadgeClass} text-foreground`}>
+          {badgeCount > 9 ? "9+" : badgeCount}
+        </Badge>
+      )}
       {badge && (
         <Badge
           variant="outline"
-          className={`justify-center text-center leading-none border-transparent font-normal ${badgeUrgent ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}
-          style={{ backgroundColor: "color-mix(in srgb, var(--sh-foreground) 10%, transparent)" }}
+          className={`${countBadgeClass} ${badgeUrgent ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}
         >
           {badge}
         </Badge>
@@ -173,7 +181,7 @@ function SummaryCard({ href, description, title, action }: {
   );
 }
 
-export function OverviewView({ client, clientEmail, projects, invoices, files, messages, projectUpdates }: {
+export function OverviewView({ client, clientEmail, projects, invoices, files, messages, projectUpdates, cases }: {
   client: Client | null;
   clientEmail: string;
   projects: Project[];
@@ -181,6 +189,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
   files: DFile[];
   messages: Message[];
   projectUpdates: ProjectUpdate[];
+  cases: Pick<Case, "id" | "status">[];
 }) {
   const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
   const router = useRouter();
@@ -227,7 +236,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
     .filter(i => i.due_date)
     .sort((a, b) => new Date(a.due_date!).getTime() - new Date(b.due_date!).getTime())[0] ?? null;
 
-  const unreadFromAdmin = messages.filter(m => m.sender === "admin" && !m.read_at);
+  const casesNeedingResponse = countCasesNeedingResponse(cases, messages);
   const latestAdminMsg = messages.filter(m => m.sender === "admin").at(-1) ?? null;
 
   const empty = projects.length === 0 && invoices.length === 0 && files.length === 0 && messages.length === 0;
@@ -307,7 +316,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
           )}
           <QuickActionPill
             label="Message support"
-            badge={unreadFromAdmin.length > 0 ? `${unreadFromAdmin.length} new` : undefined}
+            badgeCount={casesNeedingResponse}
             href="/dashboard/messages"
           />
           {latestFile && (
@@ -348,7 +357,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
         <SummaryCard
           href="/dashboard/messages"
           description="Messages"
-          title={unreadFromAdmin.length > 0 ? `${unreadFromAdmin.length} new` : messages.length > 0 ? "Up to date" : "No messages"}
+          title={casesNeedingResponse > 0 ? `${casesNeedingResponse} need response` : messages.length > 0 ? "Up to date" : "No messages"}
           action={latestAdminMsg ? `Last: ${fmtDate(latestAdminMsg.created_at)}` : "Say hello"}
         />
       </div>
@@ -455,8 +464,8 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
                     </div>
                     <div className="px-5 py-3 flex items-center justify-between" style={{ borderTop: "1px solid var(--sh-border)" }}>
                       <span className="text-[13px] text-muted-foreground">{fmtDate(latestAdminMsg.created_at)}</span>
-                      {unreadFromAdmin.length > 0 && (
-                        <Badge variant="outline" className="border-transparent bg-primary/15 text-primary">{unreadFromAdmin.length} unread</Badge>
+                      {casesNeedingResponse > 0 && (
+                        <Badge variant="outline" className="border-transparent bg-primary/15 text-primary">{casesNeedingResponse} need response</Badge>
                       )}
                     </div>
                   </Card>

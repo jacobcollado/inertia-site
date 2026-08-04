@@ -38,11 +38,16 @@ const PROVIDER_ICON: Record<string, React.ComponentType<{ className?: string }>>
   email: MailIcon,
 };
 
-function SettingsSection({ label, children }: { label: string; children: React.ReactNode }) {
+function SettingsSection({ label, children, danger }: { label: string; children: React.ReactNode; danger?: boolean }) {
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-medium text-muted-foreground px-1">{label}</p>
-      <div className="rounded-sm border bg-sidebar overflow-hidden">{children}</div>
+      <p className="px-1 text-xs font-medium text-muted-foreground">{label}</p>
+      <div
+        className="overflow-hidden rounded-sm border bg-sidebar"
+        style={danger ? { borderColor: "color-mix(in srgb, var(--sh-destructive) 45%, transparent)" } : undefined}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -353,7 +358,7 @@ export function SettingsView({ client, avatarUrl: initialAvatarUrl, signInProvid
         </SettingsRow>
       </SettingsSection>
 
-      <SettingsSection label="Danger zone">
+      <SettingsSection label="Danger zone" danger>
         <SettingsRow label="Delete account" hint="Permanently deletes your account and all associated data. This can't be undone.">
           <Button
             variant="ghost"

@@ -86,11 +86,7 @@ export function UsageView({ usage: initialUsage }: { usage: AiUsage }) {
 
   return (
     <div className="flex flex-col gap-4 w-full lg:max-w-[58%] mx-auto">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="inline-flex items-center gap-2 rounded-full border bg-sidebar py-1.5 pl-1.5 pr-4">
-          <img src="/claude-logo.svg" alt="Claude" className="size-6 rounded-full" />
-          <h2 className="text-[15px] font-semibold tracking-tight text-foreground">Usage</h2>
-        </div>
+      <div className="flex items-center justify-end gap-3 flex-wrap">
         <ToggleGroup
           multiple={false}
           value={[granularity]}
