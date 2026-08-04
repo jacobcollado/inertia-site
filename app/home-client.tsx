@@ -609,8 +609,8 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
           )}
 
           <h1
-            className="font-normal tracking-tight leading-[0.75] max-w-xl"
-            style={{ color: "#1a1a1a", fontSize: "clamp(2.6rem, 6vw, 4.2rem)" }}
+            className="font-normal tracking-tight leading-[0.75] max-w-xl text-[clamp(2.9rem,7vw,4.2rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)]"
+            style={{ color: "#1a1a1a" }}
           >
             {HEADING_WORDS.map((word, i) => (
               <span key={word + i}>
