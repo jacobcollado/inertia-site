@@ -7,6 +7,14 @@ out
 *.log
 .env.local
 
+# Local AI-tooling config/skills — not part of the app, kept out of the
+# public repo since they can carry local file paths and personal workflow
+# details.
+.claude/
+.agents/
+
+tsconfig.tsbuildinfo
+
 # Local-only OG card editor: dev tooling that drives a headless browser to
 # write files into public/. Never intended to ship.
 /app/og-lab/

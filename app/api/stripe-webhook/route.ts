@@ -27,7 +27,7 @@ async function sendLicenseEmail(email: string, key: string, tier: string) {
   }
 
   const tierLabel = tier === "lifetime" ? "Lifetime" : "Standard";
-  const logoUrl = "https://REDACTED_SUPABASE_PROJECT_REF.supabase.co/storage/v1/object/public/assets/inertia-logo.png";
+  const logoUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/assets/inertia-logo.png`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
