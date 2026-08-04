@@ -447,26 +447,47 @@ function ShimmerWord({ children, italic, variant }: { children: string; italic?:
   // a one-off tight-kern, not a general per-word behavior, so it's keyed
   // off the exact string rather than a prop.
   const isInertia = children === "Inertia";
+  const content = isInertia ? (
+    <>
+      Ine
+      <span style={{ marginRight: "-0.05em" }}>r</span>
+      tia
+    </>
+  ) : (
+    children
+  );
+  const wordStyle: React.CSSProperties = {
+    fontWeight: 450,
+    fontStyle: italic ? "italic" : undefined,
+    letterSpacing: "-0.03em",
+    fontSize: isInertia ? "1.16em" : undefined,
+  };
+  const className = variant ? `shimmer-word shimmer-word--${variant}` : "shimmer-word";
+
+  if (!isInertia) {
+    return (
+      <span aria-label={children} className={className} style={wordStyle}>
+        {content}
+      </span>
+    );
+  }
+
+  // Bloom is a blurred duplicate of the same gradient-clipped text sitting
+  // behind the crisp copy, sharing the identical class/animation so the glow
+  // color drifts in lockstep with the shimmer instead of a fixed drop-shadow
+  // color that can't track the animated gradient.
   return (
-    <span
-      aria-label={children}
-      className={variant ? `shimmer-word shimmer-word--${variant}` : "shimmer-word"}
-      style={{
-        fontWeight: 450,
-        fontStyle: italic ? "italic" : undefined,
-        letterSpacing: "-0.03em",
-        fontSize: isInertia ? "1.16em" : undefined,
-      }}
-    >
-      {isInertia ? (
-        <>
-          Ine
-          <span style={{ marginRight: "-0.05em" }}>r</span>
-          tia
-        </>
-      ) : (
-        children
-      )}
+    <span style={{ position: "relative", display: "inline-block" }}>
+      <span
+        aria-hidden="true"
+        className={className}
+        style={{ ...wordStyle, position: "absolute", inset: 0, filter: "blur(10px) saturate(1.6)", opacity: 0.85 }}
+      >
+        {content}
+      </span>
+      <span aria-label={children} className={className} style={{ ...wordStyle, position: "relative" }}>
+        {content}
+      </span>
     </span>
   );
 }
