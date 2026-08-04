@@ -10,7 +10,7 @@ type WorkMetaWithGallery = WorkMeta & { gallery: SizedImage[] };
 
 function serviceShort(s: string | undefined): string {
   if (!s) return "";
-  return s.trim();
+  return s.trim().split(/\s+/)[0] ?? "";
 }
 
 // Desktop-carousel-only thumbnail override, keyed by slug: swaps the default
@@ -414,18 +414,23 @@ function WorkCard({
             draggable={false}
           />
         ) : null}
-        {/* Desktop: name + service badge sit inside the card as a scrim-backed
-            overlay instead of a row below it; mobile keeps the row below
-            since there's no room to overlay without crowding the photo. */}
         <div
-          className="hidden sm:flex absolute inset-x-0 bottom-0 items-center justify-between gap-3 px-4 py-3 pointer-events-none"
-          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 65%)" }}
+          className="hidden sm:flex absolute inset-x-0 bottom-0 items-center justify-between gap-3 px-4 pt-14 pb-3 pointer-events-none"
+          style={{
+            background: "linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.34) 38%, rgba(0,0,0,0.12) 68%, transparent 100%)",
+          }}
         >
-          <span className="text-[16px] font-medium tracking-tight text-white">
+          <span
+            className="text-[16px] font-medium tracking-tight text-white"
+            style={{ textShadow: "0 1px 12px rgba(0,0,0,0.45)" }}
+          >
             {work.client}
           </span>
           {work.service && (
-            <span className="text-[12px] tracking-tight text-white/80 shrink-0 rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgba(255,255,255,0.15)" }}>
+            <span
+              className="text-[12px] tracking-tight shrink-0 rounded-full px-2.5 pt-[3px] pb-[4px] leading-none"
+              style={{ background: "rgb(82 82 82)", color: "rgba(255,255,255,0.88)" }}
+            >
               {serviceShort(work.service)}
             </span>
           )}
