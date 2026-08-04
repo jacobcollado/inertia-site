@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { BorderBeam } from "border-beam";
+import { ctaScaleHoverOnParent } from "@/lib/cta-hover-motion";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string; palette?: string[]; card?: string };
 
@@ -492,6 +493,11 @@ function ShimmerWord({ children, italic, variant }: { children: string; italic?:
   );
 }
 
+const HERO_CTA_OUTER_SHADOW =
+  "0 2px 4px rgba(0,0,0,0.32)," +
+  "0 10px 28px rgba(0,0,0,0.24)," +
+  "0 24px 56px -10px rgba(0,0,0,0.20)";
+
 function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: React.RefObject<HTMLAnchorElement | null> }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -553,6 +559,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
   // rather than hardcoded, so it always starts just after the last word
   // settles even if the stagger timing above changes.
   const headingLastWordDelay = HEADING_START + HEADING_WORDS.length * HEADING_WORD_STEP;
+  const ctaFadeDelay = headingLastWordDelay + 180;
 
   return (
     <section
@@ -663,6 +670,20 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
               saturation={1.35}
               active={beamActive}
               className="inline-flex rounded-full"
+              style={{
+                boxShadow: HERO_CTA_OUTER_SHADOW,
+                transformOrigin: "center",
+                ...fade(ctaFadeDelay),
+              }}
+              onTransitionEnd={e => {
+                if (e.propertyName !== "opacity") return;
+                setBeamActive(true);
+                // Tells the header (mounted separately in SiteShell, with no
+                // ref access to this CTA) that the hero's own reveal has
+                // landed, so it can wait to fade in until right after this
+                // instead of firing on mount ahead of any hero content.
+                window.dispatchEvent(new Event("hero-cta:revealed"));
+              }}
             >
             <a
               ref={ctaRef}
@@ -676,28 +697,16 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                 if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                 else window.scrollTo({ top: targetY, behavior: "smooth" });
               }}
-              onTransitionEnd={e => {
-                if (e.propertyName !== "opacity") return;
-                setBeamActive(true);
-                // Tells the header (mounted separately in SiteShell, with no
-                // ref access to this CTA) that the hero's own reveal has
-                // landed, so it can wait to fade in until right after this
-                // instead of firing on mount ahead of any hero content.
-                window.dispatchEvent(new Event("hero-cta:revealed"));
-              }}
-              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-2 text-[15px] sm:text-[16px] font-medium tracking-tight overflow-hidden"
+              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-2 text-[15px] sm:text-[16px] font-medium tracking-tight"
               style={{
-                // Follows the heading's own word stagger rather than a fixed
-                // 660ms, so the CTA always lands right after the last word
-                // settles instead of the two drifting out of sync if the
-                // stagger timing above changes.
-                ...fade(headingLastWordDelay + 180),
-                background: "#000000",
+                background:
+                  "linear-gradient(180deg, #242424 0%, #000000 52%, #080808 100%)",
                 color: "#fff",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.18)," +
+                  "inset 0 -1.5px 0 rgba(0,0,0,0.55)",
               }}
-              onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
-              onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
+              {...ctaScaleHoverOnParent}
             >
               {/* Same feTurbulence grain used on the client carousel's
                   fallback cards, layered here at a heavier opacity so it
@@ -705,7 +714,7 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                   texture. */}
               <span
                 aria-hidden="true"
-                className="absolute inset-0 pointer-events-none"
+                className="absolute inset-0 pointer-events-none rounded-full overflow-hidden"
                 style={{
                   backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
                   backgroundSize: "180px 180px",

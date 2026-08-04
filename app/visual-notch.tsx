@@ -7,6 +7,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { HeaderAuth } from "./dashboard/header-auth";
 import { TOC_ITEMS } from "./components/shared";
 import { useWebHaptics } from "web-haptics/react";
+import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 import { SiShopify } from "react-icons/si";
 import {
   HiOutlineSparkles,
@@ -588,7 +589,11 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
   const iconSize = compact ? 16 : 18;
   const gap = 3;
   return (
-    <div className="relative inline-flex items-center" style={{ height: h, gap: 0 }}>
+    <div
+      className="relative inline-flex items-center"
+      style={{ height: h, gap: 0, transformOrigin: "center" }}
+      {...ctaScaleHoverOnSelf}
+    >
       <a
         href="https://cal.com/jacob-c-99otvp/15min"
         target="_blank"
@@ -606,10 +611,7 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
           letterSpacing: "-0.01em",
           textDecoration: "none",
           whiteSpace: "nowrap",
-          transition: "transform 150ms ease",
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
       >
         Book a call
       </a>
@@ -639,10 +641,7 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
           borderRadius: "50%",
           background: "rgb(var(--fg))",
           color: "rgb(var(--bg))",
-          transition: "transform 150ms ease",
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)"; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(0)"; }}
       >
         <HiOutlineArrowRightOnRectangle style={{ width: iconSize, height: iconSize }} />
       </Link>

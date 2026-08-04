@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
 import { ThemeToggle } from "@/app/theme-toggle";
+import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 
 function Spinner() {
   return (
@@ -534,10 +535,9 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                 fontWeight: 500,
                 letterSpacing: "-0.01em",
                 textDecoration: "none",
-                transition: "opacity 150ms ease, transform 150ms ease",
+                transformOrigin: "center",
               }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
+              {...ctaScaleHoverOnSelf}
             >
               Book a call
             </a>
