@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useLayoutEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { WorkMeta, SizedImage } from "@/lib/work";
+import { getWorkIndexThumb } from "@/lib/work-thumb";
 
 type WorkMetaWithGallery = WorkMeta & { gallery: SizedImage[] };
 
@@ -364,7 +365,7 @@ function WorkCard({
   // measured header height so the card never exceeds the space below it.
   cardWidthCss?: string;
 }) {
-  const thumb = (carousel && CAROUSEL_THUMB_OVERRIDE[work.slug]) || work.card || work.gallery[0]?.src;
+  const thumb = (carousel && CAROUSEL_THUMB_OVERRIDE[work.slug]) || getWorkIndexThumb(work);
   // Per-project crop nudge. Thumbnails default to object-top; these sit lower
   // in frame, so shifting object-position down reveals more of their lower
   // portion.

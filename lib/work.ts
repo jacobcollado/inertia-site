@@ -19,8 +19,7 @@ export type WorkMeta = {
   order?: number;
   cover?: string;
   preview?: string;
-  // When set, the client carousel on page.tsx uses this photo instead of
-  // its default generated gradient+logo card.
+  // Homepage client carousel — art/mood card. /work uses getWorkIndexThumb().
   card?: string;
   palette?: string[];
   instagram?: string;

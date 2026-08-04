@@ -718,17 +718,30 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
               />
               <span className="relative">Start a project</span>
               <span
-                className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0"
+                className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0 overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.18)",
-                  // Inner depth: a dark inset shadow along the top reads as a
-                  // recessed well, and a thin light rim along the bottom
-                  // catches light like the far inside edge of that well.
+                  // Concave surface: dark pool at the top, warm catch along
+                  // the bottom rim — matches the button's underlit gradient.
+                  background:
+                    "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.32) 0%, transparent 52%)," +
+                    "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.22) 0%, transparent 65%)," +
+                    "rgba(255,255,255,0.13)",
                   boxShadow:
-                    "inset 0 1.5px 2px rgba(0,0,0,0.35), inset 0 -1px 1px rgba(255,255,255,0.25)",
+                    "inset 0 2.5px 4px rgba(0,0,0,0.48)," +
+                    "inset 0 -1.5px 2.5px rgba(255,255,255,0.38)," +
+                    "inset 0 0 0 0.5px rgba(255,255,255,0.1)," +
+                    "0 1px 2px rgba(0,0,0,0.14)",
                 }}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="block h-3.5 w-3.5 sm:h-4 sm:w-4">
+                {/* Top specular arc — overhead light catching the well rim */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none rounded-full"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 40%)",
+                  }}
+                />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="relative block h-3.5 w-3.5 sm:h-4 sm:w-4">
                   <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
                 </svg>
               </span>
@@ -1394,6 +1407,11 @@ const CLIENT_CARD_FALLBACK_PALETTE = ["#39637e", "#5b7496", "#1a3a4a"];
 // top of the page. Shifting the focal point down reveals more of it.
 const CLIENT_CARD_OBJECT_POSITION: Record<string, string> = {
   inboundly: "center 42%",
+  "trippie-redd": "center center",
+  "ellora-la": "center 42%",
+  "allure-new-york": "center 45%",
+  "samuel-norris": "center 40%",
+  "mood-swings": "center 42%",
 };
 
 function hexLuminance(hex: string) {

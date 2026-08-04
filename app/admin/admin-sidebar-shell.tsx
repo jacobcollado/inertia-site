@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,6 +17,8 @@ import {
   MenuIcon,
   SearchIcon,
   SparklesIcon,
+  SettingsIcon,
+  LogOutIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,9 +36,12 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { AdminThemeToggle } from "./admin-theme-toggle";
 import { NavUser } from "./nav-user";
+import { AccountDialog } from "./account-dialog";
+import { signOut } from "@/app/dashboard/actions";
+import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { AdminClientNavProvider, useAdminClientNavValue } from "./admin-client-nav-context";
 
@@ -87,7 +92,7 @@ function ClientSubItems({ pathname }: { pathname: string }) {
               key={slug}
               tooltip={label}
               isActive={active}
-              render={<Link href={href} />}
+              render={<Link href={href} scroll={false} />}
               className={cn(
                 "h-8 text-[13px] [&_svg]:size-3.5",
                 active
@@ -136,7 +141,15 @@ function NavItems({ items, pathname }: { items: typeof NAV_ITEMS; pathname: stri
                 )}
               >
                 <Icon />
-                <span>{label}</span>
+                <span className="flex min-w-0 flex-1 items-center gap-1">
+                  <span className="shrink-0">{label}</span>
+                  {href === "/admin/clients" && clientNav && (
+                    <>
+                      <span className="shrink-0 font-normal text-muted-foreground">/</span>
+                      <span className="truncate font-normal text-muted-foreground">{clientNav.label}</span>
+                    </>
+                  )}
+                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             {showsSubItems && <ClientSubItems pathname={pathname} />}
@@ -197,6 +210,21 @@ function MobileNavDock() {
   const [navOpen, setNavOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [signOutPending, startSignOut] = useTransition();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data }) => {
+      const user = data.user;
+      if (!user) return;
+      setEmail(user.email ?? "");
+      const { data: profile } = await supabase.from("profiles").select("avatar_url").eq("id", user.id).single();
+      setAvatarUrl((profile?.avatar_url as string | null) ?? null);
+    });
+  }, []);
 
   const clientItems = useMemo(() => {
     if (!clientNav) return [];
@@ -217,10 +245,14 @@ function MobileNavDock() {
     setQuery("");
   };
 
-  const renderRow = (item: { href: string; label: string; icon: typeof LayoutDashboardIcon }, onNavigate: () => void) => {
+  const renderRow = (
+    item: { href: string; label: string; icon: typeof LayoutDashboardIcon },
+    onNavigate: () => void,
+    { nested = false, trailingLabel }: { nested?: boolean; trailingLabel?: string } = {},
+  ) => {
     // Client sub-nav rows (/admin/clients/[id]/...) only match their exact
     // tab, not by prefix — otherwise every tab would show active at once.
-    const isClientSubItem = item.href.startsWith("/admin/clients/");
+    const isClientSubItem = item.href.startsWith("/admin/clients/") && item.href.split("/").length > 4;
     const active = item.href === "/admin"
       ? pathname === "/admin"
       : isClientSubItem
@@ -232,20 +264,56 @@ function MobileNavDock() {
       <Link
         key={item.href}
         href={item.href}
+        scroll={isClientSubItem ? false : undefined}
         onClick={onNavigate}
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] transition-colors",
-          active ? "bg-sidebar-accent font-semibold text-sidebar-foreground" : "hover:bg-sidebar-accent"
+          "flex items-center gap-3 rounded-lg transition-colors",
+          nested ? "px-2 py-2 text-[13px]" : "px-3 py-2.5 text-[14px]",
+          active ? "bg-sidebar-accent font-semibold text-sidebar-foreground" : "hover:bg-sidebar-accent",
+          nested && "[&_svg]:size-3.5",
         )}
       >
         <Icon className="size-4 shrink-0" />
-        <span className="flex-1">{item.label}</span>
+        <span className="flex min-w-0 flex-1 items-center gap-1">
+          <span className="shrink-0">{item.label}</span>
+          {trailingLabel && (
+            <>
+              <span className="shrink-0 font-normal text-muted-foreground">/</span>
+              <span className="truncate font-normal text-muted-foreground">{trailingLabel}</span>
+            </>
+          )}
+        </span>
         {!!badge && badge > 0 && (
           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-accent px-1.5 text-[11px] tabular-nums text-muted-foreground">
             {badge > 9 ? "9+" : badge}
           </span>
         )}
       </Link>
+    );
+  };
+
+  const renderAction = (
+    label: string,
+    icon: typeof SettingsIcon,
+    onClick: () => void,
+    { destructive = false, disabled = false }: { destructive?: boolean; disabled?: boolean } = {},
+  ) => {
+    const Icon = icon;
+    return (
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onClick}
+        className={cn(
+          "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] transition-colors text-left disabled:opacity-50",
+          destructive
+            ? "text-destructive hover:bg-destructive/10"
+            : "hover:bg-sidebar-accent",
+        )}
+      >
+        <Icon className="size-4 shrink-0" />
+        <span className="flex-1">{label}</span>
+      </button>
     );
   };
 
@@ -279,17 +347,37 @@ function MobileNavDock() {
           </DialogHeader>
           <nav className="flex flex-col gap-3">
             <div className="flex flex-col gap-0.5">
-              {ALL_TOP_NAV_ITEMS.map(item => renderRow(item, () => setNavOpen(false)))}
+              {ALL_TOP_NAV_ITEMS.map(item => (
+                <Fragment key={item.href}>
+                  {renderRow(item, () => setNavOpen(false), {
+                    trailingLabel: item.href === "/admin/clients" && clientNav ? clientNav.label : undefined,
+                  })}
+                  {item.href === "/admin/clients" && clientItems.length > 0 && (
+                    <div className="mb-0.5 ml-4 flex flex-col gap-0.5 border-l border-sidebar-border pl-1.5">
+                      {clientItems.map(sub => renderRow(sub, () => setNavOpen(false), { nested: true }))}
+                    </div>
+                  )}
+                </Fragment>
+              ))}
             </div>
-            {clientItems.length > 0 && (
-              <div className="flex flex-col gap-0.5">
-                <p className="px-3 pb-1 text-[11px] font-medium text-muted-foreground truncate">{clientNav!.label}</p>
-                {clientItems.map(item => renderRow(item, () => setNavOpen(false)))}
-              </div>
-            )}
+            <Separator />
+            <div className="flex flex-col gap-0.5">
+              {renderAction("Settings", SettingsIcon, () => {
+                setNavOpen(false);
+                setAccountOpen(true);
+              })}
+              {renderAction(
+                signOutPending ? "Signing out…" : "Sign out",
+                LogOutIcon,
+                () => startSignOut(() => signOut()),
+                { destructive: true, disabled: signOutPending },
+              )}
+            </div>
           </nav>
         </DialogContent>
       </Dialog>
+
+      <AccountDialog open={accountOpen} onOpenChange={setAccountOpen} email={email} avatarUrl={avatarUrl} />
 
       <Dialog open={searchOpen} onOpenChange={(open) => (open ? setSearchOpen(true) : closeSearch())}>
         <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-xs">
@@ -369,9 +457,6 @@ function SiteHeader() {
               </>
             )}
           </div>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <AdminThemeToggle />
         </div>
       </div>
     </header>

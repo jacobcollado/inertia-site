@@ -576,12 +576,34 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
           style={{
             position: "relative",
             overflow: "hidden",
-            background: "#fff",
-            boxShadow: "var(--shadow-raised), inset 0 4px 6px -6px rgba(0,0,0,0.1), inset 0 -1px 1px rgba(255,255,255,0.6)",
+            // Keep depth but bias it away from the top — the heading area
+            // should stay clean white, with recession only at the edges.
+            background:
+              "radial-gradient(55% 85% at 0% 55%, rgba(0,0,0,0.022) 0%, transparent 58%)," +
+              "radial-gradient(55% 85% at 100% 55%, rgba(0,0,0,0.022) 0%, transparent 58%)," +
+              "radial-gradient(90% 50% at 50% 100%, rgba(255,255,255,0.7) 0%, transparent 72%)," +
+              "linear-gradient(180deg, #fcfcfc 0%, #ffffff 22%)",
+            boxShadow:
+              "var(--shadow-raised)," +
+              "0 10px 28px -14px rgba(0,0,0,0.14)," +
+              "inset 0 1px 2px rgba(0,0,0,0.04)," +
+              "inset 3px 0 3px -3px rgba(0,0,0,0.035)," +
+              "inset 0 -1.5px 2px rgba(255,255,255,0.95)," +
+              "inset 0 0 0 1px rgba(0,0,0,0.04)",
             animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
           }}
         >
-          <div className="flex flex-col gap-6">
+          {/* Side + bottom edges — top stays flat for the heading */}
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none rounded-2xl"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(0,0,0,0.016) 0%, transparent 14%, transparent 86%, rgba(0,0,0,0.016) 100%)," +
+                "linear-gradient(0deg, rgba(0,0,0,0.02) 0%, transparent 18%)",
+            }}
+          />
+          <div className="relative z-[1] flex flex-col gap-6">
 
             {/* Tab notch — collapses to 0 height while on the dedicated email
                 card, since Back already covers navigation there.
@@ -633,6 +655,21 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               </div>
             </div>
 
+            <p
+              className="text-[12px] tracking-tight text-[rgb(var(--muted))] text-center"
+              style={{ opacity: 0.5 }}
+            >
+              By continuing, you agree to our{" "}
+              <Link href="/policies/terms-of-service" className="underline hover:text-[rgb(var(--fg))] transition-colors">
+                Terms of service
+              </Link>{" "}
+              and{" "}
+              <Link href="/policies/privacy-policy" className="underline hover:text-[rgb(var(--fg))] transition-colors">
+                Privacy policy
+              </Link>
+              .
+            </p>
+
           </div>
 
           {/* Hidden sizers — off-screen copies of every tab × view combo used
@@ -658,21 +695,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             )}
           </div>
         </div>
-
-        <p
-          className={`w-full max-w-[420px] text-[12px] tracking-tight text-[rgb(var(--muted))] text-center ${SIGNUPS_ENABLED ? "mt-6" : "mt-4"}`}
-          style={{ opacity: 0.5 }}
-        >
-          By continuing, you agree to our{" "}
-          <Link href="/policies/terms-of-service" className="underline hover:text-[rgb(var(--fg))] transition-colors">
-            Terms of service
-          </Link>{" "}
-          and{" "}
-          <Link href="/policies/privacy-policy" className="underline hover:text-[rgb(var(--fg))] transition-colors">
-            Privacy policy
-          </Link>
-          .
-        </p>
       </div>
 
     </div>
