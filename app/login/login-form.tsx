@@ -572,11 +572,12 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         {/* Padding tightens while sign-ups are closed: with the tab notch gone
             the card holds only a heading and two buttons. */}
         <div
-          className={`w-full max-w-[420px] rounded-2xl border border-[rgb(var(--line))] ${SIGNUPS_ENABLED ? "p-8 sm:p-10" : "p-7 sm:p-8"}`}
+          className={`w-full max-w-[420px] rounded-2xl ${SIGNUPS_ENABLED ? "p-8 sm:p-10" : "p-7 sm:p-8"}`}
           style={{
             position: "relative",
             overflow: "hidden",
-            background: "rgb(var(--surface-elevated))",
+            background: "#fff",
+            boxShadow: "var(--shadow-modal), inset 0 6px 10px -6px rgba(0,0,0,0.1), inset 0 -1px 1px rgba(255,255,255,0.6)",
             animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
           }}
         >
