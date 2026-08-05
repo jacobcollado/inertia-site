@@ -45,7 +45,7 @@ function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNod
   }, [open]);
 
   return (
-    <div className="rise" style={{ "--rise-delay": `${delay}ms` } as React.CSSProperties}>
+    <div className="rise rise--liquid" style={{ "--rise-delay": `${delay}ms` } as React.CSSProperties}>
       <div
         style={{
           borderRadius: 16,
@@ -79,7 +79,9 @@ export function AetherFaq() {
 
   return (
     <section className="px-3 py-16 sm:py-24">
-      <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center">
+      <p
+        className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid"
+      >
         FAQ
       </p>
       <div className="max-w-2xl mx-auto">

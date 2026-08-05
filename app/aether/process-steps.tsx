@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
 const STEPS = [
@@ -22,10 +21,87 @@ const STEPS = [
   },
 ];
 
+const STEP_MS = 750;
+const STEP_GAP_MS = 320;
+const STEP_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
 export function ProcessSteps() {
   const [open, setOpen] = useState<number | null>(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
+  const openRef = useRef(open);
+  const hoverPausedRef = useRef(false);
+  const pausedUntilRef = useRef(0);
+  const transitioningRef = useRef(false);
+  const stepTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  openRef.current = open;
+
+  const clearStepTimers = () => {
+    stepTimersRef.current.forEach(clearTimeout);
+    stepTimersRef.current = [];
+  };
+
+  const after = (ms: number, fn: () => void) => {
+    const id = setTimeout(fn, ms);
+    stepTimersRef.current.push(id);
+  };
+
+  const pauseAuto = (ms = 8000) => {
+    pausedUntilRef.current = Date.now() + ms;
+  };
+
+  const isAutoPaused = () => hoverPausedRef.current || Date.now() < pausedUntilRef.current;
+
+  const goToStep = (i: number, smoothScroll = true) => {
+    const el = scrollRef.current;
+    const card = cardRefs.current[i];
+    if (window.matchMedia("(max-width: 639px)").matches && el && card) {
+      const target = card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2;
+      el.scrollTo({ left: target, behavior: smoothScroll ? "smooth" : "auto" });
+    }
+    setOpen(i);
+  };
+
+  const transitionToStepRef = useRef<(nextIndex: number, onComplete?: () => void) => void>(() => {});
+  transitionToStepRef.current = (nextIndex, onComplete) => {
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (isMobile || reducedMotion) {
+      goToStep(nextIndex);
+      onComplete?.();
+      return;
+    }
+
+    if (transitioningRef.current) return;
+
+    const current = openRef.current;
+    if (current === nextIndex) {
+      onComplete?.();
+      return;
+    }
+
+    transitioningRef.current = true;
+    pauseAuto(STEP_MS * 2 + STEP_GAP_MS + 8000);
+
+    if (current !== null) {
+      setOpen(null);
+      after(STEP_MS + STEP_GAP_MS, () => {
+        setOpen(nextIndex);
+        after(STEP_MS, () => {
+          transitioningRef.current = false;
+          onComplete?.();
+        });
+      });
+    } else {
+      setOpen(nextIndex);
+      after(STEP_MS, () => {
+        transitioningRef.current = false;
+        onComplete?.();
+      });
+    }
+  };
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -33,6 +109,7 @@ export function ProcessSteps() {
 
     const syncActiveFromScroll = () => {
       if (window.matchMedia("(min-width: 640px)").matches) return;
+      pauseAuto();
       const containerCenter = el.scrollLeft + el.clientWidth / 2;
       let nearest = 0;
       let nearestDist = Infinity;
@@ -52,22 +129,54 @@ export function ProcessSteps() {
     return () => el.removeEventListener("scroll", syncActiveFromScroll);
   }, []);
 
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const scheduleNext = () => {
+      const delay = 5000 + Math.random() * 3000;
+      timeoutId = setTimeout(() => {
+        if (isAutoPaused()) {
+          scheduleNext();
+          return;
+        }
+        const current = openRef.current ?? -1;
+        const nextIndex = (current + 1) % STEPS.length;
+        transitionToStepRef.current(nextIndex, scheduleNext);
+      }, delay);
+    };
+
+    scheduleNext();
+    return () => {
+      clearTimeout(timeoutId);
+      clearStepTimers();
+      transitioningRef.current = false;
+    };
+  }, []);
+
   const scrollToCard = (i: number) => {
-    const el = scrollRef.current;
-    const card = cardRefs.current[i];
-    if (!el || !card) return;
-    const target = card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2;
-    el.scrollTo({ left: target, behavior: "smooth" });
-    setOpen(i);
+    pauseAuto();
+    transitionToStepRef.current(i);
   };
 
   const handleCardClick = (i: number, isOpen: boolean) => {
     if (window.matchMedia("(max-width: 639px)").matches) return;
-    setOpen(isOpen ? null : i);
+    pauseAuto();
+    if (isOpen) {
+      if (transitioningRef.current) return;
+      setOpen(null);
+      return;
+    }
+    transitionToStepRef.current(i);
   };
 
   return (
-    <div className="px-3 sm:px-8 py-14 sm:py-20 rise">
+    <div
+      className="px-3 sm:px-8 py-14 sm:py-20"
+      onMouseEnter={() => { hoverPausedRef.current = true; }}
+      onMouseLeave={() => { hoverPausedRef.current = false; }}
+    >
       <div
         ref={scrollRef}
         className="relative flex flex-row gap-3 sm:gap-0 sm:items-stretch overflow-x-auto snap-x snap-mandatory scroll-smooth sm:overflow-visible -mx-3 px-3 sm:mx-0 sm:px-0 pb-2 sm:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
@@ -78,11 +187,18 @@ export function ProcessSteps() {
             <React.Fragment key={s.step}>
               <div
                 ref={(el) => { cardRefs.current[i] = el; }}
-                className={`text-left rounded-2xl p-6 sm:p-8 sm:flex-1 sm:min-w-0 shrink-0 snap-center w-[85vw] sm:w-auto bg-[rgb(var(--surface))] max-sm:scale-100 ${
-                  isOpen ? "sm:bg-[rgb(var(--surface))] sm:scale-100" : "sm:bg-[rgb(var(--surface)/0.4)] sm:scale-[0.96]"
-                }`}
-                style={{ transformOrigin: "center", transition: "background 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)" }}
+                className="shrink-0 snap-center w-[85vw] sm:w-auto sm:flex-1 sm:min-w-0 rise rise--liquid"
+                style={{ "--rise-delay": `${i * 90}ms` } as React.CSSProperties}
               >
+                <div
+                  className={`text-left rounded-2xl p-6 sm:p-8 h-full bg-[rgb(var(--surface))] max-sm:scale-100 ${
+                    isOpen ? "sm:bg-[rgb(var(--surface))] sm:scale-100" : "sm:bg-[rgb(var(--surface)/0.4)] sm:scale-[0.96]"
+                  }`}
+                  style={{
+                    transformOrigin: "center",
+                    transition: `background ${STEP_MS}ms ${STEP_EASE}, transform ${STEP_MS}ms ${STEP_EASE}`,
+                  }}
+                >
                 <button
                   type="button"
                   onClick={() => handleCardClick(i, isOpen)}
@@ -92,7 +208,7 @@ export function ProcessSteps() {
                     className={`text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none mb-3 text-[rgb(var(--fg))] max-sm:opacity-100 ${
                       isOpen ? "sm:opacity-100" : "sm:opacity-40"
                     }`}
-                    style={{ transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1)" }}
+                    style={{ transition: `opacity ${STEP_MS}ms ${STEP_EASE}` }}
                   >
                     {s.step}
                   </p>
@@ -102,7 +218,7 @@ export function ProcessSteps() {
                 </button>
                 <div
                   className={`grid grid-rows-[1fr] ${isOpen ? "sm:grid-rows-[1fr]" : "sm:grid-rows-[0fr]"}`}
-                  style={{ transition: "grid-template-rows 550ms cubic-bezier(0.22,1,0.36,1)" }}
+                  style={{ transition: `grid-template-rows ${STEP_MS}ms ${STEP_EASE}` }}
                 >
                   <div className="max-sm:overflow-visible sm:overflow-hidden min-h-0">
                     <p
@@ -110,30 +226,14 @@ export function ProcessSteps() {
                         isOpen ? "sm:opacity-70 sm:translate-y-0" : "sm:opacity-0 sm:-translate-y-1.5"
                       }`}
                       style={{
-                        transition: "opacity 450ms cubic-bezier(0.22,1,0.36,1), transform 450ms cubic-bezier(0.22,1,0.36,1)",
-                        transitionDelay: isOpen ? "80ms" : "0ms",
+                        transition: `opacity ${STEP_MS}ms ${STEP_EASE}, transform ${STEP_MS}ms ${STEP_EASE}`,
+                        transitionDelay: isOpen ? "120ms" : "0ms",
                       }}
                     >
                       {s.detail}
                     </p>
-                    {i === 2 && (
-                      <Link
-                        href="/aether/buy"
-                        className={`mt-4 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[12px] font-medium tracking-tight hover:opacity-80 transition-opacity max-sm:opacity-100 max-sm:translate-y-0 ${
-                          isOpen ? "sm:opacity-100 sm:translate-y-0" : "sm:opacity-0 sm:-translate-y-1.5"
-                        }`}
-                        style={{
-                          background: "#1a1a1a",
-                          color: "#ededed",
-                          transition: "opacity 450ms cubic-bezier(0.22,1,0.36,1), transform 450ms cubic-bezier(0.22,1,0.36,1)",
-                          transitionDelay: isOpen ? "80ms" : "0ms",
-                        }}
-                      >
-                        Get Aether
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                      </Link>
-                    )}
                   </div>
+                </div>
                 </div>
               </div>
               {i < STEPS.length - 1 && (

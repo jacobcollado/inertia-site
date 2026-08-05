@@ -202,7 +202,7 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
   }, [active, displayed]);
 
   return (
-    <div className="flex flex-col sm:flex-row px-3 py-16 sm:py-0 sm:pb-8 sm:-mt-[8vh]">
+    <div className="flex flex-col sm:flex-row px-3 py-16 sm:py-0 sm:pb-8 sm:-mt-[8vh] rise rise--liquid">
       {/* Left: scrolling text */}
       <div className="flex flex-col flex-1 pr-0 sm:pr-16">
         {features.map((f, i) => {

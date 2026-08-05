@@ -66,22 +66,30 @@ function TierCard({ tier }: { tier: string }) {
   };
 
   return (
-    <div className="rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--surface))] p-6 flex flex-col gap-5">
-      <div className="flex items-start justify-between gap-6" style={row(0)}>
-        <div className="flex flex-col gap-1">
-          <span className="text-[clamp(1.75rem,5vw,2.2rem)] font-normal tabular-nums tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">{displayed.price}</span>
-          <span className="text-[11px] tracking-tight text-[rgb(var(--muted))]">{displayed.term}</span>
-        </div>
-        {displayed.badge && (
-          <span className="text-[10px] font-medium tracking-tight px-2 py-0.5 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
-            {displayed.badge}
+    <div className="rounded-2xl p-6 sm:p-8 bg-[rgb(var(--surface))] flex flex-col gap-5">
+      <div style={row(0)}>
+        <div className="flex items-start justify-between gap-4">
+          <span className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tabular-nums tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
+            {displayed.price}
           </span>
-        )}
+          {displayed.badge && (
+            <span className="text-[11px] font-medium tracking-tight px-2.5 py-1 rounded-full bg-[rgb(var(--fg))] text-[rgb(var(--bg))]">
+              {displayed.badge}
+            </span>
+          )}
+        </div>
+        <p className="mt-2 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>
+          {displayed.term}
+        </p>
       </div>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 border-t border-[rgb(var(--line))] pt-4">
+      <ul className="grid grid-cols-2 gap-x-4 gap-y-3">
         {displayed.includes.map((item, i) => (
-          <li key={item} className="flex items-center gap-2 text-[13px] tracking-tight text-[rgb(var(--muted))]" style={row(i + 1)}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
+          <li
+            key={item}
+            className="flex items-start gap-2 text-[12px] sm:text-[13px] leading-snug tracking-tight text-[rgb(var(--muted))]"
+            style={row(i + 1, 0.7)}
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0 mt-0.5 text-[rgb(var(--muted))]" style={{ opacity: 0.5 }} aria-hidden="true">
               <polyline points="2 8 6 12 14 4" />
             </svg>
             {item}
@@ -120,7 +128,7 @@ export function InlinePricing() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 max-w-md mx-auto w-full">
       {/* Tier selector — text list on the left */}
       <div className="inline-flex items-center self-center rounded-full border border-[rgb(var(--line))] p-1 gap-1">
         {TIERS.map((t) => {

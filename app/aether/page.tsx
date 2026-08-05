@@ -81,8 +81,8 @@ export default function AetherPage() {
     <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       {/* Hero */}
-      <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center rise pt-12 sm:pt-20" style={{ minHeight: 480, paddingBottom: 40 }}>
-        <h1 className="font-normal tracking-[-0.04em] leading-none m-0">
+      <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center pt-12 sm:pt-20" style={{ minHeight: 480, paddingBottom: 40 }}>
+        <h1 className="font-normal tracking-[-0.04em] leading-none m-0 rise rise--liquid">
           <Image
             src="/work-logos/aether.png"
             alt="Aether"
@@ -92,10 +92,16 @@ export default function AetherPage() {
             priority
           />
         </h1>
-        <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
+        <p
+          className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md rise rise--liquid"
+          style={{ "--rise-delay": "90ms" } as React.CSSProperties}
+        >
           Design is the product. A Shopify theme for independent brands that treat how the store looks as part of what they sell.
         </p>
-        <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
+        <div
+          className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight rise rise--liquid"
+          style={{ "--rise-delay": "180ms" } as React.CSSProperties}
+        >
           <Link
             href="/aether#pricing"
             className="w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight hover:opacity-80 transition-opacity"
@@ -123,12 +129,21 @@ export default function AetherPage() {
       <FeaturesScroll features={KEY_FEATURES} />
 
       {/* Secondary features */}
-      <div className="px-3 pb-16 sm:pb-24 rise">
-        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3">And the rest of it</p>
-        <p className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10">No add-on store, no pro unlock. It all comes standard.</p>
+      <div className="px-3 pb-16 sm:pb-24">
+        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3 rise rise--liquid">And the rest of it</p>
+        <p
+          className="text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mb-10 rise rise--liquid"
+          style={{ "--rise-delay": "60ms" } as React.CSSProperties}
+        >
+          No add-on store, no pro unlock. It all comes standard.
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
-          {SECONDARY_FEATURES.map((f) => (
-            <div key={f.name} className="flex items-start py-4">
+          {SECONDARY_FEATURES.map((f, i) => (
+            <div
+              key={f.name}
+              className="flex items-start py-4 rise rise--liquid"
+              style={{ "--rise-delay": `${120 + i * 40}ms` } as React.CSSProperties}
+            >
               <div className="flex flex-col gap-0.5">
                 <span className="text-[15px] tracking-tight font-medium text-[rgb(var(--fg))]">{f.name}</span>
                 <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{f.desc}</span>
@@ -148,13 +163,15 @@ export default function AetherPage() {
       {/* FAQ */}
       <AetherFaq />
 
-      <div className="grid-rule" aria-hidden="true" />
-
       {/* Pricing */}
       <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16 max-w-2xl mx-auto w-full">
-        <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-10 text-center">Pick a <span className="shimmer-word shimmer-word--warm">license</span></p>
+        <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
+          Pick a <span className="shimmer-word shimmer-word--warm">license</span>
+        </p>
 
-        <InlinePricing />
+        <div className="rise rise--liquid" style={{ "--rise-delay": "80ms" } as React.CSSProperties}>
+          <InlinePricing />
+        </div>
       </div>
 
     </main>
