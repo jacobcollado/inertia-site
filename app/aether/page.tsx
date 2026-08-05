@@ -82,28 +82,24 @@ export default function AetherPage() {
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center rise pt-12 sm:pt-20" style={{ minHeight: 480, paddingBottom: 40 }}>
-        <p className="inline-flex items-center rounded-full px-3 py-1.5 -mt-4" style={{ background: "rgb(var(--fg) / 0.5)" }}>
+        <h1 className="font-normal tracking-[-0.04em] leading-none m-0">
           <Image
             src="/work-logos/aether.png"
             alt="Aether"
             width={220}
             height={55}
-            className="h-[15px] w-auto"
-            style={{ filter: "brightness(0) invert(1)" }}
+            className="h-[clamp(2.6rem,6vw,4rem)] w-auto mx-auto"
             priority
           />
-        </p>
-        <h1 className="text-[clamp(2.6rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
-          Design is the product
         </h1>
         <p className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md">
-          A Shopify theme for independent brands that treat how the store looks as part of what they sell.
+          Design is the product. A Shopify theme for independent brands that treat how the store looks as part of what they sell.
         </p>
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
             href="/aether#pricing"
             className="w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight hover:opacity-80 transition-opacity"
-            style={{ background: "#1a1a1a", color: "#ededed" }}
+            style={{ background: "#000", color: "#ededed" }}
           >
             Buy a license
           </Link>
