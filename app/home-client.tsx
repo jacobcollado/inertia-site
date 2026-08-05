@@ -581,15 +581,15 @@ function VercelHero({
     if (reduced) return;
     const firstSwapDelay = ctaFadeDelay + 750 + 1400;
     let interval: ReturnType<typeof setInterval> | undefined;
-    const timeout = window.setTimeout(() => {
+    const timeout = setTimeout(() => {
       setCtaTarget((t) => (t === "project" ? "aether" : "project"));
-      interval = window.setInterval(() => {
+      interval = setInterval(() => {
         setCtaTarget((t) => (t === "project" ? "aether" : "project"));
       }, HERO_CTA_DWELL_MS);
     }, firstSwapDelay);
     return () => {
-      window.clearTimeout(timeout);
-      if (interval !== undefined) window.clearInterval(interval);
+      clearTimeout(timeout);
+      if (interval !== undefined) clearInterval(interval);
     };
   }, [visible, ctaFadeDelay]);
 
