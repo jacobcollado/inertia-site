@@ -498,7 +498,19 @@ const HERO_CTA_OUTER_SHADOW =
   "0 10px 28px rgba(0,0,0,0.24)," +
   "0 24px 56px -10px rgba(0,0,0,0.20)";
 
-function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: React.RefObject<HTMLAnchorElement | null> }) {
+const HERO_CTA_SWAP_MS = 420;
+const HERO_CTA_SWAP_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+const HERO_CTA_DWELL_MS = 5500;
+
+function VercelHero({
+  accentColor,
+  ctaRef,
+}: {
+  accentColor: string;
+  ctaRef?: React.RefObject<HTMLAnchorElement | null>;
+}) {
+  const [ctaTarget, setCtaTarget] = useState<"project" | "aether">("project");
+  const isAetherCta = ctaTarget === "aether";
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   // BorderBeam defaults to active immediately on mount, which made the beam
@@ -560,6 +572,26 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
   // settles even if the stagger timing above changes.
   const headingLastWordDelay = HEADING_START + HEADING_WORDS.length * HEADING_WORD_STEP;
   const ctaFadeDelay = headingLastWordDelay + 180;
+
+  // Alternates between the project quiz and the Aether product page on a
+  // fixed loop once the hero has landed — no carousel interaction required.
+  useEffect(() => {
+    if (!visible) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const firstSwapDelay = ctaFadeDelay + 750 + 1400;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const timeout = window.setTimeout(() => {
+      setCtaTarget((t) => (t === "project" ? "aether" : "project"));
+      interval = window.setInterval(() => {
+        setCtaTarget((t) => (t === "project" ? "aether" : "project"));
+      }, HERO_CTA_DWELL_MS);
+    }, firstSwapDelay);
+    return () => {
+      window.clearTimeout(timeout);
+      if (interval !== undefined) window.clearInterval(interval);
+    };
+  }, [visible, ctaFadeDelay]);
 
   return (
     <section
@@ -687,8 +719,10 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
             >
             <a
               ref={ctaRef}
-              href="#start"
+              href={isAetherCta ? "/aether" : "#start"}
+              aria-label={isAetherCta ? "View Aether" : "Start a project"}
               onClick={e => {
+                if (isAetherCta) return;
                 const el = document.getElementById("start");
                 if (!el) return; // let the browser handle the hash
                 e.preventDefault();
@@ -722,7 +756,30 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                   opacity: 0.3,
                 }}
               />
-              <span className="relative">Start a project</span>
+              <span className="relative inline-grid place-items-center">
+                <span
+                  className="col-start-1 row-start-1"
+                  style={{
+                    opacity: isAetherCta ? 0 : 1,
+                    transform: isAetherCta ? "translateY(5px)" : "translateY(0)",
+                    transition: `opacity ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}, transform ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}`,
+                  }}
+                  aria-hidden={isAetherCta}
+                >
+                  Start a project
+                </span>
+                <span
+                  className="col-start-1 row-start-1"
+                  style={{
+                    opacity: isAetherCta ? 1 : 0,
+                    transform: isAetherCta ? "translateY(0)" : "translateY(-5px)",
+                    transition: `opacity ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}, transform ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}`,
+                  }}
+                  aria-hidden={!isAetherCta}
+                >
+                  View Aether
+                </span>
+              </span>
               <span
                 className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0 overflow-hidden"
                 style={{
@@ -747,7 +804,19 @@ function VercelHero({ accentColor, ctaRef }: { accentColor: string; ctaRef?: Rea
                     background: "linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 40%)",
                   }}
                 />
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="relative block h-3.5 w-3.5 sm:h-4 sm:w-4">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="relative block h-3.5 w-3.5 sm:h-4 sm:w-4"
+                  style={{
+                    transform: isAetherCta ? "rotate(-90deg)" : "rotate(0deg)",
+                    transition: `transform ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}`,
+                  }}
+                >
                   <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
                 </svg>
               </span>
