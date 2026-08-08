@@ -36,31 +36,31 @@ const hl = (text: string) => (
 const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
   {
     q: "What kind of projects do you take on?",
-    a: <>We work with {hl("fashion brands")}, {hl("trade businesses")}, and founder-led companies building digital products, storefronts, and brand identities.</>,
+    a: <>We partner with {hl("fashion brands")}, {hl("trade businesses")}, and founder-led companies who care how their work looks, feels, and holds up. Storefronts, digital products, and brand identities.</>,
   },
   {
     q: "How does the process work?",
-    a: <>We start with a {hl("short discovery call")} to understand what you're building, then move into {hl("direction, design, and development")} as one continuous process.</>,
+    a: <>It starts with a {hl("short discovery call")} about what you're building and why it matters. From there, {hl("direction, design, and development")} run as one continuous process, with the same people from first sketch to ship.</>,
   },
   {
     q: "Do you work with early-stage founders?",
-    a: <>Yes. We work best with founders who have {hl("a clear vision")} but need the right team to shape and ship it properly.</>,
+    a: <>Yes, and some of our best work has started there. If you have {hl("a clear vision")} and want a team that treats it like their own, we'll get along.</>,
   },
   {
     q: "How long does a project take?",
-    a: <>Depends on scope. A focused storefront or landing page can ship in {hl("2-4 weeks")}. Larger product builds typically run {hl("6-12 weeks")}.</>,
+    a: <>Scope decides. A focused storefront or landing page ships in {hl("2-4 weeks")}, and larger product builds run {hl("6-12 weeks")}. After one conversation we can give you a real date, not a range.</>,
   },
   {
     q: "What does it cost?",
-    a: <>Projects are scoped and quoted individually. Most engagements {hl("start from $3,000")} depending on what's being built.</>,
+    a: <>Every project is scoped and quoted individually, and most engagements {hl("start from $3,000")}. You'll know exactly what you're getting, and why, before anything begins.</>,
   },
   {
     q: "Can you help with just design, or just development?",
-    a: <>We prefer to {hl("own the full process")}, but we're open to talking through what you actually need.</>,
+    a: <>Our best work happens when we {hl("own the full process")}, because that's where the seams disappear. But tell us what you actually need and we'll be honest about whether we're the right fit.</>,
   },
   {
     q: "Do you still offer the Aether Shopify theme?",
-    a: <>Yes. {hl("Aether")} is our Shopify theme, available from $85. It ships with 41 sections, dark mode, sticky cart, and mega menu. You can buy a license and go live the same afternoon at <Link href="/aether" style={{ color: "#0a84ff", textDecoration: "none" }}>byinertia.com/aether</Link>.</>,
+    a: <>Yes. {hl("Aether")} is our Shopify theme, from $85. It ships with 41 sections, dark mode, sticky cart, and mega menu, and you can buy a license and go live the same afternoon at <Link href="/aether" style={{ color: "#0a84ff", textDecoration: "none" }}>byinertia.com/aether</Link>.</>,
   },
 ];
 
@@ -720,7 +720,7 @@ function VercelHero({
             <a
               ref={ctaRef}
               href={isAetherCta ? "/aether" : "#start"}
-              aria-label={isAetherCta ? "View Aether" : "Start a project"}
+              aria-label={isAetherCta ? "View Aether" : "Get in touch"}
               onClick={e => {
                 if (isAetherCta) return;
                 const el = document.getElementById("start");
@@ -766,7 +766,7 @@ function VercelHero({
                   }}
                   aria-hidden={isAetherCta}
                 >
-                  Start a project
+                  Get in touch
                 </span>
                 <span
                   className="col-start-1 row-start-1"
@@ -856,32 +856,35 @@ function VercelHero({
 const QUIZ_QUESTIONS: AskUserQuestion[] = [
   {
     id: "ownership",
-    title: "Your product ships something ugly. Whose problem is it?",
+    title: "The site went live and it doesn't feel like your brand. Whose problem is it?",
     skippable: false,
+    chipPosition: "left",
     options: [
-      { id: "designer", title: "The designer's. They signed off on it." },
-      { id: "team", title: "Everyone's. Ugly is a team failure." },
-      { id: "ship", title: "Nobody's. Ship it, fix it later." },
+      { id: "designer", title: "The designer's. That was the whole job." },
+      { id: "team", title: "Everyone's. Identity slips one decision at a time." },
+      { id: "ship", title: "Nobody's. It works, that's what counts." },
     ],
   },
   {
     id: "detail",
-    title: "A detail nobody will notice is off by two pixels. You...",
+    title: "A detail is off by two pixels. Nobody will consciously notice. You...",
     skippable: false,
+    chipPosition: "left",
     options: [
-      { id: "fix", title: "Fix it. Someone always notices." },
-      { id: "leave", title: "Leave it. Two pixels isn't a business." },
+      { id: "fix", title: "Fix it. Effortless is built out of invisible calls like this." },
+      { id: "leave", title: "Leave it. Perfection is procrastination." },
       { id: "depends", title: "Depends what else is on fire." },
     ],
   },
   {
     id: "taste",
-    title: "What makes a site actually good?",
+    title: "What separates a good site from a great one?",
     skippable: false,
+    chipPosition: "left",
     options: [
-      { id: "convert", title: "It converts. The rest is decoration." },
-      { id: "feel", title: "It feels effortless to the person using it." },
-      { id: "different", title: "It looks nothing like everyone else's." },
+      { id: "convert", title: "The numbers. Great means it converts." },
+      { id: "feel", title: "It feels inevitable, like it couldn't be any other way." },
+      { id: "different", title: "It refuses to look like everyone else." },
     ],
   },
 ];
@@ -890,16 +893,16 @@ const QUIZ_QUESTIONS: AskUserQuestion[] = [
 // without pretending to be a real assessment.
 const QUIZ_RESULTS: Record<string, { title: string; body: string }> = {
   designer: {
-    title: "So you'd want someone to own the outcome.",
-    body: "So would we. When something ships under our name, it's ours to answer for. We're on the same page.",
+    title: "So you'd expect the designer to own it.",
+    body: "So would we. Carrying your identity through is the whole job, and when the work ships under our name, it's ours to answer for.",
   },
   team: {
-    title: "So you treat quality as a shared standard.",
+    title: "So you see identity as a shared standard.",
     body: "We agree, though someone still has to hold the line. That's usually what we're brought in for.",
   },
   ship: {
-    title: "So you'd rather move than polish.",
-    body: "Speed matters and we move fast too. We just don't ship ugly to get there. Both, or it isn't done.",
+    title: "So you'd rather move than fuss.",
+    body: "Speed matters and we move fast too. But a site that works and doesn't feel like you is half done. We ship both.",
   },
 };
 
@@ -939,6 +942,7 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
     // else" is typed rather than picked.
     allowOther: true,
     otherPlaceholder: "Somewhere else...",
+    chipPosition: "left",
     options: [
       { id: "twitter", title: "X (Twitter)" },
       { id: "recommendation", title: "Someone recommended us" },
@@ -950,6 +954,7 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
     id: "role",
     title: "What's your role?",
     skippable: false,
+    chipPosition: "left",
     options: [
       { id: "founder", title: "Founder or co-founder" },
       { id: "exec", title: "Exec or department lead" },
@@ -961,6 +966,7 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
     id: "company_stage",
     title: "Where's the company right now?",
     skippable: false,
+    chipPosition: "left",
     options: [
       { id: "idea", title: "Pre-seed or idea stage" },
       { id: "bootstrapped", title: "Bootstrapped" },
@@ -987,6 +993,7 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
     id: "readiness",
     title: "Which sounds most like you?",
     skippable: false,
+    chipPosition: "left",
     options: [
       { id: "allocated", title: "Budget's allocated and I'm ready to move" },
       { id: "unlockable", title: "I'm serious and can unlock a budget" },
@@ -1289,7 +1296,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         style={{ "--rise-delay": `${PROCESS_STEPS.length * 90}ms` } as React.CSSProperties}
       >
         <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">
-          Start a project
+          Get in touch
         </span>
         <svg
           aria-hidden
@@ -1847,10 +1854,10 @@ function LiquidText({
 
 function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
   const intro =
-    "The brands we work with already have something worth buying. Often the product sells itself, and sometimes it needs help doing that. Either way, the [[experience]] someone moves through on the way to it is the part we own, whether we're taking design to code or code to design.";
+    "Ideas and identity are rarely the problem. Execution is. We take what a company, brand, or person stands for and carry it through every [[detail]], until the result feels effortless to the people moving through it.";
   const points = [
-    "Every [[detail]] matters, whether the visitor consciously notices it or not. Most of them never will. They'll just feel that it worked.",
-    "The best design disappears. It should feel [[effortless]] to the person using it, even when the work behind it wasn't.",
+    "The best design disappears into the experience. Nobody applauds the [[craft]], and that's exactly how you know it landed.",
+    "Identity isn't expressed in one big gesture. It's carried in a hundred small decisions that all [[agree]] with each other.",
   ];
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
@@ -1890,9 +1897,9 @@ function easeInOutCubic(t: number) {
 
 function AiApproach() {
   const first =
-    "We treat AI as a [[frontier]] tool, not a shortcut. It lets a studio our size move like a much larger one, giving us room to experiment with more directions per project while still tightening turnaround time and raising the bar on quality. It has changed how fast we can work, not what we're willing to ship.";
+    "AI hasn't changed what we believe about execution; it's changed how much of it we can afford. A studio our size can now explore [[more]] directions, discard the wrong ones sooner, and spend the saved time where it counts: on the version worth shipping.";
   const second =
-    "We've been fortunate to work alongside people building genuinely great things, and every project has added to how we think about the work. Along the way we've built a deep understanding of the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and the details that make a product actually resonate with the people using it.";
+    "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:mx-auto">
@@ -2497,7 +2504,14 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                     />
                   ) : (
                     <>
-                      <div className="absolute inset-0" style={clientCardGradient(item.palette)} />
+                      <div
+                        className="absolute inset-0"
+                        style={
+                          item.slug === "aether"
+                            ? { backgroundColor: "#0a0a0a" }
+                            : clientCardGradient(item.palette)
+                        }
+                      />
                       <div
                         aria-hidden="true"
                         className="absolute inset-0 pointer-events-none"

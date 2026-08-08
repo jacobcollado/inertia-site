@@ -1274,7 +1274,14 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
         {/* Header — static top, fixed across questions; only the number
             changes. Lives outside the morphing region so it never shifts. */}
         <div className="flex items-center px-4 sm:px-5 pt-4 sm:pt-5 pb-2 text-[12px] text-muted-foreground">
-          <span>
+          {/* Same coloring as the number discs in the homepage PROCESS_STEPS
+              markers: page-background fill with foreground text. --fg/--bg
+              resolve per theme scope, so this stays correct inside and
+              outside the dark zone. */}
+          <span
+            className="inline-flex w-fit items-center rounded-full px-2.5 py-1"
+            style={{ background: "rgb(var(--bg))", color: "rgb(var(--fg))" }}
+          >
             Question {safeIndex + 1} of {total}
           </span>
         </div>
