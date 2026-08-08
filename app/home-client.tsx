@@ -502,6 +502,34 @@ const HERO_CTA_SWAP_MS = 420;
 const HERO_CTA_SWAP_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const HERO_CTA_DWELL_MS = 5500;
 
+const HERO_REVEAL_MS = 780;
+const HERO_REVEAL_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
+const HERO_WORD_STEP = 90;
+const HERO_START = 90;
+
+function heroRevealStyle(
+  visible: boolean,
+  delay: number,
+  opts?: { letter?: boolean; travel?: number; blur?: number; scaleFrom?: number },
+) {
+  const letter = opts?.letter ?? false;
+  const travel = opts?.travel ?? (letter ? 16 : 24);
+  const blur = opts?.blur ?? (letter ? 6 : 10);
+  const scaleFrom = opts?.scaleFrom ?? (letter ? 0.97 : 0.935);
+  return {
+    display: "inline-block" as const,
+    willChange: "opacity, transform, filter",
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0) scale(1)" : `translateY(${travel}px) scale(${scaleFrom})`,
+    filter: visible ? "blur(0px)" : `blur(${blur}px)`,
+    transition: [
+      `opacity ${HERO_REVEAL_MS}ms ${HERO_REVEAL_EASE} ${delay}ms`,
+      `transform ${HERO_REVEAL_MS}ms ${HERO_REVEAL_EASE} ${delay}ms`,
+      `filter ${HERO_REVEAL_MS}ms ${HERO_REVEAL_EASE} ${delay}ms`,
+    ].join(", "),
+  };
+}
+
 function VercelHero({
   accentColor,
   ctaRef,
@@ -544,34 +572,16 @@ function VercelHero({
     return () => obs.disconnect();
   }, []);
 
-  const fade = (delay: number) => ({
-    willChange: "opacity, transform",
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(18px)",
-    transition: `opacity 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms, transform 750ms cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
-  });
+  const fade = (delay: number) =>
+    heroRevealStyle(visible, delay, { travel: 20, blur: 8, scaleFrom: 0.96 });
 
-  // Heading words stagger in one after another rather than fading in as one
-  // flat block, so the reveal reads as fluid motion building toward "speed"
-  // instead of a single static pop. Each word gets a shorter, snappier
-  // transition than the section-level fade() above (420ms vs 750ms) so the
-  // stagger itself is what carries the motion, not each word's own long ease.
+  // Heading words stagger with blur+scale so each token reads as settling into
+  // place rather than popping. The wordmark lands as one fluid unit after the
+  // lead-in words, then the CTA follows.
   const HEADING_WORDS = ["Design", "with", "real"];
-  const HEADING_WORD_STEP = 70; // ms between each word's start
-  const HEADING_START = 120;
-  const wordFade = (i: number) => ({
-    display: "inline-block",
-    willChange: "opacity, transform",
-    opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0)" : "translateY(14px)",
-    transition: `opacity 420ms cubic-bezier(0.22,1,0.36,1) ${HEADING_START + i * HEADING_WORD_STEP}ms, transform 420ms cubic-bezier(0.22,1,0.36,1) ${HEADING_START + i * HEADING_WORD_STEP}ms`,
-  });
-  // "speed" (the shimmer word) is treated as one more staggered word, landing
-  // right after "your". The CTA button's own delay is computed from this
-  // rather than hardcoded, so it always starts just after the last word
-  // settles even if the stagger timing above changes.
-  const headingLastWordDelay = HEADING_START + HEADING_WORDS.length * HEADING_WORD_STEP;
-  const ctaFadeDelay = headingLastWordDelay + 180;
+  const wordReveal = (i: number) => heroRevealStyle(visible, HERO_START + i * HERO_WORD_STEP);
+  const inertiaStart = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
+  const ctaFadeDelay = inertiaStart + 644;
 
   // Alternates between the project quiz and the Aether product page on a
   // fixed loop once the hero has landed — no carousel interaction required.
@@ -579,7 +589,7 @@ function VercelHero({
     if (!visible) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
-    const firstSwapDelay = ctaFadeDelay + 750 + 1400;
+    const firstSwapDelay = ctaFadeDelay + HERO_REVEAL_MS + 1400;
     let interval: ReturnType<typeof setInterval> | undefined;
     const timeout = setTimeout(() => {
       setCtaTarget((t) => (t === "project" ? "aether" : "project"));
@@ -654,12 +664,20 @@ function VercelHero({
             <span>
               {HEADING_WORDS.map((word, i) => (
                 <span key={word + i}>
-                  <span style={wordFade(i)}>{word}</span>{" "}
+                  <span style={wordReveal(i)}>{word}</span>{" "}
                 </span>
               ))}
             </span>
-            <span style={wordFade(HEADING_WORDS.length)}>
-              Ine<span style={{ marginRight: "-0.05em" }}>r</span>tia
+            <span className="mt-2 sm:mt-2.5" style={heroRevealStyle(visible, inertiaStart)}>
+              <Image
+                src="/logo.png"
+                alt="Inertia"
+                width={420}
+                height={96}
+                priority
+                className="h-[clamp(2.3rem,6.2vw,3.6rem)] w-auto"
+                draggable={false}
+              />
             </span>
           </h1>
 
