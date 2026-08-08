@@ -11,7 +11,7 @@ import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/co
 import { BorderBeam } from "border-beam";
 import { ctaScaleHoverOnParent } from "@/lib/cta-hover-motion";
 
-export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string; palette?: string[]; card?: string };
+export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string };
 
 export default function Home({ initialWork }: { initialWork: ClientCarouselItem[] }) {
   return <VisualLayout initialWork={initialWork} />;
@@ -648,17 +648,18 @@ function VercelHero({
           )}
 
           <h1
-            className="font-normal tracking-tight leading-[0.75] max-w-xl text-[clamp(2.9rem,7vw,4.2rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)]"
+            className="font-normal tracking-tight leading-none max-w-xl text-[clamp(2.9rem,7vw,4.2rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a" }}
           >
-            {HEADING_WORDS.map((word, i) => (
-              <span key={word + i}>
-                <span style={wordFade(i)}>{word}</span>{" "}
-              </span>
-            ))}
-            <br />
+            <span>
+              {HEADING_WORDS.map((word, i) => (
+                <span key={word + i}>
+                  <span style={wordFade(i)}>{word}</span>{" "}
+                </span>
+              ))}
+            </span>
             <span style={wordFade(HEADING_WORDS.length)}>
-              <ShimmerWord variant="cta">Inertia</ShimmerWord>
+              Ine<span style={{ marginRight: "-0.05em" }}>r</span>tia
             </span>
           </h1>
 
@@ -1475,77 +1476,30 @@ const WORK_ITEMS = [
   { src: "/work/ellora-la/2.png", title: "Ellora LA", category: "Collection page", accent: "#6f283c", logo: "/work-logos/ellora-la.png" },
 ];
 
-function hexToRgba(hex: string, alpha: number) {
-  const n = parseInt(hex.slice(1), 16);
-  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  return `rgba(${r},${g},${b},${alpha})`;
-}
+const CAROUSEL_LOGO_DROP = "drop-shadow(0 3px 10px rgba(0,0,0,0.45))";
+const CAROUSEL_LOGO_WHITE =
+  "brightness(0) invert(1) drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))";
 
-const CLIENT_CARD_FALLBACK_PALETTE = ["#39637e", "#5b7496", "#1a3a4a"];
-
-// Per-client crop offset for the carousel's card photo — object-cover
-// otherwise centers the crop, which for inboundly's portrait screenshot cut
-// off too much of the middle content (headline/CTA) in favor of the empty
-// top of the page. Shifting the focal point down reveals more of it.
-const CLIENT_CARD_OBJECT_POSITION: Record<string, string> = {
-  inboundly: "center 42%",
-  "trippie-redd": "center center",
-  "ellora-la": "center 42%",
-  "allure-new-york": "center 45%",
-  "samuel-norris": "center 40%",
-  "mood-swings": "center 42%",
+// Force white for dark-on-transparent marks (Aether, Trippie, Allure, Mood
+// Swings). Skip for logos that already ship white-on-transparent (Ellora) —
+// invert turns their white artwork black.
+const CAROUSEL_LOGO_STYLE: Record<string, { width: string; filter?: string }> = {
+  aether: { width: "71.5%", filter: CAROUSEL_LOGO_WHITE },
+  inboundly: { width: "38%" },
+  "trippie-redd": { width: "48%", filter: CAROUSEL_LOGO_WHITE },
+  "ellora-la": { width: "56%" },
+  "allure-new-york": { width: "58%", filter: CAROUSEL_LOGO_WHITE },
+  "mood-swings": { width: "62%", filter: CAROUSEL_LOGO_WHITE },
+  "subtle-goods": { width: "46%" },
+  "ft-gioo": { width: "44%" },
+  "samuel-norris": { width: "68%" },
 };
 
-function hexLuminance(hex: string) {
-  const n = parseInt(hex.slice(1), 16);
-  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-}
-
-// Builds the flowing card background for the client carousel from a work
-// item's brand palette — a static (no motion) blend of every usable color
-// the palette has, so depth comes from color layering rather than
-// animation. Reads as moving water/ink rather than a scatter of blobs:
-// near-white and near-black swatches are dropped first (a bright glow or an
-// opaque black patch is what makes a gradient read as "floating shapes"
-// instead of one continuous surface), then each remaining color gets its
-// own large, heavily-overlapping, very-soft-edged current — sized well past
-// the card's own bounds so falloffs never resolve into a visible ring, and
-// no single color is reused across multiple currents (previously the same
-// hue got recycled in 2-3 places, which is what read as flat/two-tone even
-// with a 5-color palette). The darkest usable tone pools in one corner
-// instead of a flat black vignette, and a soft light sheen sits opposite it
-// for depth.
-function clientCardGradient(palette: string[] | undefined) {
-  const raw = palette && palette.length >= 2 ? palette : CLIENT_CARD_FALLBACK_PALETTE;
-  const usable = raw.filter((hex) => { const l = hexLuminance(hex); return l > 0.06 && l < 0.8; });
-  const p = usable.length >= 2 ? usable : CLIENT_CARD_FALLBACK_PALETTE;
-  const sorted = [...p].sort((a, b) => hexLuminance(a) - hexLuminance(b));
-  const deepest = sorted[0];
-  const lightest = sorted[sorted.length - 1];
-  const base = p[0];
-  // Each palette color (deduped) gets exactly one current, at a distinct
-  // position/size, cycling through a fixed set of placements.
-  const spots = [
-    { pos: "10% 12%", size: "135% 115%" },
-    { pos: "92% 18%", size: "125% 120%" },
-    { pos: "78% 92%", size: "140% 125%" },
-    { pos: "18% 96%", size: "130% 115%" },
-    { pos: "50% 45%", size: "150% 140%" },
-  ];
-  const currents = p.map((hex, i) => {
-    const spot = spots[i % spots.length];
-    const alpha = 0.62 - i * 0.06;
-    return `radial-gradient(${spot.size} at ${spot.pos}, ${hexToRgba(hex, Math.max(0.32, alpha))} 0%, transparent 64%)`;
-  });
-  const layers = [
-    ...currents,
-    `linear-gradient(155deg, ${hexToRgba(lightest, 0.16)} 0%, transparent 42%)`,
-    `radial-gradient(115% 95% at 100% 100%, ${hexToRgba(deepest, 0.55)} 0%, transparent 58%)`,
-  ];
+function carouselLogoStyle(slug: string) {
+  const style = CAROUSEL_LOGO_STYLE[slug];
   return {
-    backgroundColor: base,
-    backgroundImage: layers.join(", "),
+    width: style?.width ?? "52%",
+    filter: style?.filter ?? CAROUSEL_LOGO_DROP,
   };
 }
 
@@ -1853,12 +1807,22 @@ function LiquidText({
 }
 
 function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
+  const [open, setOpen] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
   const intro =
     "Ideas and identity are rarely the problem. Execution is. We take what a company, brand, or person stands for and carry it through every [[detail]], until the result feels effortless to the people moving through it.";
   const points = [
     "The best design disappears into the experience. Nobody applauds the [[craft]], and that's exactly how you know it landed.",
     "Identity isn't expressed in one big gesture. It's carried in a hundred small decisions that all [[agree]] with each other.",
   ];
+
+  useEffect(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    setHeight(open ? el.scrollHeight : 0);
+  }, [open]);
+
   return (
     <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
@@ -1868,20 +1832,52 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
           className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
           style={{ color: "#5c5c5c" }}
         />
-        <div className="flex flex-col gap-4 mt-8">
-          {points.map((text, i) => (
-            <div key={i} className="flex gap-3 sm:max-w-xl">
-              <span className="text-[16.5px] sm:text-[19px] tracking-tight tabular-nums shrink-0" style={{ color: "#1a1a1a" }}>
-                {i + 1}.
-              </span>
-              <LiquidText
-                text={text}
-                delayMs={160 * (i + 1)}
-                className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
-                style={{ color: "#5c5c5c" }}
-              />
+        <div className="mt-8">
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            className="inline-flex items-center gap-2 text-[16.5px] sm:text-[19px] tracking-tight text-left"
+            style={{ color: "#1a1a1a" }}
+          >
+            How we think about execution
+            <svg
+              aria-hidden
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4 shrink-0"
+              style={{
+                color: "#5c5c5c",
+                transform: open ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 350ms cubic-bezier(0.22,1,0.36,1)",
+              }}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div
+            style={{
+              height,
+              overflow: "hidden",
+              transition: "height 350ms cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            <div ref={bodyRef} className="flex flex-col gap-4 pt-4 sm:max-w-xl">
+              {points.map((text, i) => (
+                <LiquidText
+                  key={text}
+                  text={text}
+                  delayMs={open ? 80 * (i + 1) : 0}
+                  className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+                  style={{ color: "#5c5c5c" }}
+                />
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
@@ -1901,19 +1897,21 @@ function AiApproach() {
   const second =
     "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
-    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:mx-auto">
-        <LiquidText
-          text={first}
-          className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
-          style={{ color: "#5c5c5c" }}
-        />
-        <LiquidText
-          text={second}
-          delayMs={160}
-          className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5"
-          style={{ color: "#5c5c5c" }}
-        />
+    <section className="rise w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
+      <div className="px-1.5 sm:pr-0 sm:pl-[calc(50vw-384px)]">
+        <div className="max-w-xl sm:max-w-2xl">
+          <LiquidText
+            text={first}
+            className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+            style={{ color: "#5c5c5c" }}
+          />
+          <LiquidText
+            text={second}
+            delayMs={160}
+            className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5"
+            style={{ color: "#5c5c5c" }}
+          />
+        </div>
       </div>
     </section>
   );
@@ -2489,64 +2487,36 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                   onMouseEnter={(e) => { setHoveredIndex(i); e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
                   onMouseLeave={(e) => { setHoveredIndex((prev) => (prev === i ? null : prev)); if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
                 >
-                  {item.card ? (
-                    <Image
-                      src={item.card}
-                      alt={item.client}
-                      fill
-                      priority={i < 3}
-                      loading={i < 3 ? undefined : "lazy"}
-                      quality={90}
-                      sizes="(max-width: 640px) 300px, 420px"
-                      className="object-cover"
-                      style={{ objectPosition: CLIENT_CARD_OBJECT_POSITION[item.slug] }}
-                      draggable={false}
+                  <>
+                    <div className="absolute inset-0" style={{ backgroundColor: "#0a0a0a" }} />
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                        backgroundSize: "180px 180px",
+                        mixBlendMode: "overlay",
+                        opacity: 0.35,
+                      }}
                     />
-                  ) : (
-                    <>
-                      <div
-                        className="absolute inset-0"
-                        style={
-                          item.slug === "aether"
-                            ? { backgroundColor: "#0a0a0a" }
-                            : clientCardGradient(item.palette)
-                        }
-                      />
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-0 pointer-events-none"
-                        style={{
-                          backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-                          backgroundSize: "180px 180px",
-                          mixBlendMode: "overlay",
-                          opacity: 0.35,
-                        }}
-                      />
-                    </>
-                  )}
-                  {!item.card && item.slug === "aether" && item.logo ? (
-                    // Every other card's logo overlay was removed — aether
-                    // keeps it as a one-off exception since it has no card
-                    // photo and its wordmark reads better centered than the
-                    // plain client-name fallback.
+                  </>
+                  {item.logo ? (
                     <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
                       <Image
                         src={item.logo}
                         alt={item.client}
                         width={180}
                         height={180}
-                        loading="lazy"
+                        priority={i < 3}
+                        loading={i < 3 ? undefined : "lazy"}
                         quality={75}
                         sizes="230px"
                         className="h-auto object-contain"
-                        style={{
-                          width: "71.5%",
-                          filter: "brightness(0) invert(1) drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))",
-                        }}
+                        style={carouselLogoStyle(item.slug)}
                         draggable={false}
                       />
                     </div>
-                  ) : !item.card ? (
+                  ) : (
                     <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
                       <p
                         className="text-[22px] sm:text-[26px] font-medium tracking-tight text-center leading-tight"
@@ -2555,7 +2525,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                         {item.client}
                       </p>
                     </div>
-                  ) : null}
+                  )}
                 </Link>
                 <div className="flex flex-col gap-1.5 w-[300px] sm:w-[420px]">
                   <Link

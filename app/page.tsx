@@ -9,8 +9,6 @@ export default function Page() {
     client: w.client,
     blurb: w.blurb ?? w.summary,
     logo: w.logo,
-    palette: w.palette,
-    card: w.card,
   }));
   return <Home initialWork={initialWork} />;
 }
