@@ -669,7 +669,7 @@ function VercelHero({
               ))}
             </span>
             <span
-              className="mt-2 sm:mt-2.5 block h-[clamp(2.05rem,5.5vw,3.15rem)] aspect-[420/96] bg-current"
+              className="mt-2 sm:mt-2.5 block h-[clamp(2.2rem,5.9vw,3.35rem)] aspect-[420/96] bg-current"
               style={{
                 ...heroRevealStyle(visible, inertiaStart),
                 WebkitMaskImage: "url(/logo.png)",
