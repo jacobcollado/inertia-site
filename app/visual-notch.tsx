@@ -574,7 +574,7 @@ function InertiaLogo() {
     <img
       src="/logo.png"
       alt="Inertia"
-      className="h-6 w-auto"
+      className="h-7 w-auto"
       style={{ display: "block" }}
     />
   );
@@ -613,7 +613,7 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
           whiteSpace: "nowrap",
         }}
       >
-        Book a call
+        Get in touch
       </a>
       {/* Bridge — thin bar connecting the two pills, sits behind them via
           negative margins so it overlaps into each rather than floating in

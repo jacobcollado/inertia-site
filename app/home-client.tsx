@@ -578,7 +578,7 @@ function VercelHero({
   // Heading words stagger with blur+scale so each token reads as settling into
   // place rather than popping. The wordmark lands as one fluid unit after the
   // lead-in words, then the CTA follows.
-  const HEADING_WORDS = ["Design", "with", "real"];
+  const HEADING_WORDS = ["Give", "your", "idea", "real"];
   const wordReveal = (i: number) => heroRevealStyle(visible, HERO_START + i * HERO_WORD_STEP);
   const inertiaStart = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
   const ctaFadeDelay = inertiaStart + 644;
@@ -658,7 +658,7 @@ function VercelHero({
           )}
 
           <h1
-            className="font-normal tracking-tight leading-none max-w-xl text-[clamp(2.9rem,7vw,4.2rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
+            className="font-normal tracking-tight leading-none max-w-2xl text-[clamp(2.9rem,7vw,4.2rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a" }}
           >
             <span>
@@ -668,17 +668,22 @@ function VercelHero({
                 </span>
               ))}
             </span>
-            <span className="mt-2 sm:mt-2.5" style={heroRevealStyle(visible, inertiaStart)}>
-              <Image
-                src="/logo.png"
-                alt="Inertia"
-                width={420}
-                height={96}
-                priority
-                className="h-[clamp(2.3rem,6.2vw,3.6rem)] w-auto"
-                draggable={false}
-              />
-            </span>
+            <span
+              className="mt-2 sm:mt-2.5 block h-[clamp(2.05rem,5.5vw,3.15rem)] aspect-[420/96] bg-current"
+              style={{
+                ...heroRevealStyle(visible, inertiaStart),
+                WebkitMaskImage: "url(/logo.png)",
+                maskImage: "url(/logo.png)",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskPosition: "center",
+              }}
+              role="img"
+              aria-label="Inertia"
+            />
           </h1>
 
           {false && (
