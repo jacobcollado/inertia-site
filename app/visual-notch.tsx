@@ -454,7 +454,7 @@ function ComponentsMobileMenu({ onClose }: { onClose: () => void }) {
         className="inline-flex items-center justify-center w-full rounded-full py-3 text-[15px] font-medium tracking-tight transition-opacity"
         style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", letterSpacing: "-0.01em" }}
       >
-        Book a call
+        Get in touch
       </a>
     </nav>
   );
@@ -607,7 +607,7 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
           borderRadius: 999,
           background: "rgb(var(--fg))",
           color: "rgb(var(--bg))",
-          fontWeight: 500,
+          fontWeight: 400,
           letterSpacing: "-0.01em",
           textDecoration: "none",
           whiteSpace: "nowrap",

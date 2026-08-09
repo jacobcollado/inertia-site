@@ -15,12 +15,12 @@ const SECTIONS = [
   {
     id: "digital-products",
     title: "Digital Products",
-    body: `All products sold by ${COMPANY} ("Inertia", "we", "us") — including Shopify themes such as Aether — are digital goods delivered electronically. Because the product is accessible immediately upon purchase and cannot be returned, all sales are final. We do not offer refunds as a matter of standard policy.`,
+    body: `All products sold by ${COMPANY} ("Inertia", "we", "us"), including Shopify themes such as Aether, are digital goods delivered electronically. Because the product is accessible immediately upon purchase and cannot be returned, all sales are final. We do not offer refunds as a matter of standard policy.`,
   },
   {
     id: "our-commitment",
     title: "Our Commitment",
-    body: `That said, we stand behind everything we sell. If you run into a problem — a bug, something that isn't working as documented, or any other issue with your purchase — contact us at ${CONTACT} and we will do our best to make it right. We take every complaint seriously and will work with you to resolve the issue. We would rather spend the time fixing something than leave a customer frustrated.`,
+    body: `That said, we stand behind everything we sell. If you run into a problem (a bug, something that isn't working as documented, or any other issue with your purchase), contact us at ${CONTACT} and we will do our best to make it right. We take every complaint seriously and will work with you to resolve the issue. We would rather spend the time fixing something than leave a customer frustrated.`,
   },
   {
     id: "exceptions",

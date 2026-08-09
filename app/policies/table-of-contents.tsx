@@ -13,7 +13,7 @@ export function TableOfContents({ sections }: { sections: { id: string; title: s
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-3 p-6 text-left"
       >
-        <span className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-60">Contents</span>
+        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Contents</span>
         <svg
           viewBox="0 0 12 12"
           fill="none"
@@ -37,7 +37,7 @@ export function TableOfContents({ sections }: { sections: { id: string; title: s
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="text-[16px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors py-0.5"
+                className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors py-0.5"
               >
                 {s.title}
               </a>

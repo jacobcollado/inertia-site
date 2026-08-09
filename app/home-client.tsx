@@ -262,7 +262,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
 
         <div className="px-6 sm:px-8 pt-5 sm:pt-7 pb-8 sm:pb-8">
           {done ? (
-            <div style={{ animation: "rise-in 280ms cubic-bezier(0.22,1,0.36,1) both" }}>
+            <div style={{ animation: "liquid-in 680ms cubic-bezier(0.22,0.61,0.36,1) both" }}>
               <div className="w-8 h-8 rounded-full flex items-center justify-center mb-4" style={{ background: "rgb(var(--blue)/0.1)" }}>
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ color: accent }}>
                   <polyline points="2 8 6 12 14 4" />
@@ -502,30 +502,28 @@ const HERO_CTA_SWAP_MS = 420;
 const HERO_CTA_SWAP_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const HERO_CTA_DWELL_MS = 5500;
 
-const HERO_REVEAL_MS = 780;
-const HERO_REVEAL_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
+const HERO_LIQUID_MS = 680;
+const HERO_LIQUID_EASE = "cubic-bezier(0.22, 0.61, 0.36, 1)";
 const HERO_WORD_STEP = 90;
 const HERO_START = 90;
 
-function heroRevealStyle(
+function heroLiquidStyle(
   visible: boolean,
   delay: number,
-  opts?: { letter?: boolean; travel?: number; blur?: number; scaleFrom?: number },
+  opts?: { blur?: number; scaleFrom?: number },
 ) {
-  const letter = opts?.letter ?? false;
-  const travel = opts?.travel ?? (letter ? 16 : 24);
-  const blur = opts?.blur ?? (letter ? 6 : 10);
-  const scaleFrom = opts?.scaleFrom ?? (letter ? 0.97 : 0.935);
+  const blur = opts?.blur ?? 10;
+  const scaleFrom = opts?.scaleFrom ?? 0.992;
   return {
     display: "inline-block" as const,
     willChange: "opacity, transform, filter",
     opacity: visible ? 1 : 0,
-    transform: visible ? "translateY(0) scale(1)" : `translateY(${travel}px) scale(${scaleFrom})`,
+    transform: visible ? "scale(1)" : `scale(${scaleFrom})`,
     filter: visible ? "blur(0px)" : `blur(${blur}px)`,
     transition: [
-      `opacity ${HERO_REVEAL_MS}ms ${HERO_REVEAL_EASE} ${delay}ms`,
-      `transform ${HERO_REVEAL_MS}ms ${HERO_REVEAL_EASE} ${delay}ms`,
-      `filter ${HERO_REVEAL_MS}ms ${HERO_REVEAL_EASE} ${delay}ms`,
+      `opacity ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE} ${delay}ms`,
+      `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE} ${delay}ms`,
+      `filter ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE} ${delay}ms`,
     ].join(", "),
   };
 }
@@ -546,7 +544,7 @@ function VercelHero({
   // faded in — the beam has to wait for the CTA's own entrance transition to
   // actually finish, same as HeroToIntroLine's connector does off this same
   // opacity transitionend, rather than a guessed delay that could drift out
-  // of sync with the fade() timing below.
+  // of sync with the liquid reveal timing below.
   const [beamActive, setBeamActive] = useState(false);
 
   useEffect(() => {
@@ -572,14 +570,15 @@ function VercelHero({
     return () => obs.disconnect();
   }, []);
 
-  const fade = (delay: number) =>
-    heroRevealStyle(visible, delay, { travel: 20, blur: 8, scaleFrom: 0.96 });
+  const liquid = (delay: number, opts?: { blur?: number; scaleFrom?: number }) =>
+    heroLiquidStyle(visible, delay, opts);
 
-  // Heading words stagger with blur+scale so each token reads as settling into
-  // place rather than popping. The wordmark lands as one fluid unit after the
-  // lead-in words, then the CTA follows.
+  // Heading words stagger with a soft blur+scale dissolve so each token
+  // flows into focus rather than rising. The wordmark lands as one fluid
+  // unit after the lead-in words, then the CTA follows.
   const HEADING_WORDS = ["Give", "your", "idea", "real"];
-  const wordReveal = (i: number) => heroRevealStyle(visible, HERO_START + i * HERO_WORD_STEP);
+  const wordReveal = (i: number) =>
+    heroLiquidStyle(visible, HERO_START + i * HERO_WORD_STEP, { blur: 7, scaleFrom: 0.994 });
   const inertiaStart = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
   const ctaFadeDelay = inertiaStart + 644;
 
@@ -589,7 +588,7 @@ function VercelHero({
     if (!visible) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
-    const firstSwapDelay = ctaFadeDelay + HERO_REVEAL_MS + 1400;
+    const firstSwapDelay = ctaFadeDelay + HERO_LIQUID_MS + 1400;
     let interval: ReturnType<typeof setInterval> | undefined;
     const timeout = setTimeout(() => {
       setCtaTarget((t) => (t === "project" ? "aether" : "project"));
@@ -636,7 +635,7 @@ function VercelHero({
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
             style={{
-              ...fade(0),
+              ...liquid(0),
               background: "rgba(26,26,26,0.06)",
               color: "rgba(26,26,26,0.7)",
             }}
@@ -651,7 +650,7 @@ function VercelHero({
           {false && (
           <p
             className="inline-flex items-center text-[19px] sm:text-[22px] tracking-tight -mb-4 sm:-mb-6"
-            style={{ ...fade(60), color: "#1a1a1a" }}
+            style={{ ...liquid(60), color: "#1a1a1a" }}
           >
             anti<AntiSlowMark color={accentColor} />slow
           </p>
@@ -671,7 +670,7 @@ function VercelHero({
             <span
               className="mt-2 sm:mt-2.5 block h-[clamp(2.2rem,5.9vw,3.35rem)] aspect-[420/96] bg-current"
               style={{
-                ...heroRevealStyle(visible, inertiaStart),
+                ...heroLiquidStyle(visible, inertiaStart, { blur: 12, scaleFrom: 0.99 }),
                 WebkitMaskImage: "url(/logo.png)",
                 maskImage: "url(/logo.png)",
                 WebkitMaskSize: "contain",
@@ -690,7 +689,7 @@ function VercelHero({
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
             <p
               className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-right"
-              style={{ ...fade(300), color: "#5c5c5c" }}
+              style={{ ...liquid(300), color: "#5c5c5c" }}
             >
               We do design and development ourselves, so you're not stuck explaining your vision twice.
             </p>
@@ -701,7 +700,7 @@ function VercelHero({
           <div className="flex flex-col gap-5 max-w-lg sm:hidden">
             <p
               className="text-[16.5px] leading-relaxed tracking-tight"
-              style={{ ...fade(300), color: "#5c5c5c" }}
+              style={{ ...liquid(300), color: "#5c5c5c" }}
             >
               We do design and development ourselves, so you're not stuck explaining your vision twice.
             </p>
@@ -729,7 +728,7 @@ function VercelHero({
               style={{
                 boxShadow: HERO_CTA_OUTER_SHADOW,
                 transformOrigin: "center",
-                ...fade(ctaFadeDelay),
+                ...liquid(ctaFadeDelay, { blur: 10, scaleFrom: 0.992 }),
               }}
               onTransitionEnd={e => {
                 if (e.propertyName !== "opacity") return;
@@ -852,7 +851,7 @@ function VercelHero({
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
-              style={{ ...fade(720), background: "#f0f0f0", color: "#1a1a1a" }}
+              style={{ ...liquid(720), background: "#f0f0f0", color: "#1a1a1a" }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
@@ -1215,10 +1214,8 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     <section id="start" className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       {/* Left on mobile so it shares an edge with the timeline's rows there;
           centred from sm up, where the timeline becomes a centred block.
-          Shares LiquidText's exact fade+rise feel (640ms, same easing and
-          14px travel) rather than the flatter, faster .rise used elsewhere,
-          so this section reads as a continuation of AiApproach's motion
-          instead of a distinct, unrelated reveal style. */}
+          Shares the hero's liquid blur+scale dissolve rather than the plainer
+          default .rise timing. */}
       <div className="max-w-2xl mx-auto text-left sm:text-center rise rise--liquid">
         <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight">
           Quality and speed both take attention.
@@ -1259,7 +1256,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
                   // rather than a hard clip — so each rail segment reads as
                   // blending into place under its row instead of popping in
                   // as a flat line. Follows just behind its row's own
-                  // fade+rise (see --rise-delay below) so the line trails
+                  // liquid dissolve (see --rise-delay below) so the line trails
                   // the node it connects from, like it's being drawn down
                   // from the number above it.
                   maskImage: "linear-gradient(to bottom, transparent 0%, black 60%)",
@@ -1351,7 +1348,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         {/* Answered questions collapse into one card pinned to the RIGHT edge,
             reading as the visitor's sent message. */}
         {stage !== "quiz" && (
-          <div className="flex justify-end" style={{ animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div className="flex justify-end" style={{ animation: "liquid-in 680ms cubic-bezier(0.22,0.61,0.36,1) both" }}>
             <div
               className="max-w-[85%] sm:max-w-[80%] rounded-3xl px-5 py-5 sm:px-6 sm:py-6 flex flex-col gap-4"
               style={{ background: "var(--sh-card)" }}
@@ -1421,7 +1418,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         )}
 
         {stage === "intake" && (
-          <div ref={intakeRef} className="mt-8 sm:mt-10" style={{ animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}>
+          <div ref={intakeRef} className="mt-8 sm:mt-10" style={{ animation: "liquid-in 680ms cubic-bezier(0.22,0.61,0.36,1) both" }}>
             <AskUserQuestions
               key={`intake-${resetKey}`}
               questions={INTAKE_QUESTIONS}
@@ -1444,7 +1441,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         {stage === "done" && (
           <div
             className="mt-8 sm:mt-10 w-full rounded-3xl border border-border px-6 py-8 sm:px-8 sm:py-9"
-            style={{ background: "var(--sh-card)", animation: "rise-in 320ms cubic-bezier(0.22,1,0.36,1) both" }}
+            style={{ background: "var(--sh-card)", animation: "liquid-in 680ms cubic-bezier(0.22,0.61,0.36,1) both" }}
           >
             <p className="text-[20px] sm:text-[22px] font-normal tracking-tight text-foreground leading-snug mb-2.5">
               That&rsquo;s everything. Thanks.
@@ -1765,12 +1762,9 @@ function tokenizeCopy(text: string): CopyToken[] {
   return tokens;
 }
 
-// Simple per-paragraph fade + rise, consistent with the site's .rise
-// language used elsewhere rather than a separate word-by-word effect. Each
-// block waits for its own scroll-into-view (or an explicit delayMs, so a
-// group of paragraphs/bullets under one heading can be sequenced to reveal
-// one after another instead of firing independently the instant each one
-// individually crosses into the viewport).
+// Per-paragraph liquid dissolve — blur clears and type settles into focus,
+// consistent with the hero and .rise--liquid scroll reveals rather than
+// sliding up from below.
 function LiquidText({
   text,
   className,
@@ -1805,7 +1799,7 @@ function LiquidText({
     return () => obs.disconnect();
   }, [delayMs]);
 
-  const DURATION = 640;
+  const DURATION = 680;
 
   return (
     <p
@@ -1813,10 +1807,15 @@ function LiquidText({
       className={className}
       style={{
         ...style,
-        willChange: "opacity, transform",
+        willChange: "opacity, transform, filter",
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(14px)",
-        transition: `opacity ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1), transform ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1)`,
+        transform: visible ? "scale(1)" : "scale(0.992)",
+        filter: visible ? "blur(0px)" : "blur(10px)",
+        transition: [
+          `opacity ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1)`,
+          `transform ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1)`,
+          `filter ${DURATION}ms cubic-bezier(0.22,0.61,0.36,1)`,
+        ].join(", "),
       }}
     >
       {tokens.map((token, i) => (
@@ -1847,7 +1846,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   }, [open]);
 
   return (
-    <section className="rise w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section className="rise rise--liquid w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
         <LiquidText
           pRef={introRef}
@@ -1920,7 +1919,7 @@ function AiApproach() {
   const second =
     "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
-    <section className="rise w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
+    <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
       <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-1.5 sm:pr-0 sm:pl-[calc(50vw-384px)]">
         <div className="max-w-xl sm:max-w-2xl">
           <LiquidText
@@ -2092,10 +2091,10 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   const [isDragging, setIsDragging] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Liquid entrance: cards cascade in left to right (same viscous blur/scale/
-  // rise language as LiquidText's word stagger) rather than popping in as one
-  // flat block with the section's own .rise fade. Gated on the section
-  // actually scrolling into view, same trigger point as .rise elsewhere.
+  // Liquid entrance: cards cascade in left to right with the same blur+scale
+  // dissolve as the hero, rather than popping in as one flat block with the
+  // section's own .rise fade. Gated on the section actually scrolling into
+  // view, same trigger point as .rise elsewhere.
   const sectionRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -2468,7 +2467,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                 style={{
                   willChange: "opacity, transform, filter",
                   opacity: revealed ? 1 : 0,
-                  transform: revealed ? "translateY(0) scale(1)" : "translateY(22px) scale(0.94)",
+                  transform: revealed ? "scale(1)" : "scale(0.992)",
                   filter: revealed ? "blur(0px)" : "blur(10px)",
                   transition: revealed
                     ? `opacity 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, transform 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, filter 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms`
@@ -2530,8 +2529,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                         alt={item.client}
                         width={180}
                         height={180}
-                        priority={i < 3}
-                        loading={i < 3 ? undefined : "lazy"}
+                        priority
                         quality={75}
                         sizes="230px"
                         className="h-auto object-contain"
@@ -2570,7 +2568,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                   {item.blurb && (
                     <div className="max-w-[85%] sm:max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
                       <p
-                        className="text-[16px] leading-snug tracking-tight w-full"
+                        className="text-[15px] sm:text-[16px] leading-snug tracking-tight w-full"
                         style={{ color: "rgb(var(--muted))" }}
                       >
                         {item.blurb}
@@ -2622,7 +2620,7 @@ function HeroToIntroLine({
     height: number;
   } | null>(null);
   // Gates the draw-in animation. Starts false so the connector's first paint
-  // is fully undrawn, then flips once the CTA's own fade/rise-in transition
+  // is fully undrawn, then flips once the CTA's own liquid reveal transition
   // (see VercelHero's fade()) actually finishes — listening for that
   // transitionend rather than guessing a matching delay keeps this in sync
   // even if the hero's own timing changes later.
@@ -2679,7 +2677,7 @@ function HeroToIntroLine({
       const armEndY = toRect.top - containerRect.top - 4;
       const paraLeft = toRect.left - containerRect.left;
       // The paragraph must sit below the CTA for this to make sense at all;
-      // during the CTA's own fade/rise-in it's briefly offset, which could
+      // during the CTA's own liquid reveal it's briefly offset, which could
       // otherwise transiently invert this.
       if (armEndY <= trunkTop) { stableFrames = 0; return; }
       // Split point sits a fraction of the CTA-to-paragraph gap above the

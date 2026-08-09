@@ -532,14 +532,14 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                 borderRadius: 999,
                 background: "rgb(var(--fg))",
                 color: "rgb(var(--bg))",
-                fontWeight: 500,
+                fontWeight: 400,
                 letterSpacing: "-0.01em",
                 textDecoration: "none",
                 transformOrigin: "center",
               }}
               {...ctaScaleHoverOnSelf}
             >
-              Book a call
+              Get in touch
             </a>
             <ThemeToggle />
           </div>

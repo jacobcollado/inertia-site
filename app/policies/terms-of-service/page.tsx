@@ -26,12 +26,12 @@ const SECTIONS = [
   {
     id: "client-portal",
     title: "Client Portal",
-    body: "Active clients are given access to a private dashboard at byinertia.com/dashboard. You sign in via Google and will see tabs for your project status, invoices, shared files, and a direct message thread with your project team. The portal is provided as a convenience — all project-critical communications are also available via email. Access to the portal may be suspended if your account is in breach of these Terms, including non-payment of outstanding invoices. Portal access does not constitute a separate subscription; it is tied to your active or recently completed engagement with Inertia.",
+    body: "Active clients are given access to a private dashboard at byinertia.com/dashboard. You sign in via Google and will see tabs for your project status, invoices, shared files, and a direct message thread with your project team. The portal is provided as a convenience. All project-critical communications are also available via email. Access to the portal may be suspended if your account is in breach of these Terms, including non-payment of outstanding invoices. Portal access does not constitute a separate subscription; it is tied to your active or recently completed engagement with Inertia.",
   },
   {
     id: "ip",
     title: "Intellectual Property & Ownership",
-    body: `Upon receipt of full payment, Client receives full ownership of all final deliverables created specifically for the project — including custom code, design files, copy, and assets. You can use, modify, resell, or build on those deliverables however you like. Inertia retains ownership of all pre-existing work brought into the project: base themes, internal component libraries, frameworks, tooling, and anything developed outside the scope of your engagement. Where pre-existing Inertia work is incorporated into a deliverable, you receive a perpetual, non-exclusive licence to use that work within your project. You may not extract, resell, or sublicence those underlying components separately from the delivered project.`,
+    body: `Upon receipt of full payment, Client receives full ownership of all final deliverables created specifically for the project, including custom code, design files, copy, and assets. You can use, modify, resell, or build on those deliverables however you like. Inertia retains ownership of all pre-existing work brought into the project: base themes, internal component libraries, frameworks, tooling, and anything developed outside the scope of your engagement. Where pre-existing Inertia work is incorporated into a deliverable, you receive a perpetual, non-exclusive licence to use that work within your project. You may not extract, resell, or sublicence those underlying components separately from the delivered project.`,
   },
   {
     id: "payment",
@@ -41,7 +41,7 @@ const SECTIONS = [
   {
     id: "revisions",
     title: "Revisions & Scope Changes",
-    body: "Every project includes two rounds of revisions against the original agreed brief. A revision means adjusting or correcting something already built — not adding new features, redesigning sections, or changing the direction of the work. Revisions that fall outside the original brief are treated as scope changes. Additional revision rounds beyond the included two are billed at our current hourly rate, agreed in writing before proceeding. Any change that materially alters what was originally scoped requires a written change order. Projects that go quiet for more than 30 days without a scheduled pause will be treated as stalled: we will invoice for all completed work and close out the project.",
+    body: "Every project includes two rounds of revisions against the original agreed brief. A revision means adjusting or correcting something already built, not adding new features, redesigning sections, or changing the direction of the work. Revisions that fall outside the original brief are treated as scope changes. Additional revision rounds beyond the included two are billed at our current hourly rate, agreed in writing before proceeding. Any change that materially alters what was originally scoped requires a written change order. Projects that go quiet for more than 30 days without a scheduled pause will be treated as stalled: we will invoice for all completed work and close out the project.",
   },
   {
     id: "post-launch",
@@ -51,22 +51,22 @@ const SECTIONS = [
   {
     id: "confidentiality",
     title: "Confidentiality",
-    body: "Both parties agree to keep confidential all non-public information shared during the project — including business plans, unreleased products, financial data, customer lists, and internal strategies. We do not share your information with anyone outside the team working on your project. Client credentials (store access, API keys, admin logins) are stored only for the duration they are needed and revoked on handover. Files shared via the portal are accessible only to your account and Inertia admins. If you need a formal NDA before we begin, send it over. We sign reasonable ones without issue.",
+    body: "Both parties agree to keep confidential all non-public information shared during the project, including business plans, unreleased products, financial data, customer lists, and internal strategies. We do not share your information with anyone outside the team working on your project. Client credentials (store access, API keys, admin logins) are stored only for the duration they are needed and revoked on handover. Files shared via the portal are accessible only to your account and Inertia admins. If you need a formal NDA before we begin, send it over. We sign reasonable ones without issue.",
   },
   {
     id: "liability",
     title: "Limitation of Liability",
-    body: `We build carefully and stand behind our work. That said, our total liability for any claim arising from these Terms or the services provided is capped at the total fees you paid us for the relevant project. We are not liable for indirect, incidental, consequential, or punitive damages of any kind — including lost revenue, missed launches, lost data, or downstream business impact. We are also not liable for issues caused by Shopify platform changes, third-party integrations, hosting providers, or modifications to delivered work made by you or anyone you have authorised. This limitation applies to the fullest extent permitted by the laws of ${JURISDICTION}.`,
+    body: `We build carefully and stand behind our work. That said, our total liability for any claim arising from these Terms or the services provided is capped at the total fees you paid us for the relevant project. We are not liable for indirect, incidental, consequential, or punitive damages of any kind, including lost revenue, missed launches, lost data, or downstream business impact. We are also not liable for issues caused by Shopify platform changes, third-party integrations, hosting providers, or modifications to delivered work made by you or anyone you have authorised. This limitation applies to the fullest extent permitted by the laws of ${JURISDICTION}.`,
   },
   {
     id: "termination",
     title: "Termination",
-    body: "Either party may terminate a project engagement with 14 days written notice. If you terminate, you are responsible for payment of all work completed to the termination date. We will deliver everything produced up to that point in a reasonable, transferable format and files already in your portal will remain accessible for 30 days. Deposits paid are non-refundable under any circumstances. If Inertia terminates due to a breach on your end — including non-payment, abusive conduct, or misrepresentation — all outstanding invoices become immediately due, and we reserve the right to suspend portal access and withhold final deliverables until payment is received.",
+    body: "Either party may terminate a project engagement with 14 days written notice. If you terminate, you are responsible for payment of all work completed to the termination date. We will deliver everything produced up to that point in a reasonable, transferable format and files already in your portal will remain accessible for 30 days. Deposits paid are non-refundable under any circumstances. If Inertia terminates due to a breach on your end, including non-payment, abusive conduct, or misrepresentation, all outstanding invoices become immediately due, and we reserve the right to suspend portal access and withhold final deliverables until payment is received.",
   },
   {
     id: "disputes",
     title: "Dispute Resolution",
-    body: `We have never had a dispute reach a formal stage, and we would like to keep it that way. If something goes wrong, the right first step is a direct conversation — the Messages tab in your portal is a good place to start. Most issues can be resolved quickly when both parties are straightforward about what happened. If a dispute cannot be resolved through direct communication within 30 days, both parties agree to attempt non-binding mediation before pursuing any legal action. These Terms are governed by the laws of ${JURISDICTION}. Any formal legal proceedings will be conducted in the appropriate courts of ${JURISDICTION}. The prevailing party is entitled to recover reasonable legal fees.`,
+    body: `We have never had a dispute reach a formal stage, and we would like to keep it that way. If something goes wrong, the right first step is a direct conversation. The Messages tab in your portal is a good place to start. Most issues can be resolved quickly when both parties are straightforward about what happened. If a dispute cannot be resolved through direct communication within 30 days, both parties agree to attempt non-binding mediation before pursuing any legal action. These Terms are governed by the laws of ${JURISDICTION}. Any formal legal proceedings will be conducted in the appropriate courts of ${JURISDICTION}. The prevailing party is entitled to recover reasonable legal fees.`,
   },
   {
     id: "changes",
@@ -83,13 +83,13 @@ export default function TermsPage() {
 
       {/* Document header */}
       <div className="mb-10">
-        <h1 className="text-[2.4rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
+        <h1 className="text-[2.1rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
           Inertia Terms of Service
         </h1>
         <div className="flex flex-wrap gap-x-8 gap-y-1">
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {EFFECTIVE}</p>
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))]">{JURISDICTION}</p>
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {EFFECTIVE}</p>
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]">{JURISDICTION}</p>
         </div>
       </div>
 
@@ -97,8 +97,8 @@ export default function TermsPage() {
       <div className="flex flex-col gap-12">
         {SECTIONS.map((s) => (
           <section key={s.id} id={s.id} className="scroll-mt-24">
-            <h2 className="text-[20px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
-            <p className="text-[17px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
+            <h2 className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
+            <p className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
               {s.body}
             </p>
           </section>
@@ -107,13 +107,13 @@ export default function TermsPage() {
 
       {/* Footer */}
       <div className="mt-20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] opacity-50">
+        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50">
           Questions?{" "}
           <a href={`mailto:${CONTACT}`} className="underline underline-offset-2 hover:opacity-80 transition-opacity">
             {CONTACT}
           </a>
         </p>
-        <Link href="/policies/privacy-policy" className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
+        <Link href="/policies/privacy-policy" className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
           Privacy Policy →
         </Link>
       </div>

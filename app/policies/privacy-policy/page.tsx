@@ -20,7 +20,7 @@ const SECTIONS = [
   {
     id: "information-collected",
     title: "Information We Collect",
-    body: "We collect information in three ways. First, information you give us directly: if you fill out the contact form, we receive your name, email address, and message content. If you create a client portal account, you sign in via Google OAuth — we receive your email address from Google and store it alongside any display name or company name you set in your portal settings. We do not receive or store your Google password. Second, project and billing data: your portal stores the projects, invoices, files, and messages associated with your engagement. Invoice payments are processed through Whop, which passes us confirmation and your email. We never receive or store your card details. Third, technical data: our hosting logs IP addresses, browser type, and request metadata for a rolling 30-day window, used exclusively for security monitoring and debugging. We also receive anonymised, aggregated page-view data. No individual user is identifiable from this.",
+    body: "We collect information in three ways. First, information you give us directly: if you fill out the contact form, we receive your name, email address, and message content. If you create a client portal account, you sign in via Google OAuth. We receive your email address from Google and store it alongside any display name or company name you set in your portal settings. We do not receive or store your Google password. Second, project and billing data: your portal stores the projects, invoices, files, and messages associated with your engagement. Invoice payments are processed through Whop, which passes us confirmation and your email. We never receive or store your card details. Third, technical data: our hosting logs IP addresses, browser type, and request metadata for a rolling 30-day window, used exclusively for security monitoring and debugging. We also receive anonymised, aggregated page-view data. No individual user is identifiable from this.",
   },
   {
     id: "use",
@@ -35,17 +35,17 @@ const SECTIONS = [
   {
     id: "cookies",
     title: "Cookies & Tracking",
-    body: "We use a small number of browser storage entries. One stores your theme preference (light or dark mode) along with a timestamp so the site remembers your choice between visits. When you sign in to the client portal, Supabase sets a session cookie to keep you authenticated. This cookie contains a session token, not your password or payment details. We use PostHog to collect anonymised page-view analytics and to record anonymised session replays — these help us understand how visitors navigate the site so we can improve it. All form inputs and text fields are masked in session recordings; we never capture passwords, payment details, or personal data entered into forms. PostHog analytics data is routed through our own domain and stored on PostHog's US servers. We do not use advertising cookies, cross-site tracking cookies, or browser fingerprinting. You can clear cookies at any time in your browser settings. Doing so will sign you out of the portal and reset your theme preference.",
+    body: "We use a small number of browser storage entries. One stores your theme preference (light or dark mode) along with a timestamp so the site remembers your choice between visits. When you sign in to the client portal, Supabase sets a session cookie to keep you authenticated. This cookie contains a session token, not your password or payment details. We use PostHog to collect anonymised page-view analytics and to record anonymised session replays. These help us understand how visitors navigate the site so we can improve it. All form inputs and text fields are masked in session recordings; we never capture passwords, payment details, or personal data entered into forms. PostHog analytics data is routed through our own domain and stored on PostHog's US servers. We do not use advertising cookies, cross-site tracking cookies, or browser fingerprinting. You can clear cookies at any time in your browser settings. Doing so will sign you out of the portal and reset your theme preference.",
   },
   {
     id: "retention",
     title: "Data Retention",
-    body: "We keep your data only for as long as we need it. Contact form messages are kept for the duration of the active conversation plus 12 months, then deleted. Portal account data — your profile, projects, invoices, files, and messages — is retained for as long as your account is active, plus 12 months after closure to handle any follow-up queries. Invoice and billing records are retained for 7 years to satisfy tax and accounting requirements. Server logs are purged automatically after 30 days. If you want your contact or portal data deleted sooner, email us and we will action it within 7 days.",
+    body: "We keep your data only for as long as we need it. Contact form messages are kept for the duration of the active conversation plus 12 months, then deleted. Portal account data (your profile, projects, invoices, files, and messages) is retained for as long as your account is active, plus 12 months after closure to handle any follow-up queries. Invoice and billing records are retained for 7 years to satisfy tax and accounting requirements. Server logs are purged automatically after 30 days. If you want your contact or portal data deleted sooner, email us and we will action it within 7 days.",
   },
   {
     id: "security",
     title: "Security",
-    body: "Authentication for the client portal is handled via Google OAuth and Supabase, both of which use industry-standard token-based session management. We do not store passwords. Your portal data is stored in a Supabase database with row-level security policies, meaning your records are only accessible to your account and to Inertia admins. Client credentials shared during a project — store access, API keys, admin logins — are stored only for the duration they are needed and revoked on handover. That said, no system is perfectly secure, and we cannot guarantee that data transmitted over the internet will never be intercepted. If you have concerns about your account or data, contact us immediately.",
+    body: "Authentication for the client portal is handled via Google OAuth and Supabase, both of which use industry-standard token-based session management. We do not store passwords. Your portal data is stored in a Supabase database with row-level security policies, meaning your records are only accessible to your account and to Inertia admins. Client credentials shared during a project (store access, API keys, admin logins) are stored only for the duration they are needed and revoked on handover. That said, no system is perfectly secure, and we cannot guarantee that data transmitted over the internet will never be intercepted. If you have concerns about your account or data, contact us immediately.",
   },
   {
     id: "rights",
@@ -72,13 +72,13 @@ export default function PrivacyPage() {
 
       {/* Document header */}
       <div className="mb-10">
-        <h1 className="text-[2.4rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
+        <h1 className="text-[2.1rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
           Inertia Privacy Policy
         </h1>
         <div className="flex flex-wrap gap-x-8 gap-y-1">
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {EFFECTIVE}</p>
-          <a href={`mailto:${CONTACT}`} className="text-[16px] tracking-tight text-[rgb(var(--muted))] hover:opacity-80 transition-opacity">{CONTACT}</a>
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {EFFECTIVE}</p>
+          <a href={`mailto:${CONTACT}`} className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:opacity-80 transition-opacity">{CONTACT}</a>
         </div>
       </div>
 
@@ -86,8 +86,8 @@ export default function PrivacyPage() {
       <div className="flex flex-col gap-12">
         {SECTIONS.map((s) => (
           <section key={s.id} id={s.id} className="scroll-mt-24">
-            <h2 className="text-[20px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
-            <p className="text-[17px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
+            <h2 className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
+            <p className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
               {s.body}
             </p>
           </section>
@@ -96,13 +96,13 @@ export default function PrivacyPage() {
 
       {/* Footer */}
       <div className="mt-20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] opacity-50">
+        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50">
           Questions?{" "}
           <a href={`mailto:${CONTACT}`} className="underline underline-offset-2 hover:opacity-80 transition-opacity">
             {CONTACT}
           </a>
         </p>
-        <Link href="/policies/terms-of-service" className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
+        <Link href="/policies/terms-of-service" className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
           Terms of Service →
         </Link>
       </div>

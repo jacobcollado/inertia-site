@@ -758,25 +758,25 @@ h1:hover .redact > span.redact-inner,
   animation-delay: var(--rise-delay, 0ms);
 }
 
-/* Matches LiquidText's JS-driven fade+rise (used by the AI-approach
-   paragraphs above this stretch of the homepage) exactly — same duration,
-   easing, and travel distance — so the FAQ and "how it works" sections
-   right below it read as a continuation of the same motion instead of the
-   plainer, faster default .rise timing. */
+/* Viscous blur+scale dissolve (hero + index scroll reveals) — no upward
+   travel, so content flows into focus rather than rising into place. */
 .rise--liquid {
-  transform: translateY(14px);
+  transform: scale(0.992);
+  filter: blur(10px);
+  will-change: opacity, transform, filter;
 }
 
 .rise--liquid.is-visible {
   animation-name: rise-liquid;
-  animation-duration: 640ms;
+  animation-duration: 680ms;
   animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @keyframes rise-liquid {
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1);
+    filter: blur(0);
   }
 }
 
@@ -875,6 +875,19 @@ h1:hover .redact > span.redact-inner,
 }
 @media (prefers-reduced-motion: reduce) {
   .antislow-dot { animation: none; opacity: 1; }
+}
+
+@keyframes liquid-in {
+  from {
+    opacity: 0;
+    transform: scale(0.992);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
 }
 
 @keyframes rise-in {
@@ -1482,10 +1495,12 @@ h1:hover .redact > span.redact-inner,
 @media (prefers-reduced-motion: reduce) {
   .fade-in,
   .rise,
-  .rise.is-visible {
+  .rise.is-visible,
+  .rise--liquid.is-visible {
     animation: none;
     opacity: 1;
     transform: none;
+    filter: none;
   }
   [style*="hero-canvas"],
   [style*="hero-line"] {
