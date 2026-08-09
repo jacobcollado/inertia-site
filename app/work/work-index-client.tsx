@@ -8,9 +8,15 @@ import { getWorkIndexThumb } from "@/lib/work-thumb";
 
 type WorkMetaWithGallery = WorkMeta & { gallery: SizedImage[] };
 
+const SERVICE_SHORT: Record<string, string> = {
+  "Web development": "Development",
+  "UI/UX design": "UI/UX",
+};
+
 function serviceShort(s: string | undefined): string {
   if (!s) return "";
-  return s.trim().split(/\s+/)[0] ?? "";
+  const trimmed = s.trim();
+  return SERVICE_SHORT[trimmed] ?? trimmed.split(/\s+/)[0] ?? "";
 }
 
 // Desktop-carousel-only thumbnail override, keyed by slug: swaps the default
@@ -33,23 +39,6 @@ const WORK_LINKS: Record<string, { url?: string; status?: string; year?: string;
   "samuel-norris": { url: "https://samuelnorrisofficial.com", year: "Early 2025" },
   "mood-swings": { url: "https://moodswings.us", year: "August 2025" },
   "subtle-goods": { url: "https://subtlegoods.shop", year: "June 2026" },
-};
-
-// Per-project dialog logo overrides. Logos ship in varied colors and natural
-// proportions; the dialog sits on a light surface, so some need forcing to
-// solid black, a couple read better with the wordmark text alone (logo
-// hidden), and a few need a nudged height so they don't read too small/large
-// against the others. `tone`: "black" forces the artwork to pure black via
-// filter, "hide" drops the image entirely. `height`: pixel height overriding
-// the default 28px (kept as an inline number rather than a Tailwind class so
-// it doesn't depend on the JIT scanner picking up interpolated class names).
-const DIALOG_LOGO_OVERRIDE: Record<string, { tone?: "black" | "hide"; height?: number }> = {
-  "ellora-la": { tone: "black", height: 18 },
-  "inboundly": { tone: "black", height: 32 },
-  "subtle-goods": { tone: "black", height: 44 },
-  "ft-gioo": { height: 32 },
-  "aether": { tone: "hide" },
-  "samuel-norris": { tone: "hide" },
 };
 
 // Per-project thumbnail crop position (object-position). Default is "center
@@ -225,22 +214,6 @@ function WorkDialog({
         <div className="px-6 sm:px-8 pt-5 sm:pt-8 pb-8">
           {/* Header */}
           <div className="flex flex-col gap-3 pr-10">
-            {work.logo && DIALOG_LOGO_OVERRIDE[work.slug]?.tone !== "hide" && (
-              <Image
-                src={work.logo}
-                alt={work.client}
-                width={160}
-                height={160}
-                sizes="160px"
-                quality={78}
-                className="w-auto object-contain object-left"
-                style={{
-                  height: DIALOG_LOGO_OVERRIDE[work.slug]?.height ?? 28,
-                  width: "auto",
-                  filter: DIALOG_LOGO_OVERRIDE[work.slug]?.tone === "black" ? "brightness(0)" : "var(--logo-filter, none)",
-                }}
-              />
-            )}
             <h2 className="text-[clamp(1.6rem,4vw,2.1rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
               {work.client}
             </h2>
@@ -377,7 +350,7 @@ function WorkCard({
       onClick={onOpen}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
-      className={`group flex flex-col gap-3 text-left${wide && !carousel ? " sm:col-span-2" : ""}${carousel ? " shrink-0" : ""}`}
+      className={`group flex flex-col text-left${wide && !carousel ? " sm:col-span-2" : ""}${carousel ? " shrink-0" : ""}`}
       // Carousel cards are as wide as CAROUSEL_CARD_WIDTH allows, but never so
       // tall that the card plus its label row overflows the frame. Capping the
       // width by the available height (times the 4/3 aspect) means a short
@@ -390,11 +363,14 @@ function WorkCard({
         ref={cardRef}
         className={`work-card-thumb relative w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]${carousel ? " work-card-thumb--carousel" : ""}`}
         style={{
+          // Mobile grid (non-carousel) uses a shorter frame than the old 4/3
+          // so the list scrolls less and the in-card title/service overlay
+          // doesn't sit on a tall empty crop.
           aspectRatio: carousel
             ? `${CAROUSEL_AR_W} / ${CAROUSEL_AR_H}`
             : wide
               ? "16 / 9"
-              : "4 / 3",
+              : "3 / 2",
           ...(suppressThumbTransition ? { transition: "none" } : {}),
         }}
       >
@@ -409,19 +385,23 @@ function WorkCard({
             // these read as low-resolution once the cards got bigger.
             sizes={carousel ? "1536px" : wide ? "(max-width: 640px) 100vw, 1024px" : "(max-width: 640px) 100vw, 512px"}
             quality={90}
+            // /work is an image-first page — skip lazy-load so thumbs don't
+            // pop in after the card shells paint. Paired with <link rel=preload>
+            // in page.tsx for the optimized next/image URLs.
+            priority
             className="object-cover"
             style={{ objectPosition }}
             draggable={false}
           />
         ) : null}
         <div
-          className="hidden sm:flex absolute inset-x-0 bottom-0 items-center justify-between gap-3 px-4 pt-14 pb-3 pointer-events-none"
+          className="flex absolute inset-x-0 bottom-0 items-center justify-between gap-3 px-3.5 sm:px-4 pt-16 pb-3 pointer-events-none"
           style={{
-            background: "linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.34) 38%, rgba(0,0,0,0.12) 68%, transparent 100%)",
+            background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.52) 32%, rgba(0,0,0,0.22) 62%, transparent 100%)",
           }}
         >
           <span
-            className="text-[16px] font-medium tracking-tight text-white"
+            className="text-[15px] sm:text-[16px] font-normal tracking-tight text-white"
             style={{ textShadow: "0 1px 12px rgba(0,0,0,0.45)" }}
           >
             {work.client}
@@ -429,22 +409,12 @@ function WorkCard({
           {work.service && (
             <span
               className="text-[12px] tracking-tight shrink-0 rounded-full px-2.5 pt-[3px] pb-[4px] leading-none"
-              style={{ background: "rgb(82 82 82)", color: "rgba(255,255,255,0.88)" }}
+              style={{ background: "rgb(110 110 110)", color: "rgba(255,255,255,0.92)" }}
             >
               {serviceShort(work.service)}
             </span>
           )}
         </div>
-      </div>
-      <div className="flex sm:hidden items-center justify-between gap-3">
-        <span className="text-[16px] font-medium tracking-tight text-[rgb(var(--fg))]">
-          {work.client}
-        </span>
-        {work.service && (
-          <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] shrink-0 rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))" }}>
-            {serviceShort(work.service)}
-          </span>
-        )}
       </div>
     </button>
   );
@@ -991,7 +961,7 @@ const ALL_FILTER = "All";
 const FILTER_LABEL: Record<string, string> = {
   "Shopify storefront": "Storefront",
   "Shopify theme": "Theme",
-  "Web development": "Web dev",
+  "Web development": "Development",
   "UI/UX design": "UI/UX",
 };
 
@@ -1095,7 +1065,7 @@ export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWi
           <WorkCarousel items={visibleWork} onOpen={(slug) => setOpenSlug(slug)} headerPx={frameTop} />
         </div>
       ) : isDesktop === false ? (
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-5">
           {visibleWork.map((w) => (
             <WorkCard key={w.slug} work={w} onOpen={() => setOpenSlug(w.slug)} wide={w.slug === "ft-gioo"} />
           ))}

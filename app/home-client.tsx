@@ -103,7 +103,7 @@ function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNod
               the full row. */}
           <span className="flex-1 text-left sm:text-center">
             <span
-              className="inline-block text-[16px] sm:text-[17px] tracking-tight text-[rgb(var(--fg))]"
+              className={`inline-block tracking-tight text-[rgb(var(--fg))] ${open ? "text-[15px] sm:text-[16px]" : "text-[16px] sm:text-[17px]"}`}
               style={{
                 background: open ? "rgb(var(--bg))" : "transparent",
                 borderRadius: 999,
@@ -1921,7 +1921,7 @@ function AiApproach() {
     "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
     <section className="rise w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
-      <div className="px-1.5 sm:pr-0 sm:pl-[calc(50vw-384px)]">
+      <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-1.5 sm:pr-0 sm:pl-[calc(50vw-384px)]">
         <div className="max-w-xl sm:max-w-2xl">
           <LiquidText
             text={first}

@@ -1777,7 +1777,7 @@ function Row({
         aria-hidden
         className={cn(
           "absolute inline-flex items-center justify-center w-5 h-5 text-[11px] transition-[opacity,font-variation-settings] duration-80",
-          isMulti && shape.bg,
+          shape.bg,
           isMulti
             ? chipFilled
               ? "bg-foreground text-background"
@@ -1794,6 +1794,10 @@ function Row({
           fontVariationSettings: chipFilled
             ? fontWeights.semibold
             : fontWeights.medium,
+          // Single-select: same page-bg disc as the "Question N of M"
+          // counter and PROCESS_STEPS markers. Multi keeps its own
+          // filled/outlined treatment above.
+          ...(!isMulti ? { background: "rgb(var(--bg))" } : null),
         }}
       >
         {chipContent}

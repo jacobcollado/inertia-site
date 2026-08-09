@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePostHog } from "./posthog-provider";
+import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 
 // Toggle is a pure label+checkbox with CSS-only transitions on the thumb/track.
 // No JS runs on interaction beyond the state change itself.
@@ -67,10 +68,16 @@ export function CookieBanner() {
               onClick={() => setExpanded((v) => !v)}
               className="cb-btn cb-btn-secondary"
               aria-expanded={expanded}
+              {...ctaScaleHoverOnSelf}
             >
               {expanded ? "Close" : "Customize"}
             </button>
-            <button type="button" onClick={() => applyConsent(true)} className="cb-btn cb-btn-primary">
+            <button
+              type="button"
+              onClick={() => applyConsent(true)}
+              className="cb-btn cb-btn-primary"
+              {...ctaScaleHoverOnSelf}
+            >
               Accept all
             </button>
           </div>
@@ -104,10 +111,20 @@ export function CookieBanner() {
 
             {/* Confirm row */}
             <div className="flex items-center justify-end gap-2 sm:gap-3 pt-1">
-              <button type="button" onClick={() => applyConsent(false)} className="cb-btn cb-btn-secondary">
+              <button
+                type="button"
+                onClick={() => applyConsent(false)}
+                className="cb-btn cb-btn-secondary"
+                {...ctaScaleHoverOnSelf}
+              >
                 Decline all
               </button>
-              <button type="button" onClick={() => applyConsent(analytics)} className="cb-btn cb-btn-primary">
+              <button
+                type="button"
+                onClick={() => applyConsent(analytics)}
+                className="cb-btn cb-btn-primary"
+                {...ctaScaleHoverOnSelf}
+              >
                 Confirm
               </button>
             </div>
