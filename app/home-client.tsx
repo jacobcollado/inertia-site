@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { BorderBeam } from "border-beam";
-import { ctaScaleHoverOnParent } from "@/lib/cta-hover-motion";
+import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string };
 
@@ -17,148 +17,51 @@ export default function Home({ initialWork }: { initialWork: ClientCarouselItem[
   return <VisualLayout initialWork={initialWork} />;
 }
 
-const hl = (text: string) => (
-  <span
-    style={{
-      backgroundImage:
-        "linear-gradient(104deg, rgba(120,120,120,0) 0.3%, rgba(120,120,120,0.28) 2.5%, rgba(120,120,120,0.16) 20%, rgba(120,120,120,0.14) 80%, rgba(120,120,120,0.26) 97.5%, rgba(120,120,120,0) 99.7%)",
-      color: "inherit",
-      // Uneven corner radii read as a rougher, hand-marked stroke rather
-      // than a clean uniform rectangle.
-      borderRadius: "3px 7px 4px 8px / 6px 3px 7px 2px",
-      padding: "1px 3px",
-    }}
-  >
-    {text}
-  </span>
-);
+const LIQUID_REVEAL = "rise rise--liquid";
 
-const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
-  {
-    q: "What kind of projects do you take on?",
-    a: <>We partner with {hl("fashion brands")}, {hl("trade businesses")}, and founder-led companies who care how their work looks, feels, and holds up. Storefronts, digital products, and brand identities.</>,
-  },
-  {
-    q: "How does the process work?",
-    a: <>It starts with a {hl("short discovery call")} about what you're building and why it matters. From there, {hl("direction, design, and development")} run as one continuous process, with the same people from first sketch to ship.</>,
-  },
-  {
-    q: "Do you work with early-stage founders?",
-    a: <>Yes, and some of our best work has started there. If you have {hl("a clear vision")} and want a team that treats it like their own, we'll get along.</>,
-  },
-  {
-    q: "How long does a project take?",
-    a: <>Scope decides. A focused storefront or landing page ships in {hl("2-4 weeks")}, and larger product builds run {hl("6-12 weeks")}. After one conversation we can give you a real date, not a range.</>,
-  },
-  {
-    q: "What does it cost?",
-    a: <>Every project is scoped and quoted individually, and most engagements {hl("start from $3,000")}. You'll know exactly what you're getting, and why, before anything begins.</>,
-  },
-  {
-    q: "Can you help with just design, or just development?",
-    a: <>Our best work happens when we {hl("own the full process")}, because that's where the seams disappear. But tell us what you actually need and we'll be honest about whether we're the right fit.</>,
-  },
-  {
-    q: "Do you still offer the Aether Shopify theme?",
-    a: <>Yes. {hl("Aether")} is our Shopify theme, from $85. It ships with 41 sections, dark mode, sticky cart, and mega menu, and you can buy a license and go live the same afternoon at <Link href="/aether" style={{ color: "#0a84ff", textDecoration: "none" }}>byinertia.com/aether</Link>.</>,
-  },
-];
-
-function FaqItem({ q, a, open, onToggle, delay }: { q: string; a: React.ReactNode; open: boolean; onToggle: () => void; delay: number }) {
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    const el = bodyRef.current;
-    if (!el) return;
-    const target = open ? el.scrollHeight : 0;
-    setHeight(target);
-  }, [open]);
-
-  return (
-    <div
-      className="rise rise--liquid"
-      style={{ "--rise-delay": `${delay}ms` } as React.CSSProperties}
-    >
-      <div
-        style={{
-          borderRadius: 16,
-          background: open ? "rgb(var(--surface))" : "transparent",
-          transition: "background 350ms cubic-bezier(0.22,1,0.36,1)",
-          marginBottom: 6,
-        }}
-      >
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-expanded={open}
-          className="w-full flex items-center justify-between gap-6 py-5 px-5"
-        >
-          {/* Label sits on its own black pill once the item is open, so the
-              active question reads as a distinct chip against the lighter
-              --surface panel behind it. Closed items stay bare — a pill on
-              every row would flatten the open/closed distinction.
-              The wrapper keeps flex-1 and the text alignment; the inner span
-              is inline-block so the pill hugs the text instead of spanning
-              the full row. */}
-          <span className="flex-1 text-left sm:text-center">
-            <span
-              className={`inline-block tracking-tight text-[rgb(var(--fg))] ${open ? "text-[15px] sm:text-[16px]" : "text-[16px] sm:text-[17px]"}`}
-              style={{
-                background: open ? "rgb(var(--bg))" : "transparent",
-                borderRadius: 999,
-                // Vertical padding is constant and cancelled by an equal
-                // negative margin, so the pill's height never changes the
-                // button's own row height — only the horizontal padding
-                // animates in. Without this the open row grows 12px taller
-                // than the closed ones and the list jumps on toggle.
-                padding: "6px 14px",
-                marginTop: -6,
-                marginBottom: -6,
-                marginLeft: open ? 0 : -14,
-                marginRight: open ? 0 : -14,
-                transition:
-                  "background 350ms cubic-bezier(0.22,1,0.36,1), margin-left 350ms cubic-bezier(0.22,1,0.36,1), margin-right 350ms cubic-bezier(0.22,1,0.36,1)",
-              }}
-            >
-              {q}
-            </span>
-          </span>
-        </button>
-        <div
-          style={{
-            height,
-            overflow: "hidden",
-            transition: "height 350ms cubic-bezier(0.22,1,0.36,1)",
-          }}
-        >
-          <div ref={bodyRef} className="pb-5 px-5">
-            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-left sm:text-center sm:max-w-md sm:mx-auto">
-              {a}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+function liquidRevealDelay(ms: number): React.CSSProperties {
+  return { "--rise-delay": `${ms}ms` } as React.CSSProperties;
 }
 
-function IndexFaq() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+function useLiquidReveal(active: boolean, delayMs = 0) {
+  const ref = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !active) return;
+
+    el.classList.remove("is-visible");
+
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let outerRaf = 0;
+    let innerRaf = 0;
+
+    const reveal = () => {
+      outerRaf = requestAnimationFrame(() => {
+        innerRaf = requestAnimationFrame(() => el.classList.add("is-visible"));
+      });
+    };
+
+    if (delayMs > 0) timeoutId = setTimeout(reveal, delayMs);
+    else reveal();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      cancelAnimationFrame(outerRaf);
+      cancelAnimationFrame(innerRaf);
+    };
+  }, [active, delayMs]);
+
+  return ref;
+}
+
+function ServicesSection() {
   return (
     <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:max-w-xl mx-auto">
-        {FAQ_ITEMS.map((item, i) => (
-          <FaqItem
-            key={item.q}
-            q={item.q}
-            a={item.a}
-            open={openIndex === i}
-            onToggle={() => setOpenIndex(openIndex === i ? null : i)}
-            delay={i * 40}
-          />
-        ))}
+      <div className="max-w-2xl mx-auto text-left sm:text-center">
+        <p className="rise rise--liquid text-[clamp(1.8rem,4vw,2.5rem)] font-normal tracking-[-0.03em] leading-snug text-[rgb(var(--fg))]">
+          We build the version of your business (and product) people fall for.
+        </p>
       </div>
     </section>
   );
@@ -498,6 +401,11 @@ const HERO_CTA_OUTER_SHADOW =
   "0 10px 28px rgba(0,0,0,0.24)," +
   "0 24px 56px -10px rgba(0,0,0,0.20)";
 
+const INQUIRY_CTA_OUTER_SHADOW =
+  "0 2px 4px rgba(0,0,0,0.18)," +
+  "0 10px 28px rgba(0,0,0,0.14)," +
+  "0 24px 56px -10px rgba(0,0,0,0.12)";
+
 const HERO_CTA_DWELL_MS = 5500;
 
 const HERO_LIQUID_MS = 680;
@@ -766,7 +674,7 @@ function VercelHero({
                 if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                 else window.scrollTo({ top: targetY, behavior: "smooth" });
               }}
-              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-2 text-[15px] sm:text-[16px] font-medium tracking-tight"
+              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-1.5 text-[15px] sm:text-[16px] font-medium tracking-tight"
               style={{
                 background:
                   "linear-gradient(180deg, #242424 0%, #000000 52%, #080808 100%)",
@@ -1029,23 +937,6 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
   },
 ];
 
-// The three steps between landing here and starting work, shown as a timeline
-// under the heading in place of a subheading.
-const PROCESS_STEPS = [
-  {
-    title: "You answer a few questions",
-    body: "Right below. A few on how you think about the work, then the details we need.",
-  },
-  {
-    title: "We talk",
-    body: "A real conversation, both directions. You're deciding about us just as much.",
-  },
-  {
-    title: "If it clicks, we start",
-    body: "No pitch deck, no drawn-out proposal. We scope the work and get going.",
-  },
-];
-
 // Turn the component's {questionId: {selectedIds, otherText}} answer map into
 // readable "question -> answer" pairs for the transcript and the emailed
 // payload, resolving option ids back to their labels.
@@ -1105,7 +996,21 @@ function useTypewriter(text: string, active: boolean, speed = 18) {
 // chat box that becomes the real question component once the text lands.
 type Stage = "quiz" | "typing" | "intake" | "done";
 
+function QuestionnaireBoxBackdrop() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url(/questionnaire-bg.png)" }}
+      />
+      <div className="absolute inset-0 bg-black/50" />
+    </div>
+  );
+}
+
 function Questionnaire({ onStartConversation }: { onStartConversation: () => void }) {
+  const [disclosed, setDisclosed] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [stage, setStage] = useState<Stage>("quiz");
   const [result, setResult] = useState<{ title: string; body: string } | null>(null);
   const [transcript, setTranscript] = useState<{ question: string; answer: string }[]>([]);
@@ -1114,6 +1019,46 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   const [submitError, setSubmitError] = useState("");
   const [resetKey, setResetKey] = useState(0);
   const intakeRef = useRef<HTMLDivElement>(null);
+  const inquiryBorderRef = useRef<HTMLDivElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
+  const [detailsHeight, setDetailsHeight] = useState(0);
+  const flowRevealRef = useLiquidReveal(disclosed, 60);
+  const transcriptRevealRef = useLiquidReveal(disclosed && stage !== "quiz");
+  const typingRevealRef = useLiquidReveal(stage === "typing");
+  const intakeRevealRef = useLiquidReveal(stage === "intake");
+  const doneRevealRef = useLiquidReveal(stage === "done");
+
+  useEffect(() => {
+    const el = detailsRef.current;
+    if (!el) return;
+    setDetailsHeight(detailsOpen ? el.scrollHeight : 0);
+  }, [detailsOpen]);
+
+  const scaleInquiryBorder = (transform: string, transition: string) => {
+    const el = inquiryBorderRef.current;
+    if (!el) return;
+    el.style.transition = transition;
+    el.style.transform = transform;
+  };
+
+  const inquiryCtaHover = {
+    onMouseEnter(e: React.MouseEvent<HTMLButtonElement>) {
+      ctaScaleHoverOnSelf.onMouseEnter(e);
+      scaleInquiryBorder("scale(1.015)", CTA_SCALE_SPRING);
+    },
+    onMouseLeave(e: React.MouseEvent<HTMLButtonElement>) {
+      ctaScaleHoverOnSelf.onMouseLeave(e);
+      scaleInquiryBorder("scale(1)", CTA_SCALE_RESET);
+    },
+    onMouseDown(e: React.MouseEvent<HTMLButtonElement>) {
+      ctaScaleHoverOnSelf.onMouseDown(e);
+      scaleInquiryBorder("scale(0.992)", CTA_SCALE_PRESS);
+    },
+    onMouseUp(e: React.MouseEvent<HTMLButtonElement>) {
+      ctaScaleHoverOnSelf.onMouseUp(e);
+      scaleInquiryBorder("scale(1.015)", CTA_SCALE_SPRING);
+    },
+  };
 
   const onQuizComplete = (answers: Record<string, AskUserAnswer>) => {
     const first = answers["ownership"]?.selectedIds[0];
@@ -1154,13 +1099,51 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
       const rect = el.getBoundingClientRect();
       const belowFold = rect.top > window.innerHeight - 120;
       if (!belowFold) return;
-      const targetY = window.scrollY + rect.top - 80; // leave a little headroom
+      const targetY = window.scrollY + rect.top - 80;
       const lenis = window.__lenis;
       if (lenis) lenis.scrollTo(targetY, { duration: 0.9 });
       else window.scrollTo({ top: targetY, behavior: "smooth" });
     });
     return () => cancelAnimationFrame(raf);
   }, [stage]);
+
+  const onBegin = () => {
+    flushSync(() => setDisclosed(true));
+
+    // Two frames: first lets the quiz mount, second lets Lenis pick up the
+    // taller page after resize() (see route-fade.tsx).
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.getElementById("questionnaire-flow");
+        if (!el) return;
+
+        const isMobile = window.matchMedia("(max-width: 639px)").matches;
+        const offset = isMobile ? 24 : 80;
+        const rect = el.getBoundingClientRect();
+        const needsScroll =
+          isMobile ||
+          rect.top > offset ||
+          rect.bottom > window.innerHeight - 40;
+        if (!needsScroll) return;
+
+        const lenis = window.__lenis;
+        if (lenis) {
+          lenis.resize();
+          lenis.scrollTo(el, { offset: -offset, duration: 1.1 });
+        } else {
+          window.scrollTo({
+            top: window.scrollY + rect.top - offset,
+            behavior: "smooth",
+          });
+        }
+      });
+    });
+  };
+
+  const setIntakeRef = (node: HTMLDivElement | null) => {
+    intakeRef.current = node;
+    intakeRevealRef.current = node;
+  };
 
   const onIntakeComplete = async (answers: Record<string, AskUserAnswer>) => {
     // Flatten to the API's field names. Free-text (and allowOther's typed row)
@@ -1216,143 +1199,145 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
   return (
     <section id="start" className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      {/* Left on mobile so it shares an edge with the timeline's rows there;
-          centred from sm up, where the timeline becomes a centred block.
-          Shares the hero's liquid blur+scale dissolve rather than the plainer
-          default .rise timing. */}
-      <div className="max-w-2xl mx-auto text-left sm:text-center rise rise--liquid">
-        <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-normal tracking-tight text-[rgb(var(--fg))] leading-tight">
-          Quality and speed both take attention.
-          <br />
-          <span className="text-[rgb(var(--muted))]">So we&rsquo;re deliberate about who we take on.</span>
-        </h2>
-      </div>
-
-      {/* How it works, as a short timeline rather than a subheading. Each step
-          is a row with a marker on a connecting rail, so it reads as a
-          sequence at a glance. Staggers in per-step (like the FAQ rows below
-          it) rather than rising as one flat block — the two lists then read
-          as the same kind of motion instead of two different treatments. */}
-      {/* Desktop: a narrower column centred as a block under the centred
-          heading, so the steps sit in the middle of the section instead of
-          spanning its full width. Text inside stays left-aligned at every
-          size — mobile is unchanged. */}
-      <ol className="mt-8 sm:mt-10 w-full max-w-2xl sm:max-w-md mx-auto flex flex-col text-left">
-        {PROCESS_STEPS.map((s, i) => (
-          <li key={s.title} className="relative flex flex-col pb-6 last:pb-0 rise rise--liquid" style={{ "--rise-delay": `${i * 90}ms` } as React.CSSProperties}>
-            {/* Rail: drawn per-item so it stops cleanly at the last step.
-                left-[17px] puts it dead centre under the number — the pill's
-                pl-1.5 (6px) plus half the number's 22px box. It was at 11px,
-                which centred on the pill's own left edge instead and read as
-                off-kilter. */}
-            {i < PROCESS_STEPS.length - 1 && (
-              <span
-                aria-hidden
-                className="absolute left-[17px] top-[34px] bottom-0 w-px rise rise--liquid rise--fade-only"
+      <div
+        ref={inquiryBorderRef}
+        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl border border-dashed border-[rgb(var(--line))] py-7 sm:py-8 px-0 sm:px-8 ${LIQUID_REVEAL}`}
+      >
+        <QuestionnaireBoxBackdrop />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 sm:gap-10 px-4 sm:px-0">
+          <div className={`w-full sm:max-w-lg text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
+            <h2 className="text-[clamp(1.4rem,3vw,1.9rem)] font-normal tracking-[-0.025em] leading-tight text-[#d4d4d4]">
+              Tell us what you&rsquo;re building.
+            </h2>
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => setDetailsOpen((open) => !open)}
+                aria-expanded={detailsOpen}
+                className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-[rgb(var(--line))] bg-black/30 backdrop-blur-sm px-2.5 py-1 text-[13px] sm:text-[14px] tracking-tight text-[#b3b3b3] hover:bg-black/40 hover:text-[#d4d4d4] transition-colors"
+              >
+                What to expect
+                <svg
+                  aria-hidden
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{
+                    transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)",
+                  }}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+              <div
                 style={{
-                  // Dashed via a repeating gradient rather than a dashed
-                  // border: a 1px-wide element with border-left:dashed renders
-                  // the dash pattern inconsistently across browsers, and this
-                  // gives exact control over the 3px dash / 4px gap.
-                  backgroundImage:
-                    "repeating-linear-gradient(to bottom, rgb(var(--line)) 0 3px, transparent 3px 7px)",
-                  // Fades in from its own top edge downward — a soft mask
-                  // rather than a hard clip — so each rail segment reads as
-                  // blending into place under its row instead of popping in
-                  // as a flat line. Follows just behind its row's own
-                  // liquid dissolve (see --rise-delay below) so the line trails
-                  // the node it connects from, like it's being drawn down
-                  // from the number above it.
-                  maskImage: "linear-gradient(to bottom, transparent 0%, black 60%)",
-                  WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, black 60%)",
-                  "--rise-delay": `${i * 90 + 160}ms`,
-                } as React.CSSProperties}
-              />
-            )}
-            {/* Number and label share one pill. The fill is the SOLID
-                equivalent of the old rgb(var(--fg) / 0.06) rather than the
-                translucent value itself — same colour to the eye, but the rail
-                running behind no longer shows through it. color-mix keeps that
-                true in both themes instead of hardcoding one. */}
-            <span
-              className="relative z-10 inline-flex w-fit items-center gap-2.5 rounded-full pl-1.5 pr-3.5 py-1.5"
-              style={{ background: "color-mix(in srgb, rgb(var(--fg)) 6%, rgb(var(--bg)))" }}
-            >
-              {/* Dark disc behind the number, matching the section's own black
-                  canvas (--bg is 10 10 10 in the homepage dark zone). Gives
-                  the digit its own ground inside the lighter pill and reads as
-                  the marker the rail connects to. */}
-              <span
-                aria-hidden
-                className="inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full text-[11px] tabular-nums leading-none"
-                style={{
-                  background: "rgb(var(--bg))",
-                  color: "rgb(var(--fg))",
-                  // Kill the tracking inherited from the section. Letter
-                  // spacing is applied AFTER the last glyph too, so inside a
-                  // centred box it shifts the digit visibly left — worst on
-                  // "3", whose right side bearing is already tighter than 1
-                  // or 2 in this face.
-                  letterSpacing: "normal",
+                  height: detailsHeight,
+                  overflow: "hidden",
+                  transition: "height 350ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
               >
-                {i + 1}
-              </span>
-              <span className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))] leading-snug">
-                {s.title}
-              </span>
-            </span>
-            {/* Body indents to the pill's text column so it lines up under the
-                title rather than under the number. */}
-            <p className="mt-1.5 ml-[38px] text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-              {s.body}
-            </p>
-          </li>
-        ))}
-      </ol>
+                <div ref={detailsRef}>
+                  <p className="pt-2 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[#949494]">
+                    Three quick questions to start. We&rsquo;ll take it from there.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      {/* Cue that the quiz below is where the process actually starts. Shares
-          the timeline's column and its left edge at every size, so it lines up
-          under the steps rather than floating centred. Follows the timeline's
-          own stagger as its next beat, same as AiApproach's second paragraph
-          picking up right after the first. */}
-      <div
-        className="mt-10 sm:mt-12 w-full max-w-2xl sm:max-w-md mx-auto flex items-center gap-2 justify-start pl-[38px] rise rise--liquid"
-        style={{ "--rise-delay": `${PROCESS_STEPS.length * 90}ms` } as React.CSSProperties}
-      >
-        <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]">
-          Get in touch
-        </span>
-        <svg
-          aria-hidden
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-3.5 w-3.5 text-[rgb(var(--muted))]"
-        >
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <polyline points="19 12 12 19 5 12" />
-        </svg>
+        {!disclosed && (
+          <span
+            className={`self-start sm:self-auto shrink-0 inline-flex rounded-full ${LIQUID_REVEAL}`}
+            style={{ ...liquidRevealDelay(80), boxShadow: INQUIRY_CTA_OUTER_SHADOW, transformOrigin: "center" }}
+          >
+            <button
+              type="button"
+              onClick={onBegin}
+              aria-expanded="false"
+              aria-controls="questionnaire-flow"
+              className="relative inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-1 sm:px-3.5 sm:py-1 text-[13px] sm:text-[14px] font-medium tracking-tight leading-none [-webkit-tap-highlight-color:transparent]"
+              style={{
+                background:
+                  "linear-gradient(180deg, #f4f4f4 0%, #ffffff 52%, #e8e8e8 100%)",
+                color: "#757575",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,0.95)," +
+                  "inset 0 -1.5px 0 rgba(0,0,0,0.1)",
+              }}
+              {...inquiryCtaHover}
+            >
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 pointer-events-none rounded-full overflow-hidden"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                  backgroundSize: "180px 180px",
+                  mixBlendMode: "multiply",
+                  opacity: 0.14,
+                }}
+              />
+              <span className="relative inline-grid place-items-center leading-none">
+                <span className="col-start-1 row-start-1">Begin</span>
+              </span>
+              <span
+                className="relative flex items-center justify-center w-6 h-6 rounded-full shrink-0 overflow-hidden"
+                style={{
+                  background:
+                    "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.1) 0%, transparent 52%)," +
+                    "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.75) 0%, transparent 65%)," +
+                    "rgba(0,0,0,0.07)",
+                  boxShadow:
+                    "inset 0 2.5px 4px rgba(0,0,0,0.14)," +
+                    "inset 0 -1.5px 2.5px rgba(255,255,255,0.85)," +
+                    "inset 0 0 0 0.5px rgba(0,0,0,0.08)," +
+                    "0 1px 2px rgba(0,0,0,0.08)",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 pointer-events-none rounded-full"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 40%)",
+                  }}
+                />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="relative block h-3 w-3"
+                  aria-hidden="true"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <polyline points="19 12 12 19 5 12" />
+                </svg>
+              </span>
+            </button>
+          </span>
+        )}
+        </div>
       </div>
 
-      {/* Narrower than the heading/timeline above so the exchange reads like a
-          chat thread rather than a full-width form. */}
-      {/* The quiz sits in a narrow column while it's asking questions; once
-          answered the thread widens to the heading's width so the exchange can
-          hug both edges like a chat (answers right, our reply left). */}
-      <div
-        className={cn(
-          "quiz-dark mt-20 sm:mt-24 w-full mx-auto transition-[max-width] duration-500 ease-out",
-          stage === "quiz" ? "max-w-md" : "max-w-2xl"
-        )}
-      >
-        {/* Answered questions collapse into one card pinned to the RIGHT edge,
-            reading as the visitor's sent message. */}
+      {disclosed && (
+        <div
+          id="questionnaire-flow"
+          ref={flowRevealRef}
+          className={cn(
+            "quiz-dark mt-10 sm:mt-12 w-full mx-auto transition-[max-width] duration-500 ease-out",
+            LIQUID_REVEAL,
+            stage === "quiz" ? "max-w-md" : "max-w-2xl"
+          )}
+        >
         {stage !== "quiz" && (
-          <div className="flex justify-end" style={{ animation: "liquid-in 680ms cubic-bezier(0.22,0.61,0.36,1) both" }}>
+          <div ref={transcriptRevealRef} className={`flex justify-end ${LIQUID_REVEAL}`}>
             <div
               className="max-w-[85%] sm:max-w-[80%] rounded-3xl px-5 py-5 sm:px-6 sm:py-6 flex flex-col gap-4"
               style={{ background: "var(--sh-card)" }}
@@ -1374,7 +1359,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         {/* Our reply, aligned to the LEFT edge. During "typing" it fills in a
             character at a time with a caret; afterwards it just sits there. */}
         {stage !== "quiz" && result && (
-          <div className="flex justify-start">
+          <div className={`flex justify-start ${LIQUID_REVEAL}`} style={liquidRevealDelay(80)}>
             <p className="mt-6 sm:mt-7 max-w-[92%] sm:max-w-[85%] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-foreground">
               {stage === "typing" ? typedResponse : responseText}
               {stage === "typing" && !typingDone && (
@@ -1395,7 +1380,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
             key={`quiz-${resetKey}`}
             questions={QUIZ_QUESTIONS}
             onComplete={onQuizComplete}
-            className="mx-auto max-w-none border-transparent"
+            className="mx-auto max-w-none rounded-2xl border border-dashed border-[rgb(var(--line))] bg-transparent"
           />
         )}
 
@@ -1403,8 +1388,9 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
             questions are about to occupy, so the swap doesn't jump. */}
         {stage === "typing" && (
           <div
+            ref={typingRevealRef}
             aria-hidden
-            className="mt-8 sm:mt-10 w-full rounded-2xl border border-border px-4 py-3 flex items-center gap-3"
+            className={`mt-8 sm:mt-10 w-full rounded-2xl border border-border px-4 py-3 flex items-center gap-3 ${LIQUID_REVEAL}`}
             style={{ background: "var(--sh-card)", opacity: 0.55 }}
           >
             <span className="text-[14px] tracking-tight text-muted-foreground flex-1">
@@ -1422,12 +1408,12 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         )}
 
         {stage === "intake" && (
-          <div ref={intakeRef} className="mt-8 sm:mt-10" style={{ animation: "liquid-in 680ms cubic-bezier(0.22,0.61,0.36,1) both" }}>
+          <div ref={setIntakeRef} className={`mt-8 sm:mt-10 ${LIQUID_REVEAL}`}>
             <AskUserQuestions
               key={`intake-${resetKey}`}
               questions={INTAKE_QUESTIONS}
               onComplete={onIntakeComplete}
-              className="mx-auto max-w-none border-transparent"
+              className="mx-auto max-w-none rounded-2xl border border-dashed border-[rgb(var(--line))] bg-transparent"
             />
             {submitting && (
               <p className="mt-4 text-[13px] tracking-tight text-muted-foreground text-center">
@@ -1444,8 +1430,9 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
         {stage === "done" && (
           <div
-            className="mt-8 sm:mt-10 w-full rounded-3xl border border-border px-6 py-8 sm:px-8 sm:py-9"
-            style={{ background: "var(--sh-card)", animation: "liquid-in 680ms cubic-bezier(0.22,0.61,0.36,1) both" }}
+            ref={doneRevealRef}
+            className={`mt-8 sm:mt-10 w-full rounded-3xl border border-border px-6 py-8 sm:px-8 sm:py-9 ${LIQUID_REVEAL}`}
+            style={{ background: "var(--sh-card)" }}
           >
             <p className="text-[20px] sm:text-[22px] font-normal tracking-tight text-foreground leading-snug mb-2.5">
               That&rsquo;s everything. Thanks.
@@ -1476,7 +1463,8 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
             </div>
           </div>
         )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -2949,7 +2937,7 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
         <div className="mx-auto w-full max-w-[88rem] flex flex-col">
           <div className="py-4 sm:py-6" />
 
-          <IndexFaq />
+          <ServicesSection />
 
           <div className="py-14 sm:py-20" />
 
