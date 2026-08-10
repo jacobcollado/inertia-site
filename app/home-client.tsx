@@ -498,8 +498,6 @@ const HERO_CTA_OUTER_SHADOW =
   "0 10px 28px rgba(0,0,0,0.24)," +
   "0 24px 56px -10px rgba(0,0,0,0.20)";
 
-const HERO_CTA_SWAP_MS = 420;
-const HERO_CTA_SWAP_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const HERO_CTA_DWELL_MS = 5500;
 
 const HERO_LIQUID_MS = 680;
@@ -524,6 +522,20 @@ function heroLiquidStyle(
       `opacity ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE} ${delay}ms`,
       `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE} ${delay}ms`,
       `filter ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE} ${delay}ms`,
+    ].join(", "),
+  };
+}
+
+function heroCtaLabelStyle(active: boolean) {
+  return {
+    opacity: active ? 1 : 0,
+    transform: active ? "scale(1)" : "scale(0.97)",
+    filter: active ? "blur(0px)" : "blur(10px)",
+    willChange: "opacity, transform, filter",
+    transition: [
+      `opacity ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
+      `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
+      `filter ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
     ].join(", "),
   };
 }
@@ -657,7 +669,7 @@ function VercelHero({
           )}
 
           <h1
-            className="font-normal tracking-tight leading-none max-w-2xl text-[clamp(2.9rem,7vw,4.2rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
+            className="font-normal tracking-tight leading-none max-w-2xl text-[clamp(2.7rem,6.5vw,3.9rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a" }}
           >
             <span>
@@ -782,22 +794,14 @@ function VercelHero({
               <span className="relative inline-grid place-items-center">
                 <span
                   className="col-start-1 row-start-1"
-                  style={{
-                    opacity: isAetherCta ? 0 : 1,
-                    transform: isAetherCta ? "translateY(5px)" : "translateY(0)",
-                    transition: `opacity ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}, transform ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}`,
-                  }}
+                  style={heroCtaLabelStyle(!isAetherCta)}
                   aria-hidden={isAetherCta}
                 >
                   Get in touch
                 </span>
                 <span
                   className="col-start-1 row-start-1"
-                  style={{
-                    opacity: isAetherCta ? 1 : 0,
-                    transform: isAetherCta ? "translateY(0)" : "translateY(-5px)",
-                    transition: `opacity ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}, transform ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}`,
-                  }}
+                  style={heroCtaLabelStyle(isAetherCta)}
                   aria-hidden={!isAetherCta}
                 >
                   View Aether
@@ -837,7 +841,7 @@ function VercelHero({
                   className="relative block h-3.5 w-3.5 sm:h-4 sm:w-4"
                   style={{
                     transform: isAetherCta ? "rotate(-90deg)" : "rotate(0deg)",
-                    transition: `transform ${HERO_CTA_SWAP_MS}ms ${HERO_CTA_SWAP_EASE}`,
+                    transition: `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
                   }}
                 >
                   <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
@@ -1835,7 +1839,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   const intro =
     "Ideas and identity are rarely the problem. Execution is. We take what a company, brand, or person stands for and carry it through every [[detail]], until the result feels effortless to the people moving through it.";
   const points = [
-    "The best design disappears into the experience. Nobody applauds the [[craft]], and that's exactly how you know it landed.",
+    "The best design disappears into the experience. Nobody applauds the [[restraint]], and that's exactly how you know it landed.",
     "Identity isn't expressed in one big gesture. It's carried in a hundred small decisions that all [[agree]] with each other.",
   ];
 

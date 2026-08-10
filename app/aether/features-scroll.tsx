@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { AETHER_LIQUID_MS, aetherLiquidTransition } from "./motion";
 
 const g = (a: number) => `rgba(120,120,120,${a})`;
 const acc = "rgb(var(--accent))";
@@ -197,7 +198,7 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
     const t = setTimeout(() => {
       setDisplayed(active);
       setFading(false);
-    }, 200);
+    }, AETHER_LIQUID_MS / 2);
     return () => clearTimeout(t);
   }, [active, displayed]);
 
@@ -213,9 +214,11 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
               ref={(el) => { itemRefs.current[i] = el; }}
               className="flex flex-col gap-5 justify-center min-h-[520px] sm:h-[85vh] sm:min-h-0 py-12 sm:py-0"
               style={{
-                opacity: isActive ? 1 : 0.25,
-                transform: isActive ? "translateY(0)" : "translateY(6px)",
-                transition: "opacity 500ms cubic-bezier(0.22,1,0.36,1), transform 500ms cubic-bezier(0.22,1,0.36,1)",
+                opacity: isActive ? 1 : 0.28,
+                transform: isActive ? "scale(1)" : "scale(0.985)",
+                filter: isActive ? "blur(0px)" : "blur(5px)",
+                willChange: "opacity, transform, filter",
+                transition: aetherLiquidTransition(),
               }}
             >
               <div className="flex items-center gap-3">
@@ -252,8 +255,10 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
             className="w-full"
             style={{
               opacity: fading ? 0 : 1,
-              transform: fading ? "translateY(10px) scale(0.99)" : "translateY(0) scale(1)",
-              transition: "opacity 200ms ease, transform 200ms ease",
+              transform: fading ? "scale(0.97)" : "scale(1)",
+              filter: fading ? "blur(10px)" : "blur(0px)",
+              willChange: "opacity, transform, filter",
+              transition: aetherLiquidTransition(),
             }}
           >
             <Visual feature={features[displayed]} index={displayed} alt={`${features[displayed]?.title ?? ""} example`} />
