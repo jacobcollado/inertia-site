@@ -58,7 +58,7 @@ function useLiquidReveal(active: boolean, delayMs = 0) {
 function ServicesSection() {
   return (
     <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl mx-auto text-left sm:text-center">
+      <div className="max-w-2xl mx-auto text-center">
         <p className="rise rise--liquid text-[clamp(1.8rem,4vw,2.5rem)] font-normal tracking-[-0.03em] leading-snug text-[rgb(var(--fg))]">
           We build the version of your business (and product) people fall for.
         </p>
