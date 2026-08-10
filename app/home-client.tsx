@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
-import { BorderBeam } from "border-beam";
 import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string };
@@ -459,13 +458,6 @@ function VercelHero({
   const isAetherCta = ctaTarget === "aether";
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
-  // BorderBeam defaults to active immediately on mount, which made the beam
-  // visible spinning around the CTA's pill before the CTA itself had even
-  // faded in — the beam has to wait for the CTA's own entrance transition to
-  // actually finish, same as HeroToIntroLine's connector does off this same
-  // opacity transitionend, rather than a guessed delay that could drift out
-  // of sync with the liquid reveal timing below.
-  const [beamActive, setBeamActive] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -474,14 +466,8 @@ function VercelHero({
       ([e]) => {
         if (!e.isIntersecting) return;
         obs.disconnect();
-        // Wrapping the CTA in BorderBeam added a heavy synchronous mount (its
-        // own <style> tag + @property registrations) that could land in the
-        // same paint as this observer firing — collapsing the opacity:0
-        // starting frame and the opacity:1 end state into one frame, so the
-        // "transition" completed instantly and both the connector line and
-        // the beam's own activation (gated on this same transitionend) fired
-        // immediately instead of after a real 750ms fade. Forcing setVisible
-        // onto its own rAF guarantees the hidden state actually paints first.
+        // Forcing setVisible onto its own rAF guarantees the hidden state
+        // actually paints first.
         requestAnimationFrame(() => setVisible(true));
       },
       { threshold: 0.05 }
@@ -635,15 +621,7 @@ function VercelHero({
                 href so it still works without JS and offers a normal link
                 context menu; the handler only takes over to match the site's
                 Lenis smooth scrolling. */}
-            <BorderBeam
-              size="md"
-              colorVariant="colorful"
-              theme="dark"
-              borderRadius={999}
-              duration={2.6}
-              brightness={1.45}
-              saturation={1.35}
-              active={beamActive}
+            <span
               className="inline-flex rounded-full"
               style={{
                 boxShadow: HERO_CTA_OUTER_SHADOW,
@@ -652,7 +630,6 @@ function VercelHero({
               }}
               onTransitionEnd={e => {
                 if (e.propertyName !== "opacity") return;
-                setBeamActive(true);
                 // Tells the header (mounted separately in SiteShell, with no
                 // ref access to this CTA) that the hero's own reveal has
                 // landed, so it can wait to fade in until right after this
@@ -674,7 +651,7 @@ function VercelHero({
                 if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                 else window.scrollTo({ top: targetY, behavior: "smooth" });
               }}
-              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-1.5 text-[15px] sm:text-[16px] font-medium tracking-tight"
+              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-1.5 text-[15px] sm:text-[16px] font-normal tracking-tight"
               style={{
                 background:
                   "linear-gradient(180deg, #242424 0%, #000000 52%, #080808 100%)",
@@ -756,7 +733,7 @@ function VercelHero({
                 </svg>
               </span>
             </a>
-            </BorderBeam>
+            </span>
             {false && (
             <a
               href="https://t.me/kayzxyz"
