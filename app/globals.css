@@ -780,6 +780,46 @@ h1:hover .redact > span.redact-inner,
   }
 }
 
+/* AI sketch draw-on. Rides the same .is-visible trigger as its liquid
+   reveal wrapper, so the stroke unspools while the blur dissolve is still
+   resolving. pathLength=100 on the path keeps the dash math unit-free;
+   101 instead of 100 avoids the 1px seed dot some renderers leave at the
+   start of an exactly-full dash. */
+.sketch-draw-path {
+  stroke-dasharray: 101;
+  stroke-dashoffset: 101;
+}
+
+.sketch-draw-dot {
+  opacity: 0;
+  transform: scale(0.4);
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.is-visible .sketch-draw .sketch-draw-path {
+  /* Sweeps through the loops quickly, then a long glide to the end of the
+     line. Deceleration is what sells the viscous feel. */
+  animation: sketch-draw 1400ms cubic-bezier(0.3, 0, 0.1, 1) 120ms forwards;
+}
+
+.is-visible .sketch-draw .sketch-draw-dot {
+  animation: sketch-dot 500ms cubic-bezier(0.22, 0.61, 0.36, 1) 950ms forwards;
+}
+
+@keyframes sketch-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes sketch-dot {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Opts a .rise/.rise--liquid element out of the translate entirely — used by
    the process-timeline's rail, which should only blend in via its own
    top-to-bottom mask fade rather than also sliding like the rows do. */
@@ -1501,6 +1541,15 @@ h1:hover .redact > span.redact-inner,
     opacity: 1;
     transform: none;
     filter: none;
+  }
+  .sketch-draw-path {
+    animation: none !important;
+    stroke-dashoffset: 0;
+  }
+  .sketch-draw-dot {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
   }
   [style*="hero-canvas"],
   [style*="hero-line"] {

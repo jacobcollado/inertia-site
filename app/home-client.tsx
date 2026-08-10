@@ -998,7 +998,9 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   const intakeRef = useRef<HTMLDivElement>(null);
   const inquiryBorderRef = useRef<HTMLDivElement>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
+  const detailsButtonRef = useRef<HTMLButtonElement>(null);
   const [detailsHeight, setDetailsHeight] = useState(0);
+  const [panelWidth, setPanelWidth] = useState<number | undefined>(undefined);
   const flowRevealRef = useLiquidReveal(disclosed, 60);
   const transcriptRevealRef = useLiquidReveal(disclosed && stage !== "quiz");
   const typingRevealRef = useLiquidReveal(stage === "typing");
@@ -1009,6 +1011,24 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     const el = detailsRef.current;
     if (!el) return;
     setDetailsHeight(detailsOpen ? el.scrollHeight : 0);
+  }, [detailsOpen]);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const btn = detailsButtonRef.current;
+      const details = detailsRef.current;
+      if (!btn) return;
+      if (!detailsOpen) {
+        setPanelWidth(btn.offsetWidth);
+        return;
+      }
+      if (details) {
+        setPanelWidth(Math.max(btn.offsetWidth, details.scrollWidth));
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, [detailsOpen]);
 
   const scaleInquiryBorder = (transform: string, transition: string) => {
@@ -1187,41 +1207,52 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
               Get in touch, we don&rsquo;t bite
             </h2>
             <div className="mt-3">
-              <button
-                type="button"
-                onClick={() => setDetailsOpen((open) => !open)}
-                aria-expanded={detailsOpen}
-                className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-[rgb(var(--line))] bg-black/30 backdrop-blur-sm px-2.5 py-1 text-[13px] sm:text-[14px] tracking-tight text-[#b3b3b3] hover:bg-black/40 hover:text-[#d4d4d4] transition-colors"
-              >
-                What to expect
-                <svg
-                  aria-hidden
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-3.5 w-3.5 shrink-0"
-                  style={{
-                    transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)",
-                  }}
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
               <div
+                className="inline-flex flex-col rounded-md border border-dashed border-[rgb(var(--line))] bg-black/30 backdrop-blur-sm overflow-hidden"
                 style={{
-                  height: detailsHeight,
-                  overflow: "hidden",
-                  transition: "height 350ms cubic-bezier(0.22, 1, 0.36, 1)",
+                  width: panelWidth,
+                  maxWidth: detailsOpen ? "28rem" : undefined,
+                  transition: "width 350ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
               >
-                <div ref={detailsRef}>
-                  <p className="pt-2 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[#949494]">
-                    Three quick questions to start. We&rsquo;ll take it from there.
-                  </p>
+                <button
+                  ref={detailsButtonRef}
+                  type="button"
+                  onClick={() => setDetailsOpen((open) => !open)}
+                  aria-expanded={detailsOpen}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] sm:text-[14px] tracking-tight text-[#b3b3b3] hover:bg-black/20 hover:text-[#d4d4d4] transition-colors"
+                >
+                  What to expect
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-3.5 w-3.5 shrink-0"
+                    style={{
+                      transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)",
+                    }}
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <polyline points="19 12 12 19 5 12" />
+                  </svg>
+                </button>
+                <div
+                  style={{
+                    height: detailsHeight,
+                    overflow: "hidden",
+                    transition: "height 350ms cubic-bezier(0.22, 1, 0.36, 1)",
+                  }}
+                >
+                  <div ref={detailsRef}>
+                    <p className="px-2.5 pb-2.5 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[#949494]">
+                      Three quick questions to start. We&rsquo;ll take it from there.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1882,6 +1913,77 @@ function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+function SketchAiEquation() {
+  return (
+    <div
+      className="relative overflow-hidden rounded-xl px-5 py-4 sm:px-6 sm:py-5 max-w-md sm:max-w-lg"
+      style={{
+        background:
+          "radial-gradient(55% 85% at 0% 55%, rgba(0,0,0,0.018) 0%, transparent 58%)," +
+          "radial-gradient(55% 85% at 100% 55%, rgba(0,0,0,0.018) 0%, transparent 58%)," +
+          "radial-gradient(90% 50% at 50% 100%, rgba(255,255,255,0.85) 0%, transparent 72%)," +
+          "linear-gradient(180deg, #fafafa 0%, #ffffff 28%)",
+        boxShadow:
+          "inset 0 1px 2px rgba(0,0,0,0.05)," +
+          "inset 0 -1.5px 2px rgba(255,255,255,0.95)," +
+          "inset 0 0 0 1px rgba(0,0,0,0.045)",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none rounded-xl"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(0,0,0,0.012) 0%, transparent 14%, transparent 86%, rgba(0,0,0,0.012) 100%)," +
+            "linear-gradient(0deg, rgba(0,0,0,0.016) 0%, transparent 20%)",
+        }}
+      />
+      <svg
+        viewBox="0 0 320 64"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="sketch-draw relative z-[1] w-full"
+        aria-hidden="true"
+      >
+        <defs>
+          {/* Gray-to-ink shift happens where the loops give way to the line,
+              not at the path's midpoint. */}
+          <linearGradient id="sketchResolve" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="rgba(92,92,92,0.36)" />
+            <stop offset="0.28" stopColor="rgba(92,92,92,0.32)" />
+            <stop offset="0.45" stopColor="rgba(26,26,26,0.58)" />
+            <stop offset="1" stopColor="rgba(26,26,26,0.68)" />
+          </linearGradient>
+        </defs>
+        {/* One continuous stroke: exploration loops shrinking left to right,
+            resolving into the line worth shipping. The long run keeps a ~1px
+            waver so it reads as drawn, not ruled. */}
+        <path
+          d="M12 44
+             C14 16, 38 10, 40 30 C41 46, 22 50, 24 36
+             C26 18, 48 14, 50 30 C51 44, 36 47, 38 36
+             C40 24, 60 21, 62 32 C63 42, 52 43, 54 36
+             C57 29, 74 28, 84 32 C96 35, 108 34, 122 34
+             C170 32.8, 230 35.2, 286 34"
+          stroke="url(#sketchResolve)"
+          strokeWidth="1.05"
+          pathLength={100}
+          className="sketch-draw-path"
+        />
+        <circle
+          cx="296"
+          cy="34"
+          r="3.2"
+          fill="rgba(26,26,26,0.62)"
+          stroke="none"
+          className="sketch-draw-dot"
+        />
+      </svg>
+    </div>
+  );
+}
+
 function AiApproach() {
   const first =
     "AI hasn't changed what we believe about execution; it's changed how much of it we can afford. A studio our size can now explore [[more]] directions, discard the wrong ones sooner, and spend the saved time where it counts: on the version worth shipping.";
@@ -1889,13 +1991,19 @@ function AiApproach() {
     "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
     <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
-      <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-1.5 sm:pr-0 sm:pl-[calc(50vw-384px)]">
+      <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-0 sm:pl-[calc(50vw-384px)]">
         <div className="max-w-xl sm:max-w-2xl">
           <LiquidText
             text={first}
             className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
             style={{ color: "#5c5c5c" }}
           />
+          <div
+            className={`my-6 sm:my-7 ${LIQUID_REVEAL}`}
+            style={liquidRevealDelay(80)}
+          >
+            <SketchAiEquation />
+          </div>
           <LiquidText
             text={second}
             delayMs={160}
