@@ -1000,8 +1000,8 @@ function QuestionnaireBoxBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url(/questionnaire-bg.png)" }}
+        className="absolute inset-0 bg-cover bg-[center_55%]"
+        style={{ backgroundImage: "url(/questionnaire-bg.avif)" }}
       />
       <div className="absolute inset-0 bg-black/50" />
     </div>
@@ -1201,13 +1201,13 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     <section id="start" className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div
         ref={inquiryBorderRef}
-        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl border border-dashed border-[rgb(var(--line))] py-7 sm:py-8 px-0 sm:px-8 ${LIQUID_REVEAL}`}
+        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl py-7 sm:py-8 px-0 sm:px-8 ${LIQUID_REVEAL}`}
       >
         <QuestionnaireBoxBackdrop />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 sm:gap-10 px-4 sm:px-0">
           <div className={`w-full sm:max-w-lg text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
             <h2 className="text-[clamp(1.4rem,3vw,1.9rem)] font-normal tracking-[-0.025em] leading-tight text-[#d4d4d4]">
-              Tell us what you&rsquo;re building.
+              Get in touch, we don&rsquo;t bite
             </h2>
             <div className="mt-3">
               <button

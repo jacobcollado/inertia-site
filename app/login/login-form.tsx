@@ -316,6 +316,12 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const tabRefs = useRef<Partial<Record<"signin" | "signup", HTMLButtonElement | null>>>({});
   const [pillRect, setPillRect] = useState<{ left: number; width: number } | null>(null);
   const checkEmail = searchParams.get("checkEmail") === "1";
+  const oauthErrorParam = searchParams.get("error_description") ?? searchParams.get("error");
+  const shouldAutoReveal =
+    !!oauthErrorParam ||
+    checkEmail ||
+    (SIGNUPS_ENABLED && initialTab === "signup");
+  const [revealed, setRevealed] = useState(shouldAutoReveal);
 
   // Measure only the view shown on first paint (signin/auth), so the
   // pre-hydration fallback height matches what's actually displayed instead
@@ -349,7 +355,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     });
     obs.observe(el);
     return () => obs.disconnect();
-  }, [displayedTab, displayedView]);
+  }, [displayedTab, displayedView, revealed]);
 
   // Track the active tab button's position so the pill indicator can glide
   // between "Sign in" and "Create account" instead of just swapping color.
@@ -397,9 +403,11 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
   // Handle OAuth callback errors
   useEffect(() => {
-    const oauthError = searchParams.get("error_description") ?? searchParams.get("error");
-    if (oauthError) setError(oauthError.replace(/\+/g, " "));
-  }, [searchParams]);
+    if (oauthErrorParam) {
+      setRevealed(true);
+      setError(oauthErrorParam.replace(/\+/g, " "));
+    }
+  }, [oauthErrorParam]);
 
   const onOAuth = async (provider: "google") => {
     setLoading(true);
@@ -610,7 +618,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                 Not rendered AT ALL while sign-ups are closed: with one tab
                 left there's nothing to switch between, and a zero-height
                 child still costs a full gap-6 in this column. */}
-            {SIGNUPS_ENABLED && (
+            {SIGNUPS_ENABLED && revealed && (
             <div
               className="flex justify-center overflow-hidden"
               style={{
@@ -647,11 +655,37 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             </div>
             )}
 
-            {/* Animated content — height locked to the taller of the two tabs
-                so switching never resizes the card. */}
-            <div style={{ height: cardHeight ?? maxCardHeight, transition: "height 280ms cubic-bezier(0.22,1,0.36,1)", overflow: "hidden" }}>
-              <div ref={liveContentRef} style={contentStyle} className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}>
-                {renderBody(displayedTab, displayedView)}
+            {/* Animated content — height locked while auth options are shown
+                so switching tabs/views never resizes the card. */}
+            <div
+              style={{
+                height: revealed ? (cardHeight ?? maxCardHeight) : undefined,
+                transition: "height 280ms cubic-bezier(0.22,1,0.36,1)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                ref={liveContentRef}
+                style={revealed ? contentStyle : undefined}
+                className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}
+              >
+                {!revealed ? (
+                  <>
+                    <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 text-center">
+                      Existing client?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setRevealed(true)}
+                      className="flex items-center justify-center w-full py-2.5 text-[14px] font-medium tracking-tight rounded-full hover:opacity-90 transition-opacity"
+                      style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+                    >
+                      Log in
+                    </button>
+                  </>
+                ) : (
+                  renderBody(displayedTab, displayedView)
+                )}
               </div>
             </div>
 
