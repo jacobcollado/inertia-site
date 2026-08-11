@@ -480,13 +480,13 @@ function VercelHero({
     heroLiquidStyle(visible, delay, opts);
 
   // Heading words stagger with a soft blur+scale dissolve so each token
-  // flows into focus rather than rising. The wordmark lands as one fluid
-  // unit after the lead-in words, then the CTA follows.
-  const HEADING_WORDS = ["Give", "your", "idea", "real"];
+  // flows into focus rather than rising, building to "becomes
+  // infrastructure" as the payoff line, then the CTA follows.
+  const HEADING_WORDS = ["Where", "imagination", "becomes", "infrastructure"];
   const wordReveal = (i: number) =>
     heroLiquidStyle(visible, HERO_START + i * HERO_WORD_STEP, { blur: 7, scaleFrom: 0.994 });
-  const inertiaStart = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
-  const ctaFadeDelay = inertiaStart + 644;
+  const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
+  const ctaFadeDelay = headingEnd + 644;
 
   // Alternates between the project quiz and the Aether product page on a
   // fixed loop once the hero has landed — no carousel interaction required.
@@ -536,7 +536,7 @@ function VercelHero({
             pulled desktop content off centre, and a later sm:pb-10 does not
             reliably beat it (Tailwind orders utilities itself, so arbitrary
             value vs. responsive variant is not settled by source order). */}
-        <div className="relative max-w-[88rem] mx-auto w-full px-6 sm:px-8 max-sm:pt-16 sm:pt-0 max-sm:pb-[40dvh] sm:pb-[18dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-[calc(100dvh-72px)] sm:justify-center">
+        <div className="relative max-w-[88rem] mx-auto w-full px-3 sm:px-8 max-sm:pt-16 sm:pt-0 max-sm:pb-[40dvh] sm:pb-[18dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-[calc(100dvh-72px)] sm:justify-center">
           {false && (
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
@@ -563,32 +563,23 @@ function VercelHero({
           )}
 
           <h1
-            className="font-normal tracking-tight leading-none max-w-2xl text-[clamp(2.7rem,6.5vw,3.9rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
+            className="font-normal tracking-tight max-sm:tracking-[-0.045em] leading-none max-w-2xl text-[clamp(2.2rem,7vw,3.45rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a" }}
           >
-            <span>
-              {HEADING_WORDS.map((word, i) => (
+            <span className="max-sm:whitespace-nowrap">
+              {HEADING_WORDS.slice(0, 2).map((word, i) => (
                 <span key={word + i}>
                   <span style={wordReveal(i)}>{word}</span>{" "}
                 </span>
               ))}
             </span>
-            <span
-              className="mt-2 sm:mt-2.5 block h-[clamp(2.2rem,5.9vw,3.35rem)] aspect-[420/96] bg-current"
-              style={{
-                ...heroLiquidStyle(visible, inertiaStart, { blur: 12, scaleFrom: 0.99 }),
-                WebkitMaskImage: "url(/logo.png)",
-                maskImage: "url(/logo.png)",
-                WebkitMaskSize: "contain",
-                maskSize: "contain",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-                WebkitMaskPosition: "center",
-                maskPosition: "center",
-              }}
-              role="img"
-              aria-label="Inertia"
-            />
+            <span className="mt-2 sm:mt-2.5 max-sm:whitespace-nowrap">
+              {HEADING_WORDS.slice(2).map((word, i) => (
+                <span key={word + i}>
+                  <span style={wordReveal(i + 2)}>{word}</span>{" "}
+                </span>
+              ))}
+            </span>
           </h1>
 
           {false && (
