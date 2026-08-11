@@ -1725,14 +1725,13 @@ function WorkScrollGallery({ onActiveAccent }: { onActiveAccent?: (color: string
 // soft grey wash rather than an accent colour, so it reads as a highlight
 // without competing with the work thumbnails' accent tinting.
 //
-// Inline-block with a tight negative vertical margin: the padding would
-// otherwise push the pill's line taller than its neighbours and make the
-// paragraph's leading uneven.
+// Inline (not inline-flex): flex centering + align-middle sit the pill below
+// the paragraph baseline. inherit keeps the highlight the same tone as body copy.
 function Pill({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2 py-[1px] -my-[1px] whitespace-nowrap align-middle"
-      style={{ background: "rgba(26,26,26,0.06)", color: "#1a1a1a" }}
+      className="inline rounded-full px-[0.4em] py-px whitespace-nowrap align-baseline leading-none"
+      style={{ background: "rgba(26,26,26,0.06)", color: "inherit" }}
     >
       {children}
     </span>
@@ -1863,23 +1862,29 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
             style={{ color: "#1a1a1a" }}
           >
             How we think about execution
-            <svg
+            <span
               aria-hidden
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4 shrink-0"
-              style={{
-                color: "#5c5c5c",
-                transform: open ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 350ms cubic-bezier(0.22,1,0.36,1)",
-              }}
+              className="inline-flex items-center justify-center rounded-full p-1 shrink-0"
+              style={{ background: "rgba(26,26,26,0.06)" }}
             >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3.5 w-3.5"
+                style={{
+                  color: "#5c5c5c",
+                  transform: open ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 350ms cubic-bezier(0.22,1,0.36,1)",
+                }}
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <polyline points="19 12 12 19 5 12" />
+              </svg>
+            </span>
           </button>
           <div
             style={{
@@ -2643,14 +2648,12 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                     </span>
                   </Link>
                   {item.blurb && (
-                    <div className="max-w-[85%] sm:max-w-[75%] rounded-xl px-3 py-2" style={{ background: "rgb(var(--fg) / 0.06)" }}>
-                      <p
-                        className="text-[15px] sm:text-[16px] leading-snug tracking-tight w-full"
-                        style={{ color: "rgb(var(--muted))" }}
-                      >
-                        {item.blurb}
-                      </p>
-                    </div>
+                    <p
+                      className="max-w-[85%] sm:max-w-[75%] text-[15px] sm:text-[16px] leading-snug tracking-[-0.035em] w-full"
+                      style={{ color: "rgb(var(--muted))" }}
+                    >
+                      {item.blurb}
+                    </p>
                   )}
                 </div>
               </div>
