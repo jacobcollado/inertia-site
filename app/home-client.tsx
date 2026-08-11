@@ -58,7 +58,10 @@ function ServicesSection() {
   return (
     <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl mx-auto text-center">
-        <p className="rise rise--liquid text-[clamp(1.8rem,4vw,2.5rem)] font-normal tracking-[-0.03em] leading-snug text-[rgb(var(--fg))]">
+        <p
+          className="rise rise--liquid text-[clamp(1.8rem,4vw,2.5rem)] font-normal tracking-tight max-sm:tracking-[-0.05em] sm:tracking-tight leading-snug text-[rgb(var(--fg))]"
+          style={{ fontVariationSettings: "'wght' 400, 'opsz' 32" }}
+        >
           We build the version of your business (and product) people fall for.
         </p>
       </div>
@@ -563,7 +566,7 @@ function VercelHero({
           )}
 
           <h1
-            className="font-normal tracking-tight max-sm:tracking-[-0.045em] leading-none max-w-2xl text-[clamp(2.2rem,7vw,3.45rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
+            className="font-normal tracking-tight max-sm:tracking-[-0.05em] leading-none max-w-2xl text-[clamp(2.3rem,7.2vw,3.55rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a" }}
           >
             <span className="max-sm:whitespace-nowrap">
