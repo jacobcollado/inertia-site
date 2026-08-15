@@ -9,6 +9,15 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
+import {
+  CTA_FILL,
+  CTA_INSET_SHADOW,
+  CTA_OUTER_SHADOW,
+  CTA_PILL_CLASS,
+  CTA_WELL_ICON_CLASS,
+  CtaGrain,
+  CtaWell,
+} from "@/lib/cta-chrome";
 
 export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string };
 
@@ -398,11 +407,6 @@ function ShimmerWord({ children, italic, variant }: { children: string; italic?:
   );
 }
 
-const HERO_CTA_OUTER_SHADOW =
-  "0 2px 4px rgba(0,0,0,0.32)," +
-  "0 10px 28px rgba(0,0,0,0.24)," +
-  "0 24px 56px -10px rgba(0,0,0,0.20)";
-
 const INQUIRY_CTA_OUTER_SHADOW =
   "0 2px 4px rgba(0,0,0,0.18)," +
   "0 10px 28px rgba(0,0,0,0.14)," +
@@ -414,6 +418,14 @@ const HERO_LIQUID_MS = 680;
 const HERO_LIQUID_EASE = "cubic-bezier(0.22, 0.61, 0.36, 1)";
 const HERO_WORD_STEP = 90;
 const HERO_START = 90;
+// Pill grows its own width (a rounded droplet, not a rectangular clip of a
+// full-size chip — that clip read as a white bar sliding over the pill).
+// The cloud condenses after the vessel has mostly formed.
+const HERO_PILL_SLOT_MS = 860;
+const HERO_PILL_FADE_MS = 540;
+const HERO_PILL_SCALE_MS = 800;
+const HERO_PILL_BLUR_MS = 960;
+const HERO_PILL_GLYPH_LAG = 280;
 
 function heroLiquidStyle(
   visible: boolean,
@@ -489,6 +501,9 @@ function VercelHero({
   const wordReveal = (i: number) =>
     heroLiquidStyle(visible, HERO_START + i * HERO_WORD_STEP, { blur: 7, scaleFrom: 0.994 });
   const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
+  // Cloud pill waits until the last heading word has actually finished
+  // dissolving in — headingEnd is only when that transition *starts*.
+  const cloudDelay = headingEnd + HERO_LIQUID_MS;
   const ctaFadeDelay = headingEnd + 644;
 
   // Alternates between the project quiz and the Aether product page on a
@@ -569,12 +584,61 @@ function VercelHero({
             className="font-normal tracking-tight max-sm:tracking-[-0.05em] leading-none max-w-2xl text-[clamp(2.3rem,7.2vw,3.55rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a" }}
           >
-            <span className="max-sm:whitespace-nowrap">
-              {HEADING_WORDS.slice(0, 2).map((word, i) => (
-                <span key={word + i}>
-                  <span style={wordReveal(i)}>{word}</span>{" "}
+            <span className="max-sm:whitespace-nowrap inline-flex items-baseline" style={{ gap: "0.3em" }}>
+              <span style={wordReveal(0)}>Where</span>
+              <span
+                className="inline-flex items-baseline"
+                style={{
+                  gap: visible ? "0.3em" : 0,
+                  transition: `gap ${HERO_PILL_SLOT_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  className="inline-flex items-center justify-center rounded-full pointer-events-none overflow-hidden"
+                  style={{
+                    flexShrink: 0,
+                    background: "rgba(26,26,26,0.06)",
+                    height: "0.78em",
+                    width: visible ? "1.36em" : 0,
+                    minWidth: 0,
+                    transformOrigin: "50% 50%",
+                    willChange: "width, opacity, transform",
+                    opacity: visible ? 1 : 0,
+                    transform: visible ? "scale(1)" : "scale(0.96)",
+                    transition: [
+                      `width ${HERO_PILL_SLOT_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
+                      `opacity ${HERO_PILL_FADE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
+                      `transform ${HERO_PILL_SCALE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
+                    ].join(", "),
+                  }}
+                >
+                  <img
+                    src="/hero-cloud.png"
+                    alt=""
+                    width={70}
+                    height={47}
+                    draggable={false}
+                    className="block"
+                    style={{
+                      height: "0.64em",
+                      width: "auto",
+                      maxHeight: "88%",
+                      flexShrink: 0,
+                      willChange: "opacity, transform, filter",
+                      opacity: visible ? 1 : 0,
+                      transform: visible ? "scale(1)" : "scale(0.97)",
+                      filter: visible ? "blur(0px)" : "blur(8px)",
+                      transition: [
+                        `opacity ${HERO_PILL_FADE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay + HERO_PILL_GLYPH_LAG}ms`,
+                        `transform ${HERO_PILL_SCALE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay + HERO_PILL_GLYPH_LAG}ms`,
+                        `filter ${HERO_PILL_BLUR_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay + HERO_PILL_GLYPH_LAG}ms`,
+                      ].join(", "),
+                    }}
+                  />
                 </span>
-              ))}
+                <span style={wordReveal(1)}>imagination</span>
+              </span>
             </span>
             <span className="mt-2 sm:mt-2.5 max-sm:whitespace-nowrap">
               {HEADING_WORDS.slice(2).map((word, i) => (
@@ -618,7 +682,7 @@ function VercelHero({
             <span
               className="inline-flex rounded-full"
               style={{
-                boxShadow: HERO_CTA_OUTER_SHADOW,
+                boxShadow: CTA_OUTER_SHADOW,
                 transformOrigin: "center",
                 ...liquid(ctaFadeDelay, { blur: 10, scaleFrom: 0.992 }),
               }}
@@ -645,31 +709,15 @@ function VercelHero({
                 if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                 else window.scrollTo({ top: targetY, behavior: "smooth" });
               }}
-              className="relative inline-flex items-center gap-2 rounded-full px-4 py-1.5 sm:px-5 sm:py-1.5 text-[15px] sm:text-[16px] font-normal tracking-tight"
+              className={CTA_PILL_CLASS}
               style={{
-                background:
-                  "linear-gradient(180deg, #242424 0%, #000000 52%, #080808 100%)",
+                background: CTA_FILL,
                 color: "#fff",
-                boxShadow:
-                  "inset 0 1px 0 rgba(255,255,255,0.18)," +
-                  "inset 0 -1.5px 0 rgba(0,0,0,0.55)",
+                boxShadow: CTA_INSET_SHADOW,
               }}
               {...ctaScaleHoverOnParent}
             >
-              {/* Same feTurbulence grain used on the client carousel's
-                  fallback cards, layered here at a heavier opacity so it
-                  reads clearly against the gradient rather than as a subtle
-                  texture. */}
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 pointer-events-none rounded-full overflow-hidden"
-                style={{
-                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-                  backgroundSize: "180px 180px",
-                  mixBlendMode: "overlay",
-                  opacity: 0.3,
-                }}
-              />
+              <CtaGrain />
               <span className="relative inline-grid place-items-center">
                 <span
                   className="col-start-1 row-start-1"
@@ -686,30 +734,7 @@ function VercelHero({
                   View Aether
                 </span>
               </span>
-              <span
-                className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0 overflow-hidden"
-                style={{
-                  // Concave surface: dark pool at the top, warm catch along
-                  // the bottom rim — matches the button's underlit gradient.
-                  background:
-                    "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.32) 0%, transparent 52%)," +
-                    "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.22) 0%, transparent 65%)," +
-                    "rgba(255,255,255,0.13)",
-                  boxShadow:
-                    "inset 0 2.5px 4px rgba(0,0,0,0.48)," +
-                    "inset 0 -1.5px 2.5px rgba(255,255,255,0.38)," +
-                    "inset 0 0 0 0.5px rgba(255,255,255,0.1)," +
-                    "0 1px 2px rgba(0,0,0,0.14)",
-                }}
-              >
-                {/* Top specular arc — overhead light catching the well rim */}
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-0 pointer-events-none rounded-full"
-                  style={{
-                    background: "linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 40%)",
-                  }}
-                />
+              <CtaWell>
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -717,7 +742,7 @@ function VercelHero({
                   strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="relative block h-3.5 w-3.5 sm:h-4 sm:w-4"
+                  className={CTA_WELL_ICON_CLASS}
                   style={{
                     transform: isAetherCta ? "rotate(-90deg)" : "rotate(0deg)",
                     transition: `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
@@ -725,7 +750,7 @@ function VercelHero({
                 >
                   <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
                 </svg>
-              </span>
+              </CtaWell>
             </a>
             </span>
             {false && (
@@ -1198,7 +1223,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 sm:gap-10 px-4 sm:px-0">
           <div className={`w-full sm:max-w-lg text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
             <h2 className="text-[clamp(1.4rem,3vw,1.9rem)] font-normal tracking-[-0.025em] leading-tight text-[#d4d4d4]">
-              Get in touch, we don&rsquo;t bite
+              Interested? Press the button!
             </h2>
             <div className="mt-3">
               <div
@@ -1991,7 +2016,7 @@ function AiApproach() {
   return (
     <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
       <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-0 sm:pl-[calc(50vw-384px)]">
-        <div className="max-w-xl sm:max-w-2xl">
+        <div className="max-w-2xl sm:max-w-3xl">
           <LiquidText
             text={first}
             className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"

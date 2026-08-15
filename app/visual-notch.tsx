@@ -8,6 +8,15 @@ import { HeaderAuth } from "./dashboard/header-auth";
 import { TOC_ITEMS } from "./components/shared";
 import { useWebHaptics } from "web-haptics/react";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
+import {
+  CTA_FILL,
+  CTA_INSET_SHADOW,
+  CTA_OUTER_SHADOW,
+  CTA_PILL_CLASS,
+  CTA_WELL_ICON_CLASS,
+  CtaGrain,
+  CtaWell,
+} from "@/lib/cta-chrome";
 import { SiShopify } from "react-icons/si";
 import {
   HiOutlineSparkles,
@@ -20,7 +29,6 @@ import {
   HiOutlineQuestionMarkCircle,
   HiOutlineShieldCheck,
   HiOutlineSwatch,
-  HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 
 const CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
@@ -580,40 +588,34 @@ function InertiaLogo() {
   );
 }
 
-/* ── Merged CTA — two separate rounded pills (book-a-call + sign-in avatar)
-   bridged by a thin connector at vertical center, so they read as one
-   linked shape rather than a single continuous pill. ──────────────────── */
+/* ── Merged CTA — two separate rounded pills (book-a-call + sign-in)
+   bridged at vertical center. Shares the hero CTA's dark gradient,
+   grain, and inset well so the header control matches the page CTA. ── */
 
-function MergedCTA({ compact = false }: { compact?: boolean }) {
-  const h = compact ? 40 : 44;
-  const iconSize = compact ? 16 : 18;
+function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
   const gap = 3;
   return (
     <div
-      className="relative inline-flex items-center"
-      style={{ height: h, gap: 0, transformOrigin: "center" }}
+      className="relative inline-flex items-center h-9 sm:h-10"
+      style={{ gap: 0, transformOrigin: "center" }}
       {...ctaScaleHoverOnSelf}
     >
       <a
         href="https://cal.com/jacob-c-99otvp/15min"
         target="_blank"
         rel="noreferrer"
-        className={"relative " + (compact ? "inline-flex px-4 py-2.5 text-[15px]" : "inline-flex px-4 py-2.5 text-[15px] sm:px-5 sm:py-2.5 sm:text-[16px]")}
+        className={CTA_PILL_CLASS}
         style={{
           zIndex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          lineHeight: 1,
-          borderRadius: 999,
-          background: "rgb(var(--fg))",
-          color: "rgb(var(--bg))",
-          fontWeight: 400,
-          letterSpacing: "-0.01em",
+          background: CTA_FILL,
+          color: "#fff",
+          boxShadow: `${CTA_INSET_SHADOW}, ${CTA_OUTER_SHADOW}`,
           textDecoration: "none",
           whiteSpace: "nowrap",
         }}
       >
-        Get in touch
+        <CtaGrain />
+        <span className="relative">Get in touch</span>
       </a>
       {/* Bridge — thin bar connecting the two pills, sits behind them via
           negative margins so it overlaps into each rather than floating in
@@ -625,7 +627,7 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
           marginLeft: -5,
           marginRight: -5,
           height: 16,
-          background: "rgb(var(--fg))",
+          background: "#000",
           zIndex: 0,
           flexShrink: 0,
         }}
@@ -633,17 +635,30 @@ function MergedCTA({ compact = false }: { compact?: boolean }) {
       <Link
         href="/login"
         aria-label="Sign in"
-        className="relative flex items-center justify-center"
+        className="relative flex items-center justify-center overflow-hidden h-9 w-9 sm:h-10 sm:w-10"
         style={{
           zIndex: 1,
-          width: h,
-          height: h,
           borderRadius: "50%",
-          background: "rgb(var(--fg))",
-          color: "rgb(var(--bg))",
+          background: CTA_FILL,
+          color: "#fff",
+          boxShadow: `${CTA_INSET_SHADOW}, ${CTA_OUTER_SHADOW}`,
         }}
       >
-        <HiOutlineArrowRightOnRectangle style={{ width: iconSize, height: iconSize }} />
+        <CtaGrain />
+        <CtaWell>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={CTA_WELL_ICON_CLASS}
+          >
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </CtaWell>
       </Link>
     </div>
   );
