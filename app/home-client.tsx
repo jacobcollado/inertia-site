@@ -595,10 +595,17 @@ function VercelHero({
               >
                 <span
                   aria-hidden="true"
-                  className="inline-flex items-center justify-center rounded-full pointer-events-none overflow-hidden"
+                  className="relative inline-flex items-center justify-center rounded-full pointer-events-none overflow-hidden"
                   style={{
                     flexShrink: 0,
-                    background: "rgba(26,26,26,0.06)",
+                    background:
+                      "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.07) 0%, transparent 52%)," +
+                      "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.92) 0%, transparent 65%)," +
+                      "rgba(26,26,26,0.06)",
+                    boxShadow:
+                      "inset 0 1.5px 2.5px rgba(0,0,0,0.08)," +
+                      "inset 0 -1px 1.5px rgba(255,255,255,0.9)," +
+                      "inset 0 0 0 0.5px rgba(0,0,0,0.04)",
                     height: "0.78em",
                     width: visible ? "1.36em" : 0,
                     minWidth: 0,
@@ -613,13 +620,20 @@ function VercelHero({
                     ].join(", "),
                   }}
                 >
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-0 pointer-events-none rounded-full"
+                    style={{
+                      background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 42%)",
+                    }}
+                  />
                   <img
                     src="/hero-cloud.png"
                     alt=""
                     width={70}
                     height={47}
                     draggable={false}
-                    className="block"
+                    className="relative block"
                     style={{
                       height: "0.64em",
                       width: "auto",
@@ -992,21 +1006,8 @@ function useTypewriter(text: string, active: boolean, speed = 18) {
 // chat box that becomes the real question component once the text lands.
 type Stage = "quiz" | "typing" | "intake" | "done";
 
-function QuestionnaireBoxBackdrop() {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-      <div
-        className="absolute inset-0 bg-cover bg-[center_55%]"
-        style={{ backgroundImage: "url(/questionnaire-bg.avif)" }}
-      />
-      <div className="absolute inset-0 bg-black/50" />
-    </div>
-  );
-}
-
 function Questionnaire({ onStartConversation }: { onStartConversation: () => void }) {
   const [disclosed, setDisclosed] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const [stage, setStage] = useState<Stage>("quiz");
   const [result, setResult] = useState<{ title: string; body: string } | null>(null);
   const [transcript, setTranscript] = useState<{ question: string; answer: string }[]>([]);
@@ -1016,39 +1017,11 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   const [resetKey, setResetKey] = useState(0);
   const intakeRef = useRef<HTMLDivElement>(null);
   const inquiryBorderRef = useRef<HTMLDivElement>(null);
-  const detailsRef = useRef<HTMLDivElement>(null);
-  const detailsButtonRef = useRef<HTMLButtonElement>(null);
-  const [detailsHeight, setDetailsHeight] = useState(0);
-  const [panelWidth, setPanelWidth] = useState<number | undefined>(undefined);
   const flowRevealRef = useLiquidReveal(disclosed, 60);
   const transcriptRevealRef = useLiquidReveal(disclosed && stage !== "quiz");
   const typingRevealRef = useLiquidReveal(stage === "typing");
   const intakeRevealRef = useLiquidReveal(stage === "intake");
   const doneRevealRef = useLiquidReveal(stage === "done");
-
-  useEffect(() => {
-    const el = detailsRef.current;
-    if (!el) return;
-    setDetailsHeight(detailsOpen ? el.scrollHeight : 0);
-  }, [detailsOpen]);
-
-  useLayoutEffect(() => {
-    const measure = () => {
-      const btn = detailsButtonRef.current;
-      const details = detailsRef.current;
-      if (!btn) return;
-      if (!detailsOpen) {
-        setPanelWidth(btn.offsetWidth);
-        return;
-      }
-      if (details) {
-        setPanelWidth(Math.max(btn.offsetWidth, details.scrollWidth));
-      }
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, [detailsOpen]);
 
   const scaleInquiryBorder = (transform: string, transition: string) => {
     const el = inquiryBorderRef.current;
@@ -1217,69 +1190,21 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     <section id="start" className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
       <div
         ref={inquiryBorderRef}
-        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl py-7 sm:py-8 px-0 sm:px-8 ${LIQUID_REVEAL}`}
+        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl bg-[rgb(var(--surface))] py-6 sm:py-7 px-5 sm:px-8 ${LIQUID_REVEAL}`}
       >
-        <QuestionnaireBoxBackdrop />
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 sm:gap-10 px-4 sm:px-0">
-          <div className={`w-full sm:max-w-lg text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
-            <h2 className="text-[clamp(1.4rem,3vw,1.9rem)] font-normal tracking-[-0.025em] leading-tight text-[#d4d4d4]">
-              Interested? Press the button!
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+          <div className={`min-w-0 text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
+            <h2 className="text-[clamp(1.35rem,2.8vw,1.75rem)] font-normal tracking-[-0.025em] leading-tight text-[rgb(var(--fg))]">
+              What are you building?
             </h2>
-            <div className="mt-3">
-              <div
-                className="inline-flex flex-col rounded-md border border-dashed border-[rgb(var(--line))] bg-black/30 backdrop-blur-sm overflow-hidden"
-                style={{
-                  width: panelWidth,
-                  maxWidth: detailsOpen ? "28rem" : undefined,
-                  transition: "width 350ms cubic-bezier(0.22, 1, 0.36, 1)",
-                }}
-              >
-                <button
-                  ref={detailsButtonRef}
-                  type="button"
-                  onClick={() => setDetailsOpen((open) => !open)}
-                  aria-expanded={detailsOpen}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[13px] sm:text-[14px] tracking-tight text-[#b3b3b3] hover:bg-black/20 hover:text-[#d4d4d4] transition-colors"
-                >
-                  What to expect
-                  <svg
-                    aria-hidden
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-3.5 w-3.5 shrink-0"
-                    style={{
-                      transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 350ms cubic-bezier(0.22, 1, 0.36, 1)",
-                    }}
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <polyline points="19 12 12 19 5 12" />
-                  </svg>
-                </button>
-                <div
-                  style={{
-                    height: detailsHeight,
-                    overflow: "hidden",
-                    transition: "height 350ms cubic-bezier(0.22, 1, 0.36, 1)",
-                  }}
-                >
-                  <div ref={detailsRef}>
-                    <p className="px-2.5 pb-2.5 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[#949494]">
-                      Three quick questions to start. We&rsquo;ll take it from there.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="mt-2 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+              Three quick questions to start. We&rsquo;ll take it from there.
+            </p>
           </div>
 
         {!disclosed && (
           <span
-            className={`self-start sm:self-auto shrink-0 inline-flex rounded-full ${LIQUID_REVEAL}`}
+            className={`self-start sm:self-center shrink-0 inline-flex rounded-full ${LIQUID_REVEAL}`}
             style={{ ...liquidRevealDelay(80), boxShadow: INQUIRY_CTA_OUTER_SHADOW, transformOrigin: "center" }}
           >
             <button
@@ -1287,7 +1212,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
               onClick={onBegin}
               aria-expanded="false"
               aria-controls="questionnaire-flow"
-              className="relative inline-flex items-center gap-1.5 rounded-full border-0 px-3 py-1 sm:px-3.5 sm:py-1 text-[13px] sm:text-[14px] font-medium tracking-tight leading-none [-webkit-tap-highlight-color:transparent]"
+              className="relative inline-flex items-center gap-2 rounded-full border-0 h-10 sm:h-11 px-4 py-1.5 sm:px-5 sm:py-1.5 text-[14px] sm:text-[15px] font-medium tracking-tight leading-none [-webkit-tap-highlight-color:transparent]"
               style={{
                 background:
                   "linear-gradient(180deg, #f4f4f4 0%, #ffffff 52%, #e8e8e8 100%)",
@@ -1313,7 +1238,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
                 <span className="col-start-1 row-start-1">Begin</span>
               </span>
               <span
-                className="relative flex items-center justify-center w-6 h-6 rounded-full shrink-0 overflow-hidden"
+                className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0 overflow-hidden"
                 style={{
                   background:
                     "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.1) 0%, transparent 52%)," +
@@ -1340,7 +1265,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
                   strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="relative block h-3 w-3"
+                  className="relative block h-3.5 w-3.5 sm:h-4 sm:w-4"
                   aria-hidden="true"
                 >
                   <line x1="12" y1="5" x2="12" y2="19" />
@@ -1750,7 +1675,17 @@ function Pill({ children }: { children: React.ReactNode }) {
   return (
     <span
       className="inline rounded-full px-[0.4em] py-px whitespace-nowrap align-baseline leading-none"
-      style={{ background: "rgba(26,26,26,0.06)", color: "inherit" }}
+      style={{
+        background:
+          "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.07) 0%, transparent 52%)," +
+          "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.92) 0%, transparent 65%)," +
+          "rgba(26,26,26,0.06)",
+        boxShadow:
+          "inset 0 1px 1.5px rgba(0,0,0,0.08)," +
+          "inset 0 -0.5px 1px rgba(255,255,255,0.9)," +
+          "inset 0 0 0 0.5px rgba(0,0,0,0.04)",
+        color: "inherit",
+      }}
     >
       {children}
     </span>

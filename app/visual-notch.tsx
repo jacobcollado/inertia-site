@@ -12,8 +12,10 @@ import {
   CTA_FILL,
   CTA_INSET_SHADOW,
   CTA_OUTER_SHADOW,
-  CTA_PILL_CLASS,
-  CTA_WELL_ICON_CLASS,
+  CTA_HEADER_PILL_CLASS,
+  CTA_HEADER_SHELL_HEIGHT_CLASS,
+  CTA_HEADER_WELL_CLASS,
+  CTA_HEADER_WELL_ICON_CLASS,
   CtaGrain,
   CtaWell,
 } from "@/lib/cta-chrome";
@@ -596,7 +598,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
   const gap = 3;
   return (
     <div
-      className="relative inline-flex items-center h-9 sm:h-10"
+      className={`relative inline-flex items-center ${CTA_HEADER_SHELL_HEIGHT_CLASS}`}
       style={{ gap: 0, transformOrigin: "center" }}
       {...ctaScaleHoverOnSelf}
     >
@@ -604,7 +606,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
         href="https://cal.com/jacob-c-99otvp/15min"
         target="_blank"
         rel="noreferrer"
-        className={CTA_PILL_CLASS}
+        className={CTA_HEADER_PILL_CLASS}
         style={{
           zIndex: 1,
           background: CTA_FILL,
@@ -635,7 +637,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
       <Link
         href="/login"
         aria-label="Sign in"
-        className="relative flex items-center justify-center overflow-hidden h-9 w-9 sm:h-10 sm:w-10"
+        className={`relative flex items-center justify-center overflow-hidden ${CTA_HEADER_SHELL_HEIGHT_CLASS} aspect-square`}
         style={{
           zIndex: 1,
           borderRadius: "50%",
@@ -645,7 +647,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
         }}
       >
         <CtaGrain />
-        <CtaWell>
+        <CtaWell className={CTA_HEADER_WELL_CLASS}>
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -653,7 +655,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={CTA_WELL_ICON_CLASS}
+            className={CTA_HEADER_WELL_ICON_CLASS}
           >
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />
