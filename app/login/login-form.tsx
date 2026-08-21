@@ -73,7 +73,7 @@ function EmailToggle({ onToggle }: { onToggle: () => void }) {
     <button
       type="button"
       onClick={onToggle}
-      className="flex items-center justify-center gap-2 w-full py-2.5 text-[14px] tracking-tight rounded-full transition-colors hover:bg-[rgb(var(--fg)/0.1)]"
+      className="flex items-center justify-center gap-2 w-full py-2.5 text-[14px] tracking-tight rounded-[6px] transition-colors hover:bg-[rgb(var(--fg)/0.1)]"
       style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--fg))" }}
     >
       Continue with email
@@ -250,7 +250,7 @@ function EmailForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-[6px] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
         >
           {loading ? <Spinner /> : null}
@@ -267,7 +267,7 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
       type="button"
       disabled={loading}
       onClick={onOAuth}
-      className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] tracking-tight rounded-full hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+      className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] tracking-tight rounded-[6px] hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
       style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
     >
       {oauthProvider === "google" ? <Spinner /> : (
@@ -677,7 +677,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                     <button
                       type="button"
                       onClick={() => setRevealed(true)}
-                      className="flex items-center justify-center w-full py-2.5 text-[14px] font-medium tracking-tight rounded-full hover:opacity-90 transition-opacity"
+                      className="flex items-center justify-center w-full py-2.5 text-[14px] font-medium tracking-tight rounded-[6px] hover:opacity-90 transition-opacity"
                       style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
                     >
                       Log in

@@ -115,7 +115,28 @@ export async function renderMarkdown(md: string): Promise<string> {
       return `<${tag} id="${id}">${inner}</${tag}>`;
     }
   );
+  rendered = bindSentenceStarts(rendered);
   return rendered;
+}
+
+// A sentence that begins in the last inch of a line leaves one or two words
+// dangling after the previous sentence's full stop, which reads as a false
+// break. CSS has no notion of sentence boundaries, so the hint has to go in
+// the markup: tie the first two words of each new sentence together with a
+// non-breaking space. If the pair does not fit, both wrap to the next line
+// instead of the first word stranding.
+//
+// Only runs on text outside tags, so attributes and tag names are untouched.
+function bindSentenceStarts(html: string): string {
+  return html.replace(/>([^<]+)</g, (match, text: string) => {
+    const bound = text.replace(
+      // end punctuation, space, then the opening two words of the next sentence
+      /([.!?]["')\]]?)\s+([A-Z][^\s]*)\s+([^\s<]+)/g,
+      (_m, end: string, first: string, second: string) =>
+        `${end} ${first} ${second}`,
+    );
+    return `>${bound}<`;
+  });
 }
 
 export function readingStats(md: string): { words: number; minutes: number } {

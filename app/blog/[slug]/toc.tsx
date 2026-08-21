@@ -206,3 +206,94 @@ export function TOC({ headings }: { headings: Heading[] }) {
     </>
   );
 }
+
+// Collapsed "Contents" tab that sits inline above the post title. Expands in
+// place rather than overlaying, so it never covers the heading it introduces.
+export function TOCInline({ headings }: { headings: Heading[] }) {
+  const [open, setOpen] = useState(false);
+  const [height, setHeight] = useState(0);
+  const bodyRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    if (!open) { setHeight(0); return; }
+    const measure = () => setHeight(bodyRef.current?.scrollHeight ?? 0);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [open, headings]);
+
+  if (headings.length === 0) return null;
+
+  const jump = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (!el) return;
+    setOpen(false);
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    history.replaceState(null, "", `#${id}`);
+  };
+
+  return (
+    <nav aria-label="Table of contents" className="w-full">
+      {/* One container: the list lives inside the tab and the whole shape
+          grows, rather than a pill with a separate list floating under it. */}
+      <div
+        className="w-full overflow-hidden"
+        style={{
+          background: "rgb(var(--fg) / 0.04)",
+          border: "1px solid rgb(var(--line))",
+          borderRadius: 6,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="flex w-full items-center justify-between px-4 py-2.5 text-[13px] tracking-tight transition-colors"
+          style={{ color: "rgb(var(--muted))" }}
+        >
+          Contents
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-3 h-3"
+            style={{
+              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 260ms cubic-bezier(0.22,1,0.36,1)",
+            }}
+            aria-hidden="true"
+          >
+            <polyline points="4 6 8 10 12 6" />
+          </svg>
+        </button>
+
+        <div
+          style={{
+            height,
+            overflow: "hidden",
+            transition: "height 320ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        >
+          <ul ref={bodyRef} className="flex flex-col px-4 pb-3">
+            {headings.map((h) => (
+              <li key={h.id}>
+                <a
+                  href={`#${h.id}`}
+                  onClick={(e) => jump(e, h.id)}
+                  className="block py-2 text-[14px] leading-snug tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+                  style={{ paddingLeft: h.level === 3 ? "16px" : "0px", opacity: h.level === 3 ? 0.7 : 1 }}
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  );
+}

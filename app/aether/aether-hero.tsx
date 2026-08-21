@@ -30,7 +30,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
           alt="Aether"
           width={220}
           height={55}
-          className="h-[clamp(3.6rem,8.5vw,5.5rem)] sm:h-[clamp(3.2rem,6.5vw,4.75rem)] w-auto mx-auto"
+          className="h-[clamp(3.25rem,7.5vw,5rem)] sm:h-[clamp(2.9rem,6vw,4.25rem)] w-auto mx-auto"
           priority
         />
       </h1>

@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TOC } from "./toc";
+import { TOCInline } from "./toc";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
 import {
@@ -17,6 +17,8 @@ import {
 const BODY_CLASSES = `px-0 pt-10 pb-8 rise
   text-[1.125rem] leading-[2.0] tracking-[0em] text-[rgb(var(--fg))]
   space-y-8
+  [&_p]:[text-wrap:pretty] [&_li]:[text-wrap:pretty] [&_blockquote]:[text-wrap:pretty]
+  [&_h2]:[text-wrap:balance] [&_h3]:[text-wrap:balance]
   [&_p:first-of-type]:text-[1.1875rem] [&_p:first-of-type]:leading-[1.85] [&_p:first-of-type]:text-[rgb(var(--fg))]
   [&_a]:text-blue-500 [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-blue-500/40 [&_a]:transition-colors hover:[&_a]:text-blue-400 hover:[&_a]:decoration-blue-400
   [&_strong]:font-medium [&_strong]:text-[rgb(var(--fg))]
@@ -173,31 +175,24 @@ export default async function BlogPost({
 
   return (
     <main className="relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] px-3">
-<div className="xl:grid xl:grid-cols-[1fr_minmax(0,48rem)_1fr] xl:gap-8">
-        {/* Left gutter — mobile TOC only */}
-        <TOC headings={headings} />
-
+      {/* Single centred column: the TOC that used to occupy the left gutter
+          now sits inline above the title. */}
+      <div className="mx-auto w-full max-w-[48rem]">
         <article>
 
-        {/* Back nav */}
+        {/* Collapsed contents tab, above the title */}
         <div className="px-0 pt-10 pb-6 rise">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-          >
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M13 8H3"/><path d="M7 4L3 8l4 4"/></svg>
-            Recent news
-          </Link>
+          <TOCInline headings={headings} />
         </div>
 
         {/* Header */}
         <header className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-          <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] mb-5" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+          <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] mb-5 [text-wrap:balance]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
             {post.title}
           </h1>
 
           {post.subtitle && (
-            <p className="text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mb-8" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+            <p className="text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mb-8 [text-wrap:pretty]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
               {post.subtitle}
             </p>
           )}
@@ -238,21 +233,10 @@ export default async function BlogPost({
 
         <Highlighter slug={slug} />
 
-        <div className="px-0 pt-6 pb-20 flex items-center justify-between border-t border-[rgb(var(--line))]">
-          <Link href="/blog" className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true"><path d="M13 8H3"/><path d="M7 4L3 8l4 4"/></svg>
-            Recent news
+        <div className="px-0 pt-6 pb-20 border-t border-[rgb(var(--line))]">
+          <Link href="/" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+            Back home
           </Link>
-          <a
-            href="#"
-            className="inline-flex items-center gap-1.5 text-[12px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden="true">
-              <line x1="12" y1="19" x2="12" y2="5" />
-              <polyline points="5 12 12 5 19 12" />
-            </svg>
-            Back to top
-          </a>
         </div>
 
       </article>

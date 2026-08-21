@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
 import {
+  ACTION_RADIUS_CLASS,
   CTA_FILL,
   CTA_INSET_SHADOW,
   CTA_OUTER_SHADOW,
@@ -763,7 +764,7 @@ function VercelHero({
                 context menu; the handler only takes over to match the site's
                 Lenis smooth scrolling. */}
             <span
-              className="inline-flex rounded-full"
+              className="inline-flex rounded-[6px]"
               style={{
                 boxShadow: CTA_OUTER_SHADOW,
                 transformOrigin: "center",
@@ -1243,88 +1244,47 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div
         ref={inquiryBorderRef}
-        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl bg-[rgb(var(--surface))] py-6 sm:py-7 px-5 sm:px-8 ${LIQUID_REVEAL}`}
+        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl py-6 sm:py-7 px-5 sm:px-8 ${LIQUID_REVEAL}`}
+        style={{ background: "#ffffff" }}
       >
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
           <div className={`min-w-0 text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
-            <h2 className="text-[clamp(1.35rem,2.8vw,1.75rem)] font-normal tracking-[-0.025em] leading-tight text-[rgb(var(--fg))]">
+            {/* The card is hardcoded white while the site runs in dark mode,
+                so these can't use --fg/--muted (near-white there). Matches the
+                hero's ink on its own light ground. */}
+            <h2
+              className="text-[clamp(1.35rem,2.8vw,1.75rem)] font-normal tracking-[-0.025em] leading-tight"
+              style={{ color: "#1a1a1a" }}
+            >
               What are you building?
             </h2>
-            <p className="mt-2 text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+            <p
+              className="mt-2 text-[14px] sm:text-[15px] leading-relaxed tracking-tight"
+              style={{ color: "#5c5c5c" }}
+            >
               Three quick questions to start. We&rsquo;ll take it from there.
             </p>
           </div>
 
         {!disclosed && (
           <span
-            className={`self-start sm:self-center shrink-0 inline-flex rounded-full ${LIQUID_REVEAL}`}
-            style={{ ...liquidRevealDelay(80), boxShadow: INQUIRY_CTA_OUTER_SHADOW, transformOrigin: "center" }}
+            className={`self-start sm:self-center shrink-0 inline-flex ${ACTION_RADIUS_CLASS} ${LIQUID_REVEAL}`}
+            style={{ ...liquidRevealDelay(80), transformOrigin: "center" }}
           >
             <button
               type="button"
               onClick={onBegin}
               aria-expanded="false"
               aria-controls="questionnaire-flow"
-              className="relative inline-flex items-center gap-2 rounded-full border-0 h-10 sm:h-11 px-4 py-1.5 sm:px-5 sm:py-1.5 text-[14px] sm:text-[15px] font-medium tracking-tight leading-none [-webkit-tap-highlight-color:transparent]"
+              className={`relative inline-flex items-center overflow-hidden border-0 ${ACTION_RADIUS_CLASS} h-10 sm:h-11 px-5 sm:px-6 text-[16px] sm:text-[17px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
               style={{
-                background:
-                  "linear-gradient(180deg, #f4f4f4 0%, #ffffff 52%, #e8e8e8 100%)",
-                color: "#757575",
-                boxShadow:
-                  "inset 0 1px 0 rgba(255,255,255,0.95)," +
-                  "inset 0 -1.5px 0 rgba(0,0,0,0.1)",
+                background: CTA_FILL,
+                color: "#fff",
+                fontWeight: 450,
               }}
               {...inquiryCtaHover}
             >
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 pointer-events-none rounded-full overflow-hidden"
-                style={{
-                  backgroundImage:
-                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-                  backgroundSize: "180px 180px",
-                  mixBlendMode: "multiply",
-                  opacity: 0.14,
-                }}
-              />
-              <span className="relative inline-grid place-items-center leading-none">
-                <span className="col-start-1 row-start-1">Begin</span>
-              </span>
-              <span
-                className="relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full shrink-0 overflow-hidden"
-                style={{
-                  background:
-                    "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.1) 0%, transparent 52%)," +
-                    "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.75) 0%, transparent 65%)," +
-                    "rgba(0,0,0,0.07)",
-                  boxShadow:
-                    "inset 0 2.5px 4px rgba(0,0,0,0.14)," +
-                    "inset 0 -1.5px 2.5px rgba(255,255,255,0.85)," +
-                    "inset 0 0 0 0.5px rgba(0,0,0,0.08)," +
-                    "0 1px 2px rgba(0,0,0,0.08)",
-                }}
-              >
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-0 pointer-events-none rounded-full"
-                  style={{
-                    background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 40%)",
-                  }}
-                />
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="relative block h-3.5 w-3.5 sm:h-4 sm:w-4"
-                  aria-hidden="true"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <polyline points="19 12 12 19 5 12" />
-                </svg>
-              </span>
+              Begin
             </button>
           </span>
         )}
@@ -2153,6 +2113,12 @@ function ClientDialog({
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const dragRef = useRef<{ startY: number; active: boolean } | null>(null);
+  // The portal target only exists on the client. Gating on `typeof document`
+  // renders null on the server but a real portal on the very first client
+  // render, which is a hydration mismatch — so gate on an effect instead, and
+  // let the first client render agree with the server's null.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Reset the sheet position whenever it reopens, so a previous swipe doesn't
   // leave the next open offset.
@@ -2205,7 +2171,7 @@ function ClientDialog({
     };
   }, [open, onClose]);
 
-  if (typeof document === "undefined") return null;
+  if (!mounted) return null;
 
   const accent = item ? CLIENT_NAME_ACCENT[item.slug] : undefined;
 
@@ -2303,13 +2269,10 @@ function ClientDialog({
 
             <Link
               href={`/work/${item.slug}`}
-              className="mt-7 inline-flex items-center gap-2 rounded-full px-4 h-10 text-[15px] tracking-tight"
+              className={`mt-7 inline-flex items-center ${ACTION_RADIUS_CLASS} px-5 h-10 text-[15px] tracking-tight`}
               style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
             >
               View case study
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
-              </svg>
             </Link>
           </div>
         </div>
@@ -2335,6 +2298,10 @@ const CLIENT_NAME_ACCENT: Record<string, string> = {
   "subtle-goods": "#6aa9d9",
 };
 
+// Darker than the global --line token: a 1px dashed rule at 225 grey nearly
+// disappears, and this grid is built from rails so they have to read.
+const CLIENT_RULE = "1px dashed rgb(var(--fg) / 0.28)";
+
 function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
@@ -2353,12 +2320,31 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
       >
         <Pill>Clients</Pill>
       </p>
-      <ul className="grid grid-cols-2 gap-x-5 sm:gap-x-10">
-        {items.map((item) => {
+      {/* One rounded frame around the whole grid, matching the blog cards'
+          rounded-2xl. The outer rails are this container's border; overflow
+          clipping keeps the cell rules from poking past the rounded corners.
+          No gap-x: the middle rail is a real border on the odd cells, so it
+          lines up exactly with the horizontal rules, and the inner padding
+          restores the breathing room the gutter used to give. */}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{ border: CLIENT_RULE }}
+      >
+      <ul className="grid grid-cols-2">
+        {items.map((item, i) => {
           const accent = CLIENT_NAME_ACCENT[item.slug];
           const isHovered = hovered === item.slug;
           return (
-            <li key={item.slug} style={{ borderTop: "1px dashed rgb(var(--line))" }}>
+            <li
+              key={item.slug}
+              className={i % 2 === 0 ? "pl-4 pr-5 sm:pl-6 sm:pr-8" : "pl-5 pr-4 sm:pl-8 sm:pr-6"}
+              style={{
+                // First row sits against the frame's own top border, so it
+                // would double up there.
+                borderTop: i > 1 ? CLIENT_RULE : undefined,
+                borderRight: i % 2 === 0 ? CLIENT_RULE : undefined,
+              }}
+            >
               <button
                 type="button"
                 onClick={() => setOpenItem(item)}
@@ -2386,10 +2372,6 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
           );
         })}
       </ul>
-      {/* One closing rule per column so both columns terminate cleanly. */}
-      <div className="grid grid-cols-2 gap-x-5 sm:gap-x-10">
-        <div style={{ borderTop: "1px dashed rgb(var(--line))" }} />
-        <div style={{ borderTop: "1px dashed rgb(var(--line))" }} />
       </div>
       </div>
       <ClientDialog item={openItem} onClose={() => setOpenItem(null)} />

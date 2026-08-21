@@ -1,10 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  return isMobile;
+}
 
 export function DemoButton({ href, password }: { href: string; password: string }) {
   const [state, setState] = useState<"idle" | "copying" | "copied">("idle");
   const [hovered, setHovered] = useState(false);
+  const isMobile = useIsMobile();
 
   const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -14,7 +29,11 @@ export function DemoButton({ href, password }: { href: string; password: string 
     } catch {}
     setState("copied");
     setTimeout(() => {
-      window.open(href, "_blank", "noreferrer");
+      if (window.matchMedia("(max-width: 639px)").matches) {
+        window.location.assign(href);
+      } else {
+        window.open(href, "_blank", "noreferrer");
+      }
       setState("idle");
     }, 1000);
   };
@@ -25,12 +44,11 @@ export function DemoButton({ href, password }: { href: string; password: string 
     <div className="relative w-full">
       <a
         href={href}
-        target="_blank"
-        rel="noreferrer"
+        {...(!isMobile ? { target: "_blank", rel: "noreferrer" } : {})}
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-5 py-2 hover:border-[rgb(var(--fg)/0.4)] transition-colors text-[13px] font-medium tracking-tight"
+        className="w-full inline-flex items-center justify-center gap-2 rounded-[6px] border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-5 py-2 hover:border-[rgb(var(--fg)/0.4)] transition-colors text-[13px] font-medium tracking-tight"
       >
         {state === "copied" ? (
           <>

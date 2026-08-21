@@ -108,7 +108,7 @@ export function ResetPasswordForm() {
   const onInputFocus = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)");
   const onInputBlur = (e: React.FocusEvent<HTMLInputElement>) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)");
 
-  const submitButtonClass = "flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-full transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed";
+  const submitButtonClass = "flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-[6px] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed";
   const submitButtonStyle: React.CSSProperties = { background: "rgb(var(--fg))", color: "rgb(var(--bg))" };
 
   return (

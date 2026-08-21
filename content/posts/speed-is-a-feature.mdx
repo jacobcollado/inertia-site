@@ -1,0 +1,47 @@
+---
+title: "Speed is a feature"
+subtitle: "Performance as a design decision, not an afterthought."
+date: 2026-08-04
+summary: A slow site does not read as unfinished. It reads as uncared for, before a visitor reads a single word.
+tag: Infrastructure
+---
+
+Performance gets filed under engineering. It is a design problem, and treating it as engineering cleanup is why so many beautiful sites feel cheap.
+
+<mark>A visitor forms an impression before your first paragraph renders.</mark> If the page hesitates, that impression is already set, and no amount of typography recovers it.
+
+## Slow does not read as slow
+
+This is the part that gets missed. Users rarely think "this site is slow." They think the brand is careless, or the company is small, or something is broken. The judgment lands on you, not on the network.
+
+<mark>Latency is interpreted as indifference.</mark> A page that takes three seconds to become usable communicates something about how much you care, and it communicates it to everyone, before any of your actual work is visible.
+
+## The heaviest things are usually decorative
+
+When a site is slow, the cause is almost never the content. It is the ornament.
+
+An uncompressed hero image. A font family loaded in six weights when the design uses two. An animation library imported for one fade. Analytics, a chat widget, a heatmap tool, a consent banner, each added by someone reasonable for a reasonable purpose.
+
+<mark>None of these were design decisions, which is exactly the problem.</mark> They accumulated. Nobody weighed the cost against what they returned, because nobody was watching the total.
+
+## Perceived speed is designable
+
+Real speed matters, but perception is where design has direct leverage.
+
+Content that renders progressively feels faster than content that appears all at once after a wait. A skeleton that matches the final layout feels faster than a spinner, because nothing shifts when the data lands. An interaction that responds instantly and reconciles afterwards feels faster than one that waits for the server to confirm what it already knows.
+
+<mark>Layout shift is the worst offender.</mark> A page that finishes loading by rearranging itself feels broken even when it was quick, because the user has to re-find everything they were already reading.
+
+## Budgets, not vibes
+
+"Keep it fast" is not a constraint anyone can act on. A number is.
+
+Pick a page weight and a time-to-interactive you will not exceed, then treat them like any other design constraint. When something new wants to go on the page, it has to fit the budget or displace something. <mark>The discipline is not in the optimization, it is in the refusal.</mark>
+
+Most sites do not need to get faster. They need to stop getting slower, one reasonable addition at a time.
+
+## Where it actually shows
+
+Test on a mid-range phone on a normal connection, not on the machine you built it on. Your laptop on office wifi is the least representative device your site will ever run on.
+
+<mark>The gap between how a site feels to the person who made it and how it feels to everyone else is where most performance problems hide.</mark>

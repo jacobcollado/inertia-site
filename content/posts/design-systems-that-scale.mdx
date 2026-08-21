@@ -1,0 +1,51 @@
+---
+title: "Design systems that scale"
+subtitle: "Systems that survive growth, not just launch day."
+date: 2026-07-21
+summary: A design system only earns its keep when the brand grows into it, not when the first page ships.
+tag: Infrastructure
+---
+
+Most design systems are built for the day they ship. <mark>Almost none are built for the day someone else has to extend them.</mark> That gap is where the work either holds or quietly falls apart.
+
+A system that only serves launch is not a system. It is a style guide with better tooling.
+
+## The test is the tenth page, not the first
+
+The first page is easy. You designed the components while designing the page, so of course they fit. Every decision was made with that one layout in view.
+
+The tenth page is where it gets honest. Somebody needs a card with two actions instead of one. Somebody needs a table on mobile. Somebody needs a state nobody thought about. <mark>What happens next tells you whether you built a system or a snapshot.</mark>
+
+If the answer is a one-off component that lives outside the system, you have a snapshot. Do that eight more times and the system is decoration. The real components are the ad hoc ones, and they have no rules.
+
+## Constraints are the product
+
+The instinct when building a system is to cover everything. Every size, every variant, every case somebody might hit. This feels thorough. It produces something nobody can use.
+
+<mark>A system with forty spacing values has no spacing system.</mark> It has a number picker. The value was never in the options, it was in the removal of options. Six spacing steps that someone actually follows beat an infinite scale nobody respects.
+
+The same holds for type, color, and radius. Fewer decisions available means fewer decisions to get wrong, and it means two people working separately arrive at the same answer without talking. That is the whole point.
+
+## Name things for what they do
+
+`blue-500` tells you what a color looks like. It tells you nothing about when to use it.
+
+The moment you need a dark mode, or a second brand, or an accessible variant, every `blue-500` in the codebase becomes a decision you have to relitigate one by one. <mark>Semantic names survive redesigns because they describe intent, not appearance.</mark> A token called `--border-subtle` can change value forever and still be correct.
+
+This sounds pedantic until the first theme change. Then it is the difference between an afternoon and a fortnight.
+
+## Document the why, not the what
+
+Anyone can see what a component looks like. The screenshot is right there.
+
+What nobody can see is why the padding is what it is, why the disabled state does not use opacity, or why this pattern was tried and abandoned. <mark>Undocumented reasoning gets rediscovered the expensive way</mark>, usually by someone reverting a fix without knowing it was a fix.
+
+The most useful line in any system doc is the one that starts "we tried X and it broke Y."
+
+## What scaling actually means
+
+Scaling is not more components. It is usually fewer, used in more places.
+
+A system scales when a new person can build a page that looks like it belongs without asking anyone. When the answer to "what do I use here" is obvious. When the shortcut and the correct path are the same path. <mark>If doing it right is slower than doing it wrong, the system loses every time</mark>, and it should.
+
+Build for the person who joins in a year and has none of the context you have right now. They are the real user.

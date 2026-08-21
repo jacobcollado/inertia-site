@@ -593,7 +593,7 @@ function InertiaLogo() {
    grain, and inset well so the header control matches the page CTA. ── */
 
 function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
-  const gap = 3;
+  const gap = 5;
   return (
     <div
       className={`relative inline-flex items-center ${CTA_HEADER_SHELL_HEIGHT_CLASS}`}
@@ -624,8 +624,8 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
         aria-hidden="true"
         style={{
           width: gap + 6,
-          marginLeft: -5,
-          marginRight: -5,
+          marginLeft: -4,
+          marginRight: -4,
           height: 16,
           background: "#000",
           zIndex: 0,
@@ -638,7 +638,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
         className={`relative flex items-center justify-center overflow-hidden ${CTA_HEADER_SHELL_HEIGHT_CLASS} aspect-square`}
         style={{
           zIndex: 1,
-          borderRadius: "50%",
+          borderRadius: 6,
           background: CTA_FILL,
           color: "#fff",
           boxShadow: "none",

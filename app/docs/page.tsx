@@ -1291,7 +1291,7 @@ function DocsPageInner() {
             </Link>
           )}
         </div>
-        <Link href="/aether/buy" className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12px] tracking-tight font-medium transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
+        <Link href="/aether/buy" className="hidden sm:inline-flex items-center gap-1.5 rounded-[6px] px-3.5 py-1.5 text-[12px] tracking-tight font-medium transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
           Get Aether
         </Link>
       </header>
@@ -1443,13 +1443,13 @@ function DocsPageInner() {
 
               {product.id === "aether" && (
                 <div className="flex flex-wrap gap-2">
-                  <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: rgba(product.accent, 0.12), color: rgba(product.accent, 1) }}>
+                  <Link href="/aether/buy" className="inline-flex items-center gap-1.5 rounded-[6px] px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: rgba(product.accent, 0.12), color: rgba(product.accent, 1) }}>
                     Buy a license
                   </Link>
-                  <Link href="/aether/changelog" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
+                  <Link href="/aether/changelog" className="inline-flex items-center gap-1.5 rounded-[6px] px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
                     Changelog
                   </Link>
-                  <a href="https://cal.com/jacob-c-99otvp/15min" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
+                  <a href="https://cal.com/jacob-c-99otvp/15min" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-[6px] px-4 py-2 text-[13px] tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]">
                     Get support
                   </a>
                 </div>
