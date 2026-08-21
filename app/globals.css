@@ -790,33 +790,15 @@ h1:hover .redact > span.redact-inner,
   stroke-dashoffset: 101;
 }
 
-.sketch-draw-dot {
-  opacity: 0;
-  transform: scale(0.4);
-  transform-origin: center;
-  transform-box: fill-box;
-}
-
 .is-visible .sketch-draw .sketch-draw-path {
-  /* Sweeps through the loops quickly, then a long glide to the end of the
-     line. Deceleration is what sells the viscous feel. */
+  /* Swings through the oscillation quickly, then a long glide along the
+     settled line. Deceleration is what sells the viscous feel. */
   animation: sketch-draw 1400ms cubic-bezier(0.3, 0, 0.1, 1) 120ms forwards;
-}
-
-.is-visible .sketch-draw .sketch-draw-dot {
-  animation: sketch-dot 500ms cubic-bezier(0.22, 0.61, 0.36, 1) 950ms forwards;
 }
 
 @keyframes sketch-draw {
   to {
     stroke-dashoffset: 0;
-  }
-}
-
-@keyframes sketch-dot {
-  to {
-    opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -1546,11 +1528,6 @@ h1:hover .redact > span.redact-inner,
     animation: none !important;
     stroke-dashoffset: 0;
   }
-  .sketch-draw-dot {
-    animation: none !important;
-    opacity: 1;
-    transform: none;
-  }
   [style*="hero-canvas"],
   [style*="hero-line"] {
     animation: none !important;
@@ -1716,7 +1693,7 @@ h1:hover .redact > span.redact-inner,
   display: flex;
   align-items: center;
   margin: 0 12px;
-  max-width: 88rem;
+  max-width: 80rem;
   height: 72px;
 }
 

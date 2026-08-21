@@ -76,7 +76,7 @@ const DEMO_URL = "https://aether-starter.myshopify.com";
 
 export default function AetherPage() {
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       <AetherHero demoUrl={DEMO_URL} />
 

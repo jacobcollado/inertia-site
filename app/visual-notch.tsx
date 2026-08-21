@@ -10,8 +10,6 @@ import { useWebHaptics } from "web-haptics/react";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 import {
   CTA_FILL,
-  CTA_INSET_SHADOW,
-  CTA_OUTER_SHADOW,
   CTA_HEADER_PILL_CLASS,
   CTA_HEADER_SHELL_HEIGHT_CLASS,
   CTA_HEADER_WELL_CLASS,
@@ -584,7 +582,7 @@ function InertiaLogo() {
     <img
       src="/logo.png"
       alt="Inertia"
-      className="h-6 sm:h-7 w-auto"
+      className="h-5 sm:h-6 w-auto"
       style={{ display: "block" }}
     />
   );
@@ -611,7 +609,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
           zIndex: 1,
           background: CTA_FILL,
           color: "#fff",
-          boxShadow: `${CTA_INSET_SHADOW}, ${CTA_OUTER_SHADOW}`,
+          boxShadow: "none",
           textDecoration: "none",
           whiteSpace: "nowrap",
         }}
@@ -643,7 +641,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
           borderRadius: "50%",
           background: CTA_FILL,
           color: "#fff",
-          boxShadow: `${CTA_INSET_SHADOW}, ${CTA_OUTER_SHADOW}`,
+          boxShadow: "none",
         }}
       >
         <CtaGrain />

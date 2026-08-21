@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal, flushSync } from "react-dom";
+import { useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,15 +15,29 @@ import {
   CTA_INSET_SHADOW,
   CTA_OUTER_SHADOW,
   CTA_PILL_CLASS,
-  CTA_WELL_ICON_CLASS,
   CtaGrain,
-  CtaWell,
 } from "@/lib/cta-chrome";
+import type { PostMeta } from "@/lib/posts";
 
-export type ClientCarouselItem = { slug: string; client: string; blurb?: string; logo?: string };
+export type ClientCarouselItem = {
+  slug: string;
+  client: string;
+  blurb?: string;
+  logo?: string;
+  service?: string;
+  year?: string;
+  summary?: string;
+  image?: string;
+};
 
-export default function Home({ initialWork }: { initialWork: ClientCarouselItem[] }) {
-  return <VisualLayout initialWork={initialWork} />;
+export default function Home({
+  initialWork,
+  initialPosts,
+}: {
+  initialWork: ClientCarouselItem[];
+  initialPosts: PostMeta[];
+}) {
+  return <VisualLayout initialWork={initialWork} initialPosts={initialPosts} />;
 }
 
 const LIQUID_REVEAL = "rise rise--liquid";
@@ -65,7 +80,7 @@ function useLiquidReveal(active: boolean, delayMs = 0) {
 
 function ServicesSection() {
   return (
-    <section className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl mx-auto text-center">
         <p
           className="rise rise--liquid text-[clamp(1.8rem,4vw,2.5rem)] font-normal tracking-tight max-sm:tracking-[-0.05em] sm:tracking-tight leading-snug text-[rgb(var(--fg))]"
@@ -448,6 +463,107 @@ function heroLiquidStyle(
   };
 }
 
+// Figma-style selection chrome around a word: a 1px accent frame that draws
+// itself in clockwise from the top-left, then pops the four square resize
+// handles. Rendered as an inset overlay so it never affects the heading's
+// layout or the per-word reveal transform.
+// Neutral grey rather than the work accent: the frame is a Figma-selection
+// affordance, not a brand cue, and an accent colour competed with the antislow
+// mark sitting just above it.
+const SELECTION_FRAME_COLOR = "#8a8a8a";
+const SELECTION_EDGE_MS = 170;
+const SELECTION_HANDLE_MS = 160;
+
+function SelectionBox({
+  color,
+  visible,
+  delay,
+}: {
+  color: string;
+  visible: boolean;
+  delay: number;
+}) {
+  const HANDLE = 5;
+  const reduced = useReducedMotion();
+
+  // Each edge scales from the corner the previous edge finished at, so the
+  // line reads as one continuous stroke travelling around the box.
+  const edges = [
+    { side: "top", origin: "left center", axis: "scaleX" },
+    { side: "right", origin: "center top", axis: "scaleY" },
+    { side: "bottom", origin: "right center", axis: "scaleX" },
+    { side: "left", origin: "center bottom", axis: "scaleY" },
+  ] as const;
+
+  const edgeBase = (side: string): React.CSSProperties => {
+    const t = { position: "absolute" as const, background: color };
+    if (side === "top") return { ...t, top: 0, left: 0, right: 0, height: 1 };
+    if (side === "bottom") return { ...t, bottom: 0, left: 0, right: 0, height: 1 };
+    if (side === "left") return { ...t, left: 0, top: 0, bottom: 0, width: 1 };
+    return { ...t, right: 0, top: 0, bottom: 0, width: 1 };
+  };
+
+  const corners = [
+    { top: -HANDLE / 2, left: -HANDLE / 2 },
+    { top: -HANDLE / 2, right: -HANDLE / 2 },
+    { bottom: -HANDLE / 2, right: -HANDLE / 2 },
+    { bottom: -HANDLE / 2, left: -HANDLE / 2 },
+  ];
+
+  const handlesDelay = delay + edges.length * SELECTION_EDGE_MS;
+
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position: "absolute",
+        top: "-0.08em",
+        right: "-0.1em",
+        bottom: "-0.2em",
+        left: "-0.1em",
+        pointerEvents: "none",
+      }}
+    >
+      {edges.map((edge, i) => (
+        <span
+          key={edge.side}
+          style={{
+            ...edgeBase(edge.side),
+            transformOrigin: edge.origin,
+            transform: visible || reduced
+              ? `${edge.axis}(1)`
+              : `${edge.axis}(0)`,
+            transition: reduced
+              ? "none"
+              : `transform ${SELECTION_EDGE_MS}ms linear ${delay + i * SELECTION_EDGE_MS}ms`,
+          }}
+        />
+      ))}
+      {corners.map((pos, i) => (
+        <span
+          key={i}
+          style={{
+            position: "absolute",
+            width: HANDLE,
+            height: HANDLE,
+            background: "#fff",
+            border: `1px solid ${color}`,
+            ...pos,
+            opacity: visible || reduced ? 1 : 0,
+            transform: visible || reduced ? "scale(1)" : "scale(0.4)",
+            transition: reduced
+              ? "none"
+              : [
+                  `opacity ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
+                  `transform ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
+                ].join(", "),
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
 function heroCtaLabelStyle(active: boolean) {
   return {
     opacity: active ? 1 : 0,
@@ -495,16 +611,20 @@ function VercelHero({
     heroLiquidStyle(visible, delay, opts);
 
   // Heading words stagger with a soft blur+scale dissolve so each token
-  // flows into focus rather than rising, building to "becomes
-  // infrastructure" as the payoff line, then the CTA follows.
-  const HEADING_WORDS = ["Where", "imagination", "becomes", "infrastructure"];
+  // flows into focus rather than rising, building to "the development" as
+  // the payoff line, then the CTA follows.
+  const HEADING_LINE_ONE = ["We", "do", "the", "design"];
+  const HEADING_LINE_TWO = ["and", "the", "development."];
+  const HEADING_WORDS = [...HEADING_LINE_ONE, ...HEADING_LINE_TWO];
   const wordReveal = (i: number) =>
     heroLiquidStyle(visible, HERO_START + i * HERO_WORD_STEP, { blur: 7, scaleFrom: 0.994 });
   const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
-  // Cloud pill waits until the last heading word has actually finished
-  // dissolving in — headingEnd is only when that transition *starts*.
-  const cloudDelay = headingEnd + HERO_LIQUID_MS;
   const ctaFadeDelay = headingEnd + 644;
+  // Cloud pill waits until the CTA has actually finished landing —
+  // ctaFadeDelay is only when that transition *starts*.
+  const cloudDelay = ctaFadeDelay + HERO_LIQUID_MS;
+  // Selection chrome snaps on only after the CTA has finished landing.
+  const selectionDelay = cloudDelay + 220;
 
   // Alternates between the project quiz and the Aether product page on a
   // fixed loop once the hero has landed — no carousel interaction required.
@@ -554,7 +674,7 @@ function VercelHero({
             pulled desktop content off centre, and a later sm:pb-10 does not
             reliably beat it (Tailwind orders utilities itself, so arbitrary
             value vs. responsive variant is not settled by source order). */}
-        <div className="relative max-w-[88rem] mx-auto w-full px-3 sm:px-8 max-sm:pt-16 sm:pt-0 max-sm:pb-[40dvh] sm:pb-[18dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-[calc(100dvh-72px)] sm:justify-center">
+        <div className="relative max-w-[80rem] mx-auto w-full px-3 sm:px-8 max-sm:pt-16 sm:pt-0 max-sm:pb-[40dvh] sm:pb-[18dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-[calc(100dvh-72px)] sm:justify-center">
           {false && (
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
@@ -581,84 +701,33 @@ function VercelHero({
           )}
 
           <h1
-            className="font-normal tracking-tight max-sm:tracking-[-0.05em] leading-none max-w-2xl text-[clamp(2.3rem,7.2vw,3.55rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
-            style={{ color: "#1a1a1a" }}
+            className="tracking-tight max-sm:tracking-[-0.05em] leading-none max-w-2xl text-[clamp(2.5rem,7.8vw,3.55rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
+            style={{ color: "#1a1a1a", fontWeight: 450 }}
           >
-            <span className="max-sm:whitespace-nowrap inline-flex items-baseline" style={{ gap: "0.3em" }}>
-              <span style={wordReveal(0)}>Where</span>
-              <span
-                className="inline-flex items-baseline"
-                style={{
-                  gap: visible ? "0.3em" : 0,
-                  transition: `gap ${HERO_PILL_SLOT_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
-                }}
-              >
-                <span
-                  aria-hidden="true"
-                  className="relative inline-flex items-center justify-center rounded-full pointer-events-none overflow-hidden"
-                  style={{
-                    flexShrink: 0,
-                    background:
-                      "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.07) 0%, transparent 52%)," +
-                      "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.92) 0%, transparent 65%)," +
-                      "rgba(26,26,26,0.06)",
-                    boxShadow:
-                      "inset 0 1.5px 2.5px rgba(0,0,0,0.08)," +
-                      "inset 0 -1px 1.5px rgba(255,255,255,0.9)," +
-                      "inset 0 0 0 0.5px rgba(0,0,0,0.04)",
-                    height: "0.78em",
-                    width: visible ? "1.36em" : 0,
-                    minWidth: 0,
-                    transformOrigin: "50% 50%",
-                    willChange: "width, opacity, transform",
-                    opacity: visible ? 1 : 0,
-                    transform: visible ? "scale(1)" : "scale(0.96)",
-                    transition: [
-                      `width ${HERO_PILL_SLOT_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
-                      `opacity ${HERO_PILL_FADE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
-                      `transform ${HERO_PILL_SCALE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay}ms`,
-                    ].join(", "),
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-0 pointer-events-none rounded-full"
-                    style={{
-                      background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 42%)",
-                    }}
-                  />
-                  <img
-                    src="/hero-cloud.png"
-                    alt=""
-                    width={70}
-                    height={47}
-                    draggable={false}
-                    className="relative block"
-                    style={{
-                      height: "0.64em",
-                      width: "auto",
-                      maxHeight: "88%",
-                      flexShrink: 0,
-                      willChange: "opacity, transform, filter",
-                      opacity: visible ? 1 : 0,
-                      transform: visible ? "scale(1)" : "scale(0.97)",
-                      filter: visible ? "blur(0px)" : "blur(8px)",
-                      transition: [
-                        `opacity ${HERO_PILL_FADE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay + HERO_PILL_GLYPH_LAG}ms`,
-                        `transform ${HERO_PILL_SCALE_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay + HERO_PILL_GLYPH_LAG}ms`,
-                        `filter ${HERO_PILL_BLUR_MS}ms ${HERO_LIQUID_EASE} ${cloudDelay + HERO_PILL_GLYPH_LAG}ms`,
-                      ].join(", "),
-                    }}
-                  />
+            <span className="flex flex-wrap justify-center items-baseline" style={{ columnGap: "0.3em" }}>
+              {HEADING_LINE_ONE.map((word, i) => (
+                <span key={word + i} style={wordReveal(i)}>
+                  {word === "design" ? (
+                    <span style={{ position: "relative", display: "inline-block" }}>
+                      {word}
+                      <SelectionBox
+                        color={SELECTION_FRAME_COLOR}
+                        visible={visible}
+                        delay={selectionDelay}
+                      />
+                    </span>
+                  ) : (
+                    word
+                  )}
                 </span>
-                <span style={wordReveal(1)}>imagination</span>
-              </span>
+              ))}
             </span>
-            <span className="mt-2 sm:mt-2.5 max-sm:whitespace-nowrap">
-              {HEADING_WORDS.slice(2).map((word, i) => (
-                <span key={word + i}>
-                  <span style={wordReveal(i + 2)}>{word}</span>{" "}
-                </span>
+            <span
+              className="mt-1.5 sm:mt-2 flex flex-wrap justify-center"
+              style={{ columnGap: "0.3em" }}
+            >
+              {HEADING_LINE_TWO.map((word, i) => (
+                <span key={word + i} style={wordReveal(HEADING_LINE_ONE.length + i)}>{word}</span>
               ))}
             </span>
           </h1>
@@ -728,43 +797,27 @@ function VercelHero({
                 background: CTA_FILL,
                 color: "#fff",
                 boxShadow: CTA_INSET_SHADOW,
+                fontWeight: 450,
               }}
               {...ctaScaleHoverOnParent}
             >
               <CtaGrain />
-              <span className="relative inline-grid place-items-center">
+              <span className="relative inline-grid place-items-center text-center whitespace-nowrap">
                 <span
-                  className="col-start-1 row-start-1"
+                  className="col-start-1 row-start-1 justify-self-center"
                   style={heroCtaLabelStyle(!isAetherCta)}
                   aria-hidden={isAetherCta}
                 >
                   Get in touch
                 </span>
                 <span
-                  className="col-start-1 row-start-1"
+                  className="col-start-1 row-start-1 justify-self-center"
                   style={heroCtaLabelStyle(isAetherCta)}
                   aria-hidden={!isAetherCta}
                 >
                   View Aether
                 </span>
               </span>
-              <CtaWell>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={CTA_WELL_ICON_CLASS}
-                  style={{
-                    transform: isAetherCta ? "rotate(-90deg)" : "rotate(0deg)",
-                    transition: `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
-                  }}
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
-                </svg>
-              </CtaWell>
             </a>
             </span>
             {false && (
@@ -1187,7 +1240,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   };
 
   return (
-    <section id="start" className="w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div
         ref={inquiryBorderRef}
         className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl bg-[rgb(var(--surface))] py-6 sm:py-7 px-5 sm:px-8 ${LIQUID_REVEAL}`}
@@ -1440,31 +1493,22 @@ const WORK_ITEMS = [
   { src: "/work/ellora-la/2.png", title: "Ellora LA", category: "Collection page", accent: "#6f283c", logo: "/work-logos/ellora-la.png" },
 ];
 
-const CAROUSEL_LOGO_DROP = "drop-shadow(0 3px 10px rgba(0,0,0,0.45))";
-const CAROUSEL_LOGO_WHITE =
-  "brightness(0) invert(1) drop-shadow(0 3px 6px rgba(0,0,0,0.55)) drop-shadow(0 1px 14px rgba(0,0,0,0.4))";
-
-// Force white for dark-on-transparent marks (Aether, Trippie, Allure, Mood
-// Swings). Skip for logos that already ship white-on-transparent (Ellora) —
-// invert turns their white artwork black.
-const CAROUSEL_LOGO_STYLE: Record<string, { width: string; filter?: string }> = {
-  aether: { width: "71.5%", filter: CAROUSEL_LOGO_WHITE },
-  inboundly: { width: "38%" },
-  "trippie-redd": { width: "48%", filter: CAROUSEL_LOGO_WHITE },
-  "ellora-la": { width: "56%" },
-  "allure-new-york": { width: "58%", filter: CAROUSEL_LOGO_WHITE },
-  "mood-swings": { width: "62%", filter: CAROUSEL_LOGO_WHITE },
-  "subtle-goods": { width: "46%" },
-  "ft-gioo": { width: "44%" },
-  "samuel-norris": { width: "68%" },
+// Per-mark optical sizing. Tint is handled separately by CLIENT_LOGO_TINT —
+// the mark is a mask, so the source artwork's own colour no longer matters.
+const CAROUSEL_LOGO_WIDTH: Record<string, string> = {
+  aether: "71.5%",
+  inboundly: "38%",
+  "trippie-redd": "48%",
+  "ellora-la": "56%",
+  "allure-new-york": "58%",
+  "mood-swings": "62%",
+  "subtle-goods": "46%",
+  "ft-gioo": "44%",
+  "samuel-norris": "68%",
 };
 
 function carouselLogoStyle(slug: string) {
-  const style = CAROUSEL_LOGO_STYLE[slug];
-  return {
-    width: style?.width ?? "52%",
-    filter: style?.filter ?? CAROUSEL_LOGO_DROP,
-  };
+  return { width: CAROUSEL_LOGO_WIDTH[slug] ?? "52%" };
 }
 
 // One representative shot per client, in WORK_ITEMS order, with the /work/[slug]
@@ -1676,14 +1720,7 @@ function Pill({ children }: { children: React.ReactNode }) {
     <span
       className="inline rounded-full px-[0.4em] py-px whitespace-nowrap align-baseline leading-none"
       style={{
-        background:
-          "radial-gradient(130% 90% at 50% 0%, rgba(0,0,0,0.07) 0%, transparent 52%)," +
-          "radial-gradient(90% 70% at 50% 110%, rgba(255,255,255,0.92) 0%, transparent 65%)," +
-          "rgba(26,26,26,0.06)",
-        boxShadow:
-          "inset 0 1px 1.5px rgba(0,0,0,0.08)," +
-          "inset 0 -0.5px 1px rgba(255,255,255,0.9)," +
-          "inset 0 0 0 0.5px rgba(0,0,0,0.04)",
+        background: "rgba(26,26,26,0.06)",
         color: "inherit",
       }}
     >
@@ -1799,7 +1836,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   }, [open]);
 
   return (
-    <section className="rise rise--liquid w-full max-w-[88rem] mx-auto px-6 sm:px-8">
+    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
         <LiquidText
           pRef={introRef}
@@ -1906,72 +1943,76 @@ function SketchAiEquation() {
         aria-hidden="true"
       >
         <defs>
-          {/* Gray-to-ink shift happens where the loops give way to the line,
-              not at the path's midpoint. */}
-          <linearGradient id="sketchResolve" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="rgba(92,92,92,0.36)" />
-            <stop offset="0.28" stopColor="rgba(92,92,92,0.32)" />
-            <stop offset="0.45" stopColor="rgba(26,26,26,0.58)" />
+          {/* Gray while the wave is still swinging, ink once it settles —
+              the shift lands where the amplitude is already mostly gone. */}
+          <linearGradient id="sketchResolve" gradientUnits="userSpaceOnUse" x1="12" y1="32" x2="304" y2="32">
+            <stop offset="0" stopColor="rgba(92,92,92,0.32)" />
+            <stop offset="0.35" stopColor="rgba(92,92,92,0.34)" />
+            <stop offset="0.62" stopColor="rgba(26,26,26,0.56)" />
             <stop offset="1" stopColor="rgba(26,26,26,0.68)" />
           </linearGradient>
         </defs>
-        {/* One continuous stroke: exploration loops shrinking left to right,
-            resolving into the line worth shipping. The long run keeps a ~1px
-            waver so it reads as drawn, not ruled. */}
+        {/* One continuous stroke: a damped wave. Amplitude falls off by ~0.68
+            per half-swing (19 -> 0.6 over ten extremes), so the oscillation
+            reads as noise resolving into the single line worth shipping.
+            Tangents are horizontal at every extreme, which is what keeps the
+            swings sinusoidal rather than pointed. The settled run to the right
+            edge keeps a sub-pixel waver so it stays drawn, not ruled. */}
         <path
-          d="M12 44
-             C14 16, 38 10, 40 30 C41 46, 22 50, 24 36
-             C26 18, 48 14, 50 30 C51 44, 36 47, 38 36
-             C40 24, 60 21, 62 32 C63 42, 52 43, 54 36
-             C57 29, 74 28, 84 32 C96 35, 108 34, 122 34
-             C170 32.8, 230 35.2, 286 34"
+          d="M12 32
+             C18 24, 20 13, 26 13
+             C37 13, 37 44.9, 48 44.9
+             C59 44.9, 59 23.2, 70 23.2
+             C81 23.2, 81 38, 92 38
+             C102.5 38, 102.5 27.9, 113 27.9
+             C123.5 27.9, 123.5 34.8, 134 34.8
+             C144.5 34.8, 144.5 30.1, 155 30.1
+             C165 30.1, 165 33.3, 175 33.3
+             C185 33.3, 185 31.1, 195 31.1
+             C204.5 31.1, 204.5 32.6, 214 32.6
+             C248 32.6, 274 31.85, 304 32.05"
           stroke="url(#sketchResolve)"
           strokeWidth="1.05"
           pathLength={100}
           className="sketch-draw-path"
-        />
-        <circle
-          cx="296"
-          cy="34"
-          r="3.2"
-          fill="rgba(26,26,26,0.62)"
-          stroke="none"
-          className="sketch-draw-dot"
         />
       </svg>
     </div>
   );
 }
 
-function AiApproach() {
+function AiApproach({ posts }: { posts: PostMeta[] }) {
   const first =
     "AI hasn't changed what we believe about execution; it's changed how much of it we can afford. A studio our size can now explore [[more]] directions, discard the wrong ones sooner, and spend the saved time where it counts: on the version worth shipping.";
   const second =
     "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
-    <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
-      <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-0 sm:pl-[calc(50vw-384px)]">
-        <div className="max-w-2xl sm:max-w-3xl">
-          <LiquidText
-            text={first}
-            className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
-            style={{ color: "#5c5c5c" }}
-          />
-          <div
-            className={`my-6 sm:my-7 ${LIQUID_REVEAL}`}
-            style={liquidRevealDelay(80)}
-          >
-            <SketchAiEquation />
+    <>
+      <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
+        <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-0 sm:pl-[calc(50vw-384px)]">
+          <div className="max-w-2xl sm:max-w-3xl">
+            <LiquidText
+              text={first}
+              className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+              style={{ color: "#5c5c5c" }}
+            />
+            <div
+              className={`my-6 sm:my-7 ${LIQUID_REVEAL}`}
+              style={liquidRevealDelay(80)}
+            >
+              <SketchAiEquation />
+            </div>
+            <LiquidText
+              text={second}
+              delayMs={160}
+              className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5"
+              style={{ color: "#5c5c5c" }}
+            />
           </div>
-          <LiquidText
-            text={second}
-            delayMs={160}
-            className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5"
-            style={{ color: "#5c5c5c" }}
-          />
         </div>
-      </div>
-    </section>
+      </section>
+      <BlogCarousel posts={posts} />
+    </>
   );
 }
 
@@ -2074,6 +2115,285 @@ function LightCard({ children }: { children: React.ReactNode }) {
           misalign against the wrapper's black background. */}
       <div aria-hidden="true" className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: 6, background: "#fff", zIndex: 1 }} />
     </div>
+  );
+}
+
+// Every client card sits on the same near-black field; the brand colour is
+// carried by the mark instead. Logos are alpha PNGs, so they're tinted by
+// masking a solid colour block with the artwork rather than by filtering it —
+// a filter chain can't reach an arbitrary hue from an unknown source colour.
+// Slugs with no entry fall back to white.
+const CLIENT_CARD_BG = "#0a0a0a";
+const CLIENT_LOGO_TINT_DEFAULT = "#ffffff";
+const CLIENT_LOGO_TINT: Record<string, string> = {
+  aether: "#5fa8d8",
+  inboundly: "#8f7cf5",
+  "trippie-redd": "#d4484f",
+  "ellora-la": "#e0762f",
+  "allure-new-york": "#d9c39c",
+};
+
+// Client detail dialog, opened from a name in the type list. Lenis drives the
+// page scroll, so a plain body-overflow lock isn't enough — the wheel has to be
+// handed to the dialog via lenis:lock plus data-lenis-prevent, or the panel
+// won't scroll internally.
+function ClientDialog({
+  item,
+  onClose,
+}: {
+  item: ClientCarouselItem | null;
+  onClose: () => void;
+}) {
+  const open = item !== null;
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+  // Live swipe offset, in px. Written during a drag and animated back to 0 (or
+  // out) on release.
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const dragRef = useRef<{ startY: number; active: boolean } | null>(null);
+
+  // Reset the sheet position whenever it reopens, so a previous swipe doesn't
+  // leave the next open offset.
+  useEffect(() => {
+    if (open) { setDragY(0); setDragging(false); dragRef.current = null; }
+  }, [open]);
+
+  const CLOSE_THRESHOLD = 110;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    // Only start a dismiss drag from the top of the scroll area — otherwise a
+    // normal upward scroll inside the panel would read as a dismiss.
+    if ((panelRef.current?.scrollTop ?? 0) > 0) return;
+    dragRef.current = { startY: e.touches[0].clientY, active: true };
+    setDragging(true);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const d = dragRef.current;
+    if (!d?.active) return;
+    const delta = e.touches[0].clientY - d.startY;
+    // Downward only; resist upward pull so the sheet can't be dragged past its
+    // docked position.
+    setDragY(delta > 0 ? delta : delta * 0.2);
+  };
+
+  const onTouchEnd = () => {
+    const d = dragRef.current;
+    dragRef.current = null;
+    setDragging(false);
+    if (!d?.active) return;
+    setDragY((y) => {
+      if (y > CLOSE_THRESHOLD) { onClose(); return 0; }
+      return 0;
+    });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    restoreFocusRef.current = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    window.dispatchEvent(new Event("lenis:lock"));
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+      window.dispatchEvent(new Event("lenis:unlock"));
+      restoreFocusRef.current?.focus?.();
+    };
+  }, [open, onClose]);
+
+  if (typeof document === "undefined") return null;
+
+  const accent = item ? CLIENT_NAME_ACCENT[item.slug] : undefined;
+
+  return createPortal(
+    <div
+      ref={backdropRef}
+      className="fixed z-50 flex items-end sm:items-center justify-center"
+      style={{
+        inset: 0,
+        height: "100dvh",
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        opacity: open ? 1 : 0,
+        pointerEvents: open ? "auto" : "none",
+        transition: "opacity 220ms ease",
+      }}
+      onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
+    >
+      {item && (
+        <div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={item.client}
+          data-lenis-prevent
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          onTouchCancel={onTouchEnd}
+          className="relative w-full sm:max-w-[520px] bg-[rgb(var(--bg))] border border-[rgb(var(--line))] rounded-t-2xl sm:rounded-2xl mx-0 sm:mx-4 overflow-y-auto overscroll-contain"
+          style={{
+            maxHeight: "90dvh",
+            // The open animation and the drag transform both write to the same
+            // property, so only run the keyframes while the sheet is at rest.
+            animation: open && dragY === 0 && !dragging
+              ? "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both"
+              : "none",
+            transform: dragY !== 0 ? `translateY(${dragY}px)` : undefined,
+            transition: dragging ? "none" : "transform 320ms cubic-bezier(0.22,1,0.36,1)",
+            touchAction: "pan-y",
+          }}
+        >
+          <div className="sm:hidden flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
+            <div
+              className="w-9 h-1 rounded-full transition-colors"
+              style={{ background: dragging ? "rgb(var(--muted))" : "rgb(var(--line))" }}
+            />
+          </div>
+
+          <button
+            onClick={onClose}
+            className="absolute sm:top-4 sm:right-4 z-10 w-8 h-8 hidden sm:flex items-center justify-center rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+            style={{ background: "rgb(var(--fg)/0.06)" }}
+            aria-label="Close"
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5">
+              <path d="M3 3l10 10M13 3L3 13" />
+            </svg>
+          </button>
+
+          {item.image && (
+            // Inset on mobile so the image's rounded top sits inside the sheet's
+            // own corner radius instead of fighting it; full-bleed from sm up,
+            // where the panel clips the top for us.
+            <div className="px-3 sm:px-0">
+              <div
+                className="relative w-full overflow-hidden rounded-2xl sm:rounded-t-none sm:rounded-b-2xl"
+                style={{ aspectRatio: "16 / 10", background: "#0a0a0a" }}
+              >
+                <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+              </div>
+            </div>
+          )}
+
+          <div className="px-5 sm:px-7 py-6 sm:py-7">
+            <p
+              className="text-[clamp(1.6rem,5vw,2.1rem)] tracking-tight leading-none"
+              style={{ fontWeight: 450, color: accent ?? "rgb(var(--fg))" }}
+            >
+              {item.client}
+            </p>
+
+            {(item.service || item.year) && (
+              <p className="mt-2.5 text-[13px] tracking-tight" style={{ color: "rgb(var(--muted))" }}>
+                {[item.service, item.year].filter(Boolean).join(" · ")}
+              </p>
+            )}
+
+            {item.summary && (
+              <p className="mt-5 text-[15px] sm:text-[16px] leading-relaxed tracking-[-0.02em]" style={{ color: "rgb(var(--muted))" }}>
+                {item.summary}
+              </p>
+            )}
+
+            <Link
+              href={`/work/${item.slug}`}
+              className="mt-7 inline-flex items-center gap-2 rounded-full px-4 h-10 text-[15px] tracking-tight"
+              style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
+            >
+              View case study
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>,
+    document.body,
+  );
+}
+
+// Type-only client list. No logos, no cards: the names carry it, which
+// sidesteps the whole class of logo problems (mismatched source artwork,
+// per-mark optical sizing, tinting an alpha PNG). Each row is a link to the
+// case study; the brand colour shows up only on hover so the resting state
+// stays quiet.
+const CLIENT_NAME_ACCENT: Record<string, string> = {
+  aether: "#5fa8d8",
+  inboundly: "#8f7cf5",
+  "trippie-redd": "#d4484f",
+  "ellora-la": "#e0762f",
+  "allure-new-york": "#c2a878",
+  "mood-swings": "#3f8f6a",
+  "samuel-norris": "#b8353c",
+  "subtle-goods": "#6aa9d9",
+};
+
+function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
+
+  return (
+    <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      {/* Same inner column as DesignPhilosophy above, so the label, the rules
+          and the client names all line up with that paragraph's left edge. */}
+      <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
+      {/* Reuses the same Pill as the [[highlights]] in the paragraph above, so
+          the two treatments can't drift apart. Pill inherits its colour, so the
+          tone comes from this paragraph. */}
+      <p
+        className="mb-8 sm:mb-10 text-[16.5px] sm:text-[19px] tracking-tight leading-relaxed"
+        style={{ color: "#5c5c5c" }}
+      >
+        <Pill>Clients</Pill>
+      </p>
+      <ul className="grid grid-cols-2 gap-x-5 sm:gap-x-10">
+        {items.map((item) => {
+          const accent = CLIENT_NAME_ACCENT[item.slug];
+          const isHovered = hovered === item.slug;
+          return (
+            <li key={item.slug} style={{ borderTop: "1px dashed rgb(var(--line))" }}>
+              <button
+                type="button"
+                onClick={() => setOpenItem(item)}
+                aria-haspopup="dialog"
+                className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
+                onMouseEnter={() => setHovered(item.slug)}
+                onMouseLeave={() => setHovered((p) => (p === item.slug ? null : p))}
+                onFocus={() => setHovered(item.slug)}
+                onBlur={() => setHovered((p) => (p === item.slug ? null : p))}
+              >
+                <span
+                  className="text-[clamp(1.05rem,4.2vw,1.95rem)] tracking-tight leading-none transition-colors duration-300 min-w-0 hyphens-none"
+                  style={{
+                    fontWeight: 450,
+                    color: isHovered && accent ? accent : "rgb(var(--fg))",
+                    // Two columns on a 320px phone leaves ~126px per name;
+                    // wrapping is the safe failure mode, not overflow.
+                    overflowWrap: "break-word",
+                  }}
+                >
+                  {item.client}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {/* One closing rule per column so both columns terminate cleanly. */}
+      <div className="grid grid-cols-2 gap-x-5 sm:gap-x-10">
+        <div style={{ borderTop: "1px dashed rgb(var(--line))" }} />
+        <div style={{ borderTop: "1px dashed rgb(var(--line))" }} />
+      </div>
+      </div>
+      <ClientDialog item={openItem} onClose={() => setOpenItem(null)} />
+    </section>
   );
 }
 
@@ -2546,7 +2866,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                   onMouseLeave={(e) => { setHoveredIndex((prev) => (prev === i ? null : prev)); if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
                 >
                   <>
-                    <div className="absolute inset-0" style={{ backgroundColor: "#0a0a0a" }} />
+                    <div className="absolute inset-0" style={{ backgroundColor: CLIENT_CARD_BG }} />
                     <div
                       aria-hidden="true"
                       className="absolute inset-0 pointer-events-none"
@@ -2559,18 +2879,27 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                     />
                   </>
                   {item.logo ? (
-                    <div className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none">
-                      <Image
-                        src={item.logo}
-                        alt={item.client}
-                        width={180}
-                        height={180}
-                        priority
-                        quality={75}
-                        sizes="230px"
-                        className="h-auto object-contain"
-                        style={carouselLogoStyle(item.slug)}
-                        draggable={false}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center p-8 pointer-events-none"
+                      role="img"
+                      aria-label={item.client}
+                    >
+                      <span
+                        className="block"
+                        style={{
+                          width: carouselLogoStyle(item.slug).width,
+                          aspectRatio: "180 / 180",
+                          backgroundColor:
+                            CLIENT_LOGO_TINT[item.slug] ?? CLIENT_LOGO_TINT_DEFAULT,
+                          WebkitMaskImage: `url(${item.logo})`,
+                          maskImage: `url(${item.logo})`,
+                          WebkitMaskRepeat: "no-repeat",
+                          maskRepeat: "no-repeat",
+                          WebkitMaskPosition: "center",
+                          maskPosition: "center",
+                          WebkitMaskSize: "contain",
+                          maskSize: "contain",
+                        }}
                       />
                     </div>
                   ) : (
@@ -2617,6 +2946,401 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
       </div>
       </div>
 
+    </section>
+  );
+}
+
+function formatBlogDate(iso: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function BlogCarousel({ posts }: { posts: PostMeta[] }) {
+  const [items] = useState<PostMeta[]>(posts);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const padRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isTouchingRef = useRef(false);
+  const liveTouchRafRef = useRef<number | null>(null);
+  const liveNearestRef = useRef<number | null>(null);
+  const cardOffsetsRef = useRef<number[]>([]);
+  const [isTouching, setIsTouching] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const translateRef = useRef(0);
+  const padRest = useRef(0);
+  const collapseDistance = 160;
+  const dragEase = 0.6;
+  const dragRef = useRef<{ startX: number; startTranslate: number; dragging: boolean; moved: boolean } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        requestAnimationFrame(() => setRevealed(true));
+      },
+      { threshold: 0.06, rootMargin: "0px 0px -32px 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const measure = () => setIsDesktop(window.innerWidth >= 640);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  const updateActiveCard = () => {
+    if (window.innerWidth >= 640) { setActiveIndex(null); return; }
+    const el = scrollRef.current;
+    const cards = cardRefs.current;
+    if (!el) return;
+    const trackRect = el.getBoundingClientRect();
+    const center = trackRect.left + trackRect.width / 2;
+    let nearest: number | null = null;
+    let nearestDist = Infinity;
+    cards.forEach((card, i) => {
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      const dist = Math.abs(r.left + r.width / 2 - center);
+      if (dist < nearestDist) { nearestDist = dist; nearest = i; }
+    });
+    setActiveIndex(nearest);
+  };
+
+  const measureCardOffsets = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    cardOffsetsRef.current = cardRefs.current.map((card) => {
+      if (!card) return 0;
+      return card.getBoundingClientRect().left - el.getBoundingClientRect().left + scrollLeft;
+    });
+  };
+
+  const applyLiveCardScale = () => {
+    const el = scrollRef.current;
+    const cards = cardRefs.current;
+    const offsets = cardOffsetsRef.current;
+    if (!el || offsets.length === 0) return;
+    const scrollLeft = el.scrollLeft;
+    const viewportCenter = el.clientWidth / 2;
+    const slot = cards[0]?.getBoundingClientRect().width ?? 300;
+    let nearest: number | null = null;
+    let nearestDist = Infinity;
+    cards.forEach((card, i) => {
+      if (!card) return;
+      const cardCenter = (offsets[i] ?? 0) - scrollLeft + (card.clientWidth / 2);
+      const dist = Math.abs(cardCenter - viewportCenter);
+      if (dist < nearestDist) { nearestDist = dist; nearest = i; }
+      const proximity = Math.max(0, 1 - dist / slot);
+      const scale = 1 + 0.05 * proximity;
+      const translateY = 6 - 12 * proximity;
+      card.style.transform = `translateY(${translateY}px) scale(${scale})`;
+      card.style.boxShadow = proximity > 0.01 ? `0 0 ${14 * proximity}px 0px rgba(0,0,0,${0.2 * proximity})` : "none";
+    });
+    liveNearestRef.current = nearest;
+  };
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let liveRaf: number | null = null;
+    const onScroll = () => {
+      setIsTouching(true);
+      if (liveRaf === null) {
+        liveRaf = requestAnimationFrame(() => {
+          liveRaf = null;
+          applyLiveCardScale();
+        });
+      }
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+      settleTimerRef.current = setTimeout(() => {
+        setIsTouching(false);
+        updateActiveCard();
+      }, 20);
+    };
+    updateActiveCard();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+      if (liveRaf !== null) cancelAnimationFrame(liveRaf);
+    };
+  }, [items]);
+
+  const trackMinTranslate = () => {
+    const track = trackRef.current;
+    const viewport = scrollRef.current;
+    if (!track || !viewport) return 0;
+    const overdrag = 200;
+    return Math.min(0, viewport.clientWidth - track.scrollWidth - overdrag);
+  };
+
+  const applyPadForTranslate = (x: number) => {
+    const pad = padRef.current;
+    if (!pad) return;
+    const t = Math.max(0, Math.min(1, -x / collapseDistance));
+    pad.style.paddingLeft = `${padRest.current + (6 - padRest.current) * t}px`;
+  };
+
+  const onPointerDownDrag = (e: React.PointerEvent) => {
+    if (!isDesktop || e.button !== 0) return;
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    dragRef.current = { startX: e.clientX, startTranslate: translateRef.current, dragging: true, moved: false };
+  };
+
+  const onPointerMoveDrag = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    const track = trackRef.current;
+    const pad = padRef.current;
+    const viewport = scrollRef.current;
+    if (!d?.dragging || !track || !pad) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved) {
+      if (Math.abs(dx) <= 3) return;
+      d.moved = true;
+      e.preventDefault();
+      viewport?.setPointerCapture(e.pointerId);
+      const currentPad = parseFloat(getComputedStyle(pad).paddingLeft) || 0;
+      pad.style.paddingLeft = `${currentPad}px`;
+      if (translateRef.current === 0) padRest.current = currentPad;
+      setIsDragging(true);
+      setIsExpanded(true);
+    } else {
+      e.preventDefault();
+    }
+    const min = trackMinTranslate();
+    const next = Math.max(min, Math.min(0, d.startTranslate + dx * dragEase));
+    translateRef.current = next;
+    track.style.transform = `translateX(${next}px)`;
+    applyPadForTranslate(next);
+  };
+
+  const endDragDesktop = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    const viewport = scrollRef.current;
+    const pad = padRef.current;
+    dragRef.current = null;
+    if (!d?.moved) {
+      if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+      return;
+    }
+    setIsDragging(false);
+    const nextExpanded = translateRef.current < 0;
+    if (pad) {
+      const from = parseFloat(pad.style.paddingLeft) || padRest.current;
+      const to = nextExpanded ? 6 : padRest.current;
+      if (Math.abs(to - from) > 0.5) {
+        const startTime = performance.now();
+        const duration = 450;
+        const stepPad = (now: number) => {
+          const t = Math.min(1, (now - startTime) / duration);
+          pad.style.paddingLeft = `${from + (to - from) * easeInOutCubic(t)}px`;
+          if (t < 1) requestAnimationFrame(stepPad);
+          else pad.style.paddingLeft = "";
+        };
+        requestAnimationFrame(stepPad);
+      } else {
+        pad.style.paddingLeft = "";
+      }
+    }
+    setIsExpanded(nextExpanded);
+    if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
+  };
+
+  useEffect(() => {
+    if (isDragging || isExpanded || !isDesktop) return;
+    const track = trackRef.current;
+    if (!track) return;
+    let raf: number;
+    const clampDuringReturn = () => {
+      const min = trackMinTranslate();
+      if (translateRef.current < min) {
+        translateRef.current = min;
+        track.style.transform = `translateX(${min}px)`;
+      }
+      raf = requestAnimationFrame(clampDuringReturn);
+    };
+    raf = requestAnimationFrame(clampDuringReturn);
+    const stop = setTimeout(() => cancelAnimationFrame(raf), 350);
+    return () => { cancelAnimationFrame(raf); clearTimeout(stop); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDragging, isExpanded, isDesktop]);
+
+  const onTouchStart = () => {
+    if (window.innerWidth >= 640) return;
+    measureCardOffsets();
+    isTouchingRef.current = true;
+    setIsTouching(true);
+  };
+
+  const onTouchMove = () => {
+    if (!isTouchingRef.current || liveTouchRafRef.current !== null) return;
+    liveTouchRafRef.current = requestAnimationFrame(() => {
+      liveTouchRafRef.current = null;
+      applyLiveCardScale();
+    });
+  };
+
+  const onTouchEnd = () => {
+    isTouchingRef.current = false;
+    if (liveNearestRef.current !== null) setActiveIndex(liveNearestRef.current);
+  };
+
+  if (items.length === 0) return null;
+
+  return (
+    <section ref={sectionRef} className="w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)] max-sm:mt-10">
+      <div
+        ref={padRef}
+        className={`px-1.5 sm:pr-0 ${isDragging ? "" : "sm:transition-[padding-left] sm:duration-300 sm:ease-out"} ${isDragging || isExpanded ? "sm:pl-1.5" : "sm:pl-[calc(50vw-384px)]"}`}
+      >
+        <div className="relative">
+          <div
+            ref={scrollRef}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            onPointerDown={onPointerDownDrag}
+            onPointerMove={onPointerMoveDrag}
+            onPointerUp={endDragDesktop}
+            onPointerCancel={endDragDesktop}
+            className={`overflow-x-auto sm:overflow-x-hidden touch-pan-x touch-pan-y snap-x snap-mandatory sm:snap-none scroll-smooth py-6 sm:pb-10 sm:-ml-5 sm:pl-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]${isDragging ? " select-none" : ""}`}
+            style={{ cursor: isDragging ? "grabbing" : undefined }}
+          >
+            <div
+              ref={trackRef}
+              className="flex items-start gap-5 sm:gap-4 sm:w-max"
+              style={isDesktop ? { transform: `translateX(${translateRef.current}px)` } : undefined}
+            >
+              <div className="shrink-0 sm:hidden" style={{ width: 6 }} aria-hidden="true" />
+              {items.map((post, i) => (
+                <div
+                  key={post.slug}
+                  className="shrink-0 sm:w-[420px]"
+                  style={{
+                    willChange: "opacity, transform, filter",
+                    opacity: revealed ? 1 : 0,
+                    transform: revealed ? "scale(1)" : "scale(0.992)",
+                    filter: revealed ? "blur(0px)" : "blur(10px)",
+                    transition: revealed
+                      ? `opacity 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, transform 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, filter 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms`
+                      : "none",
+                  }}
+                >
+                  <Link
+                    ref={(el) => { cardRefs.current[i] = el; }}
+                    href={`/blog/${post.slug}`}
+                    draggable={false}
+                    onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
+                    className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:cursor-grab"
+                    style={{
+                      aspectRatio: "4 / 5",
+                      transition: isTouching
+                        ? "none"
+                        : "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 750ms cubic-bezier(0.4,0,0.2,1)",
+                      transform: activeIndex === i
+                        ? "translateY(-6px) scale(1.05)"
+                        : activeIndex !== null
+                          ? "translateY(6px) scale(1)"
+                          : hoveredIndex === i
+                            ? "translateY(-4px) scale(1.02)"
+                            : "translateY(0) scale(1)",
+                      ...(activeIndex === i ? { boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
+                    }}
+                    onMouseEnter={(e) => { setHoveredIndex(i); e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
+                    onMouseLeave={(e) => { setHoveredIndex((prev) => (prev === i ? null : prev)); if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
+                  >
+                    <div className="absolute inset-0" style={{ backgroundColor: "#0a0a0a" }} />
+                    {post.image ? (
+                      <img
+                        src={post.image}
+                        alt=""
+                        draggable={false}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : null}
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                        backgroundSize: "180px 180px",
+                        mixBlendMode: "overlay",
+                        opacity: 0.35,
+                      }}
+                    />
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-x-0 bottom-0 pointer-events-none"
+                      style={{
+                        height: "58%",
+                        background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.52) 42%, transparent 100%)",
+                      }}
+                    />
+                    <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-4 sm:p-5">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-[18px] tracking-tight leading-snug" style={{ color: "#fff" }}>{post.title}</p>
+                        <span
+                          className="flex items-center justify-center w-7 h-7 sm:w-6 sm:h-6 rounded-full shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                          style={{ background: "rgba(255,255,255,0.12)" }}
+                        >
+                          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 sm:w-3 sm:h-3 shrink-0" style={{ color: "rgba(255,255,255,0.72)" }}>
+                            <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
+                          </svg>
+                        </span>
+                      </div>
+                      {(post.tag || post.date) && (
+                        <div className="flex items-center gap-2">
+                          {post.tag && (
+                            <span
+                              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11.5px] tracking-tight"
+                              style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.78)" }}
+                            >
+                              {post.tag}
+                            </span>
+                          )}
+                          {post.date && (
+                            <span className="text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.58)" }}>
+                              {formatBlogDate(post.date)}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {(post.subtitle || post.summary) && (
+                        <p
+                          className="max-w-[92%] text-[15px] sm:text-[16px] leading-snug tracking-[-0.035em] line-clamp-2"
+                          style={{ color: "rgba(255,255,255,0.72)" }}
+                        >
+                          {post.subtitle || post.summary}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
@@ -2925,7 +3649,13 @@ function ArcGrowSegment({ d, drawn, delayMs }: { d: string; drawn: boolean; dela
   );
 }
 
-function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
+function VisualLayout({
+  initialWork,
+  initialPosts,
+}: {
+  initialWork: ClientCarouselItem[];
+  initialPosts: PostMeta[];
+}) {
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   const [accentColor, setAccentColor] = useState(WORK_ITEMS[0].accent);
   const ctaRef = useRef<HTMLAnchorElement>(null);
@@ -2933,9 +3663,9 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
   return (
     <>
     <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
-    <main className="page-container relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[88rem] flex flex-col">
+    <main className="page-container relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex flex-col">
       <LightCard>
-        <div className="mx-auto w-full max-w-[88rem] flex flex-col">
+        <div className="mx-auto w-full max-w-[80rem] flex flex-col">
           <VercelHero accentColor={accentColor} ctaRef={ctaRef} />
 
           {/* Work thumbnail section (WorkScrollGallery) temporarily hidden
@@ -2957,11 +3687,14 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
 
           <div className="py-10 sm:py-8" />
 
-          <ClientCarousel initialItems={initialWork} />
+          {/* Type-only client list (concept 5). The logo-card carousel is
+              still below as ClientCarousel — swap this line back to
+              <ClientCarousel initialItems={initialWork} /> to restore it. */}
+          <ClientTypeList items={initialWork} />
 
           <div className="py-10 sm:py-8" />
 
-          <AiApproach />
+          <AiApproach posts={initialPosts} />
 
           <div className="py-16 sm:py-14" />
         </div>
@@ -2976,7 +3709,7 @@ function VisualLayout({ initialWork }: { initialWork: ClientCarouselItem[] }) {
       {false && <HeroToIntroLine fromRef={ctaRef} toRef={introRef} />}
 
       <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))", marginTop: -2 }}>
-        <div className="mx-auto w-full max-w-[88rem] flex flex-col">
+        <div className="mx-auto w-full max-w-[80rem] flex flex-col">
           <div className="py-4 sm:py-6" />
 
           <ServicesSection />
