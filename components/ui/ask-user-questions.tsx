@@ -1273,17 +1273,8 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
       >
         {/* Header — static top, fixed across questions; only the number
             changes. Lives outside the morphing region so it never shifts. */}
-        <div className="flex items-center px-4 sm:px-5 pt-4 sm:pt-5 pb-2 text-[12px] text-muted-foreground">
-          {/* Same coloring as the number discs in the homepage PROCESS_STEPS
-              markers: page-background fill with foreground text. --fg/--bg
-              resolve per theme scope, so this stays correct inside and
-              outside the dark zone. */}
-          <span
-            className="inline-flex w-fit items-center rounded-full px-2.5 py-1"
-            style={{ background: "rgb(var(--bg))", color: "rgb(var(--fg))" }}
-          >
-            Question {safeIndex + 1} of {total}
-          </span>
+        <div className="flex items-center px-4 sm:px-5 pt-4 sm:pt-5 pb-2 text-[12px] tracking-tight text-muted-foreground">
+          Question {safeIndex + 1} of {total}
         </div>
 
         {/* Field context for freeText validation — one Base UI Field spans
@@ -1776,12 +1767,11 @@ function Row({
       <span
         aria-hidden
         className={cn(
-          "absolute inline-flex items-center justify-center w-5 h-5 text-[11px] transition-[opacity,font-variation-settings] duration-80",
-          shape.bg,
+          "absolute inline-flex items-center justify-center w-5 h-5 text-[11px] transition-[opacity,font-variation-settings,color] duration-80",
           isMulti
             ? chipFilled
-              ? "bg-foreground text-background"
-              : "border border-border text-muted-foreground"
+              ? cn("bg-foreground text-background", shape.bg)
+              : cn("border border-border text-muted-foreground", shape.bg)
             : chipFilled
             ? "text-foreground"
             : "text-muted-foreground",
@@ -1794,10 +1784,6 @@ function Row({
           fontVariationSettings: chipFilled
             ? fontWeights.semibold
             : fontWeights.medium,
-          // Single-select: same page-bg disc as the "Question N of M"
-          // counter and PROCESS_STEPS markers. Multi keeps its own
-          // filled/outlined treatment above.
-          ...(!isMulti ? { background: "rgb(var(--bg))" } : null),
         }}
       >
         {chipContent}

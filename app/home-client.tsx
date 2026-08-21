@@ -1248,7 +1248,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         style={{ background: "#ffffff" }}
       >
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-          <div className={`min-w-0 text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
+          <div className={`min-w-0 text-center sm:text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
             {/* The card is hardcoded white while the site runs in dark mode,
                 so these can't use --fg/--muted (near-white there). Matches the
                 hero's ink on its own light ground. */}
@@ -1268,7 +1268,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
         {!disclosed && (
           <span
-            className={`self-start sm:self-center shrink-0 inline-flex ${ACTION_RADIUS_CLASS} ${LIQUID_REVEAL}`}
+            className={`w-full sm:w-auto self-stretch sm:self-center shrink-0 flex sm:inline-flex ${ACTION_RADIUS_CLASS} ${LIQUID_REVEAL}`}
             style={{ ...liquidRevealDelay(80), transformOrigin: "center" }}
           >
             <button
@@ -1276,7 +1276,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
               onClick={onBegin}
               aria-expanded="false"
               aria-controls="questionnaire-flow"
-              className={`relative inline-flex items-center overflow-hidden border-0 ${ACTION_RADIUS_CLASS} h-10 sm:h-11 px-5 sm:px-6 text-[16px] sm:text-[17px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
+              className={`relative w-full sm:w-auto inline-flex items-center justify-center overflow-hidden border-0 ${ACTION_RADIUS_CLASS} h-10 sm:h-11 px-5 sm:px-6 text-[16px] sm:text-[17px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
               style={{
                 background: CTA_FILL,
                 color: "#fff",
@@ -2256,9 +2256,19 @@ function ClientDialog({
             </p>
 
             {(item.service || item.year) && (
-              <p className="mt-2.5 text-[13px] tracking-tight" style={{ color: "rgb(var(--muted))" }}>
-                {[item.service, item.year].filter(Boolean).join(" · ")}
-              </p>
+              <div className="mt-3 flex items-center gap-2 text-[13px] tracking-tight">
+                {item.service && (
+                  <span
+                    className="inline-flex items-center rounded-full px-2.5 py-1 leading-none"
+                    style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" }}
+                  >
+                    {item.service}
+                  </span>
+                )}
+                {item.year && (
+                  <span style={{ color: "rgb(var(--muted))" }}>{item.year}</span>
+                )}
+              </div>
             )}
 
             {item.summary && (
