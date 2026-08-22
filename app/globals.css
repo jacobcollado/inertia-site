@@ -1093,6 +1093,22 @@ h1:hover .redact > span.redact-inner,
   animation: shimmer-sweep 4.5s linear infinite;
 }
 
+/* Muted variant for the disclosure toggle label — same sweep, but based on
+   the body copy's #5c5c5c so the pill reads as part of the paragraph flow
+   rather than jumping forward like the darker [[highlight]] words do. */
+.shimmer-word--muted {
+  background-image: linear-gradient(
+    100deg,
+    #5c5c5c 0%,
+    #5c5c5c 42%,
+    #8f8f8f 48%,
+    #b4b4b4 50%,
+    #8f8f8f 52%,
+    #5c5c5c 58%,
+    #5c5c5c 100%
+  );
+}
+
 /* Same sweep, warmed with neutral stone/taupe tones instead of pure greyscale. */
 .shimmer-word--warm {
   background-image: linear-gradient(

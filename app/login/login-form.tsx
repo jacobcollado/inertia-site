@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
 import { ThemeToggle } from "@/app/theme-toggle";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
+import { CTA_FILL, CTA_HEADER_PILL_CLASS, CtaGrain } from "@/lib/cta-chrome";
 
 function Spinner() {
   return (
@@ -532,22 +533,20 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               href="https://cal.com/jacob-c-99otvp/15min"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex px-4 py-2.5 text-[15px] sm:px-5 sm:py-2.5 sm:text-[16px]"
+              className={CTA_HEADER_PILL_CLASS}
               style={{
-                alignItems: "center",
                 justifyContent: "center",
-                lineHeight: 1,
-                borderRadius: 999,
-                background: "rgb(var(--fg))",
-                color: "rgb(var(--bg))",
-                fontWeight: 400,
-                letterSpacing: "-0.01em",
+                background: CTA_FILL,
+                color: "#fff",
+                boxShadow: "none",
                 textDecoration: "none",
+                whiteSpace: "nowrap",
                 transformOrigin: "center",
               }}
               {...ctaScaleHoverOnSelf}
             >
-              Get in touch
+              <CtaGrain />
+              <span className="relative">Get in touch</span>
             </a>
             <ThemeToggle />
           </div>

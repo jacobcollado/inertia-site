@@ -475,17 +475,84 @@ const SELECTION_FRAME_COLOR = "#8a8a8a";
 const SELECTION_EDGE_MS = 170;
 const SELECTION_HANDLE_MS = 160;
 
+// After the handles pop, the frame performs a resize gesture: it's dragged
+// out past the word, pulled back in under it, then released to its true
+// bounds. Reads as someone sizing the selection rather than a decorative
+// pulse. Only the overlay scales, never the word, so the heading never
+// reflows. Timings are the beats of that gesture, in order.
+const SELECTION_RESIZE_HOLD_MS = 520;   // beat before the drag starts
+const SELECTION_RESIZE_OUT_MS = 900;    // drag outward
+const SELECTION_RESIZE_IN_MS = 800;     // pull back in past the resting size
+const SELECTION_RESIZE_BACK_MS = 900;   // settle to the real bounds
+const SELECTION_RESIZE_SETTLE_MS = 500; // pause at each extreme before moving on
+const SELECTION_RESIZE_GROW = 1.14;     // how far past the word it's dragged
+const SELECTION_RESIZE_SHRINK = 0.9;    // how far under it's pulled
+
+// Drives the resize gesture. Lifted out of SelectionBox so the word and the
+// frame around it read from one source of truth and scale in lockstep — the
+// selection is sizing the word, so the two must never drift apart.
+function useSelectionResize(visible: boolean, delay: number) {
+  // motion/react returns null until it has read the media query; treat that
+  // as "not reduced" so the gesture behaves normally on first paint.
+  const reduced = useReducedMotion() ?? false;
+  const [phase, setPhase] = useState<"idle" | "out" | "in" | "rest">("idle");
+
+  // 4 edges draw in sequence, then the handles pop.
+  const handlesDone = delay + 4 * SELECTION_EDGE_MS + SELECTION_HANDLE_MS;
+
+  useEffect(() => {
+    if (!visible || reduced) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const startAt = handlesDone + SELECTION_RESIZE_HOLD_MS;
+    const inAt = startAt + SELECTION_RESIZE_OUT_MS + SELECTION_RESIZE_SETTLE_MS;
+    const restAt = inAt + SELECTION_RESIZE_IN_MS + SELECTION_RESIZE_SETTLE_MS;
+    timers.push(setTimeout(() => setPhase("out"), startAt));
+    timers.push(setTimeout(() => setPhase("in"), inAt));
+    timers.push(setTimeout(() => setPhase("rest"), restAt));
+    return () => timers.forEach(clearTimeout);
+  }, [visible, reduced, handlesDone]);
+
+  const scale =
+    reduced || phase === "idle" || phase === "rest"
+      ? 1
+      : phase === "out"
+        ? SELECTION_RESIZE_GROW
+        : SELECTION_RESIZE_SHRINK;
+  const resizeMs =
+    phase === "out"
+      ? SELECTION_RESIZE_OUT_MS
+      : phase === "in"
+        ? SELECTION_RESIZE_IN_MS
+        : SELECTION_RESIZE_BACK_MS;
+
+  return { phase, scale, resizeMs, reduced };
+}
+
 function SelectionBox({
   color,
   visible,
   delay,
+  phase,
+  scale,
+  resizeMs,
+  reduced,
 }: {
   color: string;
   visible: boolean;
   delay: number;
+  phase: "idle" | "out" | "in" | "rest";
+  scale: number;
+  resizeMs: number;
+  reduced: boolean;
 }) {
   const HANDLE = 5;
-  const reduced = useReducedMotion();
+
+  // The word and this frame are both scaled by a shared parent, so the frame
+  // itself no longer scales. It only needs to undo that parent scale on its
+  // 1px edges and square handles, so the stroke weight and handle size stay
+  // true at every step of the resize.
+  const sx = scale;
+  const sy = scale;
 
   // Each edge scales from the corner the previous edge finished at, so the
   // line reads as one continuous stroke travelling around the box.
@@ -531,12 +598,23 @@ function SelectionBox({
           style={{
             ...edgeBase(edge.side),
             transformOrigin: edge.origin,
-            transform: visible || reduced
-              ? `${edge.axis}(1)`
-              : `${edge.axis}(0)`,
+            // Draw-in scale on the edge's own axis, plus a counter-scale on
+            // the cross axis so the box's resize doesn't thicken the stroke.
+            transform: (() => {
+              const draw = visible || reduced ? 1 : 0;
+              const counter = edge.axis === "scaleX" ? 1 / sy : 1 / sx;
+              return edge.axis === "scaleX"
+                ? `scaleX(${draw}) scaleY(${counter})`
+                : `scaleY(${draw}) scaleX(${counter})`;
+            })(),
+            // While drawing, keep the staggered draw-in timing. Once the
+            // resize starts, follow the wrapper's timing instead so the
+            // counter-scale stays locked to the box.
             transition: reduced
               ? "none"
-              : `transform ${SELECTION_EDGE_MS}ms linear ${delay + i * SELECTION_EDGE_MS}ms`,
+              : phase === "idle"
+                ? `transform ${SELECTION_EDGE_MS}ms linear ${delay + i * SELECTION_EDGE_MS}ms`
+                : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`,
           }}
         />
       ))}
@@ -551,16 +629,76 @@ function SelectionBox({
             border: `1px solid ${color}`,
             ...pos,
             opacity: visible || reduced ? 1 : 0,
-            transform: visible || reduced ? "scale(1)" : "scale(0.4)",
+            // Counter-scale keeps the square 5px and un-stretched while the
+            // box around it is being resized.
+            transform: `${visible || reduced ? "scale(1)" : "scale(0.4)"} scale(${1 / sx}, ${1 / sy})`,
             transition: reduced
               ? "none"
-              : [
-                  `opacity ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
-                  `transform ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
-                ].join(", "),
+              : phase === "idle"
+                ? [
+                    `opacity ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
+                    `transform ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
+                  ].join(", ")
+                : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`,
           }}
         />
       ))}
+    </span>
+  );
+}
+
+// "design" plus its selection frame, scaled as one unit so the word is
+// visibly being sized by the selection rather than sitting inert inside it.
+//
+// Layout note: the outer span stays UNSCALED and keeps the word's resting
+// footprint, so the heading never reflows while the gesture runs. The scaled
+// copy is absolutely positioned on top of it and painted; the outer copy is
+// kept for measurement only (invisible, but it still occupies the space).
+function DesignSelectionWord({
+  visible,
+  delay,
+  word,
+}: {
+  visible: boolean;
+  delay: number;
+  word: string;
+}) {
+  const { phase, scale, resizeMs, reduced } = useSelectionResize(visible, delay);
+
+  return (
+    <span style={{ position: "relative", display: "inline-block" }}>
+      {/* Spacer: holds the line's true width at rest. */}
+      <span style={{ visibility: "hidden" }} aria-hidden="true">
+        {word}
+      </span>
+
+      {/* The part that actually moves. Centre origin so it grows and shrinks
+          around the word rather than dragging off one edge. */}
+      <span
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "inline-block",
+          // The absolute box is exactly the resting word width, so without
+          // this the glyphs can wrap inside it at narrow widths.
+          whiteSpace: "nowrap",
+          transform: `scale(${scale})`,
+          transformOrigin: "center center",
+          transition: reduced ? "none" : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`,
+          willChange: "transform",
+        }}
+      >
+        {word}
+        <SelectionBox
+          color={SELECTION_FRAME_COLOR}
+          visible={visible}
+          delay={delay}
+          phase={phase}
+          scale={scale}
+          resizeMs={resizeMs}
+          reduced={reduced}
+        />
+      </span>
     </span>
   );
 }
@@ -709,14 +847,7 @@ function VercelHero({
               {HEADING_LINE_ONE.map((word, i) => (
                 <span key={word + i} style={wordReveal(i)}>
                   {word === "design" ? (
-                    <span style={{ position: "relative", display: "inline-block" }}>
-                      {word}
-                      <SelectionBox
-                        color={SELECTION_FRAME_COLOR}
-                        visible={visible}
-                        delay={selectionDelay}
-                      />
-                    </span>
+                    <DesignSelectionWord visible={visible} delay={selectionDelay} word={word} />
                   ) : (
                     word
                   )}
@@ -1809,32 +1940,14 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="inline-flex items-center gap-2 text-[16.5px] sm:text-[19px] tracking-tight text-left"
-            style={{ color: "#1a1a1a" }}
+            className="group inline-flex items-center rounded-full px-[0.4em] py-px whitespace-nowrap leading-none text-[16.5px] sm:text-[19px] tracking-tight text-left transition-colors duration-200"
+            style={{
+              color: "#5c5c5c",
+              background: "rgba(26,26,26,0.06)",
+            }}
           >
-            How we think about execution
-            <span
-              aria-hidden
-              className="inline-flex items-center justify-center rounded-full p-1 shrink-0"
-              style={{ background: "rgba(26,26,26,0.06)" }}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-3.5 w-3.5"
-                style={{
-                  color: "#5c5c5c",
-                  transform: open ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 350ms cubic-bezier(0.22,1,0.36,1)",
-                }}
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <polyline points="19 12 12 19 5 12" />
-              </svg>
+            <span className="shimmer-word shimmer-word--muted">
+              How we think about execution
             </span>
           </button>
           <div
