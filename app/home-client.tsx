@@ -468,10 +468,11 @@ function heroLiquidStyle(
 // itself in clockwise from the top-left, then pops the four square resize
 // handles. Rendered as an inset overlay so it never affects the heading's
 // layout or the per-word reveal transform.
-// Neutral grey rather than the work accent: the frame is a Figma-selection
-// affordance, not a brand cue, and an accent colour competed with the antislow
-// mark sitting just above it.
-const SELECTION_FRAME_COLOR = "#8a8a8a";
+// Figma's own selection blue, so the affordance reads as the tool it's
+// quoting rather than as a brand accent. (The earlier neutral grey was chosen
+// to stay clear of the antislow mark above; the mark is currently hidden, and
+// the blue is distinct enough from the work accents not to read as one.)
+const SELECTION_FRAME_COLOR = "#0d99ff";
 const SELECTION_EDGE_MS = 170;
 const SELECTION_HANDLE_MS = 160;
 
@@ -2425,9 +2426,34 @@ const CLIENT_NAME_ACCENT: Record<string, string> = {
 // disappears, and this grid is built from rails so they have to read.
 const CLIENT_RULE = "1px dashed rgb(var(--fg) / 0.28)";
 
+// The accent walks the list one client at a time. Each name holds its colour
+// for DWELL, then crossfades to the next over FADE — the two overlap, so the
+// outgoing name is still releasing its colour as the incoming one takes it up
+// and the travel reads as continuous rather than as a series of blinks.
+const CLIENT_CYCLE_DWELL_MS = 1500;
+const CLIENT_CYCLE_FADE_MS = 900;
+
 function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
+  const reduced = useReducedMotion() ?? false;
+
+  // Index of the client currently lit by the auto-cycle.
+  const [cycleIndex, setCycleIndex] = useState(0);
+
+  // Pause the walk while the visitor is hovering or has a dialog open: two
+  // accents lit at once reads as a bug, and the walk moving under a held
+  // cursor fights the hover.
+  const paused = hovered !== null || openItem !== null;
+
+  useEffect(() => {
+    if (reduced || paused || items.length < 2) return;
+    const id = setInterval(
+      () => setCycleIndex((i) => (i + 1) % items.length),
+      CLIENT_CYCLE_DWELL_MS,
+    );
+    return () => clearInterval(id);
+  }, [reduced, paused, items.length]);
 
   return (
     <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
@@ -2457,6 +2483,9 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
         {items.map((item, i) => {
           const accent = CLIENT_NAME_ACCENT[item.slug];
           const isHovered = hovered === item.slug;
+          // Hover always wins; otherwise the walk decides who is lit. While
+          // paused nothing is auto-lit, so the hovered name is the only accent.
+          const isLit = isHovered || (!paused && !reduced && cycleIndex === i);
           return (
             <li
               key={item.slug}
@@ -2478,17 +2507,40 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
                 onFocus={() => setHovered(item.slug)}
                 onBlur={() => setHovered((p) => (p === item.slug ? null : p))}
               >
+                {/* Two stacked copies rather than one transitioning colour:
+                    crossfading opacity between a fixed grey and a fixed accent
+                    keeps the midpoint neutral, where interpolating the colour
+                    itself would drag the text through muddy intermediate hues. */}
                 <span
-                  className="text-[clamp(1.05rem,4.2vw,1.95rem)] tracking-tight leading-none transition-colors duration-300 min-w-0 hyphens-none"
+                  className="relative text-[clamp(1.05rem,4.2vw,1.95rem)] tracking-tight leading-none min-w-0 hyphens-none"
                   style={{
                     fontWeight: 450,
-                    color: isHovered && accent ? accent : "rgb(var(--fg))",
+                    color: "rgb(var(--fg))",
                     // Two columns on a 320px phone leaves ~126px per name;
                     // wrapping is the safe failure mode, not overflow.
                     overflowWrap: "break-word",
                   }}
                 >
                   {item.client}
+                  {accent && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0"
+                      style={{
+                        color: accent,
+                        opacity: isLit ? 1 : 0,
+                        // Hover should feel immediate; the ambient walk should
+                        // feel like a slow tide.
+                        transition: reduced
+                          ? "none"
+                          : `opacity ${isHovered ? 200 : CLIENT_CYCLE_FADE_MS}ms ${HERO_LIQUID_EASE}`,
+                        overflowWrap: "break-word",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {item.client}
+                    </span>
+                  )}
                 </span>
               </button>
             </li>
