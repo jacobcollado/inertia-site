@@ -1059,7 +1059,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
               }}
               shape={shape}
               aria-checked={isSelected}
-              chipContent={i + 1}
+              chipContent={`${i + 1}.`}
               chipFilled={isSelected}
               isMulti={isMulti}
               showArrow={showArrow}
@@ -1121,7 +1121,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                     </span>
                   </span>
                   {opt.description && (
-                    <span className="text-[12px] text-muted-foreground leading-snug">
+                    <span className="text-[13px] text-muted-foreground leading-snug">
                       {opt.description}
                     </span>
                   )}
@@ -1170,7 +1170,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
             tabIndex={-1}
             onClick={() => otherInputRef.current?.focus()}
             shape={shape}
-            chipContent={otherIndex + 1}
+            chipContent={`${otherIndex + 1}.`}
             chipFilled={otherText.length > 0}
             isMulti={isMulti}
             // Other body is a textarea that may grow past one line;
@@ -1311,7 +1311,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
               {/* Question title */}
               <h3
                 id={`${reactId}-${qId}-title`}
-                className="text-[16px] text-foreground leading-snug"
+                className="text-[17px] sm:text-[18px] text-foreground leading-snug"
                 style={{ fontVariationSettings: fontWeights.medium }}
               >
                 {question.title}
@@ -1746,8 +1746,8 @@ function Row({
 
   // The chip "slot" is a fixed 28×28 cell holding the chip number/circle.
   // When topAlign is on, the slot floats up so the chip's vertical centre
-  // lines up with the centre of a `text-[13px] leading-snug` first line
-  // (line-height ≈ 18px → centre 9px; chip centre 14px → diff 5px).
+  // lines up with the centre of a `text-[14.5px] leading-snug` first line
+  // (line-height ≈ 20px → centre 10px; chip centre 14px → diff 4px).
   // Stacked rows pair a title with a description, so we add 4px of
   // breathing room back on top (effective shift -1px) — that lands the
   // chip near the title's baseline rather than its optical centre, which
@@ -1761,13 +1761,13 @@ function Row({
       className={cn(
         "shrink-0 w-7 h-7 relative inline-flex items-center justify-center",
         topAlign &&
-          (bodyLayout === "stacked" ? "-mt-[1px]" : "-mt-[5px]")
+          (bodyLayout === "stacked" ? "-mt-[1px]" : "-mt-[4px]")
       )}
     >
       <span
         aria-hidden
         className={cn(
-          "absolute inline-flex items-center justify-center w-5 h-5 text-[11px] transition-[opacity,font-variation-settings,color] duration-80",
+          "absolute inline-flex items-center justify-center w-6 h-5 text-[12px] transition-[opacity,font-variation-settings,color] duration-80",
           isMulti
             ? chipFilled
               ? cn("bg-foreground text-background", shape.bg)
@@ -1869,7 +1869,7 @@ function Row({
       {/* Body — fills row */}
       <span
         className={cn(
-          "min-w-0 flex-1 text-[13px] leading-snug",
+          "min-w-0 flex-1 text-[14.5px] leading-snug",
           bodyLayout === "stacked"
             ? "flex flex-col gap-0.5"
             : "inline-flex items-center gap-0"

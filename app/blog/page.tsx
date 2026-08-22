@@ -24,33 +24,19 @@ export default function BlogIndex() {
       {!loaded ? null : posts.length === 0 ? (
         <p className="px-6 sm:px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing here yet.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 pb-24">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
           {posts.map((post, i) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
               className="group flex flex-col gap-3"
             >
-              {/* Image */}
+              {/* Meta — no thumbnail; the card is a neutral typographic
+                  block with a hairline edge that warms slightly on hover. */}
               <div
-                className="w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] group-hover:border-[rgb(var(--fg)/0.2)] transition-colors"
-                style={{ aspectRatio: "1200/630", background: "rgb(var(--surface))" }}
+                className="flex flex-col gap-1.5 rounded-lg border border-[rgb(var(--line))] group-hover:border-[rgb(var(--fg)/0.2)] transition-colors p-5"
+                style={{ background: "rgb(var(--surface))" }}
               >
-                {post.image ? (
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-30">No image</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Meta */}
-              <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   {post.tag && (
                     <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{post.tag}</span>

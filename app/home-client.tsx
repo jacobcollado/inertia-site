@@ -12,6 +12,7 @@ import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/co
 import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
 import {
   ACTION_RADIUS_CLASS,
+  ACTION_RADIUS_PX,
   CTA_FILL,
   CTA_INSET_SHADOW,
   CTA_OUTER_SHADOW,
@@ -1572,7 +1573,10 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
           className={cn(
             "quiz-dark mt-10 sm:mt-12 w-full mx-auto transition-[max-width] duration-500 ease-out",
             LIQUID_REVEAL,
-            stage === "quiz" ? "max-w-md" : "max-w-2xl"
+            // Narrow on mobile so the options stay in an easy column; from sm
+            // up both stages match the begin card's max-w-3xl, so the flow
+            // sits in the same measure as the card it opened from.
+            stage === "quiz" ? "max-w-md sm:max-w-3xl" : "max-w-2xl sm:max-w-3xl"
           )}
         >
         {stage !== "quiz" && (
@@ -2053,21 +2057,70 @@ function LiquidText({
 }
 
 function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
-  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
+  const [height, setHeight] = useState<number | "auto">("auto");
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
   const intro =
     "Ideas and identity are rarely the problem. Execution is. We take what a company, brand, or person stands for and carry it through every [[detail]], until the result feels effortless to the people moving through it.";
-  const points = [
-    "The best design disappears into the experience. Nobody applauds the [[restraint]], and that's exactly how you know it landed.",
-    "Identity isn't expressed in one big gesture. It's carried in a hundred small decisions that all [[agree]] with each other.",
+  // Each segment is one way of finishing "how we think about execution" — the
+  // label names the idea, the panel argues it. Kept parallel in length so the
+  // panel height barely moves between segments.
+  const segments = [
+    {
+      label: "Restraint",
+      text: "The best design disappears into the experience. Nobody applauds the [[restraint]], and that's exactly how you know it landed.",
+    },
+    {
+      label: "Agreement",
+      text: "Identity isn't expressed in one big gesture. It's carried in a hundred small decisions that all [[agree]] with each other.",
+    },
+    {
+      label: "Follow-through",
+      text: "Taste sets the direction, but finishing is what people actually feel. We stay on a thing until the last [[detail]] stops asking for attention.",
+    },
   ];
 
-  useEffect(() => {
+  // Drive the sliding pill off measured tab geometry rather than percentages,
+  // so it stays correct with variable-width labels and after a font swap.
+  useLayoutEffect(() => {
+    const el = tabRefs.current[active];
+    if (!el) return;
+    const measure = () => setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    if (el.parentElement) ro.observe(el.parentElement);
+    return () => ro.disconnect();
+  }, [active]);
+
+  // Animate the panel between segment heights instead of letting the section
+  // jump — measure the new content, then settle back to auto so a resize or
+  // font swap can still reflow it.
+  useLayoutEffect(() => {
     const el = bodyRef.current;
     if (!el) return;
-    setHeight(open ? el.scrollHeight : 0);
-  }, [open]);
+    const next = el.scrollHeight;
+    setHeight(prev => (prev === "auto" ? next : prev));
+    const id = requestAnimationFrame(() => setHeight(next));
+    return () => cancelAnimationFrame(id);
+  }, [active]);
+
+  // Roving arrow-key navigation, which is what makes this read as a real
+  // tablist to a keyboard or screen reader rather than a row of buttons.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const last = segments.length - 1;
+    let next: number | null = null;
+    if (e.key === "ArrowRight") next = active === last ? 0 : active + 1;
+    else if (e.key === "ArrowLeft") next = active === 0 ? last : active - 1;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = last;
+    if (next === null) return;
+    e.preventDefault();
+    setActive(next);
+    tabRefs.current[next]?.focus();
+  };
 
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
@@ -2079,37 +2132,80 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
           style={{ color: "#5c5c5c" }}
         />
         <div className="mt-8">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            className="group inline-flex items-center rounded-full px-[0.4em] py-px whitespace-nowrap leading-none text-[16.5px] sm:text-[19px] tracking-tight text-left transition-colors duration-200"
+          {/* Segmented control: one bordered track, a sliding fill behind the
+              active segment. The track is the affordance — it reads as a
+              control at a glance, before anything is hovered. */}
+          <div
+            role="tablist"
+            aria-label="How we think about execution"
+            onKeyDown={onKeyDown}
+            className={`relative inline-flex items-stretch p-[3px] ${ACTION_RADIUS_CLASS} max-w-full overflow-x-auto`}
             style={{
-              color: "#5c5c5c",
-              background: "rgba(26,26,26,0.06)",
+              background: "rgba(26,26,26,0.04)",
+              boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
             }}
           >
-            <span className="shimmer-word shimmer-word--muted">
-              How we think about execution
-            </span>
-          </button>
+            {indicator && (
+              <span
+                aria-hidden="true"
+                className={`absolute top-[3px] bottom-[3px] ${ACTION_RADIUS_CLASS}`}
+                style={{
+                  left: indicator.left,
+                  width: indicator.width,
+                  background: "#ffffff",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(26,26,26,0.06)",
+                  transition:
+                    "left 320ms cubic-bezier(0.22,1,0.36,1), width 320ms cubic-bezier(0.22,1,0.36,1)",
+                }}
+              />
+            )}
+            {segments.map((seg, i) => {
+              const selected = i === active;
+              return (
+                <button
+                  key={seg.label}
+                  ref={el => {
+                    tabRefs.current[i] = el;
+                  }}
+                  type="button"
+                  role="tab"
+                  id={`execution-tab-${i}`}
+                  aria-selected={selected}
+                  aria-controls="execution-panel"
+                  tabIndex={selected ? 0 : -1}
+                  onClick={() => setActive(i)}
+                  className="relative z-[1] whitespace-nowrap px-3.5 sm:px-4 py-1.5 text-[14px] sm:text-[15px] tracking-tight leading-none transition-colors duration-200"
+                  style={{
+                    color: selected ? "#1a1a1a" : "#7a7a7a",
+                    fontWeight: selected ? 450 : 400,
+                    borderRadius: ACTION_RADIUS_PX,
+                  }}
+                >
+                  {seg.label}
+                </button>
+              );
+            })}
+          </div>
           <div
             style={{
               height,
               overflow: "hidden",
-              transition: "height 350ms cubic-bezier(0.22,1,0.36,1)",
+              transition: "height 320ms cubic-bezier(0.22,1,0.36,1)",
             }}
           >
-            <div ref={bodyRef} className="flex flex-col gap-4 pt-4 sm:max-w-xl">
-              {points.map((text, i) => (
-                <LiquidText
-                  key={text}
-                  text={text}
-                  delayMs={open ? 80 * (i + 1) : 0}
-                  className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
-                  style={{ color: "#5c5c5c" }}
-                />
-              ))}
+            <div
+              ref={bodyRef}
+              id="execution-panel"
+              role="tabpanel"
+              aria-labelledby={`execution-tab-${active}`}
+              className="pt-4 sm:max-w-xl"
+            >
+              <LiquidText
+                key={segments[active].label}
+                text={segments[active].text}
+                className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+                style={{ color: "#5c5c5c" }}
+              />
             </div>
           </div>
         </div>
@@ -2123,78 +2219,6 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
 // let go.
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-
-function SketchAiEquation() {
-  return (
-    <div
-      className="relative overflow-hidden rounded-xl px-5 py-4 sm:px-6 sm:py-5 max-w-md sm:max-w-lg"
-      style={{
-        background:
-          "radial-gradient(55% 85% at 0% 55%, rgba(0,0,0,0.018) 0%, transparent 58%)," +
-          "radial-gradient(55% 85% at 100% 55%, rgba(0,0,0,0.018) 0%, transparent 58%)," +
-          "radial-gradient(90% 50% at 50% 100%, rgba(255,255,255,0.85) 0%, transparent 72%)," +
-          "linear-gradient(180deg, #fafafa 0%, #ffffff 28%)",
-        boxShadow:
-          "inset 0 1px 2px rgba(0,0,0,0.05)," +
-          "inset 0 -1.5px 2px rgba(255,255,255,0.95)," +
-          "inset 0 0 0 1px rgba(0,0,0,0.045)",
-      }}
-    >
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none rounded-xl"
-        style={{
-          background:
-            "linear-gradient(90deg, rgba(0,0,0,0.012) 0%, transparent 14%, transparent 86%, rgba(0,0,0,0.012) 100%)," +
-            "linear-gradient(0deg, rgba(0,0,0,0.016) 0%, transparent 20%)",
-        }}
-      />
-      <svg
-        viewBox="0 0 320 64"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="sketch-draw relative z-[1] w-full"
-        aria-hidden="true"
-      >
-        <defs>
-          {/* Gray while the wave is still swinging, ink once it settles —
-              the shift lands where the amplitude is already mostly gone. */}
-          <linearGradient id="sketchResolve" gradientUnits="userSpaceOnUse" x1="12" y1="32" x2="304" y2="32">
-            <stop offset="0" stopColor="rgba(92,92,92,0.32)" />
-            <stop offset="0.35" stopColor="rgba(92,92,92,0.34)" />
-            <stop offset="0.62" stopColor="rgba(26,26,26,0.56)" />
-            <stop offset="1" stopColor="rgba(26,26,26,0.68)" />
-          </linearGradient>
-        </defs>
-        {/* One continuous stroke: a damped wave. Amplitude falls off by ~0.68
-            per half-swing (19 -> 0.6 over ten extremes), so the oscillation
-            reads as noise resolving into the single line worth shipping.
-            Tangents are horizontal at every extreme, which is what keeps the
-            swings sinusoidal rather than pointed. The settled run to the right
-            edge keeps a sub-pixel waver so it stays drawn, not ruled. */}
-        <path
-          d="M12 32
-             C18 24, 20 13, 26 13
-             C37 13, 37 44.9, 48 44.9
-             C59 44.9, 59 23.2, 70 23.2
-             C81 23.2, 81 38, 92 38
-             C102.5 38, 102.5 27.9, 113 27.9
-             C123.5 27.9, 123.5 34.8, 134 34.8
-             C144.5 34.8, 144.5 30.1, 155 30.1
-             C165 30.1, 165 33.3, 175 33.3
-             C185 33.3, 185 31.1, 195 31.1
-             C204.5 31.1, 204.5 32.6, 214 32.6
-             C248 32.6, 274 31.85, 304 32.05"
-          stroke="url(#sketchResolve)"
-          strokeWidth="1.05"
-          pathLength={100}
-          className="sketch-draw-path"
-        />
-      </svg>
-    </div>
-  );
 }
 
 function AiApproach({ posts }: { posts: PostMeta[] }) {
@@ -2212,12 +2236,6 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
               className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
               style={{ color: "#5c5c5c" }}
             />
-            <div
-              className={`my-6 sm:my-7 ${LIQUID_REVEAL}`}
-              style={liquidRevealDelay(80)}
-            >
-              <SketchAiEquation />
-            </div>
             <LiquidText
               text={second}
               delayMs={160}
@@ -2227,6 +2245,10 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
           </div>
         </div>
       </section>
+      {/* Matches the spacer between the client list and this section's
+          paragraph (py-10 sm:py-8 → 80px / 64px), so the paragraph sits the
+          same distance above the cards as it does below the client list. */}
+      <div className="py-10 sm:py-8" />
       <BlogCarousel posts={posts} />
     </>
   );
@@ -2602,15 +2624,10 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
       {/* Same inner column as DesignPhilosophy above, so the label, the rules
           and the client names all line up with that paragraph's left edge. */}
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-      {/* Reuses the same Pill as the [[highlights]] in the paragraph above, so
-          the two treatments can't drift apart. Pill inherits its colour, so the
-          tone comes from this paragraph. */}
-      <p
-        className="mb-8 sm:mb-10 text-[16.5px] sm:text-[19px] tracking-tight leading-relaxed"
-        style={{ color: "#5c5c5c" }}
-      >
-        <Pill>Clients</Pill>
-      </p>
+      {/* No label above the grid: eight company names in a frame read as
+          clients without being told, and a lone Pill outside a sentence
+          borrowed the inline-highlight treatment for something that wasn't
+          a highlight. */}
       {/* One rounded frame around the whole grid, matching the blog cards'
           rounded-2xl. The outer rails are this container's border; overflow
           clipping keeps the cell rules from poking past the rounded corners.
@@ -2848,7 +2865,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
       const scale = 1 + 0.05 * proximity;
       const translateY = 6 - 12 * proximity; // +6px inactive -> -6px active
       card.style.transform = `translateY(${translateY}px) scale(${scale})`;
-      card.style.boxShadow = proximity > 0.01 ? `0 0 ${14 * proximity}px 0px rgba(0,0,0,${0.2 * proximity})` : "none";
+      card.style.boxShadow = proximity > 0.01 ? `0 ${2 * proximity}px ${8 * proximity}px 0px rgba(0,0,0,${0.07 * proximity})` : "none";
     });
     liveNearestRef.current = nearest;
   };
@@ -3134,7 +3151,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                   href="/work"
                   draggable={false}
                   onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
-                  className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:cursor-grab"
+                  className="relative block shrink-0 snap-center sm:snap-align-none rounded-lg overflow-hidden group w-[300px] sm:w-[420px] sm:cursor-grab"
                   style={{
                     aspectRatio: "4 / 5",
                     // While actively swiping, applyLiveCardScale writes
@@ -3159,10 +3176,10 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
                         : hoveredIndex === i
                           ? "translateY(-4px) scale(1.02)"
                           : "translateY(0) scale(1)",
-                    ...(activeIndex === i ? { boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
+                    ...(activeIndex === i ? { boxShadow: "0 2px 8px 0px rgba(0,0,0,0.07)" } : {}),
                   }}
-                  onMouseEnter={(e) => { setHoveredIndex(i); e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
-                  onMouseLeave={(e) => { setHoveredIndex((prev) => (prev === i ? null : prev)); if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
+                  onMouseEnter={() => { setHoveredIndex(i); }}
+                  onMouseLeave={() => { setHoveredIndex((prev) => (prev === i ? null : prev)); }}
                 >
                   <>
                     <div className="absolute inset-0" style={{ backgroundColor: CLIENT_CARD_BG }} />
@@ -3249,15 +3266,126 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   );
 }
 
-function formatBlogDate(iso: string): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+/* ── Tag glyphs ──────────────────────────────────────────────────────
+   One line-drawn mark per blog tag, drawn from the same vocabulary as the
+   card arrow (1.25 stroke, round caps, muted ink). There are only three
+   tags across the whole archive, so the carousel reads as three visual
+   families rather than eight unrelated illustrations — and a new post
+   inherits its mark from frontmatter with no per-post artwork to make.
+
+   Standards      four identical squares — the tenth page matching the first
+   Infrastructure nested frames — layers that hold each other up
+   Practice       many paths from one origin, one carried through — judgment   */
+function TagGlyph({ tag }: { tag?: string }) {
+  const key = (tag ?? "").toLowerCase();
+  const stroke = "rgba(26,26,26,0.30)";
+  const common = {
+    viewBox: "0 0 64 64",
+    fill: "none" as const,
+    stroke,
+    strokeWidth: 1.25,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    className: "w-20 h-20 sm:w-24 sm:h-24",
+    "aria-hidden": true,
+  };
+
+  if (key === "standards") {
+    // Four identical squares on a strict grid. The point of these posts is
+    // that the tenth page matches the first, so the mark is about sameness
+    // across instances — nothing varies, and that's what you're meant to see.
+    return (
+      <svg {...common}>
+        <rect x="13" y="13" width="16" height="16" rx="2" />
+        <rect x="35" y="13" width="16" height="16" rx="2" />
+        <rect x="13" y="35" width="16" height="16" rx="2" />
+        <rect x="35" y="35" width="16" height="16" rx="2" />
+      </svg>
+    );
+  }
+
+  if (key === "infrastructure") {
+    return (
+      <svg {...common}>
+        <rect x="9" y="9" width="46" height="46" rx="3" />
+        <rect x="19" y="19" width="26" height="26" rx="2.5" />
+        <rect x="28.5" y="28.5" width="7" height="7" rx="1.5" />
+      </svg>
+    );
+  }
+
+  if (key === "practice") {
+    // Several paths leave the same origin; one is carried through to the end
+    // while the rest stop short. Reps generate the options, judgment picks
+    // the one worth shipping — the tapering strays are the discarded ones.
+    return (
+      <svg {...common}>
+        <path d="M12 32 C24 32, 30 16, 44 14" strokeOpacity={0.45} />
+        <path d="M12 32 C24 32, 32 24, 43 22" strokeOpacity={0.45} />
+        <path d="M12 32 C26 32, 34 40, 43 42" strokeOpacity={0.45} />
+        <path d="M12 32 C24 32, 30 48, 44 50" strokeOpacity={0.45} />
+        {/* The one taken all the way through. */}
+        <path d="M12 32 C28 32, 36 32, 52 32" />
+        <circle cx="52" cy="32" r="2.25" fill={stroke} stroke="none" />
+      </svg>
+    );
+  }
+
+  // Unknown or missing tag — a single centered rule keeps the card's
+  // vertical rhythm without inventing a mark the reader can't decode.
+  return (
+    <svg {...common}>
+      <line x1="20" y1="32" x2="44" y2="32" />
+    </svg>
+  );
+}
+
+/* Posts arrive sorted newest-first, which currently puts three Practice
+   posts at the front — three identical glyphs in a row. Rotate through the
+   tag groups instead: date order is preserved *within* each tag, but
+   consecutive cards pull from different tags, so the glyph changes card to
+   card. Deterministic (no reshuffle between renders or between server and
+   client) and it degrades to plain date order once one tag runs out. */
+function interleaveByTag(posts: PostMeta[]): PostMeta[] {
+  const groups = new Map<string, PostMeta[]>();
+  for (const post of posts) {
+    const key = post.tag ?? "";
+    const group = groups.get(key);
+    if (group) group.push(post);
+    else groups.set(key, [post]);
+  }
+  // Largest group first, so the tag with the most posts can't bunch up at
+  // the tail once the smaller groups are exhausted.
+  const queues = [...groups.values()].sort((a, b) => b.length - a.length);
+  const out: PostMeta[] = [];
+  while (out.length < posts.length) {
+    let placed = false;
+    for (const queue of queues) {
+      if (queue.length === 0) continue;
+      // Skip a queue whose next post repeats the previous card's tag,
+      // unless it's the only one left with posts remaining.
+      const remaining = queues.filter(q => q.length > 0);
+      if (
+        remaining.length > 1 &&
+        out.length > 0 &&
+        queue[0].tag === out[out.length - 1].tag
+      ) continue;
+      out.push(queue.shift() as PostMeta);
+      placed = true;
+    }
+    // No queue was eligible this pass (every remaining post repeats the
+    // last tag) — take the next one anyway rather than loop forever.
+    if (!placed) {
+      const queue = queues.find(q => q.length > 0);
+      if (!queue) break;
+      out.push(queue.shift() as PostMeta);
+    }
+  }
+  return out;
 }
 
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
-  const [items] = useState<PostMeta[]>(posts);
+  const [items] = useState<PostMeta[]>(() => interleaveByTag(posts));
   const scrollRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const padRef = useRef<HTMLDivElement>(null);
@@ -3350,7 +3478,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
       const scale = 1 + 0.05 * proximity;
       const translateY = 6 - 12 * proximity;
       card.style.transform = `translateY(${translateY}px) scale(${scale})`;
-      card.style.boxShadow = proximity > 0.01 ? `0 0 ${14 * proximity}px 0px rgba(0,0,0,${0.2 * proximity})` : "none";
+      card.style.boxShadow = proximity > 0.01 ? `0 ${3 * proximity}px ${12 * proximity}px 0px rgba(0,0,0,${0.10 * proximity})` : "none";
     });
     liveNearestRef.current = nearest;
   };
@@ -3507,7 +3635,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className="w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)] max-sm:mt-10">
+    <section ref={sectionRef} className="w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
       <div
         ref={padRef}
         className={`px-1.5 sm:pr-0 ${isDragging ? "" : "sm:transition-[padding-left] sm:duration-300 sm:ease-out"} ${isDragging || isExpanded ? "sm:pl-1.5" : "sm:pl-[calc(50vw-384px)]"}`}
@@ -3563,71 +3691,53 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                           : hoveredIndex === i
                             ? "translateY(-4px) scale(1.02)"
                             : "translateY(0) scale(1)",
-                      ...(activeIndex === i ? { boxShadow: "0 0 14px 0px rgba(0,0,0,0.2)" } : {}),
+                      ...(activeIndex === i ? { boxShadow: "0 3px 12px 0px rgba(0,0,0,0.10)" } : {}),
                     }}
-                    onMouseEnter={(e) => { setHoveredIndex(i); e.currentTarget.style.boxShadow = "0 0 22px 0px rgba(0,0,0,0.35)"; }}
-                    onMouseLeave={(e) => { setHoveredIndex((prev) => (prev === i ? null : prev)); if (activeIndex !== i) e.currentTarget.style.boxShadow = "none"; }}
+                    onMouseEnter={() => { setHoveredIndex(i); }}
+                    onMouseLeave={() => { setHoveredIndex((prev) => (prev === i ? null : prev)); }}
                   >
-                    <div className="absolute inset-0" style={{ backgroundColor: "#0a0a0a" }} />
-                    {post.image ? (
-                      <img
-                        src={post.image}
-                        alt=""
-                        draggable={false}
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
-                    ) : null}
+                    {/* Neutral surface in place of the old cover image — a
+                        near-white card with a hairline edge, so the type
+                        carries the card instead of a photograph. */}
                     <div
-                      aria-hidden="true"
-                      className="absolute inset-0 pointer-events-none"
+                      className="absolute inset-0"
                       style={{
-                        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-                        backgroundSize: "180px 180px",
-                        mixBlendMode: "overlay",
-                        opacity: 0.35,
+                        background: "#f4f4f2",
+                        boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
                       }}
                     />
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-x-0 bottom-0 pointer-events-none"
-                      style={{
-                        height: "58%",
-                        background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.52) 42%, transparent 100%)",
-                      }}
-                    />
-                    <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-4 sm:p-5">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-[18px] tracking-tight leading-snug" style={{ color: "#fff" }}>{post.title}</p>
-                        <span
-                          className="flex items-center justify-center w-7 h-7 sm:w-6 sm:h-6 rounded-full shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                          style={{ background: "rgba(255,255,255,0.12)" }}
-                        >
-                          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 sm:w-3 sm:h-3 shrink-0" style={{ color: "rgba(255,255,255,0.72)" }}>
-                            <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
-                          </svg>
-                        </span>
-                      </div>
-                      {(post.tag || post.date) && (
-                        <div className="flex items-center gap-2">
-                          {post.tag && (
-                            <span
-                              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11.5px] tracking-tight"
-                              style={{ background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.78)" }}
-                            >
-                              {post.tag}
-                            </span>
-                          )}
-                          {post.date && (
-                            <span className="text-[13px] tracking-tight" style={{ color: "rgba(255,255,255,0.58)" }}>
-                              {formatBlogDate(post.date)}
-                            </span>
-                          )}
+                    {/* Title leads the card from the top, centered. The whole
+                        card is the link, so there's no corner arrow competing
+                        with it — which also frees the title to use more of the
+                        card's width. */}
+                    <div className="absolute inset-x-0 top-0 px-7 sm:px-8 pt-10 sm:pt-12">
+                      <p
+                        className="text-[24px] sm:text-[28px] tracking-tight leading-tight text-center text-balance"
+                        style={{ color: "#1a1a1a" }}
+                      >
+                        {post.title}
+                      </p>
+                    </div>
+                    {/* Glyph occupies the card's empty middle, centered on the
+                        same axis as the title and summary. */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <TagGlyph tag={post.tag} />
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-1.5 px-4 sm:px-5 pb-10 sm:pb-12">
+                      {post.tag && (
+                        <div className="flex items-center justify-center gap-2">
+                          <span
+                            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11.5px] tracking-tight"
+                            style={{ background: "rgba(26,26,26,0.06)", color: "rgba(26,26,26,0.62)" }}
+                          >
+                            {post.tag}
+                          </span>
                         </div>
                       )}
                       {(post.subtitle || post.summary) && (
                         <p
-                          className="max-w-[92%] text-[15px] sm:text-[16px] leading-snug tracking-[-0.035em] line-clamp-2"
-                          style={{ color: "rgba(255,255,255,0.72)" }}
+                          className="max-w-[92%] text-[15px] sm:text-[16px] leading-snug tracking-[-0.035em] line-clamp-2 text-center text-balance"
+                          style={{ color: "#5c5c5c" }}
                         >
                           {post.subtitle || post.summary}
                         </p>
