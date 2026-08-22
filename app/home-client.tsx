@@ -704,6 +704,128 @@ function DesignSelectionWord({
   );
 }
 
+// Hand-drawn aside by the hero CTA, once the selection frame has finished.
+// Uneven control points and a marker font keep it reading as pen on paper.
+const NUDGE_DRAW_MS = 700;
+const NUDGE_TEXT_MS = 420;
+// Arrow is drawn shaft-then-head, the way it would actually be inked.
+const ARROW_DRAW_MS = 460;
+const ARROWHEAD_DRAW_MS = 200;
+
+// Dash lengths are measured from the paths; an oversized value leaves part of
+// the stroke pre-painted.
+const NUDGE_ARROW = {
+  // Starts on the bubble outline so the two strokes connect; tip lands level
+  // with the button's middle.
+  shaft: "M36 46.4 C 26 54, 13 52, 3 45",
+  head: "M12 45.8 L 3 45 L 6.8 53.2",
+  shaftDash: 36,
+  headDash: 19,
+};
+
+function CtaNudgeBubble({ show }: { show: boolean }) {
+  const reduced = useReducedMotion() ?? false;
+  // Measured length of the bubble path; re-measure if the path changes.
+  const DASH = 271;
+  const arrow = NUDGE_ARROW;
+
+  return (
+    <span
+      aria-hidden="true"
+      className="pointer-events-none absolute left-full top-1/2 hidden sm:block"
+      style={{
+        marginLeft: 14,
+        transform: "translateY(-58%)",
+        opacity: show ? 1 : 0,
+        transition: reduced ? "none" : `opacity 260ms ${HERO_LIQUID_EASE}`,
+      }}
+    >
+      <svg
+        width="150"
+        height="74"
+        viewBox="0 0 150 74"
+        fill="none"
+        style={{ overflow: "visible", display: "block" }}
+      >
+        {/* Shaft: leaves the bubble's lower-left and hooks into the CTA. */}
+        <path
+          d={arrow.shaft}
+          stroke={SELECTION_FRAME_COLOR}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          style={{
+            strokeDasharray: arrow.shaftDash,
+            strokeDashoffset: show || reduced ? 0 : arrow.shaftDash,
+            transition: reduced
+              ? "none"
+              : `stroke-dashoffset ${ARROW_DRAW_MS}ms ${HERO_LIQUID_EASE}`,
+          }}
+        />
+        {/* Head: one stroke through the tip so it inks with the shaft. */}
+        <path
+          d={arrow.head}
+          stroke={SELECTION_FRAME_COLOR}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          style={{
+            strokeDasharray: arrow.headDash,
+            strokeDashoffset: show || reduced ? 0 : arrow.headDash,
+            transition: reduced
+              ? "none"
+              : `stroke-dashoffset ${ARROWHEAD_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.85}ms`,
+          }}
+        />
+        {/* Uneven loop that overshoots where it closes, like a drawn circle. */}
+        <path
+          d="M34 40
+             C 30 22, 52 11, 82 12
+             C 116 13, 140 22, 141 37
+             C 142 52, 116 63, 84 62
+             C 54 61, 36 54, 34 41
+             C 33 37, 35 33, 38 30"
+          stroke={SELECTION_FRAME_COLOR}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          fill="none"
+          style={{
+            strokeDasharray: DASH,
+            strokeDashoffset: show || reduced ? 0 : DASH,
+            transition: reduced
+              ? "none"
+              : `stroke-dashoffset ${NUDGE_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55}ms`,
+          }}
+        />
+      </svg>
+      <span
+        className="absolute inset-0 flex items-center justify-center"
+        style={{
+          paddingLeft: 22,
+          paddingTop: 2,
+          color: SELECTION_FRAME_COLOR,
+          fontFamily: '"Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
+          fontSize: 15,
+          lineHeight: 1.15,
+          letterSpacing: "0.01em",
+          textAlign: "center",
+          transform: "rotate(-3deg)",
+          opacity: show || reduced ? 1 : 0,
+          transition: reduced
+            ? "none"
+            : `opacity ${NUDGE_TEXT_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55 + NUDGE_DRAW_MS * 0.65}ms`,
+        }}
+      >
+        you should
+        <br />
+        do it
+      </span>
+    </span>
+  );
+}
+
 function heroCtaLabelStyle(active: boolean) {
   return {
     opacity: active ? 1 : 0,
@@ -765,6 +887,25 @@ function VercelHero({
   const cloudDelay = ctaFadeDelay + HERO_LIQUID_MS;
   // Selection chrome snaps on only after the CTA has finished landing.
   const selectionDelay = cloudDelay + 220;
+  // Waits for the full frame sequence; derived so retiming the frame retimes
+  // the bubble with it.
+  const selectionSettled =
+    selectionDelay +
+    4 * SELECTION_EDGE_MS +
+    SELECTION_HANDLE_MS +
+    SELECTION_RESIZE_HOLD_MS +
+    SELECTION_RESIZE_OUT_MS +
+    SELECTION_RESIZE_SETTLE_MS +
+    SELECTION_RESIZE_IN_MS +
+    SELECTION_RESIZE_SETTLE_MS +
+    SELECTION_RESIZE_BACK_MS;
+
+  const [nudgeShown, setNudgeShown] = useState(false);
+  useEffect(() => {
+    if (!visible) return;
+    const id = setTimeout(() => setNudgeShown(true), selectionSettled + 260);
+    return () => clearTimeout(id);
+  }, [visible, selectionSettled]);
 
   // Alternates between the project quiz and the Aether product page on a
   // fixed loop once the hero has landed — no carousel interaction required.
@@ -896,7 +1037,7 @@ function VercelHero({
                 context menu; the handler only takes over to match the site's
                 Lenis smooth scrolling. */}
             <span
-              className="inline-flex rounded-[6px]"
+              className="relative inline-flex rounded-[6px]"
               style={{
                 boxShadow: CTA_OUTER_SHADOW,
                 transformOrigin: "center",
@@ -952,6 +1093,7 @@ function VercelHero({
                 </span>
               </span>
             </a>
+            <CtaNudgeBubble show={nudgeShown} />
             </span>
             {false && (
             <a
