@@ -17,7 +17,7 @@ import {
   readingStats,
 } from "@/lib/posts";
 
-const BODY_CLASSES = `px-0 pt-10 pb-8 rise
+const BODY_CLASSES = `px-0 pt-10 pb-8 rise prose-marker
   text-[15px] sm:text-[19px] leading-[1.75] sm:leading-[1.85] tracking-[0em] text-[rgb(var(--fg))]
   space-y-8
   [&_p]:[text-wrap:pretty] [&_li]:[text-wrap:pretty] [&_blockquote]:[text-wrap:pretty]

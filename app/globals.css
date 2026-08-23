@@ -2489,3 +2489,71 @@ h1:hover .redact > span.redact-inner,
   0%, 100% { stroke-dasharray: 15 85; }
   50% { stroke-dasharray: 40 60; }
 }
+
+/* ── Hand-drawn highlighter for lead-in labels ──────────────
+   The bold label that opens an example paragraph ("Asymmetric motion.")
+   gets a marker stroke behind it instead of just heavier ink.
+
+   Three things sell it as a pen rather than a rectangle. The stroke sits
+   lower than the text and covers only the lower ~62%, the way a real
+   highlighter is dragged slightly below a word; both ends fade, so the colour
+   ramps in and out instead of stopping on a hard vertical edge; and the band
+   is rotated a fraction of a degree so it never sits parallel to the
+   baseline. box-decoration-break keeps it intact if a label ever wraps.
+
+   Each label in a post gets its OWN pen rather than all four sharing one
+   colour, so a run of examples reads like someone worked through the page
+   with a few markers to hand. The set is drawn from the blog card tints
+   (see POST_TINT in components/post-glyph.tsx) so they stay in the same
+   family as the thumbnails without matching any one of them exactly. */
+.prose-marker > p > strong:first-child {
+  --marker-pen: 213 123 168;
+  position: relative;
+  display: inline;
+  background-image: linear-gradient(
+    to right,
+    rgb(var(--marker-pen) / 0) 0%,
+    rgb(var(--marker-pen) / 0.55) 1.5%,
+    rgb(var(--marker-pen) / 0.62) 12%,
+    rgb(var(--marker-pen) / 0.5) 46%,
+    rgb(var(--marker-pen) / 0.66) 74%,
+    rgb(var(--marker-pen) / 0.52) 96%,
+    rgb(var(--marker-pen) / 0) 100%
+  );
+  background-repeat: no-repeat;
+  /* Sits low, and overshoots the label slightly on both sides. */
+  background-size: calc(100% + 0.5em) 62%;
+  background-position: -0.25em 78%;
+  padding: 0 0.12em;
+  border-radius: 0.08em;
+  transform: rotate(-0.35deg);
+  transform-origin: left center;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* A different pen per label. nth-of-type counts paragraphs within the body
+   chunk, and the labelled ones run consecutively, so cycling on a prime-ish
+   stride keeps neighbouring labels in different hues. Four pens covers the
+   longest run currently in the posts; it wraps cleanly past that. */
+.prose-marker > p:nth-of-type(4n + 1) > strong:first-child { --marker-pen: 213 123 168; } /* pink */
+.prose-marker > p:nth-of-type(4n + 2) > strong:first-child { --marker-pen: 216 190 110; } /* gold */
+.prose-marker > p:nth-of-type(4n + 3) > strong:first-child { --marker-pen: 112 195 205; } /* cyan */
+.prose-marker > p:nth-of-type(4n + 4) > strong:first-child { --marker-pen: 140 189 107; } /* olive */
+
+/* Dark mode: a translucent wash over a dark page turns muddy, so pull the
+   stroke back and let the label's own ink stay bright on top. */
+@media (prefers-color-scheme: dark) {
+  .prose-marker > p > strong:first-child {
+    background-image: linear-gradient(
+      to right,
+      rgb(var(--marker-pen) / 0) 0%,
+      rgb(var(--marker-pen) / 0.34) 1.5%,
+      rgb(var(--marker-pen) / 0.4) 12%,
+      rgb(var(--marker-pen) / 0.3) 46%,
+      rgb(var(--marker-pen) / 0.42) 74%,
+      rgb(var(--marker-pen) / 0.32) 96%,
+      rgb(var(--marker-pen) / 0) 100%
+    );
+  }
+}
