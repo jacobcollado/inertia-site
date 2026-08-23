@@ -728,7 +728,10 @@ const NUDGE_ARROW = {
 // Hot-pink hand-drawn nudge beside the Begin button, built from the same
 // vocabulary as CtaNudgeBubble above: uneven loop, marker font, shaft inked
 // before the head. Sits to the RIGHT of the button and points back left at it.
-const BEGIN_NUDGE_COLOR = "#ff2d8a";
+// Pastel rather than a saturated hot pink: same hue, chroma pulled back and
+// lightness raised, so the aside reads as a soft margin note beside the CTA
+// instead of competing with it.
+const BEGIN_NUDGE_COLOR = "#fa89ba";
 
 /* Two things keep this reading as pen rather than vector. The loop is drawn
    as five cubics with deliberately mismatched control points, so no two sides
@@ -783,7 +786,7 @@ function BeginNudgeBubble({ show }: { show: boolean }) {
         <path
           d={arrow.shaft}
           stroke={BEGIN_NUDGE_COLOR}
-          strokeWidth="1.6"
+          strokeWidth="1.9"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
@@ -799,7 +802,7 @@ function BeginNudgeBubble({ show }: { show: boolean }) {
         <path
           d={arrow.head}
           stroke={BEGIN_NUDGE_COLOR}
-          strokeWidth="1.6"
+          strokeWidth="1.9"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill="none"
@@ -820,7 +823,7 @@ function BeginNudgeBubble({ show }: { show: boolean }) {
              C 62 74, 40 66, 38 50
              C 37 45, 40 39, 44 35"
           stroke={BEGIN_NUDGE_COLOR}
-          strokeWidth="1.7"
+          strokeWidth="2"
           strokeLinecap="round"
           fill="none"
           style={{
@@ -2772,8 +2775,46 @@ const CLIENT_RULE = "1px dashed rgb(var(--fg) / 0.28)";
 // outgoing name is still releasing its colour as the incoming one takes it up
 // and the travel reads as continuous rather than as a series of blinks.
 
+// Small deterministic tilts, so no two adjacent names sit at the same angle
+// and the grid reads as written by hand rather than set at one rotation.
+const CLIENT_TILT = [-1.6, 1.1, -0.8, 1.7, -1.2, 0.9, -1.9, 1.4];
+
+/* Three boil variants (see globals.css) cycled across the grid, so no two
+   neighbouring names redraw on the same beat. Their differing durations mean
+   the eight drift out of phase within a second or two and never resync. */
+const BOIL_CLASSES = ["boil-a", "boil-b", "boil-c"];
+
 function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
   const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
+  const reducedMotion = useReducedMotion() ?? false;
+
+  /* Phones get a thinner outline: the stroke is set in px, so at ~15px type
+     the desktop weight is proportionally twice as heavy and closes up the
+     letterforms. */
+  const [isPhone, setIsPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const apply = () => setIsPhone(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+  const strokeW = isPhone ? "0.55px" : "1.1px";
+  /* The outline is a second copy of the word offset from the first, so how
+     far apart the two drift decides whether it reads as one thickened mark or
+     two overlapping words. On a phone the type is small enough that the
+     desktop opacity made the second layer plainly legible as its own text, so
+     it is pulled well back there and the boil does the rest. */
+  const outlineOpacity = isPhone ? 0.4 : 0.85;
+
+  /* Every name boils continuously, rather than a rotating subset taking
+     turns. Switching the animation on and off mid-page was visible as a pop:
+     a name would freeze, or jolt into motion, right under the eye - exactly
+     what a hand-drawn effect must never do.
+
+     No scheduling is needed. The three variants run at deliberately
+     non-harmonic durations, so the eight names sit permanently out of phase
+     and the grid never pulses as a unit. */
 
   return (
     <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
@@ -2813,20 +2854,73 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
                 aria-haspopup="dialog"
                 className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
               >
-                {/* No accent on hover or on a timer — the names stay in the
-                    page's own ink. A slight fade is the only hover feedback,
-                    since each name still opens a dialog. */}
+                {/* Written rather than set: marker face, a slight tilt, and
+                    the page's own ink. A fade is still the only hover
+                    feedback, since each name opens a dialog. */}
+                {/* Outline and fill are two stacked copies of the same word,
+                    each boiling on its own variant at its own speed. That
+                    independence is the point: when the stroke wobbles out of
+                    step with the letter it sits on, the edge of the mark
+                    reads as redrawn every frame, which a single element with
+                    one -webkit-text-stroke can never do. */}
                 <span
-                  className="text-[clamp(1.05rem,4.2vw,1.6rem)] tracking-tight leading-none min-w-0 hyphens-none transition-opacity duration-200 group-hover:opacity-60"
+                  className="relative inline-block min-w-0 group-hover:opacity-60 transition-opacity duration-200"
                   style={{
-                    fontWeight: 450,
-                    color: "rgb(var(--fg))",
-                    // Two columns on a 320px phone leaves ~126px per name;
-                    // wrapping is the safe failure mode, not overflow.
+                    fontFamily:
+                      '"Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
+                    letterSpacing: "0.005em",
+                    fontWeight: 400,
                     overflowWrap: "break-word",
                   }}
                 >
-                  {item.client}
+                  {/* Outline layer, behind. aria-hidden so the name isn't
+                      announced twice. */}
+                  <span
+                    aria-hidden="true"
+                    // left-0 top-0 rather than inset-0: the layer must take
+                    // its size from its own text, exactly as the fill does.
+                    // inset-0 stretched it to the wrapper box, so a name that
+                    // wrapped to two lines on a phone set the outline to a
+                    // different width than the letters underneath it.
+                    className={`text-[clamp(0.95rem,3.6vw,1.35rem)] leading-none hyphens-none absolute left-0 top-0 w-full ${
+                      reducedMotion ? "" : BOIL_CLASSES[(i + 1) % BOIL_CLASSES.length]
+                    }`}
+                    style={{
+                      display: "inline-block",
+                      color: "transparent",
+                      // Stroke is scaled to the type: 1.1px against ~20px
+                      // desktop reads as a fine edge, but the same weight on a
+                      // ~15px phone closes up the counters and turns the word
+                      // into a blur.
+                      WebkitTextStroke: `${strokeW} rgb(var(--fg))`,
+                      opacity: outlineOpacity,
+                      ["--boil-tilt" as string]: `${CLIENT_TILT[i % CLIENT_TILT.length]}deg`,
+                      transform: `rotate(${CLIENT_TILT[i % CLIENT_TILT.length]}deg)`,
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {item.client}
+                  </span>
+                  {/* Fill layer, in front. */}
+                  <span
+                    className={`text-[clamp(0.95rem,3.6vw,1.35rem)] leading-none hyphens-none relative ${
+                      reducedMotion ? "" : BOIL_CLASSES[i % BOIL_CLASSES.length]
+                    }`}
+                    style={{
+                      color: "rgb(var(--fg))",
+                      display: "inline-block",
+                      // Resting tilt lives in a variable, not a transform: the
+                      // boil keyframes rebuild the transform every frame and
+                      // would otherwise flatten it.
+                      ["--boil-tilt" as string]: `${CLIENT_TILT[i % CLIENT_TILT.length]}deg`,
+                      transform: `rotate(${CLIENT_TILT[i % CLIENT_TILT.length]}deg)`,
+                      // Two columns on a 320px phone leaves ~126px per name;
+                      // wrapping is the safe failure mode, not overflow.
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {item.client}
+                  </span>
                 </span>
               </button>
             </li>

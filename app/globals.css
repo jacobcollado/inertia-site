@@ -2489,3 +2489,80 @@ h1:hover .redact > span.redact-inner,
   0%, 100% { stroke-dasharray: 15 85; }
   50% { stroke-dasharray: 40 60; }
 }
+/* ── Boil ─────────────────────────────────────────────────────
+   The wobble of hand-drawn cartoon lettering, where every frame is redrawn by
+   hand and no two land in quite the same place. Three variants so no two
+   names redraw on the same beat, each holding five discrete positions.
+
+   The timing function is what sells it. A linear tween reads as a floating
+   element rather than a redrawn one; a hard steps() cut reads as a jump. The
+   curve in --boil-ease does almost all its travel in the first fraction of
+   each interval and then flattens, so the eye never tracks the movement
+   itself, only the new position - and each drawing is held for most of the
+   cycle before the next one takes over.
+
+   Each frame varies rotation, offset, scale AND skew together, and by uneven
+   amounts - one frame barely moves, the next is the big one. A redrawn letter
+   changes weight and proportion slightly, not just position, and an even
+   wobble reads mechanical however small it is.
+
+   Rate and amplitude are tuned against each other, and both extremes fail:
+   ~11 redraws a second reads as a shake, ~4 at quarter-pixel offsets vanishes.
+   The answer was not a middle rate but a SLOW rate with a LARGE offset - each
+   drawing held about a third of a second, then a jump big enough to see.
+
+   That hold is what makes it staticky rather than fluid. The eye registers a
+   sequence of separate drawings, the way real cel animation does, instead of
+   one letter sliding around. Speeding it up smooths the jumps together and
+   the whole illusion collapses into vibration.
+
+   The rotate() in each frame replaces the element's resting tilt, so anything
+   using these must carry its tilt through --boil-tilt rather than its own
+   transform, or the animation would overwrite it. */
+@keyframes boil-a {
+  0%   { transform: rotate(calc(var(--boil-tilt, 0deg) + 1.13deg)) translate(0.0675em, -0.047em) scale(1.0162) skewX(0.81deg); }
+  20%  { transform: rotate(calc(var(--boil-tilt, 0deg) - 0.32deg)) translate(-0.027em, 0.02em) scale(0.9919) skewX(-0.27deg); }
+  40%  { transform: rotate(calc(var(--boil-tilt, 0deg) + 0.54deg))  translate(0.02em, 0.061em) scale(1.0054) skewX(-0.94deg); }
+  60%  { transform: rotate(calc(var(--boil-tilt, 0deg) - 1.22deg)) translate(-0.061em, -0.027em) scale(1.0216) skewX(0.4deg); }
+  80%  { transform: rotate(calc(var(--boil-tilt, 0deg) + 0.16deg)) translate(0.0405em, 0.0135em) scale(0.9865) skewX(1.08deg); }
+  100% { transform: rotate(calc(var(--boil-tilt, 0deg) + 1.13deg)) translate(0.0675em, -0.047em) scale(1.0162) skewX(0.81deg); }
+}
+@keyframes boil-b {
+  0%   { transform: rotate(calc(var(--boil-tilt, 0deg) - 1.03deg)) translate(-0.061em, 0.054em) scale(1.0108) skewX(-0.81deg); }
+  20%  { transform: rotate(calc(var(--boil-tilt, 0deg) + 1.19deg)) translate(0.047em, -0.054em) scale(0.9838) skewX(0.94deg); }
+  40%  { transform: rotate(calc(var(--boil-tilt, 0deg) - 0.22deg)) translate(-0.02em, -0.016em) scale(1.0189) skewX(0.27deg); }
+  60%  { transform: rotate(calc(var(--boil-tilt, 0deg) + 0.43deg)) translate(0.061em, 0.061em) scale(0.9946) skewX(-1.08deg); }
+  80%  { transform: rotate(calc(var(--boil-tilt, 0deg) - 1.24deg)) translate(-0.0405em, 0.007em) scale(1.0081) skewX(0.54deg); }
+  100% { transform: rotate(calc(var(--boil-tilt, 0deg) - 1.03deg)) translate(-0.061em, 0.054em) scale(1.0108) skewX(-0.81deg); }
+}
+@keyframes boil-c {
+  0%   { transform: rotate(calc(var(--boil-tilt, 0deg) + 0.76deg)) translate(-0.047em, -0.061em) scale(0.9892) skewX(1.03deg); }
+  20%  { transform: rotate(calc(var(--boil-tilt, 0deg) - 1.19deg)) translate(0.061em, 0.0405em) scale(1.0189) skewX(-0.54deg); }
+  40%  { transform: rotate(calc(var(--boil-tilt, 0deg) + 0.27deg))  translate(-0.0135em, 0.054em) scale(1.0027) skewX(0.14deg); }
+  60%  { transform: rotate(calc(var(--boil-tilt, 0deg) - 0.54deg))  translate(0.054em, -0.02em) scale(0.9811) skewX(-1.13deg); }
+  80%  { transform: rotate(calc(var(--boil-tilt, 0deg) + 1.24deg)) translate(-0.054em, 0.027em) scale(1.0135) skewX(0.68deg); }
+  100% { transform: rotate(calc(var(--boil-tilt, 0deg) + 0.76deg)) translate(-0.047em, -0.061em) scale(0.9892) skewX(1.03deg); }
+}
+
+:root {
+  /* Not steps(): a hard cut made each drawing land like a jump-cut, and the
+     handoff between positions was the part that read as jarring. This curve
+     covers almost all the distance in the first fraction of the interval,
+     then flattens - the move still happens too fast to track, so it keeps the
+     redrawn feel, but it eases into place rather than teleporting, and most of
+     the cycle is the hold. */
+  --boil-ease: cubic-bezier(0.16, 0.9, 0.2, 1);
+}
+
+/* Durations chosen not to share a common multiple, so the three never resync.
+   will-change keeps each boiling word on its own compositor layer: without it
+   every redraw repaints the grid cell behind it, which is what a phone feels
+   first. Only the classes carry it, so a name that is not currently boiling
+   holds no layer of its own. */
+.boil-a { animation: boil-a 2.6s var(--boil-ease) infinite; will-change: transform; }
+.boil-b { animation: boil-b 3.05s var(--boil-ease) infinite; will-change: transform; }
+.boil-c { animation: boil-c 3.5s var(--boil-ease) infinite; will-change: transform; }
+
+@media (prefers-reduced-motion: reduce) {
+  .boil-a, .boil-b, .boil-c { animation: none; }
+}
