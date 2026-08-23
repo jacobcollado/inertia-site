@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
+import { PostGlyph, postTint } from "@/components/post-glyph";
 import { createPortal, flushSync } from "react-dom";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
@@ -473,7 +474,7 @@ function heroLiquidStyle(
 // quoting rather than as a brand accent. (The earlier neutral grey was chosen
 // to stay clear of the antislow mark above; the mark is currently hidden, and
 // the blue is distinct enough from the work accents not to read as one.)
-const SELECTION_FRAME_COLOR = "#0d99ff";
+const SELECTION_FRAME_COLOR = "#6bb8ef";
 const SELECTION_EDGE_MS = 170;
 const SELECTION_HANDLE_MS = 160;
 
@@ -2594,30 +2595,9 @@ const CLIENT_RULE = "1px dashed rgb(var(--fg) / 0.28)";
 // for DWELL, then crossfades to the next over FADE — the two overlap, so the
 // outgoing name is still releasing its colour as the incoming one takes it up
 // and the travel reads as continuous rather than as a series of blinks.
-const CLIENT_CYCLE_DWELL_MS = 1500;
-const CLIENT_CYCLE_FADE_MS = 900;
 
 function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
-  const [hovered, setHovered] = useState<string | null>(null);
   const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
-  const reduced = useReducedMotion() ?? false;
-
-  // Index of the client currently lit by the auto-cycle.
-  const [cycleIndex, setCycleIndex] = useState(0);
-
-  // Pause the walk while the visitor is hovering or has a dialog open: two
-  // accents lit at once reads as a bug, and the walk moving under a held
-  // cursor fights the hover.
-  const paused = hovered !== null || openItem !== null;
-
-  useEffect(() => {
-    if (reduced || paused || items.length < 2) return;
-    const id = setInterval(
-      () => setCycleIndex((i) => (i + 1) % items.length),
-      CLIENT_CYCLE_DWELL_MS,
-    );
-    return () => clearInterval(id);
-  }, [reduced, paused, items.length]);
 
   return (
     <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
@@ -2640,11 +2620,6 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
       >
       <ul className="grid grid-cols-2">
         {items.map((item, i) => {
-          const accent = CLIENT_NAME_ACCENT[item.slug];
-          const isHovered = hovered === item.slug;
-          // Hover always wins; otherwise the walk decides who is lit. While
-          // paused nothing is auto-lit, so the hovered name is the only accent.
-          const isLit = isHovered || (!paused && !reduced && cycleIndex === i);
           return (
             <li
               key={item.slug}
@@ -2661,17 +2636,12 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
                 onClick={() => setOpenItem(item)}
                 aria-haspopup="dialog"
                 className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
-                onMouseEnter={() => setHovered(item.slug)}
-                onMouseLeave={() => setHovered((p) => (p === item.slug ? null : p))}
-                onFocus={() => setHovered(item.slug)}
-                onBlur={() => setHovered((p) => (p === item.slug ? null : p))}
               >
-                {/* Two stacked copies rather than one transitioning colour:
-                    crossfading opacity between a fixed grey and a fixed accent
-                    keeps the midpoint neutral, where interpolating the colour
-                    itself would drag the text through muddy intermediate hues. */}
+                {/* No accent on hover or on a timer — the names stay in the
+                    page's own ink. A slight fade is the only hover feedback,
+                    since each name still opens a dialog. */}
                 <span
-                  className="relative text-[clamp(1.05rem,4.2vw,1.95rem)] tracking-tight leading-none min-w-0 hyphens-none"
+                  className="text-[clamp(1.05rem,4.2vw,1.6rem)] tracking-tight leading-none min-w-0 hyphens-none transition-opacity duration-200 group-hover:opacity-60"
                   style={{
                     fontWeight: 450,
                     color: "rgb(var(--fg))",
@@ -2681,25 +2651,6 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
                   }}
                 >
                   {item.client}
-                  {accent && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-0"
-                      style={{
-                        color: accent,
-                        opacity: isLit ? 1 : 0,
-                        // Hover should feel immediate; the ambient walk should
-                        // feel like a slow tide.
-                        transition: reduced
-                          ? "none"
-                          : `opacity ${isHovered ? 200 : CLIENT_CYCLE_FADE_MS}ms ${HERO_LIQUID_EASE}`,
-                        overflowWrap: "break-word",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      {item.client}
-                    </span>
-                  )}
                 </span>
               </button>
             </li>
@@ -3266,80 +3217,6 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   );
 }
 
-/* ── Tag glyphs ──────────────────────────────────────────────────────
-   One line-drawn mark per blog tag, drawn from the same vocabulary as the
-   card arrow (1.25 stroke, round caps, muted ink). There are only three
-   tags across the whole archive, so the carousel reads as three visual
-   families rather than eight unrelated illustrations — and a new post
-   inherits its mark from frontmatter with no per-post artwork to make.
-
-   Standards      four identical squares — the tenth page matching the first
-   Infrastructure nested frames — layers that hold each other up
-   Practice       the same square attempted four times, one landing true   */
-function TagGlyph({ tag }: { tag?: string }) {
-  const key = (tag ?? "").toLowerCase();
-  const stroke = "rgba(26,26,26,0.30)";
-  const common = {
-    viewBox: "0 0 64 64",
-    fill: "none" as const,
-    stroke,
-    strokeWidth: 1.25,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    className: "w-20 h-20 sm:w-24 sm:h-24",
-    "aria-hidden": true,
-  };
-
-  if (key === "standards") {
-    // Four identical squares on a strict grid. The point of these posts is
-    // that the tenth page matches the first, so the mark is about sameness
-    // across instances — nothing varies, and that's what you're meant to see.
-    return (
-      <svg {...common}>
-        <rect x="13" y="13" width="16" height="16" rx="2" />
-        <rect x="35" y="13" width="16" height="16" rx="2" />
-        <rect x="13" y="35" width="16" height="16" rx="2" />
-        <rect x="35" y="35" width="16" height="16" rx="2" />
-      </svg>
-    );
-  }
-
-  if (key === "infrastructure") {
-    return (
-      <svg {...common}>
-        <rect x="9" y="9" width="46" height="46" rx="3" />
-        <rect x="19" y="19" width="26" height="26" rx="2.5" />
-        <rect x="28.5" y="28.5" width="7" height="7" rx="1.5" />
-      </svg>
-    );
-  }
-
-  if (key === "practice") {
-    // The Standards square, drawn four times about the same center: three
-    // attempts off the grid by a few degrees, and one that lands square.
-    // Same mark, repeated until it's right — the reps are visible, and the
-    // shared square ties this to the Standards glyph rather than inventing
-    // a second visual language for the neighbouring card.
-    return (
-      <svg {...common}>
-        <rect x="18" y="18" width="28" height="28" rx="2" strokeOpacity={0.55} transform="rotate(-18 32 32)" />
-        <rect x="18" y="18" width="28" height="28" rx="2" strokeOpacity={0.7} transform="rotate(11 32 32)" />
-        <rect x="18" y="18" width="28" height="28" rx="2" strokeOpacity={0.85} transform="rotate(-5 32 32)" />
-        {/* The one that lands on the grid. */}
-        <rect x="18" y="18" width="28" height="28" rx="2" />
-      </svg>
-    );
-  }
-
-  // Unknown or missing tag — a single centered rule keeps the card's
-  // vertical rhythm without inventing a mark the reader can't decode.
-  return (
-    <svg {...common}>
-      <line x1="20" y1="32" x2="44" y2="32" />
-    </svg>
-  );
-}
-
 /* Posts arrive sorted newest-first, which currently puts three Practice
    posts at the front — three identical glyphs in a row. Rotate through the
    tag groups instead: date order is preserved *within* each tag, but
@@ -3696,51 +3573,48 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                     onMouseEnter={() => { setHoveredIndex(i); }}
                     onMouseLeave={() => { setHoveredIndex((prev) => (prev === i ? null : prev)); }}
                   >
-                    {/* Neutral surface in place of the old cover image — a
-                        near-white card with a hairline edge, so the type
-                        carries the card instead of a photograph. */}
+                    {/* Split card: a tinted panel on top carrying the tag
+                        glyph, near-white below carrying the type. The real
+                        edge between them does the work the old centered
+                        layout asked an isolated glyph to do. */}
                     <div
-                      className="absolute inset-0"
+                      className="absolute inset-x-0 top-0 flex items-center justify-center"
                       style={{
-                        background: "#f4f4f2",
-                        boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
+                        bottom: "45%",
+                        background: postTint(post.slug, post.tag),
+                        borderBottom: "1px solid rgba(26,26,26,0.08)",
                       }}
-                    />
-                    {/* Title leads the card from the top, centered. The whole
-                        card is the link, so there's no corner arrow competing
-                        with it — which also frees the title to use more of the
-                        card's width. */}
-                    <div className="absolute inset-x-0 top-0 px-7 sm:px-8 pt-10 sm:pt-12">
+                    >
+                      <PostGlyph slug={post.slug} tag={post.tag} />
+                    </div>
+                    {/* Type block, left-aligned against the card's own margin
+                        rather than centered — the tinted panel above is doing
+                        the centering, so repeating it here flattened the card. */}
+                    <div
+                      className="absolute inset-x-0 bottom-0 flex flex-col px-6 sm:px-7 pt-5 sm:pt-6 pb-6 sm:pb-7"
+                      style={{ top: "55%", background: "#fbfbfa" }}
+                    >
                       <p
-                        className="text-[24px] sm:text-[28px] tracking-tight leading-tight text-center text-balance"
+                        className="text-[21px] sm:text-[25px] tracking-[-0.028em] leading-tight text-balance"
                         style={{ color: "#1a1a1a" }}
                       >
                         {post.title}
                       </p>
-                    </div>
-                    {/* Glyph occupies the card's empty middle, centered on the
-                        same axis as the title and summary. */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <TagGlyph tag={post.tag} />
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center gap-1.5 px-4 sm:px-5 pb-10 sm:pb-12">
-                      {post.tag && (
-                        <div className="flex items-center justify-center gap-2">
-                          <span
-                            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11.5px] tracking-tight"
-                            style={{ background: "rgba(26,26,26,0.06)", color: "rgba(26,26,26,0.62)" }}
-                          >
-                            {post.tag}
-                          </span>
-                        </div>
-                      )}
                       {(post.subtitle || post.summary) && (
                         <p
-                          className="max-w-[92%] text-[15px] sm:text-[16px] leading-snug tracking-[-0.035em] line-clamp-2 text-center text-balance"
+                          className="mt-2 text-[14.5px] sm:text-[15.5px] leading-snug tracking-[-0.035em] line-clamp-2"
                           style={{ color: "#5c5c5c" }}
                         >
                           {post.subtitle || post.summary}
                         </p>
+                      )}
+                      {post.tag && (
+                        <span
+                          className="mt-auto pt-3 text-[12.5px] sm:text-[13px] tracking-tight"
+                          style={{ color: "rgba(26,26,26,0.62)" }}
+                        >
+                          {post.tag}
+                        </span>
                       )}
                     </div>
                   </Link>

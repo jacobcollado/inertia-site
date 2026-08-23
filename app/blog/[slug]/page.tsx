@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { TOCInline } from "./toc";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
+import { PostGlyph, postTint } from "@/components/post-glyph";
 import {
   getAllPosts,
   getPost,
@@ -219,14 +220,20 @@ export default async function BlogPost({
           </div>
         </header>
 
-        {/* Cover image */}
-        {post.image && (
-          <div className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
-            <div className="w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))]" style={{ aspectRatio: "1200/630" }}>
-              <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
-            </div>
+        {/* Header mark. The same glyph and tint the homepage card used, so
+            the card the reader clicked is the header they land on. Replaces
+            the old cover PNGs, which only four of eight posts had. */}
+        <div className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
+          <div
+            className="w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] flex items-center justify-center"
+            style={{
+              aspectRatio: "1200/630",
+              background: postTint(slug, post.tag),
+            }}
+          >
+            <PostGlyph slug={slug} tag={post.tag} className="w-28 h-28 sm:w-36 sm:h-36" />
           </div>
-        )}
+        </div>
 
         {/* Body */}
         <ArticleBody html={html} />
