@@ -1569,7 +1569,11 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                           // symmetric padding there. Sits between the stock sm
                           // and lg sizes: more presence than sm without
                           // dominating the card.
-                          className="h-8 text-[13.5px] pl-4 pr-3 sm:pr-2 rounded-full"
+                          // Pure white rather than the card's off-white
+                          // --sh-primary (#ededed): as the one commit action on
+                          // a near-black card, it should read as the brightest
+                          // thing there, and the token sits a step under that.
+                          className="h-8 text-[13.5px] pl-4 pr-3 sm:pr-2 rounded-full bg-white text-black hover:bg-white/90"
                         >
                           <span className="inline-flex items-center gap-1.5">
                             {question.nextLabel ??

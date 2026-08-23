@@ -725,6 +725,147 @@ const NUDGE_ARROW = {
   headDash: 19,
 };
 
+// Hot-pink hand-drawn nudge beside the Begin button, built from the same
+// vocabulary as CtaNudgeBubble above: uneven loop, marker font, shaft inked
+// before the head. Sits to the RIGHT of the button and points back left at it.
+const BEGIN_NUDGE_COLOR = "#ff2d8a";
+
+/* Two things keep this reading as pen rather than vector. The loop is drawn
+   as five cubics with deliberately mismatched control points, so no two sides
+   bow the same way and the top-left arc is flatter than the bottom-right one;
+   and it overshoots where it closes, crossing back over its own start the way
+   a circled word does. The whole mark is then rotated a couple of degrees off
+   axis - a perfectly level hand-drawn loop reads as a shape, not a scribble. */
+const BEGIN_NUDGE_ARROW = {
+  // Leaves the bubble's lower-left and hooks back toward the button on its
+  // left; tip lands level with the button's middle. The slight S in the shaft
+  // is the wrist moving, not a straight ruled line.
+  shaft: "M44 58 C 33 68, 17 66, 4 57",
+  // Two strokes off the tip, uneven lengths, as a real arrowhead is inked.
+  head: "M14 57.5 L 4 57 L 8.5 66.5",
+  shaftDash: 44,
+  headDash: 21,
+};
+
+// Measured length of the loop path below; re-measure if the path changes, or
+// the stroke starts out part-painted.
+const BEGIN_NUDGE_DASH = 342;
+
+function BeginNudgeBubble({ show }: { show: boolean }) {
+  const reduced = useReducedMotion() ?? false;
+  const DASH = BEGIN_NUDGE_DASH;
+  const arrow = BEGIN_NUDGE_ARROW;
+
+  return (
+    <span
+      aria-hidden="true"
+      // Sits in the open margin to the right of the card, so unlike the
+      // in-gap placement it has room at full size. Hidden below lg, where
+      // that margin closes up and the card runs to the viewport edge.
+      className="pointer-events-none absolute left-full top-1/2 hidden lg:block"
+      style={{
+        marginLeft: 12,
+        // Rotated off axis: a perfectly level loop reads as a drawn shape
+        // rather than something scrawled in the margin.
+        transform: "translateY(-52%) rotate(-2.4deg)",
+        opacity: show ? 1 : 0,
+        transition: reduced ? "none" : `opacity 260ms ${HERO_LIQUID_EASE}`,
+      }}
+    >
+      <svg
+        width="182"
+        height="88"
+        viewBox="0 0 182 88"
+        fill="none"
+        style={{ overflow: "visible", display: "block" }}
+      >
+        {/* Shaft: leaves the bubble's lower-left and hooks toward Begin. */}
+        <path
+          d={arrow.shaft}
+          stroke={BEGIN_NUDGE_COLOR}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          style={{
+            strokeDasharray: arrow.shaftDash,
+            strokeDashoffset: show || reduced ? 0 : arrow.shaftDash,
+            transition: reduced
+              ? "none"
+              : `stroke-dashoffset ${ARROW_DRAW_MS}ms ${HERO_LIQUID_EASE}`,
+          }}
+        />
+        {/* Head: one stroke through the tip so it inks with the shaft. */}
+        <path
+          d={arrow.head}
+          stroke={BEGIN_NUDGE_COLOR}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          style={{
+            strokeDasharray: arrow.headDash,
+            strokeDashoffset: show || reduced ? 0 : arrow.headDash,
+            transition: reduced
+              ? "none"
+              : `stroke-dashoffset ${ARROWHEAD_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.85}ms`,
+          }}
+        />
+        {/* Uneven loop that overshoots where it closes, like a drawn circle. */}
+        <path
+          d="M40 48
+             C 33 25, 60 11, 96 12
+             C 139 13, 170 21, 172 42
+             C 174 64, 140 76, 100 75
+             C 62 74, 40 66, 38 50
+             C 37 45, 40 39, 44 35"
+          stroke={BEGIN_NUDGE_COLOR}
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          fill="none"
+          style={{
+            strokeDasharray: DASH,
+            strokeDashoffset: show || reduced ? 0 : DASH,
+            transition: reduced
+              ? "none"
+              : `stroke-dashoffset ${NUDGE_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55}ms`,
+          }}
+        />
+      </svg>
+      <span
+        // Positioned against the loop's own bounds (x 38-174, y 12-76 in the
+        // 182x88 box), not the SVG box, which the arrow tail makes wider on
+        // the left. Insetting to the loop is what keeps the two lines sitting
+        // centred inside the circle with clear space on every side.
+        className="absolute flex items-center justify-center"
+        style={{
+          left: 38,
+          top: 12,
+          width: 136,
+          height: 64,
+          color: BEGIN_NUDGE_COLOR,
+          fontFamily: '"Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
+          fontSize: 15,
+          lineHeight: 1.2,
+          letterSpacing: "0.01em",
+          textAlign: "center",
+          // Counter-rotates part of the wrapper's tilt, so the words sit a
+          // touch off-axis from the loop rather than perfectly parallel to it.
+          transform: "rotate(-1.2deg)",
+          opacity: show || reduced ? 1 : 0,
+          transition: reduced
+            ? "none"
+            : `opacity ${NUDGE_TEXT_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55 + NUDGE_DRAW_MS * 0.65}ms`,
+        }}
+      >
+        we don&rsquo;t bite,
+        <br />
+        say hi
+      </span>
+    </span>
+  );
+}
+
 function CtaNudgeBubble({ show }: { show: boolean }) {
   const reduced = useReducedMotion() ?? false;
   // Measured length of the bubble path; re-measure if the path changes.
@@ -1347,6 +1488,30 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   const [resetKey, setResetKey] = useState(0);
   const intakeRef = useRef<HTMLDivElement>(null);
   const inquiryBorderRef = useRef<HTMLDivElement>(null);
+
+  /* The hero's nudge fires off a timer because it is on screen at load. This
+     card sits well below the fold, so a timer would ink it unseen; it waits
+     for the card to scroll into view instead, then holds a beat so the arrow
+     draws after the card has settled rather than during its reveal. */
+  const [beginNudgeShown, setBeginNudgeShown] = useState(false);
+  useEffect(() => {
+    const el = inquiryBorderRef.current;
+    if (!el) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        timer = setTimeout(() => setBeginNudgeShown(true), 420);
+      },
+      { threshold: 0.35 },
+    );
+    obs.observe(el);
+    return () => {
+      obs.disconnect();
+      if (timer) clearTimeout(timer);
+    };
+  }, []);
   const flowRevealRef = useLiquidReveal(disclosed, 60);
   const transcriptRevealRef = useLiquidReveal(disclosed && stage !== "quiz");
   const typingRevealRef = useLiquidReveal(stage === "typing");
@@ -1518,9 +1683,14 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
   return (
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      {/* Wrapper exists purely to anchor the nudge: the card itself clips its
+          overflow (for the border's scale-on-hover), so a bubble parented to
+          the button inside would be cut off at the card's edge. */}
+      <div className="relative max-w-3xl mx-auto">
+      {!disclosed && <BeginNudgeBubble show={beginNudgeShown} />}
       <div
         ref={inquiryBorderRef}
-        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl border border-dashed border-[rgb(var(--line))] py-8 sm:py-10 px-6 sm:px-10 ${LIQUID_REVEAL}`}
+        className={`relative overflow-hidden origin-center rounded-2xl border border-dashed border-[rgb(var(--line))] py-8 sm:py-10 px-6 sm:px-10 ${LIQUID_REVEAL}`}
         style={{ background: "transparent" }}
       >
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
@@ -1544,7 +1714,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
         {!disclosed && (
           <span
-            className={`w-full sm:w-auto self-stretch sm:self-center shrink-0 flex sm:inline-flex ${ACTION_RADIUS_CLASS} ${LIQUID_REVEAL}`}
+            className={`relative w-full sm:w-auto self-stretch sm:self-center shrink-0 flex sm:inline-flex ${ACTION_RADIUS_CLASS} ${LIQUID_REVEAL}`}
             style={{ ...liquidRevealDelay(80), transformOrigin: "center" }}
           >
             <button
@@ -1552,10 +1722,15 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
               onClick={onBegin}
               aria-expanded="false"
               aria-controls="questionnaire-flow"
-              className={`relative w-full sm:w-auto inline-flex items-center justify-center overflow-hidden border-0 ${ACTION_RADIUS_CLASS} h-11 sm:h-12 px-6 sm:px-7 text-[17px] sm:text-[18px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
+              className={`relative w-full sm:w-auto inline-flex items-center justify-center overflow-hidden ${ACTION_RADIUS_CLASS} h-11 sm:h-12 px-6 sm:px-7 text-[17px] sm:text-[18px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
+              // White rather than the shared black CTA_FILL. This one sits on
+              // the light page rather than inside the dark quiz card, so it
+              // needs a hairline to hold its edge - a borderless white pill on
+              // a near-white ground has nothing to read against.
               style={{
-                background: CTA_FILL,
-                color: "#fff",
+                background: "#ffffff",
+                color: "#1a1a1a",
+                border: "1px solid rgb(var(--line))",
                 fontWeight: 450,
               }}
               {...inquiryCtaHover}
@@ -1565,6 +1740,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
           </span>
         )}
         </div>
+      </div>
       </div>
 
       {disclosed && (
@@ -3271,7 +3447,6 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTouchingRef = useRef(false);
-  const liveTouchRafRef = useRef<number | null>(null);
   const liveNearestRef = useRef<number | null>(null);
   const cardOffsetsRef = useRef<number[]>([]);
   const [isTouching, setIsTouching] = useState(false);
@@ -3285,6 +3460,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
+  const reducedMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -3336,57 +3512,166 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
     });
   };
 
-  const applyLiveCardScale = () => {
+  /* Liquid drag response. The earlier version recomputed each card's
+     transform straight from scrollLeft on every scroll event, with a linear
+     proximity ramp. That tracked the finger exactly, which is what made it
+     feel rigid: nothing lagged, nothing overshot, and the scale stopped dead
+     at the neighbour boundary.
+
+     Now scroll only sets a target. A spring integrates toward it every frame,
+     so cards trail the finger slightly, carry momentum past a fast flick, and
+     settle rather than stop. Velocity also shears the cards laterally - the
+     further from centre, the more it lags - which is what reads as the row
+     behaving like a liquid rather than a rail of tiles. */
+  const springRef = useRef({ value: 0, velocity: 0, target: 0 });
+  const flowRafRef = useRef<number | null>(null);
+  const lastFrameRef = useRef(0);
+
+  // Eased falloff, so influence fades out smoothly at the edge of a card's
+  // reach instead of hitting zero on a straight line. Cosine rather than a
+  // polynomial: it leaves and arrives flat, so a card at the boundary has no
+  // visible kink as it starts to lift.
+  const falloff = (d: number) => {
+    const t = Math.max(0, Math.min(1, d));
+    return 0.5 + 0.5 * Math.cos(Math.PI * t);
+  };
+
+  const paintCards = (springValue: number, velocity: number) => {
     const el = scrollRef.current;
     const cards = cardRefs.current;
     const offsets = cardOffsetsRef.current;
     if (!el || offsets.length === 0) return;
-    const scrollLeft = el.scrollLeft;
     const viewportCenter = el.clientWidth / 2;
     const slot = cards[0]?.getBoundingClientRect().width ?? 300;
+    // Normalised flick speed. Capped so a hard swipe distorts the row
+    // without tearing it apart.
+    const vNorm = Math.max(-1, Math.min(1, velocity / 1800));
     let nearest: number | null = null;
     let nearestDist = Infinity;
     cards.forEach((card, i) => {
       if (!card) return;
-      const cardCenter = (offsets[i] ?? 0) - scrollLeft + (card.clientWidth / 2);
+      const cardCenter = (offsets[i] ?? 0) - springValue + (card.clientWidth / 2);
       const dist = Math.abs(cardCenter - viewportCenter);
       if (dist < nearestDist) { nearestDist = dist; nearest = i; }
-      const proximity = Math.max(0, 1 - dist / slot);
-      const scale = 1 + 0.05 * proximity;
-      const translateY = 6 - 12 * proximity;
-      card.style.transform = `translateY(${translateY}px) scale(${scale})`;
-      card.style.boxShadow = proximity > 0.01 ? `0 ${3 * proximity}px ${12 * proximity}px 0px rgba(0,0,0,${0.10 * proximity})` : "none";
+      const proximity = falloff(dist / slot);
+
+      // Cards away from centre lag further behind the drag, so the row bends
+      // under speed and straightens as it settles.
+      const lagReach = Math.min(1, dist / (slot * 1.4));
+      const lag = -vNorm * 26 * lagReach;
+
+      // Under a fast flick the off-centre cards also sink and narrow a touch,
+      // so the row reads as stretching rather than sliding rigidly.
+      const stretch = Math.abs(vNorm) * lagReach;
+      const scale = 1 + 0.05 * proximity - 0.02 * stretch;
+      const translateY = 6 - 12 * proximity + 5 * stretch;
+
+      card.style.transform = `translate3d(${lag}px, ${translateY}px, 0) scale(${scale})`;
+      const shadow = proximity * (1 - 0.35 * Math.abs(vNorm));
+      card.style.boxShadow = shadow > 0.01
+        ? `0 ${4 * shadow}px ${16 * shadow}px 0px rgba(0,0,0,${0.11 * shadow})`
+        : "none";
     });
     liveNearestRef.current = nearest;
   };
 
+  /* Spring integration. Runs only while there is motion left to resolve, then
+     parks itself - an always-on rAF would keep the phone's compositor awake
+     for a static row. */
+  const runFlow = () => {
+    // Reduced motion: track scroll exactly, with no trail, shear, or
+    // overshoot. The proximity scale stays, since it is a static emphasis
+    // rather than motion for its own sake.
+    if (reducedMotion) {
+      const el = scrollRef.current;
+      if (el) paintCards(el.scrollLeft, 0);
+      return;
+    }
+    if (flowRafRef.current !== null) return;
+    lastFrameRef.current = performance.now();
+    const step = (now: number) => {
+      const spring = springRef.current;
+      // Clamped so a backgrounded tab resuming doesn't integrate one huge step.
+      const dt = Math.min(0.032, Math.max(0.001, (now - lastFrameRef.current) / 1000));
+      lastFrameRef.current = now;
+
+      // Near-critically damped: catches up quickly with just enough give to
+      // trail the finger and overshoot slightly on release.
+      const stiffness = 190;
+      const damping = 24;
+      const displacement = spring.target - spring.value;
+      spring.velocity += (displacement * stiffness - spring.velocity * damping) * dt;
+      spring.value += spring.velocity * dt;
+
+      paintCards(spring.value, spring.velocity);
+
+      if (Math.abs(displacement) < 0.15 && Math.abs(spring.velocity) < 12) {
+        spring.value = spring.target;
+        spring.velocity = 0;
+        paintCards(spring.value, 0);
+        flowRafRef.current = null;
+        return;
+      }
+      flowRafRef.current = requestAnimationFrame(step);
+    };
+    flowRafRef.current = requestAnimationFrame(step);
+  };
+
+  // Scroll no longer paints; it just moves the target the spring chases.
+  const applyLiveCardScale = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    springRef.current.target = el.scrollLeft;
+    runFlow();
+  };
+
+  // Jump straight to a position with no spring, for first paint and resize.
+  const snapFlowTo = (scrollLeft: number) => {
+    springRef.current.value = scrollLeft;
+    springRef.current.target = scrollLeft;
+    springRef.current.velocity = 0;
+    paintCards(scrollLeft, 0);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (flowRafRef.current !== null) cancelAnimationFrame(flowRafRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    let liveRaf: number | null = null;
     const onScroll = () => {
       setIsTouching(true);
-      if (liveRaf === null) {
-        liveRaf = requestAnimationFrame(() => {
-          liveRaf = null;
-          applyLiveCardScale();
-        });
-      }
+      applyLiveCardScale();
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+      // Longer than the old 20ms: the spring is usually still resolving when
+      // scrolling stops, and marking the row settled mid-flight cut the
+      // motion short.
       settleTimerRef.current = setTimeout(() => {
         setIsTouching(false);
         updateActiveCard();
-      }, 20);
+      }, 90);
     };
+    // Resize changes card geometry, so re-measure and land without a spring
+    // rather than animating from a stale position.
+    const onResize = () => {
+      measureCardOffsets();
+      snapFlowTo(el.scrollLeft);
+      updateActiveCard();
+    };
+    measureCardOffsets();
+    snapFlowTo(el.scrollLeft);
     updateActiveCard();
     el.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
     return () => {
       el.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-      if (liveRaf !== null) cancelAnimationFrame(liveRaf);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   const trackMinTranslate = () => {
@@ -3496,16 +3781,19 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
     setIsTouching(true);
   };
 
+  // The scroll listener already feeds the spring every frame, so touchmove
+  // only needs to keep the target fresh during the parts of a drag that
+  // don't emit scroll events (a finger held still at an overscroll edge).
   const onTouchMove = () => {
-    if (!isTouchingRef.current || liveTouchRafRef.current !== null) return;
-    liveTouchRafRef.current = requestAnimationFrame(() => {
-      liveTouchRafRef.current = null;
-      applyLiveCardScale();
-    });
+    if (!isTouchingRef.current) return;
+    applyLiveCardScale();
   };
 
   const onTouchEnd = () => {
     isTouchingRef.current = false;
+    // Let the spring keep resolving after the finger leaves, so release
+    // carries momentum instead of freezing at the lift point.
+    runFlow();
     if (liveNearestRef.current !== null) setActiveIndex(liveNearestRef.current);
   };
 
@@ -3580,7 +3868,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                         the space left above the panel. */}
                     <div
                       className="absolute inset-0"
-                      style={{ background: postTint(post.slug, post.tag) }}
+                      style={{ background: postTint(post.slug) }}
                     />
                     <div
                       className="absolute inset-x-0 top-0 flex items-center justify-center pointer-events-none"
@@ -3604,14 +3892,14 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                       }}
                     >
                       <p
-                        className="text-[21px] sm:text-[25px] tracking-[-0.028em] leading-tight text-balance"
+                        className="text-[16px] sm:text-[21px] tracking-[-0.028em] leading-tight text-balance"
                         style={{ color: "#1a1a1a" }}
                       >
                         {post.title}
                       </p>
                       {(post.subtitle || post.summary) && (
                         <p
-                          className="mt-2 text-[14.5px] sm:text-[15.5px] leading-snug tracking-[-0.035em] line-clamp-2"
+                          className="mt-2 text-[12.5px] sm:text-[14px] leading-snug tracking-[-0.035em] line-clamp-2"
                           style={{ color: "#5c5c5c" }}
                         >
                           {post.subtitle || post.summary}
@@ -3619,7 +3907,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                       )}
                       {post.tag && (
                         <span
-                          className="mt-auto pt-3 text-[12.5px] sm:text-[13px] tracking-tight"
+                          className="mt-auto pt-3 text-[11px] sm:text-[12.5px] tracking-tight"
                           style={{ color: "rgba(26,26,26,0.62)" }}
                         >
                           {post.tag}

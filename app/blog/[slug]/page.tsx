@@ -1,11 +1,13 @@
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { TOCInline } from "./toc";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
 import { PostGlyph, postTint } from "@/components/post-glyph";
+import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 import {
   getAllPosts,
   getPost,
@@ -16,23 +18,23 @@ import {
 } from "@/lib/posts";
 
 const BODY_CLASSES = `px-0 pt-10 pb-8 rise
-  text-[1.125rem] leading-[2.0] tracking-[0em] text-[rgb(var(--fg))]
+  text-[15px] sm:text-[19px] leading-[1.75] sm:leading-[1.85] tracking-[0em] text-[rgb(var(--fg))]
   space-y-8
   [&_p]:[text-wrap:pretty] [&_li]:[text-wrap:pretty] [&_blockquote]:[text-wrap:pretty]
   [&_h2]:[text-wrap:balance] [&_h3]:[text-wrap:balance]
-  [&_p:first-of-type]:text-[1.1875rem] [&_p:first-of-type]:leading-[1.85] [&_p:first-of-type]:text-[rgb(var(--fg))]
+  [&_p:first-of-type]:text-[16px] sm:[&_p:first-of-type]:text-[20px] [&_p:first-of-type]:leading-[1.7] sm:[&_p:first-of-type]:leading-[1.8] [&_p:first-of-type]:text-[rgb(var(--fg))]
   [&_a]:text-blue-500 [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-blue-500/40 [&_a]:transition-colors hover:[&_a]:text-blue-400 hover:[&_a]:decoration-blue-400
   [&_strong]:font-medium [&_strong]:text-[rgb(var(--fg))]
   [&_em]:not-italic [&_em]:text-[rgb(var(--fg))] [&_em]:font-medium
   [&_mark]:bg-transparent [&_mark]:text-[rgb(var(--fg))] [&_mark]:font-medium [&_mark]:border-b [&_mark]:border-[rgb(var(--fg))/0.25] [&_mark]:pb-px
   [&_code]:font-mono [&_code]:text-[0.875em] [&_code]:bg-[rgb(var(--line))/0.6] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded
   [&_pre]:bg-[rgb(var(--line))/0.4] [&_pre]:rounded-lg [&_pre]:p-5 [&_pre]:overflow-x-auto [&_pre]:text-[0.875em]
-  [&_blockquote]:border-l-[3px] [&_blockquote]:border-[rgb(var(--fg))/0.15] [&_blockquote]:pl-6 [&_blockquote]:text-[rgb(var(--muted))] [&_blockquote]:italic [&_blockquote]:text-[1.125rem]
+  [&_blockquote]:border-l-[3px] [&_blockquote]:border-[rgb(var(--fg))/0.15] [&_blockquote]:pl-6 [&_blockquote]:text-[rgb(var(--muted))] [&_blockquote]:italic [&_blockquote]:text-[15px] sm:[&_blockquote]:text-[19px]
   [&_ul]:list-none [&_ul]:space-y-2
   [&_ul_li]:relative [&_ul_li]:pl-4 [&_ul_li]:before:absolute [&_ul_li]:before:left-0 [&_ul_li]:before:top-[0.75em] [&_ul_li]:before:h-px [&_ul_li]:before:w-2.5 [&_ul_li]:before:bg-[rgb(var(--muted))] [&_ul_li]:before:opacity-30 [&_ul_li]:before:content-['']
   [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-2
-  [&_h2]:[font-family:'Satoshi',sans-serif] [&_h2]:text-[1.5rem] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:mt-16 [&_h2]:mb-4 [&_h2]:scroll-mt-24 [&_h2]:text-[rgb(var(--fg))]
-  [&_h3]:[font-family:'Satoshi',sans-serif] [&_h3]:text-[1.1875rem] [&_h3]:font-medium [&_h3]:tracking-tight [&_h3]:mt-10 [&_h3]:mb-3 [&_h3]:scroll-mt-24
+  [&_h2]:[font-family:'Satoshi',sans-serif] [&_h2]:text-[19px] sm:[&_h2]:text-[25px] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:mt-16 [&_h2]:mb-4 [&_h2]:scroll-mt-24 [&_h2]:text-[rgb(var(--fg))]
+  [&_h3]:[font-family:'Satoshi',sans-serif] [&_h3]:text-[16px] sm:[&_h3]:text-[20px] [&_h3]:font-medium [&_h3]:tracking-tight [&_h3]:mt-10 [&_h3]:mb-3 [&_h3]:scroll-mt-24
   [&_hr]:border-none [&_hr]:h-px [&_hr]:bg-[rgb(var(--line))] [&_hr]:my-14
   [&_table]:w-full [&_table]:text-[1rem] [&_th]:text-left [&_th]:pb-2 [&_th]:border-b [&_th]:border-[rgb(var(--line))] [&_th]:font-medium [&_td]:py-2 [&_td]:border-b [&_td]:border-[rgb(var(--line))/0.5]`;
 
@@ -188,22 +190,44 @@ export default async function BlogPost({
 
         {/* Header */}
         <header className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
-          <h1 className="text-[clamp(2rem,4.5vw,3.25rem)] font-medium tracking-[-0.04em] leading-[1.05] text-[rgb(var(--fg))] mb-5 [text-wrap:balance]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+          {/* clamp in px, not rem: the root is 15px, so rem values here read
+              15/16ths of their number and made the scale hard to reason about
+              against the index's px sizes. */}
+          <h1 className="text-[clamp(26px,4.4vw,46px)] font-medium tracking-[-0.04em] leading-[1.08] text-[rgb(var(--fg))] mb-4 [text-wrap:balance]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
             {post.title}
           </h1>
 
           {post.subtitle && (
-            <p className="text-[1.0625rem] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mb-8 [text-wrap:pretty]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+            <p className="text-[14px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mb-7 [text-wrap:pretty]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
               {post.subtitle}
             </p>
           )}
 
-          <div className="flex items-center justify-between pt-5 border-t border-[rgb(var(--line))]">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-[rgb(var(--surface))] border border-[rgb(var(--line))] flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-[rgb(var(--muted))]" aria-hidden="true">
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
-                </svg>
+          {/* Dashed hairline between the subtitle and the byline. Drawn as a
+              background gradient rather than border-top: a 1px dashed border
+              renders as chunky 3px-on-3px segments with no way to tune them,
+              where a repeating gradient lets the dash and gap be set
+              independently and stay fine at this weight. */}
+          <div
+            className="flex items-center justify-between pt-5 bg-no-repeat bg-top"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(to right, rgb(var(--line)) 0 4px, transparent 4px 8px)",
+              backgroundSize: "100% 1px",
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full border border-[rgb(var(--line))] overflow-hidden shrink-0">
+                {/* Source is a 1000x1000 square, so the portrait fills the
+                    circle without a crop hint. Served at 2x for retina. */}
+                <Image
+                  src="/blog/author-jacob.png"
+                  alt="Jacob Collado"
+                  width={88}
+                  height={88}
+                  quality={75}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]">Jacob Collado</span>
@@ -228,7 +252,7 @@ export default async function BlogPost({
             className="w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] flex items-center justify-center"
             style={{
               aspectRatio: "1200/630",
-              background: postTint(slug, post.tag),
+              background: postTint(slug),
             }}
           >
             <PostGlyph slug={slug} tag={post.tag} className="w-28 h-28 sm:w-36 sm:h-36" />
@@ -240,8 +264,23 @@ export default async function BlogPost({
 
         <Highlighter slug={slug} />
 
-        <div className="px-0 pt-6 pb-20 border-t border-[rgb(var(--line))]">
-          <Link href="/" className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors">
+        {/* Same dashed hairline as the byline rule above, drawn the same way
+            and with matching dash/gap so the page opens and closes on the
+            same mark. */}
+        <div
+          className="px-0 pt-6 pb-20 bg-no-repeat bg-top"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(to right, rgb(var(--line)) 0 4px, transparent 4px 8px)",
+            backgroundSize: "100% 1px",
+          }}
+        >
+          {/* inline-flex, not block: the pill should hug the label rather
+              than stretch the full column width. */}
+          <Link
+            href="/"
+            className={`inline-flex items-center ${ACTION_RADIUS_CLASS} px-3.5 py-2 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[rgb(var(--surface))] border border-[rgb(var(--line))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.2] transition-colors`}
+          >
             Back home
           </Link>
         </div>

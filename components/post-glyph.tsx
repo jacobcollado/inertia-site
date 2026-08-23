@@ -2,48 +2,34 @@
    has exactly one mark and the card the reader clicked is the header they
    land on. Pure SVG with no hooks, so it renders fine in a server component. */
 
-/* Panel tint per post. One hue per tag, constant saturation across all
-   eight, and only lightness stepping within a family. Holding chroma even is
-   what makes the set read as one palette: the earlier version let the greens
-   sit near-colourless while the sands were four times more saturated, so the
-   families looked like they came from different systems.
+/* Panel tint per post. The hero heading's selection-frame blue (#6bb8ef,
+   hue 205) is still the anchor, but half the set now sits opposite it - amber,
+   sand, clay, rose - so the carousel alternates warm and cool instead of
+   reading as one blue wash. An all-blue palette kept the cards related at the
+   cost of telling them apart; the warm tones are the contrast, the cool ones
+   keep the frame's colour leading.
 
-   Hues are picked to survive being this pale. A low-chroma green goes muddy,
-   so Standards uses a teal-slate at 168 instead; Infrastructure a periwinkle
-   at 222; Practice a warm clay at 28. Within each family the lightest tone
-   goes to the most recent post. */
+   Assignments follow the carousel's real order (newest-first, then
+   interleaved by tag) rather than this file's order, so warm and cool land
+   alternately on screen. Each post owns its tone; a tag no longer implies
+   a colour. */
 export const POST_TINT: Record<string, string> = {
-  // Standards — teal-slate, hue 168
-  "the-invisible-details": "#dcece9",
-  "copy-is-design": "#cfe5e1",
-  "consistency-beats-novelty": "#c2ded8",
-
-  // Infrastructure — periwinkle, hue 222
-  "speed-is-a-feature": "#dce1ec",
-  "design-systems-that-scale": "#ccd3e3",
-
-  // Practice — warm clay, hue 28
-  "taste-is-trained": "#ece4dc",
-  "the-brief-is-the-product": "#e5d9cf",
-  "judgment-over-output": "#decfc2",
+  // Carousel order: cool, warm, cool, warm ...
+  "taste-is-trained": "#a9cce5",          // frame blue
+  "the-invisible-details": "#efd9c2",     // amber
+  "speed-is-a-feature": "#b3e0e6",        // cyan
+  "the-brief-is-the-product": "#eccfc6",  // clay
+  "copy-is-design": "#c9e3ee",            // pale blue
+  "design-systems-that-scale": "#e8c9d2", // rose
+  "judgment-over-output": "#bac6e8",      // periwinkle
+  "consistency-beats-novelty": "#e5dcc4", // sand
 };
 
-/* Fallback by tag, for a post with no tone of its own yet. Sits at the
-   middle step of each family. */
-export const TAG_TINT: Record<string, string> = {
-  standards: "#cfe5e1",
-  infrastructure: "#dce1ec",
-  practice: "#e5d9cf",
-};
-
-/* The tone a post's card and header should use. Per-post first, then its
-   tag's family, then a neutral. */
-export function postTint(slug?: string, tag?: string): string {
-  return (
-    (slug ? POST_TINT[slug] : undefined) ??
-    TAG_TINT[(tag ?? "").toLowerCase()] ??
-    "#eaeae7"
-  );
+/* The tone a post's card and header should use. There is no tag-level
+   fallback any more - a tag no longer implies a colour - so a post with no
+   step of its own gets a neutral blue until it is given one above. */
+export function postTint(slug?: string): string {
+  return (slug ? POST_TINT[slug] : undefined) ?? "#dfe6ec";
 }
 
 /* ── Post glyphs ─────────────────────────────────────────
