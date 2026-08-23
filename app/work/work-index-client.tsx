@@ -222,12 +222,12 @@ function WorkDialog({
           {/* Meta row: service + year/status */}
           <div className="flex items-center gap-2.5 flex-wrap mt-4">
             {work.service && (
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--fg) / 0.06)" }}>
+              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none">
                 {serviceShort(work.service)}
               </span>
             )}
             {(status || yearLabel) && (
-              <span className="text-[11px] tabular-nums tracking-tight rounded-full px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))" }}>
+              <span className="text-[11px] tabular-nums tracking-tight rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))" }}>
                 {status && yearLabel ? `${status} - ${yearLabel}` : status || yearLabel}
               </span>
             )}
@@ -408,8 +408,8 @@ function WorkCard({
           </span>
           {work.service && (
             <span
-              className="text-[12px] tracking-tight shrink-0 rounded-full px-2.5 pt-[3px] pb-[4px] leading-none"
-              style={{ background: "rgb(110 110 110)", color: "rgba(255,255,255,0.92)" }}
+              className="text-[12px] tracking-tight shrink-0 rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none"
+              style={{ background: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.92)" }}
             >
               {serviceShort(work.service)}
             </span>

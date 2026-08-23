@@ -228,7 +228,7 @@ function DashboardModal({ open, onClose }: { open: boolean; onClose: () => void 
                     key={key}
                     type="button"
                     onClick={() => setPlan(key)}
-                    className="flex flex-col gap-1 p-3.5 border text-left transition-all duration-150 rounded-sm"
+                    className="flex flex-col gap-1 p-3.5 border text-left transition-all duration-150 rounded-[6px]"
                     style={{
                       borderColor: plan === key ? accent : "rgb(var(--line))",
                       background: plan === key ? "rgb(var(--blue)/0.07)" : "transparent",
@@ -724,150 +724,6 @@ const NUDGE_ARROW = {
   shaftDash: 36,
   headDash: 19,
 };
-
-// Hot-pink hand-drawn nudge beside the Begin button, built from the same
-// vocabulary as CtaNudgeBubble above: uneven loop, marker font, shaft inked
-// before the head. Sits to the RIGHT of the button and points back left at it.
-// Pastel rather than a saturated hot pink: same hue, chroma pulled back and
-// lightness raised, so the aside reads as a soft margin note beside the CTA
-// instead of competing with it.
-const BEGIN_NUDGE_COLOR = "#fa89ba";
-
-/* Two things keep this reading as pen rather than vector. The loop is drawn
-   as five cubics with deliberately mismatched control points, so no two sides
-   bow the same way and the top-left arc is flatter than the bottom-right one;
-   and it overshoots where it closes, crossing back over its own start the way
-   a circled word does. The whole mark is then rotated a couple of degrees off
-   axis - a perfectly level hand-drawn loop reads as a shape, not a scribble. */
-const BEGIN_NUDGE_ARROW = {
-  // Leaves the bubble's lower-left and hooks back toward the button on its
-  // left; tip lands level with the button's middle. The slight S in the shaft
-  // is the wrist moving, not a straight ruled line.
-  shaft: "M44 58 C 33 68, 17 66, 4 57",
-  // Two strokes off the tip, uneven lengths, as a real arrowhead is inked.
-  head: "M14 57.5 L 4 57 L 8.5 66.5",
-  shaftDash: 44,
-  headDash: 21,
-};
-
-// Measured length of the loop path below; re-measure if the path changes, or
-// the stroke starts out part-painted.
-const BEGIN_NUDGE_DASH = 342;
-
-function BeginNudgeBubble({ show }: { show: boolean }) {
-  const reduced = useReducedMotion() ?? false;
-  const DASH = BEGIN_NUDGE_DASH;
-  const arrow = BEGIN_NUDGE_ARROW;
-
-  return (
-    <span
-      aria-hidden="true"
-      // Sits in the open margin to the right of the card, so unlike the
-      // in-gap placement it has room at full size. Hidden below lg, where
-      // that margin closes up and the card runs to the viewport edge.
-      className="pointer-events-none absolute left-full top-1/2 hidden lg:block"
-      style={{
-        marginLeft: 12,
-        // Rotated off axis: a perfectly level loop reads as a drawn shape
-        // rather than something scrawled in the margin.
-        transform: "translateY(-52%) rotate(-2.4deg)",
-        opacity: show ? 1 : 0,
-        transition: reduced ? "none" : `opacity 260ms ${HERO_LIQUID_EASE}`,
-      }}
-    >
-      <svg
-        width="182"
-        height="88"
-        viewBox="0 0 182 88"
-        fill="none"
-        style={{ overflow: "visible", display: "block" }}
-      >
-        {/* Shaft: leaves the bubble's lower-left and hooks toward Begin. */}
-        <path
-          d={arrow.shaft}
-          stroke={BEGIN_NUDGE_COLOR}
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          style={{
-            strokeDasharray: arrow.shaftDash,
-            strokeDashoffset: show || reduced ? 0 : arrow.shaftDash,
-            transition: reduced
-              ? "none"
-              : `stroke-dashoffset ${ARROW_DRAW_MS}ms ${HERO_LIQUID_EASE}`,
-          }}
-        />
-        {/* Head: one stroke through the tip so it inks with the shaft. */}
-        <path
-          d={arrow.head}
-          stroke={BEGIN_NUDGE_COLOR}
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          style={{
-            strokeDasharray: arrow.headDash,
-            strokeDashoffset: show || reduced ? 0 : arrow.headDash,
-            transition: reduced
-              ? "none"
-              : `stroke-dashoffset ${ARROWHEAD_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.85}ms`,
-          }}
-        />
-        {/* Uneven loop that overshoots where it closes, like a drawn circle. */}
-        <path
-          d="M40 48
-             C 33 25, 60 11, 96 12
-             C 139 13, 170 21, 172 42
-             C 174 64, 140 76, 100 75
-             C 62 74, 40 66, 38 50
-             C 37 45, 40 39, 44 35"
-          stroke={BEGIN_NUDGE_COLOR}
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill="none"
-          style={{
-            strokeDasharray: DASH,
-            strokeDashoffset: show || reduced ? 0 : DASH,
-            transition: reduced
-              ? "none"
-              : `stroke-dashoffset ${NUDGE_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55}ms`,
-          }}
-        />
-      </svg>
-      <span
-        // Positioned against the loop's own bounds (x 38-174, y 12-76 in the
-        // 182x88 box), not the SVG box, which the arrow tail makes wider on
-        // the left. Insetting to the loop is what keeps the two lines sitting
-        // centred inside the circle with clear space on every side.
-        className="absolute flex items-center justify-center"
-        style={{
-          left: 38,
-          top: 12,
-          width: 136,
-          height: 64,
-          color: BEGIN_NUDGE_COLOR,
-          fontFamily: '"Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
-          fontSize: 15,
-          lineHeight: 1.2,
-          letterSpacing: "0.01em",
-          textAlign: "center",
-          // Counter-rotates part of the wrapper's tilt, so the words sit a
-          // touch off-axis from the loop rather than perfectly parallel to it.
-          transform: "rotate(-1.2deg)",
-          opacity: show || reduced ? 1 : 0,
-          transition: reduced
-            ? "none"
-            : `opacity ${NUDGE_TEXT_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55 + NUDGE_DRAW_MS * 0.65}ms`,
-        }}
-      >
-        we don&rsquo;t bite,
-        <br />
-        say hi
-      </span>
-    </span>
-  );
-}
 
 function CtaNudgeBubble({ show }: { show: boolean }) {
   const reduced = useReducedMotion() ?? false;
@@ -1492,29 +1348,6 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   const intakeRef = useRef<HTMLDivElement>(null);
   const inquiryBorderRef = useRef<HTMLDivElement>(null);
 
-  /* The hero's nudge fires off a timer because it is on screen at load. This
-     card sits well below the fold, so a timer would ink it unseen; it waits
-     for the card to scroll into view instead, then holds a beat so the arrow
-     draws after the card has settled rather than during its reveal. */
-  const [beginNudgeShown, setBeginNudgeShown] = useState(false);
-  useEffect(() => {
-    const el = inquiryBorderRef.current;
-    if (!el) return;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        obs.disconnect();
-        timer = setTimeout(() => setBeginNudgeShown(true), 420);
-      },
-      { threshold: 0.35 },
-    );
-    obs.observe(el);
-    return () => {
-      obs.disconnect();
-      if (timer) clearTimeout(timer);
-    };
-  }, []);
   const flowRevealRef = useLiquidReveal(disclosed, 60);
   const transcriptRevealRef = useLiquidReveal(disclosed && stage !== "quiz");
   const typingRevealRef = useLiquidReveal(stage === "typing");
@@ -1686,11 +1519,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
   return (
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      {/* Wrapper exists purely to anchor the nudge: the card itself clips its
-          overflow (for the border's scale-on-hover), so a bubble parented to
-          the button inside would be cut off at the card's edge. */}
       <div className="relative max-w-3xl mx-auto">
-      {!disclosed && <BeginNudgeBubble show={beginNudgeShown} />}
       <div
         ref={inquiryBorderRef}
         className={`relative overflow-hidden origin-center rounded-2xl border border-dashed border-[rgb(var(--line))] py-8 sm:py-10 px-6 sm:px-10 ${LIQUID_REVEAL}`}
@@ -1761,9 +1590,13 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         >
         {stage !== "quiz" && (
           <div ref={transcriptRevealRef} className={`flex justify-end ${LIQUID_REVEAL}`}>
+            {/* --sh-muted, not --sh-card: the card token is pure white in
+                light mode, which made this read as a lit panel rather than a
+                quiet transcript. Muted is the neutral step and resolves
+                correctly in both themes. */}
             <div
               className="max-w-[85%] sm:max-w-[80%] rounded-3xl px-5 py-5 sm:px-6 sm:py-6 flex flex-col gap-4"
-              style={{ background: "var(--sh-card)" }}
+              style={{ background: "var(--sh-muted)" }}
             >
               {transcript.map((t) => (
                 <div key={t.question}>
@@ -2136,7 +1969,7 @@ function WorkScrollGallery({ onActiveAccent }: { onActiveAccent?: (color: string
 function Pill({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline rounded-full px-[0.4em] py-px whitespace-nowrap align-baseline leading-none"
+      className="inline rounded-[6px] px-[0.4em] py-px whitespace-nowrap align-baseline leading-none"
       style={{
         background: "rgba(26,26,26,0.06)",
         color: "inherit",
@@ -2570,7 +2403,13 @@ function ClientDialog({
   // out) on release.
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const dragRef = useRef<{ startY: number; active: boolean } | null>(null);
+  // Mirrors dragY for the touch handlers: touchend needs the latest offset
+  // synchronously, and reading the state variable there would close over the
+  // value from the render that installed the handler.
+  const dragYRef = useRef(0);
+  const dragRef = useRef<{ startY: number; startX: number; active: boolean } | null>(null);
+  // Single writer for the offset, so the ref can never drift from the state.
+  const applyDragY = (v: number) => { dragYRef.current = v; setDragY(v); };
   // The portal target only exists on the client. Gating on `typeof document`
   // renders null on the server but a real portal on the very first client
   // render, which is a hydration mismatch — so gate on an effect instead, and
@@ -2581,37 +2420,70 @@ function ClientDialog({
   // Reset the sheet position whenever it reopens, so a previous swipe doesn't
   // leave the next open offset.
   useEffect(() => {
-    if (open) { setDragY(0); setDragging(false); dragRef.current = null; }
+    if (open) { applyDragY(0); setDragging(false); dragRef.current = null; }
   }, [open]);
 
   const CLOSE_THRESHOLD = 110;
+  // Finger has to travel this far down before the touch is treated as a
+  // dismiss drag at all. Below it the gesture stays a candidate: nothing
+  // moves, no transform is written, and a tap on a link or button inside the
+  // sheet behaves like a plain tap. Without this, touchstart alone armed the
+  // drag, so every press read as "about to close".
+  const DRAG_SLOP = 8;
+  // Past the slop, a gesture is only a dismiss if it is mostly vertical.
+  // A mostly-horizontal swipe keeps the sheet still.
+  const DIRECTION_RATIO = 1.2;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    // Only start a dismiss drag from the top of the scroll area — otherwise a
-    // normal upward scroll inside the panel would read as a dismiss.
+    // Only a drag that begins at the very top of the scroll area can dismiss;
+    // otherwise a normal upward scroll inside the panel would read as one.
     if ((panelRef.current?.scrollTop ?? 0) > 0) return;
-    dragRef.current = { startY: e.touches[0].clientY, active: true };
-    setDragging(true);
+    const t = e.touches[0];
+    // `active` starts false: this is a candidate, not yet a drag. It is
+    // promoted in touchmove once the finger clears the slop downward.
+    dragRef.current = { startY: t.clientY, startX: t.clientX, active: false };
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
     const d = dragRef.current;
-    if (!d?.active) return;
-    const delta = e.touches[0].clientY - d.startY;
-    // Downward only; resist upward pull so the sheet can't be dragged past its
-    // docked position.
-    setDragY(delta > 0 ? delta : delta * 0.2);
+    if (!d) return;
+    const t = e.touches[0];
+    const delta = t.clientY - d.startY;
+
+    if (!d.active) {
+      const absY = Math.abs(delta);
+      const absX = Math.abs(t.clientX - d.startX);
+      // Not moved enough yet — stay a tap.
+      if (absY < DRAG_SLOP) return;
+      // Moved, but sideways or upward: this gesture is not a dismiss. Drop the
+      // candidate so the rest of the touch is left alone.
+      if (delta < 0 || absY < absX * DIRECTION_RATIO) {
+        dragRef.current = null;
+        return;
+      }
+      d.active = true;
+      setDragging(true);
+    }
+
+    // Measure from where the drag was promoted, not from touchstart, so the
+    // sheet does not jump by DRAG_SLOP the moment it engages.
+    const dragDelta = delta - DRAG_SLOP;
+    applyDragY(dragDelta > 0 ? dragDelta : dragDelta * 0.2);
   };
 
   const onTouchEnd = () => {
     const d = dragRef.current;
     dragRef.current = null;
-    setDragging(false);
+    // Never became a real drag (a tap, or a sideways swipe): leave the sheet
+    // exactly as it was rather than running a settle animation.
     if (!d?.active) return;
-    setDragY((y) => {
-      if (y > CLOSE_THRESHOLD) { onClose(); return 0; }
-      return 0;
-    });
+    setDragging(false);
+    // Read the committed offset rather than deciding inside a setDragY
+    // updater. React treats updaters as pure and may run them during render,
+    // so calling onClose() in there sets state on the parent mid-render
+    // ("Cannot update a component while rendering a different component").
+    if (dragYRef.current > CLOSE_THRESHOLD) onClose();
+    applyDragY(0);
   };
 
   useEffect(() => {
@@ -2669,8 +2541,21 @@ function ClientDialog({
               ? "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both"
               : "none",
             transform: dragY !== 0 ? `translateY(${dragY}px)` : undefined,
-            transition: dragging ? "none" : "transform 320ms cubic-bezier(0.22,1,0.36,1)",
+            // While the finger is down the sheet tracks it 1:1 with no
+            // transition. On release it springs back with a softer, slightly
+            // longer curve than the open animation, so letting go reads as the
+            // sheet settling rather than snapping.
+            transition: dragging
+              ? "none"
+              : "transform 420ms cubic-bezier(0.22,1,0.36,1)",
+            // pan-y alone still let the browser claim the gesture mid-drag on
+            // some Android builds. The sheet handles its own vertical drag and
+            // scrolls its own content, so opt out of browser gestures here.
             touchAction: "pan-y",
+            // Dragging a sheet should never start a text selection or a
+            // long-press callout under the finger.
+            WebkitUserSelect: dragging ? "none" : undefined,
+            userSelect: dragging ? "none" : undefined,
           }}
         >
           <div className="sm:hidden flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
@@ -2717,7 +2602,7 @@ function ClientDialog({
               <div className="mt-3 flex items-center gap-2 text-[13px] tracking-tight">
                 {item.service && (
                   <span
-                    className="inline-flex items-center rounded-full px-2.5 py-1 leading-none"
+                    className="inline-flex items-center rounded-[6px] px-2.5 py-1 leading-none"
                     style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" }}
                   >
                     {item.service}
@@ -3908,12 +3793,18 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                           {post.subtitle || post.summary}
                         </p>
                       )}
+                      {/* Tag sits in its own neutral pill, matching the 6px
+                          radius used for the service pills on /work. The panel
+                          behind it is near-white, so the pill is a grey step
+                          up from it rather than a tint of the card's colour. */}
                       {post.tag && (
-                        <span
-                          className="mt-auto pt-3 text-[11px] sm:text-[12.5px] tracking-tight"
-                          style={{ color: "rgba(26,26,26,0.62)" }}
-                        >
-                          {post.tag}
+                        <span className="mt-auto pt-3">
+                          <span
+                            className="inline-block rounded-[6px] px-2 pt-[3px] pb-[4px] text-[11px] sm:text-[12.5px] leading-none tracking-tight"
+                            style={{ background: "rgba(26,26,26,0.07)", color: "rgba(26,26,26,0.68)" }}
+                          >
+                            {post.tag}
+                          </span>
                         </span>
                       )}
                     </div>

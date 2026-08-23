@@ -2,34 +2,39 @@
    has exactly one mark and the card the reader clicked is the header they
    land on. Pure SVG with no hooks, so it renders fine in a server component. */
 
-/* Panel tint per post. The hero heading's selection-frame blue (#6bb8ef,
-   hue 205) is still the anchor, but half the set now sits opposite it - amber,
-   sand, clay, rose - so the carousel alternates warm and cool instead of
-   reading as one blue wash. An all-blue palette kept the cards related at the
-   cost of telling them apart; the warm tones are the contrast, the cool ones
-   keep the frame's colour leading.
+/* Panel tint per post. Eight distinct hue families - blue, orange, green,
+   pink, cyan, gold, violet, olive - spaced roughly 45 degrees apart around
+   the wheel so no two posts read as versions of one colour. The earlier set
+   was really four close pairs (two blues, two warms), which is what made the
+   cards blur together.
 
-   Assignments follow the carousel's real order (newest-first, then
-   interleaved by tag) rather than this file's order, so warm and cool land
-   alternately on screen. Each post owns its tone; a tag no longer implies
-   a colour. */
+   Listed in the carousel's real order, which is strictly newest-first (see
+   getAllPosts in lib/posts.ts - pinned first, then date descending; nothing
+   is pinned today). Order matters: the sequence is arranged so every
+   neighbouring pair jumps at least 126 degrees, so adjacent cards contrast
+   rather than merely differ. Adding a post at a new date shifts that
+   adjacency, so re-check the spacing when one lands mid-list.
+
+   Tones sit around 58-66% lightness: deep enough to read as the card's own
+   colour against the near-white type panel, light enough for the glyph's
+   dark strokes to hold. */
 export const POST_TINT: Record<string, string> = {
-  // Carousel order: cool, warm, cool, warm ...
-  "taste-is-trained": "#a9cce5",          // frame blue
-  "the-invisible-details": "#efd9c2",     // amber
-  "speed-is-a-feature": "#b3e0e6",        // cyan
-  "the-brief-is-the-product": "#eccfc6",  // clay
-  "copy-is-design": "#c9e3ee",            // pale blue
-  "design-systems-that-scale": "#e8c9d2", // rose
-  "judgment-over-output": "#bac6e8",      // periwinkle
-  "consistency-beats-novelty": "#e5dcc4", // sand
+  "taste-is-trained": "#6eacd8",          // blue    h205
+  "the-brief-is-the-product": "#db9566",  // orange  h24
+  "judgment-over-output": "#6ec499",      // green   h150
+  "the-invisible-details": "#d57ba8",     // pink    h330
+  "speed-is-a-feature": "#70c3cd",        // cyan    h186
+  "copy-is-design": "#d8be6e",            // gold    h45
+  "consistency-beats-novelty": "#9e82ce", // violet  h262
+  "design-systems-that-scale": "#8cbd6b", // olive   h96
 };
-
 /* The tone a post's card and header should use. There is no tag-level
    fallback any more - a tag no longer implies a colour - so a post with no
-   step of its own gets a neutral blue until it is given one above. */
+   tone of its own gets a desaturated grey. That grey is deliberately outside
+   the eight hue families above: an unassigned post should look unassigned
+   rather than borrow another post's identity. */
 export function postTint(slug?: string): string {
-  return (slug ? POST_TINT[slug] : undefined) ?? "#dfe6ec";
+  return (slug ? POST_TINT[slug] : undefined) ?? "#b0b3b8";
 }
 
 /* ── Post glyphs ─────────────────────────────────────────
@@ -51,12 +56,12 @@ export function PostGlyph({
   tag?: string;
   className?: string;
 }) {
-  const stroke = "rgba(26,26,26,0.30)";
+  const stroke = "rgba(26,26,26,0.46)";
   const common = {
     viewBox: "0 0 64 64",
     fill: "none" as const,
     stroke,
-    strokeWidth: 1.25,
+    strokeWidth: 1.6,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
     className,
@@ -64,101 +69,105 @@ export function PostGlyph({
   };
 
   switch (slug) {
-    // Ten identical frames on a strict grid, every one the same. The tenth
-    // page matching the first is literally the argument.
+    // A steady grid of frames with one deliberately, visibly identical to the
+    // rest. The regularity is the argument, so the mark is a regular field.
     case "consistency-beats-novelty":
       return (
         <svg {...common}>
-          {[0, 1, 2, 3, 4].map((c) => (
-            <rect key={`a${c}`} x={9 + c * 10} y="22" width="7" height="9" rx="1.5" />
-          ))}
-          {[0, 1, 2, 3, 4].map((c) => (
-            <rect key={`b${c}`} x={9 + c * 10} y="35" width="7" height="9" rx="1.5" />
-          ))}
+          {[0, 1, 2].map((r) =>
+            [0, 1, 2].map((c) => (
+              <rect
+                key={`${r}-${c}`}
+                x={14 + c * 13}
+                y={14 + r * 13}
+                width="10"
+                height="10"
+                rx="2"
+                strokeOpacity={0.85}
+              />
+            )),
+          )}
         </svg>
       );
 
     // Lines of copy that draw the page's own margins: the writing is doing
     // the layout work, so it forms the frame instead of sitting inside one.
+    // Heavier rules, fewer of them, so the block reads as type at 96px.
     case "copy-is-design":
       return (
         <svg {...common}>
-          <line x1="16" y1="18" x2="48" y2="18" />
-          <line x1="16" y1="25" x2="48" y2="25" />
-          <line x1="16" y1="32" x2="40" y2="32" />
-          <line x1="16" y1="39" x2="48" y2="39" />
-          <line x1="16" y1="46" x2="34" y2="46" />
-          <line x1="11" y1="14" x2="11" y2="50" strokeOpacity={0.45} />
-          <line x1="53" y1="14" x2="53" y2="50" strokeOpacity={0.45} />
+          <line x1="18" y1="20" x2="46" y2="20" />
+          <line x1="18" y1="28" x2="46" y2="28" />
+          <line x1="18" y1="36" x2="38" y2="36" />
+          <line x1="18" y1="44" x2="46" y2="44" />
+          <line x1="12" y1="14" x2="12" y2="50" strokeOpacity={0.5} />
+          <line x1="52" y1="14" x2="52" y2="50" strokeOpacity={0.5} />
         </svg>
       );
 
-    // One module repeated outward at increasing scale: the system keeps its
-    // proportion as it grows, which is the only real test of a system.
+    // One module holding its proportion as it grows: three nested steps
+    // stepping out from a single corner, so growth reads as scale, not sprawl.
     case "design-systems-that-scale":
       return (
         <svg {...common}>
-          <rect x="12" y="34" width="12" height="12" rx="1.5" />
-          <rect x="27" y="27" width="19" height="19" rx="2" strokeOpacity={0.7} />
-          <rect x="27" y="12" width="19" height="12" rx="2" strokeOpacity={0.45} />
-          <rect x="12" y="20" width="12" height="11" rx="1.5" strokeOpacity={0.45} />
+          <rect x="14" y="34" width="16" height="16" rx="2.5" />
+          <rect x="14" y="22" width="28" height="28" rx="3" strokeOpacity={0.62} />
+          <rect x="14" y="14" width="36" height="36" rx="3.5" strokeOpacity={0.38} />
         </svg>
       );
 
-    // Many candidates on the table, one selected and ringed. The rest are
-    // equally well made and simply not shipped.
+    // Many candidates, one chosen. The unpicked options stay light and the
+    // selected one is ringed and solid: the choice is the whole mark.
     case "judgment-over-output":
       return (
         <svg {...common}>
-          {[0, 1, 2, 3].map((c) => (
-            <rect key={`t${c}`} x={12 + c * 11} y="16" width="8" height="8" rx="1.5" strokeOpacity={0.4} />
-          ))}
-          {[0, 1, 2, 3].map((c) => (
-            <rect key={`m${c}`} x={12 + c * 11} y="28" width="8" height="8" rx="1.5" strokeOpacity={0.4} />
-          ))}
-          <rect x="23" y="40" width="8" height="8" rx="1.5" />
-          <rect x="19.5" y="36.5" width="15" height="15" rx="3" strokeOpacity={0.55} />
+          <circle cx="18" cy="20" r="4.5" strokeOpacity={0.32} />
+          <circle cx="32" cy="20" r="4.5" strokeOpacity={0.32} />
+          <circle cx="46" cy="20" r="4.5" strokeOpacity={0.32} />
+          <circle cx="18" cy="34" r="4.5" strokeOpacity={0.32} />
+          <circle cx="46" cy="34" r="4.5" strokeOpacity={0.32} />
+          <circle cx="32" cy="38" r="7" />
+          <circle cx="32" cy="38" r="2.4" fill={stroke} stroke="none" />
         </svg>
       );
 
-    // Load times collapsing bar by bar to almost nothing, the fastest one
-    // carried to a marker. Speed as a measured result, not a side effect.
+    // Load times collapsing to almost nothing. Fewer, heavier bars with a
+    // clear descending silhouette, so it reads as a fall rather than hatching.
     case "speed-is-a-feature":
       return (
         <svg {...common}>
-          <line x1="12" y1="48" x2="52" y2="48" strokeOpacity={0.45} />
-          <line x1="17" y1="48" x2="17" y2="20" strokeOpacity={0.35} />
-          <line x1="25" y1="48" x2="25" y2="27" strokeOpacity={0.45} />
-          <line x1="33" y1="48" x2="33" y2="34" strokeOpacity={0.6} />
-          <line x1="41" y1="48" x2="41" y2="41" strokeOpacity={0.8} />
-          <line x1="49" y1="48" x2="49" y2="45" />
-          <circle cx="49" cy="43" r="1.9" fill={stroke} stroke="none" />
+          <line x1="11" y1="50" x2="53" y2="50" strokeOpacity={0.5} />
+          <line x1="17" y1="50" x2="17" y2="16" strokeOpacity={0.5} />
+          <line x1="26" y1="50" x2="26" y2="27" strokeOpacity={0.68} />
+          <line x1="35" y1="50" x2="35" y2="35" strokeOpacity={0.85} />
+          <line x1="44" y1="50" x2="44" y2="42" />
+          <circle cx="44" cy="38.5" r="2.4" fill={stroke} stroke="none" />
         </svg>
       );
 
-    // The same judgment made over and over, tightening each pass, converging
-    // on a centre rather than arriving there by instinct.
+    // The same judgment made repeatedly, converging on a centre. Concentric
+    // frames tightening inward, the innermost solid: arrival by repetition.
     case "taste-is-trained":
       return (
         <svg {...common}>
-          <rect x="10" y="10" width="44" height="44" rx="2.5" strokeOpacity={0.3} />
-          <rect x="16" y="16" width="32" height="32" rx="2.5" strokeOpacity={0.5} />
-          <rect x="22" y="22" width="20" height="20" rx="2" strokeOpacity={0.7} />
-          <rect x="28" y="28" width="8" height="8" rx="1.5" />
+          <rect x="10" y="10" width="44" height="44" rx="3" strokeOpacity={0.3} />
+          <rect x="18" y="18" width="28" height="28" rx="2.5" strokeOpacity={0.58} />
+          <rect x="26" y="26" width="12" height="12" rx="2" strokeOpacity={0.9} />
+          <circle cx="32" cy="32" r="2.2" fill={stroke} stroke="none" />
         </svg>
       );
 
-    // A small brief at the top determining everything built below it. The
-    // narrow input is what the whole outcome inherits.
+    // A small brief at the top determining everything built beneath it. One
+    // input, one bracket, three outcomes inheriting from it.
     case "the-brief-is-the-product":
       return (
         <svg {...common}>
-          <rect x="25" y="11" width="14" height="10" rx="1.5" />
-          <line x1="32" y1="21" x2="32" y2="28" strokeOpacity={0.6} />
-          <path d="M18 34 L32 28 L46 34" strokeOpacity={0.5} />
-          <rect x="11" y="34" width="14" height="18" rx="1.5" strokeOpacity={0.55} />
-          <rect x="25" y="34" width="14" height="18" rx="1.5" strokeOpacity={0.55} />
-          <rect x="39" y="34" width="14" height="18" rx="1.5" strokeOpacity={0.55} />
+          <rect x="24" y="11" width="16" height="11" rx="2" />
+          <line x1="32" y1="22" x2="32" y2="30" strokeOpacity={0.7} />
+          <path d="M15 36 L15 32 L49 32 L49 36" strokeOpacity={0.55} />
+          <rect x="10" y="38" width="12" height="15" rx="2" strokeOpacity={0.5} />
+          <rect x="26" y="38" width="12" height="15" rx="2" strokeOpacity={0.5} />
+          <rect x="42" y="38" width="12" height="15" rx="2" strokeOpacity={0.5} />
         </svg>
       );
 
@@ -167,17 +176,17 @@ export function PostGlyph({
     case "the-invisible-details":
       return (
         <svg {...common}>
-          <rect x="13" y="13" width="38" height="38" rx="3" strokeOpacity={0.22} strokeDasharray="2 4" />
-          {[0, 1, 2, 3, 4].map((r) =>
-            [0, 1, 2, 3, 4].map((c) => (
+          <rect x="12" y="12" width="40" height="40" rx="4" strokeOpacity={0.28} strokeDasharray="3 5" />
+          {[0, 1, 2, 3].map((r) =>
+            [0, 1, 2, 3].map((c) => (
               <circle
                 key={`${r}-${c}`}
-                cx={19 + c * 6.5}
-                cy={19 + r * 6.5}
-                r="1"
+                cx={20 + c * 8}
+                cy={20 + r * 8}
+                r="1.7"
                 fill={stroke}
                 stroke="none"
-                fillOpacity={(r + c) % 3 === 0 ? 1 : 0.4}
+                fillOpacity={(r + c) % 2 === 0 ? 1 : 0.42}
               />
             )),
           )}

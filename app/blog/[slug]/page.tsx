@@ -230,12 +230,12 @@ export default async function BlogPost({
                 />
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-[13px] tracking-tight text-[rgb(var(--fg))]">Jacob Collado</span>
-                <div className="flex items-center gap-1.5 text-[11px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.45 }}>
+                <span className="text-[13px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">Jacob Collado</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
                   <span>Founder, Inertia</span>
-                  <span aria-hidden="true">·</span>
+                  <span aria-hidden="true">/</span>
                   <span>{formatDate(post.date)}</span>
-                  <span aria-hidden="true">·</span>
+                  <span aria-hidden="true">/</span>
                   <span>{stats.minutes} min read</span>
                 </div>
               </div>
@@ -275,11 +275,11 @@ export default async function BlogPost({
             backgroundSize: "100% 1px",
           }}
         >
-          {/* inline-flex, not block: the pill should hug the label rather
-              than stretch the full column width. */}
+          {/* Full width of the article column, with the label centred: the
+              CTA reads as the end of the post rather than a stray chip. */}
           <Link
             href="/"
-            className={`inline-flex items-center ${ACTION_RADIUS_CLASS} px-3.5 py-2 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[rgb(var(--surface))] border border-[rgb(var(--line))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.2] transition-colors`}
+            className={`flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-3.5 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[rgb(var(--surface))] border border-[rgb(var(--line))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.2] transition-colors`}
           >
             Back home
           </Link>

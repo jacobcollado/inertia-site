@@ -76,7 +76,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
             </h1>
             <div className="flex items-center gap-3 flex-wrap">
               {piece.service && (
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] rounded-full px-2.5 pt-[3px] pb-[4px] leading-none">
+                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none">
                   {serviceTag(piece.service)}
                 </span>
               )}
