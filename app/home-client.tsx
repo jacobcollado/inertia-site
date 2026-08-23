@@ -3573,26 +3573,35 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                     onMouseEnter={() => { setHoveredIndex(i); }}
                     onMouseLeave={() => { setHoveredIndex((prev) => (prev === i ? null : prev)); }}
                   >
-                    {/* Split card: a tinted panel on top carrying the tag
-                        glyph, near-white below carrying the type. The real
-                        edge between them does the work the old centered
-                        layout asked an isolated glyph to do. */}
+                    {/* The tint is the card's whole ground, not a top half:
+                        the type panel below is inset on every side, so the
+                        colour has to run behind it for that inset to read as
+                        a margin rather than a seam. The glyph is centered in
+                        the space left above the panel. */}
                     <div
-                      className="absolute inset-x-0 top-0 flex items-center justify-center"
-                      style={{
-                        bottom: "45%",
-                        background: postTint(post.slug, post.tag),
-                        borderBottom: "1px solid rgba(26,26,26,0.08)",
-                      }}
+                      className="absolute inset-0"
+                      style={{ background: postTint(post.slug, post.tag) }}
+                    />
+                    <div
+                      className="absolute inset-x-0 top-0 flex items-center justify-center pointer-events-none"
+                      style={{ bottom: "45%" }}
                     >
                       <PostGlyph slug={post.slug} tag={post.tag} />
                     </div>
-                    {/* Type block, left-aligned against the card's own margin
-                        rather than centered — the tinted panel above is doing
-                        the centering, so repeating it here flattened the card. */}
+                    {/* Type block as its own rounded panel floating inside the
+                        card, inset on three sides so the tint reads as the
+                        card's ground behind it rather than a top half. Left
+                        aligned: the glyph above already does the centering. */}
                     <div
-                      className="absolute inset-x-0 bottom-0 flex flex-col px-6 sm:px-7 pt-5 sm:pt-6 pb-6 sm:pb-7"
-                      style={{ top: "55%", background: "#fbfbfa" }}
+                      className="absolute flex flex-col rounded-xl px-5 sm:px-6 pt-4 sm:pt-5 pb-5 sm:pb-6"
+                      style={{
+                        top: "55%",
+                        left: 10,
+                        right: 10,
+                        bottom: 10,
+                        background: "#fbfbfa",
+                        boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.06)",
+                      }}
                     >
                       <p
                         className="text-[21px] sm:text-[25px] tracking-[-0.028em] leading-tight text-balance"

@@ -2,35 +2,38 @@
    has exactly one mark and the card the reader clicked is the header they
    land on. Pure SVG with no hooks, so it renders fine in a server component. */
 
-/* Panel tint per post. Each post gets its own tone so no two cards in the
-   carousel read as duplicates, but the tones are grouped by tag: the three
-   Standards posts sit in one green-grey family, Infrastructure in a
-   blue-grey family, Practice in a warm sand family. Close enough that a tag
-   still reads as a family at a glance, separated enough that each post is
-   its own card.
+/* Panel tint per post. One hue per tag, constant saturation across all
+   eight, and only lightness stepping within a family. Holding chroma even is
+   what makes the set read as one palette: the earlier version let the greens
+   sit near-colourless while the sands were four times more saturated, so the
+   families looked like they came from different systems.
 
-   All are near-neutral by design. These are surfaces, not brand accents. */
+   Hues are picked to survive being this pale. A low-chroma green goes muddy,
+   so Standards uses a teal-slate at 168 instead; Infrastructure a periwinkle
+   at 222; Practice a warm clay at 28. Within each family the lightest tone
+   goes to the most recent post. */
 export const POST_TINT: Record<string, string> = {
-  // Standards — sage/green-grey. Steps down in lightness across the three.
-  "consistency-beats-novelty": "#dde7e0",
-  "copy-is-design": "#cddcd3",
-  "the-invisible-details": "#e8efe9",
+  // Standards — teal-slate, hue 168
+  "the-invisible-details": "#dcece9",
+  "copy-is-design": "#cfe5e1",
+  "consistency-beats-novelty": "#c2ded8",
 
-  // Infrastructure — blue-grey.
-  "design-systems-that-scale": "#dee5ef",
-  "speed-is-a-feature": "#c8d5e6",
+  // Infrastructure — periwinkle, hue 222
+  "speed-is-a-feature": "#dce1ec",
+  "design-systems-that-scale": "#ccd3e3",
 
-  // Practice — warm sand/clay.
-  "judgment-over-output": "#eee2d2",
-  "taste-is-trained": "#e4d5c2",
-  "the-brief-is-the-product": "#f3ebe0",
+  // Practice — warm clay, hue 28
+  "taste-is-trained": "#ece4dc",
+  "the-brief-is-the-product": "#e5d9cf",
+  "judgment-over-output": "#decfc2",
 };
 
-/* Fallback by tag, for a post with no tone of its own yet. */
+/* Fallback by tag, for a post with no tone of its own yet. Sits at the
+   middle step of each family. */
 export const TAG_TINT: Record<string, string> = {
-  standards: "#dde7e0",
-  infrastructure: "#d6dfea",
-  practice: "#eee2d2",
+  standards: "#cfe5e1",
+  infrastructure: "#dce1ec",
+  practice: "#e5d9cf",
 };
 
 /* The tone a post's card and header should use. Per-post first, then its
