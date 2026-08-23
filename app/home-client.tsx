@@ -1519,23 +1519,23 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div
         ref={inquiryBorderRef}
-        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl py-6 sm:py-7 px-5 sm:px-8 ${LIQUID_REVEAL}`}
-        style={{ background: "#ffffff" }}
+        className={`relative overflow-hidden max-w-3xl mx-auto origin-center rounded-2xl border border-dashed border-[rgb(var(--line))] py-8 sm:py-10 px-6 sm:px-10 ${LIQUID_REVEAL}`}
+        style={{ background: "transparent" }}
       >
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
           <div className={`min-w-0 text-center sm:text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
-            {/* The card is hardcoded white while the site runs in dark mode,
-                so these can't use --fg/--muted (near-white there). Matches the
-                hero's ink on its own light ground. */}
+            {/* Transparent fill now, so the card sits on the dark zone's own
+                ground and takes the zone's ink — the hardcoded near-black
+                these used while the card was white would be invisible here. */}
             <h2
-              className="text-[clamp(1.35rem,2.8vw,1.75rem)] font-normal tracking-[-0.025em] leading-tight"
-              style={{ color: "#1a1a1a" }}
+              className="text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight"
+              style={{ color: "rgb(var(--fg))" }}
             >
               What are you building?
             </h2>
             <p
-              className="mt-2 text-[14px] sm:text-[15px] leading-relaxed tracking-tight"
-              style={{ color: "#5c5c5c" }}
+              className="mt-2.5 text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight"
+              style={{ color: "rgb(var(--muted))" }}
             >
               Three quick questions to start. We&rsquo;ll take it from there.
             </p>
@@ -1551,7 +1551,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
               onClick={onBegin}
               aria-expanded="false"
               aria-controls="questionnaire-flow"
-              className={`relative w-full sm:w-auto inline-flex items-center justify-center overflow-hidden border-0 ${ACTION_RADIUS_CLASS} h-10 sm:h-11 px-5 sm:px-6 text-[16px] sm:text-[17px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
+              className={`relative w-full sm:w-auto inline-flex items-center justify-center overflow-hidden border-0 ${ACTION_RADIUS_CLASS} h-11 sm:h-12 px-6 sm:px-7 text-[17px] sm:text-[18px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
               style={{
                 background: CTA_FILL,
                 color: "#fff",
@@ -3275,7 +3275,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
 
    Standards      four identical squares — the tenth page matching the first
    Infrastructure nested frames — layers that hold each other up
-   Practice       many paths from one origin, one carried through — judgment   */
+   Practice       the same square attempted four times, one landing true   */
 function TagGlyph({ tag }: { tag?: string }) {
   const key = (tag ?? "").toLowerCase();
   const stroke = "rgba(26,26,26,0.30)";
@@ -3315,18 +3315,18 @@ function TagGlyph({ tag }: { tag?: string }) {
   }
 
   if (key === "practice") {
-    // Several paths leave the same origin; one is carried through to the end
-    // while the rest stop short. Reps generate the options, judgment picks
-    // the one worth shipping — the tapering strays are the discarded ones.
+    // The Standards square, drawn four times about the same center: three
+    // attempts off the grid by a few degrees, and one that lands square.
+    // Same mark, repeated until it's right — the reps are visible, and the
+    // shared square ties this to the Standards glyph rather than inventing
+    // a second visual language for the neighbouring card.
     return (
       <svg {...common}>
-        <path d="M12 32 C24 32, 30 16, 44 14" strokeOpacity={0.45} />
-        <path d="M12 32 C24 32, 32 24, 43 22" strokeOpacity={0.45} />
-        <path d="M12 32 C26 32, 34 40, 43 42" strokeOpacity={0.45} />
-        <path d="M12 32 C24 32, 30 48, 44 50" strokeOpacity={0.45} />
-        {/* The one taken all the way through. */}
-        <path d="M12 32 C28 32, 36 32, 52 32" />
-        <circle cx="52" cy="32" r="2.25" fill={stroke} stroke="none" />
+        <rect x="18" y="18" width="28" height="28" rx="2" strokeOpacity={0.55} transform="rotate(-18 32 32)" />
+        <rect x="18" y="18" width="28" height="28" rx="2" strokeOpacity={0.7} transform="rotate(11 32 32)" />
+        <rect x="18" y="18" width="28" height="28" rx="2" strokeOpacity={0.85} transform="rotate(-5 32 32)" />
+        {/* The one that lands on the grid. */}
+        <rect x="18" y="18" width="28" height="28" rx="2" />
       </svg>
     );
   }
