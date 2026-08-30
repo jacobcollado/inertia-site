@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
-import { PostGlyph, postTint } from "@/components/post-glyph";
+import { postTint } from "@/components/post-glyph";
 import { createPortal, flushSync } from "react-dom";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
@@ -706,128 +706,6 @@ function DesignSelectionWord({
   );
 }
 
-// Hand-drawn aside by the hero CTA, once the selection frame has finished.
-// Uneven control points and a marker font keep it reading as pen on paper.
-const NUDGE_DRAW_MS = 700;
-const NUDGE_TEXT_MS = 420;
-// Arrow is drawn shaft-then-head, the way it would actually be inked.
-const ARROW_DRAW_MS = 460;
-const ARROWHEAD_DRAW_MS = 200;
-
-// Dash lengths are measured from the paths; an oversized value leaves part of
-// the stroke pre-painted.
-const NUDGE_ARROW = {
-  // Starts on the bubble outline so the two strokes connect; tip lands level
-  // with the button's middle.
-  shaft: "M36 46.4 C 26 54, 13 52, 3 45",
-  head: "M12 45.8 L 3 45 L 6.8 53.2",
-  shaftDash: 36,
-  headDash: 19,
-};
-
-function CtaNudgeBubble({ show }: { show: boolean }) {
-  const reduced = useReducedMotion() ?? false;
-  // Measured length of the bubble path; re-measure if the path changes.
-  const DASH = 271;
-  const arrow = NUDGE_ARROW;
-
-  return (
-    <span
-      aria-hidden="true"
-      className="pointer-events-none absolute left-full top-1/2 hidden sm:block"
-      style={{
-        marginLeft: 14,
-        transform: "translateY(-58%)",
-        opacity: show ? 1 : 0,
-        transition: reduced ? "none" : `opacity 260ms ${HERO_LIQUID_EASE}`,
-      }}
-    >
-      <svg
-        width="150"
-        height="74"
-        viewBox="0 0 150 74"
-        fill="none"
-        style={{ overflow: "visible", display: "block" }}
-      >
-        {/* Shaft: leaves the bubble's lower-left and hooks into the CTA. */}
-        <path
-          d={arrow.shaft}
-          stroke={SELECTION_FRAME_COLOR}
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          style={{
-            strokeDasharray: arrow.shaftDash,
-            strokeDashoffset: show || reduced ? 0 : arrow.shaftDash,
-            transition: reduced
-              ? "none"
-              : `stroke-dashoffset ${ARROW_DRAW_MS}ms ${HERO_LIQUID_EASE}`,
-          }}
-        />
-        {/* Head: one stroke through the tip so it inks with the shaft. */}
-        <path
-          d={arrow.head}
-          stroke={SELECTION_FRAME_COLOR}
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          style={{
-            strokeDasharray: arrow.headDash,
-            strokeDashoffset: show || reduced ? 0 : arrow.headDash,
-            transition: reduced
-              ? "none"
-              : `stroke-dashoffset ${ARROWHEAD_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.85}ms`,
-          }}
-        />
-        {/* Uneven loop that overshoots where it closes, like a drawn circle. */}
-        <path
-          d="M34 40
-             C 30 22, 52 11, 82 12
-             C 116 13, 140 22, 141 37
-             C 142 52, 116 63, 84 62
-             C 54 61, 36 54, 34 41
-             C 33 37, 35 33, 38 30"
-          stroke={SELECTION_FRAME_COLOR}
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          fill="none"
-          style={{
-            strokeDasharray: DASH,
-            strokeDashoffset: show || reduced ? 0 : DASH,
-            transition: reduced
-              ? "none"
-              : `stroke-dashoffset ${NUDGE_DRAW_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55}ms`,
-          }}
-        />
-      </svg>
-      <span
-        className="absolute inset-0 flex items-center justify-center"
-        style={{
-          paddingLeft: 22,
-          paddingTop: 2,
-          color: SELECTION_FRAME_COLOR,
-          fontFamily: '"Bradley Hand", "Segoe Print", "Comic Sans MS", cursive',
-          fontSize: 15,
-          lineHeight: 1.15,
-          letterSpacing: "0.01em",
-          textAlign: "center",
-          transform: "rotate(-3deg)",
-          opacity: show || reduced ? 1 : 0,
-          transition: reduced
-            ? "none"
-            : `opacity ${NUDGE_TEXT_MS}ms ${HERO_LIQUID_EASE} ${ARROW_DRAW_MS * 0.55 + NUDGE_DRAW_MS * 0.65}ms`,
-        }}
-      >
-        you should
-        <br />
-        do it
-      </span>
-    </span>
-  );
-}
-
 function heroCtaLabelStyle(active: boolean) {
   return {
     opacity: active ? 1 : 0,
@@ -880,34 +758,19 @@ function VercelHero({
   const HEADING_LINE_ONE = ["We", "do", "the", "design"];
   const HEADING_LINE_TWO = ["and", "the", "development."];
   const HEADING_WORDS = [...HEADING_LINE_ONE, ...HEADING_LINE_TWO];
-  const wordReveal = (i: number) =>
-    heroLiquidStyle(visible, HERO_START + i * HERO_WORD_STEP, { blur: 7, scaleFrom: 0.994 });
+  // Heading itself no longer animates in — it's present immediately so the
+  // page doesn't feel like it's waiting on text. The word-reveal stagger
+  // stays available for other callers of heroLiquidStyle below.
+  const wordReveal = (_i: number) => undefined;
   const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
   const ctaFadeDelay = headingEnd + 644;
   // Cloud pill waits until the CTA has actually finished landing —
   // ctaFadeDelay is only when that transition *starts*.
   const cloudDelay = ctaFadeDelay + HERO_LIQUID_MS;
-  // Selection chrome snaps on only after the CTA has finished landing.
-  const selectionDelay = cloudDelay + 220;
-  // Waits for the full frame sequence; derived so retiming the frame retimes
-  // the bubble with it.
-  const selectionSettled =
-    selectionDelay +
-    4 * SELECTION_EDGE_MS +
-    SELECTION_HANDLE_MS +
-    SELECTION_RESIZE_HOLD_MS +
-    SELECTION_RESIZE_OUT_MS +
-    SELECTION_RESIZE_SETTLE_MS +
-    SELECTION_RESIZE_IN_MS +
-    SELECTION_RESIZE_SETTLE_MS +
-    SELECTION_RESIZE_BACK_MS;
-
-  const [nudgeShown, setNudgeShown] = useState(false);
-  useEffect(() => {
-    if (!visible) return;
-    const id = setTimeout(() => setNudgeShown(true), selectionSettled + 260);
-    return () => clearTimeout(id);
-  }, [visible, selectionSettled]);
+  // Selection chrome no longer waits on the heading/CTA/pill chain since the
+  // heading is visible immediately — it only needs a short beat after mount
+  // so the frame reads as drawing itself rather than appearing pre-formed.
+  const selectionDelay = 260;
 
   // Alternates between the project quiz and the Aether product page on a
   // fixed loop once the hero has landed — no carousel interaction required.
@@ -1043,15 +906,6 @@ function VercelHero({
               style={{
                 boxShadow: CTA_OUTER_SHADOW,
                 transformOrigin: "center",
-                ...liquid(ctaFadeDelay, { blur: 10, scaleFrom: 0.992 }),
-              }}
-              onTransitionEnd={e => {
-                if (e.propertyName !== "opacity") return;
-                // Tells the header (mounted separately in SiteShell, with no
-                // ref access to this CTA) that the hero's own reveal has
-                // landed, so it can wait to fade in until right after this
-                // instead of firing on mount ahead of any hero content.
-                window.dispatchEvent(new Event("hero-cta:revealed"));
               }}
             >
             <a
@@ -1095,7 +949,6 @@ function VercelHero({
                 </span>
               </span>
             </a>
-            <CtaNudgeBubble show={nudgeShown} />
             </span>
             {false && (
             <a
@@ -2138,10 +1991,18 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
+        <h2 className="mb-3">
+          <span
+            className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+            style={{ background: "#1a1a1a" }}
+          >
+            How we think about execution
+          </span>
+        </h2>
         <LiquidText
           pRef={introRef}
           text={intro}
-          className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+          className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
           style={{ color: "#5c5c5c" }}
         />
         <div className="mt-8">
@@ -2187,7 +2048,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
                   aria-controls="execution-panel"
                   tabIndex={selected ? 0 : -1}
                   onClick={() => setActive(i)}
-                  className="relative z-[1] whitespace-nowrap px-3.5 sm:px-4 py-1.5 text-[14px] sm:text-[15px] tracking-tight leading-none transition-colors duration-200"
+                  className="relative z-[1] whitespace-nowrap px-3.5 sm:px-4 py-1.5 text-[14px] sm:text-[17px] tracking-tight leading-none transition-colors duration-200"
                   style={{
                     color: selected ? "#1a1a1a" : "#7a7a7a",
                     fontWeight: selected ? 450 : 400,
@@ -2216,7 +2077,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
               <LiquidText
                 key={segments[active].label}
                 text={segments[active].text}
-                className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+                className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
                 style={{ color: "#5c5c5c" }}
               />
             </div>
@@ -2234,6 +2095,70 @@ function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+const WHAT_WE_DO_ITEMS = [
+  {
+    label: "Direction",
+    description: "We figure out what the product or brand actually needs to be before anything gets designed.",
+    image: "/what-we-do/direction.png",
+  },
+  {
+    label: "Design",
+    description: "Interfaces, identity, and the small decisions in between, held to one standard of taste.",
+    image: "/what-we-do/design.png",
+  },
+  {
+    label: "Development",
+    description: "We build what we design ourselves, so nothing is lost translating one team's vision to another's code.",
+    image: "/what-we-do/development.png",
+  },
+];
+
+function WhatWeDo() {
+  return (
+    <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
+      <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-[calc(0.375rem+6px+1.25rem)] sm:pl-[calc(50vw-384px)]">
+        <div className="max-w-2xl sm:max-w-none">
+          <h2 className="mb-6 sm:mb-8">
+            <span
+              className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+              style={{ background: "#1a1a1a" }}
+            >
+              What we do
+            </span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
+            {WHAT_WE_DO_ITEMS.map((item) => (
+              <div key={item.label}>
+                <p
+                  className="text-[16px] sm:text-[21px] tracking-[-0.02em]"
+                  style={{ color: "#1a1a1a", fontWeight: 500 }}
+                >
+                  {item.label}
+                </p>
+                <p
+                  className="mt-2 text-[14.5px] sm:text-[21px] leading-relaxed tracking-tight"
+                  style={{ color: "#5c5c5c" }}
+                >
+                  {item.description}
+                </p>
+                {item.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.image}
+                    alt=""
+                    aria-hidden="true"
+                    className="w-full h-auto mt-4 max-w-[220px] sm:max-w-[280px]"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AiApproach({ posts }: { posts: PostMeta[] }) {
   const first =
     "AI hasn't changed what we believe about execution; it's changed how much of it we can afford. A studio our size can now explore [[more]] directions, discard the wrong ones sooner, and spend the saved time where it counts: on the version worth shipping.";
@@ -2244,24 +2169,34 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
       <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
         <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-0 sm:pl-[calc(50vw-384px)]">
           <div className="max-w-2xl sm:max-w-3xl">
+            <h2 className="mb-3">
+              <span
+                className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+                style={{ background: "#1a1a1a" }}
+              >
+                How we think about AI
+              </span>
+            </h2>
             <LiquidText
               text={first}
-              className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+              className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
               style={{ color: "#5c5c5c" }}
             />
             <LiquidText
               text={second}
               delayMs={160}
-              className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left mt-5"
+              className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left mt-5"
               style={{ color: "#5c5c5c" }}
             />
           </div>
         </div>
       </section>
+      <div className="py-12 sm:py-16" />
+      <WhatWeDo />
       {/* Matches the spacer between the client list and this section's
-          paragraph (py-10 sm:py-8 → 80px / 64px), so the paragraph sits the
-          same distance above the cards as it does below the client list. */}
-      <div className="py-10 sm:py-8" />
+          paragraph, so the paragraph sits the same distance above the cards
+          as it does below the client list. */}
+      <div className="py-12 sm:py-16" />
       <BlogCarousel posts={posts} />
     </>
   );
@@ -2679,7 +2614,7 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
           lines up exactly with the horizontal rules, and the inner padding
           restores the breathing room the gutter used to give. */}
       <div
-        className="rounded-2xl overflow-hidden"
+        className="rounded-[6px] overflow-hidden"
         style={{ border: CLIENT_RULE }}
       >
       <ul className="grid grid-cols-2">
@@ -3749,59 +3684,32 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                     onMouseEnter={() => { setHoveredIndex(i); }}
                     onMouseLeave={() => { setHoveredIndex((prev) => (prev === i ? null : prev)); }}
                   >
-                    {/* The tint is the card's whole ground, not a top half:
-                        the type panel below is inset on every side, so the
-                        colour has to run behind it for that inset to read as
-                        a margin rather than a seam. The glyph is centered in
-                        the space left above the panel. */}
+                    {/* The tint is the card's whole ground; text sits
+                        straight on it now, no glyph, no panel behind it. */}
                     <div
                       className="absolute inset-0"
                       style={{ background: postTint(post.slug) }}
                     />
                     <div
-                      className="absolute inset-x-0 top-0 flex items-center justify-center pointer-events-none"
-                      style={{ bottom: "45%" }}
-                    >
-                      <PostGlyph slug={post.slug} tag={post.tag} />
-                    </div>
-                    {/* Type block as its own rounded panel floating inside the
-                        card, inset on three sides so the tint reads as the
-                        card's ground behind it rather than a top half. Left
-                        aligned: the glyph above already does the centering. */}
-                    <div
-                      className="absolute flex flex-col rounded-xl px-5 sm:px-6 pt-4 sm:pt-5 pb-5 sm:pb-6"
-                      style={{
-                        top: "55%",
-                        left: 10,
-                        right: 10,
-                        bottom: 10,
-                        background: "#fbfbfa",
-                        boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.06)",
-                      }}
+                      className="absolute inset-2.5 flex flex-col justify-start px-5 sm:px-6 py-5 sm:py-6"
                     >
                       <p
-                        className="text-[16px] sm:text-[21px] tracking-[-0.028em] leading-tight text-balance"
-                        style={{ color: "#1a1a1a" }}
+                        className="text-[22px] sm:text-[30px] tracking-[-0.028em] leading-tight text-balance text-white"
                       >
                         {post.title}
                       </p>
                       {(post.subtitle || post.summary) && (
                         <p
-                          className="mt-2 text-[12.5px] sm:text-[14px] leading-snug tracking-[-0.035em] line-clamp-2"
-                          style={{ color: "#5c5c5c" }}
+                          className="mt-2.5 text-[15.5px] sm:text-[18px] leading-snug tracking-[-0.035em] line-clamp-2 text-white/70"
                         >
                           {post.subtitle || post.summary}
                         </p>
                       )}
-                      {/* Tag sits in its own neutral pill, matching the 6px
-                          radius used for the service pills on /work. The panel
-                          behind it is near-white, so the pill is a grey step
-                          up from it rather than a tint of the card's colour. */}
                       {post.tag && (
-                        <span className="mt-auto pt-3">
+                        <span className="mt-4">
                           <span
-                            className="inline-block rounded-[6px] px-2 pt-[3px] pb-[4px] text-[11px] sm:text-[12.5px] leading-none tracking-tight"
-                            style={{ background: "rgba(26,26,26,0.07)", color: "rgba(26,26,26,0.68)" }}
+                            className="inline-block rounded-[6px] px-2 pt-[3px] pb-[4px] text-[11px] sm:text-[12.5px] leading-none tracking-tight text-white"
+                            style={{ background: "rgba(255,255,255,0.16)" }}
                           >
                             {post.tag}
                           </span>
@@ -4159,14 +4067,14 @@ function VisualLayout({
 
           <DesignPhilosophy introRef={introRef} />
 
-          <div className="py-10 sm:py-8" />
+          <div className="py-12 sm:py-16" />
 
           {/* Type-only client list (concept 5). The logo-card carousel is
               still below as ClientCarousel — swap this line back to
               <ClientCarousel initialItems={initialWork} /> to restore it. */}
           <ClientTypeList items={initialWork} />
 
-          <div className="py-10 sm:py-8" />
+          <div className="py-12 sm:py-16" />
 
           <AiApproach posts={initialPosts} />
 

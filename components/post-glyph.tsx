@@ -2,39 +2,32 @@
    has exactly one mark and the card the reader clicked is the header they
    land on. Pure SVG with no hooks, so it renders fine in a server component. */
 
-/* Panel tint per post. Eight distinct hue families - blue, orange, green,
-   pink, cyan, gold, violet, olive - spaced roughly 45 degrees apart around
-   the wheel so no two posts read as versions of one colour. The earlier set
-   was really four close pairs (two blues, two warms), which is what made the
-   cards blur together.
+/* Panel tint per post. Every post now has its own hand-drawn sketch (see
+   POST_SKETCH below), so the tint no longer needs to carry per-post
+   identity through hue - that job moved to the drawing. One flat neutral
+   grey for every card keeps the row calm and lets the sketches read as the
+   actual point of difference. */
+export function postTint(_slug?: string): string {
+  return "#b0b3b8";
+}
 
-   Listed in the carousel's real order, which is strictly newest-first (see
-   getAllPosts in lib/posts.ts - pinned first, then date descending; nothing
-   is pinned today). Order matters: the sequence is arranged so every
-   neighbouring pair jumps at least 126 degrees, so adjacent cards contrast
-   rather than merely differ. Adding a post at a new date shifts that
-   adjacency, so re-check the spacing when one lands mid-list.
-
-   Tones sit around 58-66% lightness: deep enough to read as the card's own
-   colour against the near-white type panel, light enough for the glyph's
-   dark strokes to hold. */
-export const POST_TINT: Record<string, string> = {
-  "taste-is-trained": "#6eacd8",          // blue    h205
-  "the-brief-is-the-product": "#db9566",  // orange  h24
-  "judgment-over-output": "#6ec499",      // green   h150
-  "the-invisible-details": "#d57ba8",     // pink    h330
-  "speed-is-a-feature": "#70c3cd",        // cyan    h186
-  "copy-is-design": "#d8be6e",            // gold    h45
-  "consistency-beats-novelty": "#9e82ce", // violet  h262
-  "design-systems-that-scale": "#8cbd6b", // olive   h96
+/* Hand-drawn pencil sketches, one per post, replacing the vector PostGlyph
+   where one exists. Each is generated as an isolated drawing (no paper
+   background) so it composites directly onto the card's flat tint. Falls
+   back to PostGlyph below for any post without one yet. */
+export const POST_SKETCH: Record<string, string> = {
+  "taste-is-trained": "/blog/sketches/taste-is-trained.png",
+  "the-brief-is-the-product": "/blog/sketches/the-brief-is-the-product.png",
+  "judgment-over-output": "/blog/sketches/judgment-over-output.png",
+  "the-invisible-details": "/blog/sketches/the-invisible-details.png",
+  "speed-is-a-feature": "/blog/sketches/speed-is-a-feature.png",
+  "copy-is-design": "/blog/sketches/copy-is-design.png",
+  "consistency-beats-novelty": "/blog/sketches/consistency-beats-novelty.png",
+  "design-systems-that-scale": "/blog/sketches/design-systems-that-scale.png",
 };
-/* The tone a post's card and header should use. There is no tag-level
-   fallback any more - a tag no longer implies a colour - so a post with no
-   tone of its own gets a desaturated grey. That grey is deliberately outside
-   the eight hue families above: an unassigned post should look unassigned
-   rather than borrow another post's identity. */
-export function postTint(slug?: string): string {
-  return (slug ? POST_TINT[slug] : undefined) ?? "#b0b3b8";
+
+export function postSketch(slug?: string): string | undefined {
+  return slug ? POST_SKETCH[slug] : undefined;
 }
 
 /* ── Post glyphs ─────────────────────────────────────────

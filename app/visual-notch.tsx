@@ -582,7 +582,7 @@ function InertiaLogo() {
     <img
       src="/logo.png"
       alt="Inertia"
-      className="h-5 sm:h-6 w-auto"
+      className="h-6 w-auto"
       style={{ display: "block" }}
     />
   );

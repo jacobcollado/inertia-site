@@ -14,16 +14,16 @@ export const CTA_WELL_BG = "transparent";
 
 export const CTA_WELL_SHADOW = "none";
 
-export const CTA_SHELL_HEIGHT_CLASS = "h-10 sm:h-11";
+export const CTA_SHELL_HEIGHT_CLASS = "h-10 sm:h-12";
 
-export const CTA_HEADER_SHELL_HEIGHT_CLASS = "h-9 sm:h-11";
+export const CTA_HEADER_SHELL_HEIGHT_CLASS = "h-9 sm:h-12";
 
 export const CTA_PILL_CLASS =
-  "relative inline-flex items-center overflow-hidden rounded-[6px] px-5 py-1.5 sm:px-6 sm:py-1.5 text-[16px] sm:text-[17px] tracking-tight leading-none " +
+  "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-4 sm:py-1.5 text-[16px] sm:text-[19px] tracking-tight leading-none " +
   CTA_SHELL_HEIGHT_CLASS;
 
 export const CTA_HEADER_PILL_CLASS =
-  "relative inline-flex items-center overflow-hidden rounded-[6px] px-4 py-1 sm:px-6 sm:py-1.5 text-[14px] sm:text-[17px] font-normal tracking-tight leading-none " +
+  "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-4 sm:py-1.5 text-[14px] sm:text-[19px] font-normal tracking-tight leading-none " +
   CTA_HEADER_SHELL_HEIGHT_CLASS;
 
 export const CTA_WELL_CLASS =

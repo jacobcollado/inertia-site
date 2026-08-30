@@ -523,8 +523,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     <div className="w-full min-h-screen">
 
       {/* Top bar — fixed so it doesn't affect centering */}
-      <div className="fixed top-0 inset-x-0 z-10 px-6" style={{ height: 72 }}>
-        <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "80rem" }}>
+      <div className="fixed top-0 inset-x-0 z-10 px-6 sm:px-8" style={{ height: 72 }}>
+        <div
+          className="flex items-center justify-between h-full mx-auto w-full max-w-[80rem]"
+        >
           <Link href="/">
             <img src="/logo.png" alt="Inertia" className="h-6 w-auto" style={{ display: "block" }} />
           </Link>
@@ -554,7 +556,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
       </div>
 
       {/* Form — centered against full viewport */}
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 sm:px-8 py-24">
         {/* Sign-ups closed notice. Sits above the card so it reads as
             page-level context rather than something the card itself offers. */}
         {!SIGNUPS_ENABLED && (

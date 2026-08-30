@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { TOCInline } from "./toc";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
-import { PostGlyph, postTint } from "@/components/post-glyph";
+import { PostGlyph, postTint, postSketch } from "@/components/post-glyph";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 import {
   getAllPosts,
@@ -249,13 +249,24 @@ export default async function BlogPost({
             the old cover PNGs, which only four of eight posts had. */}
         <div className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
           <div
-            className="w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] flex items-center justify-center"
+            className="relative w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] flex items-center justify-center"
             style={{
               aspectRatio: "1200/630",
               background: postTint(slug),
             }}
           >
-            <PostGlyph slug={slug} tag={post.tag} className="w-28 h-28 sm:w-36 sm:h-36" />
+            {postSketch(slug) ? (
+              <Image
+                src={postSketch(slug)!}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover"
+                style={{ mixBlendMode: "multiply" }}
+              />
+            ) : (
+              <PostGlyph slug={slug} tag={post.tag} className="w-28 h-28 sm:w-36 sm:h-36" />
+            )}
           </div>
         </div>
 
