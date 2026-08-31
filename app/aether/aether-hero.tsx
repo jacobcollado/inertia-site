@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DemoButton } from "./demo-button";
 import { aetherLiquidReveal } from "./motion";
+import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 
 export function AetherHero({ demoUrl }: { demoUrl: string }) {
   const [visible, setVisible] = useState(false);
@@ -22,7 +23,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
   return (
     <section
       className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center pt-12 sm:pt-20"
-      style={{ minHeight: 480, paddingBottom: 40 }}
+      style={{ minHeight: 480, paddingBottom: 96 }}
     >
       <h1 className="font-normal tracking-[-0.04em] leading-none m-0" style={liquid(0, { blur: 12, scaleFrom: 0.99 })}>
         <Image
@@ -35,7 +36,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
         />
       </h1>
       <p
-        className="text-[clamp(1rem,1.8vw,1.1rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm sm:max-w-md"
+        className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md sm:max-w-xl"
         style={liquid(90, { blur: 8, scaleFrom: 0.994 })}
       >
         Design is the product. A Shopify theme for independent brands that treat how the store looks as part of what they sell.
@@ -46,18 +47,18 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
       >
         <Link
           href="/aether#pricing"
-          className="w-full inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-medium tracking-tight hover:opacity-80 transition-opacity"
+          className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} px-5 py-2.5 text-[17px] sm:text-[18px] font-medium tracking-tight hover:opacity-80 transition-opacity`}
           style={{ background: "#000", color: "#ededed" }}
         >
           Buy a license
         </Link>
         <div className="w-full flex gap-2">
-          <div className="flex-[2]">
+          <div className="flex-[3] min-w-0">
             <DemoButton href={demoUrl} password="aether" />
           </div>
           <Link
             href="/docs?from=aether"
-            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-[rgb(var(--line))] px-5 py-2 text-[13px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors"
+            className={`flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} border border-[rgb(var(--line))] px-5 py-2 text-[17px] sm:text-[18px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors whitespace-nowrap`}
           >
             Docs
           </Link>

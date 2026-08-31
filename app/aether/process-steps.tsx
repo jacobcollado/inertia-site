@@ -40,7 +40,7 @@ function StepCopy({ step, detail, compact }: { step: string; detail: string; com
       <p className={`font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] ${compact ? "text-[clamp(1.6rem,2.5vw,2rem)]" : "text-[clamp(2rem,5vw,2.75rem)]"}`}>
         {step}
       </p>
-      <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] ${compact ? "text-[13px] sm:text-[14px] mt-3" : "text-[14px] sm:text-[15px] mt-2"}`}>
+      <p className={`leading-relaxed tracking-tight text-[rgb(var(--muted))] ${compact ? "text-[15px] sm:text-[16px] mt-3" : "text-[14px] sm:text-[15px] mt-2"}`}>
         {detail}
       </p>
     </>

@@ -226,7 +226,7 @@ export function FeaturesScroll({ features }: { features: Feature[] }) {
                   {f.title}
                 </h2>
               </div>
-              <p className="text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+              <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
                 {f.desc}
               </p>
               <ul className="flex flex-col gap-2.5">

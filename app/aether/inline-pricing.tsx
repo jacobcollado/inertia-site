@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PricingLifeShader } from "./pricing-life-shader";
+import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 
 const TIERS = [
   {
@@ -99,7 +100,7 @@ export function InlinePricing() {
         <div className="flex flex-1 flex-col p-5 sm:p-7 lg:p-8 text-left">
           <div className="flex flex-col gap-5 sm:gap-6">
             <div
-              className="inline-flex items-center self-start rounded-full border border-[rgb(var(--line))] p-1 gap-1"
+              className={`inline-flex items-center self-start ${ACTION_RADIUS_CLASS} border border-[rgb(var(--line))] p-1 gap-1`}
               role="tablist"
               aria-label="License type"
             >
@@ -116,7 +117,7 @@ export function InlinePricing() {
                       setStatus("idle");
                       setError("");
                     }}
-                    className="rounded-full px-4 py-1.5 text-[13px] font-normal tracking-tight transition-all duration-200 [-webkit-tap-highlight-color:transparent]"
+                    className={`${ACTION_RADIUS_CLASS} px-4 py-1.5 text-[17px] sm:text-[18px] font-normal tracking-tight transition-all duration-200 [-webkit-tap-highlight-color:transparent]`}
                     style={{
                       background: active ? "rgb(var(--fg))" : "transparent",
                       color: active ? "rgb(var(--bg))" : "rgb(var(--muted))",
@@ -148,7 +149,7 @@ export function InlinePricing() {
                 type="button"
                 onClick={handleCheckout}
                 disabled={status === "submitting"}
-                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+                className={`w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} px-4 py-2 text-[17px] sm:text-[18px] font-medium tracking-tight transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
                 style={{ background: "#000", color: "#ededed" }}
               >
                 {status === "submitting" ? <Spinner /> : null}

@@ -6,9 +6,13 @@
    POST_SKETCH below), so the tint no longer needs to carry per-post
    identity through hue - that job moved to the drawing. One flat neutral
    grey for every card keeps the row calm and lets the sketches read as the
-   actual point of difference. */
+   actual point of difference. Flattened rgba(26,26,26,0.06) on white (the
+   Pill highlight's own background, see home-client.tsx) to a solid hex -
+   at pill size the wash reads grey against dark body text, but the same
+   translucent value over a whole card's white backdrop reads as plain
+   white, so it needs to be opaque here to actually match. */
 export function postTint(_slug?: string): string {
-  return "#b0b3b8";
+  return "#f1f1f1";
 }
 
 /* Hand-drawn pencil sketches, one per post, replacing the vector PostGlyph

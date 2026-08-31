@@ -89,7 +89,7 @@ export default function AetherPage() {
       <div className="px-3 pb-16 sm:pb-24">
         <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3 rise rise--liquid">And the rest of it</p>
         <div className="mb-10 rise rise--liquid" style={{ "--rise-delay": "60ms" } as React.CSSProperties}>
-          <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[12px] sm:text-[13px] font-normal tracking-tight bg-[rgb(var(--fg)/0.06)] text-[rgb(var(--fg))]">
+          <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[14px] sm:text-[15px] font-normal tracking-tight bg-[rgb(var(--fg)/0.06)] text-[rgb(var(--fg))]">
             Everything included
           </span>
         </div>
@@ -101,8 +101,8 @@ export default function AetherPage() {
               style={{ "--rise-delay": `${120 + i * 40}ms` } as React.CSSProperties}
             >
               <div className="flex flex-col gap-0.5">
-                <span className="text-[15px] tracking-tight font-medium text-[rgb(var(--fg))]">{f.name}</span>
-                <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{f.desc}</span>
+                <span className="text-[17px] tracking-tight font-medium text-[rgb(var(--fg))]">{f.name}</span>
+                <span className="text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{f.desc}</span>
               </div>
             </div>
           ))}
@@ -116,17 +116,19 @@ export default function AetherPage() {
 
       <div className="grid-rule" aria-hidden="true" />
 
-      {/* FAQ */}
-      <AetherFaq />
-
       {/* Pricing */}
-      <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-4 scroll-mt-16 w-full">
+      <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24 scroll-mt-16 w-full">
         <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
           Pick a <span className="shimmer-word shimmer-word--warm">license</span>
         </p>
 
         <InlinePricing />
       </div>
+
+      <div className="grid-rule" aria-hidden="true" />
+
+      {/* FAQ */}
+      <AetherFaq />
 
     </main>
   );

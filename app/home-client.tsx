@@ -1375,7 +1375,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
       <div className="relative max-w-3xl mx-auto">
       <div
         ref={inquiryBorderRef}
-        className={`relative overflow-hidden origin-center rounded-2xl border border-dashed border-[rgb(var(--line))] py-8 sm:py-10 px-6 sm:px-10 ${LIQUID_REVEAL}`}
+        className={`relative overflow-hidden origin-center rounded-[6px] border border-dashed border-[rgb(var(--line))] py-8 sm:py-10 px-6 sm:px-10 ${LIQUID_REVEAL}`}
         style={{ background: "transparent" }}
       >
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
@@ -1384,7 +1384,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
                 ground and takes the zone's ink — the hardcoded near-black
                 these used while the card was white would be invisible here. */}
             <h2
-              className="text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight"
+              className="text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight"
               style={{ color: "rgb(var(--fg))" }}
             >
               What are you building?
@@ -1489,7 +1489,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
             key={`quiz-${resetKey}`}
             questions={QUIZ_QUESTIONS}
             onComplete={onQuizComplete}
-            className="mx-auto max-w-none rounded-2xl border border-dashed border-[rgb(var(--line))] bg-transparent"
+            className="mx-auto max-w-none rounded-[6px] border border-dashed border-[rgb(var(--line))] bg-transparent"
           />
         )}
 
@@ -1522,7 +1522,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
               key={`intake-${resetKey}`}
               questions={INTAKE_QUESTIONS}
               onComplete={onIntakeComplete}
-              className="mx-auto max-w-none rounded-2xl border border-dashed border-[rgb(var(--line))] bg-transparent"
+              className="mx-auto max-w-none rounded-[6px] border border-dashed border-[rgb(var(--line))] bg-transparent"
             />
             {submitting && (
               <p className="mt-4 text-[13px] tracking-tight text-muted-foreground text-center">
@@ -1993,7 +1993,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
         <h2 className="mb-3">
           <span
-            className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+            className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
             style={{ background: "#1a1a1a" }}
           >
             How we think about execution
@@ -2120,7 +2120,7 @@ function WhatWeDo() {
         <div className="max-w-2xl sm:max-w-none">
           <h2 className="mb-6 sm:mb-8">
             <span
-              className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+              className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
               style={{ background: "#1a1a1a" }}
             >
               What we do
@@ -2171,7 +2171,7 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
           <div className="max-w-2xl sm:max-w-3xl">
             <h2 className="mb-3">
               <span
-                className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.55rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+                className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
                 style={{ background: "#1a1a1a" }}
               >
                 How we think about AI
@@ -3694,13 +3694,15 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                       className="absolute inset-2.5 flex flex-col justify-start px-5 sm:px-6 py-5 sm:py-6"
                     >
                       <p
-                        className="text-[22px] sm:text-[30px] tracking-[-0.028em] leading-tight text-balance text-white"
+                        className="text-[22px] sm:text-[30px] tracking-[-0.028em] leading-tight text-balance"
+                        style={{ color: "#5c5c5c" }}
                       >
                         {post.title}
                       </p>
                       {(post.subtitle || post.summary) && (
                         <p
-                          className="mt-2.5 text-[15.5px] sm:text-[18px] leading-snug tracking-[-0.035em] line-clamp-2 text-white/70"
+                          className="mt-2.5 text-[15.5px] sm:text-[18px] leading-snug tracking-[-0.035em] line-clamp-2"
+                          style={{ color: "rgba(92,92,92,0.75)" }}
                         >
                           {post.subtitle || post.summary}
                         </p>
@@ -3708,8 +3710,8 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                       {post.tag && (
                         <span className="mt-4">
                           <span
-                            className="inline-block rounded-[6px] px-2 pt-[3px] pb-[4px] text-[11px] sm:text-[12.5px] leading-none tracking-tight text-white"
-                            style={{ background: "rgba(255,255,255,0.16)" }}
+                            className="inline-block rounded-[6px] px-2 pt-[3px] pb-[4px] text-[11px] sm:text-[12.5px] leading-none tracking-tight"
+                            style={{ background: "rgba(26,26,26,0.08)", color: "#5c5c5c" }}
                           >
                             {post.tag}
                           </span>
