@@ -23,7 +23,7 @@ export const CTA_PILL_CLASS =
   CTA_SHELL_HEIGHT_CLASS;
 
 export const CTA_HEADER_PILL_CLASS =
-  "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-4 sm:py-1.5 text-[14px] sm:text-[19px] font-normal tracking-tight leading-none " +
+  "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-4 sm:py-1.5 text-[14px] sm:text-[18px] font-normal tracking-tight leading-none " +
   CTA_HEADER_SHELL_HEIGHT_CLASS;
 
 export const CTA_WELL_CLASS =

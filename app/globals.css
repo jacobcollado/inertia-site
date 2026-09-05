@@ -261,8 +261,8 @@
 /* Dark scope for the homepage questionnaire (ask-user-questions). The component
    uses shadcn tokens (bg-card, text-foreground, border-border, bg-accent...)
    which map to --sh-* — light by default. The quiz sits in the homepage's dark
-   zone, so override those tokens to dark values here rather than site-wide. The
-   round shape comes from the component's default "pill" ShapeProvider. */
+   zone, so override those tokens to dark values here rather than site-wide. Row
+   hover/selected radii come from ShapeProvider defaultShape="action" (6px). */
 .quiz-dark {
   --sh-background: #0a0a0a;
   --sh-foreground: #ededed;
@@ -970,7 +970,7 @@ h1:hover .redact > span.redact-inner,
   align-items: center;
   justify-content: center;
   line-height: 1;
-  border-radius: 999px;
+  border-radius: 6px;
   padding: 0.625rem 1rem;
   font-size: 15px;
   font-weight: 500;

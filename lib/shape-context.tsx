@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-type ShapeVariant = "pill" | "rounded";
+type ShapeVariant = "pill" | "rounded" | "action";
 
 interface ShapeClasses {
   item: string;
@@ -56,6 +56,17 @@ const shapeMap: Record<ShapeVariant, ShapeClasses> = {
     input: "rounded-lg",
     bgRadius: 8,
     mergedRadius: 8,
+  },
+  action: {
+    item: "rounded-[6px]",
+    bg: "rounded-[6px]",
+    focusRing: "rounded-[6px]",
+    mergedBg: "rounded-[6px]",
+    container: "rounded-[6px]",
+    button: "rounded-[6px]",
+    input: "rounded-[6px]",
+    bgRadius: 6,
+    mergedRadius: 6,
   },
 };
 

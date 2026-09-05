@@ -9,6 +9,18 @@ import { ThemeToggle } from "@/app/theme-toggle";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 import { CTA_FILL, CTA_HEADER_PILL_CLASS, CtaGrain } from "@/lib/cta-chrome";
 
+// Typography aligned with homepage index cards (questionnaire, body copy, inputs).
+const LOGIN_TITLE =
+  "text-[clamp(1.35rem,3.2vw,2.05rem)] font-medium tracking-[-0.025em] leading-tight";
+const LOGIN_SUBTITLE =
+  "text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight";
+const LOGIN_SECTION_TITLE =
+  "text-[clamp(1.15rem,2.2vw,1.65rem)] font-medium tracking-[-0.025em] leading-tight";
+const LOGIN_INPUT = "text-[16px] tracking-tight";
+const LOGIN_BTN = "text-[15px] sm:text-[16px] font-medium tracking-tight";
+const LOGIN_UI = "text-[14px] sm:text-[14.5px] tracking-tight";
+const LOGIN_CAPTION = "text-[13px] sm:text-[14px] tracking-tight";
+
 function Spinner() {
   return (
     <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 animate-spin" aria-hidden="true" fill="none">
@@ -44,7 +56,7 @@ function Alert({ msg, tone }: { msg: string; tone: "error" | "info" }) {
           </svg>
         )}
       </span>
-      <p className="text-[13px] leading-snug tracking-tight pt-0.5" style={{ color: "rgb(var(--fg))" }}>
+      <p className={`${LOGIN_UI} leading-snug pt-0.5`} style={{ color: "rgb(var(--fg))" }}>
         {msg}
       </p>
     </div>
@@ -63,7 +75,7 @@ function Divider() {
   return (
     <div className="flex items-center gap-3" aria-hidden="true">
       <div className="flex-1 h-px" style={{ background: "rgb(var(--line))" }} />
-      <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>or</span>
+      <span className={`${LOGIN_CAPTION} text-[rgb(var(--muted))]`} style={{ opacity: 0.5 }}>or</span>
       <div className="flex-1 h-px" style={{ background: "rgb(var(--line))" }} />
     </div>
   );
@@ -74,7 +86,7 @@ function EmailToggle({ onToggle }: { onToggle: () => void }) {
     <button
       type="button"
       onClick={onToggle}
-      className="flex items-center justify-center gap-2 w-full py-2.5 text-[14px] tracking-tight rounded-[6px] transition-colors hover:bg-[rgb(var(--fg)/0.1)]"
+      className={`flex items-center justify-center gap-2 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-colors hover:bg-[rgb(var(--fg)/0.1)]`}
       style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--fg))" }}
     >
       Continue with email
@@ -98,7 +110,7 @@ function EmailForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [capsLock, setCapsLock] = useState(false);
-  const inputBase = "w-full px-4 py-3 text-[14px] tracking-tight rounded-xl outline-none transition-colors bg-[rgb(var(--fg)/0.035)] placeholder:text-[rgb(var(--muted))] placeholder:opacity-70";
+  const inputBase = `w-full px-4 py-3 ${LOGIN_INPUT} rounded-xl outline-none transition-colors bg-[rgb(var(--fg)/0.035)] placeholder:text-[rgb(var(--muted))] placeholder:opacity-70`;
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (typeof e.getModifierState === "function") setCapsLock(e.getModifierState("CapsLock"));
@@ -125,7 +137,7 @@ function EmailForm({
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start"
+        className={`flex items-center gap-1.5 ${LOGIN_UI} text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start`}
       >
         <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="10 4 6 8 10 12" />
@@ -135,7 +147,7 @@ function EmailForm({
 
       {/* Heading */}
       <div className="flex items-center justify-center gap-2">
-        <h2 className="text-[1.4rem] font-medium tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
+        <h2 className={`${LOGIN_SECTION_TITLE} text-[rgb(var(--fg))]`}>
           Continue with email
         </h2>
       </div>
@@ -243,7 +255,7 @@ function EmailForm({
         {mode === "signin" && (
           <Link
             href="/reset-password"
-            className="self-end text-[12.5px] tracking-tight text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]"
+            className={`self-end ${LOGIN_UI} text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]`}
           >
             Forgot password?
           </Link>
@@ -251,7 +263,7 @@ function EmailForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] font-medium tracking-tight rounded-[6px] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+          className={`flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed`}
           style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
         >
           {loading ? <Spinner /> : null}
@@ -268,7 +280,7 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
       type="button"
       disabled={loading}
       onClick={onOAuth}
-      className="flex items-center justify-center gap-2.5 w-full py-2.5 text-[14px] tracking-tight rounded-[6px] hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+      className={`flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed`}
       style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
     >
       {oauthProvider === "google" ? <Spinner /> : (
@@ -463,10 +475,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     <>
       {/* Heading */}
       <div className="flex flex-col text-center">
-        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 mb-2">
+        <p className={`${LOGIN_SUBTITLE} text-[rgb(var(--muted))] opacity-50 mb-2`}>
           {t === "signin" ? "Welcome back to Inertia" : "Welcome to Inertia"}
         </p>
-        <h1 className="text-[1.8rem] font-medium tracking-[-0.045em] leading-[1.1] text-[rgb(var(--fg))]">
+        <h1 className={`${LOGIN_TITLE} text-[rgb(var(--fg))]`}>
           {t === "signin" ? "Sign in to your portal" : "Create your account"}
         </h1>
       </div>
@@ -488,7 +500,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         <button
           type="button"
           onClick={() => switchTab(t === "signin" ? "signup" : "signin")}
-          className="text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center"
+          className={`${LOGIN_UI} text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center`}
         >
           {t === "signin" ? "No account? Create one →" : "Already have an account? Sign in →"}
         </button>
@@ -561,7 +573,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             page-level context rather than something the card itself offers. */}
         {!SIGNUPS_ENABLED && (
           <div
-            className="flex items-center justify-center gap-2 pl-1 pr-3.5 py-1 rounded-full text-[13px] tracking-tight mb-6"
+            className={`flex items-center justify-center gap-2 pl-1 pr-3.5 py-1 rounded-full ${LOGIN_CAPTION} mb-6`}
             style={{ background: "rgb(var(--fg) / 0.05)", color: "rgb(var(--muted))" }}
           >
             <span
@@ -646,7 +658,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                     key={t}
                     ref={(el) => { tabRefs.current[t] = el; }}
                     onClick={() => switchTab(t)}
-                    className="relative px-5 py-2 text-[13.5px] tracking-tight rounded-full transition-colors duration-200"
+                    className="relative px-5 py-2 text-[14px] sm:text-[15px] tracking-tight rounded-full transition-colors duration-200"
                     style={{ color: tab === t ? "rgb(var(--bg))" : "rgb(var(--muted))" }}
                   >
                     {t === "signin" ? "Sign in" : "Create account"}
@@ -672,13 +684,13 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               >
                 {!revealed ? (
                   <>
-                    <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50 text-center">
+                    <p className={`${LOGIN_SUBTITLE} text-[rgb(var(--muted))] opacity-50 text-center`}>
                       Existing client?
                     </p>
                     <button
                       type="button"
                       onClick={() => setRevealed(true)}
-                      className="flex items-center justify-center w-full py-2.5 text-[14px] font-medium tracking-tight rounded-[6px] hover:opacity-90 transition-opacity"
+                      className={`flex items-center justify-center w-full py-3 ${LOGIN_BTN} rounded-[6px] hover:opacity-90 transition-opacity`}
                       style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
                     >
                       Log in
@@ -691,7 +703,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             </div>
 
             <p
-              className="text-[12px] tracking-tight text-[rgb(var(--muted))] text-center"
+              className={`${LOGIN_CAPTION} text-[rgb(var(--muted))] text-center`}
               style={{ opacity: 0.5 }}
             >
               By continuing, you agree to our{" "}

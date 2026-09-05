@@ -204,13 +204,9 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
       [ArrowRight]
     );
 
-    // Detect the platform so the Continue shortcut hint shows the right
-    // modifier: ⌘ on macOS, ⌃ (Control) elsewhere. Computed in a lazy
-    // initializer (guarded for SSR, where `navigator` doesn't exist) rather
-    // than an effect — an effect resolves a frame late, so ⌘/⌃+Enter would
-    // check ctrlKey on Macs for the first frames. The server can't know the
-    // platform, so the ⌘/⌃ glyph alone may differ on hydration; ShortcutChip
-    // carries suppressHydrationWarning to absorb that one-character delta.
+    // Detect the platform so ⌘/⌃+Enter resolves the right modifier key.
+    // Lazy initializer (guarded for SSR) — an effect would resolve a frame
+    // late, so ⌘/⌃+Enter would check ctrlKey on Macs for the first frames.
     const [isMac] = useState(() => {
       if (typeof navigator === "undefined") return false;
       const nav = navigator as Navigator & {
@@ -820,6 +816,20 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
     const showSubmit = isMulti || isFreeText;
     const showFooter = showBack || showSkip || showSubmit;
 
+    const submitLabel =
+      question.nextLabel ?? (safeIndex >= total - 1 ? "Finish" : "Continue");
+    const submitDisabled = isFreeText
+      ? otherText.trim().length === 0
+      : selectedIds.length === 0 && otherText.trim().length === 0;
+    const submitMotion = {
+      key: "continue" as const,
+      layout: "position" as const,
+      initial: { opacity: 0, scale: 0.85 },
+      animate: { opacity: 1, scale: 1 },
+      exit: { opacity: 0, scale: 0.85 },
+      transition: { ...spring.fast, opacity: { duration: 0.1 } },
+    };
+
     // ── Roving tabindex ──────────────────────────────────────────
     // One tab stop for the whole group, single- AND multi-select alike: the
     // first selected row, or — when the question is unanswered — the first
@@ -1332,20 +1342,15 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                 <div
                   onClick={() => otherInputRef.current?.focus()}
                   className={cn(
-                    // -mx-3 + px-3 mirrors the option rows / "Something else"
-                    // field: the box bleeds 12px each side (so its fill spans the
-                    // same width as the hover/selected backgrounds) while the
-                    // text starts at the content edge, aligned with the option
-                    // titles and the question heading.
-                    "relative mt-1 -mx-3 px-3 py-2.5 cursor-text transition-colors",
+                    // Full width within the content column — no -mx bleed — so
+                    // the box left edge lines up with the question title above.
+                    "relative mt-1 w-full py-2.5 px-3 cursor-text transition-colors",
                     // Resting height: a few lines for multi-line, one row for
                     // single-line. The textarea still auto-resizes above this
                     // floor as content wraps.
                     isFreeTextMultiline ? "min-h-[76px]" : "min-h-10",
-                    // A text field reads better as a soft rectangle than the
-                    // fully-round pill the option rows use, so it takes a fixed
-                    // radius rather than shape.bg.
-                    "rounded-xl",
+                    shape.input,
+                    shape.bgRadius === 6 && "!rounded-[6px]",
                     // The field carries a visible border at rest so it reads as
                     // an input before you interact with it (the stock component
                     // left it borderless until focus, which made it invisible).
@@ -1434,6 +1439,102 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
               in lockstep. */}
           {showFooter && (
             <div className="px-4 sm:px-5 pt-1 pb-2">
+              {isFreeText ? (
+                // freeText: full-width Continue on mobile; on desktop, compact
+                // and right-aligned within the input column — no -mx bleed so
+                // the button never overshoots the field edge.
+                <div className="flex w-full flex-col gap-2">
+                  <div
+                    className={cn(
+                      "flex w-full flex-col gap-2",
+                      "sm:flex-row sm:items-center",
+                      showBack ? "sm:justify-between" : "sm:justify-end"
+                    )}
+                  >
+                    {(showBack || freeTextError) && (
+                      <div className="relative flex min-w-0 items-center gap-2">
+                        <AnimatePresence mode="popLayout" initial={false}>
+                          {showBack && (
+                            <motion.div
+                              key="back"
+                              layout="position"
+                              initial={{ opacity: 0, scale: 0.85 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.85 }}
+                              transition={{
+                                ...spring.fast,
+                                opacity: { duration: 0.1 },
+                              }}
+                            >
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleBack}
+                                className="pl-0 sm:pl-0 text-muted-foreground hover:text-foreground"
+                              >
+                                <ArrowLeftKey />
+                                Back
+                              </Button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        {freeTextError && (
+                          <Field.Error
+                            key="ft-error"
+                            match
+                            render={
+                              <motion.p
+                                role="alert"
+                                initial={{ opacity: 0, y: -2 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                  ...spring.fast,
+                                  opacity: { duration: 0.12 },
+                                }}
+                                className="min-w-0 text-left text-[12px] leading-snug text-destructive"
+                              />
+                            }
+                          >
+                            {freeTextError}
+                          </Field.Error>
+                        )}
+                      </div>
+                    )}
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {showSubmit && (
+                        <motion.div
+                          {...submitMotion}
+                          className="w-full sm:w-auto sm:shrink-0"
+                        >
+                          <Button
+                            variant="secondary"
+                            size="lg"
+                            onClick={handleOtherSubmit}
+                            disabled={submitDisabled}
+                            className={cn(
+                              "h-8 w-full sm:w-auto justify-center text-[13.5px] pl-4 pr-3 sm:pr-2 border border-border bg-muted text-foreground hover:bg-active",
+                              shape.bgRadius === 6 ? "!rounded-[6px]" : shape.button
+                            )}
+                          >
+                            <span className="inline-flex items-center gap-1.5">
+                              {submitLabel}
+                              <span className="hidden sm:inline-flex items-center">
+                                <ShortcutChip shape={shape} tone="muted">
+                                  <ArrowRight
+                                    className="size-3"
+                                    strokeWidth={2.25}
+                                    aria-hidden
+                                  />
+                                </ShortcutChip>
+                              </span>
+                            </span>
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              ) : (
               <div className="flex items-center justify-between gap-2 -mx-2 sm:-mx-3">
                 {/* Each button is wrapped in a motion.div so it fades + scales
                     when it appears/disappears (e.g. Continue on multi-select).
@@ -1478,35 +1579,6 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  {/* Validation error — left-aligned at the content edge (the
-                      px-2/sm:px-3 cancels the row's -mx), or just after Back when
-                      present. Conditionally rendered (no exit animation) so
-                      clearing it on edit removes the node immediately instead of
-                      leaving an invisible spacer. Rendered through Base UI
-                      Field.Error so its generated id is registered on the Field
-                      and auto-appears in the textarea's aria-describedby;
-                      `match` pins it visible while our submit-time validation
-                      (handleOtherSubmit) has an error standing. */}
-                  {freeTextError && (
-                    <Field.Error
-                      key="ft-error"
-                      match
-                      render={
-                        <motion.p
-                          role="alert"
-                          initial={{ opacity: 0, y: -2 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{
-                            ...spring.fast,
-                            opacity: { duration: 0.12 },
-                          }}
-                          className="min-w-0 px-2 sm:px-3 text-left text-[12px] leading-snug text-destructive"
-                        />
-                      }
-                    >
-                      {freeTextError}
-                    </Field.Error>
-                  )}
                 </div>
                 <div className="relative flex items-center gap-2">
                   <AnimatePresence mode="popLayout" initial={false}>
@@ -1538,31 +1610,14 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                       </motion.div>
                     )}
                     {showSubmit && (
-                      <motion.div
-                        key="continue"
-                        layout="position"
-                        initial={{ opacity: 0, scale: 0.85 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.85 }}
-                        transition={{
-                          ...spring.fast,
-                          opacity: { duration: 0.1 },
-                        }}
-                      >
+                      <motion.div {...submitMotion}>
                         <Button
                           variant="default"
                           // Larger than the ghost Back/Skip beside it: this is
                           // the primary commit action and was undersized at sm.
                           size="lg"
-                          onClick={
-                            isFreeText ? handleOtherSubmit : handleMultiNext
-                          }
-                          disabled={
-                            isFreeText
-                              ? otherText.trim().length === 0
-                              : selectedIds.length === 0 &&
-                                otherText.trim().length === 0
-                          }
+                          onClick={handleMultiNext}
+                          disabled={submitDisabled}
                           // The shortcut chip acts as a trailing icon, so tighten
                           // the right padding to match the Button's iconRight on
                           // desktop. The chip is hidden on mobile, so restore
@@ -1573,19 +1628,21 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                           // --sh-primary (#ededed): as the one commit action on
                           // a near-black card, it should read as the brightest
                           // thing there, and the token sits a step under that.
-                          className="h-8 text-[13.5px] pl-4 pr-3 sm:pr-2 rounded-full bg-white text-black hover:bg-white/90"
+                          className={cn(
+                            "h-8 text-[13.5px] pl-4 pr-3 sm:pr-2 bg-white text-black hover:bg-white/90",
+                            shape.bgRadius === 6 ? "!rounded-[6px]" : shape.button
+                          )}
                         >
                           <span className="inline-flex items-center gap-1.5">
-                            {question.nextLabel ??
-                              (safeIndex >= total - 1 ? "Finish" : "Continue")}
-                            {/* Shortcut hint — replaces the trailing arrow. Sits
-                                inside the button so it dims with the disabled
-                                state. ⌘↵ on macOS, ⌃↵ elsewhere. Desktop-only:
-                                mobile has no physical keyboard to trigger it. */}
-                            <span className="hidden sm:contents">
-                              <ShortcutChip shape={shape} tone="inverted">
-                                {isMac ? "⌘" : "⌃"}
-                                {"↵"}
+                            {submitLabel}
+                            {/* Shortcut hint — desktop-only. */}
+                            <span className="hidden sm:inline-flex items-center">
+                              <ShortcutChip shape={shape} tone="onLight">
+                                <ArrowRight
+                                  className="size-3"
+                                  strokeWidth={2.25}
+                                  aria-hidden
+                                />
                               </ShortcutChip>
                             </span>
                           </span>
@@ -1595,6 +1652,7 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                   </AnimatePresence>
                 </div>
               </div>
+              )}
             </div>
           )}
         </Field.Root>
@@ -1607,30 +1665,27 @@ AskUserQuestions.displayName = "AskUserQuestions";
 
 // ── Shortcut chip ─────────────────────────────────────────────
 // Small keycap showing the keyboard shortcut for an action, so Back (←),
-// Skip (→) and Continue (⌘↵ / ⌃↵) all read consistently. `tone="inverted"`
-// sits on the dark primary button; the default reads on quiet ghost buttons.
-// suppressHydrationWarning: the ⌘/⌃ glyph is platform-detected in a lazy
-// initializer (see isMac), so the server always renders ⌃ while a Mac client
-// renders ⌘ — a benign one-character text mismatch on hydration.
+// Skip (→) and Continue (→) keyboard hints read consistently.
 function ShortcutChip({
   children,
   tone = "muted",
   shape,
 }: {
   children: React.ReactNode;
-  tone?: "muted" | "inverted";
+  tone?: "muted" | "inverted" | "onLight";
   shape: ReturnType<typeof useShape>;
 }) {
   return (
     <kbd
       aria-hidden
-      suppressHydrationWarning
       className={cn(
-        "inline-flex items-center justify-center gap-0.5 px-1 min-w-[18px] h-[18px] text-[11px] leading-none font-sans tracking-wide",
-        tone === "inverted"
-          ? "bg-background/15 text-background"
-          : "bg-foreground/10 text-muted-foreground",
-        shape.bg
+        "inline-flex shrink-0 items-center justify-center min-w-[20px] h-5 px-1 text-[11px] leading-none font-sans tracking-wide",
+        tone === "onLight"
+          ? "bg-black/10 text-black/75 ring-1 ring-inset ring-black/15"
+          : tone === "inverted"
+            ? "bg-background/15 text-background"
+            : "bg-foreground/10 text-muted-foreground",
+        shape.bgRadius <= 6 ? "rounded-[4px]" : shape.bg
       )}
     >
       {children}

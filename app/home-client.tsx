@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
-import { postTint } from "@/components/post-glyph";
 import { createPortal, flushSync } from "react-dom";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
@@ -9,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { ShapeProvider } from "@/lib/shape-context";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
 import {
@@ -706,17 +706,273 @@ function DesignSelectionWord({
   );
 }
 
-function heroCtaLabelStyle(active: boolean) {
+// Static Figma-style frame — same stroke and corner handles as the hero's
+// "design" selection, without the draw-in or resize animation.
+function FigmaSelectionFrame({
+  children,
+  className,
+  frameRef,
+  style,
+  strokeColor = SELECTION_FRAME_COLOR,
+  handleFill = "#fff",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  frameRef?: React.RefObject<HTMLDivElement | null>;
+  style?: React.CSSProperties;
+  strokeColor?: string;
+  handleFill?: string;
+}) {
+  const color = strokeColor;
+  const HANDLE = 5;
+  const corners = [
+    { top: -HANDLE / 2, left: -HANDLE / 2 },
+    { top: -HANDLE / 2, right: -HANDLE / 2 },
+    { bottom: -HANDLE / 2, right: -HANDLE / 2 },
+    { bottom: -HANDLE / 2, left: -HANDLE / 2 },
+  ] as const;
+
+  return (
+    <div
+      ref={frameRef}
+      className={cn("relative w-full", className)}
+      style={{ border: `1px solid ${color}`, ...style }}
+    >
+      {children}
+      {corners.map((pos, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: HANDLE,
+            height: HANDLE,
+            background: handleFill,
+            border: `1px solid ${color}`,
+            pointerEvents: "none",
+            ...pos,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FigmaHorizontalRule({
+  strokeColor = SELECTION_FRAME_COLOR,
+  handleFill = "rgb(var(--bg))",
+}: {
+  strokeColor?: string;
+  handleFill?: string;
+}) {
+  const color = strokeColor;
+  const HANDLE = 5;
+  const handleStyle: React.CSSProperties = {
+    position: "absolute",
+    top: -HANDLE / 2,
+    width: HANDLE,
+    height: HANDLE,
+    background: handleFill,
+    border: `1px solid ${color}`,
+    pointerEvents: "none",
+    zIndex: 2,
+  };
+
+  return (
+    <div
+      className="relative z-20 w-full shrink-0"
+      aria-hidden="true"
+      style={{ borderTop: `1px solid ${color}` }}
+    >
+      <span style={{ ...handleStyle, left: -HANDLE / 2 }} />
+      <span style={{ ...handleStyle, right: -HANDLE / 2 }} />
+    </div>
+  );
+}
+
+function sampleImageAmbientTone(data: Uint8ClampedArray) {
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  const n = data.length / 4;
+  for (let i = 0; i < data.length; i += 4) {
+    r += data[i];
+    g += data[i + 1];
+    b += data[i + 2];
+  }
+
+  // Pull dark screenshot averages toward a light wash while keeping hue.
+  let rr = r / n;
+  let gg = g / n;
+  let bb = b / n;
+  const lift = 0.55;
+  rr += (255 - rr) * lift;
+  gg += (255 - gg) * lift;
+  bb += (255 - bb) * lift;
+
+  const gray = (rr + gg + bb) / 3;
+  const satBoost = 1.45;
+  rr = gray + (rr - gray) * satBoost;
+  gg = gray + (gg - gray) * satBoost;
+  bb = gray + (bb - gray) * satBoost;
+
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+  return `rgb(${clamp(rr)}, ${clamp(gg)}, ${clamp(bb)})`;
+}
+
+function clientAmbientSolid(color: string) {
   return {
-    opacity: active ? 1 : 0,
-    transform: active ? "scale(1)" : "scale(0.97)",
-    filter: active ? "blur(0px)" : "blur(10px)",
-    willChange: "opacity, transform, filter",
-    transition: [
-      `opacity ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
-      `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
-      `filter ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
-    ].join(", "),
+    field: `radial-gradient(ellipse 110% 95% at 50% 36%, ${color} 0%, transparent 74%)`,
+    fade: "linear-gradient(to bottom, transparent 0%, transparent 50%, rgb(var(--bg) / 0.42) 78%, rgb(var(--bg)) 100%)",
+  };
+}
+
+const CLIENT_DIALOG_STROKE = "rgb(var(--line))";
+
+const CLIENT_DIALOG_AMBIENT: Record<string, { field: string; fade: string }> = {
+  "mood-swings": clientAmbientSolid("rgb(106 34 53 / 0.44)"),
+  "trippie-redd": clientAmbientSolid("rgb(20 31 82 / 0.46)"),
+  inboundly: clientAmbientSolid("rgb(74 45 122 / 0.44)"),
+  "allure-new-york": clientAmbientSolid("rgb(155 45 63 / 0.42)"),
+};
+
+function resolveClientDialogAmbient(slug: string, sampled: string) {
+  const custom = CLIENT_DIALOG_AMBIENT[slug];
+  if (custom) return custom;
+  return {
+    field: `radial-gradient(ellipse 95% 75% at 50% 18%, ${sampled} 0%, transparent 68%), radial-gradient(ellipse 90% 70% at 72% 72%, ${sampled} 0%, transparent 70%)`,
+    fade: `linear-gradient(to bottom, transparent 0%, transparent 40%, rgb(var(--bg) / 0.6) 74%, rgb(var(--bg)) 100%)`,
+  };
+}
+
+function useImageAmbientTone(src: string | undefined) {
+  const [tone, setTone] = useState("rgb(var(--bg))");
+
+  useEffect(() => {
+    if (!src) return;
+    let cancelled = false;
+    const img = document.createElement("img");
+    img.decoding = "async";
+    img.onload = () => {
+      if (cancelled) return;
+      try {
+        const canvas = document.createElement("canvas");
+        const size = 32;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, size, size);
+        const { data } = ctx.getImageData(0, 0, size, size);
+        setTone(sampleImageAmbientTone(data));
+      } catch {
+        // Same-origin only; fall back to page background.
+      }
+    };
+    img.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  return tone;
+}
+
+function ClientDialogDragHandle({
+  dragging,
+  dragY,
+}: {
+  dragging: boolean;
+  dragY: number;
+}) {
+  const progress = Math.min(Math.max(dragY, 0) / 110, 1);
+  const active = dragging || progress > 0;
+
+  return (
+    <div className="sm:hidden flex justify-center pt-4 pb-2.5 cursor-grab active:cursor-grabbing touch-none">
+      <div
+        className="rounded-full"
+        style={{
+          width: 36 + progress * 32,
+          height: active ? 5 : 4,
+          background:
+            progress > 0.45
+              ? `rgb(var(--fg) / ${0.28 + progress * 0.42})`
+              : active
+                ? "rgb(var(--muted))"
+                : "rgb(var(--line))",
+          opacity: 0.55 + progress * 0.45,
+          transition: dragging
+            ? "none"
+            : "width 280ms cubic-bezier(0.22,1,0.36,1), height 180ms ease, background-color 180ms ease, opacity 180ms ease",
+        }}
+      />
+    </div>
+  );
+}
+
+function ClientDialogMediaBlock({
+  slug,
+  src,
+  dragging,
+  dragY,
+}: {
+  slug: string;
+  src: string;
+  dragging: boolean;
+  dragY: number;
+}) {
+  const sampled = useImageAmbientTone(src);
+  const ambient = resolveClientDialogAmbient(slug, sampled);
+  const customAmbient = Boolean(CLIENT_DIALOG_AMBIENT[slug]);
+
+  return (
+    <>
+      <div className="relative overflow-hidden sm:overflow-visible">
+        <div className="sm:hidden absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+          <img
+            src={src}
+            alt=""
+            className="absolute left-1/2 top-1/2 h-[165%] w-[165%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover blur-[40px] saturate-135"
+            style={{ opacity: customAmbient ? 0.68 : 0.74 }}
+            draggable={false}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: ambient.field }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(ellipse 120% 90% at 50% 40%, rgb(var(--bg) / 0.02) 0%, rgb(var(--bg) / 0.18) 100%)",
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: ambient.fade }}
+          />
+        </div>
+
+        <ClientDialogDragHandle dragging={dragging} dragY={dragY} />
+
+        <div className="relative px-3 pb-3 sm:px-0 sm:pb-4">
+          <div
+            className="relative w-full overflow-hidden rounded-2xl sm:rounded-none aspect-[16/10]"
+            style={{ background: "#0a0a0a" }}
+          >
+            <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function heroCtaTrackStyle(isAetherCta: boolean) {
+  return {
+    transform: isAetherCta ? "translateY(-50%)" : "translateY(0)",
+    willChange: "transform",
+    transition: `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
   };
 }
 
@@ -871,6 +1127,13 @@ function VercelHero({
             </span>
           </h1>
 
+          <p
+            className="max-w-md sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight"
+            style={{ ...liquid(120), color: "#5c5c5c" }}
+          >
+            For brand owners and startups.
+          </p>
+
           {false && (
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
             <p
@@ -932,20 +1195,25 @@ function VercelHero({
               {...ctaScaleHoverOnParent}
             >
               <CtaGrain />
-              <span className="relative inline-grid place-items-center text-center whitespace-nowrap">
-                <span
-                  className="col-start-1 row-start-1 justify-self-center"
-                  style={heroCtaLabelStyle(!isAetherCta)}
-                  aria-hidden={isAetherCta}
-                >
+              <span className="relative inline-grid text-center whitespace-nowrap">
+                <span className="invisible col-start-1 row-start-1" aria-hidden="true">
                   Get in touch
                 </span>
-                <span
-                  className="col-start-1 row-start-1 justify-self-center"
-                  style={heroCtaLabelStyle(isAetherCta)}
-                  aria-hidden={!isAetherCta}
-                >
+                <span className="invisible col-start-1 row-start-1" aria-hidden="true">
                   View Aether
+                </span>
+                <span className="col-start-1 row-start-1 relative overflow-hidden h-10 sm:h-12 w-full">
+                  <span
+                    className="flex flex-col motion-reduce:transition-none"
+                    style={heroCtaTrackStyle(isAetherCta)}
+                  >
+                    <span className="flex h-10 sm:h-12 items-center justify-center">
+                      Get in touch
+                    </span>
+                    <span className="flex h-10 sm:h-12 items-center justify-center">
+                      View Aether
+                    </span>
+                  </span>
                 </span>
               </span>
             </a>
@@ -1189,6 +1457,8 @@ function useTypewriter(text: string, active: boolean, speed = 18) {
 // chat box that becomes the real question component once the text lands.
 type Stage = "quiz" | "typing" | "intake" | "done";
 
+const QUIZ_FRAME_INNER_CLASS = "mx-auto max-w-none border-0 bg-transparent rounded-none";
+
 function Questionnaire({ onStartConversation }: { onStartConversation: () => void }) {
   const [disclosed, setDisclosed] = useState(false);
   const [stage, setStage] = useState<Stage>("quiz");
@@ -1373,13 +1643,13 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
   return (
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div className="relative max-w-3xl mx-auto">
-      <div
-        ref={inquiryBorderRef}
-        className={`relative overflow-hidden origin-center rounded-[6px] border border-dashed border-[rgb(var(--line))] py-8 sm:py-10 px-6 sm:px-10 ${LIQUID_REVEAL}`}
+      <FigmaSelectionFrame
+        frameRef={inquiryBorderRef}
+        className={cn("origin-center py-8 sm:py-10 px-6 sm:px-10", LIQUID_REVEAL)}
         style={{ background: "transparent" }}
       >
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-          <div className={`min-w-0 text-center sm:text-left ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
+          <div className={`min-w-0 text-center ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
             {/* Transparent fill now, so the card sits on the dark zone's own
                 ground and takes the zone's ink — the hardcoded near-black
                 these used while the card was white would be invisible here. */}
@@ -1390,7 +1660,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
               What are you building?
             </h2>
             <p
-              className="mt-2.5 text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight"
+              className="mt-3.5 sm:mt-4 text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight"
               style={{ color: "rgb(var(--muted))" }}
             >
               Three quick questions to start. We&rsquo;ll take it from there.
@@ -1425,7 +1695,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
           </span>
         )}
         </div>
-      </div>
+      </FigmaSelectionFrame>
       </div>
 
       {disclosed && (
@@ -1441,6 +1711,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
             stage === "quiz" ? "max-w-md sm:max-w-3xl" : "max-w-2xl sm:max-w-3xl"
           )}
         >
+        <ShapeProvider defaultShape="action">
         {stage !== "quiz" && (
           <div ref={transcriptRevealRef} className={`flex justify-end ${LIQUID_REVEAL}`}>
             {/* --sh-muted, not --sh-card: the card token is pure white in
@@ -1483,14 +1754,14 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         )}
 
         {stage === "quiz" && (
-          // max-w-none lets the component fill the narrow wrapper above instead
-          // of its own max-w-[520px] (cn uses tailwind-merge, so this wins).
-          <AskUserQuestions
-            key={`quiz-${resetKey}`}
-            questions={QUIZ_QUESTIONS}
-            onComplete={onQuizComplete}
-            className="mx-auto max-w-none rounded-[6px] border border-dashed border-[rgb(var(--line))] bg-transparent"
-          />
+          <FigmaSelectionFrame>
+            <AskUserQuestions
+              key={`quiz-${resetKey}`}
+              questions={QUIZ_QUESTIONS}
+              onComplete={onQuizComplete}
+              className={QUIZ_FRAME_INNER_CLASS}
+            />
+          </FigmaSelectionFrame>
         )}
 
         {/* Inert chat input while the reply types: it holds the space the real
@@ -1499,14 +1770,14 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
           <div
             ref={typingRevealRef}
             aria-hidden
-            className={`mt-8 sm:mt-10 w-full rounded-2xl border border-border px-4 py-3 flex items-center gap-3 ${LIQUID_REVEAL}`}
+            className={`mt-8 sm:mt-10 w-full rounded-[6px] border border-border px-4 py-3 flex items-center gap-3 ${LIQUID_REVEAL}`}
             style={{ background: "var(--sh-card)", opacity: 0.55 }}
           >
             <span className="text-[14px] tracking-tight text-muted-foreground flex-1">
               Type your answer...
             </span>
             <span
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full shrink-0"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] shrink-0"
               style={{ background: "var(--sh-muted)" }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-muted-foreground">
@@ -1518,12 +1789,14 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
         {stage === "intake" && (
           <div ref={setIntakeRef} className={`mt-8 sm:mt-10 ${LIQUID_REVEAL}`}>
-            <AskUserQuestions
-              key={`intake-${resetKey}`}
-              questions={INTAKE_QUESTIONS}
-              onComplete={onIntakeComplete}
-              className="mx-auto max-w-none rounded-[6px] border border-dashed border-[rgb(var(--line))] bg-transparent"
-            />
+            <FigmaSelectionFrame>
+              <AskUserQuestions
+                key={`intake-${resetKey}`}
+                questions={INTAKE_QUESTIONS}
+                onComplete={onIntakeComplete}
+                className={QUIZ_FRAME_INNER_CLASS}
+              />
+            </FigmaSelectionFrame>
             {submitting && (
               <p className="mt-4 text-[13px] tracking-tight text-muted-foreground text-center">
                 Sending...
@@ -1572,6 +1845,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
             </div>
           </div>
         )}
+        </ShapeProvider>
         </div>
       )}
     </section>
@@ -1991,7 +2265,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-        <h2 className="mb-3">
+        <h2 className="mb-5 sm:mb-6 text-center">
           <span
             className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
             style={{ background: "#1a1a1a" }}
@@ -2100,25 +2374,48 @@ const WHAT_WE_DO_ITEMS = [
     label: "Direction",
     description: "We figure out what the product or brand actually needs to be before anything gets designed.",
     image: "/what-we-do/direction.png",
+    // Asset has a scale bar on the right — nudge left so the diagram reads centered.
+    imageShift: "-translate-x-[5%] sm:-translate-x-[6%]",
+    bentoClass: "sm:col-span-2 sm:row-span-2 sm:min-h-[28rem] lg:min-h-[32rem]",
   },
   {
     label: "Design",
     description: "Interfaces, identity, and the small decisions in between, held to one standard of taste.",
     image: "/what-we-do/design.png",
+    bentoClass: "sm:col-span-2 sm:row-span-1",
   },
   {
     label: "Development",
     description: "We build what we design ourselves, so nothing is lost translating one team's vision to another's code.",
     image: "/what-we-do/development.png",
+    bentoClass: "sm:col-span-1 sm:row-span-1",
   },
-];
+  {
+    label: "Launch",
+    description: "We ship what we build and stay through launch, so what goes live matches what was designed.",
+    bentoClass: "sm:col-span-1 sm:row-span-1",
+  },
+] as const;
+
+const WHAT_WE_DO_CELL =
+  "flex flex-col rounded-[6px] p-4 sm:p-5 min-h-[168px] sm:min-h-0 h-full";
+const WHAT_WE_DO_CELL_STYLE = {
+  background: "rgba(26,26,26,0.03)",
+  boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
+} as const;
 
 function WhatWeDo() {
   return (
-    <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
-      <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-[calc(0.375rem+6px+1.25rem)] sm:pl-[calc(50vw-384px)]">
-        <div className="max-w-2xl sm:max-w-none">
-          <h2 className="mb-6 sm:mb-8">
+    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      <div className="max-w-2xl sm:max-w-none sm:mx-auto">
+        <div
+          className="rounded-[6px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
+          style={{
+            background: "rgba(26,26,26,0.04)",
+            boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
+          }}
+        >
+          <h2 className="mb-8 sm:mb-10 text-center">
             <span
               className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
               style={{ background: "#1a1a1a" }}
@@ -2126,32 +2423,62 @@ function WhatWeDo() {
               What we do
             </span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
-            {WHAT_WE_DO_ITEMS.map((item) => (
-              <div key={item.label}>
-                <p
-                  className="text-[16px] sm:text-[21px] tracking-[-0.02em]"
-                  style={{ color: "#1a1a1a", fontWeight: 500 }}
-                >
-                  {item.label}
-                </p>
-                <p
-                  className="mt-2 text-[14.5px] sm:text-[21px] leading-relaxed tracking-tight"
-                  style={{ color: "#5c5c5c" }}
-                >
-                  {item.description}
-                </p>
-                {item.image && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.image}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-full h-auto mt-4 max-w-[220px] sm:max-w-[280px]"
-                  />
+          <div className="grid grid-cols-1 sm:grid-cols-4 sm:auto-rows-[minmax(11rem,auto)] gap-3 sm:gap-4">
+            {WHAT_WE_DO_ITEMS.map((item) => {
+              const isHeroCell = item.bentoClass.includes("row-span-2");
+              const hasImage = "image" in item && item.image;
+
+              return (
+              <div
+                key={item.label}
+                className={cn(
+                  WHAT_WE_DO_CELL,
+                  item.bentoClass,
+                  isHeroCell && hasImage && "relative overflow-hidden"
+                )}
+                style={WHAT_WE_DO_CELL_STYLE}
+              >
+                <div className={cn(isHeroCell && hasImage && "relative z-10")}>
+                  <p
+                    className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight"
+                    style={{ color: "#1a1a1a", fontWeight: 500 }}
+                  >
+                    {item.label}
+                  </p>
+                  <p
+                    className="mt-2 text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight"
+                    style={{ color: "#5c5c5c" }}
+                  >
+                    {item.description}
+                  </p>
+                </div>
+                {hasImage && (
+                  <div
+                    className={cn(
+                      "w-full min-w-0",
+                      isHeroCell
+                        ? "pointer-events-none absolute inset-0 flex items-center justify-center p-4 sm:p-5"
+                        : "mt-auto pt-4 sm:pt-5 flex flex-1 items-end justify-center min-h-[120px] sm:min-h-[140px]"
+                    )}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.image}
+                      alt=""
+                      aria-hidden="true"
+                      className={cn(
+                        "object-contain",
+                        isHeroCell
+                          ? "max-h-full max-w-full"
+                          : "h-auto w-full max-w-[160px] sm:max-w-[200px]",
+                        "imageShift" in item && item.imageShift,
+                      )}
+                    />
+                  </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -2166,10 +2493,9 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
     "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
     <>
-      <section className="rise rise--liquid w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
-        <div className="pl-[calc(0.375rem+6px+1.25rem)] pr-[calc(0.375rem+6px+1.25rem)] sm:pr-0 sm:pl-[calc(50vw-384px)]">
-          <div className="max-w-2xl sm:max-w-3xl">
-            <h2 className="mb-3">
+      <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+        <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
+            <h2 className="mb-5 sm:mb-6 text-center">
               <span
                 className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
                 style={{ background: "#1a1a1a" }}
@@ -2188,15 +2514,14 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
               className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left mt-5"
               style={{ color: "#5c5c5c" }}
             />
-          </div>
         </div>
       </section>
-      <div className="py-12 sm:py-16" />
+      <div className="py-16 sm:py-24" />
       <WhatWeDo />
       {/* Matches the spacer between the client list and this section's
-          paragraph, so the paragraph sits the same distance above the cards
+          paragraph, so the paragraph sits the same distance above the list
           as it does below the client list. */}
-      <div className="py-12 sm:py-16" />
+      <div className="py-16 sm:py-24" />
       <BlogCarousel posts={posts} />
     </>
   );
@@ -2333,11 +2658,14 @@ function ClientDialog({
   const open = item !== null;
   const backdropRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Live swipe offset, in px. Written during a drag and animated back to 0 (or
   // out) on release.
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   // Mirrors dragY for the touch handlers: touchend needs the latest offset
   // synchronously, and reading the state variable there would close over the
   // value from the render that installed the handler.
@@ -2355,10 +2683,36 @@ function ClientDialog({
   // Reset the sheet position whenever it reopens, so a previous swipe doesn't
   // leave the next open offset.
   useEffect(() => {
-    if (open) { applyDragY(0); setDragging(false); dragRef.current = null; }
+    if (open) {
+      applyDragY(0);
+      setDragging(false);
+      setDismissing(false);
+      dismissDoneRef.current = false;
+      dragRef.current = null;
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+        dismissTimerRef.current = null;
+      }
+    }
   }, [open]);
 
+  useEffect(() => () => {
+    if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+  }, []);
+
+  const dismissDoneRef = useRef(false);
+  const finishDismiss = () => {
+    if (dismissDoneRef.current) return;
+    dismissDoneRef.current = true;
+    if (dismissTimerRef.current) {
+      clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = null;
+    }
+    onClose();
+  };
+
   const CLOSE_THRESHOLD = 110;
+  const DISMISS_MS = 420;
   // Finger has to travel this far down before the touch is treated as a
   // dismiss drag at all. Below it the gesture stays a candidate: nothing
   // moves, no transform is written, and a tap on a link or button inside the
@@ -2372,7 +2726,8 @@ function ClientDialog({
   const onTouchStart = (e: React.TouchEvent) => {
     // Only a drag that begins at the very top of the scroll area can dismiss;
     // otherwise a normal upward scroll inside the panel would read as one.
-    if ((panelRef.current?.scrollTop ?? 0) > 0) return;
+    const textScroll = panelRef.current?.querySelector("[data-client-dialog-text]");
+    if ((textScroll instanceof HTMLElement ? textScroll.scrollTop : 0) > 0) return;
     const t = e.touches[0];
     // `active` starts false: this is a candidate, not yet a drag. It is
     // promoted in touchmove once the finger clears the slop downward.
@@ -2417,7 +2772,18 @@ function ClientDialog({
     // updater. React treats updaters as pure and may run them during render,
     // so calling onClose() in there sets state on the parent mid-render
     // ("Cannot update a component while rendering a different component").
-    if (dragYRef.current > CLOSE_THRESHOLD) onClose();
+    if (dragYRef.current > CLOSE_THRESHOLD) {
+      setDismissing(true);
+      const rect = sheetRef.current?.getBoundingClientRect();
+      // translateY is measured from rest, not from the current drag offset — add
+      // the remaining distance from the finger-released position to off-screen.
+      const exitY = rect
+        ? dragYRef.current + (window.innerHeight - rect.top) + 56
+        : window.innerHeight;
+      requestAnimationFrame(() => applyDragY(exitY));
+      dismissTimerRef.current = setTimeout(finishDismiss, DISMISS_MS + 80);
+      return;
+    }
     applyDragY(0);
   };
 
@@ -2438,67 +2804,80 @@ function ClientDialog({
 
   if (!mounted) return null;
 
-  const accent = item ? CLIENT_NAME_ACCENT[item.slug] : undefined;
+  const dragFade = Math.min(Math.max(dragY, 0) / 280, 0.45);
 
   return createPortal(
     <div
-      ref={backdropRef}
-      className="fixed z-50 flex items-end sm:items-center justify-center"
-      style={{
-        inset: 0,
-        height: "100dvh",
-        background: "rgba(0,0,0,0.55)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
-        opacity: open ? 1 : 0,
-        pointerEvents: open ? "auto" : "none",
-        transition: "opacity 220ms ease",
-      }}
-      onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
+      className="fixed z-50 flex items-end sm:items-center justify-center px-4 pt-6 pb-4 sm:p-6"
+      style={{ inset: 0, height: "100dvh", pointerEvents: open && !dismissing ? "auto" : "none" }}
     >
+      <div
+        ref={backdropRef}
+        className="absolute inset-0"
+        style={{
+          background: "rgba(0,0,0,0.55)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          opacity: open ? (dismissing ? 0 : 1 - dragFade) : 0,
+          transition: dismissing
+            ? `opacity ${DISMISS_MS}ms ease`
+            : dragging
+              ? "none"
+              : "opacity 220ms ease",
+        }}
+        onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
+      />
       {item && (
         <div
-          ref={panelRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label={item.client}
-          data-lenis-prevent
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
-          onTouchCancel={onTouchEnd}
-          className="relative w-full sm:max-w-[520px] bg-[rgb(var(--bg))] border border-[rgb(var(--line))] rounded-t-2xl sm:rounded-2xl mx-0 sm:mx-4 overflow-y-auto overscroll-contain"
+          ref={sheetRef}
+          className="relative w-full min-w-0 max-w-[520px] p-[3px] max-h-[calc(100dvh-2.5rem)] sm:max-h-none"
+          onTransitionEnd={(e) => {
+            if (e.target !== e.currentTarget || e.propertyName !== "transform" || !dismissing) return;
+            finishDismiss();
+          }}
           style={{
-            maxHeight: "90dvh",
-            // The open animation and the drag transform both write to the same
-            // property, so only run the keyframes while the sheet is at rest.
-            animation: open && dragY === 0 && !dragging
+            animation: open && dragY === 0 && !dragging && !dismissing
               ? "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both"
               : "none",
             transform: dragY !== 0 ? `translateY(${dragY}px)` : undefined,
-            // While the finger is down the sheet tracks it 1:1 with no
-            // transition. On release it springs back with a softer, slightly
-            // longer curve than the open animation, so letting go reads as the
-            // sheet settling rather than snapping.
             transition: dragging
               ? "none"
-              : "transform 420ms cubic-bezier(0.22,1,0.36,1)",
-            // pan-y alone still let the browser claim the gesture mid-drag on
-            // some Android builds. The sheet handles its own vertical drag and
-            // scrolls its own content, so opt out of browser gestures here.
-            touchAction: "pan-y",
-            // Dragging a sheet should never start a text selection or a
-            // long-press callout under the finger.
-            WebkitUserSelect: dragging ? "none" : undefined,
-            userSelect: dragging ? "none" : undefined,
+              : dismissing
+                ? `transform ${DISMISS_MS}ms cubic-bezier(0.32, 0, 0.67, 0)`
+                : "transform 420ms cubic-bezier(0.22,1,0.36,1)",
           }}
         >
-          <div className="sm:hidden flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
-            <div
-              className="w-9 h-1 rounded-full transition-colors"
-              style={{ background: dragging ? "rgb(var(--muted))" : "rgb(var(--line))" }}
-            />
-          </div>
+          <FigmaSelectionFrame
+            className="bg-[rgb(var(--bg))] min-w-0 flex max-h-[calc(100dvh-3rem-6px)] flex-col sm:max-h-none"
+            strokeColor={CLIENT_DIALOG_STROKE}
+            handleFill="rgb(var(--bg))"
+          >
+          <div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={item.client}
+            data-lenis-prevent
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            onTouchCancel={onTouchEnd}
+            className="relative flex min-h-0 min-w-0 max-w-full flex-1 flex-col"
+            style={{
+              touchAction: "pan-y",
+              WebkitUserSelect: dragging ? "none" : undefined,
+              userSelect: dragging ? "none" : undefined,
+            }}
+          >
+          {item.image ? (
+            <ClientDialogMediaBlock slug={item.slug} src={item.image} dragging={dragging} dragY={dragY} />
+          ) : (
+            <ClientDialogDragHandle dragging={dragging} dragY={dragY} />
+          )}
+
+          {item.image && (
+            <FigmaHorizontalRule strokeColor={CLIENT_DIALOG_STROKE} handleFill="rgb(var(--bg))" />
+          )}
 
           <button
             onClick={onClose}
@@ -2511,30 +2890,19 @@ function ClientDialog({
             </svg>
           </button>
 
-          {item.image && (
-            // Inset on mobile so the image's rounded top sits inside the sheet's
-            // own corner radius instead of fighting it; full-bleed from sm up,
-            // where the panel clips the top for us.
-            <div className="px-3 sm:px-0">
-              <div
-                className="relative w-full overflow-hidden rounded-2xl sm:rounded-t-none sm:rounded-b-2xl"
-                style={{ aspectRatio: "16 / 10", background: "#0a0a0a" }}
-              >
-                <img src={item.image} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
-              </div>
-            </div>
-          )}
-
-          <div className="px-5 sm:px-7 py-6 sm:py-7">
+          <div
+            data-client-dialog-text
+            className="min-h-0 min-w-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-5 py-6 sm:overflow-visible sm:px-6 sm:py-5"
+          >
             <p
-              className="text-[clamp(1.6rem,5vw,2.1rem)] tracking-tight leading-none"
-              style={{ fontWeight: 450, color: accent ?? "rgb(var(--fg))" }}
+              className="min-w-0 break-words text-[clamp(1.6rem,5vw,2.1rem)] tracking-tight leading-none text-[rgb(var(--fg))]"
+              style={{ fontWeight: 450, overflowWrap: "anywhere" }}
             >
               {item.client}
             </p>
 
             {(item.service || item.year) && (
-              <div className="mt-3 flex items-center gap-2 text-[13px] tracking-tight">
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] tracking-tight min-w-0">
                 {item.service && (
                   <span
                     className="inline-flex items-center rounded-[6px] px-2.5 py-1 leading-none"
@@ -2550,19 +2918,21 @@ function ClientDialog({
             )}
 
             {item.summary && (
-              <p className="mt-5 text-[15px] sm:text-[16px] leading-relaxed tracking-[-0.02em]" style={{ color: "rgb(var(--muted))" }}>
+              <p className="mt-4 sm:mt-3 min-w-0 break-words text-[15px] sm:text-[16px] leading-relaxed tracking-[-0.02em]" style={{ color: "rgb(var(--muted))", overflowWrap: "anywhere" }}>
                 {item.summary}
               </p>
             )}
 
             <Link
               href={`/work/${item.slug}`}
-              className={`mt-7 inline-flex items-center ${ACTION_RADIUS_CLASS} px-5 h-10 text-[15px] tracking-tight`}
+              className={`mt-6 sm:mt-5 inline-flex items-center ${ACTION_RADIUS_CLASS} px-5 h-10 text-[15px] tracking-tight`}
               style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
             >
               View case study
             </Link>
           </div>
+          </div>
+          </FigmaSelectionFrame>
         </div>
       )}
     </div>,
@@ -2588,12 +2958,24 @@ const CLIENT_NAME_ACCENT: Record<string, string> = {
 
 // Darker than the global --line token: a 1px dashed rule at 225 grey nearly
 // disappears, and this grid is built from rails so they have to read.
-const CLIENT_RULE = "1px dashed rgb(var(--fg) / 0.28)";
+const CLIENT_GRID_LINE = `1px solid ${SELECTION_FRAME_COLOR}`;
 
-// The accent walks the list one client at a time. Each name holds its colour
-// for DWELL, then crossfades to the next over FADE — the two overlap, so the
-// outgoing name is still releasing its colour as the incoming one takes it up
-// and the travel reads as continuous rather than as a series of blinks.
+function ClientName({ name, slug }: { name: string; slug: string }) {
+  const accent = CLIENT_NAME_ACCENT[slug] ?? "#1a1a1a";
+  return (
+    <span
+      className="block text-[clamp(1.15rem,4.6vw,1.75rem)] tracking-tight leading-none min-w-0 hyphens-none transition-colors duration-200 group-hover:text-[color:var(--client-accent)]"
+      style={{
+        fontWeight: 450,
+        color: "#1a1a1a",
+        overflowWrap: "break-word",
+        ["--client-accent" as string]: accent,
+      }}
+    >
+      {name}
+    </span>
+  );
+}
 
 function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
   const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
@@ -2607,27 +2989,19 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
           clients without being told, and a lone Pill outside a sentence
           borrowed the inline-highlight treatment for something that wasn't
           a highlight. */}
-      {/* One rounded frame around the whole grid, matching the blog cards'
-          rounded-2xl. The outer rails are this container's border; overflow
-          clipping keeps the cell rules from poking past the rounded corners.
-          No gap-x: the middle rail is a real border on the odd cells, so it
-          lines up exactly with the horizontal rules, and the inner padding
-          restores the breathing room the gutter used to give. */}
-      <div
-        className="rounded-[6px] overflow-hidden"
-        style={{ border: CLIENT_RULE }}
-      >
+      {/* Outer frame matches the hero's Figma selection on "design" — solid
+          blue stroke, square corners, resize handles on the four corners.
+          Internal rails use the same stroke so the grid reads as one object. */}
+      <FigmaSelectionFrame>
       <ul className="grid grid-cols-2">
         {items.map((item, i) => {
           return (
             <li
               key={item.slug}
-              className={i % 2 === 0 ? "pl-4 pr-5 sm:pl-6 sm:pr-8" : "pl-5 pr-4 sm:pl-8 sm:pr-6"}
+              className="px-4 sm:px-6"
               style={{
-                // First row sits against the frame's own top border, so it
-                // would double up there.
-                borderTop: i > 1 ? CLIENT_RULE : undefined,
-                borderRight: i % 2 === 0 ? CLIENT_RULE : undefined,
+                borderTop: i >= 2 ? CLIENT_GRID_LINE : undefined,
+                borderRight: i % 2 === 0 ? CLIENT_GRID_LINE : undefined,
               }}
             >
               <button
@@ -2636,27 +3010,13 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
                 aria-haspopup="dialog"
                 className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
               >
-                {/* No accent on hover or on a timer — the names stay in the
-                    page's own ink. A slight fade is the only hover feedback,
-                    since each name still opens a dialog. */}
-                <span
-                  className="text-[clamp(1.05rem,4.2vw,1.6rem)] tracking-tight leading-none min-w-0 hyphens-none transition-opacity duration-200 group-hover:opacity-60"
-                  style={{
-                    fontWeight: 450,
-                    color: "rgb(var(--fg))",
-                    // Two columns on a 320px phone leaves ~126px per name;
-                    // wrapping is the safe failure mode, not overflow.
-                    overflowWrap: "break-word",
-                  }}
-                >
-                  {item.client}
-                </span>
+                <ClientName name={item.client} slug={item.slug} />
               </button>
             </li>
           );
         })}
       </ul>
-      </div>
+      </FigmaSelectionFrame>
       </div>
       <ClientDialog item={openItem} onClose={() => setOpenItem(null)} />
     </section>
@@ -3262,28 +3622,8 @@ function interleaveByTag(posts: PostMeta[]): PostMeta[] {
 
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const [items] = useState<PostMeta[]>(() => interleaveByTag(posts));
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const padRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isTouchingRef = useRef(false);
-  const liveNearestRef = useRef<number | null>(null);
-  const cardOffsetsRef = useRef<number[]>([]);
-  const [isTouching, setIsTouching] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const translateRef = useRef(0);
-  const padRest = useRef(0);
-  const collapseDistance = 160;
-  const dragEase = 0.6;
-  const dragRef = useRef<{ startX: number; startTranslate: number; dragging: boolean; moved: boolean } | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
-  const reducedMotion = useReducedMotion() ?? false;
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -3300,430 +3640,103 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
     return () => obs.disconnect();
   }, []);
 
-  useEffect(() => {
-    const measure = () => setIsDesktop(window.innerWidth >= 640);
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  const updateActiveCard = () => {
-    if (window.innerWidth >= 640) { setActiveIndex(null); return; }
-    const el = scrollRef.current;
-    const cards = cardRefs.current;
-    if (!el) return;
-    const trackRect = el.getBoundingClientRect();
-    const center = trackRect.left + trackRect.width / 2;
-    let nearest: number | null = null;
-    let nearestDist = Infinity;
-    cards.forEach((card, i) => {
-      if (!card) return;
-      const r = card.getBoundingClientRect();
-      const dist = Math.abs(r.left + r.width / 2 - center);
-      if (dist < nearestDist) { nearestDist = dist; nearest = i; }
-    });
-    setActiveIndex(nearest);
-  };
-
-  const measureCardOffsets = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const scrollLeft = el.scrollLeft;
-    cardOffsetsRef.current = cardRefs.current.map((card) => {
-      if (!card) return 0;
-      return card.getBoundingClientRect().left - el.getBoundingClientRect().left + scrollLeft;
-    });
-  };
-
-  /* Liquid drag response. The earlier version recomputed each card's
-     transform straight from scrollLeft on every scroll event, with a linear
-     proximity ramp. That tracked the finger exactly, which is what made it
-     feel rigid: nothing lagged, nothing overshot, and the scale stopped dead
-     at the neighbour boundary.
-
-     Now scroll only sets a target. A spring integrates toward it every frame,
-     so cards trail the finger slightly, carry momentum past a fast flick, and
-     settle rather than stop. Velocity also shears the cards laterally - the
-     further from centre, the more it lags - which is what reads as the row
-     behaving like a liquid rather than a rail of tiles. */
-  const springRef = useRef({ value: 0, velocity: 0, target: 0 });
-  const flowRafRef = useRef<number | null>(null);
-  const lastFrameRef = useRef(0);
-
-  // Eased falloff, so influence fades out smoothly at the edge of a card's
-  // reach instead of hitting zero on a straight line. Cosine rather than a
-  // polynomial: it leaves and arrives flat, so a card at the boundary has no
-  // visible kink as it starts to lift.
-  const falloff = (d: number) => {
-    const t = Math.max(0, Math.min(1, d));
-    return 0.5 + 0.5 * Math.cos(Math.PI * t);
-  };
-
-  const paintCards = (springValue: number, velocity: number) => {
-    const el = scrollRef.current;
-    const cards = cardRefs.current;
-    const offsets = cardOffsetsRef.current;
-    if (!el || offsets.length === 0) return;
-    const viewportCenter = el.clientWidth / 2;
-    const slot = cards[0]?.getBoundingClientRect().width ?? 300;
-    // Normalised flick speed. Capped so a hard swipe distorts the row
-    // without tearing it apart.
-    const vNorm = Math.max(-1, Math.min(1, velocity / 1800));
-    let nearest: number | null = null;
-    let nearestDist = Infinity;
-    cards.forEach((card, i) => {
-      if (!card) return;
-      const cardCenter = (offsets[i] ?? 0) - springValue + (card.clientWidth / 2);
-      const dist = Math.abs(cardCenter - viewportCenter);
-      if (dist < nearestDist) { nearestDist = dist; nearest = i; }
-      const proximity = falloff(dist / slot);
-
-      // Cards away from centre lag further behind the drag, so the row bends
-      // under speed and straightens as it settles.
-      const lagReach = Math.min(1, dist / (slot * 1.4));
-      const lag = -vNorm * 26 * lagReach;
-
-      // Under a fast flick the off-centre cards also sink and narrow a touch,
-      // so the row reads as stretching rather than sliding rigidly.
-      const stretch = Math.abs(vNorm) * lagReach;
-      const scale = 1 + 0.05 * proximity - 0.02 * stretch;
-      const translateY = 6 - 12 * proximity + 5 * stretch;
-
-      card.style.transform = `translate3d(${lag}px, ${translateY}px, 0) scale(${scale})`;
-      const shadow = proximity * (1 - 0.35 * Math.abs(vNorm));
-      card.style.boxShadow = shadow > 0.01
-        ? `0 ${4 * shadow}px ${16 * shadow}px 0px rgba(0,0,0,${0.11 * shadow})`
-        : "none";
-    });
-    liveNearestRef.current = nearest;
-  };
-
-  /* Spring integration. Runs only while there is motion left to resolve, then
-     parks itself - an always-on rAF would keep the phone's compositor awake
-     for a static row. */
-  const runFlow = () => {
-    // Reduced motion: track scroll exactly, with no trail, shear, or
-    // overshoot. The proximity scale stays, since it is a static emphasis
-    // rather than motion for its own sake.
-    if (reducedMotion) {
-      const el = scrollRef.current;
-      if (el) paintCards(el.scrollLeft, 0);
-      return;
-    }
-    if (flowRafRef.current !== null) return;
-    lastFrameRef.current = performance.now();
-    const step = (now: number) => {
-      const spring = springRef.current;
-      // Clamped so a backgrounded tab resuming doesn't integrate one huge step.
-      const dt = Math.min(0.032, Math.max(0.001, (now - lastFrameRef.current) / 1000));
-      lastFrameRef.current = now;
-
-      // Near-critically damped: catches up quickly with just enough give to
-      // trail the finger and overshoot slightly on release.
-      const stiffness = 190;
-      const damping = 24;
-      const displacement = spring.target - spring.value;
-      spring.velocity += (displacement * stiffness - spring.velocity * damping) * dt;
-      spring.value += spring.velocity * dt;
-
-      paintCards(spring.value, spring.velocity);
-
-      if (Math.abs(displacement) < 0.15 && Math.abs(spring.velocity) < 12) {
-        spring.value = spring.target;
-        spring.velocity = 0;
-        paintCards(spring.value, 0);
-        flowRafRef.current = null;
-        return;
-      }
-      flowRafRef.current = requestAnimationFrame(step);
-    };
-    flowRafRef.current = requestAnimationFrame(step);
-  };
-
-  // Scroll no longer paints; it just moves the target the spring chases.
-  const applyLiveCardScale = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    springRef.current.target = el.scrollLeft;
-    runFlow();
-  };
-
-  // Jump straight to a position with no spring, for first paint and resize.
-  const snapFlowTo = (scrollLeft: number) => {
-    springRef.current.value = scrollLeft;
-    springRef.current.target = scrollLeft;
-    springRef.current.velocity = 0;
-    paintCards(scrollLeft, 0);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (flowRafRef.current !== null) cancelAnimationFrame(flowRafRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      setIsTouching(true);
-      applyLiveCardScale();
-      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-      // Longer than the old 20ms: the spring is usually still resolving when
-      // scrolling stops, and marking the row settled mid-flight cut the
-      // motion short.
-      settleTimerRef.current = setTimeout(() => {
-        setIsTouching(false);
-        updateActiveCard();
-      }, 90);
-    };
-    // Resize changes card geometry, so re-measure and land without a spring
-    // rather than animating from a stale position.
-    const onResize = () => {
-      measureCardOffsets();
-      snapFlowTo(el.scrollLeft);
-      updateActiveCard();
-    };
-    measureCardOffsets();
-    snapFlowTo(el.scrollLeft);
-    updateActiveCard();
-    el.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
-    return () => {
-      el.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
-
-  const trackMinTranslate = () => {
-    const track = trackRef.current;
-    const viewport = scrollRef.current;
-    if (!track || !viewport) return 0;
-    const overdrag = 200;
-    return Math.min(0, viewport.clientWidth - track.scrollWidth - overdrag);
-  };
-
-  const applyPadForTranslate = (x: number) => {
-    const pad = padRef.current;
-    if (!pad) return;
-    const t = Math.max(0, Math.min(1, -x / collapseDistance));
-    pad.style.paddingLeft = `${padRest.current + (6 - padRest.current) * t}px`;
-  };
-
-  const onPointerDownDrag = (e: React.PointerEvent) => {
-    if (!isDesktop || e.button !== 0) return;
-    const viewport = scrollRef.current;
-    if (!viewport) return;
-    dragRef.current = { startX: e.clientX, startTranslate: translateRef.current, dragging: true, moved: false };
-  };
-
-  const onPointerMoveDrag = (e: React.PointerEvent) => {
-    const d = dragRef.current;
-    const track = trackRef.current;
-    const pad = padRef.current;
-    const viewport = scrollRef.current;
-    if (!d?.dragging || !track || !pad) return;
-    const dx = e.clientX - d.startX;
-    if (!d.moved) {
-      if (Math.abs(dx) <= 3) return;
-      d.moved = true;
-      e.preventDefault();
-      viewport?.setPointerCapture(e.pointerId);
-      const currentPad = parseFloat(getComputedStyle(pad).paddingLeft) || 0;
-      pad.style.paddingLeft = `${currentPad}px`;
-      if (translateRef.current === 0) padRest.current = currentPad;
-      setIsDragging(true);
-      setIsExpanded(true);
-    } else {
-      e.preventDefault();
-    }
-    const min = trackMinTranslate();
-    const next = Math.max(min, Math.min(0, d.startTranslate + dx * dragEase));
-    translateRef.current = next;
-    track.style.transform = `translateX(${next}px)`;
-    applyPadForTranslate(next);
-  };
-
-  const endDragDesktop = (e: React.PointerEvent) => {
-    const d = dragRef.current;
-    const viewport = scrollRef.current;
-    const pad = padRef.current;
-    dragRef.current = null;
-    if (!d?.moved) {
-      if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
-      return;
-    }
-    setIsDragging(false);
-    const nextExpanded = translateRef.current < 0;
-    if (pad) {
-      const from = parseFloat(pad.style.paddingLeft) || padRest.current;
-      const to = nextExpanded ? 6 : padRest.current;
-      if (Math.abs(to - from) > 0.5) {
-        const startTime = performance.now();
-        const duration = 450;
-        const stepPad = (now: number) => {
-          const t = Math.min(1, (now - startTime) / duration);
-          pad.style.paddingLeft = `${from + (to - from) * easeInOutCubic(t)}px`;
-          if (t < 1) requestAnimationFrame(stepPad);
-          else pad.style.paddingLeft = "";
-        };
-        requestAnimationFrame(stepPad);
-      } else {
-        pad.style.paddingLeft = "";
-      }
-    }
-    setIsExpanded(nextExpanded);
-    if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
-  };
-
-  useEffect(() => {
-    if (isDragging || isExpanded || !isDesktop) return;
-    const track = trackRef.current;
-    if (!track) return;
-    let raf: number;
-    const clampDuringReturn = () => {
-      const min = trackMinTranslate();
-      if (translateRef.current < min) {
-        translateRef.current = min;
-        track.style.transform = `translateX(${min}px)`;
-      }
-      raf = requestAnimationFrame(clampDuringReturn);
-    };
-    raf = requestAnimationFrame(clampDuringReturn);
-    const stop = setTimeout(() => cancelAnimationFrame(raf), 350);
-    return () => { cancelAnimationFrame(raf); clearTimeout(stop); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDragging, isExpanded, isDesktop]);
-
-  const onTouchStart = () => {
-    if (window.innerWidth >= 640) return;
-    measureCardOffsets();
-    isTouchingRef.current = true;
-    setIsTouching(true);
-  };
-
-  // The scroll listener already feeds the spring every frame, so touchmove
-  // only needs to keep the target fresh during the parts of a drag that
-  // don't emit scroll events (a finger held still at an overscroll edge).
-  const onTouchMove = () => {
-    if (!isTouchingRef.current) return;
-    applyLiveCardScale();
-  };
-
-  const onTouchEnd = () => {
-    isTouchingRef.current = false;
-    // Let the spring keep resolving after the finger leaves, so release
-    // carries momentum instead of freezing at the lift point.
-    runFlow();
-    if (liveNearestRef.current !== null) setActiveIndex(liveNearestRef.current);
-  };
-
   if (items.length === 0) return null;
 
+  const rowReveal = (i: number): React.CSSProperties => ({
+    willChange: "opacity, transform, filter",
+    opacity: revealed ? 1 : 0,
+    transform: revealed ? "translateY(0)" : "translateY(6px)",
+    filter: revealed ? "blur(0px)" : "blur(8px)",
+    transition: revealed
+      ? `opacity 680ms cubic-bezier(0.22,0.61,0.36,1) ${i * 70}ms, transform 680ms cubic-bezier(0.22,0.61,0.36,1) ${i * 70}ms, filter 680ms cubic-bezier(0.22,0.61,0.36,1) ${i * 70}ms`
+      : "none",
+  });
+
   return (
-    <section ref={sectionRef} className="w-[100vw] ml-[calc(50%-50vw)] sm:mr-[calc(50%-50vw)]">
-      <div
-        ref={padRef}
-        className={`px-1.5 sm:pr-0 ${isDragging ? "" : "sm:transition-[padding-left] sm:duration-300 sm:ease-out"} ${isDragging || isExpanded ? "sm:pl-1.5" : "sm:pl-[calc(50vw-384px)]"}`}
-      >
-        <div className="relative">
-          <div
-            ref={scrollRef}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-            onPointerDown={onPointerDownDrag}
-            onPointerMove={onPointerMoveDrag}
-            onPointerUp={endDragDesktop}
-            onPointerCancel={endDragDesktop}
-            className={`overflow-x-auto sm:overflow-x-hidden touch-pan-x touch-pan-y snap-x snap-mandatory sm:snap-none scroll-smooth py-6 sm:pb-10 sm:-ml-5 sm:pl-5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]${isDragging ? " select-none" : ""}`}
-            style={{ cursor: isDragging ? "grabbing" : undefined }}
-          >
-            <div
-              ref={trackRef}
-              className="flex items-start gap-5 sm:gap-4 sm:w-max"
-              style={isDesktop ? { transform: `translateX(${translateRef.current}px)` } : undefined}
+    <section ref={sectionRef} className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
+        <header
+          className="mb-8 sm:mb-10 text-center"
+          style={rowReveal(0)}
+        >
+          <h2 className="mb-5 sm:mb-6">
+            <span
+              className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+              style={{ background: "#1a1a1a" }}
             >
-              <div className="shrink-0 sm:hidden" style={{ width: 6 }} aria-hidden="true" />
-              {items.map((post, i) => (
-                <div
-                  key={post.slug}
-                  className="shrink-0 sm:w-[420px]"
-                  style={{
-                    willChange: "opacity, transform, filter",
-                    opacity: revealed ? 1 : 0,
-                    transform: revealed ? "scale(1)" : "scale(0.992)",
-                    filter: revealed ? "blur(0px)" : "blur(10px)",
-                    transition: revealed
-                      ? `opacity 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, transform 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms, filter 780ms cubic-bezier(0.22,0.61,0.36,1) ${i * 90}ms`
-                      : "none",
-                  }}
-                >
-                  <Link
-                    ref={(el) => { cardRefs.current[i] = el; }}
-                    href={`/blog/${post.slug}`}
-                    draggable={false}
-                    onClick={(e) => { if (dragRef.current?.moved) e.preventDefault(); }}
-                    className="relative block shrink-0 snap-center sm:snap-align-none rounded-2xl overflow-hidden group w-[300px] sm:w-[420px] sm:cursor-grab"
-                    style={{
-                      aspectRatio: "4 / 5",
-                      transition: isTouching
-                        ? "none"
-                        : "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 750ms cubic-bezier(0.4,0,0.2,1)",
-                      transform: activeIndex === i
-                        ? "translateY(-6px) scale(1.05)"
-                        : activeIndex !== null
-                          ? "translateY(6px) scale(1)"
-                          : hoveredIndex === i
-                            ? "translateY(-4px) scale(1.02)"
-                            : "translateY(0) scale(1)",
-                      ...(activeIndex === i ? { boxShadow: "0 3px 12px 0px rgba(0,0,0,0.10)" } : {}),
-                    }}
-                    onMouseEnter={() => { setHoveredIndex(i); }}
-                    onMouseLeave={() => { setHoveredIndex((prev) => (prev === i ? null : prev)); }}
-                  >
-                    {/* The tint is the card's whole ground; text sits
-                        straight on it now, no glyph, no panel behind it. */}
-                    <div
-                      className="absolute inset-0"
-                      style={{ background: postTint(post.slug) }}
-                    />
-                    <div
-                      className="absolute inset-2.5 flex flex-col justify-start px-5 sm:px-6 py-5 sm:py-6"
+              Writing
+            </span>
+          </h2>
+          <p
+            className="text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight text-balance"
+            style={{ color: "#5c5c5c" }}
+          >
+            Essays on design and building.
+          </p>
+        </header>
+
+        <ul className="flex flex-col gap-1 sm:gap-1.5">
+          {items.map((post, i) => (
+            <li
+              key={post.slug}
+              style={rowReveal(i + 1)}
+            >
+              <Link
+                href={`/blog/${post.slug}`}
+                className="group block -mx-2 px-2 sm:-mx-3 sm:px-3 py-5 sm:py-6 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
+              >
+                <div className="flex items-start justify-between gap-4 sm:gap-6">
+                  <div className="min-w-0 flex-1">
+                    {post.tag && (
+                      <span
+                        className="mb-2 inline-block rounded-[6px] px-2 py-0.5 text-[12px] sm:text-[13px] tracking-tight leading-none"
+                        style={{
+                          color: "#5c5c5c",
+                          background: "rgba(26,26,26,0.06)",
+                          boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
+                        }}
+                      >
+                        {post.tag}
+                      </span>
+                    )}
+                    <p
+                      className="text-[18px] sm:text-[21px] tracking-[-0.025em] leading-snug text-balance"
+                      style={{ color: "#1a1a1a", fontWeight: 500 }}
                     >
+                      {post.title}
+                    </p>
+                    {(post.subtitle || post.summary) && (
                       <p
-                        className="text-[22px] sm:text-[30px] tracking-[-0.028em] leading-tight text-balance"
+                        className="mt-1.5 text-[14.5px] sm:text-[16px] leading-relaxed tracking-tight line-clamp-2"
                         style={{ color: "#5c5c5c" }}
                       >
-                        {post.title}
+                        {post.subtitle || post.summary}
                       </p>
-                      {(post.subtitle || post.summary) && (
-                        <p
-                          className="mt-2.5 text-[15.5px] sm:text-[18px] leading-snug tracking-[-0.035em] line-clamp-2"
-                          style={{ color: "rgba(92,92,92,0.75)" }}
-                        >
-                          {post.subtitle || post.summary}
-                        </p>
-                      )}
-                      {post.tag && (
-                        <span className="mt-4">
-                          <span
-                            className="inline-block rounded-[6px] px-2 pt-[3px] pb-[4px] text-[11px] sm:text-[12.5px] leading-none tracking-tight"
-                            style={{ background: "rgba(26,26,26,0.08)", color: "#5c5c5c" }}
-                          >
-                            {post.tag}
-                          </span>
-                        </span>
-                      )}
-                    </div>
-                  </Link>
+                    )}
+                  </div>
+                  <span
+                    aria-hidden
+                    className="mt-1 shrink-0 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+                    style={{ color: "#5c5c5c" }}
+                  >
+                    <svg
+                      viewBox="0 0 16 16"
+                      className="size-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.75"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M3 8h10" />
+                      <path d="M9 4l4 4-4 4" />
+                    </svg>
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
@@ -4065,22 +4078,22 @@ function VisualLayout({
               negative top margin. With it hidden, pull DesignPhilosophy back
               up toward the hero, but not all the way — a full reclaim sat
               too close underneath it. */}
-          <div className="py-7 sm:py-12 max-sm:-mt-[18dvh] sm:-mt-[7dvh]" />
+          <div className="py-10 sm:py-16 max-sm:-mt-[18dvh] sm:-mt-[7dvh]" />
 
           <DesignPhilosophy introRef={introRef} />
 
-          <div className="py-12 sm:py-16" />
+          <div className="py-16 sm:py-24" />
 
           {/* Type-only client list (concept 5). The logo-card carousel is
               still below as ClientCarousel — swap this line back to
               <ClientCarousel initialItems={initialWork} /> to restore it. */}
           <ClientTypeList items={initialWork} />
 
-          <div className="py-12 sm:py-16" />
+          <div className="py-16 sm:py-24" />
 
           <AiApproach posts={initialPosts} />
 
-          <div className="py-16 sm:py-14" />
+          <div className="py-16 sm:py-28" />
         </div>
       </LightCard>
 
@@ -4094,15 +4107,15 @@ function VisualLayout({
 
       <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))", marginTop: -2 }}>
         <div className="mx-auto w-full max-w-[80rem] flex flex-col">
-          <div className="py-4 sm:py-6" />
+          <div className="py-6 sm:py-10" />
 
           <ServicesSection />
 
-          <div className="py-14 sm:py-20" />
+          <div className="py-16 sm:py-28" />
 
           <Questionnaire onStartConversation={() => setDashboardModalOpen(true)} />
 
-          <div className="py-20 sm:py-20" />
+          <div className="py-24 sm:py-28" />
         </div>
       </div>
 
