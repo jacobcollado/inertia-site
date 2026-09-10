@@ -983,6 +983,7 @@ function VercelHero({
   accentColor: string;
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
 }) {
+  const router = useRouter();
   const [ctaTarget, setCtaTarget] = useState<"project" | "aether">("project");
   const isAetherCta = ctaTarget === "aether";
   const ref = useRef<HTMLDivElement>(null);
@@ -1047,6 +1048,11 @@ function VercelHero({
       if (interval !== undefined) clearInterval(interval);
     };
   }, [visible, ctaFadeDelay]);
+
+  useEffect(() => {
+    if (!visible) return;
+    router.prefetch("/aether");
+  }, [visible, router]);
 
   return (
     <section
@@ -2374,8 +2380,6 @@ const WHAT_WE_DO_ITEMS = [
     label: "Direction",
     description: "We figure out what the product or brand actually needs to be before anything gets designed.",
     image: "/what-we-do/direction.png",
-    // Asset has a scale bar on the right — nudge left so the diagram reads centered.
-    imageShift: "-translate-x-[5%] sm:-translate-x-[6%]",
     bentoClass: "sm:col-span-2 sm:row-span-2 sm:min-h-[28rem] lg:min-h-[32rem]",
   },
   {
@@ -2404,6 +2408,78 @@ const WHAT_WE_DO_CELL_STYLE = {
   boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
 } as const;
 
+const WHAT_WE_DO_LABEL_CLASS =
+  "text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight";
+const WHAT_WE_DO_LABEL_STYLE = { color: "#1a1a1a", fontWeight: 500 } as const;
+const WHAT_WE_DO_DESC_STYLE = { color: "#5c5c5c" } as const;
+
+function WhatWeDoDirectionCell() {
+  const item = WHAT_WE_DO_ITEMS[0];
+
+  return (
+    <div className="what-we-do-direction">
+      <div className="what-we-do-direction__mobile">
+        <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
+          {item.label}
+        </p>
+        <p className={cn(WHAT_WE_DO_LABEL_CLASS, "mt-2")} style={WHAT_WE_DO_DESC_STYLE}>
+          {item.description}
+        </p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={item.image} alt="" aria-hidden="true" />
+      </div>
+
+      <div className="what-we-do-direction__desktop">
+        <div className="what-we-do-direction__desktop-copy">
+          <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
+            {item.label}
+          </p>
+          <p className={cn(WHAT_WE_DO_LABEL_CLASS, "mt-2")} style={WHAT_WE_DO_DESC_STYLE}>
+            {item.description}
+          </p>
+        </div>
+        <div className="what-we-do-direction__desktop-art">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={item.image} alt="" aria-hidden="true" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WhatWeDoStandardCell({
+  item,
+}: {
+  item: (typeof WHAT_WE_DO_ITEMS)[number];
+}) {
+  const hasImage = "image" in item && item.image;
+
+  return (
+    <div
+      className={cn(WHAT_WE_DO_CELL, item.bentoClass)}
+      style={WHAT_WE_DO_CELL_STYLE}
+    >
+      <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
+        {item.label}
+      </p>
+      <p className={cn(WHAT_WE_DO_LABEL_CLASS, "mt-2")} style={WHAT_WE_DO_DESC_STYLE}>
+        {item.description}
+      </p>
+      {hasImage ? (
+        <div className="mt-auto flex min-h-[120px] w-full min-w-0 flex-1 items-end justify-center pt-4 sm:min-h-[140px] sm:pt-5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={item.image}
+            alt=""
+            aria-hidden="true"
+            className="h-auto w-full max-w-[160px] object-contain sm:max-w-[200px]"
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function WhatWeDo() {
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
@@ -2424,61 +2500,10 @@ function WhatWeDo() {
             </span>
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-4 sm:auto-rows-[minmax(11rem,auto)] gap-3 sm:gap-4">
-            {WHAT_WE_DO_ITEMS.map((item) => {
-              const isHeroCell = item.bentoClass.includes("row-span-2");
-              const hasImage = "image" in item && item.image;
-
-              return (
-              <div
-                key={item.label}
-                className={cn(
-                  WHAT_WE_DO_CELL,
-                  item.bentoClass,
-                  isHeroCell && hasImage && "relative overflow-hidden"
-                )}
-                style={WHAT_WE_DO_CELL_STYLE}
-              >
-                <div className={cn(isHeroCell && hasImage && "relative z-10")}>
-                  <p
-                    className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight"
-                    style={{ color: "#1a1a1a", fontWeight: 500 }}
-                  >
-                    {item.label}
-                  </p>
-                  <p
-                    className="mt-2 text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight"
-                    style={{ color: "#5c5c5c" }}
-                  >
-                    {item.description}
-                  </p>
-                </div>
-                {hasImage && (
-                  <div
-                    className={cn(
-                      "w-full min-w-0",
-                      isHeroCell
-                        ? "pointer-events-none absolute inset-0 flex items-center justify-center p-4 sm:p-5"
-                        : "mt-auto pt-4 sm:pt-5 flex flex-1 items-end justify-center min-h-[120px] sm:min-h-[140px]"
-                    )}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.image}
-                      alt=""
-                      aria-hidden="true"
-                      className={cn(
-                        "object-contain",
-                        isHeroCell
-                          ? "max-h-full max-w-full"
-                          : "h-auto w-full max-w-[160px] sm:max-w-[200px]",
-                        "imageShift" in item && item.imageShift,
-                      )}
-                    />
-                  </div>
-                )}
-              </div>
-              );
-            })}
+            <WhatWeDoDirectionCell />
+            {WHAT_WE_DO_ITEMS.filter((item) => item.label !== "Direction").map((item) => (
+              <WhatWeDoStandardCell key={item.label} item={item} />
+            ))}
           </div>
         </div>
       </div>

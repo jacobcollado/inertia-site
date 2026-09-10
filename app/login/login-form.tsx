@@ -567,8 +567,9 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         </div>
       </div>
 
-      {/* Form — centered against full viewport */}
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 sm:px-8 py-24">
+      {/* Form — same page shell as index sections */}
+      <div className="min-h-screen flex flex-col items-center justify-center w-full max-w-[80rem] mx-auto px-6 sm:px-8 py-24">
+        <div className="w-full max-w-3xl mx-auto flex flex-col items-center">
         {/* Sign-ups closed notice. Sits above the card so it reads as
             page-level context rather than something the card itself offers. */}
         {!SIGNUPS_ENABLED && (
@@ -741,6 +742,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               </>
             )}
           </div>
+        </div>
         </div>
       </div>
 

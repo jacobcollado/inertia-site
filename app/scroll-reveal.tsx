@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
+
+function revealInViewport() {
+  document.querySelectorAll<HTMLElement>(".rise:not(.is-visible)").forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.classList.add("is-visible");
+    }
+  });
+}
 
 export function ScrollReveal() {
   const pathname = usePathname();
 
-  useEffect(() => {
-    const all = document.querySelectorAll<HTMLElement>(".rise");
-    all.forEach((el) => el.classList.remove("is-visible"));
-
+  useLayoutEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -25,17 +31,17 @@ export function ScrollReveal() {
       }
     );
 
-    const mutation = new MutationObserver(() => {
+    const observeNew = () => {
+      revealInViewport();
       document.querySelectorAll<HTMLElement>(".rise:not(.is-visible)").forEach((el) => observer.observe(el));
-    });
+    };
 
-    const raf = requestAnimationFrame(() => {
-      document.querySelectorAll<HTMLElement>(".rise:not(.is-visible)").forEach((el) => observer.observe(el));
-      mutation.observe(document.body, { childList: true, subtree: true });
-    });
+    observeNew();
+
+    const mutation = new MutationObserver(observeNew);
+    mutation.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      cancelAnimationFrame(raf);
       observer.disconnect();
       mutation.disconnect();
     };

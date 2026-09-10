@@ -2,25 +2,26 @@ import type { Metadata } from "next";
 import { AetherHero } from "./aether-hero";
 import { HeroRule } from "./hero-rule";
 import { FeaturesScroll } from "./features-scroll";
-import { ProcessSteps } from "./process-steps";
+import { ConversionFeatures } from "./conversion-features";
+import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
 import { AetherFaq } from "./faq";
 
 export const metadata: Metadata = {
   title: "Aether",
-  description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+  description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. $125 once.",
   alternates: { canonical: "https://byinertia.com/aether" },
   openGraph: {
     type: "website",
     url: "https://byinertia.com/aether",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. $125 once.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Aether Shopify Theme" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. From $85.",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. $125 once.",
     images: ["/og.png"],
   },
 };
@@ -28,28 +29,28 @@ export const metadata: Metadata = {
 const KEY_FEATURES = [
   {
     title: "Upsell",
-    desc: "More per order, without the hard sell. Bundles and add-ons appear at the moments they make sense and stay out of the way the rest of the time.",
-    points: ["Post-purchase offer block", "Bundle builder section", "Frequently bought together rail"],
+    desc: "More per order, without the hard sell.",
     visual: "upsell",
     image: "/aether/upsell.png",
+    imageMobile: "/aether/upsell-mobile.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
   {
     title: "Scarcity",
-    desc: "When there are four left, say four. Aether treats scarcity as honesty, which is why it converts for brands that can't afford to look desperate.",
-    points: ["Live inventory counter", "Countdown timer block", "Designed sold-out states"],
+    desc: "When there are four left, say four.",
     visual: "scarcity",
     image: "/aether/scarcity.png",
+    imageMobile: "/aether/scarcity-mobile.png",
     flip: true,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
   },
   {
     title: "Guided format",
-    desc: "No dead ends anywhere in the store. Each section leads into the next, so a browser is always one scroll away from becoming a buyer.",
-    points: ["Sticky add-to-cart bar", "Progress indicators through checkout", "Cart drawer with built-in upsells"],
+    desc: "No dead ends. Every section leads to the next.",
     visual: "guided",
-    image: "/aether/guided.png",
+    image: "/aether/guided.jpg",
+    imageMobile: "/aether/guided-mobile.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
@@ -72,7 +73,40 @@ const SECONDARY_FEATURES = [
 
 const DEMO_URL = "https://aether-starter.myshopify.com";
 
+const CONVERSION_MOMENTS = [
+  {
+    outcome: "First impression",
+    headline: "They decide in seconds whether you look like a brand or a template.",
+    detail:
+      "Hero, type, and spacing set the tone before anyone reads a product description. Aether opens like something worth staying on.",
+    image: "/aether/first-impression.jpg",
+    alt: "Aether storefront first impression",
+  },
+  {
+    outcome: "The decision",
+    headline: "The product page is where margin gets made or lost.",
+    detail:
+      "Gallery order, variant pickers, trust signals, and add-to-cart placement, tuned for stores that sell on look and feel, not spec sheets.",
+    image: "/aether/product-page.png",
+    alt: "Aether product page",
+  },
+  {
+    outcome: "Through to checkout",
+    headline: "Nothing between browse and buy should feel like friction.",
+    detail:
+      "Sticky cart, quick buy, and layouts that keep the next step obvious on every screen size. Shoppers stay in motion until they pay.",
+    image: "/aether/checkout-path.png",
+    alt: "Aether path to checkout",
+  },
+];
 
+const THEME_VARIATIONS = [
+  { name: "Alpine", image: "/aether/alpine.jpg" },
+  { name: "Noir", image: "/aether/noir.jpg" },
+  { name: "Showroom", image: "/aether/showroom.jpg" },
+  { name: "Chronicle", image: "/aether/chronicle.jpg" },
+  { name: "Quiet", image: "/aether/quiet.jpg" },
+];
 
 export default function AetherPage() {
   return (
@@ -82,8 +116,12 @@ export default function AetherPage() {
 
       <HeroRule />
 
-      {/* Key features — sticky scroll */}
-      <FeaturesScroll features={KEY_FEATURES} />
+      {/* Key features — carousel */}
+      <FeaturesScroll features={KEY_FEATURES} demoUrl={DEMO_URL} />
+
+      <ConversionFeatures moments={CONVERSION_MOMENTS} />
+
+      <VariationsScroll variations={THEME_VARIATIONS} />
 
       {/* Secondary features */}
       <div className="px-3 pb-16 sm:pb-24">
@@ -111,15 +149,10 @@ export default function AetherPage() {
 
       <div className="grid-rule" aria-hidden="true" />
 
-      {/* Process steps */}
-      <ProcessSteps />
-
-      <div className="grid-rule" aria-hidden="true" />
-
       {/* Pricing */}
       <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24 scroll-mt-16 w-full">
         <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
-          Pick a <span className="shimmer-word shimmer-word--warm">license</span>
+          One <span className="shimmer-word shimmer-word--warm">license</span>
         </p>
 
         <InlinePricing />

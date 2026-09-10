@@ -43,6 +43,7 @@ export default function Page() {
 
   return (
     <>
+      <link rel="prefetch" href="/aether" />
       <CarouselLogoPreloads srcs={logoSrcs} />
       <Home initialWork={initialWork} initialPosts={initialPosts} />
     </>

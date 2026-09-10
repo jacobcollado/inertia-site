@@ -4,8 +4,12 @@
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 150ms;
-  animation-timing-function: ease;
+  animation: none;
+}
+
+::view-transition-group(root),
+::view-transition-image-pair(root) {
+  animation-duration: 0s !important;
 }
 
 :root {
@@ -2555,5 +2559,88 @@ h1:hover .redact > span.redact-inner,
       rgb(var(--marker-pen) / 0.32) 96%,
       rgb(var(--marker-pen) / 0) 100%
     );
+  }
+}
+
+/* What we do — Direction card: separate mobile/desktop layouts. */
+.what-we-do-direction {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .what-we-do-direction {
+    grid-column: span 2 / span 2;
+    grid-row: span 2 / span 2;
+  }
+}
+
+.what-we-do-direction__mobile {
+  display: block;
+  border-radius: 6px;
+  padding: 1rem;
+  background: rgba(26, 26, 26, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(26, 26, 26, 0.08);
+}
+
+.what-we-do-direction__mobile img {
+  display: block;
+  position: static;
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  margin: 1rem auto 0;
+  object-fit: contain;
+}
+
+.what-we-do-direction__desktop {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .what-we-do-direction__mobile {
+    display: none;
+  }
+
+  .what-we-do-direction__desktop {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    padding: 1.25rem;
+    min-height: 28rem;
+    height: 100%;
+    background: rgba(26, 26, 26, 0.03);
+    box-shadow: inset 0 0 0 1px rgba(26, 26, 26, 0.08);
+  }
+
+  .what-we-do-direction__desktop-copy {
+    position: relative;
+    z-index: 1;
+  }
+
+  .what-we-do-direction__desktop-art {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    pointer-events: none;
+  }
+
+  .what-we-do-direction__desktop-art img {
+    display: block;
+    position: static;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transform: translateX(-6%);
+  }
+}
+
+@media (min-width: 1024px) {
+  .what-we-do-direction__desktop {
+    min-height: 32rem;
   }
 }
