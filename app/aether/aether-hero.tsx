@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DemoButton } from "./demo-button";
-import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
 
 export function AetherHero({ demoUrl }: { demoUrl: string }) {
 
@@ -29,7 +29,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
             href="/aether#pricing"
-            className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} px-5 py-2.5 text-[17px] sm:text-[18px] font-medium tracking-tight hover:opacity-80 transition-opacity`}
+            className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none hover:opacity-80 transition-opacity`}
             style={{ background: "#000", color: "#ededed" }}
           >
             Buy a license
@@ -40,7 +40,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             </div>
             <Link
               href="/docs?from=aether"
-              className={`flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} border border-[rgb(var(--line))] px-5 py-2 text-[17px] sm:text-[18px] font-medium tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors whitespace-nowrap`}
+              className={`flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} border border-[rgb(var(--line))] px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors whitespace-nowrap`}
             >
               Docs
             </Link>

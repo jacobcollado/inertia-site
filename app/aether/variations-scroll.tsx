@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { HiMiniArrowLeft, HiMiniArrowRight } from "react-icons/hi2";
 import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS, aetherLiquidTransition } from "./motion";
 
 export interface ThemeVariation {
@@ -18,31 +19,70 @@ const SHOT_H = 858;
 const CARD_TRANSITION = aetherLiquidTransition();
 const TRACK_TRANSITION = `transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
 const GAP_PX = 20;
-const PEEK_PX_MOBILE = 40;
+const PEEK_PX_MOBILE = 22;
 const PEEK_PX_DESKTOP = 64;
 const CONTENT_MAX_PX = 1280;
 const MOBILE_GUTTER_PX = 12;
 const INITIAL_RUNWAY = 3;
 const EXTEND_THRESHOLD = 2;
 
-function ArrowIcon({ direction }: { direction: "left" | "right" }) {
+const NAV_BUTTON_CLASS =
+  "relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface-elevated))] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]";
+
+const LABEL_MOTION = `opacity ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, filter ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
+const LABEL_EXIT_MS = Math.round(AETHER_LIQUID_MS * 0.42);
+
+type LabelPhase = "visible" | "exit" | "enter-from";
+
+function VariationLabel({ name, reduceMotion }: { name: string; reduceMotion: boolean }) {
+  const [displayName, setDisplayName] = useState(name);
+  const [phase, setPhase] = useState<LabelPhase>("visible");
+  const nameRef = useRef(name);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    if (name === nameRef.current) return;
+
+    if (reduceMotion) {
+      nameRef.current = name;
+      setDisplayName(name);
+      setPhase("visible");
+      return;
+    }
+
+    setPhase("exit");
+    clearTimeout(timerRef.current);
+
+    timerRef.current = setTimeout(() => {
+      nameRef.current = name;
+      setDisplayName(name);
+      setPhase("enter-from");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setPhase("visible"));
+      });
+    }, LABEL_EXIT_MS);
+
+    return () => clearTimeout(timerRef.current);
+  }, [name, reduceMotion]);
+
+  const motion =
+    phase === "visible"
+      ? { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" }
+      : phase === "exit"
+        ? { opacity: 0, transform: "translateY(-5px)", filter: "blur(5px)" }
+        : { opacity: 0, transform: "translateY(5px)", filter: "blur(5px)" };
+
   return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="w-4 h-4"
-      aria-hidden="true"
+    <p
+      className="text-left text-[18px] sm:text-[20px] font-normal tracking-[-0.02em] text-[rgb(var(--fg))] min-w-0"
+      style={{
+        ...motion,
+        transition: phase === "enter-from" || reduceMotion ? "none" : LABEL_MOTION,
+        willChange: reduceMotion ? undefined : "opacity, transform, filter",
+      }}
     >
-      {direction === "left" ? (
-        <polyline points="10 3 5 8 10 13" />
-      ) : (
-        <polyline points="6 3 11 8 6 13" />
-      )}
-    </svg>
+      {displayName}
+    </p>
   );
 }
 
@@ -92,12 +132,12 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
     const viewport = viewportRef.current;
     if (!viewport) return;
     const vw = viewport.clientWidth;
-    const isDesktop = window.matchMedia("(min-width: 640px)").matches;
+    const desktop = window.matchMedia("(min-width: 640px)").matches;
     const contentWidth = Math.min(CONTENT_MAX_PX, vw);
-    const cardAreaWidth = isDesktop
+    const cardAreaWidth = desktop
       ? contentWidth - MOBILE_GUTTER_PX * 2
-      : vw - MOBILE_GUTTER_PX * 4;
-    const peek = isDesktop ? PEEK_PX_DESKTOP : PEEK_PX_MOBILE;
+      : vw - MOBILE_GUTTER_PX * 2;
+    const peek = desktop ? PEEK_PX_DESKTOP : PEEK_PX_MOBILE;
     const nextSlideWidth = Math.max(0, cardAreaWidth - peek * 2 - GAP_PX);
     setSlideWidth(nextSlideWidth);
     setEdgePad(Math.max(0, (vw - nextSlideWidth) / 2));
@@ -261,22 +301,6 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
       </div>
 
       <div className="relative w-screen left-1/2 -translate-x-1/2">
-        <button
-          type="button"
-          aria-label="Previous variation"
-          onClick={() => shift(-1)}
-          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--surface-elevated))] text-[rgb(var(--fg))] shadow-sm transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]"
-        >
-          <ArrowIcon direction="left" />
-        </button>
-        <button
-          type="button"
-          aria-label="Next variation"
-          onClick={() => shift(1)}
-          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--surface-elevated))] text-[rgb(var(--fg))] shadow-sm transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]"
-        >
-          <ArrowIcon direction="right" />
-        </button>
         <div
           ref={viewportRef}
           role="region"
@@ -288,7 +312,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          className={`w-full overflow-hidden outline-none ${dragging ? "select-none cursor-grabbing" : "cursor-grab"}`}
+          className={`w-full overflow-hidden outline-none pb-14 sm:pb-16 ${dragging ? "select-none cursor-grabbing" : "cursor-grab"}`}
         >
           <div
             ref={trackRef}
@@ -327,14 +351,45 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
                       />
                     </div>
                   </div>
-                  <div className="text-center px-2">
-                    <p className="text-[18px] sm:text-[20px] font-normal tracking-[-0.02em] text-[rgb(var(--fg))]">
-                      {v.name}
-                    </p>
-                  </div>
                 </article>
               );
             })}
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center">
+          <div
+            className="flex items-center justify-between gap-4 pointer-events-auto px-4 sm:px-5"
+            style={slideWidth > 0 ? { width: slideWidth } : undefined}
+          >
+            <VariationLabel
+              name={variations[active]?.name ?? ""}
+              reduceMotion={reduceMotion}
+            />
+            <div className="flex items-center gap-1.5 shrink-0 ml-4">
+              <button
+                type="button"
+                aria-label="Previous variation"
+                onClick={() => shift(-1)}
+                className={NAV_BUTTON_CLASS}
+              >
+                <HiMiniArrowLeft
+                  className="absolute left-1/2 top-1/2 block h-[17px] w-[17px] -translate-x-1/2 -translate-y-1/2"
+                  aria-hidden="true"
+                />
+              </button>
+              <button
+                type="button"
+                aria-label="Next variation"
+                onClick={() => shift(1)}
+                className={NAV_BUTTON_CLASS}
+              >
+                <HiMiniArrowRight
+                  className="absolute left-1/2 top-1/2 block h-[17px] w-[17px] -translate-x-1/2 -translate-y-1/2"
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>

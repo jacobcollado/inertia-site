@@ -152,7 +152,7 @@ export default function AetherPage() {
       {/* Pricing */}
       <div id="pricing" className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24 scroll-mt-16 w-full">
         <p className="text-[clamp(2.2rem,4vw,3.2rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
-          One <span className="shimmer-word shimmer-word--warm">license</span>
+          What&apos;s <span className="shimmer-word shimmer-word--warm">included</span>
         </p>
 
         <InlinePricing />

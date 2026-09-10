@@ -209,6 +209,9 @@ export function FeaturesScroll({
   const autoplayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const easeAnimRef = useRef<number | null>(null);
   const isEasingRef = useRef(false);
+  const settlingRef = useRef(false);
+  const touchScrollingRef = useRef(false);
+  const draggingRef = useRef(false);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -253,6 +256,7 @@ export function FeaturesScroll({
     let closest = 0;
     let closestDist = Infinity;
     const falloff = slot * 1.35;
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
     cardRefs.current.forEach((el, i) => {
       if (!el) return;
       const dist = Math.abs(scroll - i * slot);
@@ -264,8 +268,12 @@ export function FeaturesScroll({
       const eased = proximity * proximity * (3 - 2 * proximity);
       el.style.transition = "none";
       el.style.opacity = String(0.32 + 0.68 * eased);
-      el.style.transform = `scale(${0.975 + 0.025 * eased})`;
-      el.style.transformOrigin = "center top";
+      if (isMobile) {
+        el.style.transform = "none";
+      } else {
+        el.style.transform = `scale(${0.975 + 0.025 * eased})`;
+        el.style.transformOrigin = "center top";
+      }
     });
     if (syncActive && closest !== activeRef.current) {
       activeRef.current = closest;
@@ -357,15 +365,48 @@ export function FeaturesScroll({
   const settleToNearest = useCallback(() => {
     const scroller = scrollerRef.current;
     const slot = slotWidth();
-    if (!scroller || slot <= 0) return;
+    if (!scroller || slot <= 0 || settlingRef.current || isEasingRef.current || draggingRef.current) {
+      return;
+    }
+
     const target = nearestIndex();
     const targetScroll = target * slot;
+    const delta = Math.abs(scroller.scrollLeft - targetScroll);
+
     activeRef.current = target;
     setActive(target);
+
+    if (delta < 2) {
+      scroller.scrollLeft = targetScroll;
+      scroller.style.scrollSnapType = "x proximity";
+      applyCardProximity(true);
+      setScrolling(false);
+      touchScrollingRef.current = false;
+      return;
+    }
+
+    settlingRef.current = true;
+
+    if (touchScrollingRef.current || reduceMotion) {
+      touchScrollingRef.current = false;
+      scroller.style.scrollSnapType = "x proximity";
+      scroller.scrollTo({
+        left: targetScroll,
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+      window.setTimeout(() => {
+        settlingRef.current = false;
+        applyCardProximity(true);
+        setScrolling(false);
+      }, reduceMotion ? 0 : 280);
+      return;
+    }
+
     easeScrollTo(targetScroll, () => {
+      settlingRef.current = false;
       scroller.style.scrollSnapType = "x proximity";
     });
-  }, [easeScrollTo, nearestIndex, slotWidth]);
+  }, [applyCardProximity, easeScrollTo, nearestIndex, reduceMotion, slotWidth]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -386,39 +427,45 @@ export function FeaturesScroll({
     const scroller = scrollerRef.current;
     if (!scroller) return;
     let ticking = false;
-    const onScrollEnd = () => {
+
+    const scheduleSettle = () => {
       if (scrollEndRef.current) clearTimeout(scrollEndRef.current);
-      if (isEasingRef.current || dragging) return;
-      settleToNearest();
+      scrollEndRef.current = setTimeout(() => {
+        scrollEndRef.current = null;
+        settleToNearest();
+      }, 80);
     };
+
     const measure = () => {
       ticking = false;
       if (!isEasingRef.current) setScrolling(true);
       applyCardProximity(false);
-      if (scrollEndRef.current) clearTimeout(scrollEndRef.current);
-      scrollEndRef.current = setTimeout(onScrollEnd, 120);
+      scheduleSettle();
     };
+
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(measure);
     };
+
     const onTouchStart = () => {
+      touchScrollingRef.current = true;
+      settlingRef.current = false;
       cancelEase();
       scroller.style.scrollSnapType = "none";
     };
+
     scroller.addEventListener("scroll", onScroll, { passive: true });
-    scroller.addEventListener("scrollend", onScrollEnd);
     scroller.addEventListener("touchstart", onTouchStart, { passive: true });
     applyCardProximity(true);
     return () => {
       scroller.removeEventListener("scroll", onScroll);
-      scroller.removeEventListener("scrollend", onScrollEnd);
       scroller.removeEventListener("touchstart", onTouchStart);
       if (scrollEndRef.current) clearTimeout(scrollEndRef.current);
       cancelEase();
     };
-  }, [applyCardProximity, cancelEase, dragging, settleToNearest]);
+  }, [applyCardProximity, cancelEase, settleToNearest]);
 
   useEffect(() => {
     clearAutoplay();
@@ -469,6 +516,7 @@ export function FeaturesScroll({
       didDragRef.current = true;
       scroller.setPointerCapture(e.pointerId);
       scroller.style.scrollSnapType = "none";
+      draggingRef.current = true;
       setDragging(true);
     }
     e.preventDefault();
@@ -483,9 +531,12 @@ export function FeaturesScroll({
     if (!scroller) return;
     if (scroller.hasPointerCapture(e.pointerId)) scroller.releasePointerCapture(e.pointerId);
     if (drag?.moved) {
+      draggingRef.current = false;
       setDragging(false);
+      touchScrollingRef.current = false;
       settleToNearest();
     } else {
+      draggingRef.current = false;
       scroller.style.scrollSnapType = "x proximity";
     }
   };

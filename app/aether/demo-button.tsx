@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -48,7 +49,7 @@ export function DemoButton({ href, password }: { href: string; password: string 
         onClick={handleClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-[6px] border border-[rgb(var(--line))] text-[rgb(var(--fg))] px-5 py-2 hover:border-[rgb(var(--fg)/0.4)] transition-colors text-[17px] sm:text-[18px] font-medium tracking-tight whitespace-nowrap"
+        className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} border border-[rgb(var(--line))] px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.4)] transition-colors whitespace-nowrap`}
       >
         {state === "copied" ? (
           <>
