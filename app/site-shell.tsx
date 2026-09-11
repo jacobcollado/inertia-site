@@ -4,7 +4,6 @@ import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { VisualNotch } from "./visual-notch";
 import { MinimalFooter } from "./site-footer";
-import { AetherFooterWave } from "./aether/bottom-accent-wave";
 
 const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password", "/accept-invite", "/docs"];
 
@@ -18,7 +17,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // continues through the footer — every other route keeps the normal
   // light footer.
   const isHome = pathname === "/";
-  const isAetherLanding = pathname === "/aether";
 
   // The footer's dark zone only covers page content, not the <html> element
   // itself — so overscroll/rubber-band past the bottom (Safari, and anywhere
@@ -76,13 +74,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       {noFooter ? null : isHome ? (
         <div className="homepage-dark-zone" style={{ background: "rgb(var(--bg))" }}>
           <MinimalFooter />
-        </div>
-      ) : isAetherLanding ? (
-        <div className="relative w-full">
-          <AetherFooterWave />
-          <div className="relative z-10">
-            <MinimalFooter />
-          </div>
         </div>
       ) : (
         <MinimalFooter />
