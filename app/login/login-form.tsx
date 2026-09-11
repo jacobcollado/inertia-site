@@ -567,9 +567,11 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         </div>
       </div>
 
-      {/* Form — same page shell as index sections */}
-      <div className="min-h-screen flex flex-col items-center justify-center w-full max-w-[80rem] mx-auto px-6 sm:px-8 py-24">
-        <div className="w-full max-w-3xl mx-auto flex flex-col items-center">
+      {/* Form — centered in the viewport below the fixed header */}
+      <div className="min-h-dvh flex flex-col w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+        <div className="h-[72px] shrink-0" aria-hidden="true" />
+        <div className="flex flex-1 flex-col items-center justify-center pb-[10vh]">
+          <div className="w-full max-w-3xl mx-auto flex flex-col items-center -translate-y-3 sm:-translate-y-4">
         {/* Sign-ups closed notice. Sits above the card so it reads as
             page-level context rather than something the card itself offers. */}
         {!SIGNUPS_ENABLED && (
@@ -742,6 +744,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               </>
             )}
           </div>
+        </div>
         </div>
         </div>
       </div>

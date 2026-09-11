@@ -35,11 +35,11 @@ export function ConversionFeatures({ moments }: { moments: ConversionMoment[] })
                 style={{ "--rise-delay": `${i * 80}ms` } as React.CSSProperties}
               >
                 <div className="flex flex-col gap-4 sm:gap-5">
-                  <div className="inline-flex w-fit items-center rounded-full bg-[rgb(var(--fg)/0.06)] p-0.5 pr-2.5">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--bg))] text-[11px] tabular-nums tracking-tight text-[rgb(var(--muted))] ring-1 ring-[rgb(var(--fg)/0.05)]">
-                      {i + 1}.
+                  <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[rgb(var(--fg)/0.06)] p-1 pr-2.5">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--bg))] text-[11px] leading-none tabular-nums text-[rgb(var(--muted))] ring-1 ring-[rgb(var(--fg)/0.05)]">
+                      {i + 1}
                     </span>
-                    <span className="py-1 pl-2 text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--fg))]">
+                    <span className="text-[12px] sm:text-[13px] leading-none tracking-tight text-[rgb(var(--fg))]">
                       {moment.outcome}
                     </span>
                   </div>

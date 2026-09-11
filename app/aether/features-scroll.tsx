@@ -145,14 +145,16 @@ const CONTENT_MAX_PX = 1280; // 80rem — matches page column
 const MOBILE_GUTTER_PX = 12; // mx-3
 
 function FeatureImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const isMockup = src.includes("mockup");
   return (
     <Image
       src={src}
       alt={alt}
-      width={SHOT_W}
-      height={SHOT_H}
+      width={isMockup ? 496 : SHOT_W}
+      height={isMockup ? 1024 : SHOT_H}
       sizes="(max-width: 640px) 100vw, min(48rem, 90vw)"
       quality={90}
+      unoptimized={isMockup}
       className={className ?? "max-w-full max-h-[340px] sm:max-h-[440px] w-auto h-auto object-contain rounded-lg"}
       draggable={false}
     />
@@ -162,10 +164,11 @@ function FeatureImage({ src, alt, className }: { src: string; alt: string; class
 function Visual({ feature, index, alt }: { feature: Feature; index: number; alt: string }) {
   if (feature.image) {
     const imgClass = "max-w-full max-h-[340px] sm:max-h-[440px] w-auto h-auto object-contain rounded-lg";
+    const mobileMockupClass = "sm:hidden max-w-full max-h-[340px] w-auto h-auto object-contain mx-auto";
     if (feature.imageMobile) {
       return (
         <>
-          <FeatureImage src={feature.imageMobile} alt={alt} className={`sm:hidden ${imgClass}`} />
+          <FeatureImage src={feature.imageMobile} alt={alt} className={mobileMockupClass} />
           <FeatureImage src={feature.image} alt={alt} className={`hidden sm:block ${imgClass}`} />
         </>
       );
@@ -204,6 +207,7 @@ export function FeaturesScroll({
   const [slideWidth, setSlideWidth] = useState(0);
   const [peekPx, setPeekPx] = useState(PEEK_PX_MOBILE);
   const [columnLeft, setColumnLeft] = useState(MOBILE_GUTTER_PX);
+  const [trackPadRight, setTrackPadRight] = useState(PEEK_PX_MOBILE + GAP_PX);
   const [playing, setPlaying] = useState(true);
   const scrollEndRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoplayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -227,16 +231,20 @@ export function FeaturesScroll({
     const vw = scroller.clientWidth;
     const isDesktop = window.matchMedia("(min-width: 640px)").matches;
     const contentWidth = Math.min(CONTENT_MAX_PX, vw);
-    const columnLeft = isDesktop ? Math.max(0, (vw - contentWidth) / 2) : MOBILE_GUTTER_PX;
     const peek = isDesktop ? PEEK_PX_DESKTOP : PEEK_PX_MOBILE;
-    // Full-width track, but cards stay page-column width — same as before the breakout.
-    const cardAreaWidth = isDesktop
-      ? contentWidth - MOBILE_GUTTER_PX * 2
-      : vw - MOBILE_GUTTER_PX * 4;
-    const trackInset = isDesktop ? columnLeft + MOBILE_GUTTER_PX : MOBILE_GUTTER_PX * 2;
     setPeekPx(peek);
-    setColumnLeft(trackInset);
-    setSlideWidth(Math.max(0, cardAreaWidth - peek - GAP_PX));
+
+    if (isDesktop) {
+      const cardAreaWidth = contentWidth - MOBILE_GUTTER_PX * 2;
+      setColumnLeft(Math.max(0, (vw - contentWidth) / 2) + MOBILE_GUTTER_PX);
+      setTrackPadRight(peek + GAP_PX);
+      setSlideWidth(Math.max(0, cardAreaWidth - peek - GAP_PX));
+    } else {
+      const cardAreaWidth = vw - MOBILE_GUTTER_PX * 4;
+      setColumnLeft(MOBILE_GUTTER_PX * 2);
+      setTrackPadRight(peek + GAP_PX);
+      setSlideWidth(Math.max(0, cardAreaWidth - peek - GAP_PX));
+    }
   }, []);
 
   useLayoutEffect(() => {
@@ -247,6 +255,33 @@ export function FeaturesScroll({
     const card = cardRefs.current[0];
     return (card?.offsetWidth ?? 0) + GAP_PX;
   }, []);
+
+  const scrollTargetForIndex = useCallback((index: number) => {
+    const scroller = scrollerRef.current;
+    const slot = slotWidth();
+    if (!scroller || slot <= 0) return 0;
+    const count = features.length;
+    const i = Math.max(0, Math.min(count - 1, index));
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
+
+    if (!isMobile || count <= 1) return i * slot;
+    if (i === 0) return 0;
+    if (i === count - 1) return Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+
+    const cardW = cardRefs.current[0]?.offsetWidth ?? slideWidth;
+    const vw = scroller.clientWidth;
+    const peek = peekPx;
+    const ideal = columnLeft + i * slot + cardW / 2 - vw / 2;
+    // Keep peeks of both neighbors visible — don't scroll past either edge.
+    const minScroll = columnLeft + (i + 1) * slot - vw + peek;
+    const maxScroll = columnLeft + (i - 1) * slot + cardW - peek;
+
+    if (minScroll <= maxScroll) {
+      return Math.max(minScroll, Math.min(maxScroll, ideal));
+    }
+    // Narrow viewport: full peek on both sides isn't possible — keep the left card in view.
+    return maxScroll;
+  }, [columnLeft, features.length, peekPx, slideWidth, slotWidth]);
 
   const applyCardProximity = useCallback((syncActive = true) => {
     const scroller = scrollerRef.current;
@@ -259,7 +294,8 @@ export function FeaturesScroll({
     const isMobile = window.matchMedia("(max-width: 639px)").matches;
     cardRefs.current.forEach((el, i) => {
       if (!el) return;
-      const dist = Math.abs(scroll - i * slot);
+      const anchor = isMobile ? scrollTargetForIndex(i) : i * slot;
+      const dist = Math.abs(scroll - anchor);
       if (dist < closestDist) {
         closestDist = dist;
         closest = i;
@@ -280,17 +316,27 @@ export function FeaturesScroll({
       setActive(closest);
     }
     return closest;
-  }, [slotWidth]);
+  }, [scrollTargetForIndex, slotWidth]);
 
-  // Index 0 sits at scrollLeft 0, left-aligned behind the scroller's padding.
-  // Each next card is one layout slot further — use offsetWidth, not
-  // getBoundingClientRect, so a visual scale on a card can't drift the target.
   const nearestIndex = useCallback(() => {
     const scroller = scrollerRef.current;
     const slot = slotWidth();
     if (!scroller || slot <= 0) return 0;
-    return Math.max(0, Math.min(features.length - 1, Math.round(scroller.scrollLeft / slot)));
-  }, [features.length, slotWidth]);
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
+    if (!isMobile) {
+      return Math.max(0, Math.min(features.length - 1, Math.round(scroller.scrollLeft / slot)));
+    }
+    let best = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < features.length; i++) {
+      const dist = Math.abs(scroller.scrollLeft - scrollTargetForIndex(i));
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    }
+    return best;
+  }, [features.length, scrollTargetForIndex, slotWidth]);
 
   const cancelEase = useCallback(() => {
     if (easeAnimRef.current) cancelAnimationFrame(easeAnimRef.current);
@@ -337,8 +383,8 @@ export function FeaturesScroll({
     const slot = slotWidth();
     if (!scroller || slot <= 0) return;
     const next = Math.max(0, Math.min(features.length - 1, index));
-    const max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-    const target = Math.min(max, next * slot);
+    const target = scrollTargetForIndex(next);
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
     if (behavior === "auto" || reduceMotion) {
       cancelEase();
       scroller.scrollLeft = target;
@@ -349,8 +395,13 @@ export function FeaturesScroll({
     }
     activeRef.current = next;
     setActive(next);
+    if (isMobile) {
+      cancelEase();
+      scroller.scrollTo({ left: target, behavior: "smooth" });
+      return;
+    }
     easeScrollTo(target);
-  }, [applyCardProximity, cancelEase, easeScrollTo, features.length, reduceMotion, slotWidth]);
+  }, [applyCardProximity, cancelEase, easeScrollTo, features.length, reduceMotion, scrollTargetForIndex, slotWidth]);
 
   const clearAutoplay = useCallback(() => {
     if (autoplayRef.current) clearTimeout(autoplayRef.current);
@@ -370,11 +421,13 @@ export function FeaturesScroll({
     }
 
     const target = nearestIndex();
-    const targetScroll = target * slot;
+    const targetScroll = scrollTargetForIndex(target);
     const delta = Math.abs(scroller.scrollLeft - targetScroll);
 
     activeRef.current = target;
     setActive(target);
+
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
 
     if (delta < 2) {
       scroller.scrollLeft = targetScroll;
@@ -387,9 +440,10 @@ export function FeaturesScroll({
 
     settlingRef.current = true;
 
-    if (touchScrollingRef.current || reduceMotion) {
-      touchScrollingRef.current = false;
-      scroller.style.scrollSnapType = "x proximity";
+    touchScrollingRef.current = false;
+    scroller.style.scrollSnapType = "x proximity";
+
+    if (isMobile || reduceMotion) {
       scroller.scrollTo({
         left: targetScroll,
         behavior: reduceMotion ? "auto" : "smooth",
@@ -398,7 +452,7 @@ export function FeaturesScroll({
         settlingRef.current = false;
         applyCardProximity(true);
         setScrolling(false);
-      }, reduceMotion ? 0 : 280);
+      }, reduceMotion ? 0 : 320);
       return;
     }
 
@@ -406,7 +460,7 @@ export function FeaturesScroll({
       settlingRef.current = false;
       scroller.style.scrollSnapType = "x proximity";
     });
-  }, [applyCardProximity, easeScrollTo, nearestIndex, reduceMotion, slotWidth]);
+  }, [applyCardProximity, easeScrollTo, nearestIndex, reduceMotion, scrollTargetForIndex, slotWidth]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -456,16 +510,36 @@ export function FeaturesScroll({
       scroller.style.scrollSnapType = "none";
     };
 
+    const onTouchEnd = () => {
+      scroller.style.scrollSnapType = "x proximity";
+    };
+
+    const onScrollEnd = () => {
+      if (isEasingRef.current || draggingRef.current || settlingRef.current) return;
+      scroller.style.scrollSnapType = "x proximity";
+      const target = nearestIndex();
+      activeRef.current = target;
+      setActive(target);
+      applyCardProximity(true);
+      setScrolling(false);
+    };
+
     scroller.addEventListener("scroll", onScroll, { passive: true });
+    scroller.addEventListener("scrollend", onScrollEnd);
     scroller.addEventListener("touchstart", onTouchStart, { passive: true });
+    scroller.addEventListener("touchend", onTouchEnd, { passive: true });
+    scroller.addEventListener("touchcancel", onTouchEnd, { passive: true });
     applyCardProximity(true);
     return () => {
       scroller.removeEventListener("scroll", onScroll);
+      scroller.removeEventListener("scrollend", onScrollEnd);
       scroller.removeEventListener("touchstart", onTouchStart);
+      scroller.removeEventListener("touchend", onTouchEnd);
+      scroller.removeEventListener("touchcancel", onTouchEnd);
       if (scrollEndRef.current) clearTimeout(scrollEndRef.current);
       cancelEase();
     };
-  }, [applyCardProximity, cancelEase, settleToNearest]);
+  }, [applyCardProximity, cancelEase, nearestIndex, settleToNearest]);
 
   useEffect(() => {
     clearAutoplay();
@@ -599,7 +673,7 @@ export function FeaturesScroll({
         >
         <div
           className="flex items-start w-max"
-          style={{ paddingLeft: columnLeft, paddingRight: peekPx + GAP_PX }}
+          style={{ paddingLeft: columnLeft, paddingRight: trackPadRight }}
         >
           {features.map((f, i) => {
             const isActive = active === i;

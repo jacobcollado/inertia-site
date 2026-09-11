@@ -19,7 +19,8 @@ const SHOT_H = 858;
 const CARD_TRANSITION = aetherLiquidTransition();
 const TRACK_TRANSITION = `transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
 const GAP_PX = 20;
-const PEEK_PX_MOBILE = 22;
+const GAP_PX_MOBILE = 12;
+const PEEK_PX_MOBILE = 36;
 const PEEK_PX_DESKTOP = 64;
 const CONTENT_MAX_PX = 1280;
 const MOBILE_GUTTER_PX = 12;
@@ -117,6 +118,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
   const [reduceMotion, setReduceMotion] = useState(false);
   const [slideWidth, setSlideWidth] = useState(0);
   const [edgePad, setEdgePad] = useState(0);
+  const [gapPx, setGapPx] = useState(GAP_PX);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -126,7 +128,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
     return () => media.removeEventListener("change", sync);
   }, []);
 
-  const step = slideWidth + GAP_PX;
+  const step = slideWidth + gapPx;
 
   const measureLayout = useCallback(() => {
     const viewport = viewportRef.current;
@@ -138,7 +140,9 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
       ? contentWidth - MOBILE_GUTTER_PX * 2
       : vw - MOBILE_GUTTER_PX * 2;
     const peek = desktop ? PEEK_PX_DESKTOP : PEEK_PX_MOBILE;
-    const nextSlideWidth = Math.max(0, cardAreaWidth - peek * 2 - GAP_PX);
+    const nextGap = desktop ? GAP_PX : GAP_PX_MOBILE;
+    const nextSlideWidth = Math.max(0, cardAreaWidth - peek * 2 - nextGap);
+    setGapPx(nextGap);
     setSlideWidth(nextSlideWidth);
     setEdgePad(Math.max(0, (vw - nextSlideWidth) / 2));
   }, []);
@@ -333,7 +337,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
                   className="shrink-0 flex flex-col gap-3 sm:gap-4"
                   style={{
                     width: slideWidth || undefined,
-                    marginRight: i < slides.length - 1 ? GAP_PX : 0,
+                    marginRight: i < slides.length - 1 ? gapPx : 0,
                     transformOrigin: "center center",
                   }}
                 >

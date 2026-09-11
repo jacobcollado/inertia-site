@@ -6,6 +6,7 @@ import { ConversionFeatures } from "./conversion-features";
 import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
 import { AetherFaq } from "./faq";
+import { SecondaryFeatures } from "./secondary-features";
 
 export const metadata: Metadata = {
   title: "Aether",
@@ -32,7 +33,7 @@ const KEY_FEATURES = [
     desc: "More per order, without the hard sell.",
     visual: "upsell",
     image: "/aether/upsell.png",
-    imageMobile: "/aether/upsell-mobile.png",
+    imageMobile: "/aether/upsell-mockup.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
@@ -41,7 +42,7 @@ const KEY_FEATURES = [
     desc: "When there are four left, say four.",
     visual: "scarcity",
     image: "/aether/scarcity.png",
-    imageMobile: "/aether/scarcity-mobile.png",
+    imageMobile: "/aether/scarcity-mockup.png",
     flip: true,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
   },
@@ -50,7 +51,7 @@ const KEY_FEATURES = [
     desc: "No dead ends. Every section leads to the next.",
     visual: "guided",
     image: "/aether/guided.jpg",
-    imageMobile: "/aether/guided-mobile.png",
+    imageMobile: "/aether/iphone-mockup.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
@@ -121,30 +122,21 @@ export default function AetherPage() {
 
       <ConversionFeatures moments={CONVERSION_MOMENTS} />
 
+      <div className="grid-rule" aria-hidden="true" />
+
       <VariationsScroll variations={THEME_VARIATIONS} />
 
+      <div className="grid-rule" aria-hidden="true" />
+
       {/* Secondary features */}
-      <div className="px-3 pb-16 sm:pb-24">
+      <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
         <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-3 rise rise--liquid">And the rest of it</p>
         <div className="mb-10 rise rise--liquid" style={{ "--rise-delay": "60ms" } as React.CSSProperties}>
           <span className="inline-flex items-center rounded-full px-2.5 py-1 text-[14px] sm:text-[15px] font-normal tracking-tight bg-[rgb(var(--fg)/0.06)] text-[rgb(var(--fg))]">
             Everything included
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
-          {SECONDARY_FEATURES.map((f, i) => (
-            <div
-              key={f.name}
-              className="flex items-start py-4 rise rise--liquid"
-              style={{ "--rise-delay": `${120 + i * 40}ms` } as React.CSSProperties}
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[17px] tracking-tight font-medium text-[rgb(var(--fg))]">{f.name}</span>
-                <span className="text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>{f.desc}</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        <SecondaryFeatures features={SECONDARY_FEATURES} />
       </div>
 
       <div className="grid-rule" aria-hidden="true" />

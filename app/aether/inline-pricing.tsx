@@ -78,7 +78,7 @@ export function InlinePricing() {
         {LICENSE.includes.map((item) => (
           <div
             key={item}
-            className="flex items-center gap-3 rounded-xl border border-[rgb(var(--line))] bg-[rgb(var(--surface)/0.45)] px-5 py-4"
+            className="flex items-center gap-3 rounded-xl bg-[rgb(var(--surface)/0.45)] px-5 py-4"
           >
             <CheckIcon />
             <span className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">{item}</span>
@@ -86,8 +86,8 @@ export function InlinePricing() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[rgb(var(--line))] bg-[rgb(var(--surface)/0.45)] flex flex-col sm:flex-row sm:items-stretch">
-        <div className="hidden sm:block sm:w-[35%] sm:shrink-0 border-r border-[rgb(var(--line))]">
+      <div className="overflow-hidden rounded-2xl bg-[rgb(var(--surface)/0.45)] flex flex-col sm:flex-row sm:items-stretch">
+        <div className="hidden sm:block sm:w-[35%] sm:shrink-0">
           <PricingLifeShader embedded className="min-h-[220px]" />
         </div>
 

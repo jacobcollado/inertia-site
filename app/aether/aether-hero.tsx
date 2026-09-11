@@ -32,7 +32,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none hover:opacity-80 transition-opacity`}
             style={{ background: "#000", color: "#ededed" }}
           >
-            Buy a license
+            Get Aether
           </Link>
           <div className="w-full flex gap-2">
             <div className="flex-[3] min-w-0">
@@ -51,12 +51,11 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
         <Image
           src="/aether/iphone-mockup.png"
           alt="Aether theme on iPhone"
-          width={503}
+          width={496}
           height={1024}
-          sizes="(max-width: 639px) 72vw, 0px"
-          quality={90}
-          unoptimized
-          className="sm:hidden w-full max-w-[16.5rem] h-auto mx-auto"
+          sizes="(max-width: 639px) 248px, 0px"
+          quality={100}
+          className="sm:hidden w-[248px] max-w-[72vw] h-auto mx-auto"
           priority
         />
         <Image
