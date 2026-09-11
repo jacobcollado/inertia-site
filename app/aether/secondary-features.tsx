@@ -24,7 +24,7 @@ export function SecondaryFeatures({ features }: { features: SecondaryFeature[] }
             style={{ "--rise-delay": `${120 + i * 40}ms` } as React.CSSProperties}
           >
             <div className="flex flex-col gap-0.5">
-              <span className="text-[17px] tracking-tight font-medium text-[rgb(var(--fg))]">{f.name}</span>
+              <span className="text-[17px] tracking-tight font-normal text-[rgb(var(--fg))]">{f.name}</span>
               <span className="text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
                 {f.desc}
               </span>

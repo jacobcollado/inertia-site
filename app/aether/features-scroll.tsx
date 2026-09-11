@@ -716,12 +716,12 @@ export function FeaturesScroll({
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          className={`no-scrollbar w-full overflow-x-auto snap-x snap-proximity overscroll-x-contain outline-none ${dragging || scrolling ? "select-none" : ""}`}
+          className={`no-scrollbar w-full overflow-x-auto overflow-y-hidden snap-x snap-proximity overscroll-x-contain outline-none ${dragging || scrolling ? "select-none" : ""}`}
           style={{
             cursor: dragging ? "grabbing" : "grab",
             WebkitOverflowScrolling: "touch",
             scrollPaddingInlineStart: columnLeft,
-            touchAction: "pan-x",
+            touchAction: "pan-x pan-y",
           }}
         >
         <div
