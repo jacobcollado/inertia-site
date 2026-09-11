@@ -2245,6 +2245,59 @@ h1:hover .redact > span.redact-inner,
   flex-shrink: 0;
 }
 
+/* Aether page — blue accent wave rising from the bottom */
+.aether-bottom-wave__glow {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    rgb(10 132 255 / 0.2) 0%,
+    rgb(10 132 255 / 0.08) 42%,
+    transparent 100%
+  );
+}
+
+.aether-bottom-wave__layer {
+  position: absolute;
+  left: -25%;
+  width: 150%;
+  height: 160%;
+  bottom: -78%;
+  border-radius: 46% 54% 0 0 / 38% 38% 0 0;
+  background: rgb(10 132 255 / 0.13);
+  filter: blur(10px);
+  will-change: transform;
+}
+
+.aether-bottom-wave__layer--a {
+  animation: aether-bottom-wave-drift 9s ease-in-out infinite alternate;
+}
+
+.aether-bottom-wave__layer--b {
+  bottom: -82%;
+  opacity: 0.75;
+  background: rgb(10 132 255 / 0.1);
+  animation: aether-bottom-wave-drift 12s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes aether-bottom-wave-drift {
+  from {
+    transform: translate3d(-3.5%, 0, 0) rotate(-1.2deg);
+  }
+  to {
+    transform: translate3d(3.5%, 0, 0) rotate(1.2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aether-bottom-wave__layer--a,
+  .aether-bottom-wave__layer--b {
+    animation: none;
+  }
+}
+
 /* â”€â”€ Internal column divider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /* py-16 = 4rem on the parent flex row. Negative margins extend the line

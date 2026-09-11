@@ -29,21 +29,51 @@ float noise(vec2 p) {
   );
 }
 
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  mat2 rot = mat2(0.8, -0.6, 0.6, 0.8);
+  for (int i = 0; i < 4; i++) {
+    v += a * noise(p);
+    p = rot * p * 2.05 + vec2(17.0, 23.0);
+    a *= 0.5;
+  }
+  return v;
+}
+
 void main() {
   vec2 uv = gl_FragCoord.xy / u_resolution.xy;
   uv.x *= u_resolution.x / u_resolution.y;
 
-  float t = u_time * 0.12;
-  float n = noise(uv * 2.2 + vec2(t, t * 0.65));
-  n += noise(uv * 4.8 - vec2(t * 0.45, t * 1.1)) * 0.45;
-  n /= 1.45;
+  float t = u_time * 0.42;
+  vec2 drift = vec2(t * 0.28, t * 0.18);
 
-  vec3 base = vec3(0.96, 0.96, 0.96);
-  vec3 deep = vec3(0.86, 0.86, 0.86);
-  vec3 ink = vec3(0.07, 0.07, 0.07);
+  // Domain warp — soft currents that pull the field along over time.
+  vec2 warp = vec2(
+    fbm(uv * 1.35 + drift),
+    fbm(uv * 1.35 + drift + vec2(4.2, 1.7))
+  ) - 0.5;
+  vec2 p = uv + warp * 0.14;
+
+  float n = fbm(p * 2.0 + drift);
+  n += fbm(p * 4.2 - drift.yx * 1.4 + vec2(t * 0.12, 0.0)) * 0.42;
+  n /= 1.42;
+
+  float blueFlow = fbm(p * 3.4 + drift * 1.15 + vec2(1.8, 4.6));
+  blueFlow += fbm(p * 5.6 - drift * 0.8 + vec2(t * 0.08, 2.2)) * 0.35;
+  blueFlow /= 1.35;
+
+  // Site primary — #0a84ff
+  vec3 accent = vec3(0.039, 0.518, 1.0);
+  vec3 accentSoft = vec3(0.82, 0.91, 0.99);
+  vec3 base = vec3(0.965, 0.968, 0.975);
+  vec3 deep = vec3(0.84, 0.87, 0.92);
+  vec3 ink = vec3(0.07, 0.09, 0.12);
 
   vec3 col = mix(base, deep, smoothstep(0.15, 0.95, n));
-  col = mix(col, ink, smoothstep(0.62, 0.92, n) * 0.07);
+  col = mix(col, accentSoft, smoothstep(0.48, 0.78, blueFlow) * 0.28);
+  col = mix(col, accent, smoothstep(0.68, 0.9, blueFlow) * 0.14);
+  col = mix(col, ink, smoothstep(0.62, 0.92, n) * 0.06);
 
   outColor = vec4(col, 1.0);
 }`;
