@@ -139,8 +139,10 @@ function EmailForm({
         onClick={onBack}
         className={`flex items-center gap-1.5 ${LOGIN_UI} text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start`}
       >
-        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <polyline points="10 4 6 8 10 12" />
+        <svg viewBox="0 0 16 16" className="size-[1em] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <line x1="13" y1="8" x2="5" y2="8" />
+          <line x1="8" y1="5" x2="5" y2="8" />
+          <line x1="8" y1="11" x2="5" y2="8" />
         </svg>
         Back
       </button>
@@ -191,9 +193,7 @@ function EmailForm({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className={inputBase}
-          style={{ border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" }}
-          onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
-          onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)")}
+          style={{ border: "none", color: "rgb(var(--fg))" }}
         />
         <div className="relative">
           <input
@@ -208,12 +208,11 @@ function EmailForm({
             onKeyDown={checkCapsLock}
             className={inputBase}
             style={{
-              border: "1.5px solid rgb(var(--fg) / 0.14)",
+              border: "none",
               color: "rgb(var(--fg))",
               paddingRight: capsLock && mode === "signup" && strength ? 68 : capsLock || (mode === "signup" && strength) ? 44 : undefined,
             }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)"; setCapsLock(false); }}
+            onBlur={() => setCapsLock(false)}
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
             {capsLock && (

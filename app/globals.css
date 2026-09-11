@@ -932,6 +932,50 @@ h1:hover .redact > span.redact-inner,
   to   { transform: translateY(-3px); }
 }
 
+/* Hero flanking mockups — a perspective tilt plus a slow vertical drift, so
+   the two laptops read as floating beside the centre one rather than sitting
+   flat against it. The tilt lives inside the keyframes rather than as a
+   static transform: an animation on `transform` replaces the property
+   outright, so a separately-declared rotate would be discarded the moment
+   the float starts. The two sides mirror each other on the Y axis and run
+   off-phase (different durations, negative delay on one) so they never bob
+   in lockstep. */
+.hero-float {
+  will-change: transform;
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
+.hero-float--left {
+  animation: hero-float-left 9s ease-in-out infinite;
+}
+
+.hero-float--right {
+  animation: hero-float-right 11s ease-in-out infinite -3.5s;
+}
+
+@keyframes hero-float-left {
+  0%, 100% { transform: perspective(1800px) rotateY(9deg) rotateX(2deg) rotateZ(-1.2deg) translateY(0); }
+  50%      { transform: perspective(1800px) rotateY(9deg) rotateX(2deg) rotateZ(-1.2deg) translateY(-14px); }
+}
+
+@keyframes hero-float-right {
+  0%, 100% { transform: perspective(1800px) rotateY(-9deg) rotateX(2deg) rotateZ(1.2deg) translateY(0); }
+  50%      { transform: perspective(1800px) rotateY(-9deg) rotateX(2deg) rotateZ(1.2deg) translateY(-16px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the tilt, drop the drift — the angle is composition, the bob is motion. */
+  .hero-float--left {
+    animation: none;
+    transform: perspective(1800px) rotateY(9deg) rotateX(2deg) rotateZ(-1.2deg);
+  }
+  .hero-float--right {
+    animation: none;
+    transform: perspective(1800px) rotateY(-9deg) rotateX(2deg) rotateZ(1.2deg);
+  }
+}
+
 /* ── Cookie banner ─────────────────────────────────────────────────────────
    Deliberately cheap: a one-shot CSS entrance, `contain` to keep its paints
    local, and pure-CSS interaction states (no JS mutates style on hover/press).

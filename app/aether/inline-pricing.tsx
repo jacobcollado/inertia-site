@@ -6,7 +6,7 @@ import { PolicyDisclaimer } from "./policy-disclaimer";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 
 const INCLUDE_ICON_CLASS =
-  "h-3.5 w-3.5 shrink-0 text-[rgb(var(--fg))] opacity-[0.35]";
+  "h-3.5 w-3.5 shrink-0 text-primary";
 
 const LICENSE = {
   id: "lifetime" as const,
@@ -54,7 +54,19 @@ const LICENSE = {
         </svg>
       ),
     },
-  ] satisfies { label: string; icon: ReactNode }[],
+    {
+      label: "Theme install included",
+      bonus: "$50 value — free",
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+          <path d="M8 2v8" />
+          <path d="M5 7l3 3 3-3" />
+          <path d="M3 12.5h10" />
+          <path d="M3 12.5v1.5h10v-1.5" />
+        </svg>
+      ),
+    },
+  ] satisfies { label: string; icon: ReactNode; bonus?: string }[],
 };
 
 type Status = "idle" | "submitting" | "error";
@@ -100,10 +112,17 @@ export function InlinePricing() {
         {LICENSE.includes.map((item) => (
           <div
             key={item.label}
-            className="flex items-center gap-3 rounded-xl bg-[rgb(var(--surface)/0.45)] px-5 py-4"
+            className={`flex items-center gap-3 rounded-xl bg-[rgb(var(--surface)/0.45)] px-5 py-4${item.bonus ? " sm:col-span-2" : ""}`}
           >
             {item.icon}
-            <span className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">{item.label}</span>
+            <span className="flex min-w-0 flex-wrap items-center gap-2.5 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">
+              {item.label}
+              {item.bonus ? (
+                <span className="inline-flex shrink-0 items-center rounded-full border border-[#0a84ff]/25 bg-[#0a84ff]/12 px-2.5 py-1 text-[12px] sm:text-[13px] font-medium tracking-tight text-[#0a84ff]">
+                  {item.bonus}
+                </span>
+              ) : null}
+            </span>
           </div>
         ))}
       </div>

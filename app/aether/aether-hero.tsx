@@ -10,7 +10,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
   return (
     <section className="flex flex-col">
       <div
-        className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center pt-12 sm:pt-20"
+        className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center pt-12 sm:pt-20 lg:pt-40"
         style={{ minHeight: 480, paddingBottom: 32 }}
       >
         <h1 className="font-normal tracking-[-0.04em] leading-none m-0">
@@ -47,7 +47,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
           </div>
         </div>
       </div>
-      <div className="px-3 mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid">
+      <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">
         <Image
           src="/aether/iphone-mockup.png"
           alt="Aether theme on iPhone"
@@ -58,16 +58,38 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
           className="sm:hidden w-[248px] max-w-[72vw] h-auto mx-auto"
           priority
         />
-        <Image
-          src="/aether/macbook-mockup.jpg"
-          alt="Aether theme on MacBook"
-          width={2048}
-          height={1364}
-          sizes="(min-width: 640px) min(80rem, 100vw), 0px"
-          quality={90}
-          className="hidden sm:block w-full h-auto"
-          priority
-        />
+        <div className="hidden sm:block relative">
+          <Image
+            src="/aether/macbook-mockup.jpg"
+            alt="Aether theme on MacBook"
+            width={2048}
+            height={1364}
+            sizes="(min-width: 640px) 60vw"
+            quality={90}
+            className="w-[60vw] max-w-none h-auto mx-auto"
+            priority
+          />
+          <Image
+            src="/aether/macbook-cart.png"
+            alt="Aether cart drawer on MacBook"
+            width={4500}
+            height={3000}
+            sizes="(min-width: 1024px) 60vw, 0px"
+            quality={90}
+            className="hero-float hero-float--left hidden lg:block absolute left-0 top-[8%] w-[min(52rem,60vw)] h-auto pointer-events-none select-none"
+            priority
+          />
+          <Image
+            src="/aether/macbook-pdp-v2.png"
+            alt="Aether product page on MacBook"
+            width={4500}
+            height={3000}
+            sizes="(min-width: 1024px) 60vw, 0px"
+            quality={90}
+            className="hero-float hero-float--right hidden lg:block absolute right-0 top-[8%] w-[min(52rem,60vw)] h-auto pointer-events-none select-none"
+            priority
+          />
+        </div>
       </div>
     </section>
   );
