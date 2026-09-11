@@ -51,7 +51,7 @@ export function ConversionFeatures({ moments }: { moments: ConversionMoment[] })
                   </p>
                 </div>
 
-                <div className="relative rounded-xl bg-[rgb(var(--surface-elevated))] overflow-hidden p-4 sm:p-6">
+                <div className="relative rounded-xl bg-[rgb(var(--surface)/0.45)] overflow-hidden p-4 sm:p-6">
                   <Image
                     src={moment.image}
                     alt={moment.alt}
@@ -68,7 +68,7 @@ export function ConversionFeatures({ moments }: { moments: ConversionMoment[] })
         </div>
 
         <div
-          className="rise rise--liquid mt-16 sm:mt-20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl bg-[rgb(var(--surface-elevated))] px-6 py-6 sm:px-8 sm:py-7"
+          className="rise rise--liquid mt-16 sm:mt-20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl bg-[rgb(var(--surface)/0.45)] px-6 py-6 sm:px-8 sm:py-7"
           style={{ "--rise-delay": "240ms" } as React.CSSProperties}
         >
           <div className="flex flex-col gap-1.5">

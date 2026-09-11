@@ -28,7 +28,7 @@ const INITIAL_RUNWAY = 3;
 const EXTEND_THRESHOLD = 2;
 
 const NAV_BUTTON_CLASS =
-  "relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface-elevated))] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]";
+  "relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface)/0.45)] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]";
 
 const LABEL_MOTION = `opacity ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, filter ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
 const LABEL_EXIT_MS = Math.round(AETHER_LIQUID_MS * 0.42);
@@ -341,7 +341,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
                     transformOrigin: "center center",
                   }}
                 >
-                  <div className="relative w-full rounded-xl bg-[rgb(var(--surface-elevated))] overflow-hidden p-4 sm:p-5">
+                  <div className="relative w-full rounded-xl bg-[rgb(var(--surface)/0.45)] overflow-hidden p-4 sm:p-5">
                     <div className="relative overflow-hidden rounded-lg bg-[rgb(var(--surface))]">
                       <Image
                         src={v.image}

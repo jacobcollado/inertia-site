@@ -1,20 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { PricingLifeShader } from "./pricing-life-shader";
 import { PolicyDisclaimer } from "./policy-disclaimer";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+
+const INCLUDE_ICON_CLASS =
+  "h-3.5 w-3.5 shrink-0 text-[rgb(var(--fg))] opacity-[0.35]";
 
 const LICENSE = {
   id: "lifetime" as const,
   price: "$125 once",
   desc: "Lifetime updates, priority support, single store.",
   includes: [
-    "Full Aether theme, all 41 sections",
-    "Lifetime updates, no renewals",
-    "Single store license",
-    "Priority support",
-  ],
+    {
+      label: "Full Aether theme, all 41 sections",
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+          <rect x="1" y="2" width="14" height="3" rx="1" />
+          <rect x="1" y="7" width="9" height="3" rx="1" />
+          <rect x="1" y="12" width="6" height="3" rx="1" />
+        </svg>
+      ),
+    },
+    {
+      label: "Lifetime updates, no renewals",
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+          <path d="M13 2.5v3.5H9.5" />
+          <path d="M3 13.5V10h3.5" />
+          <path d="M12.2 5.8A5 5 0 0 0 4.2 6.5" />
+          <path d="M3.8 10.2A5 5 0 0 0 11.8 9.5" />
+        </svg>
+      ),
+    },
+    {
+      label: "Single store license",
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+          <path d="M2.5 6.5 3.5 3h9l1 3.5" />
+          <rect x="2.5" y="6.5" width="11" height="7" rx="1" />
+          <path d="M6.5 13.5V9.5h3v4" />
+        </svg>
+      ),
+    },
+    {
+      label: "Priority support",
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+          <path d="M4 10V8a4 4 0 0 1 8 0v2" />
+          <rect x="2" y="9.5" width="2.5" height="4" rx="1.2" />
+          <rect x="11.5" y="9.5" width="2.5" height="4" rx="1.2" />
+        </svg>
+      ),
+    },
+  ] satisfies { label: string; icon: ReactNode }[],
 };
 
 type Status = "idle" | "submitting" | "error";
@@ -24,24 +64,6 @@ function Spinner() {
     <svg className="animate-spin h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5" strokeOpacity="0.2" />
       <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-3.5 w-3.5 shrink-0 text-[rgb(var(--fg))]"
-      style={{ opacity: 0.35 }}
-      aria-hidden="true"
-    >
-      <polyline points="2 8 6 12 14 4" />
     </svg>
   );
 }
@@ -77,11 +99,11 @@ export function InlinePricing() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 sm:mb-10">
         {LICENSE.includes.map((item) => (
           <div
-            key={item}
+            key={item.label}
             className="flex items-center gap-3 rounded-xl bg-[rgb(var(--surface)/0.45)] px-5 py-4"
           >
-            <CheckIcon />
-            <span className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">{item}</span>
+            {item.icon}
+            <span className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">{item.label}</span>
           </div>
         ))}
       </div>

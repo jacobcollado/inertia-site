@@ -4,7 +4,11 @@ import Image from "next/image";
 import { HiMiniPause, HiMiniPlay } from "react-icons/hi2";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DemoButton } from "./demo-button";
-import { AETHER_LIQUID_MS, easeLiquid } from "./motion";
+import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS, easeLiquid } from "./motion";
+
+const PILL_ACTIVE_W = 20;
+const PILL_INACTIVE_W = 8;
+const PILL_TRANSITION = `width ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, opacity ${Math.round(AETHER_LIQUID_MS * 0.55)}ms ${AETHER_LIQUID_EASE}`;
 const g = (a: number) => `rgba(120,120,120,${a})`;
 const acc = "rgb(var(--accent))";
 
@@ -190,6 +194,7 @@ export function FeaturesScroll({
   features: Feature[];
   demoUrl: string;
 }) {
+  const sectionRef = useRef<HTMLElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const activeRef = useRef(0);
@@ -209,8 +214,12 @@ export function FeaturesScroll({
   const [columnLeft, setColumnLeft] = useState(MOBILE_GUTTER_PX);
   const [trackPadRight, setTrackPadRight] = useState(PEEK_PX_MOBILE + GAP_PX);
   const [playing, setPlaying] = useState(true);
+  const [inView, setInView] = useState(false);
+  const [progress, setProgress] = useState(0);
   const scrollEndRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const autoplayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressRafRef = useRef(0);
+  const progressElapsedRef = useRef(0);
+  const progressTickStartRef = useRef(0);
   const easeAnimRef = useRef<number | null>(null);
   const isEasingRef = useRef(false);
   const settlingRef = useRef(false);
@@ -403,11 +412,6 @@ export function FeaturesScroll({
     easeScrollTo(target);
   }, [applyCardProximity, cancelEase, easeScrollTo, features.length, reduceMotion, scrollTargetForIndex, slotWidth]);
 
-  const clearAutoplay = useCallback(() => {
-    if (autoplayRef.current) clearTimeout(autoplayRef.current);
-    autoplayRef.current = null;
-  }, []);
-
   const togglePlay = useCallback(() => {
     if (reduceMotion) return;
     setPlaying((on) => !on);
@@ -542,13 +546,62 @@ export function FeaturesScroll({
   }, [applyCardProximity, cancelEase, nearestIndex, settleToNearest]);
 
   useEffect(() => {
-    clearAutoplay();
-    if (!playing || reduceMotion || dragging || scrolling) return;
-    autoplayRef.current = setTimeout(() => {
-      goTo((activeRef.current + 1) % features.length);
-    }, AUTOPLAY_MS);
-    return clearAutoplay;
-  }, [playing, active, dragging, scrolling, reduceMotion, features.length, goTo, clearAutoplay]);
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.3, rootMargin: "0px 0px -8% 0px" },
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    progressElapsedRef.current = 0;
+    progressTickStartRef.current = 0;
+    setProgress(0);
+  }, [active]);
+
+  useEffect(() => {
+    cancelAnimationFrame(progressRafRef.current);
+
+    const canRun = inView && playing && !reduceMotion && !dragging && !scrolling;
+    if (!canRun) {
+      if (progressTickStartRef.current > 0) {
+        progressElapsedRef.current += performance.now() - progressTickStartRef.current;
+        progressTickStartRef.current = 0;
+      }
+      return;
+    }
+
+    progressTickStartRef.current = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = progressElapsedRef.current + (now - progressTickStartRef.current);
+      const linear = Math.min(1, elapsed / AUTOPLAY_MS);
+      setProgress(easeLiquid(linear));
+
+      if (linear >= 1) {
+        progressElapsedRef.current = 0;
+        progressTickStartRef.current = 0;
+        setProgress(0);
+        goTo((activeRef.current + 1) % features.length);
+        return;
+      }
+
+      progressRafRef.current = requestAnimationFrame(tick);
+    };
+
+    progressRafRef.current = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(progressRafRef.current);
+      if (progressTickStartRef.current > 0) {
+        progressElapsedRef.current += performance.now() - progressTickStartRef.current;
+        progressTickStartRef.current = 0;
+      }
+    };
+  }, [inView, playing, active, dragging, scrolling, reduceMotion, features.length, goTo]);
 
   useEffect(() => {
     if (reduceMotion) setPlaying(false);
@@ -641,7 +694,7 @@ export function FeaturesScroll({
   };
 
   return (
-    <section className="relative py-16 sm:py-24 rise rise--liquid">
+    <section ref={sectionRef} className="relative py-16 sm:py-24 rise rise--liquid">
       <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex items-center justify-between gap-4 mb-16 sm:mb-16">
         <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
           Key features
@@ -692,7 +745,7 @@ export function FeaturesScroll({
                   transformOrigin: "center top",
                 }}
               >
-                <div className="relative w-full rounded-xl bg-[rgb(var(--surface-elevated))] overflow-hidden">
+                <div className="relative w-full rounded-xl bg-[rgb(var(--surface)/0.45)] overflow-hidden">
                   <p className="px-6 pt-6 sm:px-8 sm:pt-8 text-center text-[22px] sm:text-[28px] leading-relaxed tracking-tight [text-wrap:pretty] text-[rgb(var(--fg))] max-w-[42rem] mx-auto">
                     {f.desc}
                   </p>
@@ -708,7 +761,7 @@ export function FeaturesScroll({
       </div>
 
       <div className="flex items-center justify-center gap-3 mt-10">
-        <div className="inline-flex items-center gap-1 rounded-full px-3 py-2 bg-[rgb(var(--surface-elevated))]">
+        <div className="inline-flex items-center gap-1 rounded-full px-3 py-2 bg-[rgb(var(--surface)/0.45)]">
           {features.map((f, i) => {
             const isActive = active === i;
             return (
@@ -718,23 +771,24 @@ export function FeaturesScroll({
                 aria-label={`Show ${f.title}`}
                 aria-current={isActive ? "true" : undefined}
                 onClick={() => goTo(i)}
-                className="flex items-center justify-center h-6 px-1.5"
+                className="flex h-6 w-5 items-center justify-center"
               >
-                {isActive ? (
-                  <span className="relative block h-1.5 w-5 rounded-full overflow-hidden bg-[rgb(var(--fg)/0.22)]">
-                    <span
-                      key={`${active}-${playing}`}
-                      className="absolute inset-y-0 left-0 rounded-full bg-[rgb(var(--fg))]"
-                      style={
-                        playing && !reduceMotion
-                          ? { animation: `progress-fill ${AUTOPLAY_MS}ms linear forwards` }
-                          : { width: "100%" }
-                      }
-                    />
-                  </span>
-                ) : (
-                  <span className="block h-1.5 w-2 rounded-full bg-[rgb(var(--fg)/0.22)]" />
-                )}
+                <span
+                  className="relative block h-1.5 rounded-full overflow-hidden bg-[rgb(var(--fg)/0.22)]"
+                  style={{
+                    width: isActive ? PILL_ACTIVE_W : PILL_INACTIVE_W,
+                    transition: reduceMotion ? undefined : PILL_TRANSITION,
+                  }}
+                >
+                  <span
+                    className="absolute inset-y-0 left-0 rounded-full bg-[rgb(var(--fg))]"
+                    style={{
+                      width: isActive && !reduceMotion ? `${progress * 100}%` : isActive ? "100%" : "0%",
+                      opacity: isActive ? (playing && inView && !reduceMotion ? 1 : 0.85) : 0,
+                      transition: reduceMotion ? undefined : `opacity ${Math.round(AETHER_LIQUID_MS * 0.55)}ms ${AETHER_LIQUID_EASE}`,
+                    }}
+                  />
+                </span>
               </button>
             );
           })}
@@ -745,7 +799,7 @@ export function FeaturesScroll({
           aria-pressed={playing}
           disabled={reduceMotion}
           onClick={togglePlay}
-          className="relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface-elevated))] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+          className="relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface)/0.45)] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
         >
           {playing ? (
             <HiMiniPause
