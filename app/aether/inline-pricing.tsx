@@ -108,11 +108,11 @@ export function InlinePricing() {
 
   return (
     <div className="w-full rise rise--liquid">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 sm:mb-10">
+      <div className="grid grid-cols-2 gap-3 mb-8 sm:mb-10">
         {LICENSE.includes.map((item) => (
           <div
             key={item.label}
-            className={`flex items-center gap-3 rounded-xl bg-[rgb(var(--surface)/0.45)] px-5 py-4${item.bonus ? " sm:col-span-2" : ""}`}
+            className={`flex items-center gap-3 rounded-xl bg-[rgb(var(--surface)/0.45)] px-4 py-4 sm:px-5${item.bonus ? " col-span-2" : ""}`}
           >
             {item.icon}
             <span className="flex min-w-0 flex-wrap items-center gap-2.5 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">
