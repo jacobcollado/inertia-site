@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ClaimAccount } from "./claim-account";
 
 export const metadata: Metadata = {
   title: "Purchase complete — Aether by Inertia",
@@ -10,11 +11,20 @@ export default async function BuySuccessPage({
 }: {
   searchParams: Promise<{ session_id?: string }>;
 }) {
-  await searchParams; // consumed but not used — session data handled by webhook
+  const { session_id } = await searchParams;
 
+  // Height budget: the in-flow site header (72px) and minimal footer (~86px)
+  // both sit outside this main, so a full-viewport min-height here would always
+  // overflow by their combined height. svh (not vh) so mobile toolbars don't
+  // create the same overflow dynamically. No bottom padding: it would sit below
+  // the centered content and pull the optical centre up.
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
-      <div className="flex flex-col items-center justify-center flex-1 text-center px-3 py-24 rise">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-[calc(100svh-158px)] flex flex-col">
+      {/* Optical, not mathematical, centre: the block is visually top-heavy (a
+          48px badge and a large headline over one short line and a button row),
+          so true centre reads as sitting low. A small upward nudge corrects it.
+          translate rather than margin so it doesn't alter the height budget. */}
+      <div className="flex flex-col items-center justify-center flex-1 text-center px-3 py-10 rise -translate-y-[2%]">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center mb-6"
           style={{ background: "rgb(var(--green) / 0.15)" }}
@@ -31,21 +41,7 @@ export default async function BuySuccessPage({
           Your license key is on its way to your inbox. It usually arrives within a minute.
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/portal/licenses"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight text-[rgb(var(--bg))] transition-opacity hover:opacity-85"
-            style={{ background: "var(--accent-gradient)" }}
-          >
-            View my licenses
-          </Link>
-          <Link
-            href="/aether/docs"
-            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium tracking-tight border border-[rgb(var(--line))] text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.4)] transition-colors"
-          >
-            Installation docs
-          </Link>
-        </div>
+        <ClaimAccount sessionId={session_id} />
       </div>
     </main>
   );

@@ -1,12 +1,19 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useAnimate, useReducedMotion } from "motion/react";
+import { AnimatedNumber } from "@/components/animated-number";
 import { PricingLifeShader } from "./pricing-life-shader";
 import { PolicyDisclaimer } from "./policy-disclaimer";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { createCtaScalePressOnRef, ctaScalePressOnSelf } from "@/lib/cta-hover-motion";
 
-const INCLUDE_ICON_CLASS =
-  "h-3.5 w-3.5 shrink-0 text-primary";
+const PRICE_BOUNCE_EASING = "cubic-bezier(0.22, 1.18, 0.36, 1)";
+const PRICE_TIMING = { duration: 520, easing: PRICE_BOUNCE_EASING };
+
+const INCLUDE_ICON = "size-[1em] shrink-0";
+const INCLUDE_LABEL_CLASS =
+  "text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]";
 
 const LICENSE = {
   id: "lifetime" as const,
@@ -16,17 +23,19 @@ const LICENSE = {
     {
       label: "Full Aether theme, all 41 sections",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
-          <rect x="1" y="2" width="14" height="3" rx="1" />
-          <rect x="1" y="7" width="9" height="3" rx="1" />
-          <rect x="1" y="12" width="6" height="3" rx="1" />
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#a855f7]`} aria-hidden="true">
+          <rect x="1" y="1.5" width="14" height="2" rx="0.5" />
+          <rect x="1" y="4.5" width="14" height="3" rx="0.5" />
+          <rect x="1" y="8.5" width="6" height="2.5" rx="0.5" />
+          <rect x="9" y="8.5" width="6" height="2.5" rx="0.5" />
+          <rect x="1" y="12" width="14" height="2.5" rx="0.5" />
         </svg>
       ),
     },
     {
       label: "Lifetime updates, no renewals",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#22c55e]`} aria-hidden="true">
           <path d="M13 2.5v3.5H9.5" />
           <path d="M3 13.5V10h3.5" />
           <path d="M12.2 5.8A5 5 0 0 0 4.2 6.5" />
@@ -37,7 +46,7 @@ const LICENSE = {
     {
       label: "Single store license",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#f97316]`} aria-hidden="true">
           <path d="M2.5 6.5 3.5 3h9l1 3.5" />
           <rect x="2.5" y="6.5" width="11" height="7" rx="1" />
           <path d="M6.5 13.5V9.5h3v4" />
@@ -45,12 +54,14 @@ const LICENSE = {
       ),
     },
     {
-      label: "Priority support",
+      label: "Personal dashboard",
+      details:
+        "Improves support, store license control, invoices, project updates, and files, all in one place.",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
-          <path d="M4 10V8a4 4 0 0 1 8 0v2" />
-          <rect x="2" y="9.5" width="2.5" height="4" rx="1.2" />
-          <rect x="11.5" y="9.5" width="2.5" height="4" rx="1.2" />
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#0a84ff]`} aria-hidden="true">
+          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
+          <path d="M2 6h12" />
+          <path d="M6 6v7.5" />
         </svg>
       ),
     },
@@ -58,7 +69,7 @@ const LICENSE = {
       label: "Theme install included",
       bonus: "$50 value — free",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON_CLASS} aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#14b8a6]`} aria-hidden="true">
           <path d="M8 2v8" />
           <path d="M5 7l3 3 3-3" />
           <path d="M3 12.5h10" />
@@ -66,10 +77,55 @@ const LICENSE = {
         </svg>
       ),
     },
-  ] satisfies { label: string; icon: ReactNode; bonus?: string }[],
+    {
+      label: "Priority support",
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#ef4444]`} aria-hidden="true">
+          <path d="M4 10V8a4 4 0 0 1 8 0v2" />
+          <rect x="2" y="9.5" width="2.5" height="4" rx="1.2" />
+          <rect x="11.5" y="9.5" width="2.5" height="4" rx="1.2" />
+        </svg>
+      ),
+    },
+  ] satisfies { label: string; icon: ReactNode; bonus?: string; details?: string }[],
 };
 
 type Status = "idle" | "submitting" | "error";
+
+type IncludeItem = (typeof LICENSE.includes)[number];
+
+const INCLUDE_CARD_CLASS =
+  "rounded-xl bg-[rgb(var(--surface)/0.45)] px-4 py-4 sm:px-5";
+
+function IncludeCard({ item, className }: { item: IncludeItem; className?: string }) {
+  if (item.details) {
+    return (
+      <div className={`${INCLUDE_CARD_CLASS} flex h-full flex-col items-start gap-2.5${className ? ` ${className}` : ""}`}>
+        <div className={`flex items-center gap-[0.75em] ${INCLUDE_LABEL_CLASS}`}>
+          {item.icon}
+          <span>{item.label}</span>
+        </div>
+        <p className="text-[13px] sm:text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+          {item.details}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${INCLUDE_CARD_CLASS} flex items-center gap-[0.75em] ${INCLUDE_LABEL_CLASS}${className ? ` ${className}` : ""}`}>
+      {item.icon}
+      <span className="flex min-w-0 flex-wrap items-center gap-[0.65em]">
+        {item.label}
+        {item.bonus ? (
+          <span className="inline-flex shrink-0 items-center rounded-full bg-[#0a84ff] px-2.5 py-1 text-[12px] sm:text-[13px] font-medium tracking-tight text-white">
+            {item.bonus}
+          </span>
+        ) : null}
+      </span>
+    </div>
+  );
+}
 
 function Spinner() {
   return (
@@ -83,6 +139,30 @@ function Spinner() {
 export function InlinePricing() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
+  const [smsSetup, setSmsSetup] = useState(false);
+  const [priceScope, animatePrice] = useAnimate<HTMLParagraphElement>();
+  const skipPriceBounce = useRef(true);
+  const smsCheckRef = useRef<HTMLSpanElement>(null);
+  const reduceMotion = useReducedMotion();
+  const priceAmount = smsSetup ? 135 : 125;
+  const smsCheckPress = useMemo(
+    () => createCtaScalePressOnRef(() => smsCheckRef.current),
+    [],
+  );
+
+  useEffect(() => {
+    if (skipPriceBounce.current) {
+      skipPriceBounce.current = false;
+      return;
+    }
+    if (reduceMotion || !priceScope.current) return;
+
+    void animatePrice(
+      priceScope.current,
+      { scale: [1, 1.045, 0.985, 1], y: [0, -3, 1, 0] },
+      { duration: 0.55, ease: [0.22, 1.18, 0.36, 1] },
+    );
+  }, [priceAmount, animatePrice, priceScope, reduceMotion]);
 
   const handleCheckout = async () => {
     if (status === "submitting") return;
@@ -92,7 +172,7 @@ export function InlinePricing() {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier: LICENSE.id }),
+        body: JSON.stringify({ tier: LICENSE.id, smsSetup }),
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
@@ -109,22 +189,12 @@ export function InlinePricing() {
   return (
     <div className="w-full rise rise--liquid">
       <div className="grid grid-cols-2 gap-3 mb-8 sm:mb-10">
-        {LICENSE.includes.map((item) => (
-          <div
-            key={item.label}
-            className={`flex items-center gap-3 rounded-xl bg-[rgb(var(--surface)/0.45)] px-4 py-4 sm:px-5${item.bonus ? " col-span-2" : ""}`}
-          >
-            {item.icon}
-            <span className="flex min-w-0 flex-wrap items-center gap-2.5 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">
-              {item.label}
-              {item.bonus ? (
-                <span className="inline-flex shrink-0 items-center rounded-full border border-[#0a84ff]/25 bg-[#0a84ff]/12 px-2.5 py-1 text-[12px] sm:text-[13px] font-medium tracking-tight text-[#0a84ff]">
-                  {item.bonus}
-                </span>
-              ) : null}
-            </span>
-          </div>
-        ))}
+        <IncludeCard item={LICENSE.includes[0]} />
+        <IncludeCard item={LICENSE.includes[1]} />
+        <IncludeCard item={LICENSE.includes[2]} />
+        <IncludeCard item={LICENSE.includes[3]} className="row-span-2 h-full" />
+        <IncludeCard item={LICENSE.includes[5]} />
+        <IncludeCard item={LICENSE.includes[4]} className="col-span-2" />
       </div>
 
       <div className="overflow-hidden rounded-2xl bg-[rgb(var(--surface)/0.45)] flex flex-col sm:flex-row sm:items-stretch">
@@ -134,8 +204,17 @@ export function InlinePricing() {
 
         <div className="flex flex-1 flex-col gap-5 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-7 lg:p-8">
           <div className="flex flex-col gap-2 sm:max-w-[22rem] text-left">
-            <p className="text-[clamp(2rem,4vw,2.75rem)] font-normal tabular-nums tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
-              {LICENSE.price}
+            <p
+              ref={priceScope}
+              className="text-[clamp(2rem,4vw,2.75rem)] font-normal tabular-nums tracking-[-0.04em] leading-none text-[rgb(var(--fg))]"
+            >
+              $
+              <AnimatedNumber
+                value={priceAmount}
+                transformTiming={PRICE_TIMING}
+                spinTiming={PRICE_TIMING}
+              />
+              {" once"}
             </p>
             <p className="text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
               {LICENSE.desc}
@@ -147,12 +226,30 @@ export function InlinePricing() {
               type="button"
               onClick={handleCheckout}
               disabled={status === "submitting"}
-              className={`inline-flex w-full items-center justify-center gap-1.5 sm:w-auto ${ACTION_RADIUS_CLASS} px-4 py-2 text-[17px] sm:text-[18px] font-medium tracking-tight transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
+              className={`inline-flex w-full items-center justify-center gap-1.5 sm:w-auto ${ACTION_RADIUS_CLASS} px-4 py-2 text-[17px] sm:text-[18px] font-medium tracking-tight disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
               style={{ background: "#000", color: "#ededed" }}
+              {...(status === "submitting" ? {} : ctaScalePressOnSelf)}
             >
               {status === "submitting" ? <Spinner /> : null}
               {status === "submitting" ? "Redirecting…" : "Get Aether"}
             </button>
+            <label
+              className="flex w-full cursor-pointer items-center gap-2.5 sm:w-auto [-webkit-tap-highlight-color:transparent]"
+              {...(status === "submitting" ? {} : smsCheckPress)}
+            >
+              <span ref={smsCheckRef} className="inline-flex shrink-0">
+                <input
+                  type="checkbox"
+                  checked={smsSetup}
+                  disabled={status === "submitting"}
+                  onChange={(e) => setSmsSetup(e.target.checked)}
+                  className="h-4 w-4 appearance-none rounded border border-[rgb(var(--line))] bg-transparent transition-colors checked:border-[#0a84ff] checked:bg-[#0a84ff] checked:bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%223.5%208.5%206.5%2011.5%2012.5%204.5%22%2F%3E%3C%2Fsvg%3E')] checked:bg-[length:0.65rem_0.65rem] checked:bg-center checked:bg-no-repeat disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </span>
+              <span className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
+                Add SMS setup <span className="text-[rgb(var(--fg))]">+$10</span>
+              </span>
+            </label>
             <PolicyDisclaimer />
           </div>
         </div>

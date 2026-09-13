@@ -5,17 +5,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-05
 
 const PRICES: Record<string, string> = {
   standard: process.env.STRIPE_PRICE_STANDARD!,
-  lifetime:  process.env.STRIPE_PRICE_LIFETIME!,
+  lifetime: process.env.STRIPE_PRICE_LIFETIME!,
+  lifetime_sms: process.env.STRIPE_PRICE_LIFETIME_SMS ?? "price_1UEzgfBn9rslYjlBfhz5TwO6",
 };
 
 export async function POST(req: Request) {
   try {
-    const { tier } = await req.json();
+    const { tier, smsSetup } = await req.json();
     if (tier !== "standard" && tier !== "lifetime") {
       return NextResponse.json({ error: "Invalid tier" }, { status: 400 });
     }
 
-    const priceId = PRICES[tier];
+    const priceKey = tier === "lifetime" && smsSetup ? "lifetime_sms" : tier;
+    const priceId = PRICES[priceKey];
     if (!priceId) {
       return NextResponse.json({ error: "Price not configured" }, { status: 500 });
     }
@@ -28,7 +30,7 @@ export async function POST(req: Request) {
       success_url: `${origin}/aether/buy/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:  `${origin}/aether#pricing`,
       allow_promotion_codes: true,
-      metadata: { tier },
+      metadata: { tier, sms_setup: smsSetup ? "true" : "false" },
     });
 
     return NextResponse.json({ url: session.url });

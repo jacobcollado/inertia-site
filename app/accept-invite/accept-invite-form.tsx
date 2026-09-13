@@ -120,7 +120,20 @@ export function AcceptInviteForm() {
     setLoading(false);
     if (profileRes.error) { setError(profileRes.error); return; }
     setPhase("done");
-    setTimeout(() => router.push("/dashboard?welcome=1"), 2000);
+
+    // Two kinds of account finish setup here: a client an admin invited, and
+    // someone who just bought a license and claimed it from the purchase
+    // success page. Send the buyer straight to their key, since that's what
+    // they came for, and keep the welcome dialog (which only /dashboard reads)
+    // for invited clients who have no licenses to look at.
+    const { data: license } = await supabase
+      .from("licenses")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+
+    const dest = license ? "/dashboard/licenses" : "/dashboard?welcome=1";
+    setTimeout(() => router.push(dest), 2000);
   };
 
   const onPasswordKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -131,14 +144,24 @@ export function AcceptInviteForm() {
     setGoogleLoading(true);
     setError("");
     const supabase = createClient();
+    // Same split as the password path below: a buyer goes to their key, an
+    // invited client gets the welcome dialog. Checked before the redirect,
+    // since the invite link has already signed this user in.
+    const { data: license } = await supabase
+      .from("licenses")
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+    const next = license ? "/dashboard/licenses" : "/dashboard?welcome=1";
+
     // linkIdentity (not signInWithOAuth) attaches Google to the invited
     // account that's already signed in from the invite link, rather than
     // starting a fresh sign-in that could create or collide with a separate
     // account. The redirect back through /auth/callback already syncs
-    // Google's name/avatar into clients/profiles and lands on /dashboard.
+    // Google's name/avatar into clients/profiles.
     const { error } = await supabase.auth.linkIdentity({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/dashboard?welcome=1")}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     });
     if (error) { setGoogleLoading(false); setError(error.message); }
   };

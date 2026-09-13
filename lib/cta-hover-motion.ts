@@ -41,3 +41,51 @@ export function createCtaScaleHoverHandlers(target: ScaleTarget = "self") {
 
 export const ctaScaleHoverOnSelf = createCtaScaleHoverHandlers("self");
 export const ctaScaleHoverOnParent = createCtaScaleHoverHandlers("parent");
+
+export function createCtaScalePressHandlers(target: ScaleTarget = "self") {
+  return {
+    onMouseLeave(e: MouseEvent<HTMLElement>) {
+      const el = getScaleEl(e, target);
+      if (!el) return;
+      el.style.transition = CTA_SCALE_RESET;
+      el.style.transform = "scale(1)";
+    },
+    onMouseDown(e: MouseEvent<HTMLElement>) {
+      const el = getScaleEl(e, target);
+      if (!el) return;
+      el.style.transition = CTA_SCALE_PRESS;
+      el.style.transform = "scale(0.975)";
+    },
+    onMouseUp(e: MouseEvent<HTMLElement>) {
+      const el = getScaleEl(e, target);
+      if (!el) return;
+      el.style.transition = CTA_SCALE_SPRING;
+      el.style.transform = "scale(1)";
+    },
+  };
+}
+
+export const ctaScalePressOnSelf = createCtaScalePressHandlers("self");
+
+export function createCtaScalePressOnRef(getEl: () => HTMLElement | null) {
+  return {
+    onMouseLeave() {
+      const el = getEl();
+      if (!el) return;
+      el.style.transition = CTA_SCALE_RESET;
+      el.style.transform = "scale(1)";
+    },
+    onMouseDown() {
+      const el = getEl();
+      if (!el) return;
+      el.style.transition = CTA_SCALE_PRESS;
+      el.style.transform = "scale(0.975)";
+    },
+    onMouseUp() {
+      const el = getEl();
+      if (!el) return;
+      el.style.transition = CTA_SCALE_SPRING;
+      el.style.transform = "scale(1)";
+    },
+  };
+}
