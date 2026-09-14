@@ -89,7 +89,11 @@ function ServicesSection() {
           className="rise rise--liquid text-[clamp(1.8rem,4vw,2.5rem)] font-normal tracking-tight max-sm:tracking-[-0.05em] sm:tracking-tight leading-snug text-[rgb(var(--fg))]"
           style={{ fontVariationSettings: "'wght' 400, 'opsz' 32" }}
         >
-          We build the version of your business (and product) people fall for.
+          We build the version of your business (and product){" "}
+          <span className="box-decoration-clone border-b border-dashed border-[rgb(var(--fg))]/50 [border-bottom-width:1px] pb-[0.12em]">
+            people fall
+          </span>{" "}
+          for.
         </p>
       </div>
     </section>
@@ -2887,6 +2891,15 @@ function ClientDialog({
   }, [open, onClose]);
 
   if (!mounted) return null;
+  // Idle: render nothing at all. The container below is fixed/inset-0/100dvh,
+  // so leaving it mounted with an invisible backdrop still parks a painted
+  // layer against the bottom viewport edge — and iOS 26 Safari tints its
+  // toolbar from fixed elements near that edge in preference to the body,
+  // finding no colour here and falling back to white. `dismissing` keeps it
+  // alive through the exit animation.
+  // See .home-dark-root in globals.css and
+  // https://nasedk.in/blog/ios26-safari-toolbar-colors/
+  if (!open && !dismissing) return null;
 
   const dragFade = Math.min(Math.max(dragY, 0) / 280, 0.45);
 
@@ -3735,7 +3748,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
 
   return (
     <section ref={sectionRef} className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-3xl sm:max-w-4xl sm:mx-auto">
+      <div className="max-w-3xl sm:max-w-5xl sm:mx-auto">
         <header
           className="mb-8 sm:mb-10 text-center"
           style={rowReveal(0)}
@@ -3749,7 +3762,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
             </span>
           </h2>
           <p
-            className="text-[13px] sm:text-[14px] leading-snug tracking-tight text-balance"
+            className="text-[clamp(1.05rem,2.8vw,1.45rem)] leading-relaxed tracking-tight text-balance"
             style={{ color: "#5c5c5c" }}
           >
             Essays on design and building.
@@ -3765,15 +3778,15 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
             >
               <Link
                 href={`/blog/${post.slug}`}
-                className="group block h-full px-2 sm:px-3 py-4 sm:py-5 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
+                className="group relative block h-full px-2 sm:px-3 py-4 sm:py-5 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
               >
-                <div className="flex items-start justify-between gap-4 sm:gap-6">
-                  <div className="min-w-0 flex-1">
+                <div className="min-w-0 sm:pr-6">
                     {post.tag && (
                       <span
-                        className="mb-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] sm:text-[14px] leading-snug tracking-tight"
+                        className="mb-1.5 sm:mb-1 inline-flex items-center rounded-full px-2 py-0.5 text-[clamp(0.65rem,1.6vw,0.8rem)] font-normal leading-snug tracking-tight"
                         style={{
                           color: "#5c5c5c",
+                          fontWeight: 400,
                           background: "rgba(26,26,26,0.04)",
                           boxShadow: "inset 0 1px 2px rgba(26,26,26,0.05), inset 0 0 0 1px rgba(26,26,26,0.08)",
                         }}
@@ -3782,15 +3795,15 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                       </span>
                     )}
                     <p
-                      className="text-[18px] sm:text-[21px] tracking-[-0.025em] leading-snug text-balance"
-                      style={{ color: "#1a1a1a", fontWeight: 500 }}
+                      className="text-[clamp(0.9rem,2.5vw,1.3rem)] font-normal tracking-[-0.025em] leading-snug sm:leading-tight text-pretty"
+                      style={{ color: "#1a1a1a", fontWeight: 400 }}
                     >
                       {post.title}
                     </p>
-                  </div>
+                </div>
                   <span
                     aria-hidden
-                    className="mt-1 shrink-0 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+                    className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
                     style={{ color: "#5c5c5c" }}
                   >
                     <svg
@@ -3806,7 +3819,6 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                       <path d="M9 4l4 4-4 4" />
                     </svg>
                   </span>
-                </div>
               </Link>
             </li>
           ))}

@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { Heading } from "@/lib/posts";
 import { GlassFilterDef, GLASS_FILTER_ID } from "@/components/ui/glass-card";
 
+// Matches the sheet's slide-out transition below, so it stays mounted for
+// exactly as long as it's still animating off screen.
+const SHEET_EXIT_MS = 380;
+
 export function TOC({ headings }: { headings: Heading[] }) {
   const [activeId, setActiveId] = useState<string>("");
   const [open, setOpen] = useState(false);
@@ -37,6 +41,25 @@ export function TOC({ headings }: { headings: Heading[] }) {
   useEffect(() => {
     setHeight(open ? (bodyRef.current?.scrollHeight ?? 0) : 0);
   }, [open]);
+
+  // The sheet is fixed to bottom-0, full-width, and carries an opaque
+  // near-white --surface background. Parking it off-screen with translateY
+  // still leaves a painted layer against the bottom viewport edge, and iOS 26
+  // Safari tints its toolbar from fixed elements near that edge in preference
+  // to the body — so it samples this and shows a white bar. Keep it in the DOM
+  // only while it's actually on screen: mounted on open, unmounted once the
+  // slide-out transition has run.
+  // See https://nasedk.in/blog/ios26-safari-toolbar-colors/
+  const [sheetPresent, setSheetPresent] = useState(false);
+  useEffect(() => {
+    if (open) {
+      setSheetPresent(true);
+      return;
+    }
+    if (!sheetPresent) return;
+    const t = setTimeout(() => setSheetPresent(false), SHEET_EXIT_MS);
+    return () => clearTimeout(t);
+  }, [open, sheetPresent]);
 
   if (headings.length === 0) return null;
 
@@ -151,14 +174,15 @@ export function TOC({ headings }: { headings: Heading[] }) {
         />
       )}
 
-      {/* Bottom sheet */}
+      {/* Bottom sheet — only in the DOM while on screen, see sheetPresent. */}
+      {sheetPresent && (
       <div
         className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl overflow-hidden"
         style={{
           background: "rgb(var(--surface))",
           border: "1px solid rgb(var(--line))",
           transform: open ? "translateY(0)" : "translateY(100%)",
-          transition: "transform 380ms cubic-bezier(0.22,1,0.36,1)",
+          transition: `transform ${SHEET_EXIT_MS}ms cubic-bezier(0.22,1,0.36,1)`,
           maxHeight: "70vh",
         }}
       >
@@ -193,6 +217,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
           })}
         </ul>
       </div>
+      )}
     </div>
   );
 
