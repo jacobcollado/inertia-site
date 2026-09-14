@@ -2397,6 +2397,7 @@ const WHAT_WE_DO_ITEMS = [
   {
     label: "Launch",
     description: "We ship what we build and stay through launch, so what goes live matches what was designed.",
+    image: "/what-we-do/launch.png",
     bentoClass: "sm:col-span-1 sm:row-span-1",
   },
 ] as const;
@@ -2472,7 +2473,11 @@ function WhatWeDoStandardCell({
             src={item.image}
             alt=""
             aria-hidden="true"
-            className="h-auto w-full max-w-[160px] object-contain sm:max-w-[200px]"
+            // Portrait art (Launch) would run ~1.5x taller than the box if it
+            // were sized by width like the landscape pieces, dragging its card
+            // past the neighbour sharing its row. Cap the height instead and
+            // let width follow, so every cell lands at the same art height.
+            className="h-auto max-h-[120px] w-auto max-w-[160px] object-contain sm:max-h-[140px] sm:max-w-[200px]"
           />
         </div>
       ) : null}
@@ -2543,9 +2548,6 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
       </section>
       <div className="py-16 sm:py-24" />
       <WhatWeDo />
-      {/* Matches the spacer between the client list and this section's
-          paragraph, so the paragraph sits the same distance above the list
-          as it does below the client list. */}
       <div className="py-16 sm:py-24" />
       <BlogCarousel posts={posts} />
     </>
@@ -2985,14 +2987,14 @@ const CLIENT_NAME_ACCENT: Record<string, string> = {
 // disappears, and this grid is built from rails so they have to read.
 const CLIENT_GRID_LINE = `1px solid ${SELECTION_FRAME_COLOR}`;
 
-function ClientName({ name, slug }: { name: string; slug: string }) {
+function ClientName({ name, slug, onDark = false }: { name: string; slug: string; onDark?: boolean }) {
   const accent = CLIENT_NAME_ACCENT[slug] ?? "#1a1a1a";
   return (
     <span
       className="block text-[clamp(1.15rem,4.6vw,1.75rem)] tracking-tight leading-none min-w-0 hyphens-none transition-colors duration-200 group-hover:text-[color:var(--client-accent)]"
       style={{
         fontWeight: 450,
-        color: "#1a1a1a",
+        color: onDark ? "rgb(var(--fg))" : "#1a1a1a",
         overflowWrap: "break-word",
         ["--client-accent" as string]: accent,
       }}
@@ -3002,22 +3004,19 @@ function ClientName({ name, slug }: { name: string; slug: string }) {
   );
 }
 
-function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
+function ClientTypeList({ items, onDark = false }: { items: ClientCarouselItem[]; onDark?: boolean }) {
   const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
 
   return (
     <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      {/* Same inner column as DesignPhilosophy above, so the label, the rules
-          and the client names all line up with that paragraph's left edge. */}
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-      {/* No label above the grid: eight company names in a frame read as
-          clients without being told, and a lone Pill outside a sentence
-          borrowed the inline-highlight treatment for something that wasn't
-          a highlight. */}
-      {/* Outer frame matches the hero's Figma selection on "design" — solid
-          blue stroke, square corners, resize handles on the four corners.
-          Internal rails use the same stroke so the grid reads as one object. */}
-      <FigmaSelectionFrame>
+      <p
+        className="mb-6 sm:mb-8 text-center text-[13px] sm:text-[14px] leading-snug tracking-tight text-balance"
+        style={{ color: onDark ? "rgb(var(--muted))" : "#5c5c5c" }}
+      >
+        Some names we&rsquo;ve worked with.
+      </p>
+      <FigmaSelectionFrame handleFill={onDark ? "rgb(var(--bg))" : "#fff"}>
       <ul className="grid grid-cols-2">
         {items.map((item, i) => {
           return (
@@ -3035,7 +3034,7 @@ function ClientTypeList({ items }: { items: ClientCarouselItem[] }) {
                 aria-haspopup="dialog"
                 className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
               >
-                <ClientName name={item.client} slug={item.slug} />
+                <ClientName name={item.client} slug={item.slug} onDark={onDark} />
               </button>
             </li>
           );
@@ -3679,7 +3678,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
 
   return (
     <section ref={sectionRef} className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
+      <div className="max-w-3xl sm:max-w-4xl sm:mx-auto">
         <header
           className="mb-8 sm:mb-10 text-center"
           style={rowReveal(0)}
@@ -3689,26 +3688,31 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
               className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
               style={{ background: "#1a1a1a" }}
             >
-              Writing
+              Our thoughts
             </span>
           </h2>
           <p
-            className="text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight text-balance"
-            style={{ color: "#5c5c5c" }}
+            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] sm:text-[14px] leading-snug tracking-tight text-balance"
+            style={{
+              color: "#5c5c5c",
+              background: "rgba(26,26,26,0.04)",
+              boxShadow: "inset 0 1px 2px rgba(26,26,26,0.05), inset 0 0 0 1px rgba(26,26,26,0.08)",
+            }}
           >
             Essays on design and building.
           </p>
         </header>
 
-        <ul className="flex flex-col gap-1 sm:gap-1.5">
+        <ul className="grid grid-cols-2 gap-2 sm:gap-3">
           {items.map((post, i) => (
             <li
               key={post.slug}
+              className="min-w-0"
               style={rowReveal(i + 1)}
             >
               <Link
                 href={`/blog/${post.slug}`}
-                className="group block -mx-2 px-2 sm:-mx-3 sm:px-3 py-5 sm:py-6 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
+                className="group block h-full px-2 sm:px-3 py-4 sm:py-5 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
               >
                 <div className="flex items-start justify-between gap-4 sm:gap-6">
                   <div className="min-w-0 flex-1">
@@ -4109,13 +4113,6 @@ function VisualLayout({
 
           <div className="py-16 sm:py-24" />
 
-          {/* Type-only client list (concept 5). The logo-card carousel is
-              still below as ClientCarousel — swap this line back to
-              <ClientCarousel initialItems={initialWork} /> to restore it. */}
-          <ClientTypeList items={initialWork} />
-
-          <div className="py-16 sm:py-24" />
-
           <AiApproach posts={initialPosts} />
 
           <div className="py-16 sm:py-28" />
@@ -4139,6 +4136,10 @@ function VisualLayout({
           <div className="py-16 sm:py-28" />
 
           <Questionnaire onStartConversation={() => setDashboardModalOpen(true)} />
+
+          <div className="py-16 sm:py-24" />
+
+          <ClientTypeList items={initialWork} onDark />
 
           <div className="py-24 sm:py-28" />
         </div>

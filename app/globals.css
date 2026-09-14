@@ -2626,11 +2626,13 @@ h1:hover .redact > span.redact-inner,
   box-shadow: inset 0 0 0 1px rgba(26, 26, 26, 0.08);
 }
 
+/* Landscape art, so a width cap tuned for the old square piece would render
+   it noticeably shorter. Size it a little wider to hold the same presence. */
 .what-we-do-direction__mobile img {
   display: block;
   position: static;
   width: 100%;
-  max-width: 200px;
+  max-width: 240px;
   height: auto;
   margin: 1rem auto 0;
   object-fit: contain;
@@ -2673,13 +2675,18 @@ h1:hover .redact > span.redact-inner,
     pointer-events: none;
   }
 
+  /* The art is landscape and the card is tall, so width is the binding
+     constraint. Cap it well short of the full width and push the piece down,
+     which keeps it clear of the copy sitting above it rather than relying on
+     a sideways nudge (the guide lines now run off both edges, so shifting
+     horizontally just trades one crowded side for the other). */
   .what-we-do-direction__desktop-art img {
     display: block;
     position: static;
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 78%;
+    max-height: 72%;
     object-fit: contain;
-    transform: translateX(-6%);
+    transform: translateY(12%);
   }
 }
 
