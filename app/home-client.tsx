@@ -490,6 +490,9 @@ const SELECTION_RESIZE_BACK_MS = 900;   // settle to the real bounds
 const SELECTION_RESIZE_SETTLE_MS = 500; // pause at each extreme before moving on
 const SELECTION_RESIZE_GROW = 1.14;     // how far past the word it's dragged
 const SELECTION_RESIZE_SHRINK = 0.9;    // how far under it's pulled
+const SELECTION_SOLID_AFTER_RESIZE_MS = 240;
+const SELECTION_SOLID_EDGE_MS = 320;
+const SELECTION_SOLID_EDGES = ["top", "left"] as const;
 
 // Drives the resize gesture. Lifted out of SelectionBox so the word and the
 // frame around it read from one source of truth and scale in lockstep — the
@@ -566,8 +569,15 @@ function SelectionBox({
     { side: "left", origin: "center bottom", axis: "scaleY" },
   ] as const;
 
+  const dashGradient = (side: string) => {
+    const horizontal = side === "top" || side === "bottom";
+    return horizontal
+      ? `repeating-linear-gradient(to right, ${color} 0, ${color} 3px, transparent 3px, transparent 7px)`
+      : `repeating-linear-gradient(to bottom, ${color} 0, ${color} 3px, transparent 3px, transparent 7px)`;
+  };
+
   const edgeBase = (side: string): React.CSSProperties => {
-    const t = { position: "absolute" as const, background: color };
+    const t = { position: "absolute" as const, backgroundImage: dashGradient(side) };
     if (side === "top") return { ...t, top: 0, left: 0, right: 0, height: 1 };
     if (side === "bottom") return { ...t, bottom: 0, left: 0, right: 0, height: 1 };
     if (side === "left") return { ...t, left: 0, top: 0, bottom: 0, width: 1 };
@@ -582,6 +592,45 @@ function SelectionBox({
   ];
 
   const handlesDelay = delay + edges.length * SELECTION_EDGE_MS;
+  const [solidEdges, setSolidEdges] = useState<ReadonlySet<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!visible || reduced) {
+      setSolidEdges(new Set());
+      return;
+    }
+    if (phase !== "rest") return;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const solidStart = SELECTION_RESIZE_BACK_MS + SELECTION_SOLID_AFTER_RESIZE_MS;
+    SELECTION_SOLID_EDGES.forEach((side, i) => {
+      timers.push(
+        setTimeout(() => {
+          setSolidEdges((prev) => new Set(prev).add(side));
+        }, solidStart + i * SELECTION_SOLID_EDGE_MS),
+      );
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [visible, reduced, phase]);
+
+  const edgeTransform = (edge: (typeof edges)[number], draw: number) => {
+    const counter = edge.axis === "scaleX" ? 1 / sy : 1 / sx;
+    return edge.axis === "scaleX"
+      ? `scaleX(${draw}) scaleY(${counter})`
+      : `scaleY(${draw}) scaleX(${counter})`;
+  };
+
+  const edgeTransition = (i: number, ms: number) =>
+    reduced
+      ? "none"
+      : phase === "idle"
+        ? `transform ${ms}ms linear ${delay + i * SELECTION_EDGE_MS}ms`
+        : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`;
+
+  const solidEdgeTransition = () =>
+    reduced
+      ? "none"
+      : `transform ${SELECTION_SOLID_EDGE_MS}ms ${HERO_LIQUID_EASE}, opacity ${SELECTION_SOLID_EDGE_MS}ms ${HERO_LIQUID_EASE}`;
 
   return (
     <span
@@ -595,32 +644,40 @@ function SelectionBox({
         pointerEvents: "none",
       }}
     >
-      {edges.map((edge, i) => (
-        <span
-          key={edge.side}
-          style={{
-            ...edgeBase(edge.side),
-            transformOrigin: edge.origin,
-            // Draw-in scale on the edge's own axis, plus a counter-scale on
-            // the cross axis so the box's resize doesn't thicken the stroke.
-            transform: (() => {
-              const draw = visible || reduced ? 1 : 0;
-              const counter = edge.axis === "scaleX" ? 1 / sy : 1 / sx;
-              return edge.axis === "scaleX"
-                ? `scaleX(${draw}) scaleY(${counter})`
-                : `scaleY(${draw}) scaleX(${counter})`;
-            })(),
-            // While drawing, keep the staggered draw-in timing. Once the
-            // resize starts, follow the wrapper's timing instead so the
-            // counter-scale stays locked to the box.
-            transition: reduced
-              ? "none"
-              : phase === "idle"
-                ? `transform ${SELECTION_EDGE_MS}ms linear ${delay + i * SELECTION_EDGE_MS}ms`
-                : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`,
-          }}
-        />
-      ))}
+      {edges.map((edge, i) => {
+        const dashedDraw = visible || reduced ? 1 : 0;
+        const solidDraw = solidEdges.has(edge.side) || reduced ? 1 : 0;
+        const solidEligible = (SELECTION_SOLID_EDGES as readonly string[]).includes(edge.side);
+
+        return (
+          <span key={edge.side} aria-hidden="true">
+            <span
+              style={{
+                ...edgeBase(edge.side),
+                transformOrigin: edge.origin,
+                transform: edgeTransform(edge, dashedDraw),
+                opacity: solidEligible && solidDraw ? 0.35 : 1,
+                transition: [
+                  edgeTransition(i, SELECTION_EDGE_MS),
+                  solidEligible ? `opacity ${SELECTION_SOLID_EDGE_MS}ms ${HERO_LIQUID_EASE}` : "none",
+                ].join(", "),
+              }}
+            />
+            {solidEligible && (
+              <span
+                style={{
+                  ...edgeBase(edge.side),
+                  background: color,
+                  transformOrigin: edge.origin,
+                  transform: edgeTransform(edge, solidDraw),
+                  opacity: solidDraw,
+                  transition: solidEdgeTransition(),
+                }}
+              />
+            )}
+          </span>
+        );
+      })}
       {corners.map((pos, i) => (
         <span
           key={i}
@@ -3692,12 +3749,8 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
             </span>
           </h2>
           <p
-            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] sm:text-[14px] leading-snug tracking-tight text-balance"
-            style={{
-              color: "#5c5c5c",
-              background: "rgba(26,26,26,0.04)",
-              boxShadow: "inset 0 1px 2px rgba(26,26,26,0.05), inset 0 0 0 1px rgba(26,26,26,0.08)",
-            }}
+            className="text-[13px] sm:text-[14px] leading-snug tracking-tight text-balance"
+            style={{ color: "#5c5c5c" }}
           >
             Essays on design and building.
           </p>
@@ -3718,11 +3771,11 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                   <div className="min-w-0 flex-1">
                     {post.tag && (
                       <span
-                        className="mb-2 inline-block rounded-[6px] px-2 py-0.5 text-[12px] sm:text-[13px] tracking-tight leading-none"
+                        className="mb-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-[13px] sm:text-[14px] leading-snug tracking-tight"
                         style={{
                           color: "#5c5c5c",
-                          background: "rgba(26,26,26,0.06)",
-                          boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
+                          background: "rgba(26,26,26,0.04)",
+                          boxShadow: "inset 0 1px 2px rgba(26,26,26,0.05), inset 0 0 0 1px rgba(26,26,26,0.08)",
                         }}
                       >
                         {post.tag}
@@ -3734,14 +3787,6 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                     >
                       {post.title}
                     </p>
-                    {(post.subtitle || post.summary) && (
-                      <p
-                        className="mt-1.5 text-[14.5px] sm:text-[16px] leading-relaxed tracking-tight line-clamp-2"
-                        style={{ color: "#5c5c5c" }}
-                      >
-                        {post.subtitle || post.summary}
-                      </p>
-                    )}
                   </div>
                   <span
                     aria-hidden

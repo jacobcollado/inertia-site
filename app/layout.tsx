@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
@@ -62,6 +62,22 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-icon.png",
   },
+};
+
+// viewport-fit=cover is required for the iOS 26 Safari toolbar tinting in
+// globals.css (.home-dark-root) to have anything to work with: without it the
+// page never goes edge-to-edge, so there are no obscured insets for Safari to
+// sample the top/bottom toolbar colors from.
+// See https://nasedk.in/blog/ios26-safari-toolbar-colors/
+//
+// themeColor is white to match the hero. iOS 26 ignores it (hence the
+// scroll-driven background technique), but Android Chrome and older iOS
+// Safari still honour it.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
