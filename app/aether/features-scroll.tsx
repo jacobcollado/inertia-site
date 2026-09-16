@@ -468,7 +468,9 @@ export function FeaturesScroll({
     scroller.scrollLeft = 0;
     activeRef.current = 0;
     const frame = requestAnimationFrame(() => {
-      scroller.style.scrollSnapType = "x proximity";
+      scroller.style.scrollSnapType = window.matchMedia("(max-width: 639px)").matches
+        ? "x mandatory"
+        : "x proximity";
       scroller.scrollLeft = 0;
     });
     return () => cancelAnimationFrame(frame);
@@ -485,6 +487,11 @@ export function FeaturesScroll({
       scrollEndRef.current = setTimeout(() => {
         scrollEndRef.current = null;
         if (touchAxisRef.current === "y") return;
+        if (window.matchMedia("(max-width: 639px)").matches) {
+          applyCardProximity(true);
+          setScrolling(false);
+          return;
+        }
         settleToNearest();
       }, 80);
     };
@@ -506,7 +513,9 @@ export function FeaturesScroll({
     const onScrollEnd = () => {
       if (touchAxisRef.current === "y") return;
       if (isEasingRef.current || settlingRef.current) return;
-      scroller.style.scrollSnapType = "x proximity";
+      scroller.style.scrollSnapType = window.matchMedia("(max-width: 639px)").matches
+        ? "x mandatory"
+        : "x proximity";
       const target = nearestIndex();
       activeRef.current = target;
       setActive(target);
@@ -521,7 +530,6 @@ export function FeaturesScroll({
       touchAxisRef.current = null;
       settlingRef.current = false;
       cancelEase();
-      scroller.style.scrollSnapType = "none";
     };
 
     const onTouchMove = (e: TouchEvent) => {
@@ -540,7 +548,6 @@ export function FeaturesScroll({
           clearTimeout(scrollEndRef.current);
           scrollEndRef.current = null;
         }
-        scroller.style.scrollSnapType = "none";
       } else {
         setPlaying(false);
       }
@@ -549,7 +556,6 @@ export function FeaturesScroll({
     const onTouchEnd = () => {
       touchStartRef.current = null;
       touchAxisRef.current = null;
-      scroller.style.scrollSnapType = "x proximity";
     };
 
     scroller.addEventListener("scroll", onScroll, { passive: true });
@@ -673,7 +679,7 @@ export function FeaturesScroll({
     <section ref={sectionRef} className="relative py-16 sm:py-24 rise rise--liquid">
       <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex items-center justify-between gap-4 mb-16 sm:mb-16">
         <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-          More than good looks
+          Sell smarter
         </h2>
         <div className="shrink-0 w-auto [&>div]:w-auto [&_a]:w-auto">
           <DemoButton href={demoUrl} password="aether" />
@@ -688,7 +694,7 @@ export function FeaturesScroll({
           aria-label="Aether features"
           tabIndex={0}
           onKeyDown={onKeyDown}
-          className="no-scrollbar w-full overflow-x-auto overflow-y-hidden snap-x snap-proximity overscroll-x-contain outline-none"
+          className="no-scrollbar w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory sm:snap-proximity overscroll-x-contain outline-none"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollPaddingInlineStart: columnLeft,
