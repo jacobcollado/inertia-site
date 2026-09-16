@@ -44,23 +44,20 @@ const LABEL_EXIT_MS = Math.round(AETHER_LIQUID_MS * 0.42);
 type LabelPhase = "visible" | "exit" | "enter-from";
 
 /**
- * One device-mode's render of a variation card. Two of these are mounted at
- * once during a mode switch (see the `overlay` prop) so the outgoing shot
- * can fade/scale out while the incoming one fades/scales in, instead of a
- * single <Image> swapping `src` and cutting instantly.
+ * One device-mode's render of a variation card. `src` swaps in place on a
+ * mode switch; `visible` (driven by the caller's modeSettled flag) eases
+ * its opacity/blur so the swap crossfades instead of cutting instantly.
  */
 function VariationShot({
   variation,
   shotMode,
   visible,
   reduceMotion,
-  overlay = false,
 }: {
   variation: ThemeVariation;
   shotMode: ViewMode;
   visible: boolean;
   reduceMotion: boolean;
-  overlay?: boolean;
 }) {
   const isMobileShot = shotMode === "mobile";
   // Its wrapper (see the caller) is the source of truth for real height —
@@ -74,14 +71,13 @@ function VariationShot({
       sizes="(max-width: 640px) 92vw, min(70rem, 90vw)"
       quality={90}
       className={
-        (isMobileShot ? "w-auto h-auto mx-auto max-w-[50%] max-h-[55vh]" : "w-full h-auto scale-[1.3] sm:scale-100") +
-        (overlay ? " absolute inset-0 m-auto" : " block")
+        isMobileShot
+          ? "block w-auto h-auto mx-auto max-w-[50%] max-h-[55vh]"
+          : "block w-full h-auto scale-[1.2] sm:scale-100 origin-bottom"
       }
       style={
         reduceMotion
-          ? overlay
-            ? { display: "none" }
-            : undefined
+          ? undefined
           : {
               // Only opacity/filter go inline — the crop-scale for desktop
               // shots lives in the scale-[...] utility class above, and an
@@ -188,27 +184,16 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
   // Briefly false right after a mode switch so the cards crossfade/settle
   // into their new aspect ratio instead of snapping to it instantly.
   const [modeSettled, setModeSettled] = useState(true);
-  // The mode we're crossfading FROM — kept mounted (fading out) alongside
-  // the new mode's image (fading in) for the duration of the transition,
-  // instead of the single <Image> just swapping src instantly.
-  const [outgoingMode, setOutgoingMode] = useState<ViewMode | null>(null);
   // Tracks the *site's own* viewport (not the toggle's mode) so the tab
   // order can lead with "Mobile" there, matching the default above.
   const [viewportIsMobile, setViewportIsMobile] = useState(false);
   const modeInitRef = useRef(false);
-  const outgoingTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const innerIdRef = useRef<number | undefined>(undefined);
 
   const handleModeChange = useCallback((next: ViewMode) => {
-    if (mode === next) return;
+    setMode((prevMode) => (prevMode === next ? prevMode : next));
     setModeSettled(false);
-    setOutgoingMode(mode);
-    setMode(next);
-    clearTimeout(outgoingTimerRef.current);
-    outgoingTimerRef.current = setTimeout(() => setOutgoingMode(null), AETHER_LIQUID_MS);
-  }, [mode]);
-
-  useEffect(() => () => clearTimeout(outgoingTimerRef.current), []);
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 639px)");
@@ -509,21 +494,6 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
                               : "38rem",
                     }}
                   >
-                    {/* Outgoing mode's image stays mounted just long enough to
-                        fade/scale out underneath the incoming one, so the
-                        switch reads as a crossfade rather than an instant cut. */}
-                    {outgoingMode && outgoingMode !== mode && (
-                      <VariationShot
-                        variation={v}
-                        shotMode={outgoingMode}
-                        // Starts visible (it was, a moment ago) then the same
-                        // frame-later flip that reveals the incoming shot
-                        // below fades this one out underneath it.
-                        visible={!modeSettled}
-                        reduceMotion={reduceMotion}
-                        overlay
-                      />
-                    )}
                     <VariationShot
                       variation={v}
                       shotMode={mode}
