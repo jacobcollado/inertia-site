@@ -101,10 +101,6 @@ export function DemoButton({ href, password }: { href: string; password: string 
         </div>
       </div>
 
-      {/* Mobile hint — absolute so it doesn't affect row height */}
-      <p className="sm:hidden absolute top-full left-0 right-0 text-center text-[11px] tracking-tight text-[rgb(var(--muted))] mt-1.5" style={{ opacity: 0.5 }}>
-        Tapping copies password <span className="font-medium" style={{ opacity: 1 }}>{password}</span>
-      </p>
     </div>
   );
 }

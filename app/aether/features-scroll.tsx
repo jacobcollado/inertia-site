@@ -218,6 +218,8 @@ export function FeaturesScroll({
   const easeAnimRef = useRef<number | null>(null);
   const isEasingRef = useRef(false);
   const settlingRef = useRef(false);
+  const touchAxisRef = useRef<"x" | "y" | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -478,15 +480,18 @@ export function FeaturesScroll({
     let ticking = false;
 
     const scheduleSettle = () => {
+      if (touchAxisRef.current === "y") return;
       if (scrollEndRef.current) clearTimeout(scrollEndRef.current);
       scrollEndRef.current = setTimeout(() => {
         scrollEndRef.current = null;
+        if (touchAxisRef.current === "y") return;
         settleToNearest();
       }, 80);
     };
 
     const measure = () => {
       ticking = false;
+      if (touchAxisRef.current === "y") return;
       if (!isEasingRef.current) setScrolling(true);
       applyCardProximity(false);
       scheduleSettle();
@@ -499,6 +504,7 @@ export function FeaturesScroll({
     };
 
     const onScrollEnd = () => {
+      if (touchAxisRef.current === "y") return;
       if (isEasingRef.current || settlingRef.current) return;
       scroller.style.scrollSnapType = "x proximity";
       const target = nearestIndex();
@@ -508,12 +514,58 @@ export function FeaturesScroll({
       setScrolling(false);
     };
 
+    const onTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+      touchAxisRef.current = null;
+      settlingRef.current = false;
+      cancelEase();
+      scroller.style.scrollSnapType = "none";
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const start = touchStartRef.current;
+      const touch = e.touches[0];
+      if (!start || !touch || touchAxisRef.current) return;
+
+      const dx = Math.abs(touch.clientX - start.x);
+      const dy = Math.abs(touch.clientY - start.y);
+      const threshold = 8;
+      if (dx < threshold && dy < threshold) return;
+
+      touchAxisRef.current = dy > dx ? "y" : "x";
+      if (touchAxisRef.current === "y") {
+        if (scrollEndRef.current) {
+          clearTimeout(scrollEndRef.current);
+          scrollEndRef.current = null;
+        }
+        scroller.style.scrollSnapType = "none";
+      } else {
+        setPlaying(false);
+      }
+    };
+
+    const onTouchEnd = () => {
+      touchStartRef.current = null;
+      touchAxisRef.current = null;
+      scroller.style.scrollSnapType = "x proximity";
+    };
+
     scroller.addEventListener("scroll", onScroll, { passive: true });
     scroller.addEventListener("scrollend", onScrollEnd);
+    scroller.addEventListener("touchstart", onTouchStart, { passive: true });
+    scroller.addEventListener("touchmove", onTouchMove, { passive: true });
+    scroller.addEventListener("touchend", onTouchEnd, { passive: true });
+    scroller.addEventListener("touchcancel", onTouchEnd, { passive: true });
     applyCardProximity(true);
     return () => {
       scroller.removeEventListener("scroll", onScroll);
       scroller.removeEventListener("scrollend", onScrollEnd);
+      scroller.removeEventListener("touchstart", onTouchStart);
+      scroller.removeEventListener("touchmove", onTouchMove);
+      scroller.removeEventListener("touchend", onTouchEnd);
+      scroller.removeEventListener("touchcancel", onTouchEnd);
       if (scrollEndRef.current) clearTimeout(scrollEndRef.current);
       cancelEase();
     };
@@ -593,21 +645,26 @@ export function FeaturesScroll({
 
   const onCardClick = (index: number) => {
     if (index === activeRef.current) return;
+    setPlaying(false);
     goTo(index);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowRight") {
       e.preventDefault();
+      setPlaying(false);
       goTo(Math.min(features.length - 1, activeRef.current + 1));
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
+      setPlaying(false);
       goTo(Math.max(0, activeRef.current - 1));
     } else if (e.key === "Home") {
       e.preventDefault();
+      setPlaying(false);
       goTo(0);
     } else if (e.key === "End") {
       e.preventDefault();
+      setPlaying(false);
       goTo(features.length - 1);
     }
   };
@@ -616,7 +673,7 @@ export function FeaturesScroll({
     <section ref={sectionRef} className="relative py-16 sm:py-24 rise rise--liquid">
       <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex items-center justify-between gap-4 mb-16 sm:mb-16">
         <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-          Key features
+          More than good looks
         </h2>
         <div className="shrink-0 w-auto [&>div]:w-auto [&_a]:w-auto">
           <DemoButton href={demoUrl} password="aether" />
@@ -631,12 +688,12 @@ export function FeaturesScroll({
           aria-label="Aether features"
           tabIndex={0}
           onKeyDown={onKeyDown}
-          className="no-scrollbar w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory overscroll-x-contain outline-none"
+          className="no-scrollbar w-full overflow-x-auto overflow-y-hidden snap-x snap-proximity overscroll-x-contain outline-none"
           style={{
             WebkitOverflowScrolling: "touch",
             scrollPaddingInlineStart: columnLeft,
             scrollPaddingInlineEnd: columnLeft,
-            touchAction: "pan-x",
+            touchAction: "pan-x pan-y",
           }}
         >
         <div
@@ -685,7 +742,10 @@ export function FeaturesScroll({
                 type="button"
                 aria-label={`Show ${f.title}`}
                 aria-current={isActive ? "true" : undefined}
-                onClick={() => goTo(i)}
+                onClick={() => {
+                  setPlaying(false);
+                  goTo(i);
+                }}
                 className="flex h-6 w-5 items-center justify-center"
               >
                 <span

@@ -67,16 +67,31 @@ export function ConversionFeatures({ moments }: { moments: ConversionMoment[] })
         </div>
 
         <div
-          className="rise rise--liquid mt-16 sm:mt-20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 py-2"
+          className="rise rise--liquid mt-16 sm:mt-20 rounded-xl bg-[rgb(var(--surface)/0.45)] p-5 sm:p-7"
           style={{ "--rise-delay": "240ms" } as React.CSSProperties}
         >
-          <p className="max-w-[28rem] text-[clamp(1.35rem,2.5vw,1.75rem)] font-normal leading-tight tracking-[-0.03em] text-[rgb(var(--fg))]">
-            The complete Aether theme. $125 once.
-          </p>
-          <div className="flex w-full flex-col items-start sm:w-auto sm:shrink-0">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-normal leading-tight tracking-[-0.03em] text-[rgb(var(--fg))]">
+                Aether, complete
+              </p>
+              <p className="mt-2 max-w-[32rem] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+                41 sections, lifetime updates, and installation help.
+              </p>
+            </div>
+            <div className="sm:text-right">
+              <p className="text-[clamp(2rem,4vw,2.75rem)] font-normal leading-none tracking-[-0.04em] text-[rgb(var(--fg))]">
+                $125
+              </p>
+              <p className="mt-1 text-[13px] tracking-tight text-[rgb(var(--muted))]">
+                One-time payment
+              </p>
+            </div>
+          </div>
+          <div className="mt-6">
             <Link
               href="/aether#pricing"
-              className={`inline-flex w-full items-center justify-center sm:w-auto ${ACTION_RADIUS_CLASS} px-5 py-2.5 text-[17px] sm:text-[18px] font-medium tracking-tight hover:opacity-80 transition-opacity whitespace-nowrap`}
+              className={`inline-flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-5 py-2.5 text-[17px] sm:text-[18px] font-medium tracking-tight hover:opacity-80 transition-opacity whitespace-nowrap`}
               style={{ background: "#000", color: "#ededed" }}
             >
               See what&apos;s included
