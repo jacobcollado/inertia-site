@@ -8,20 +8,28 @@ import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS, aetherLiquidTransition } from "./
 export interface ThemeVariation {
   name: string;
   image: string;
+  imageMobile: string;
 }
 
 interface SlideItem extends ThemeVariation {
   uid: string;
 }
 
+type ViewMode = "desktop" | "mobile";
+
+// MacBook renders are landscape (~1.59:1); the phone renders are portrait
+// (1280x2642, ~0.48:1) — the card box has to switch aspect ratio with mode,
+// not just swap which src loads into the same box.
 const SHOT_W = 1365;
 const SHOT_H = 858;
+const SHOT_W_MOBILE = 1280;
+const SHOT_H_MOBILE = 2642;
 const CARD_TRANSITION = aetherLiquidTransition();
 const TRACK_TRANSITION = `transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
 const GAP_PX = 20;
 const GAP_PX_MOBILE = 12;
-const PEEK_PX_MOBILE = 22;
-const PEEK_PX_DESKTOP = 64;
+const PEEK_PX_MOBILE = 0;
+const PEEK_PX_DESKTOP = 32;
 const CONTENT_MAX_PX = 1280;
 const MOBILE_GUTTER_PX = 12;
 const INITIAL_RUNWAY = 3;
@@ -34,6 +42,60 @@ const LABEL_MOTION = `opacity ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, trans
 const LABEL_EXIT_MS = Math.round(AETHER_LIQUID_MS * 0.42);
 
 type LabelPhase = "visible" | "exit" | "enter-from";
+
+/**
+ * One device-mode's render of a variation card. Two of these are mounted at
+ * once during a mode switch (see the `overlay` prop) so the outgoing shot
+ * can fade/scale out while the incoming one fades/scales in, instead of a
+ * single <Image> swapping `src` and cutting instantly.
+ */
+function VariationShot({
+  variation,
+  shotMode,
+  visible,
+  reduceMotion,
+  overlay = false,
+}: {
+  variation: ThemeVariation;
+  shotMode: ViewMode;
+  visible: boolean;
+  reduceMotion: boolean;
+  overlay?: boolean;
+}) {
+  const isMobileShot = shotMode === "mobile";
+  // Its wrapper (see the caller) is the source of truth for real height —
+  // this max-h-[55vh] is just a sane pre-layout ceiling for first paint.
+  return (
+    <Image
+      src={isMobileShot ? variation.imageMobile : variation.image}
+      alt={`${variation.name} hero, ${shotMode} view`}
+      width={isMobileShot ? SHOT_W_MOBILE : SHOT_W}
+      height={isMobileShot ? SHOT_H_MOBILE : SHOT_H}
+      sizes="(max-width: 640px) 92vw, min(70rem, 90vw)"
+      quality={90}
+      className={
+        (isMobileShot ? "w-auto h-auto mx-auto max-w-[50%] max-h-[55vh]" : "w-full h-auto scale-[1.3] sm:scale-100") +
+        (overlay ? " absolute inset-0 m-auto" : " block")
+      }
+      style={
+        reduceMotion
+          ? overlay
+            ? { display: "none" }
+            : undefined
+          : {
+              // Only opacity/filter go inline — the crop-scale for desktop
+              // shots lives in the scale-[...] utility class above, and an
+              // inline transform here would silently override it.
+              opacity: visible ? 1 : 0,
+              filter: visible ? "blur(0px)" : "blur(6px)",
+              transition: `opacity ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, filter ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`,
+            }
+      }
+      draggable={false}
+      loading="eager"
+    />
+  );
+}
 
 function VariationLabel({ name, reduceMotion }: { name: string; reduceMotion: boolean }) {
   const [displayName, setDisplayName] = useState(name);
@@ -119,6 +181,62 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
   const [slideWidth, setSlideWidth] = useState(0);
   const [edgePad, setEdgePad] = useState(0);
   const [gapPx, setGapPx] = useState(GAP_PX);
+  // Defaults to "desktop" for a stable SSR render, then flips to "mobile"
+  // on mount if the visitor's own viewport is mobile-sized — someone on a
+  // phone almost certainly wants to preview the mobile mockups first.
+  const [mode, setMode] = useState<ViewMode>("desktop");
+  // Briefly false right after a mode switch so the cards crossfade/settle
+  // into their new aspect ratio instead of snapping to it instantly.
+  const [modeSettled, setModeSettled] = useState(true);
+  // The mode we're crossfading FROM — kept mounted (fading out) alongside
+  // the new mode's image (fading in) for the duration of the transition,
+  // instead of the single <Image> just swapping src instantly.
+  const [outgoingMode, setOutgoingMode] = useState<ViewMode | null>(null);
+  // Tracks the *site's own* viewport (not the toggle's mode) so the tab
+  // order can lead with "Mobile" there, matching the default above.
+  const [viewportIsMobile, setViewportIsMobile] = useState(false);
+  const modeInitRef = useRef(false);
+  const outgoingTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const innerIdRef = useRef<number | undefined>(undefined);
+
+  const handleModeChange = useCallback((next: ViewMode) => {
+    if (mode === next) return;
+    setModeSettled(false);
+    setOutgoingMode(mode);
+    setMode(next);
+    clearTimeout(outgoingTimerRef.current);
+    outgoingTimerRef.current = setTimeout(() => setOutgoingMode(null), AETHER_LIQUID_MS);
+  }, [mode]);
+
+  useEffect(() => () => clearTimeout(outgoingTimerRef.current), []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const sync = () => setViewportIsMobile(media.matches);
+    sync();
+    if (!modeInitRef.current) {
+      modeInitRef.current = true;
+      if (media.matches) setMode("mobile");
+    }
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (modeSettled) return;
+    // Double rAF: a single one can fire before the browser has actually
+    // painted the "hidden" starting frame, so the opacity/blur transition
+    // has no committed before-state to animate from and the swap looks
+    // instant. Waiting a full extra frame guarantees that paint happened.
+    const outer = requestAnimationFrame(() => {
+      const inner = requestAnimationFrame(() => setModeSettled(true));
+      innerIdRef.current = inner;
+    });
+    return () => {
+      cancelAnimationFrame(outer);
+      if (innerIdRef.current) cancelAnimationFrame(innerIdRef.current);
+    };
+  }, [modeSettled, mode]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -138,7 +256,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
     const contentWidth = Math.min(CONTENT_MAX_PX, vw);
     const cardAreaWidth = desktop
       ? contentWidth - MOBILE_GUTTER_PX * 2
-      : vw - MOBILE_GUTTER_PX * 2;
+      : vw;
     const peek = desktop ? PEEK_PX_DESKTOP : PEEK_PX_MOBILE;
     const nextGap = desktop ? GAP_PX : GAP_PX_MOBILE;
     const nextSlideWidth = Math.max(0, cardAreaWidth - peek * 2 - nextGap);
@@ -224,7 +342,16 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
       requestAnimationFrame(() => paintTrack(indexRef.current, false));
     };
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    // Mobile browsers can settle their real layout (font swap, address-bar
+    // collapse, viewport unit changes) a frame or two after mount, after the
+    // initial measureLayout() already ran — re-measuring once more here
+    // self-corrects the track position if that happened, the same way the
+    // resize handler above does mid-session.
+    const settleId = requestAnimationFrame(() => requestAnimationFrame(onResize));
+    return () => {
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(settleId);
+    };
   }, [measureLayout, paintTrack]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -298,10 +425,32 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
 
   return (
     <section className="relative py-16 sm:py-24 rise rise--liquid">
-      <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] mb-8 sm:mb-10">
+      <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] mb-8 sm:mb-10 flex flex-col items-center gap-4">
         <h2 className="text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
           Infinite variations
         </h2>
+        <div
+          role="tablist"
+          aria-label="Preview device"
+          className="inline-flex items-center gap-0.5 rounded-full bg-[rgb(var(--surface)/0.45)] p-1 text-[13px] tracking-tight"
+        >
+          {(viewportIsMobile ? (["mobile", "desktop"] as const) : (["desktop", "mobile"] as const)).map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="tab"
+              aria-selected={mode === option}
+              onClick={() => handleModeChange(option)}
+              className={`rounded-full px-4 py-1.5 capitalize transition-colors ${
+                mode === option
+                  ? "bg-[rgb(var(--fg))] text-[rgb(var(--bg))]"
+                  : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="relative w-screen left-1/2 -translate-x-1/2">
@@ -341,16 +490,45 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
                     transformOrigin: "center center",
                   }}
                 >
-                  <div className="relative w-full overflow-hidden rounded-xl">
-                    <Image
-                      src={v.image}
-                      alt={`${v.name} hero`}
-                      width={SHOT_W}
-                      height={SHOT_H}
-                      sizes="(max-width: 640px) 92vw, min(70rem, 90vw)"
-                      quality={90}
-                      className="block w-full h-auto"
-                      draggable={false}
+                  <div
+                    className="relative w-full overflow-hidden rounded-xl flex items-center justify-center"
+                    style={{
+                      transition: reduceMotion ? "none" : `max-height ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`,
+                      // Desktop viewport only: cap the mobile shot at the
+                      // same height the desktop shot actually renders at
+                      // (its card-width-driven aspect ratio), so toggling
+                      // modes doesn't change the card's height there. Mobile
+                      // viewport is untouched — same 55vh cap as before.
+                      maxHeight:
+                        mode !== "mobile"
+                          ? "60rem"
+                          : viewportIsMobile
+                            ? "55vh"
+                            : slideWidth > 0
+                              ? `${(slideWidth * SHOT_H) / SHOT_W}px`
+                              : "38rem",
+                    }}
+                  >
+                    {/* Outgoing mode's image stays mounted just long enough to
+                        fade/scale out underneath the incoming one, so the
+                        switch reads as a crossfade rather than an instant cut. */}
+                    {outgoingMode && outgoingMode !== mode && (
+                      <VariationShot
+                        variation={v}
+                        shotMode={outgoingMode}
+                        // Starts visible (it was, a moment ago) then the same
+                        // frame-later flip that reveals the incoming shot
+                        // below fades this one out underneath it.
+                        visible={!modeSettled}
+                        reduceMotion={reduceMotion}
+                        overlay
+                      />
+                    )}
+                    <VariationShot
+                      variation={v}
+                      shotMode={mode}
+                      visible={modeSettled}
+                      reduceMotion={reduceMotion}
                     />
                   </div>
                 </article>

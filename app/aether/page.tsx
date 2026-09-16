@@ -96,10 +96,10 @@ const CONVERSION_MOMENTS = [
 ];
 
 const THEME_VARIATIONS = [
-  { name: "Dark Mountains", image: "/aether/dark-mountains.jpg" },
-  { name: "Runway", image: "/aether/runway-fashion.jpg" },
-  { name: "Auditorium", image: "/aether/auditorium-editorial.jpg" },
-  { name: "Ocean", image: "/aether/ocean-waves.jpg" },
+  { name: "Editorial", image: "/aether/dark-mountains-macbook.png", imageMobile: "/aether/hero-mobile-mockup.png" },
+  { name: "Runway", image: "/aether/runway-macbook.png", imageMobile: "/aether/runway-mobile.png" },
+  { name: "Auditorium", image: "/aether/auditorium-macbook.png", imageMobile: "/aether/auditorium-mobile.png" },
+  { name: "Ocean", image: "/aether/ocean-macbook.png", imageMobile: "/aether/ocean-mobile.png" },
 ];
 
 export default function AetherPage() {
