@@ -149,16 +149,19 @@ const CONTENT_MAX_PX = 1280; // 80rem — matches page column
 const MOBILE_GUTTER_PX = 12; // mx-3
 
 function FeatureImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
-  const isMockup = src.includes("mockup");
+  const isMockup = /mockup|mobile-cart/.test(src);
+  // The hero phone renders are large PNGs at their true size, so let the
+  // optimizer resize them; the older mockups stay unoptimized as before.
+  const isPhoneRender = /^\/aether\/hero-mobile-/.test(src);
   return (
     <Image
       src={src}
       alt={alt}
-      width={isMockup ? 496 : SHOT_W}
-      height={isMockup ? 1024 : SHOT_H}
+      width={isPhoneRender ? 1280 : isMockup ? 496 : SHOT_W}
+      height={isPhoneRender ? 2642 : isMockup ? 1024 : SHOT_H}
       sizes="(max-width: 640px) 100vw, min(48rem, 90vw)"
       quality={90}
-      unoptimized={isMockup}
+      unoptimized={isMockup && !isPhoneRender}
       className={className ?? "max-w-full max-h-[340px] sm:max-h-[440px] w-auto h-auto object-contain rounded-lg"}
       draggable={false}
     />
@@ -198,15 +201,7 @@ export function FeaturesScroll({
   const scrollerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const activeRef = useRef(0);
-  const didDragRef = useRef(false);
-  const dragRef = useRef<{
-    pointerId: number;
-    startX: number;
-    startScroll: number;
-    moved: boolean;
-  } | null>(null);
   const [active, setActive] = useState(0);
-  const [dragging, setDragging] = useState(false);
   const [scrolling, setScrolling] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [slideWidth, setSlideWidth] = useState(0);
@@ -223,8 +218,6 @@ export function FeaturesScroll({
   const easeAnimRef = useRef<number | null>(null);
   const isEasingRef = useRef(false);
   const settlingRef = useRef(false);
-  const touchScrollingRef = useRef(false);
-  const draggingRef = useRef(false);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -251,7 +244,7 @@ export function FeaturesScroll({
     } else {
       const cardAreaWidth = vw - MOBILE_GUTTER_PX * 4;
       setColumnLeft(MOBILE_GUTTER_PX * 2);
-      setTrackPadRight(peek + GAP_PX);
+      setTrackPadRight(MOBILE_GUTTER_PX * 2);
       setSlideWidth(Math.max(0, cardAreaWidth - peek - GAP_PX));
     }
   }, []);
@@ -420,7 +413,7 @@ export function FeaturesScroll({
   const settleToNearest = useCallback(() => {
     const scroller = scrollerRef.current;
     const slot = slotWidth();
-    if (!scroller || slot <= 0 || settlingRef.current || isEasingRef.current || draggingRef.current) {
+    if (!scroller || slot <= 0 || settlingRef.current || isEasingRef.current) {
       return;
     }
 
@@ -438,13 +431,11 @@ export function FeaturesScroll({
       scroller.style.scrollSnapType = "x proximity";
       applyCardProximity(true);
       setScrolling(false);
-      touchScrollingRef.current = false;
       return;
     }
 
     settlingRef.current = true;
 
-    touchScrollingRef.current = false;
     scroller.style.scrollSnapType = "x proximity";
 
     if (isMobile || reduceMotion) {
@@ -507,19 +498,8 @@ export function FeaturesScroll({
       requestAnimationFrame(measure);
     };
 
-    const onTouchStart = () => {
-      touchScrollingRef.current = true;
-      settlingRef.current = false;
-      cancelEase();
-      scroller.style.scrollSnapType = "none";
-    };
-
-    const onTouchEnd = () => {
-      scroller.style.scrollSnapType = "x proximity";
-    };
-
     const onScrollEnd = () => {
-      if (isEasingRef.current || draggingRef.current || settlingRef.current) return;
+      if (isEasingRef.current || settlingRef.current) return;
       scroller.style.scrollSnapType = "x proximity";
       const target = nearestIndex();
       activeRef.current = target;
@@ -530,16 +510,10 @@ export function FeaturesScroll({
 
     scroller.addEventListener("scroll", onScroll, { passive: true });
     scroller.addEventListener("scrollend", onScrollEnd);
-    scroller.addEventListener("touchstart", onTouchStart, { passive: true });
-    scroller.addEventListener("touchend", onTouchEnd, { passive: true });
-    scroller.addEventListener("touchcancel", onTouchEnd, { passive: true });
     applyCardProximity(true);
     return () => {
       scroller.removeEventListener("scroll", onScroll);
       scroller.removeEventListener("scrollend", onScrollEnd);
-      scroller.removeEventListener("touchstart", onTouchStart);
-      scroller.removeEventListener("touchend", onTouchEnd);
-      scroller.removeEventListener("touchcancel", onTouchEnd);
       if (scrollEndRef.current) clearTimeout(scrollEndRef.current);
       cancelEase();
     };
@@ -566,7 +540,7 @@ export function FeaturesScroll({
   useEffect(() => {
     cancelAnimationFrame(progressRafRef.current);
 
-    const canRun = inView && playing && !reduceMotion && !dragging && !scrolling;
+    const canRun = inView && playing && !reduceMotion && !scrolling;
     if (!canRun) {
       if (progressTickStartRef.current > 0) {
         progressElapsedRef.current += performance.now() - progressTickStartRef.current;
@@ -601,7 +575,7 @@ export function FeaturesScroll({
         progressTickStartRef.current = 0;
       }
     };
-  }, [inView, playing, active, dragging, scrolling, reduceMotion, features.length, goTo]);
+  }, [inView, playing, active, scrolling, reduceMotion, features.length, goTo]);
 
   useEffect(() => {
     if (reduceMotion) setPlaying(false);
@@ -617,62 +591,7 @@ export function FeaturesScroll({
     return () => window.removeEventListener("resize", onResize);
   }, [applyCardProximity, goTo, measureSlideWidth]);
 
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    if (e.pointerType === "touch") return;
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    cancelEase();
-    didDragRef.current = false;
-    dragRef.current = {
-      pointerId: e.pointerId,
-      startX: e.clientX,
-      startScroll: scroller.scrollLeft,
-      moved: false,
-    };
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    const scroller = scrollerRef.current;
-    if (!drag || !scroller || e.pointerId !== drag.pointerId) return;
-    const dx = e.clientX - drag.startX;
-    if (!drag.moved) {
-      if (Math.abs(dx) <= 4) return;
-      drag.moved = true;
-      didDragRef.current = true;
-      scroller.setPointerCapture(e.pointerId);
-      scroller.style.scrollSnapType = "none";
-      draggingRef.current = true;
-      setDragging(true);
-    }
-    e.preventDefault();
-    scroller.scrollLeft = drag.startScroll - dx;
-    applyCardProximity(false);
-  };
-
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    const scroller = scrollerRef.current;
-    dragRef.current = null;
-    if (!scroller) return;
-    if (scroller.hasPointerCapture(e.pointerId)) scroller.releasePointerCapture(e.pointerId);
-    if (drag?.moved) {
-      draggingRef.current = false;
-      setDragging(false);
-      touchScrollingRef.current = false;
-      settleToNearest();
-    } else {
-      draggingRef.current = false;
-      scroller.style.scrollSnapType = "x proximity";
-    }
-  };
-
   const onCardClick = (index: number) => {
-    if (didDragRef.current) {
-      didDragRef.current = false;
-      return;
-    }
     if (index === activeRef.current) return;
     goTo(index);
   };
@@ -712,21 +631,17 @@ export function FeaturesScroll({
           aria-label="Aether features"
           tabIndex={0}
           onKeyDown={onKeyDown}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          className={`no-scrollbar w-full overflow-x-auto overflow-y-hidden snap-x snap-proximity overscroll-x-contain outline-none ${dragging || scrolling ? "select-none" : ""}`}
+          className="no-scrollbar w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory overscroll-x-contain outline-none"
           style={{
-            cursor: dragging ? "grabbing" : "grab",
             WebkitOverflowScrolling: "touch",
             scrollPaddingInlineStart: columnLeft,
-            touchAction: "pan-x pan-y",
+            scrollPaddingInlineEnd: columnLeft,
+            touchAction: "pan-x",
           }}
         >
         <div
           className="flex items-start w-max"
-          style={{ paddingLeft: columnLeft, paddingRight: trackPadRight }}
+          style={{ paddingLeft: columnLeft, paddingRight: columnLeft }}
         >
           {features.map((f, i) => {
             const isActive = active === i;

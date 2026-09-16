@@ -24,7 +24,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
           />
         </h1>
         <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md sm:max-w-xl">
-          Design is the product. A Shopify theme for independent brands that treat how the store looks as part of what they sell.
+          A better Shopify theme for independent brands.
         </p>
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
@@ -50,7 +50,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
       <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">
         <div className="sm:hidden flex items-center justify-center px-2">
           <Image
-            src="/aether/hero-mobile-pdp.png"
+            src="/aether/hero-mobile-jacket.png"
             alt="Aether product page on iPhone"
             width={1280}
             height={2642}

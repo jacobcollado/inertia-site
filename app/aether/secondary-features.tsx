@@ -31,8 +31,8 @@ function FeatureCard({ feature, index }: { feature: SecondaryFeature; index: num
       >
         {feature.icon}
       </span>
-      <p className="text-[16px] sm:text-[17px] font-medium tracking-tight leading-snug text-[rgb(var(--muted))] [text-wrap:pretty]">
-        <span className={`font-semibold ${accent}`}>{feature.name}.</span> {feature.desc}
+      <p className="text-[16px] sm:text-[17px] font-normal tracking-tight leading-snug text-[rgb(var(--muted))] [text-wrap:pretty]">
+        <span className={`font-medium ${accent}`}>{feature.name}.</span> {feature.desc}
       </p>
     </div>
   );

@@ -13,7 +13,7 @@ const PRICE_TIMING = { duration: 520, easing: PRICE_BOUNCE_EASING };
 
 const INCLUDE_ICON = "size-[1em] shrink-0 text-[rgb(var(--muted))]";
 const INCLUDE_LABEL_CLASS =
-  "text-[16px] sm:text-[17px] font-medium tracking-tight leading-snug text-[rgb(var(--fg))] [text-wrap:pretty]";
+  "text-[16px] sm:text-[17px] font-normal tracking-tight leading-snug text-[rgb(var(--fg))] [text-wrap:pretty]";
 
 const LICENSE = {
   id: "lifetime" as const,

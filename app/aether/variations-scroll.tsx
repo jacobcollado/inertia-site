@@ -299,7 +299,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
   return (
     <section className="relative py-16 sm:py-24 rise rise--liquid">
       <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] mb-8 sm:mb-10">
-        <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
+        <h2 className="text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
           Infinite variations
         </h2>
       </div>

@@ -29,11 +29,20 @@ export const metadata: Metadata = {
 
 const KEY_FEATURES = [
   {
+    title: "Guided format",
+    desc: "Guide every visit toward checkout.",
+    visual: "guided",
+    image: "/aether/guided.jpg",
+    imageMobile: "/aether/hero-mobile-mockup.png",
+    flip: false,
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
+  },
+  {
     title: "Upsell",
     desc: "Raise order value without the hard sell.",
     visual: "upsell",
     image: "/aether/upsell.png",
-    imageMobile: "/aether/upsell-mockup.png",
+    imageMobile: "/aether/hero-mobile-cart.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
@@ -42,18 +51,9 @@ const KEY_FEATURES = [
     desc: "Show low stock when urgency is real.",
     visual: "scarcity",
     image: "/aether/scarcity.png",
-    imageMobile: "/aether/scarcity-mockup.png",
+    imageMobile: "/aether/hero-mobile-jacket.png",
     flip: true,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
-  },
-  {
-    title: "Guided format",
-    desc: "Guide every visit toward checkout.",
-    visual: "guided",
-    image: "/aether/guided.jpg",
-    imageMobile: "/aether/iphone-mockup.png",
-    flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
 ];
 
@@ -82,8 +82,8 @@ const CONVERSION_MOMENTS = [
     headline: "Make every product easy to choose.",
     detail:
       "Clear galleries, variants, and trust signals keep shoppers moving toward the cart.",
-    image: "/aether/product-page.png",
-    alt: "Aether product page",
+    image: "/aether/product-page-jacket.png",
+    alt: "Aether product page with size selector and add to cart",
   },
   {
     outcome: "Path to checkout",
