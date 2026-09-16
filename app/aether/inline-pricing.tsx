@@ -11,9 +11,9 @@ import { createCtaScalePressOnRef, ctaScalePressOnSelf } from "@/lib/cta-hover-m
 const PRICE_BOUNCE_EASING = "cubic-bezier(0.22, 1.18, 0.36, 1)";
 const PRICE_TIMING = { duration: 520, easing: PRICE_BOUNCE_EASING };
 
-const INCLUDE_ICON = "size-[1em] shrink-0";
+const INCLUDE_ICON = "size-[1em] shrink-0 text-[rgb(var(--muted))]";
 const INCLUDE_LABEL_CLASS =
-  "text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]";
+  "text-[16px] sm:text-[17px] font-medium tracking-tight leading-snug text-[rgb(var(--fg))] [text-wrap:pretty]";
 
 const LICENSE = {
   id: "lifetime" as const,
@@ -23,7 +23,7 @@ const LICENSE = {
     {
       label: "Full Aether theme, all 41 sections",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#a855f7]`} aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
           <rect x="1" y="1.5" width="14" height="2" rx="0.5" />
           <rect x="1" y="4.5" width="14" height="3" rx="0.5" />
           <rect x="1" y="8.5" width="6" height="2.5" rx="0.5" />
@@ -35,7 +35,7 @@ const LICENSE = {
     {
       label: "Lifetime updates, no renewals",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#22c55e]`} aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
           <path d="M13 2.5v3.5H9.5" />
           <path d="M3 13.5V10h3.5" />
           <path d="M12.2 5.8A5 5 0 0 0 4.2 6.5" />
@@ -46,7 +46,7 @@ const LICENSE = {
     {
       label: "Single store license",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#f97316]`} aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
           <path d="M2.5 6.5 3.5 3h9l1 3.5" />
           <rect x="2.5" y="6.5" width="11" height="7" rx="1" />
           <path d="M6.5 13.5V9.5h3v4" />
@@ -54,22 +54,20 @@ const LICENSE = {
       ),
     },
     {
-      label: "Personal dashboard",
-      details:
-        "Improves support, store license control, invoices, project updates, and files, all in one place.",
+      label: "Priority support",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#0a84ff]`} aria-hidden="true">
-          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
-          <path d="M2 6h12" />
-          <path d="M6 6v7.5" />
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
+          <path d="M4 10V8a4 4 0 0 1 8 0v2" />
+          <rect x="2" y="9.5" width="2.5" height="4" rx="1.2" />
+          <rect x="11.5" y="9.5" width="2.5" height="4" rx="1.2" />
         </svg>
       ),
     },
     {
       label: "Theme install included",
-      bonus: "$50 value — free",
+      bonus: "$50 value for free",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#14b8a6]`} aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
           <path d="M8 2v8" />
           <path d="M5 7l3 3 3-3" />
           <path d="M3 12.5h10" />
@@ -78,51 +76,58 @@ const LICENSE = {
       ),
     },
     {
-      label: "Priority support",
+      label: "Personal dashboard",
       icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={`${INCLUDE_ICON} text-[#ef4444]`} aria-hidden="true">
-          <path d="M4 10V8a4 4 0 0 1 8 0v2" />
-          <rect x="2" y="9.5" width="2.5" height="4" rx="1.2" />
-          <rect x="11.5" y="9.5" width="2.5" height="4" rx="1.2" />
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
+          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
+          <path d="M2 6h12" />
+          <path d="M6 6v7.5" />
         </svg>
       ),
     },
-  ] satisfies { label: string; icon: ReactNode; bonus?: string; details?: string }[],
+  ] satisfies { label: string; icon: ReactNode; bonus?: string }[],
 };
 
 type Status = "idle" | "submitting" | "error";
 
 type IncludeItem = (typeof LICENSE.includes)[number];
 
+const INCLUDE_CAROUSEL_CLASS =
+  "min-h-[9.5rem] w-[min(17.5rem,calc(100vw-2.5rem))] shrink-0 snap-start sm:min-h-0 sm:w-auto sm:shrink";
 const INCLUDE_CARD_CLASS =
-  "rounded-xl bg-[rgb(var(--surface)/0.45)] px-4 py-4 sm:px-5";
+  "rounded-xl bg-[rgb(var(--surface)/0.45)] px-4 py-5 sm:px-5 sm:py-4";
+const INCLUDE_BONUS_INNER_CLASS =
+  "block rounded-[5px] bg-black px-2.5 py-1 text-[12px] sm:text-[13px] font-medium tracking-tight text-white whitespace-nowrap";
 
-function IncludeCard({ item, className }: { item: IncludeItem; className?: string }) {
-  if (item.details) {
+function IncludeCard({ item, mobileFirst = false }: { item: IncludeItem; mobileFirst?: boolean }) {
+  const orderClass = mobileFirst ? "order-first sm:order-none" : "";
+  const icon = (
+    <span
+      className="mb-5 flex shrink-0 items-center text-[rgb(var(--muted))] sm:mb-6 [&_svg]:size-5"
+      aria-hidden="true"
+    >
+      {item.icon}
+    </span>
+  );
+
+  if (item.bonus) {
     return (
-      <div className={`${INCLUDE_CARD_CLASS} flex h-full flex-col items-start gap-2.5${className ? ` ${className}` : ""}`}>
-        <div className={`flex items-center gap-[0.75em] ${INCLUDE_LABEL_CLASS}`}>
-          {item.icon}
-          <span>{item.label}</span>
-        </div>
-        <p className="text-[13px] sm:text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-          {item.details}
-        </p>
+      <div
+        className={`relative ${INCLUDE_CARD_CLASS} flex flex-col items-start justify-center overflow-visible ${INCLUDE_CAROUSEL_CLASS} ${orderClass}`}
+      >
+        {icon}
+        <p className={INCLUDE_LABEL_CLASS}>{item.label}</p>
+        <span className="absolute left-1/2 -bottom-3 z-10 -translate-x-1/2 include-bonus-outline sm:-bottom-3.5">
+          <span className={INCLUDE_BONUS_INNER_CLASS}>{item.bonus}</span>
+        </span>
       </div>
     );
   }
 
   return (
-    <div className={`${INCLUDE_CARD_CLASS} flex items-center gap-[0.75em] ${INCLUDE_LABEL_CLASS}${className ? ` ${className}` : ""}`}>
-      {item.icon}
-      <span className="flex min-w-0 flex-wrap items-center gap-[0.65em]">
-        {item.label}
-        {item.bonus ? (
-          <span className="inline-flex shrink-0 items-center rounded-full bg-[#0a84ff] px-2.5 py-1 text-[12px] sm:text-[13px] font-medium tracking-tight text-white">
-            {item.bonus}
-          </span>
-        ) : null}
-      </span>
+    <div className={`${INCLUDE_CARD_CLASS} flex flex-col items-start justify-center ${INCLUDE_CAROUSEL_CLASS} ${orderClass}`}>
+      {icon}
+      <p className={INCLUDE_LABEL_CLASS}>{item.label}</p>
     </div>
   );
 }
@@ -188,13 +193,16 @@ export function InlinePricing() {
 
   return (
     <div className="w-full rise rise--liquid">
-      <div className="grid grid-cols-2 gap-3 mb-8 sm:mb-10">
-        <IncludeCard item={LICENSE.includes[0]} />
-        <IncludeCard item={LICENSE.includes[1]} />
-        <IncludeCard item={LICENSE.includes[2]} />
-        <IncludeCard item={LICENSE.includes[3]} className="row-span-2 h-full" />
-        <IncludeCard item={LICENSE.includes[5]} />
-        <IncludeCard item={LICENSE.includes[4]} className="col-span-2" />
+      <div
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="What's included"
+        className="no-scrollbar -mx-3 mb-8 flex gap-3 overflow-x-auto overscroll-x-contain px-3 pb-4 snap-x snap-proximity sm:mx-0 sm:mb-10 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
+        {LICENSE.includes.map((item) => (
+          <IncludeCard key={item.label} item={item} mobileFirst={item.label === "Theme install included"} />
+        ))}
       </div>
 
       <div className="overflow-hidden rounded-2xl bg-[rgb(var(--surface)/0.45)] flex flex-col sm:flex-row sm:items-stretch">

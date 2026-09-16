@@ -2695,3 +2695,38 @@ h1:hover .redact > span.redact-inner,
     min-height: 32rem;
   }
 }
+
+/* Aether pricing — ocean gradient outline on include bonus badge */
+.include-bonus-outline {
+  display: inline-flex;
+  border-radius: 6px;
+  padding: 1px;
+  background: linear-gradient(
+    100deg,
+    #023e8a 0%,
+    #0071e3 18%,
+    #0a84ff 36%,
+    #64d2ff 52%,
+    #90e0ef 68%,
+    #0a84ff 84%,
+    #023e8a 100%
+  );
+  background-size: 300% 100%;
+  animation: include-bonus-outline-flow 5.5s linear infinite;
+}
+
+@keyframes include-bonus-outline-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .include-bonus-outline {
+    animation: none;
+    background-position: 50% 50%;
+  }
+}

@@ -20,7 +20,7 @@ const CARD_TRANSITION = aetherLiquidTransition();
 const TRACK_TRANSITION = `transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
 const GAP_PX = 20;
 const GAP_PX_MOBILE = 12;
-const PEEK_PX_MOBILE = 36;
+const PEEK_PX_MOBILE = 22;
 const PEEK_PX_DESKTOP = 64;
 const CONTENT_MAX_PX = 1280;
 const MOBILE_GUTTER_PX = 12;
@@ -341,19 +341,17 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
                     transformOrigin: "center center",
                   }}
                 >
-                  <div className="relative w-full rounded-xl bg-[rgb(var(--surface)/0.45)] overflow-hidden p-4 sm:p-5">
-                    <div className="relative overflow-hidden rounded-lg bg-[rgb(var(--surface))]">
-                      <Image
-                        src={v.image}
-                        alt={`${v.name} hero`}
-                        width={SHOT_W}
-                        height={SHOT_H}
-                        sizes="(max-width: 640px) 85vw, min(70rem, 90vw)"
-                        quality={90}
-                        className="w-full h-auto"
-                        draggable={false}
-                      />
-                    </div>
+                  <div className="relative w-full overflow-hidden rounded-xl">
+                    <Image
+                      src={v.image}
+                      alt={`${v.name} hero`}
+                      width={SHOT_W}
+                      height={SHOT_H}
+                      sizes="(max-width: 640px) 92vw, min(70rem, 90vw)"
+                      quality={90}
+                      className="block w-full h-auto"
+                      draggable={false}
+                    />
                   </div>
                 </article>
               );

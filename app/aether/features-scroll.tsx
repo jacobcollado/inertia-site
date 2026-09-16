@@ -746,7 +746,7 @@ export function FeaturesScroll({
                 }}
               >
                 <div className="relative w-full rounded-xl bg-[rgb(var(--surface)/0.45)] overflow-hidden">
-                  <p className="px-6 pt-6 sm:px-8 sm:pt-8 text-center text-[22px] sm:text-[28px] leading-relaxed tracking-tight [text-wrap:pretty] text-[rgb(var(--fg))] max-w-[42rem] mx-auto">
+                  <p className="px-6 pt-6 sm:px-8 sm:pt-8 text-center text-[22px] sm:text-[28px] leading-[1.25] sm:leading-relaxed tracking-tight [text-wrap:pretty] text-[rgb(var(--fg))] max-w-[42rem] mx-auto">
                     {f.desc}
                   </p>
                   <div className="flex items-center justify-center px-6 py-10 sm:px-8 sm:py-12 min-h-[320px] sm:min-h-[420px]">

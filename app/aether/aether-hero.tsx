@@ -48,16 +48,36 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
         </div>
       </div>
       <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">
-        <Image
-          src="/aether/iphone-mockup.png"
-          alt="Aether theme on iPhone"
-          width={496}
-          height={1024}
-          sizes="(max-width: 639px) 248px, 0px"
-          quality={100}
-          className="sm:hidden w-[248px] max-w-[72vw] h-auto mx-auto"
-          priority
-        />
+        <div className="sm:hidden flex items-center justify-center px-2">
+          <Image
+            src="/aether/hero-mobile-pdp.png"
+            alt="Aether product page on iPhone"
+            width={1280}
+            height={2642}
+            sizes="(max-width: 639px) 28vw, 0px"
+            quality={90}
+            className="w-[28vw] shrink-0 h-auto relative z-0 mr-[-7vw]"
+          />
+          <Image
+            src="/aether/hero-mobile-mockup.png"
+            alt="Aether theme on iPhone"
+            width={1280}
+            height={2642}
+            sizes="(max-width: 639px) 42vw, 0px"
+            quality={100}
+            className="w-[42vw] shrink-0 h-auto relative z-10"
+            priority
+          />
+          <Image
+            src="/aether/hero-mobile-cart.png"
+            alt="Aether cart drawer on iPhone"
+            width={1280}
+            height={2642}
+            sizes="(max-width: 639px) 28vw, 0px"
+            quality={90}
+            className="w-[28vw] shrink-0 h-auto relative z-0 ml-[-7vw]"
+          />
+        </div>
         <div className="hidden sm:block relative">
           <Image
             src="/aether/macbook-mockup.jpg"
