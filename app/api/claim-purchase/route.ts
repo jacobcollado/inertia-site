@@ -1,8 +1,44 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { renderInviteEmail } from "@/lib/invite-email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-05-27.dahlia" });
+
+async function sendInviteEmail(email: string, actionLink: string): Promise<boolean> {
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!resendKey) {
+    console.warn("[claim-purchase] RESEND_API_KEY not set, cannot send setup email");
+    return false;
+  }
+
+  const { subject, html, text } = renderInviteEmail({ actionLink });
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Inertia <hello@byinertia.com>",
+        to: [email],
+        subject,
+        html,
+        text,
+      }),
+    });
+    if (!res.ok) {
+      console.error("[claim-purchase] Resend rejected setup email", res.status, await res.text().catch(() => ""));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[claim-purchase] setup email send failed", err);
+    return false;
+  }
+}
 
 /* Turns a completed Checkout session into a portal account.
  *
@@ -71,11 +107,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ state: "already_claimed" satisfies ClaimState, email });
     }
 
-    // Invite rather than createUser: the emailed link lands on /accept-invite,
-    // which already handles Supabase's implicit-flow hash tokens correctly.
+    // generateLink rather than inviteUserByEmail: both create the user and
+    // produce the same /accept-invite link, but generateLink doesn't send
+    // anything, so the message can go out through Resend from the verified
+    // byinertia.com domain. Supabase's built-in mailer sends from a shared
+    // Supabase domain that fails SPF/DKIM alignment for us, and those invites
+    // land in spam while the license email (same domain as Resend) does not.
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
-    const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${siteUrl}/accept-invite`,
+    const { data: invited, error: inviteError } = await admin.auth.admin.generateLink({
+      type: "invite",
+      email,
+      options: { redirectTo: `${siteUrl}/accept-invite` },
     });
 
     if (inviteError || !invited?.user) {
@@ -108,6 +150,19 @@ export async function POST(req: Request) {
     // different casing, so /portal/licenses finds it.
     if (license.email !== email) {
       await admin.from("licenses").update({ email }).eq("id", license.id);
+    }
+
+    const actionLink = invited.properties?.action_link;
+    if (!actionLink) {
+      console.error("[claim-purchase] generateLink returned no action_link");
+      return NextResponse.json({ error: "Could not create setup link" }, { status: 500 });
+    }
+
+    const sent = await sendInviteEmail(email, actionLink);
+    if (!sent) {
+      // The account exists either way; only the email failed. Say so rather
+      // than reporting success for a message that never went out.
+      return NextResponse.json({ error: "Account created, but the setup email failed to send" }, { status: 500 });
     }
 
     return NextResponse.json({ state: "invite_sent" satisfies ClaimState, email });

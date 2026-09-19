@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { renderSignInMethodLinked } from "@/lib/security-email";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -81,6 +82,18 @@ export async function GET(request: NextRequest) {
         await (isGoogleSignIn ? query : query.is("avatar_url", null));
       }
 
+      // Tell the account owner when a new sign-in method appears, so an
+      // unexpected link is visible to them. This callback runs on every
+      // Google sign-in, not just the first, so it's gated on the identity
+      // having been created moments ago rather than on the provider alone.
+      const linked = (data.user.identities ?? []).find(
+        (i) => i.provider !== "email" && i.created_at &&
+          Date.now() - new Date(i.created_at).getTime() < 60_000,
+      );
+      if (linked && data.user.email) {
+        void notifySignInMethodLinked(data.user.email, linked.provider);
+      }
+
       const defaultDest = isAdmin ? "/admin" : "/dashboard";
       const dest = (!isAdmin && next.startsWith("/")) ? next : defaultDest;
       return NextResponse.redirect(`${origin}${dest}`);
@@ -88,4 +101,30 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.redirect(`${origin}/login?error=auth`);
+}
+
+/* Fire-and-forget: a failed notification must never block a sign-in. */
+async function notifySignInMethodLinked(email: string, provider: string) {
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!resendKey) return;
+
+  try {
+    const { subject, html, text } = renderSignInMethodLinked({ email, provider });
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Inertia <hello@byinertia.com>",
+        to: [email],
+        subject,
+        html,
+        text,
+      }),
+    });
+  } catch (err) {
+    console.error("[auth/callback] sign-in method notification failed", err);
+  }
 }

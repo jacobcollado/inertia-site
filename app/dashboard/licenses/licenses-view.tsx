@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CheckIcon, CopyIcon, MoreHorizontalIcon, ChevronDownIcon, KeyRoundIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, MoreHorizontalIcon, ChevronDownIcon, KeyRoundIcon, ReceiptIcon } from "lucide-react";
 import { StatusPill } from "../status-pill";
 import { fmtDate, type License } from "../types";
 
@@ -123,6 +123,14 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
                         {copied === l.key ? <CheckIcon className="text-[#2E873F]" /> : <CopyIcon />}
                         {copied === l.key ? "Copied" : "Copy key"}
                       </DropdownMenuItem>
+                      {l.receipt_url && (
+                        <DropdownMenuItem
+                          render={<a href={l.receipt_url} target="_blank" rel="noopener noreferrer" />}
+                        >
+                          <ReceiptIcon />
+                          View receipt
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-05
 const PRICES: Record<string, string> = {
   standard: process.env.STRIPE_PRICE_STANDARD!,
   lifetime: process.env.STRIPE_PRICE_LIFETIME!,
-  lifetime_sms: process.env.STRIPE_PRICE_LIFETIME_SMS ?? "price_1UEzgfBn9rslYjlBfhz5TwO6",
+  lifetime_sms: process.env.STRIPE_PRICE_LIFETIME_SMS!,
 };
 
 export async function POST(req: Request) {

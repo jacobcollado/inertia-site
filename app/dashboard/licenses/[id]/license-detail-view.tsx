@@ -2,12 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon, CheckIcon, CopyIcon, DownloadIcon, LoaderCircleIcon } from "lucide-react";
+import { ArrowLeftIcon, CheckIcon, CopyIcon, DownloadIcon, ExternalLinkIcon, LoaderCircleIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getSignedFileUrl } from "../../actions";
 import { StatusPill } from "../../status-pill";
 import { fmtDate, type License } from "../../types";
 import { useSetPageCrumb } from "../../page-crumb-context";
+
+/* Stripe reports the currency per session, so this formats from that rather
+ * than the USD-fixed fmt$ helper. Zero-decimal currencies (JPY and friends)
+ * aren't divided by 100. */
+function fmtAmount(amount: number, currency: string) {
+  const code = currency.toUpperCase();
+  const zeroDecimal = new Set(["JPY", "KRW", "VND", "CLP", "ISK"]);
+  const value = zeroDecimal.has(code) ? amount : amount / 100;
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: code }).format(value);
+  } catch {
+    return `${value.toFixed(2)} ${code}`;
+  }
+}
 
 function ThemeDownloadButton({ path }: { path: string }) {
   const [loading, setLoading] = useState(false);
@@ -81,6 +95,48 @@ export function LicenseDetailView({ license }: { license: License }) {
           </Button>
         </div>
       </div>
+
+      {/* Purchases made before receipt capture shipped have no amount, and a
+          license issued by hand has none either, so the whole block is
+          conditional rather than rendering empty rows. */}
+      {(license.amount_total !== null || license.receipt_url) && (
+        <div className="border-t pt-6 flex flex-col gap-4">
+          <span className="text-[13px] text-muted-foreground">Purchase</span>
+
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            {license.amount_total !== null && (
+              <div className="flex flex-col gap-1">
+                <span className="text-[13px] text-muted-foreground">Amount</span>
+                <span className="text-sm font-medium tracking-tight">
+                  {fmtAmount(license.amount_total, license.currency ?? "usd")}
+                </span>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[13px] text-muted-foreground">Paid</span>
+              <span className="text-sm font-medium tracking-tight">
+                {fmtDate(license.paid_at ?? license.created_at)}
+              </span>
+            </div>
+
+            {license.receipt_url && (
+              <div className="flex flex-col gap-1">
+                <span className="text-[13px] text-muted-foreground">Receipt</span>
+                <a
+                  href={license.receipt_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm font-medium tracking-tight text-primary hover:opacity-80 transition-opacity"
+                >
+                  View receipt
+                  <ExternalLinkIcon className="size-3.5" />
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
