@@ -29,6 +29,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
             href="/aether#pricing"
+            data-aether-cta
             className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none hover:opacity-80 transition-opacity`}
             style={{ background: "#000", color: "#ededed" }}
           >
@@ -50,18 +51,18 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
       <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">
         <div className="sm:hidden flex items-center justify-center px-2">
           <Image
-            src="/aether/hero-mobile-jacket.png"
-            alt="Aether product page on iPhone"
-            width={1280}
+            src="/aether/parisian-mobile.png"
+            alt="Aether Parisian variation on iPhone"
+            width={1300}
             height={2642}
             sizes="(max-width: 639px) 28vw, 0px"
             quality={90}
             className="w-[28vw] shrink-0 h-auto relative z-0 mr-[-7vw]"
           />
           <Image
-            src="/aether/hero-mobile-mockup.png"
-            alt="Aether theme on iPhone"
-            width={1280}
+            src="/aether/ember-mobile.png"
+            alt="Aether Ember variation on iPhone"
+            width={1300}
             height={2642}
             sizes="(max-width: 639px) 42vw, 0px"
             quality={100}
@@ -69,9 +70,9 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             priority
           />
           <Image
-            src="/aether/hero-mobile-cart.png"
-            alt="Aether cart drawer on iPhone"
-            width={1280}
+            src="/aether/nocturne-mobile.png"
+            alt="Aether Nocturne variation on iPhone"
+            width={1300}
             height={2642}
             sizes="(max-width: 639px) 28vw, 0px"
             quality={90}

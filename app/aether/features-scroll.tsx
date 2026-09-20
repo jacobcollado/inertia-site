@@ -140,6 +140,10 @@ interface Feature {
 // Native dimensions of the work screenshots — the container adapts to this ratio.
 const SHOT_W = 1365;
 const SHOT_H = 858;
+// Intrinsic size of the iPhone device-frame renders used for the mobile
+// mockups, so Next reserves the right aspect box before the image loads.
+const PHONE_RENDER_W = 1300;
+const PHONE_RENDER_H = 2642;
 
 const AUTOPLAY_MS = 5200;
 const GAP_PX = 24;
@@ -150,15 +154,17 @@ const MOBILE_GUTTER_PX = 12; // mx-3
 
 function FeatureImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const isMockup = /mockup|mobile-cart/.test(src);
-  // The hero phone renders are large PNGs at their true size, so let the
-  // optimizer resize them; the older mockups stay unoptimized as before.
-  const isPhoneRender = /^\/aether\/hero-mobile-/.test(src);
+  // The phone renders are large PNGs at their true size, so let the optimizer
+  // resize them; the older mockups stay unoptimized as before. Both the hero-
+  // and feature- prefixed renders come out of the same device frame, so they
+  // share one intrinsic size.
+  const isPhoneRender = /^\/aether\/(hero|feature)-mobile-/.test(src);
   return (
     <Image
       src={src}
       alt={alt}
-      width={isPhoneRender ? 1280 : isMockup ? 496 : SHOT_W}
-      height={isPhoneRender ? 2642 : isMockup ? 1024 : SHOT_H}
+      width={isPhoneRender ? PHONE_RENDER_W : isMockup ? 496 : SHOT_W}
+      height={isPhoneRender ? PHONE_RENDER_H : isMockup ? 1024 : SHOT_H}
       sizes="(max-width: 640px) 100vw, min(48rem, 90vw)"
       quality={90}
       unoptimized={isMockup && !isPhoneRender}

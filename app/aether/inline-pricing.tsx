@@ -245,6 +245,7 @@ export function InlinePricing() {
               type="button"
               onClick={handleCheckout}
               disabled={status === "submitting"}
+              data-aether-cta
               className={`inline-flex w-full items-center justify-center gap-1.5 sm:w-auto ${ACTION_RADIUS_CLASS} px-4 py-2 text-[17px] sm:text-[18px] font-medium tracking-tight disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
               style={{ background: "#000", color: "#ededed" }}
               {...(status === "submitting" ? {} : ctaScalePressOnSelf)}

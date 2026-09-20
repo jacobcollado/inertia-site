@@ -22,7 +22,7 @@ type ViewMode = "desktop" | "mobile";
 // not just swap which src loads into the same box.
 const SHOT_W = 1365;
 const SHOT_H = 858;
-const SHOT_W_MOBILE = 1280;
+const SHOT_W_MOBILE = 1300;
 const SHOT_H_MOBILE = 2642;
 const CARD_TRANSITION = aetherLiquidTransition();
 const TRACK_TRANSITION = `transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;

@@ -7,6 +7,8 @@ import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
 import { AetherFaq } from "./faq";
 import { SecondaryFeatures } from "./secondary-features";
+import { Comparison } from "./comparison";
+import { StickyCta } from "./sticky-cta";
 import { TrackAetherViewContent } from "./track-view-content";
 
 export const metadata: Metadata = {
@@ -31,28 +33,28 @@ export const metadata: Metadata = {
 const KEY_FEATURES = [
   {
     title: "Guided format",
-    desc: "Guide every visit toward checkout.",
+    desc: "Every landing sends visitors somewhere.",
     visual: "guided",
     image: "/aether/guided.jpg",
-    imageMobile: "/aether/hero-mobile-mockup.png",
+    imageMobile: "/aether/nocturne-mobile.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
   {
     title: "Upsell",
-    desc: "Raise order value without the hard sell.",
+    desc: "Free shipping thresholds that lift the basket.",
     visual: "upsell",
     image: "/aether/upsell.png",
-    imageMobile: "/aether/hero-mobile-cart.png",
+    imageMobile: "/aether/feature-mobile-cart.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
   {
     title: "Scarcity",
-    desc: "Show low stock when urgency is real.",
+    desc: "Sold-out sizes marked before the tap.",
     visual: "scarcity",
     image: "/aether/scarcity.png",
-    imageMobile: "/aether/hero-mobile-jacket.png",
+    imageMobile: "/aether/feature-mobile-product.png",
     flip: true,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
   },
@@ -71,36 +73,36 @@ const DEMO_URL = "https://aether-starter.myshopify.com";
 
 const CONVERSION_MOMENTS = [
   {
-    outcome: "First impression",
-    headline: "Look like a brand, not a template.",
+    outcome: "The first few seconds",
+    headline: "People decide before they read a word.",
     detail:
-      "Strong imagery, type, and spacing earn attention from the first scroll.",
+      "Type, spacing, and imagery answer that for them. Aether builds every section around full-bleed photography, so your product is the first thing on screen and the loudest.",
     image: "/aether/first-impression-runway.jpg",
     alt: "Aether storefront first impression",
   },
   {
-    outcome: "Product decision",
-    headline: "Make every product easy to choose.",
+    outcome: "The moment of doubt",
+    headline: "Nobody buys what they can't picture owning.",
     detail:
-      "Clear galleries, variants, and trust signals keep shoppers moving toward the cart.",
+      "Generous galleries, honest sizing, and sold-out variants marked before the tap. Fewer unanswered questions means fewer abandoned carts.",
     image: "/aether/product-page-jacket.png",
     alt: "Aether product page with size selector and add to cart",
   },
   {
-    outcome: "Path to checkout",
-    headline: "Make buying feel effortless.",
+    outcome: "The last click",
+    headline: "Never make someone hunt for the button.",
     detail:
-      "Sticky cart and quick buy shorten the path from browsing to checkout.",
+      "Add to cart follows the scroll and quick buy sits right in the collection grid, so checkout stays one tap away from anywhere on the page.",
     image: "/aether/checkout-cart-drawer.png",
     alt: "Aether cart drawer with upsells and checkout",
   },
 ];
 
 const THEME_VARIATIONS = [
-  { name: "Editorial", image: "/aether/dark-mountains-macbook.png", imageMobile: "/aether/hero-mobile-mockup.png" },
-  { name: "Runway", image: "/aether/runway-macbook.png", imageMobile: "/aether/runway-mobile.png" },
-  { name: "Auditorium", image: "/aether/auditorium-macbook.png", imageMobile: "/aether/auditorium-mobile.png" },
-  { name: "Ocean", image: "/aether/ocean-macbook.png", imageMobile: "/aether/ocean-mobile.png" },
+  { name: "Ember", image: "/aether/ember-macbook.png", imageMobile: "/aether/ember-mobile.png" },
+  { name: "Parisian", image: "/aether/parisian-macbook.png", imageMobile: "/aether/parisian-mobile.png" },
+  { name: "Nocturne", image: "/aether/nocturne-macbook.png", imageMobile: "/aether/nocturne-mobile.png" },
+  { name: "Vespers", image: "/aether/vespers-macbook.png", imageMobile: "/aether/vespers-mobile.png" },
 ];
 
 export default function AetherPage() {
@@ -108,6 +110,8 @@ export default function AetherPage() {
     <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
 
       <TrackAetherViewContent />
+
+      <StickyCta />
 
       <AetherHero demoUrl={DEMO_URL} />
 
@@ -128,6 +132,17 @@ export default function AetherPage() {
       <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
         <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">And the rest of it</p>
         <SecondaryFeatures features={SECONDARY_FEATURES} />
+      </div>
+
+      <div className="grid-rule" aria-hidden="true" />
+
+      {/* Comparison — sits immediately before pricing so the case is made at
+          the moment the price is read, not paragraphs earlier. */}
+      <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
+        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
+          How it compares
+        </p>
+        <Comparison />
       </div>
 
       <div className="grid-rule" aria-hidden="true" />

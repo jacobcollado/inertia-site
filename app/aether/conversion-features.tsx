@@ -19,7 +19,7 @@ export function ConversionFeatures({ moments }: { moments: ConversionMoment[] })
       <div className="max-w-[80rem] mx-auto">
         <div className="mb-12 sm:mb-16 rise rise--liquid">
           <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] text-center">
-            How it converts
+            Where sales are won and lost
           </p>
         </div>
 
