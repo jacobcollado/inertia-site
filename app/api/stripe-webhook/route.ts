@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import { renderLicenseEmail } from "@/lib/license-email";
+import { sendMetaEvent } from "@/lib/meta-capi";
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-05-27.dahlia" });
@@ -136,6 +137,32 @@ export async function POST(req: Request) {
     // Don't fail the webhook if email fails — license is already saved
     console.error("[stripe-webhook] email send failed", err);
   }
+
+  /* Meta Purchase, sent from here rather than the browser: this is the only
+   * place the settled amount and the buyer's email are both authoritative,
+   * and it still fires when the visitor closes the tab on Stripe's page or
+   * runs an ad blocker. It sits after the duplicate guard above, so a Stripe
+   * redelivery can't send it twice — and the session id doubles as the
+   * dedup event_id against any browser-side Purchase. */
+  await sendMetaEvent({
+    eventName: "Purchase",
+    eventId: session.id,
+    eventSourceUrl: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com"}/aether/buy/success`,
+    user: {
+      email,
+      fbp: session.metadata?.fbp || null,
+      fbc: session.metadata?.fbc || null,
+    },
+    customData: {
+      // amount_total is in cents.
+      value: (session.amount_total ?? 0) / 100,
+      currency: (session.currency ?? "usd").toUpperCase(),
+      content_name: "Aether Shopify Theme",
+      content_ids: [tier],
+      content_type: "product",
+      num_items: 1,
+    },
+  });
 
   return NextResponse.json({ received: true });
 }

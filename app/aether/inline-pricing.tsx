@@ -7,6 +7,7 @@ import { PricingLifeShader } from "./pricing-life-shader";
 import { PolicyDisclaimer } from "./policy-disclaimer";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 import { createCtaScalePressOnRef, ctaScalePressOnSelf } from "@/lib/cta-hover-motion";
+import { trackMeta } from "../meta-pixel";
 
 const PRICE_BOUNCE_EASING = "cubic-bezier(0.22, 1.18, 0.36, 1)";
 const PRICE_TIMING = { duration: 520, easing: PRICE_BOUNCE_EASING };
@@ -173,6 +174,16 @@ export function InlinePricing() {
     if (status === "submitting") return;
     setStatus("submitting");
     setError("");
+    // Before the request, not after: the success path replaces the document
+    // with Stripe's, and an event fired at that point can be cut off mid-send.
+    trackMeta("InitiateCheckout", {
+      content_name: "Aether Shopify Theme",
+      content_ids: [smsSetup ? "lifetime_sms" : LICENSE.id],
+      content_type: "product",
+      value: priceAmount,
+      currency: "USD",
+      num_items: 1,
+    });
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",

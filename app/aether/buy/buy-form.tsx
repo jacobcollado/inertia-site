@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ShieldCheck, MailCheck, PackageCheck } from "lucide-react";
 import { SiStripe } from "react-icons/si";
+import { trackMeta } from "../../meta-pixel";
 
 type Status = "idle" | "submitting" | "sent" | "error";
 
@@ -158,6 +159,17 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
     if (isSubmitting) return;
     setStatus("submitting");
     setError("");
+    // Fired before the request: on success the document is replaced with
+    // Stripe's hosted page, which can cut off an event sent afterwards.
+    const selected = TIERS.find((t) => t.id === tier);
+    trackMeta("InitiateCheckout", {
+      content_name: "Aether Shopify Theme",
+      content_ids: [tier],
+      content_type: "product",
+      value: selected ? Number(selected.price.replace(/[^0-9.]/g, "")) : undefined,
+      currency: "USD",
+      num_items: 1,
+    });
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
