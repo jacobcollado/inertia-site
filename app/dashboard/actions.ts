@@ -492,10 +492,14 @@ export async function deleteOwnAccount() {
 }
 
 /* Mints a short-lived signed URL for a private client file. Uses the service
-   role client (which bypasses RLS), so it must verify the caller itself — and
+   role client (which bypasses RLS), so it must verify the caller itself, and
    must confirm the path belongs to them, since storage keys are
    `${clientId}/...` and an arbitrary path would otherwise expose any client's
-   files to any signed-in user. */
+   files to any signed-in user.
+
+   Two shapes are allowed: a file under the caller's own `${user.id}/` prefix,
+   and the shared theme build under `theme/` for anyone holding an active
+   license. Everything else is refused. */
 export async function getSignedFileUrl(storagePath: string) {
   const isStoragePath = !storagePath.startsWith("http");
   if (!isStoragePath) return { url: storagePath };
@@ -512,7 +516,28 @@ export async function getSignedFileUrl(storagePath: string) {
 
   // Admins may read any client's files; everyone else only their own prefix.
   if (profile?.role !== "admin" && !storagePath.startsWith(`${user.id}/`)) {
-    return { error: "Not authorized" };
+    // The theme build is the one shared object a customer may read outside
+    // their own prefix, since every buyer downloads the same zip rather than
+    // a per-client copy. Gated on actually holding an active license, so a
+    // signed-in account that never purchased still can't pull the product.
+    //
+    // The prefix test rejects "theme" without a slash and, with the ".."
+    // check, a path like "theme/../<someone-else>/private.pdf" that would
+    // otherwise satisfy startsWith and escape the folder.
+    const isThemeFile =
+      storagePath.startsWith("theme/") && !storagePath.includes("..");
+
+    if (!isThemeFile) return { error: "Not authorized" };
+
+    const { data: license } = await supabase
+      .from("licenses")
+      .select("id")
+      .eq("email", user.email!)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    if (!license) return { error: "Not authorized" };
   }
 
   const admin = createAdminClient();

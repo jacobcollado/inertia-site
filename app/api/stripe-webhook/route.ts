@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import { renderLicenseEmail } from "@/lib/license-email";
+import { CURRENT_THEME_FILE } from "@/lib/aether-theme";
 import { sendMetaEvent } from "@/lib/meta-capi";
 
 
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
     tier,
     status: "active",
     stripe_session_id: session.id,
-    theme_file_path: "theme/aether-v1.5.zip",
+    theme_file_path: CURRENT_THEME_FILE,
     amount_total: session.amount_total,
     currency: session.currency,
     receipt_url: receiptUrl,
