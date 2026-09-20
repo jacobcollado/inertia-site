@@ -88,9 +88,14 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
             return (
               <div
                 key={l.id}
-                className={`rounded-md border bg-sidebar px-5 py-4 sm:rounded-none sm:border-0 sm:border-b ${i === filtered.length - 1 ? "sm:border-b-0" : ""}`}
+                className={`relative rounded-md border bg-sidebar px-5 py-4 transition-colors hover:bg-sidebar-accent/40 sm:rounded-none sm:border-0 sm:border-b ${i === filtered.length - 1 ? "sm:border-b-0" : ""}`}
               >
-                <div className="flex items-center justify-between gap-2 sm:grid sm:grid-cols-[1fr_auto_1fr_auto] sm:items-center sm:gap-4">
+                <Link
+                  href={`/dashboard/licenses/${l.id}`}
+                  className="absolute inset-0 rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  aria-label={`View Aether ${tierLabel} license details`}
+                />
+                <div className="relative flex items-center justify-between gap-2 pointer-events-none sm:grid sm:grid-cols-[1fr_auto_1fr_auto] sm:items-center sm:gap-4">
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-[15px] font-medium tracking-tight truncate">Aether {tierLabel}</span>
@@ -111,7 +116,9 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
                   </div>
 
                   <DropdownMenu>
-                    <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" className="shrink-0" />}>
+                    <DropdownMenuTrigger
+                      render={<Button variant="ghost" size="icon-sm" className="pointer-events-auto shrink-0 relative z-10" />}
+                    >
                       <MoreHorizontalIcon />
                       <span className="sr-only">License actions</span>
                     </DropdownMenuTrigger>
@@ -135,7 +142,7 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
                   </DropdownMenu>
                 </div>
 
-                <div className="sm:hidden border-t mt-3 pt-3 flex items-end justify-between gap-4">
+                <div className="pointer-events-none sm:hidden border-t mt-3 pt-3 flex items-end justify-between gap-4">
                   <div className="flex flex-col gap-1">
                     <span className="text-[13px] text-muted-foreground">Domain</span>
                     <span className="text-[15px] font-medium">{l.domain ?? "Not assigned"}</span>

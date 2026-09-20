@@ -38,6 +38,13 @@ export default async function DashboardOverviewPage() {
         .neq("status", "closed"),
     ]);
 
+  // Licenses are keyed by email, not client id: the Stripe webhook writes them
+  // before an account exists, so there's no client row to attach them to yet.
+  const { data: licenses } = await supabase
+    .from("licenses")
+    .select("id, key, email, domain, tier, status, created_at, theme_file_path, amount_total, currency, receipt_url, paid_at, downloaded_at")
+    .eq("email", user.email!);
+
   return (
     <OverviewView
       client={client}
@@ -48,6 +55,7 @@ export default async function DashboardOverviewPage() {
       messages={messages ?? []}
       projectUpdates={projectUpdates ?? []}
       cases={cases ?? []}
+      licenses={licenses ?? []}
     />
   );
 }

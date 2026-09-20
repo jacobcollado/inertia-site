@@ -30,7 +30,7 @@ export async function requestHuman(caseId: string) {
   const { error } = await admin.from("cases").update({ human_requested: true }).eq("id", caseId).eq("client_id", user.id);
   if (error) return { error: error.message };
 
-  revalidatePath(`/dashboard/messages/${caseId}`);
+  revalidatePath(`/dashboard/support/${caseId}`);
   return { success: true };
 }
 
@@ -47,7 +47,7 @@ export async function undoRequestHuman(caseId: string) {
   const { error } = await admin.from("cases").update({ human_requested: false }).eq("id", caseId).eq("client_id", user.id);
   if (error) return { error: error.message };
 
-  revalidatePath(`/dashboard/messages/${caseId}`);
+  revalidatePath(`/dashboard/support/${caseId}`);
   return { success: true };
 }
 
@@ -101,8 +101,8 @@ export async function sendClientMessage(body: string, caseId: string) {
   // would incorrectly tell the client their message didn't send.
   if (replyError) console.error("Failed to insert auto-reply:", replyError.message);
 
-  revalidatePath(`/dashboard/messages/${caseId}`);
-  revalidatePath("/dashboard/messages");
+  revalidatePath(`/dashboard/support/${caseId}`);
+  revalidatePath("/dashboard/support");
   revalidatePath("/dashboard");
   return { success: true, reply: replyRow ?? null, aiBarredUntil: rateLimit.barredUntil };
 }
@@ -397,8 +397,8 @@ export async function createCaseWithMessage(body: string) {
   });
   if (replyError) console.error("Failed to insert auto-reply:", replyError.message);
 
-  revalidatePath("/dashboard/messages");
-  revalidatePath(`/dashboard/messages/${newCase.id}`);
+  revalidatePath("/dashboard/support");
+  revalidatePath(`/dashboard/support/${newCase.id}`);
   return { success: true, caseId: newCase.id as string, aiBarredUntil: rateLimit.barredUntil };
 }
 
@@ -420,7 +420,7 @@ export async function createFollowUpCase(fromCaseId: string, fromCaseTitle: stri
     .single();
   if (caseError || !newCase) return { error: caseError?.message ?? "Could not create case" };
 
-  revalidatePath("/dashboard/messages");
+  revalidatePath("/dashboard/support");
   return { success: true, caseId: newCase.id as string };
 }
 
@@ -446,8 +446,8 @@ export async function closeCase(caseId: string) {
   const { error } = await admin.from("cases").update({ status: "closed" }).eq("id", caseId);
   if (error) return { error: error.message };
 
-  revalidatePath(`/dashboard/messages/${caseId}`);
-  revalidatePath("/dashboard/messages");
+  revalidatePath(`/dashboard/support/${caseId}`);
+  revalidatePath("/dashboard/support");
   revalidatePath("/dashboard");
   return { success: true };
 }
@@ -531,13 +531,32 @@ export async function getSignedFileUrl(storagePath: string) {
 
     const { data: license } = await supabase
       .from("licenses")
-      .select("id")
+      .select("id, downloaded_at")
       .eq("email", user.email!)
       .eq("status", "active")
       .limit(1)
       .maybeSingle();
 
     if (!license) return { error: "Not authorized" };
+
+    // Stamp the first download so the portal can stop nagging them to fetch
+    // the theme. Only when unset, so this records first download rather than
+    // last: re-downloading an update shouldn't reset the onboarding state.
+    // Through the admin client because buyers have no update policy on
+    // licenses, and failures are ignored since a tracking write must never
+    // cost someone the download they came for.
+    if (!license.downloaded_at) {
+      await createAdminClient()
+        .from("licenses")
+        .update({ downloaded_at: new Date().toISOString() })
+        .eq("id", license.id);
+
+      // The overview's setup banner reads this column, and the page is cached
+      // for 30s, so without this the banner would keep asking them to download
+      // something they just downloaded.
+      revalidatePath("/dashboard");
+      revalidatePath("/dashboard/licenses");
+    }
   }
 
   const admin = createAdminClient();

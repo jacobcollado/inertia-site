@@ -2513,6 +2513,73 @@ h1:hover .redact > span.redact-inner,
   animation: placeholder-shimmer 3s linear infinite;
 }
 
+/* Dashboard “Download theme” — border + fill sweep (uses --sh-* tokens). */
+.download-theme-shimmer:not(:disabled)::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1px;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    color-mix(in srgb, var(--sh-primary) 55%, transparent) 42%,
+    rgb(255 255 255 / 0.55) 50%,
+    color-mix(in srgb, var(--sh-primary) 55%, transparent) 58%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: download-theme-shimmer-sweep 3.8s ease-in-out infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.download-theme-shimmer:not(:disabled)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.85;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 32%,
+    rgb(255 255 255 / 0.16) 50%,
+    transparent 68%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: download-theme-shimmer-sweep 3.8s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+}
+
+@keyframes download-theme-shimmer-sweep {
+  0% {
+    background-position: 115% 0;
+  }
+  100% {
+    background-position: -115% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-theme-shimmer::before,
+  .download-theme-shimmer::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 /* Solid-block counterpart to .placeholder-shimmer, for image skeletons
    (work dialog gallery/logo) rather than text — same sweep technique, just
    painted as a background fill instead of clipped to glyphs. */

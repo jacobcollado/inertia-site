@@ -12,7 +12,7 @@ export default async function LicenseDetailPage({ params }: { params: Promise<{ 
 
   const { data: license } = await supabase
     .from("licenses")
-    .select("id, key, email, domain, tier, status, created_at, theme_file_path, amount_total, currency, receipt_url, paid_at")
+    .select("id, key, email, domain, tier, status, created_at, theme_file_path, amount_total, currency, receipt_url, paid_at, downloaded_at")
     .eq("email", user.email!)
     .eq("id", id)
     .single();

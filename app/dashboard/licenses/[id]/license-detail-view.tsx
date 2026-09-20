@@ -41,9 +41,17 @@ function ThemeDownloadButton({ path }: { path: string }) {
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={onClick} disabled={loading}>
-      {loading ? <LoaderCircleIcon className="animate-spin" /> : <DownloadIcon />}
-      {loading ? "Preparing…" : "Download theme"}
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onClick}
+      disabled={loading}
+      className="download-theme-shimmer relative isolate overflow-hidden"
+    >
+      <span className="relative z-[1] inline-flex items-center gap-1">
+        {loading ? <LoaderCircleIcon className="animate-spin" /> : <DownloadIcon />}
+        {loading ? "Preparing…" : "Download theme"}
+      </span>
     </Button>
   );
 }

@@ -477,7 +477,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
     const result = await createFollowUpCase(caseData.id, caseData.title);
     setCreatingFollowUp(false);
     if (result.success && result.caseId) {
-      router.push(`/dashboard/messages/${result.caseId}`);
+      router.push(`/dashboard/support/${result.caseId}`);
     }
   };
 
@@ -509,7 +509,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
           <span className="sr-only">Case actions</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem render={<Link href="/dashboard/messages" />}>
+          <DropdownMenuItem render={<Link href="/dashboard/support" />}>
             All cases
           </DropdownMenuItem>
           {!isClosed && (

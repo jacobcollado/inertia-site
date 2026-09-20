@@ -21,7 +21,7 @@ export const CASE_SEVERITY_LABEL: Record<CaseSeverity, string> = {
   severity_3: "Severity 3",
   severity_4: "Severity 4",
 };
-export type License = { id: string; key: string; email: string; domain: string | null; tier: string; status: string; created_at: string; theme_file_path: string | null; amount_total: number | null; currency: string | null; receipt_url: string | null; paid_at: string | null };
+export type License = { id: string; key: string; email: string; domain: string | null; tier: string; status: string; created_at: string; theme_file_path: string | null; amount_total: number | null; currency: string | null; receipt_url: string | null; paid_at: string | null; downloaded_at: string | null };
 
 export const STATUS_VARIANT: Record<string, string> = {
   active:    "bg-[#2E873F]/15 text-[#2E873F]",

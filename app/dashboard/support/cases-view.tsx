@@ -66,7 +66,7 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
           />
         </div>
         <Link
-          href="/dashboard/messages/new"
+          href="/dashboard/support/new"
           className="flex items-center justify-center gap-1.5 rounded-md border bg-sidebar text-foreground px-3.5 py-2 text-sm font-medium tracking-tight hover:bg-sidebar-accent/40 transition-colors shrink-0"
         >
           <PlusIcon className="size-4" />
@@ -132,7 +132,7 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
             </p>
           </div>
           {cases.length === 0 && (
-            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/messages/new" />}>
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/support/new" />}>
               New case
             </Button>
           )}
@@ -144,7 +144,7 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
             return (
             <Link
               key={c.id}
-              href={`/dashboard/messages/${c.id}`}
+              href={`/dashboard/support/${c.id}`}
               className={`flex items-center justify-between gap-4 rounded-md border bg-sidebar px-5 py-4 hover:bg-sidebar-accent/40 transition-colors sm:rounded-none sm:border-0 sm:border-b ${i === filtered.length - 1 ? "sm:border-b-0" : ""}`}
             >
               <div className="flex flex-col gap-0.5 min-w-0">

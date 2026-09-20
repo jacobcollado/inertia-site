@@ -136,6 +136,8 @@ export function FileManager({
   mobileMode = "auto",
   showBackButton = true,
   allowUpload = true,
+  showFolderChips = true,
+  showToolbar = true,
   className,
 }: {
   files: FileManagerItem[]
@@ -156,6 +158,13 @@ export function FileManager({
   // callers (the client dashboard's Files tab, where clients can only
   // download what admin has shared, not add their own).
   allowUpload?: boolean
+  /** The mobile row of folder buttons (the "Files" chip at the root). Off when
+   *  there are no real folders, where it's a single chip naming the page. */
+  showFolderChips?: boolean
+  /** The header row: path breadcrumb, folder picker, view toggle, upload, and
+   *  the item count beneath them. Off for a flat list with no folders to
+   *  navigate, where the row holds only a dead "Files" label and a count. */
+  showToolbar?: boolean
   className?: string
 }) {
   const [internalPath, setInternalPath] = React.useState(defaultPath)
@@ -272,6 +281,7 @@ export function FileManager({
       <div
         className={cn("overflow-hidden rounded-md border bg-card", className)}
       >
+        {showToolbar && (
         <div className="border-b p-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
@@ -371,8 +381,9 @@ export function FileManager({
             {compactFolderNavigation ? null : " in this folder"}
           </div>
         </div>
+        )}
 
-        {mobileMode === "list" ? (
+        {mobileMode === "list" && showFolderChips ? (
           <div className="border-b p-2 md:hidden">
             <div className="scrollbar-none flex gap-1 overflow-x-auto">
               {folders.map((folder) => {

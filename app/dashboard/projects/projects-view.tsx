@@ -76,7 +76,7 @@ export function ProjectsView({ projects, projectUpdates }: { projects: Project[]
             </p>
           </div>
           {filter === "all" && (
-            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/messages/new" />}>
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/support/new" />}>
               Start a project
             </Button>
           )}

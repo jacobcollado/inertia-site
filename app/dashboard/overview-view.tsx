@@ -12,7 +12,8 @@ import { StatusPill } from "./status-pill";
 import { getSignedFileUrl } from "./actions";
 import { WhopCheckoutModal } from "./invoices/whop-checkout-modal";
 import { countCasesNeedingResponse } from "./support-cases";
-import { fmt$, fmtDate, type Case, type Client, type Project, type ProjectUpdate, type Invoice, type DFile, type Message } from "./types";
+import { SetupBanner } from "./setup-banner";
+import { fmt$, fmtDate, type Case, type Client, type Project, type ProjectUpdate, type Invoice, type DFile, type Message, type License } from "./types";
 
 function QuickActionPill({ label, badge, badgeCount, badgeUrgent, onClick, href }: {
   label: string;
@@ -181,7 +182,7 @@ function SummaryCard({ href, description, title, action }: {
   );
 }
 
-export function OverviewView({ client, clientEmail, projects, invoices, files, messages, projectUpdates, cases }: {
+export function OverviewView({ client, clientEmail, projects, invoices, files, messages, projectUpdates, cases, licenses }: {
   client: Client | null;
   clientEmail: string;
   projects: Project[];
@@ -190,6 +191,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
   messages: Message[];
   projectUpdates: ProjectUpdate[];
   cases: Pick<Case, "id" | "status">[];
+  licenses: License[];
 }) {
   const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
   const router = useRouter();
@@ -272,7 +274,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
       label: m.body.length > 60 ? `${m.body.slice(0, 60)}…` : m.body,
       sublabel: "message",
       date: m.created_at,
-      href: "/dashboard/messages",
+      href: "/dashboard/support",
     })),
   ]
     .filter(a => a.date)
@@ -296,6 +298,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
 
   return (
     <div className="flex flex-col gap-8 pb-12 sm:pb-0">
+      <SetupBanner licenses={licenses} />
       {showFirstProjectBar && firstProject && (
         <FirstProjectBar project={firstProject} onDismiss={dismissFirstProjectBar} />
       )}
@@ -317,7 +320,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
           <QuickActionPill
             label="Message support"
             badgeCount={casesNeedingResponse}
-            href="/dashboard/messages"
+            href="/dashboard/support"
           />
           {latestFile && (
             <QuickActionPill
@@ -328,7 +331,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
               }}
             />
           )}
-          <QuickActionPill label="New case" href="/dashboard/messages" />
+          <QuickActionPill label="New case" href="/dashboard/support" />
         </div>
       </div>
 
@@ -355,8 +358,8 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
         />
 
         <SummaryCard
-          href="/dashboard/messages"
-          description="Messages"
+          href="/dashboard/support"
+          description="Support"
           title={casesNeedingResponse > 0 ? `${casesNeedingResponse} need response` : messages.length > 0 ? "Up to date" : "No messages"}
           action={latestAdminMsg ? `Last: ${fmtDate(latestAdminMsg.created_at)}` : "Say hello"}
         />
@@ -457,7 +460,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
           {latestAdminMsg && (
             <TabsContent value="message">
               <div className="flex flex-col gap-3">
-                <Link href="/dashboard/messages">
+                <Link href="/dashboard/support">
                   <Card className="overflow-hidden py-0 rounded-sm border hover:bg-sidebar-accent/40 transition-colors">
                     <div className="px-5 py-4">
                       <p className="text-[15px] leading-relaxed line-clamp-2">{latestAdminMsg.body}</p>
@@ -508,7 +511,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
           <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
             We're getting everything ready. You'll see your project details, files, and invoices here once we kick things off.
           </p>
-          <Link href="/dashboard/messages" className="self-start mt-1 text-sm underline underline-offset-4 text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/dashboard/support" className="self-start mt-1 text-sm underline underline-offset-4 text-muted-foreground hover:text-foreground transition-colors">
             Send a message
           </Link>
         </Card>
@@ -537,7 +540,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
             <WelcomeAction label="Projects" href="/dashboard/projects" icon={FolderKanbanIcon} />
             <WelcomeAction label="Invoices" href="/dashboard/invoices" icon={ReceiptIcon} />
             <WelcomeAction label="Files" href="/dashboard/files" icon={FileIcon} />
-            <WelcomeAction label="Support" href="/dashboard/messages" icon={LifeBuoyIcon} />
+            <WelcomeAction label="Support" href="/dashboard/support" icon={LifeBuoyIcon} />
           </div>
         </DialogContent>
       </Dialog>

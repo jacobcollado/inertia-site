@@ -35,6 +35,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { NavUser } from "./nav-user";
+import { TopbarUser } from "./topbar-user";
 import { cn } from "@/lib/utils";
 import { PageCrumbProvider, usePageCrumbValues } from "./page-crumb-context";
 
@@ -44,7 +45,7 @@ const OVERVIEW_NAV_ITEMS = [
 
 const WORKSPACE_NAV_ITEMS = [
   { href: "/dashboard/projects", label: "Projects", icon: FolderIcon },
-  { href: "/dashboard/messages", label: "Support", icon: LifeBuoyIcon },
+  { href: "/dashboard/support", label: "Support", icon: LifeBuoyIcon },
   { href: "/dashboard/licenses", label: "Licenses", icon: BadgeCheckIcon },
   { href: "/dashboard/changelog", label: "Changelog", icon: HistoryIcon },
 ];
@@ -150,11 +151,25 @@ function MobileNavDock({ casesNeedingResponse }: { casesNeedingResponse: number 
   const [query, setQuery] = useState("");
   const [showAll, setShowAll] = useState(false);
 
+  // Search omits wherever the user already is: offering to navigate to the
+  // current page wastes a row and is the one result that can't do anything.
+  // The nav dialog still lists it, since there the active highlight is the
+  // point. Matching the same active test used for that highlight below.
+  const searchable = useMemo(
+    () =>
+      ALL_NAV_ITEMS.filter(item =>
+        item.href === "/dashboard"
+          ? pathname !== "/dashboard"
+          : !pathname.startsWith(item.href),
+      ),
+    [pathname],
+  );
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return ALL_NAV_ITEMS;
-    return ALL_NAV_ITEMS.filter(item => item.label.toLowerCase().includes(q));
-  }, [query]);
+    if (!q) return searchable;
+    return searchable.filter(item => item.label.toLowerCase().includes(q));
+  }, [query, searchable]);
 
   // Only the empty-query default list is capped — typed queries are already
   // a deliberate narrowing, so they show every match with nothing hidden.
@@ -282,7 +297,7 @@ const TITLES: Record<string, string> = {
   "/dashboard/projects": "Projects",
   "/dashboard/invoices": "Invoices",
   "/dashboard/files": "Files",
-  "/dashboard/messages": "Support",
+  "/dashboard/support": "Support",
   "/dashboard/licenses": "Licenses",
   "/dashboard/changelog": "Changelog",
   "/dashboard/settings": "Settings",
@@ -293,21 +308,33 @@ const TITLES: Record<string, string> = {
 // /projects/[id] detail routes, whose label is only known once that page's own
 // data has loaded — those publish it via PageCrumbProvider instead of a static map.
 const CRUMB_SECTIONS: { prefix: string; base: string }[] = [
-  { prefix: "/dashboard/messages", base: "Support" },
+  { prefix: "/dashboard/support", base: "Support" },
   { prefix: "/dashboard/licenses", base: "Licenses" },
   { prefix: "/dashboard/invoices", base: "Invoices" },
   { prefix: "/dashboard/projects", base: "Projects" },
 ];
 
-function SiteHeader() {
+function SiteHeader({ email, displayName, avatarUrl }: {
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+}) {
   const pathname = usePathname();
   const { crumb, actions } = usePageCrumbValues();
 
   const section = CRUMB_SECTIONS.find(s => pathname !== s.prefix && pathname.startsWith(`${s.prefix}/`));
   const title = TITLES[pathname] ?? section?.base ?? "Dashboard";
-  const titleHref = TITLES[pathname] ? undefined : section?.prefix;
+  // On a section root the title is a way home; on a detail page it stays a
+  // breadcrumb up to that section's list, which is the more useful step from
+  // there. The overview's own title links nowhere, since it's already home.
+  const titleHref =
+    pathname === "/dashboard"
+      ? undefined
+      : TITLES[pathname]
+        ? "/dashboard"
+        : section?.prefix;
   const trailingLabel = section
-    ? (pathname === "/dashboard/messages/new" ? "New" : crumb)
+    ? (pathname === "/dashboard/support/new" ? "New" : crumb)
     : null;
 
   // Pages that publish `actions` (currently just the case thread) render
@@ -317,7 +344,7 @@ function SiteHeader() {
   // shared topbar. /messages/new has no actions of its own, but needs the
   // same bare "back arrow only" treatment (its old in-page header — arrow +
   // "New case" label — was removed in favor of this).
-  const isNewCase = pathname === "/dashboard/messages/new";
+  const isNewCase = pathname === "/dashboard/support/new";
   if (actions || isNewCase) {
     return (
       <header className="flex h-14 shrink-0 items-center gap-2 border-b border-sidebar-border md:rounded-t-xl">
@@ -343,6 +370,11 @@ function SiteHeader() {
           </div>
           <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
             {actions}
+            {/* Mobile only: on desktop the sidebar footer's NavUser already
+                offers this menu, so showing both would duplicate it. */}
+            <span className="-mr-1 flex shrink-0 items-center md:hidden">
+              <TopbarUser email={email} displayName={displayName} avatarUrl={avatarUrl} />
+            </span>
           </div>
         </div>
       </header>
@@ -364,7 +396,19 @@ function SiteHeader() {
               actually see as centered in the row below. */}
           <div className="w-full lg:max-w-[58%] mx-auto lg:-translate-x-5 flex items-center justify-center gap-1.5">
             {titleHref ? (
-              <Link href={titleHref} className="pointer-events-auto text-[15px] font-medium tracking-tight text-muted-foreground hover:text-foreground transition-colors">
+              // Muted only when a crumb follows it, where the trailing segment
+              // is the real heading and this is the path back. On a section
+              // root the title is the heading, so it keeps full strength even
+              // though it links home.
+              <Link
+                href={titleHref}
+                className={cn(
+                  "pointer-events-auto text-[15px] font-medium tracking-tight transition-colors",
+                  trailingLabel
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "text-foreground hover:text-muted-foreground",
+                )}
+              >
                 {title}
               </Link>
             ) : (
@@ -378,8 +422,15 @@ function SiteHeader() {
             )}
           </div>
         </div>
-        <div className="ml-auto flex items-center gap-3">
-          <SidebarTrigger className="invisible pointer-events-none" />
+        {/* -mr-1 mirrors the left SidebarTrigger's -ml-1 so the avatar's
+            optical edge lines up with the header's padding rather than sitting
+            a hair inside it. Both controls are size-7, so the absolutely
+            centered title stays balanced whichever one is showing. */}
+        <div className="ml-auto -mr-1 flex shrink-0 items-center">
+          <SidebarTrigger className="invisible pointer-events-none hidden md:flex" />
+          <span className="flex items-center md:hidden">
+            <TopbarUser email={email} displayName={displayName} avatarUrl={avatarUrl} />
+          </span>
         </div>
       </div>
     </header>
@@ -420,7 +471,7 @@ export function ClientSidebarShell({ children, casesNeedingResponse = 0, email, 
       <MobileNavDock casesNeedingResponse={casesNeedingResponse} />
       <SidebarInset>
         <PageCrumbProvider>
-          <SiteHeader />
+          <SiteHeader email={email} displayName={displayName} avatarUrl={avatarUrl} />
           <main className="flex flex-1 flex-col gap-6 p-4 pb-24 md:pb-4 lg:p-6">
             {children}
           </main>

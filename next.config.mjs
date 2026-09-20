@@ -48,6 +48,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // The client support section moved from /messages to /support. Kept so
+      // links already sent to clients, and anything bookmarked, still resolve.
+      { source: "/dashboard/messages", destination: "/dashboard/support", permanent: true },
+      { source: "/dashboard/messages/:path*", destination: "/dashboard/support/:path*", permanent: true },
       { source: "/legal", destination: "/policies/terms-of-service", permanent: true },
       { source: "/privacy", destination: "/policies/privacy-policy", permanent: true },
     ];

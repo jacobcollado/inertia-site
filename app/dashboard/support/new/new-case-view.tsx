@@ -168,7 +168,7 @@ export function NewCaseView({ clientName, clientAvatarUrl, licenses }: {
     const tag = selectedLicense ? `[Aether license: ${selectedLicense.key}]\n\n` : "";
     const result = await createCaseWithMessage(`${tag}${body}`);
     if (result.success && result.caseId) {
-      router.push(`/dashboard/messages/${result.caseId}`);
+      router.push(`/dashboard/support/${result.caseId}`);
       return;
     }
     setSending(false);

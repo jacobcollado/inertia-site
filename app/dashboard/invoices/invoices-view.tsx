@@ -74,7 +74,7 @@ export function InvoicesView({ invoices, clientEmail }: { invoices: Invoice[]; c
             </p>
           </div>
           {filter === "all" && (
-            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/messages/new" />}>
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/dashboard/support/new" />}>
               Ask about billing
             </Button>
           )}

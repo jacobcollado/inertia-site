@@ -24,7 +24,7 @@ export function ProjectDetailView({ project, updates }: { project: Project; upda
           <h1 className="text-2xl font-semibold tracking-tight">{project.title}</h1>
           {project.phase && <span className="text-sm text-muted-foreground">{project.phase}</span>}
         </div>
-        <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/dashboard/messages" />}>
+        <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/dashboard/support" />}>
           <HeadphonesIcon />
           Contact support
         </Button>

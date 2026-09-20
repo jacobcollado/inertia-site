@@ -126,7 +126,7 @@ export function InvoiceDetailView({ invoice, clientEmail }: { invoice: Invoice; 
           <span className="text-lg font-semibold tracking-tight">{invoice.id.slice(0, 8).toUpperCase()}</span>
         </div>
 
-        <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/dashboard/messages" />}>
+        <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/dashboard/support" />}>
           <HeadphonesIcon />
           Contact support
         </Button>
