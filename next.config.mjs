@@ -20,7 +20,10 @@ const securityHeaders = [
       "font-src 'self' data: https://cdn.fontshare.com",
       "connect-src 'self' https://connect.facebook.net https://www.facebook.com https://*.supabase.co wss://*.supabase.co https://api.resend.com https://api.stripe.com https://*.myshopify.com https://us.posthog.com https://app.cal.com https://cal.com",
       "script-src-elem 'self' 'unsafe-inline' https://connect.facebook.net https://js.stripe.com https://app.cal.com",
-      "frame-src https://js.stripe.com https://hooks.stripe.com https://app.cal.com https://cal.com",
+      // www.facebook.com: the Meta Pixel injects a hidden iframe there to sync
+      // cookies across the facebook.com origin. Without it the pixel still
+      // reports, but every page logs a CSP violation and match quality drops.
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://app.cal.com https://cal.com https://www.facebook.com",
       "frame-ancestors 'none'",
     ].join("; "),
   },
