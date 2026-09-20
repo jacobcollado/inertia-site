@@ -11,6 +11,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const bare = BARE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
+  // Routes that set their own <html> background (via .dashboard-dark) so iOS
+  // Safari tints its toolbars to match the page rather than to white. Keep in
+  // sync with whoever adds that class.
+  const ownsRootBackground = ["/dashboard", "/accept-invite"].some(
+    (r) => pathname === r || pathname.startsWith(r + "/"),
+  );
+
   const isComponents = pathname.startsWith("/components");
   const noFooter = isComponents;
   // The homepage's AI section transitions the page to a black theme that
@@ -52,8 +59,19 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       // to its unanimated value, which is exactly the window where the next
       // route flashes black. An inline background wins over the animation
       // immediately, with no such gap.
-      root.style.background = "rgb(255 255 255)";
-      document.body.style.background = "rgb(255 255 255)";
+      //
+      // Except on routes that pin their own root background (.dashboard-dark,
+      // set for the same iOS toolbar-tinting reason). An inline style beats
+      // their class, so forcing white here left the dashboard with white
+      // toolbars against its dark page. Clearing it instead still cancels the
+      // animation, and lets their class win.
+      if (ownsRootBackground) {
+        root.style.background = "";
+        document.body.style.background = "";
+      } else {
+        root.style.background = "rgb(255 255 255)";
+        document.body.style.background = "rgb(255 255 255)";
+      }
     } else {
       // Back on the homepage — clear any inline override left by a previous
       // visit elsewhere so the scroll-driven animation regains control.
@@ -63,7 +81,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     return () => {
       root.classList.remove("home-dark-root");
     };
-  }, [isHome, bare]);
+  }, [isHome, bare, ownsRootBackground]);
 
   if (bare) return <>{children}</>;
 

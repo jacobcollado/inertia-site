@@ -1,8 +1,17 @@
+import type { Viewport } from "next";
 import { redirect } from "next/navigation";
 import Script from "next/script";
 import { createClient } from "@/lib/supabase/server";
 import { ClientSidebarShell } from "./client-sidebar-shell";
 import { countCasesNeedingResponse } from "./support-cases";
+
+// The root layout declares white, which is right for the marketing pages and
+// wrong here. iOS 26 ignores this and samples the page background instead
+// (hence .dashboard-dark), but Android Chrome and older iOS Safari still
+// colour their bars from it, so the dashboard has to restate its own.
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+};
 
 // Applied synchronously before first paint so there's no white flash before
 // ClientSidebarShell's effect runs — see .dashboard-dark in globals.css.
