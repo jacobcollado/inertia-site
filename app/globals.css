@@ -2730,3 +2730,36 @@ h1:hover .redact > span.redact-inner,
     background-position: 50% 50%;
   }
 }
+
+/* Collapsible detail in the "Where sales are won and lost" moments.
+ *
+ * Height can't animate to `auto`, so this leans on interpolate-size, which
+ * lets the browser interpolate to intrinsic sizes. Where it isn't supported
+ * the content still opens and closes, just without the slide, which is the
+ * correct fallback for progressive enhancement. */
+@supports (interpolate-size: allow-keywords) {
+  .moment-detail {
+    interpolate-size: allow-keywords;
+  }
+
+  .moment-detail::details-content {
+    block-size: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      block-size 380ms cubic-bezier(0.22, 0.61, 0.36, 1),
+      content-visibility 380ms allow-discrete,
+      opacity 260ms ease;
+  }
+
+  .moment-detail[open]::details-content {
+    block-size: auto;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .moment-detail::details-content {
+    transition: none;
+  }
+}

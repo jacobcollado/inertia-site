@@ -25,41 +25,66 @@ export function ConversionFeatures({ moments }: { moments: ConversionMoment[] })
 
         <div className="flex flex-col gap-16 sm:gap-24">
           {moments.map((moment, i) => {
-            const reversed = i % 2 === 1;
-
             return (
               <article
                 key={moment.outcome}
-                className={`rise rise--liquid grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center ${reversed ? "sm:[&>*:first-child]:order-2" : ""}`}
+                className="rise rise--liquid flex flex-col gap-6 sm:gap-8"
                 style={{ "--rise-delay": `${i * 80}ms` } as React.CSSProperties}
               >
-                <div className="flex flex-col gap-4 sm:gap-5">
-                  <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[rgb(var(--fg)/0.06)] p-1 pr-2.5">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--bg))] text-[11px] leading-none tabular-nums text-[rgb(var(--muted))] ring-1 ring-[rgb(var(--fg)/0.05)]">
-                      {i + 1}
-                    </span>
-                    <span className="text-[12px] sm:text-[13px] leading-none tracking-tight text-[rgb(var(--fg))]">
-                      {moment.outcome}
-                    </span>
-                  </div>
-                  <h3 className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-normal tracking-[-0.03em] leading-tight [text-wrap:pretty] text-[rgb(var(--fg))]">
-                    {moment.headline}
-                  </h3>
-                  <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-[28rem]">
-                    {moment.detail}
-                  </p>
-                </div>
-
                 <div className="relative overflow-hidden rounded-xl">
                   <Image
                     src={moment.image}
                     alt={moment.alt}
                     width={SHOT_W}
                     height={SHOT_H}
-                    sizes="(max-width: 640px) 100vw, min(40rem, 90vw)"
+                    sizes="(max-width: 640px) 100vw, min(80rem, 92vw)"
                     quality={90}
                     className="block h-auto w-full"
                   />
+                </div>
+
+                <div className="flex flex-col gap-4 sm:gap-5">
+                  <h3 className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-normal tracking-[-0.03em] leading-tight [text-wrap:pretty] text-[rgb(var(--fg))]">
+                    {moment.headline}
+                  </h3>
+                  {/* Collapsed by default so the three moments read as three
+                      headlines rather than three paragraphs. Native <details>
+                      rather than state: this section is a server component,
+                      and the element already handles toggling, keyboard, and
+                      screen-reader expanded/collapsed announcements. */}
+                  <details className="moment-detail group w-fit">
+                    <summary
+                      // display:flex is set explicitly because <summary>
+                      // defaults to display:list-item, which survives
+                      // list-none and reserves marker space that knocks the
+                      // glyph off centre. leading-none drops the inherited
+                      // line-height so the flex box is exactly size-7 tall.
+                      className="flex size-7 cursor-pointer list-none items-center justify-center rounded-full bg-[rgb(var(--fg)/0.06)] leading-none text-[rgb(var(--muted))] transition-colors hover:bg-[rgb(var(--fg)/0.12)] hover:text-[rgb(var(--fg))] [&::-webkit-details-marker]:hidden"
+                      aria-label={`How it works: ${moment.headline}`}
+                    >
+                      {/* Two strokes, with the vertical one collapsing to a
+                          minus on open. Cheaper than swapping icons and it
+                          animates rather than cutting. */}
+                      {/* block, not the default inline: an inline SVG sits on
+                          the text baseline, which leaves descender space below
+                          it and pushes the glyph a fraction above centre. The
+                          path itself is symmetric about the viewBox centre, so
+                          taking it out of the text flow is all that's needed. */}
+                      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="block size-3 shrink-0" aria-hidden="true">
+                        <line x1="2.5" y1="6" x2="9.5" y2="6" />
+                        <line
+                          x1="6"
+                          y1="2.5"
+                          x2="6"
+                          y2="9.5"
+                          className="origin-center transition-transform duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)] group-open:scale-y-0"
+                        />
+                      </svg>
+                    </summary>
+                    <p className="mt-4 max-w-[28rem] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+                      {moment.detail}
+                    </p>
+                  </details>
                 </div>
               </article>
             );
