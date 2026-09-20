@@ -22,6 +22,18 @@ const LICENSE = {
   desc: "Lifetime updates, priority support, single store.",
   includes: [
     {
+      // First: the delivery promise is the thing a buyer wants settled before
+      // anything else, so it leads rather than naming a feature.
+      label: "Instant delivery, key in your inbox",
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
+          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
+          <path d="M2 6h12" />
+          <path d="M6 6v7.5" />
+        </svg>
+      ),
+    },
+    {
       label: "Full Aether theme, all 41 sections",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
@@ -73,16 +85,6 @@ const LICENSE = {
           <path d="M5 7l3 3 3-3" />
           <path d="M3 12.5h10" />
           <path d="M3 12.5v1.5h10v-1.5" />
-        </svg>
-      ),
-    },
-    {
-      label: "Personal dashboard",
-      icon: (
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
-          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
-          <path d="M2 6h12" />
-          <path d="M6 6v7.5" />
         </svg>
       ),
     },

@@ -101,7 +101,9 @@ export function ConversionFeatures({ moments }: { moments: ConversionMoment[] })
                 Aether, complete
               </p>
               <p className="mt-2 max-w-[32rem] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-                41 sections, lifetime updates, and installation help.
+                41 sections, lifetime updates, and installation help. Your key
+                arrives by email the moment you check out, and the theme is
+                waiting in your account.
               </p>
             </div>
             <div className="sm:text-right">
