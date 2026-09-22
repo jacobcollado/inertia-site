@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DemoButton } from "./demo-button";
 import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
+import { AETHER_CHECKOUT_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
 
 export function AetherHero({ demoUrl }: { demoUrl: string }) {
 
@@ -24,12 +25,13 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
           />
         </h1>
         <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md sm:max-w-xl">
-          A better Shopify theme for independent brands.
+          A better Shopify theme for independent brands, made by real design engineers.
         </p>
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
-            href="/aether#pricing"
+            href={`/aether#${AETHER_CHECKOUT_ID}`}
             data-aether-cta
+            onClick={navigateToAetherCheckout}
             className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none hover:opacity-80 transition-opacity`}
             style={{ background: "#000", color: "#ededed" }}
           >
@@ -51,8 +53,8 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
       <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">
         <div className="sm:hidden flex items-center justify-center px-2">
           <Image
-            src="/aether/parisian-mobile.png"
-            alt="Aether Parisian variation on iPhone"
+            src="/aether/hero-mobile-left.png"
+            alt="Aether storefront on iPhone"
             width={1300}
             height={2642}
             sizes="(max-width: 639px) 28vw, 0px"
@@ -60,13 +62,13 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             className="w-[28vw] shrink-0 h-auto relative z-0 mr-[-7vw]"
           />
           <Image
-            src="/aether/ember-mobile.png"
-            alt="Aether Ember variation on iPhone"
-            width={1300}
-            height={2642}
-            sizes="(max-width: 639px) 42vw, 0px"
+            src="/aether/hero-mobile-center-v2.png"
+            alt="Aether storefront on iPhone"
+            width={1349}
+            height={2691}
+            sizes="(max-width: 639px) 46vw, 0px"
             quality={100}
-            className="w-[42vw] shrink-0 h-auto relative z-10"
+            className="w-[46vw] max-w-[15.5rem] shrink-0 h-auto relative z-10"
             priority
           />
           <Image

@@ -1,0 +1,35 @@
+---
+description: Use stemmed arrows in UI icons — never bare chevrons (< > ^)
+alwaysApply: true
+---
+
+# No chevron icons
+
+Do not use bare chevron shapes for navigation or direction in UI — no `<`, `>`, `^`, `‹`, `›`, or V-shaped polylines without a stem.
+
+## Use instead
+
+| Instead of | Prefer |
+|---|---|
+| Chevron up (`^`, polyline-only up V) | Arrow up — vertical stem + arrowhead |
+| Chevron down | Arrow down — stem + head |
+| Chevron left / right (`<`, `>`) | Arrow left / right — stem + head |
+| `polyline` V-shape only | Line/path with shaft and distinct head |
+
+## Arrow icon pattern
+
+```tsx
+// Up — stem + head, not a lone chevron
+<line x1="8" y1="13" x2="8" y2="5" />
+<line x1="5" y1="8" x2="8" y2="5" />
+<line x1="11" y1="8" x2="8" y2="5" />
+```
+
+## Scope
+
+- Icons, buttons, nav affordances, carousel controls, accordions
+- Inline UI glyphs in components
+
+Prose arrows in copy (e.g. `→` in a link label) are fine when they read as text, not as icon substitutes.
+
+When reviewing UI, replace chevron-only SVGs before shipping.

@@ -48,18 +48,6 @@ function FeatureCard({ feature, index }: { feature: SecondaryFeature; index: num
       } ${span}`}
       style={{ "--rise-delay": `${120 + index * 40}ms` } as React.CSSProperties}
     >
-      {/* A wide tile has room to breathe, so it gets a soft accent wash bled in
-          from the top-left corner. It reads as depth rather than decoration at
-          this opacity, and it's what separates the two hero tiles from the
-          supporting four at a glance. */}
-      {isWide && (
-        <span
-          aria-hidden="true"
-          className={`pointer-events-none absolute -left-12 -top-12 size-36 rounded-full opacity-[0.07] blur-2xl transition-opacity duration-700 group-hover:opacity-[0.13] sm:-left-16 sm:-top-16 sm:size-48 ${accent}`}
-          style={{ background: "currentColor" }}
-        />
-      )}
-
       <span
         className={`relative mb-5 flex shrink-0 items-center sm:mb-6 ${accent} ${
           isWide ? "mt-auto [&_svg]:size-5 sm:[&_svg]:size-6" : "[&_svg]:size-5"

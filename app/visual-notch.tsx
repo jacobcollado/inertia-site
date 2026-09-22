@@ -12,12 +12,14 @@ import {
   CTA_FILL,
   CTA_HEADER_PILL_CLASS,
   CTA_HEADER_SHELL_HEIGHT_CLASS,
+  CTA_HEADER_SIGNIN_SHELL_CLASS,
   CTA_HEADER_WELL_CLASS,
   CTA_HEADER_WELL_ICON_CLASS,
   CtaGrain,
   CtaWell,
 } from "@/lib/cta-chrome";
 import { SiShopify } from "react-icons/si";
+import { AetherDemoBanner } from "./aether/demo-banner";
 import {
   HiOutlineSparkles,
   HiOutlineChatBubbleLeftRight,
@@ -592,7 +594,54 @@ function InertiaLogo() {
    bridged at vertical center. Shares the hero CTA's dark gradient,
    grain, and inset well so the header control matches the page CTA. ── */
 
-function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
+function SignInWellIcon({ variant }: { variant: "arrow" | "avatar" }) {
+  const iconClass = CTA_HEADER_WELL_ICON_CLASS;
+
+  if (variant === "avatar") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={iconClass}
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="8" r="3.5" />
+        <path d="M5.5 19.5c0-3.3 2.7-6 6.5-6s6.5 2.7 6.5 6" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={iconClass}
+      aria-hidden="true"
+    >
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <line x1="12" y1="5" x2="19" y2="12" />
+      <line x1="12" y1="19" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function MergedCTA({
+  compact: _compact = false,
+  hideContact = false,
+  signInIcon = "arrow",
+}: {
+  compact?: boolean;
+  hideContact?: boolean;
+  signInIcon?: "arrow" | "avatar";
+}) {
   const gap = 5;
   return (
     <div
@@ -600,42 +649,46 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
       style={{ gap: 0, transformOrigin: "center" }}
       {...ctaScaleHoverOnSelf}
     >
-      <a
-        href="https://cal.com/jacob-c-99otvp/15min"
-        target="_blank"
-        rel="noreferrer"
-        className={CTA_HEADER_PILL_CLASS}
-        style={{
-          zIndex: 1,
-          background: CTA_FILL,
-          color: "#fff",
-          boxShadow: "none",
-          textDecoration: "none",
-          whiteSpace: "nowrap",
-        }}
-      >
-        <CtaGrain />
-        <span className="relative">Get in touch</span>
-      </a>
-      {/* Bridge — thin bar connecting the two pills, sits behind them via
-          negative margins so it overlaps into each rather than floating in
-          an empty gap. */}
-      <span
-        aria-hidden="true"
-        style={{
-          width: gap + 6,
-          marginLeft: -4,
-          marginRight: -4,
-          height: 16,
-          background: "#000",
-          zIndex: 0,
-          flexShrink: 0,
-        }}
-      />
+      {!hideContact ? (
+        <>
+          <a
+            href="https://cal.com/jacob-c-99otvp/15min"
+            target="_blank"
+            rel="noreferrer"
+            className={CTA_HEADER_PILL_CLASS}
+            style={{
+              zIndex: 1,
+              background: CTA_FILL,
+              color: "#fff",
+              boxShadow: "none",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <CtaGrain />
+            <span className="relative">Get in touch</span>
+          </a>
+          {/* Bridge — thin bar connecting the two pills, sits behind them via
+              negative margins so it overlaps into each rather than floating in
+              an empty gap. */}
+          <span
+            aria-hidden="true"
+            style={{
+              width: gap + 6,
+              marginLeft: -4,
+              marginRight: -4,
+              height: 16,
+              background: "#000",
+              zIndex: 0,
+              flexShrink: 0,
+            }}
+          />
+        </>
+      ) : null}
       <Link
         href="/login"
         aria-label="Sign in"
-        className={`relative flex items-center justify-center overflow-hidden ${CTA_HEADER_SHELL_HEIGHT_CLASS} aspect-square`}
+        className={CTA_HEADER_SIGNIN_SHELL_CLASS}
         style={{
           zIndex: 1,
           borderRadius: 6,
@@ -646,18 +699,7 @@ function MergedCTA({ compact: _compact = false }: { compact?: boolean }) {
       >
         <CtaGrain />
         <CtaWell className={CTA_HEADER_WELL_CLASS}>
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={CTA_HEADER_WELL_ICON_CLASS}
-          >
-            <line x1="5" y1="12" x2="19" y2="12" />
-            <polyline points="12 5 19 12 12 19" />
-          </svg>
+          <SignInWellIcon variant={signInIcon} />
         </CtaWell>
       </Link>
     </div>
@@ -714,6 +756,11 @@ export function VisualNotch() {
     const bgEl = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
     if (!bgEl) return;
 
+    // Refraction comes from an SVG displacement filter in backdrop-filter,
+    // which only Chromium renders. Safari/Firefox drop the whole filter list
+    // when it contains url(), so they get the plain blur instead.
+    const canRefract = "userAgentData" in navigator;
+
     let frame: number | null = null;
     let lastProgress = -1;
 
@@ -727,11 +774,14 @@ export function VisualNotch() {
       if (rounded === lastProgress) return;
       lastProgress = rounded;
 
-      const filter = `blur(${rounded * 20}px) saturate(${1 + rounded * 0.8})`;
+      // Clear glass: no tint, no saturation boost. The fill fades out fully
+      // so only the blurred, warped content behind shows through.
+      const blur = `blur(${rounded * 6}px)`;
+      const filter = canRefract && rounded > 0 ? `url(#header-glass) ${blur}` : blur;
       bgEl.style.transition = "";
       bgEl.style.backdropFilter = filter;
       (bgEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = filter;
-      bgEl.style.background = `rgb(var(--bg) / ${1 - rounded * 0.55})`;
+      bgEl.style.background = `rgb(var(--bg) / ${1 - rounded})`;
     };
 
     const onScroll = () => {
@@ -750,6 +800,7 @@ export function VisualNotch() {
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
+  const isAetherLanding = pathname === "/aether";
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
   const isBlog = pathname.startsWith("/blog");
@@ -758,7 +809,17 @@ export function VisualNotch() {
   if (useMinimalHeader) {
     return (
       <>
-        <div className={`site-header${mobileOpen ? " site-header--open" : ""}`} ref={headerRef}>
+        <div
+          className={`site-header${mobileOpen ? " site-header--open" : ""}${isAetherLanding ? " site-header--pinned" : ""}`}
+          ref={headerRef}
+        >
+          {isAetherLanding ? <AetherDemoBanner embedded /> : null}
+          <svg width="0" height="0" className="absolute" aria-hidden="true">
+            <filter id="header-glass" colorInterpolationFilters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="2" seed="4" result="noise" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+          </svg>
           <div className="site-header__bg" aria-hidden="true" />
           <div className="site-header__bg-fill" aria-hidden="true" />
           <div className="site-header__inner" style={isComponents ? { maxWidth: "96rem" } : undefined}>
@@ -767,10 +828,15 @@ export function VisualNotch() {
             </Link>
             <div className="site-header__actions">
               <div className="hidden sm:flex">
-                <MergedCTA />
+                <MergedCTA
+                  hideContact={isAetherLanding}
+                />
               </div>
               <div className={isComponents ? "hidden" : "flex sm:hidden"}>
-                <MergedCTA compact />
+                <MergedCTA
+                  compact
+                  hideContact={isAetherLanding}
+                />
               </div>
               {isComponents && (
                 <button

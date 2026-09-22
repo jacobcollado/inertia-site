@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { AETHER_CHECKOUT_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
 
 /* A persistent "Get Aether" that rides along once the hero's own CTA has
  * scrolled away, and steps aside whenever a real one is on screen.
@@ -40,10 +41,10 @@ export function StickyCta() {
         if (onScreen.current < 0) onScreen.current = 0;
         sync();
       },
-      // A CTA counts as "on screen" a little before it truly is, so the
-      // sticky bar is already gone by the time the real button arrives
-      // rather than swapping out underneath the user's thumb.
-      { rootMargin: "0px 0px -15% 0px" },
+      // Full viewport — a negative bottom margin hid the pricing CTA whenever
+      // it sat in the lower band of the screen (common on mobile), which kept
+      // this bar on top and stole taps meant for checkout.
+      { threshold: 0 },
     );
     ctas.forEach((el) => ctaObserver.observe(el));
 
@@ -76,8 +77,9 @@ export function StickyCta() {
       aria-hidden={!visible}
     >
       <Link
-        href="/aether#pricing"
+        href={`/aether#${AETHER_CHECKOUT_ID}`}
         tabIndex={visible ? undefined : -1}
+        onClick={navigateToAetherCheckout}
         className={`${ACTION_RADIUS_CLASS} pointer-events-auto inline-flex h-11 items-center justify-center px-6 text-[15px] font-medium tracking-tight leading-none shadow-lg shadow-black/10 transition-opacity hover:opacity-85 sm:h-12 sm:px-8 sm:text-[16px]`}
         style={{ background: "#000", color: "#ededed" }}
       >

@@ -1,0 +1,25 @@
+---
+description: Actions that sit together in a component or section share one visual language
+alwaysApply: true
+---
+
+# Sibling action consistency
+
+When a component or section has more than one action (a CTA next to a dismiss button, a primary next to a secondary, icon buttons in a row), they must read as one set.
+
+## Rules
+
+1. **Same radius:** use `ACTION_RADIUS_CLASS` from `lib/cta-chrome` on every action in the group.
+2. **Same height:** give every action the same explicit height (`h-7` next to `size-7`, etc.), not padding that happens to land close.
+3. **Same states:** hover, focus and active use the same tokens across the group. If the main action gets a `--bg` fill and a `--fg/0.35` border on hover, the icon button gets that too.
+4. **No layout shift:** if a quieter action only shows a border on hover, give it `border border-transparent` at rest.
+5. **Hierarchy through emphasis, not shape:** the main action can be more visible at rest (fill, border), but shape, size and hover behavior stay shared.
+
+## Example
+
+`app/aether/demo-banner.tsx` (embedded): the demo button and the dismiss × are both 28px, both use `ACTION_RADIUS_CLASS`, and on hover both get the `--bg` fill and `--fg/0.35` border.
+
+## Do not
+
+- Pair a bordered button with an icon button whose hover is a different tint (e.g. `--fg/0.06` wash).
+- Mix radii or heights within one action group.

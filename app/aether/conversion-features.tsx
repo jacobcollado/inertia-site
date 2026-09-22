@@ -1,128 +1,104 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import type { CSSProperties } from "react";
+import { DemoButton } from "./demo-button";
+import { RevealDetail } from "./reveal-detail";
 
-const SHOT_W = 1365;
-const SHOT_H = 858;
+const ASSURANCES = [
+  {
+    title: "Before you buy",
+    body: "Test the live store on your own phone. Browse every page and run the cart before you spend a cent.",
+  },
+  {
+    title: "When you buy",
+    body: "Pay securely through Stripe. Your license key usually lands in your inbox within a minute.",
+  },
+  {
+    title: "After you launch",
+    body: "Install help and priority support from the people who built Aether, plus every future update, included.",
+  },
+];
 
-export interface ConversionMoment {
-  outcome: string;
-  headline: string;
-  detail: string;
-  image: string;
-  alt: string;
-}
+export function ConversionFeatures({ demoUrl }: { demoUrl: string }) {
 
-export function ConversionFeatures({ moments }: { moments: ConversionMoment[] }) {
   return (
     <section className="px-3 py-16 sm:py-24">
       <div className="max-w-[80rem] mx-auto">
-        <div className="mb-12 sm:mb-16 rise rise--liquid">
-          <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] text-center">
-            Where sales are won and lost
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-16 sm:gap-24">
-          {moments.map((moment, i) => {
-            return (
-              <article
-                key={moment.outcome}
-                className="rise rise--liquid flex flex-col gap-6 sm:gap-8"
-                style={{ "--rise-delay": `${i * 80}ms` } as React.CSSProperties}
-              >
-                <div className="relative overflow-hidden rounded-xl">
-                  <Image
-                    src={moment.image}
-                    alt={moment.alt}
-                    width={SHOT_W}
-                    height={SHOT_H}
-                    sizes="(max-width: 640px) 100vw, min(80rem, 92vw)"
-                    quality={90}
-                    className="block h-auto w-full"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-4 sm:gap-5">
-                  <h3 className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-normal tracking-[-0.03em] leading-tight [text-wrap:pretty] text-[rgb(var(--fg))]">
-                    {moment.headline}
-                  </h3>
-                  {/* Collapsed by default so the three moments read as three
-                      headlines rather than three paragraphs. Native <details>
-                      rather than state: this section is a server component,
-                      and the element already handles toggling, keyboard, and
-                      screen-reader expanded/collapsed announcements. */}
-                  <details className="moment-detail group w-fit">
-                    <summary
-                      // display:flex is set explicitly because <summary>
-                      // defaults to display:list-item, which survives
-                      // list-none and reserves marker space that knocks the
-                      // glyph off centre. leading-none drops the inherited
-                      // line-height so the flex box is exactly size-7 tall.
-                      className="flex size-7 cursor-pointer list-none items-center justify-center rounded-full bg-[rgb(var(--fg)/0.06)] leading-none text-[rgb(var(--muted))] transition-colors hover:bg-[rgb(var(--fg)/0.12)] hover:text-[rgb(var(--fg))] [&::-webkit-details-marker]:hidden"
-                      aria-label={`How it works: ${moment.headline}`}
-                    >
-                      {/* Two strokes, with the vertical one collapsing to a
-                          minus on open. Cheaper than swapping icons and it
-                          animates rather than cutting. */}
-                      {/* block, not the default inline: an inline SVG sits on
-                          the text baseline, which leaves descender space below
-                          it and pushes the glyph a fraction above centre. The
-                          path itself is symmetric about the viewBox centre, so
-                          taking it out of the text flow is all that's needed. */}
-                      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="block size-3 shrink-0" aria-hidden="true">
-                        <line x1="2.5" y1="6" x2="9.5" y2="6" />
-                        <line
-                          x1="6"
-                          y1="2.5"
-                          x2="6"
-                          y2="9.5"
-                          className="origin-center transition-transform duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)] group-open:scale-y-0"
-                        />
-                      </svg>
-                    </summary>
-                    <p className="mt-4 max-w-[28rem] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-                      {moment.detail}
+        <div className="rise rise--liquid overflow-hidden rounded-2xl bg-[rgb(var(--surface)/0.45)]">
+          <div className="grid lg:grid-cols-[minmax(19rem,0.72fr)_minmax(0,1.28fr)]">
+            <div className="flex flex-col justify-between p-6 sm:p-8 lg:p-10">
+              <div>
+                <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.035em] leading-[1.1] text-[rgb(var(--fg))] [text-wrap:pretty]">
+                  Don&apos;t trust the screenshots.
+                  <br aria-hidden="true" />
+                  Test the real store.
+                </p>
+                <div className="mt-5">
+                  <RevealDetail label="What you can test">
+                    <p className="max-w-[27rem] pt-3 text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] sm:text-[17px]">
+                      Aether is running on a live Shopify store right now. Tap through every page, add to cart, and try it on your phone. What you test is exactly what you install.
                     </p>
-                  </details>
+                  </RevealDetail>
                 </div>
-              </article>
-            );
-          })}
-        </div>
+              </div>
 
-        <div
-          className="rise rise--liquid mt-16 sm:mt-20 rounded-xl bg-[rgb(var(--surface)/0.45)] p-5 sm:p-7"
-          style={{ "--rise-delay": "240ms" } as React.CSSProperties}
-        >
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[clamp(1.35rem,2.5vw,1.75rem)] font-normal leading-tight tracking-[-0.03em] text-[rgb(var(--fg))]">
-                Aether, complete
-              </p>
-              <p className="mt-2 max-w-[32rem] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-                41 sections, lifetime updates, and installation help. Your key
-                arrives by email the moment you check out, and the theme is
-                waiting in your account.
-              </p>
+              <div className="mt-8 max-w-[20rem]">
+                <DemoButton href={demoUrl} password="aether" />
+                <p className="mt-3 text-[12px] leading-relaxed tracking-tight text-[rgb(var(--muted))] sm:text-[13px]">
+                  We copy the store password for you. Just paste it when the demo opens.
+                </p>
+              </div>
             </div>
-            <div className="sm:text-right">
-              <p className="text-[clamp(2rem,4vw,2.75rem)] font-normal leading-none tracking-[-0.04em] text-[rgb(var(--fg))]">
-                $125
-              </p>
-              <p className="mt-1 text-[13px] tracking-tight text-[rgb(var(--muted))]">
-                One-time payment
-              </p>
+
+            <div className="relative min-h-[22rem] overflow-hidden bg-[#dfe8f5] sm:min-h-[32rem] lg:min-h-[36rem]">
+              <Image
+                src="/aether/live-storefront.jpg"
+                alt="Aether storefront fashion homepage"
+                fill
+                sizes="(max-width: 1023px) 100vw, min(52rem, 62vw)"
+                quality={92}
+                className="object-cover object-[center_38%]"
+              />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[min(52%,14rem)] bg-gradient-to-t from-black/80 via-black/55 to-transparent sm:h-[min(48%,16rem)]" />
+              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6 sm:p-7">
+                <p
+                  className="max-w-[26rem] text-[14px] leading-relaxed tracking-tight text-white sm:text-[15px]"
+                  style={{ textShadow: "0 1px 14px rgba(0,0,0,0.65)" }}
+                >
+                  Nothing in the demo is mocked up. Product pages, variants, cart, navigation and mobile all work.
+                </p>
+                <Link
+                  href="/docs?from=aether"
+                  className="shrink-0 text-[14px] font-medium tracking-tight text-white transition-opacity hover:opacity-80 sm:text-[15px]"
+                  style={{ textShadow: "0 1px 14px rgba(0,0,0,0.65)" }}
+                >
+                  Read the setup docs
+                </Link>
+              </div>
             </div>
           </div>
-          <div className="mt-6">
-            <Link
-              href="/aether#pricing"
-              className={`inline-flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-5 py-2.5 text-[17px] sm:text-[18px] font-medium tracking-tight hover:opacity-80 transition-opacity whitespace-nowrap`}
-              style={{ background: "#000", color: "#ededed" }}
-            >
-              See what&apos;s included
-            </Link>
+        </div>
+
+        {/* Mobile: the same three columns as a sideways swipe row, bleeding
+            to the screen edge so the next column peeks in. sm+: static grid. */}
+        <div className="no-scrollbar -mx-3 mt-8 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-px-3 px-3 sm:mx-0 sm:snap-none sm:overflow-visible sm:px-0">
+          <div className="flex w-max border-y border-dashed border-[rgb(var(--line))] sm:grid sm:w-auto sm:grid-cols-3">
+            {ASSURANCES.map((item, index) => (
+              <div
+                key={item.title}
+                className={`rise rise--liquid w-[72vw] max-w-[18rem] shrink-0 snap-start py-6 pr-6 sm:w-auto sm:max-w-none sm:px-7 sm:py-8 ${
+                  index > 0 ? "border-l border-dashed border-[rgb(var(--line))] pl-6" : ""
+                }`}
+                style={{ "--rise-delay": `${120 + index * 70}ms` } as CSSProperties}
+              >
+                <p className="text-[16px] font-normal tracking-tight text-[rgb(var(--fg))] sm:text-[18px]">
+                  {item.title}
+                </p>
+                <p className="mt-2 text-[14px] leading-relaxed tracking-tight text-[rgb(var(--muted))] sm:text-[15px]">
+                  {item.body}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

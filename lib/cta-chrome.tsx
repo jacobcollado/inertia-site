@@ -26,15 +26,25 @@ export const CTA_HEADER_PILL_CLASS =
   "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-4 sm:py-1.5 text-[14px] sm:text-[18px] font-normal tracking-tight leading-none " +
   CTA_HEADER_SHELL_HEIGHT_CLASS;
 
+// Icons inside CTA wells scale from shell height (h-9 / sm:h-12) via calc —
+// not % on SVGs (collapses) and not em without an explicit shell width.
+/** Well diameter ÷ shell height (0.58 × 2.25rem / 3rem). */
+export const CTA_WELL_IN_SHELL_RATIO = 0.58;
+/** Icon diameter ÷ well diameter. */
+export const CTA_WELL_ICON_IN_WELL_RATIO = 0.68;
+
+export const CTA_HEADER_SIGNIN_SHELL_CLASS =
+  "relative z-[1] inline-flex size-9 shrink-0 items-center justify-center overflow-hidden sm:size-12";
+
 export const CTA_WELL_CLASS =
-  "relative flex items-center justify-center w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full shrink-0 overflow-hidden";
+  "relative z-[1] inline-flex size-[calc(2.25rem*0.58)] shrink-0 items-center justify-center overflow-hidden rounded-full sm:size-[calc(3rem*0.58)]";
 
-export const CTA_HEADER_WELL_CLASS =
-  "relative flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full shrink-0 overflow-hidden";
+export const CTA_HEADER_WELL_CLASS = CTA_WELL_CLASS;
 
-export const CTA_WELL_ICON_CLASS = "relative block h-3.5 w-3.5 sm:h-4 sm:w-4";
+export const CTA_WELL_ICON_CLASS =
+  "relative z-[1] block size-[calc(2.25rem*0.58*0.68)] shrink-0 sm:size-[calc(3rem*0.58*0.68)]";
 
-export const CTA_HEADER_WELL_ICON_CLASS = "relative block h-3 w-3 sm:h-3.5 sm:w-3.5";
+export const CTA_HEADER_WELL_ICON_CLASS = CTA_WELL_ICON_CLASS;
 
 export function CtaGrain() {
   return null;

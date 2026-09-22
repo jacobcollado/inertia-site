@@ -1,0 +1,40 @@
+---
+description: CTA and pill icons must scale relative to their container, not fixed pixels
+alwaysApply: true
+---
+
+# CTA icon scale
+
+Icons inside action pills, wells, or square header controls must **scale with the control**, not use one-off `h-3 w-3` (or similar) that breaks alignment when the pill height changes.
+
+## Rules
+
+1. **Shell size:** Square sign-in links use **`CTA_HEADER_SIGNIN_SHELL_CLASS`** (`size-9 sm:size-12`) — explicit width and height, not `aspect-square` with auto width.
+2. **Shell → well:** Well uses **`calc()` from shell rem tokens** — `size-[calc(2.25rem*0.58)] sm:size-[calc(3rem*0.58)]` (`CTA_WELL_IN_SHELL_RATIO`).
+3. **Well → icon:** Icon uses **`calc()` through the same chain** — `* 0.68` (`CTA_WELL_ICON_IN_WELL_RATIO`). Do not use `size-[68%]` on SVGs (often resolves to 0).
+4. **Stacking:** Wells/icons use `relative z-[1]` above grain inside the pill.
+5. **Tailwind content:** These classes live only in `lib/cta-chrome.tsx`, so `./lib/**` must stay in `tailwind.config.ts` `content`. Without it Tailwind never generates the arbitrary `calc()` sizes and the well and icon collapse to 0×0.
+
+## Use
+
+```tsx
+import {
+  CTA_HEADER_SHELL_HEIGHT_CLASS,
+  CTA_HEADER_WELL_CLASS,
+  CTA_HEADER_WELL_ICON_CLASS,
+  CtaWell,
+} from "@/lib/cta-chrome";
+
+<Link href="/login" className={CTA_HEADER_SIGNIN_SHELL_CLASS} style={{ background: CTA_FILL, color: "#fff" }}>
+  <CtaWell className={CTA_HEADER_WELL_CLASS}>
+    <svg className={CTA_HEADER_WELL_ICON_CLASS} viewBox="0 0 24 24" … />
+  </CtaWell>
+</Link>
+```
+
+## Do not
+
+- Hardcode icon dimensions that do not derive from the pill/well.
+- Size the well in px while the pill uses responsive height classes.
+
+When adding new header or CTA icon affordances, reuse `cta-chrome` well/icon classes or the same percentage pattern.

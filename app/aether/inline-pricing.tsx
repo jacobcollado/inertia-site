@@ -5,9 +5,11 @@ import { useAnimate, useReducedMotion } from "motion/react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { PricingLifeShader } from "./pricing-life-shader";
 import { PolicyDisclaimer } from "./policy-disclaimer";
-import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { PaymentMethodIcons } from "@/components/payment-method-icons";
+import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
 import { createCtaScalePressOnRef, ctaScalePressOnSelf } from "@/lib/cta-hover-motion";
 import { trackMeta } from "../meta-pixel";
+import { AETHER_CHECKOUT_ID } from "@/lib/scroll-to-hash";
 
 const PRICE_BOUNCE_EASING = "cubic-bezier(0.22, 1.18, 0.36, 1)";
 const PRICE_TIMING = { duration: 520, easing: PRICE_BOUNCE_EASING };
@@ -218,12 +220,13 @@ export function InlinePricing() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-2xl bg-[rgb(var(--surface)/0.45)] flex flex-col sm:flex-row sm:items-stretch">
-        <div className="hidden sm:block sm:w-[35%] sm:shrink-0">
-          <PricingLifeShader embedded className="min-h-[220px]" />
-        </div>
+      <div className="overflow-hidden rounded-2xl bg-[rgb(var(--surface)/0.45)] flex flex-col">
+        <div className="flex flex-col sm:flex-row sm:items-stretch">
+          <div className="hidden sm:block sm:w-[35%] sm:shrink-0">
+            <PricingLifeShader embedded className="min-h-[220px]" />
+          </div>
 
-        <div className="flex flex-1 flex-col gap-5 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-7 lg:p-8">
+          <div className="flex flex-1 flex-col gap-5 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-7 lg:p-8">
           <div className="flex flex-col gap-2 sm:max-w-[22rem] text-left">
             <p
               ref={priceScope}
@@ -244,16 +247,25 @@ export function InlinePricing() {
 
           <div className="flex w-full flex-col items-start gap-2 sm:w-auto sm:shrink-0">
             <button
+              id={AETHER_CHECKOUT_ID}
               type="button"
               onClick={handleCheckout}
               disabled={status === "submitting"}
               data-aether-cta
-              className={`inline-flex w-full items-center justify-center gap-1.5 sm:w-auto ${ACTION_RADIUS_CLASS} px-4 py-2 text-[17px] sm:text-[18px] font-medium tracking-tight disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
-              style={{ background: "#000", color: "#ededed" }}
+              className={`scroll-mt-24 inline-flex w-full items-center justify-center gap-1.5 sm:w-auto sm:min-w-[14rem] ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-8 text-[17px] sm:text-[19px] font-medium tracking-tight leading-none disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
+              style={{
+                background: "#000",
+                color: "#ededed",
+                // Warm edge: a faint inner light in the heading shimmer's warm
+                // tone (#ded2c2), marking this as the final CTA without a new
+                // color. Top highlight, bottom glow, hairline ring.
+                boxShadow:
+                  "inset 0 1px 0 rgba(222,210,194,0.35), inset 0 -12px 22px -10px rgba(222,210,194,0.7), 0 0 0 1px rgba(222,210,194,0.28), 0 6px 22px -8px rgba(184,173,160,0.55)",
+              }}
               {...(status === "submitting" ? {} : ctaScalePressOnSelf)}
             >
               {status === "submitting" ? <Spinner /> : null}
-              {status === "submitting" ? "Redirecting…" : "Get Aether"}
+              {status === "submitting" ? "Redirecting…" : "Own Aether"}
             </button>
             <label
               className="flex w-full cursor-pointer items-center gap-2.5 sm:w-auto [-webkit-tap-highlight-color:transparent]"
@@ -273,6 +285,25 @@ export function InlinePricing() {
               </span>
             </label>
             <PolicyDisclaimer />
+          </div>
+          </div>
+        </div>
+
+        <div className="flex w-full flex-col gap-3 border-t border-[rgb(var(--line))] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5 lg:px-8">
+          <div className="flex flex-col gap-2 sm:gap-2.5">
+            <PaymentMethodIcons />
+          </div>
+          <div className="flex shrink-0 items-center gap-2 self-start sm:self-center" style={{ opacity: 0.55 }}>
+            <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] sm:text-[12px]">Secured by</span>
+            <img
+              src="/stripe-wordmark.svg"
+              alt="Stripe"
+              width={46}
+              height={20}
+              className="h-5 w-auto"
+              draggable={false}
+              style={{ filter: "grayscale(1) brightness(0) invert(0.42)" }}
+            />
           </div>
         </div>
       </div>

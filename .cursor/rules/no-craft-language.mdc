@@ -1,0 +1,31 @@
+---
+description: Never use the word "craft" in site copy, labels, or UI text
+alwaysApply: true
+---
+
+# No "craft" language
+
+Do not use the word **craft** (or **Craft**) anywhere in user-facing copy — headings, body text, blog tags, metadata, CTAs, docs, or marketing.
+
+## Use instead
+
+| Instead of | Prefer |
+|---|---|
+| craft / craftsmanship | judgment, standards, taste, care, attention, execution |
+| crafted | built, designed, made, refined |
+| craft-led | detail-led, standards-led |
+
+## Examples
+
+```
+❌ "A studio that cares about craft"
+✅ "A studio that cares about the details"
+
+❌ tag: Craft
+✅ tag: Details
+
+❌ "Craft and engineering"
+✅ "Design and engineering"
+```
+
+When reviewing or writing copy, scan for `craft` case-insensitively and replace before shipping.

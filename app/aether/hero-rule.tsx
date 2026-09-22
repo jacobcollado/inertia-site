@@ -22,7 +22,7 @@ export function HeroRule() {
 
   return (
     <>
-      <div ref={sentinelRef} style={{ height: "1px", background: "rgb(var(--line))" }} />
+      <div ref={sentinelRef} className="grid-rule grid-rule--dashed" />
     </>
   );
 }

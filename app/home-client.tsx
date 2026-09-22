@@ -434,7 +434,6 @@ const INQUIRY_CTA_OUTER_SHADOW =
   "0 10px 28px rgba(0,0,0,0.14)," +
   "0 24px 56px -10px rgba(0,0,0,0.12)";
 
-const HERO_CTA_DWELL_MS = 5500;
 
 const HERO_LIQUID_MS = 680;
 const HERO_LIQUID_EASE = "cubic-bezier(0.22, 0.61, 0.36, 1)";
@@ -1029,14 +1028,6 @@ function ClientDialogMediaBlock({
   );
 }
 
-function heroCtaTrackStyle(isAetherCta: boolean) {
-  return {
-    transform: isAetherCta ? "translateY(-50%)" : "translateY(0)",
-    willChange: "transform",
-    transition: `transform ${HERO_LIQUID_MS}ms ${HERO_LIQUID_EASE}`,
-  };
-}
-
 function VercelHero({
   accentColor,
   ctaRef,
@@ -1045,8 +1036,6 @@ function VercelHero({
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
 }) {
   const router = useRouter();
-  const [ctaTarget, setCtaTarget] = useState<"project" | "aether">("project");
-  const isAetherCta = ctaTarget === "aether";
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -1089,26 +1078,6 @@ function VercelHero({
   // heading is visible immediately — it only needs a short beat after mount
   // so the frame reads as drawing itself rather than appearing pre-formed.
   const selectionDelay = 260;
-
-  // Alternates between the project quiz and the Aether product page on a
-  // fixed loop once the hero has landed — no carousel interaction required.
-  useEffect(() => {
-    if (!visible) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
-    const firstSwapDelay = ctaFadeDelay + HERO_LIQUID_MS + 1400;
-    let interval: ReturnType<typeof setInterval> | undefined;
-    const timeout = setTimeout(() => {
-      setCtaTarget((t) => (t === "project" ? "aether" : "project"));
-      interval = setInterval(() => {
-        setCtaTarget((t) => (t === "project" ? "aether" : "project"));
-      }, HERO_CTA_DWELL_MS);
-    }, firstSwapDelay);
-    return () => {
-      clearTimeout(timeout);
-      if (interval !== undefined) clearInterval(interval);
-    };
-  }, [visible, ctaFadeDelay]);
 
   useEffect(() => {
     if (!visible) return;
@@ -1223,7 +1192,7 @@ function VercelHero({
           </div>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {/* Points at the quiz at the foot of the page rather than straight
                 to Cal: answering a few questions is a lower commitment than
                 putting a meeting on the calendar, and the quiz hands off to
@@ -1238,52 +1207,53 @@ function VercelHero({
                 transformOrigin: "center",
               }}
             >
-            <a
-              ref={ctaRef}
-              href={isAetherCta ? "/aether" : "#start"}
-              aria-label={isAetherCta ? "View Aether" : "Get in touch"}
-              onClick={e => {
-                if (isAetherCta) return;
-                const el = document.getElementById("start");
-                if (!el) return; // let the browser handle the hash
-                e.preventDefault();
-                const targetY = window.scrollY + el.getBoundingClientRect().top - 40;
-                const lenis = window.__lenis;
-                if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
-                else window.scrollTo({ top: targetY, behavior: "smooth" });
-              }}
-              className={CTA_PILL_CLASS}
+              <a
+                ref={ctaRef}
+                href="#start"
+                aria-label="Get in touch"
+                onClick={e => {
+                  const el = document.getElementById("start");
+                  if (!el) return; // let the browser handle the hash
+                  e.preventDefault();
+                  const targetY = window.scrollY + el.getBoundingClientRect().top - 40;
+                  const lenis = window.__lenis;
+                  if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
+                  else window.scrollTo({ top: targetY, behavior: "smooth" });
+                }}
+                className={CTA_PILL_CLASS}
+                style={{
+                  background: CTA_FILL,
+                  color: "#fff",
+                  boxShadow: CTA_INSET_SHADOW,
+                  fontWeight: 450,
+                }}
+                {...ctaScaleHoverOnParent}
+              >
+                <CtaGrain />
+                <span className="relative whitespace-nowrap">Get in touch</span>
+              </a>
+            </span>
+            <span
+              className="relative inline-flex rounded-[6px]"
               style={{
-                background: CTA_FILL,
-                color: "#fff",
-                boxShadow: CTA_INSET_SHADOW,
-                fontWeight: 450,
+                boxShadow: CTA_OUTER_SHADOW,
+                transformOrigin: "center",
               }}
-              {...ctaScaleHoverOnParent}
             >
-              <CtaGrain />
-              <span className="relative inline-grid text-center whitespace-nowrap">
-                <span className="invisible col-start-1 row-start-1" aria-hidden="true">
-                  Get in touch
-                </span>
-                <span className="invisible col-start-1 row-start-1" aria-hidden="true">
-                  View Aether
-                </span>
-                <span className="col-start-1 row-start-1 relative overflow-hidden h-10 sm:h-12 w-full">
-                  <span
-                    className="flex flex-col motion-reduce:transition-none"
-                    style={heroCtaTrackStyle(isAetherCta)}
-                  >
-                    <span className="flex h-10 sm:h-12 items-center justify-center">
-                      Get in touch
-                    </span>
-                    <span className="flex h-10 sm:h-12 items-center justify-center">
-                      View Aether
-                    </span>
-                  </span>
-                </span>
-              </span>
-            </a>
+              <Link
+                href="/aether"
+                aria-label="View Aether"
+                className={CTA_PILL_CLASS}
+                style={{
+                  background: "#f0f0f0",
+                  color: "#1a1a1a",
+                  boxShadow: CTA_INSET_SHADOW,
+                  fontWeight: 450,
+                }}
+                {...ctaScaleHoverOnParent}
+              >
+                <span className="relative whitespace-nowrap">View Aether</span>
+              </Link>
             </span>
             {false && (
             <a

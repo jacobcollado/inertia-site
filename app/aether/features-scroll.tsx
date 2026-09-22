@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { HiMiniPause, HiMiniPlay } from "react-icons/hi2";
+import { HiMiniArrowLeft, HiMiniArrowRight } from "react-icons/hi2";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DemoButton } from "./demo-button";
 import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS, easeLiquid } from "./motion";
@@ -9,6 +9,9 @@ import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS, easeLiquid } from "./motion";
 const PILL_ACTIVE_W = 20;
 const PILL_INACTIVE_W = 8;
 const PILL_TRANSITION = `width ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, opacity ${Math.round(AETHER_LIQUID_MS * 0.55)}ms ${AETHER_LIQUID_EASE}`;
+// Matches the 40px dot rail beside it (h-6 dots + py-2).
+const ARROW_CLASS =
+  "inline-flex h-10 w-10 items-center justify-center rounded-full bg-[rgb(var(--surface)/0.45)] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]";
 const g = (a: number) => `rgba(120,120,120,${a})`;
 const acc = "rgb(var(--accent))";
 
@@ -145,7 +148,6 @@ const SHOT_H = 858;
 const PHONE_RENDER_W = 1300;
 const PHONE_RENDER_H = 2642;
 
-const AUTOPLAY_MS = 5200;
 const GAP_PX = 24;
 const PEEK_PX_MOBILE = 48;
 const PEEK_PX_DESKTOP = 72;
@@ -208,19 +210,13 @@ export function FeaturesScroll({
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const activeRef = useRef(0);
   const [active, setActive] = useState(0);
-  const [scrolling, setScrolling] = useState(false);
+  const [, setScrolling] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [slideWidth, setSlideWidth] = useState(0);
   const [peekPx, setPeekPx] = useState(PEEK_PX_MOBILE);
   const [columnLeft, setColumnLeft] = useState(MOBILE_GUTTER_PX);
   const [trackPadRight, setTrackPadRight] = useState(PEEK_PX_MOBILE + GAP_PX);
-  const [playing, setPlaying] = useState(true);
-  const [inView, setInView] = useState(false);
-  const [progress, setProgress] = useState(0);
   const scrollEndRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const progressRafRef = useRef(0);
-  const progressElapsedRef = useRef(0);
-  const progressTickStartRef = useRef(0);
   const easeAnimRef = useRef<number | null>(null);
   const isEasingRef = useRef(false);
   const settlingRef = useRef(false);
@@ -413,11 +409,6 @@ export function FeaturesScroll({
     easeScrollTo(target);
   }, [applyCardProximity, cancelEase, easeScrollTo, features.length, reduceMotion, scrollTargetForIndex, slotWidth]);
 
-  const togglePlay = useCallback(() => {
-    if (reduceMotion) return;
-    setPlaying((on) => !on);
-  }, [reduceMotion]);
-
   const settleToNearest = useCallback(() => {
     const scroller = scrollerRef.current;
     const slot = slotWidth();
@@ -549,13 +540,9 @@ export function FeaturesScroll({
       if (dx < threshold && dy < threshold) return;
 
       touchAxisRef.current = dy > dx ? "y" : "x";
-      if (touchAxisRef.current === "y") {
-        if (scrollEndRef.current) {
-          clearTimeout(scrollEndRef.current);
-          scrollEndRef.current = null;
-        }
-      } else {
-        setPlaying(false);
+      if (touchAxisRef.current === "y" && scrollEndRef.current) {
+        clearTimeout(scrollEndRef.current);
+        scrollEndRef.current = null;
       }
     };
 
@@ -584,68 +571,6 @@ export function FeaturesScroll({
   }, [applyCardProximity, cancelEase, nearestIndex, settleToNearest]);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.3, rootMargin: "0px 0px -8% 0px" },
-    );
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    progressElapsedRef.current = 0;
-    progressTickStartRef.current = 0;
-    setProgress(0);
-  }, [active]);
-
-  useEffect(() => {
-    cancelAnimationFrame(progressRafRef.current);
-
-    const canRun = inView && playing && !reduceMotion && !scrolling;
-    if (!canRun) {
-      if (progressTickStartRef.current > 0) {
-        progressElapsedRef.current += performance.now() - progressTickStartRef.current;
-        progressTickStartRef.current = 0;
-      }
-      return;
-    }
-
-    progressTickStartRef.current = performance.now();
-
-    const tick = (now: number) => {
-      const elapsed = progressElapsedRef.current + (now - progressTickStartRef.current);
-      const linear = Math.min(1, elapsed / AUTOPLAY_MS);
-      setProgress(easeLiquid(linear));
-
-      if (linear >= 1) {
-        progressElapsedRef.current = 0;
-        progressTickStartRef.current = 0;
-        setProgress(0);
-        goTo((activeRef.current + 1) % features.length);
-        return;
-      }
-
-      progressRafRef.current = requestAnimationFrame(tick);
-    };
-
-    progressRafRef.current = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(progressRafRef.current);
-      if (progressTickStartRef.current > 0) {
-        progressElapsedRef.current += performance.now() - progressTickStartRef.current;
-        progressTickStartRef.current = 0;
-      }
-    };
-  }, [inView, playing, active, scrolling, reduceMotion, features.length, goTo]);
-
-  useEffect(() => {
-    if (reduceMotion) setPlaying(false);
-  }, [reduceMotion]);
-
-  useEffect(() => {
     const onResize = () => {
       measureSlideWidth();
       goTo(activeRef.current, "auto");
@@ -657,26 +582,21 @@ export function FeaturesScroll({
 
   const onCardClick = (index: number) => {
     if (index === activeRef.current) return;
-    setPlaying(false);
     goTo(index);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "ArrowRight") {
       e.preventDefault();
-      setPlaying(false);
       goTo(Math.min(features.length - 1, activeRef.current + 1));
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
-      setPlaying(false);
       goTo(Math.max(0, activeRef.current - 1));
     } else if (e.key === "Home") {
       e.preventDefault();
-      setPlaying(false);
       goTo(0);
     } else if (e.key === "End") {
       e.preventDefault();
-      setPlaying(false);
       goTo(features.length - 1);
     }
   };
@@ -745,6 +665,15 @@ export function FeaturesScroll({
       </div>
 
       <div className="flex items-center justify-center gap-3 mt-10">
+        <button
+          type="button"
+          aria-label="Previous feature"
+          disabled={active === 0}
+          onClick={() => goTo(active - 1)}
+          className={ARROW_CLASS}
+        >
+          <HiMiniArrowLeft className="h-[17px] w-[17px]" aria-hidden="true" />
+        </button>
         <div className="inline-flex items-center gap-1 rounded-full px-3 py-2 bg-[rgb(var(--surface)/0.45)]">
           {features.map((f, i) => {
             const isActive = active === i;
@@ -755,7 +684,6 @@ export function FeaturesScroll({
                 aria-label={`Show ${f.title}`}
                 aria-current={isActive ? "true" : undefined}
                 onClick={() => {
-                  setPlaying(false);
                   goTo(i);
                 }}
                 className="flex h-6 w-5 items-center justify-center"
@@ -770,8 +698,8 @@ export function FeaturesScroll({
                   <span
                     className="absolute inset-y-0 left-0 rounded-full bg-[rgb(var(--fg))]"
                     style={{
-                      width: isActive && !reduceMotion ? `${progress * 100}%` : isActive ? "100%" : "0%",
-                      opacity: isActive ? (playing && inView && !reduceMotion ? 1 : 0.85) : 0,
+                      width: isActive ? "100%" : "0%",
+                      opacity: isActive ? 1 : 0,
                       transition: reduceMotion ? undefined : `opacity ${Math.round(AETHER_LIQUID_MS * 0.55)}ms ${AETHER_LIQUID_EASE}`,
                     }}
                   />
@@ -782,23 +710,12 @@ export function FeaturesScroll({
         </div>
         <button
           type="button"
-          aria-label={playing ? "Pause autoplay" : "Play autoplay"}
-          aria-pressed={playing}
-          disabled={reduceMotion}
-          onClick={togglePlay}
-          className="relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface)/0.45)] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]"
+          aria-label="Next feature"
+          disabled={active === features.length - 1}
+          onClick={() => goTo(active + 1)}
+          className={ARROW_CLASS}
         >
-          {playing ? (
-            <HiMiniPause
-              className="absolute left-1/2 top-1/2 block h-[17px] w-[17px] -translate-x-1/2 -translate-y-1/2"
-              aria-hidden="true"
-            />
-          ) : (
-            <HiMiniPlay
-              className="absolute left-1/2 top-1/2 block h-[17px] w-[17px] -translate-x-1/2 -translate-y-1/2"
-              aria-hidden="true"
-            />
-          )}
+          <HiMiniArrowRight className="h-[17px] w-[17px]" aria-hidden="true" />
         </button>
       </div>
     </section>
