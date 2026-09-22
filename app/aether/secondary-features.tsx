@@ -17,6 +17,16 @@ const FEATURE_ACCENTS = [
   "text-[#0891b2]",
 ] as const;
 
+// Tinted tile behind each icon, same hue as its accent.
+const FEATURE_TILES = [
+  "bg-[#0a84ff]/10",
+  "bg-[#16a34a]/10",
+  "bg-[#ea580c]/10",
+  "bg-[#7c3aed]/10",
+  "bg-[#db2777]/10",
+  "bg-[#0891b2]/10",
+] as const;
+
 /* Bento spans, keyed by the feature's index in the source list.
  *
  * Two features carry the pitch and get double-width tiles at every breakpoint:
@@ -35,6 +45,7 @@ const SPANS: Record<number, string> = {
 
 function FeatureCard({ feature, index }: { feature: SecondaryFeature; index: number }) {
   const accent = FEATURE_ACCENTS[index % FEATURE_ACCENTS.length];
+  const tile = FEATURE_TILES[index % FEATURE_TILES.length];
   const span = SPANS[index] ?? "";
   const isWide = Boolean(SPANS[index]);
 
@@ -49,8 +60,8 @@ function FeatureCard({ feature, index }: { feature: SecondaryFeature; index: num
       style={{ "--rise-delay": `${120 + index * 40}ms` } as React.CSSProperties}
     >
       <span
-        className={`relative mb-5 flex shrink-0 items-center sm:mb-6 ${accent} ${
-          isWide ? "mt-auto [&_svg]:size-5 sm:[&_svg]:size-6" : "[&_svg]:size-5"
+        className={`relative mb-5 flex shrink-0 items-center justify-center rounded-[8px] sm:mb-6 ${accent} ${tile} ${
+          isWide ? "mt-auto size-9 [&_svg]:size-[18px] sm:size-10 sm:[&_svg]:size-5" : "size-9 [&_svg]:size-[18px]"
         }`}
         aria-hidden="true"
       >

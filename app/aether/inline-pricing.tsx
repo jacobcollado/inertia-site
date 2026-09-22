@@ -29,9 +29,10 @@ const LICENSE = {
       label: "Instant delivery, key in your inbox",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
-          <rect x="2" y="2.5" width="12" height="11" rx="1.5" />
-          <path d="M2 6h12" />
-          <path d="M6 6v7.5" />
+          <circle cx="5" cy="8" r="3" />
+          <path d="M8 8h6.5" />
+          <path d="M12 8v2.5" />
+          <path d="M14.5 8v2" />
         </svg>
       ),
     },
@@ -39,11 +40,10 @@ const LICENSE = {
       label: "Full Aether theme, all 41 sections",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
-          <rect x="1" y="1.5" width="14" height="2" rx="0.5" />
-          <rect x="1" y="4.5" width="14" height="3" rx="0.5" />
-          <rect x="1" y="8.5" width="6" height="2.5" rx="0.5" />
-          <rect x="9" y="8.5" width="6" height="2.5" rx="0.5" />
-          <rect x="1" y="12" width="14" height="2.5" rx="0.5" />
+          <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" />
+          <path d="M1.5 5.5h13" />
+          <path d="M4 8.5h8" />
+          <path d="M4 11h5" />
         </svg>
       ),
     },
@@ -51,10 +51,7 @@ const LICENSE = {
       label: "Lifetime updates, no renewals",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
-          <path d="M13 2.5v3.5H9.5" />
-          <path d="M3 13.5V10h3.5" />
-          <path d="M12.2 5.8A5 5 0 0 0 4.2 6.5" />
-          <path d="M3.8 10.2A5 5 0 0 0 11.8 9.5" />
+          <path d="M8 8C6.8 5.2 1.8 5.2 1.8 8s5 2.8 6.2 0 6.2-2.8 6.2 0-5 2.8-6.2 0Z" />
         </svg>
       ),
     },
@@ -62,9 +59,9 @@ const LICENSE = {
       label: "Single store license",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
-          <path d="M2.5 6.5 3.5 3h9l1 3.5" />
-          <rect x="2.5" y="6.5" width="11" height="7" rx="1" />
-          <path d="M6.5 13.5V9.5h3v4" />
+          <path d="M2 6 3.2 2.5h9.6L14 6Z" />
+          <path d="M3 6v7.5h10V6" />
+          <path d="M6.5 13.5V10h3v3.5" />
         </svg>
       ),
     },
@@ -72,9 +69,8 @@ const LICENSE = {
       label: "Priority support",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
-          <path d="M4 10V8a4 4 0 0 1 8 0v2" />
-          <rect x="2" y="9.5" width="2.5" height="4" rx="1.2" />
-          <rect x="11.5" y="9.5" width="2.5" height="4" rx="1.2" />
+          <path d="M3 2h10A1.5 1.5 0 0 1 14.5 3.5v6A1.5 1.5 0 0 1 13 11H7.5L4.5 13.5V11H3A1.5 1.5 0 0 1 1.5 9.5v-6A1.5 1.5 0 0 1 3 2Z" />
+          <path d="M8.6 4.5 7.2 6.6h1.6L7.4 8.7" />
         </svg>
       ),
     },
@@ -83,10 +79,9 @@ const LICENSE = {
       bonus: "$50 value for free",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
-          <path d="M8 2v8" />
-          <path d="M5 7l3 3 3-3" />
-          <path d="M3 12.5h10" />
-          <path d="M3 12.5v1.5h10v-1.5" />
+          <path d="M3 13 9.5 6.5" />
+          <path d="M8.5 5.5l2 2" />
+          <path d="M12.5 1.8v3.4M10.8 3.5h3.4" />
         </svg>
       ),
     },
@@ -108,7 +103,9 @@ function IncludeCard({ item, mobileFirst = false }: { item: IncludeItem; mobileF
   const orderClass = mobileFirst ? "order-first sm:order-none" : "";
   const icon = (
     <span
-      className="mb-5 flex shrink-0 items-center text-[rgb(var(--muted))] sm:mb-6 [&_svg]:size-5"
+      // Sized in em off the label's font size, so icon, gap and text scale
+      // together: icon ~1.4x the cap line, gap ~1.3x.
+      className="mb-[1.3em] flex shrink-0 items-center text-[16px] text-[rgb(var(--muted))] sm:text-[17px] [&_svg]:size-[1.4em]"
       aria-hidden="true"
     >
       {item.icon}
