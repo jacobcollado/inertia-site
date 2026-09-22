@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
-import { AETHER_CHECKOUT_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
+import { AETHER_PRICING_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
 
 /* A persistent "Get Aether" that rides along once the hero's own CTA has
  * scrolled away, and steps aside whenever a real one is on screen.
@@ -77,7 +77,7 @@ export function StickyCta() {
       aria-hidden={!visible}
     >
       <Link
-        href={`/aether#${AETHER_CHECKOUT_ID}`}
+        href={`/aether#${AETHER_PRICING_ID}`}
         tabIndex={visible ? undefined : -1}
         onClick={navigateToAetherCheckout}
         className={`${ACTION_RADIUS_CLASS} pointer-events-auto inline-flex h-11 items-center justify-center px-6 text-[15px] font-medium tracking-tight leading-none shadow-lg shadow-black/10 transition-opacity hover:opacity-85 sm:h-12 sm:px-8 sm:text-[16px]`}

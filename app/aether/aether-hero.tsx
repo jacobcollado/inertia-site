@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DemoButton } from "./demo-button";
 import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
-import { AETHER_CHECKOUT_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
+import { AETHER_PRICING_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
 
 export function AetherHero({ demoUrl }: { demoUrl: string }) {
 
@@ -29,7 +29,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
         </p>
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
-            href={`/aether#${AETHER_CHECKOUT_ID}`}
+            href={`/aether#${AETHER_PRICING_ID}`}
             data-aether-cta
             onClick={navigateToAetherCheckout}
             className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none hover:opacity-80 transition-opacity`}

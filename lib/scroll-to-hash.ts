@@ -1,6 +1,9 @@
 import type { MouseEvent } from "react";
 
 export const AETHER_CHECKOUT_ID = "checkout";
+/** Top of the pricing section. In-page "Get Aether" CTAs land here so the
+ *  heading and includes are seen before the checkout button. */
+export const AETHER_PRICING_ID = "pricing";
 
 type ScrollToIdOptions = {
   immediate?: boolean;
@@ -43,7 +46,7 @@ export function scrollToHash() {
 export function navigateToAetherCheckout(e: MouseEvent<HTMLAnchorElement>) {
   const href = e.currentTarget.getAttribute("href") ?? "";
   const url = new URL(href, window.location.origin);
-  const id = url.hash ? url.hash.slice(1) : AETHER_CHECKOUT_ID;
+  const id = url.hash ? url.hash.slice(1) : AETHER_PRICING_ID;
 
   if (url.pathname !== "/aether" || window.location.pathname !== "/aether") return;
 
@@ -53,6 +56,9 @@ export function navigateToAetherCheckout(e: MouseEvent<HTMLAnchorElement>) {
     history.pushState(null, "", `${url.pathname}${nextHash}`);
   }
 
-  // Room for the fixed header; on mobile the checkout row often sits above the sticky bar.
-  scrollToElementById(id, { immediate: false, offset: -88 });
+  // Land the section's top edge just under the sticky header, measured live
+  // because the demo banner inside it changes its height.
+  const header = document.querySelector<HTMLElement>(".site-header");
+  const headerH = header ? header.getBoundingClientRect().height : 88;
+  scrollToElementById(id, { immediate: false, offset: -headerH });
 }
