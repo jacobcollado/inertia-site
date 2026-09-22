@@ -42,7 +42,10 @@ export function scrollToHash() {
   }
 }
 
-/** In-page "Get Aether" links: always scroll, even when the hash is already set. */
+/** In-page "Get Aether" links: scroll to pricing without touching the URL.
+ *  Writing #pricing into history behind Next's router left the hash on the
+ *  /aether entry, so a later plain /aether visit (e.g. "View Aether" on the
+ *  index) could land on pricing instead of the top. */
 export function navigateToAetherCheckout(e: MouseEvent<HTMLAnchorElement>) {
   const href = e.currentTarget.getAttribute("href") ?? "";
   const url = new URL(href, window.location.origin);
@@ -51,10 +54,6 @@ export function navigateToAetherCheckout(e: MouseEvent<HTMLAnchorElement>) {
   if (url.pathname !== "/aether" || window.location.pathname !== "/aether") return;
 
   e.preventDefault();
-  const nextHash = `#${id}`;
-  if (window.location.hash !== nextHash) {
-    history.pushState(null, "", `${url.pathname}${nextHash}`);
-  }
 
   // Land the section's top edge just under the sticky header, measured live
   // because the demo banner inside it changes its height.

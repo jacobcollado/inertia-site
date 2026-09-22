@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useEffect, useState, type CSSProperties } from "react";
 
 interface Testimonial {
   quote: string;
@@ -8,9 +10,11 @@ interface Testimonial {
 }
 
 /* PLACEHOLDER reviews, written as demo copy. They are not from real customers,
- * so the section only renders outside production (see below). Replace these
+ * so in production the section only renders for a private preview link
+ * (/aether?preview=testimonials), never for regular visitors. Replace these
  * with real, attributable reviews, then set USING_PLACEHOLDERS to false. */
 const USING_PLACEHOLDERS = true;
+const PREVIEW_PARAM = "testimonials";
 
 const TESTIMONIALS: Testimonial[] = [
   { quote: "super easy setup tbh. had it live before my coffee got cold", name: "maya", tone: ["#ffd6c9", "#f4a79a", "#7a2e22"] },
@@ -75,7 +79,12 @@ function Row({ items, duration, reverse }: { items: Testimonial[]; duration: num
 }
 
 export function Testimonials() {
-  if (USING_PLACEHOLDERS && process.env.NODE_ENV === "production") return null;
+  const [preview, setPreview] = useState(false);
+  useEffect(() => {
+    setPreview(new URLSearchParams(window.location.search).get("preview") === PREVIEW_PARAM);
+  }, []);
+
+  if (USING_PLACEHOLDERS && process.env.NODE_ENV === "production" && !preview) return null;
 
   const half = Math.ceil(TESTIMONIALS.length / 2);
 

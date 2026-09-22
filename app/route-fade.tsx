@@ -31,6 +31,16 @@ export function RouteFade({ children }: { children: React.ReactNode }) {
       return;
     }
     scrollToHash();
+    // A plain route (no hash) must start at the top. Re-assert after the
+    // frame so a late router or Lenis scroll can't leave the new page midway.
+    if (!window.location.hash) {
+      const frame = requestAnimationFrame(() => {
+        if (window.location.hash) return;
+        if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true, force: true });
+        else window.scrollTo({ top: 0, behavior: "auto" });
+      });
+      return () => cancelAnimationFrame(frame);
+    }
   }, [pathname]);
 
   if (isPersistentShell) {
