@@ -42,11 +42,23 @@ export default async function DashboardOverviewPage() {
   // before an account exists, so there's no client row to attach them to yet.
   const { data: licenses } = await supabase
     .from("licenses")
-    .select("id, key, email, domain, tier, status, created_at, theme_file_path, amount_total, currency, receipt_url, paid_at, downloaded_at")
+    .select("id, key, email, domain, tier, status, created_at, theme_file_path, amount_total, currency, receipt_url, paid_at, downloaded_at, downloaded_version")
     .eq("email", user.email!);
+
+  // The person's own first name for the welcome greeting. clients.name is
+  // sometimes set to the business (the same value as company), so a name
+  // that matches the company is skipped rather than greeting the brand.
+  const meta = user.user_metadata ?? {};
+  const company = client?.company?.trim().toLowerCase();
+  const firstName = [meta.given_name, meta.full_name, meta.name, client?.name]
+    .map((n) => (typeof n === "string" ? n.trim() : ""))
+    .find((n) => n && n.toLowerCase() !== company)
+    ?.split(/\s+/)[0];
 
   return (
     <OverviewView
+      firstName={firstName}
+      welcomeSeen={meta.welcome_seen === true}
       client={client}
       clientEmail={client?.email ?? user.email ?? ""}
       projects={projects ?? []}

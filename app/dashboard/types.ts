@@ -4,7 +4,8 @@ export type Project = { id: string; title: string; status: string; phase: string
 export type ProjectUpdate = { id: string; project_id: string; status: string; note: string | null; created_at: string };
 export type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null; payment_url: string | null };
 export type DFile = { id: string; label: string; url: string; uploaded_at: string };
-export type Message = { id: string; client_id: string; case_id: string | null; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null; suggest_close?: boolean; suggest_human?: boolean };
+export type Message = { id: string; client_id: string; case_id: string | null; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null; suggest_close?: boolean; suggest_human?: boolean; attachments?: Attachment[] };
+export type Attachment = { path: string; name: string; size: number; type: string };
 export type CaseStatus = "open" | "pending" | "closed";
 export type CaseSeverity = "severity_1" | "severity_2" | "severity_3" | "severity_4";
 export type Case = { id: string; client_id: string; case_number: string; title: string; status: CaseStatus; severity: CaseSeverity; created_at: string; updated_at: string; human_requested: boolean };
@@ -21,7 +22,7 @@ export const CASE_SEVERITY_LABEL: Record<CaseSeverity, string> = {
   severity_3: "Severity 3",
   severity_4: "Severity 4",
 };
-export type License = { id: string; key: string; email: string; domain: string | null; tier: string; status: string; created_at: string; theme_file_path: string | null; amount_total: number | null; currency: string | null; receipt_url: string | null; paid_at: string | null; downloaded_at: string | null };
+export type License = { id: string; key: string; email: string; domain: string | null; tier: string; status: string; created_at: string; theme_file_path: string | null; amount_total: number | null; currency: string | null; receipt_url: string | null; paid_at: string | null; downloaded_at: string | null; downloaded_version: string | null };
 
 export const STATUS_VARIANT: Record<string, string> = {
   active:    "bg-[#2E873F]/15 text-[#2E873F]",

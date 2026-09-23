@@ -710,28 +710,69 @@ function SelectionBox({
   );
 }
 
+// How far the frame sits outside the word box (SelectionBox's insets), in em.
+// The neighbours are pushed by how far the frame edges travel, not the glyphs.
+const SELECTION_INSET_X_EM = 0.1;
+const SELECTION_INSET_BOTTOM_EM = 0.2;
+
+// How far the line under "design" moves while the frame resizes, so the
+// frame's bottom edge never runs into it. The heading is leading-none, so the
+// word box is 1em tall and its bottom edge sits half of that below centre.
+function selectionPushBelowEm(scale: number) {
+  return (scale - 1) * (0.5 + SELECTION_INSET_BOTTOM_EM);
+}
+
 // "design" plus its selection frame, scaled as one unit so the word is
 // visibly being sized by the selection rather than sitting inert inside it.
 //
-// Layout note: the outer span stays UNSCALED and keeps the word's resting
-// footprint, so the heading never reflows while the gesture runs. The scaled
-// copy is absolutely positioned on top of it and painted; the outer copy is
-// kept for measurement only (invisible, but it still occupies the space).
+// Layout note: the scaled copy is absolutely positioned over an invisible
+// spacer that holds the word's resting footprint. The spacer's side margins
+// then grow and shrink with the frame, so the words either side are pushed
+// away as it's dragged out and follow it back in, instead of the frame
+// sliding over them. The resize state lives in the hero, which also moves the
+// line below by selectionPushBelowEm.
 function DesignSelectionWord({
   visible,
   delay,
   word,
+  selection,
 }: {
   visible: boolean;
   delay: number;
   word: string;
+  selection: ReturnType<typeof useSelectionResize>;
 }) {
-  const { phase, scale, resizeMs, reduced } = useSelectionResize(visible, delay);
+  const { phase, scale, resizeMs, reduced } = selection;
+  const spacerRef = useRef<HTMLSpanElement>(null);
+  // Half the resting word width, in em, so the push is right at any size.
+  const [halfWidthEm, setHalfWidthEm] = useState(0);
+
+  useLayoutEffect(() => {
+    const el = spacerRef.current;
+    if (!el) return;
+    const measure = () => {
+      const fontSize = parseFloat(getComputedStyle(el).fontSize) || 16;
+      setHalfWidthEm(el.offsetWidth / fontSize / 2);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const pushSideEm = (scale - 1) * (halfWidthEm + SELECTION_INSET_X_EM);
 
   return (
-    <span style={{ position: "relative", display: "inline-block" }}>
+    <span
+      style={{
+        position: "relative",
+        display: "inline-block",
+        marginInline: `${pushSideEm}em`,
+        transition: reduced ? "none" : `margin ${resizeMs}ms ${HERO_LIQUID_EASE}`,
+      }}
+    >
       {/* Spacer: holds the line's true width at rest. */}
-      <span style={{ visibility: "hidden" }} aria-hidden="true">
+      <span ref={spacerRef} style={{ visibility: "hidden" }} aria-hidden="true">
         {word}
       </span>
 
@@ -1078,6 +1119,7 @@ function VercelHero({
   // heading is visible immediately — it only needs a short beat after mount
   // so the frame reads as drawing itself rather than appearing pre-formed.
   const selectionDelay = 260;
+  const selection = useSelectionResize(visible, selectionDelay);
 
   useEffect(() => {
     if (!visible) return;
@@ -1146,16 +1188,22 @@ function VercelHero({
               {HEADING_LINE_ONE.map((word, i) => (
                 <span key={word + i} style={wordReveal(i)}>
                   {word === "design" ? (
-                    <DesignSelectionWord visible={visible} delay={selectionDelay} word={word} />
+                    <DesignSelectionWord visible={visible} delay={selectionDelay} word={word} selection={selection} />
                   ) : (
                     word
                   )}
                 </span>
               ))}
             </span>
+            {/* Moves with the bottom edge of the "design" frame above it, as a
+                transform so the rest of the hero doesn't shift with it. */}
             <span
               className="mt-1.5 sm:mt-2 flex flex-wrap justify-center"
-              style={{ columnGap: "0.3em" }}
+              style={{
+                columnGap: "0.3em",
+                transform: `translateY(${selectionPushBelowEm(selection.scale)}em)`,
+                transition: selection.reduced ? "none" : `transform ${selection.resizeMs}ms ${HERO_LIQUID_EASE}`,
+              }}
             >
               {HEADING_LINE_TWO.map((word, i) => (
                 <span key={word + i} style={wordReveal(HEADING_LINE_ONE.length + i)}>{word}</span>

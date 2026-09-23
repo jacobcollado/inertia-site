@@ -1,3 +1,5 @@
+import type { Attachment } from "@/app/dashboard/types";
+
 export type Client = {
   id: string;
   email: string;
@@ -12,7 +14,7 @@ export type Project = { id: string; title: string; status: string; phase: string
 export type ProjectUpdate = { id: string; project_id: string; status: string; note: string | null; created_at: string };
 export type Invoice = { id: string; label: string; amount: number; status: string; due_date: string | null; paid_at: string | null; payment_url: string | null };
 export type DFile = { id: string; label: string; url: string; uploaded_at: string };
-export type Message = { id: string; client_id: string; case_id: string | null; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null };
+export type Message = { id: string; client_id: string; case_id: string | null; sender: "admin" | "client"; body: string; created_at: string; read_at: string | null; attachments?: Attachment[] };
 export type AuditEntry = { id: string; action: string; detail: string | null; created_at: string };
 export type CaseStatus = "open" | "pending" | "closed";
 export type CaseSeverity = "severity_1" | "severity_2" | "severity_3" | "severity_4";

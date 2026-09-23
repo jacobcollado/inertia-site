@@ -13,6 +13,7 @@ import { getSignedFileUrl } from "./actions";
 import { WhopCheckoutModal } from "./invoices/whop-checkout-modal";
 import { countCasesNeedingResponse } from "./support-cases";
 import { SetupBanner } from "./setup-banner";
+import { createClient as createSupabaseClient } from "@/lib/supabase/client";
 import { fmt$, fmtDate, type Case, type Client, type Project, type ProjectUpdate, type Invoice, type DFile, type Message, type License } from "./types";
 
 function QuickActionPill({ label, badge, badgeCount, badgeUrgent, onClick, href }: {
@@ -118,7 +119,9 @@ function SummaryCard({ href, description, title, action }: {
   );
 }
 
-export function OverviewView({ client, clientEmail, projects, invoices, files, messages, projectUpdates, cases, licenses }: {
+export function OverviewView({ firstName, welcomeSeen, client, clientEmail, projects, invoices, files, messages, projectUpdates, cases, licenses }: {
+  firstName?: string;
+  welcomeSeen: boolean;
   client: Client | null;
   clientEmail: string;
   projects: Project[];
@@ -137,25 +140,15 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
 
   // Accept-invite redirects here with ?welcome=1 right after a new client
   // finishes setting up their account. Strip the param immediately so a
-  // refresh or back-navigation doesn't re-trigger the dialog.
+  // refresh or back-navigation doesn't re-trigger the dialog, and record it
+  // on the user so reusing the link or another device never shows it again.
   useEffect(() => {
-    if (searchParams.get("welcome") === "1") {
-      setShowWelcome(true);
-      router.replace("/dashboard");
-    }
-  }, [searchParams, router]);
-
-  // Demo account sees the welcome dialog once per browser session, for
-  // previewing it without creating a fresh account. Once, not every mount:
-  // the tour navigates back here and must not have the dialog reopen on it.
-  useEffect(() => {
-    if (clientEmail !== "demo@byinertia.com") return;
-    try {
-      if (sessionStorage.getItem("demo-welcome-shown")) return;
-      sessionStorage.setItem("demo-welcome-shown", "1");
-    } catch {}
+    if (searchParams.get("welcome") !== "1") return;
+    router.replace("/dashboard");
+    if (welcomeSeen) return;
     setShowWelcome(true);
-  }, [clientEmail]);
+    createSupabaseClient().auth.updateUser({ data: { welcome_seen: true } });
+  }, [searchParams, router, welcomeSeen]);
 
   const firstProject = projects[0] ?? null;
 
@@ -476,7 +469,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
       <WelcomeDialog
         open={showWelcome}
         onOpenChange={setShowWelcome}
-        firstName={client?.name?.split(" ")[0]}
+        firstName={firstName}
         onStartTour={startDashboardTour}
       />
     </div>

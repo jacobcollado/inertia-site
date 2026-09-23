@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,6 +13,7 @@ import {
 import { CheckIcon, CopyIcon, MoreHorizontalIcon, ChevronDownIcon, KeyRoundIcon, ReceiptIcon } from "lucide-react";
 import { StatusPill } from "../status-pill";
 import { fmtDate, type License } from "../types";
+import { releasesSince } from "@/lib/aether-changelog";
 
 const FILTERS = [
   { value: "all", label: "All licenses" },
@@ -100,6 +102,11 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-[15px] font-medium tracking-tight truncate">Aether {tierLabel}</span>
                       <StatusPill status={l.status} />
+                      {l.status === "active" && releasesSince(l).length > 0 && (
+                        <Badge variant="outline" className="shrink-0 border-transparent bg-primary/15 text-primary">
+                          Update available
+                        </Badge>
+                      )}
                     </div>
                     <span className="text-[13px] text-muted-foreground font-mono truncate">{l.key}</span>
                   </div>

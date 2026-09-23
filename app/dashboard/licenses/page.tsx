@@ -11,7 +11,7 @@ export default async function LicensesPage() {
 
   const { data: licenses } = await supabase
     .from("licenses")
-    .select("id, key, email, domain, tier, status, created_at, theme_file_path, amount_total, currency, receipt_url, paid_at, downloaded_at")
+    .select("id, key, email, domain, tier, status, created_at, theme_file_path, amount_total, currency, receipt_url, paid_at, downloaded_at, downloaded_version")
     .eq("email", user.email!)
     .order("created_at", { ascending: false });
 

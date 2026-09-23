@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { sendAdminMessage, markMessagesRead, updateCaseSeverity, updateCaseStatus, suggestAdminReply } from "../../../actions";
+import { MessageAttachments } from "@/app/dashboard/support/attachments";
 import { CASE_STATUS_VARIANT, CASE_SEVERITY_LABEL, type Message, type Case, type CaseStatus, type CaseSeverity } from "../types";
 
 const STATUS_OPTIONS: CaseStatus[] = ["open", "pending", "closed"];
@@ -479,7 +480,8 @@ export function MessagesTab({ clientId, messages, setMessages, cases: initialCas
                       <span className="text-[14px] font-semibold tracking-tight">{isAdmin ? "You" : clientName}</span>
                       <span className="text-xs text-muted-foreground">{fmtTime(m.created_at)}{isAdmin && m.read_at && " · Read"}</span>
                     </div>
-                    <p className="max-w-[85%] sm:max-w-[75%] text-[15px] leading-relaxed whitespace-pre-wrap text-left">{m.body}</p>
+                    {m.body && <p className="max-w-[85%] sm:max-w-[75%] text-[15px] leading-relaxed whitespace-pre-wrap text-left">{m.body}</p>}
+                    <MessageAttachments attachments={m.attachments} className={`mt-1 ${isAdmin ? "justify-end" : "justify-start"}`} />
                   </div>
                 </div>
               </div>

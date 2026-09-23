@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PaperclipIcon, ArrowUpIcon } from "lucide-react";
+import { ArrowUpIcon } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createCaseWithMessage } from "../../actions";
+import { AttachButton, DraftAttachments, useAttachmentDraft } from "../attachments";
 
 type License = { id: string; key: string; domain: string | null; tier: string };
 type Path = "aether" | "general";
@@ -140,6 +141,7 @@ export function NewCaseView({ clientName, clientAvatarUrl, licenses }: {
   const [path, setPath] = useState<Path | null>(null);
   const [licenseId, setLicenseId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const files = useAttachmentDraft();
   const [sending, setSending] = useState(false);
 
   const selectedLicense = licenses.find(l => l.id === licenseId) ?? null;
@@ -158,7 +160,7 @@ export function NewCaseView({ clientName, clientAvatarUrl, licenses }: {
 
   const send = async () => {
     const body = draft.trim();
-    if (!body || sending) return;
+    if ((!body && files.ready.length === 0) || files.uploading || sending) return;
     trigger("light");
     setSending(true);
     // The selected license (when the Aether path was taken) is folded into
@@ -166,7 +168,7 @@ export function NewCaseView({ clientName, clientAvatarUrl, licenses }: {
     // it on cases/messages yet, and prepending it keeps the case's first
     // message self-describing for whoever picks it up.
     const tag = selectedLicense ? `[Aether license: ${selectedLicense.key}]\n\n` : "";
-    const result = await createCaseWithMessage(`${tag}${body}`);
+    const result = await createCaseWithMessage(`${tag}${body}`, files.ready);
     if (result.success && result.caseId) {
       router.push(`/dashboard/support/${result.caseId}`);
       return;
@@ -262,31 +264,23 @@ export function NewCaseView({ clientName, clientAvatarUrl, licenses }: {
             </Avatar>
             <span className="text-[13px] font-medium tracking-tight">{clientName}</span>
           </div>
+          <DraftAttachments drafts={files.drafts} onRemove={files.remove} />
           <textarea
             rows={1}
             value={draft}
             onChange={e => setDraft(e.target.value)}
             onKeyDown={onKeyDown}
+            onPaste={e => { if (e.clipboardData.files.length) { e.preventDefault(); files.add(e.clipboardData.files); } }}
             placeholder={composerPlaceholder}
             autoFocus
             className="w-full resize-none tracking-tight placeholder:text-muted-foreground focus:outline-none leading-relaxed bg-transparent"
             style={{ maxHeight: 100, overflowY: "auto", fontSize: 16 }}
           />
           <div className="flex items-center justify-between mt-auto">
-            {/* Attachments aren't wired up yet — no upload/storage path exists
-                for case messages. Placeholder so the composer reads complete;
-                swap for a real file picker once that's built. */}
-            <button
-              type="button"
-              disabled
-              title="Attachments coming soon"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground opacity-40 cursor-not-allowed"
-            >
-              <PaperclipIcon className="size-4" />
-            </button>
+            <AttachButton onFiles={files.add} disabled={files.full} />
             <button
               type="submit"
-              disabled={!draft.trim() || sending}
+              disabled={(!draft.trim() && files.ready.length === 0) || files.uploading || sending}
               className="flex h-8 w-8 items-center justify-center rounded-full border bg-background text-foreground transition-opacity hover:bg-sidebar-accent/40 disabled:opacity-40 disabled:hover:bg-background"
             >
               <ArrowUpIcon className="size-4" />

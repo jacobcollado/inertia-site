@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { DownloadIcon, LoaderCircleIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { DownloadIcon, LoaderCircleIcon, XIcon } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { getSignedFileUrl } from "./actions";
 import type { License } from "./types";
+import { LATEST_AETHER_VERSION, downloadedThemeVersion, releasesSince } from "@/lib/aether-changelog";
+
+const DISMISSED_UPDATE_KEY = "dashboard-update-dismissed";
 
 /* Onboarding nudge for a license that hasn't finished setup.
  *
@@ -18,26 +21,41 @@ import type { License } from "./types";
  * Nothing renders once a license has both, and a buyer with several licenses
  * only ever sees the furthest-behind one: three stacked banners would read as
  * an error state rather than a prompt.
+ *
+ * Once setup is done, the same slot announces a newer theme release than the
+ * one they last downloaded. That one can be dismissed, per version, since
+ * updating is their call; the license page keeps showing it regardless.
  */
 export function SetupBanner({ licenses }: { licenses: License[] }) {
   const [loading, setLoading] = useState(false);
+  const [dismissedVersion, setDismissedVersion] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    try {
+      setDismissedVersion(localStorage.getItem(DISMISSED_UPDATE_KEY));
+    } catch {}
+  }, []);
 
   const active = licenses.filter((l) => l.status === "active");
   // Never downloaded outranks downloaded-but-not-activated, since that buyer
   // hasn't started at all.
   const pending =
     active.find((l) => !l.downloaded_at) ?? active.find((l) => !l.domain);
+  const outdated = pending
+    ? undefined
+    : active.find((l) => releasesSince(l).length > 0 && dismissedVersion !== LATEST_AETHER_VERSION);
 
-  if (!pending) return null;
+  const target = pending ?? outdated;
+  if (!target) return null;
 
-  const needsDownload = !pending.downloaded_at;
+  const needsDownload = !!pending && !pending.downloaded_at;
 
   const download = async () => {
-    if (!pending.theme_file_path || loading) return;
+    if (!target.theme_file_path || loading) return;
     setLoading(true);
     try {
-      const { url, error } = await getSignedFileUrl(pending.theme_file_path);
+      const { url, error } = await getSignedFileUrl(target.theme_file_path);
       if (error || !url) return;
       const a = document.createElement("a");
       a.href = url;
@@ -51,6 +69,46 @@ export function SetupBanner({ licenses }: { licenses: License[] }) {
       setLoading(false);
     }
   };
+
+  const dismissUpdate = () => {
+    setDismissedVersion(LATEST_AETHER_VERSION);
+    try {
+      localStorage.setItem(DISMISSED_UPDATE_KEY, LATEST_AETHER_VERSION);
+    } catch {}
+  };
+
+  if (outdated) {
+    return (
+      <div className="rounded-sm border bg-sidebar px-4 py-3.5 sm:px-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div className="flex items-start gap-3">
+            <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Aether v{LATEST_AETHER_VERSION} is available</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                You&rsquo;re on v{downloadedThemeVersion(outdated)}. Download the update, then upload it to Shopify like before.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2 pl-5 sm:pl-0">
+            {outdated.theme_file_path && (
+              <Button size="sm" onClick={download} disabled={loading}>
+                {loading ? <LoaderCircleIcon className="animate-spin" /> : <DownloadIcon />}
+                {loading ? "Preparing…" : "Download update"}
+              </Button>
+            )}
+            <Link href="/dashboard/changelog" className={buttonVariants({ variant: "outline", size: "sm" })}>
+              What&rsquo;s new
+            </Link>
+            <Button variant="ghost" size="icon-sm" onClick={dismissUpdate} aria-label="Dismiss">
+              <XIcon />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-sm border bg-sidebar px-4 py-3.5 sm:px-5">
@@ -68,13 +126,13 @@ export function SetupBanner({ licenses }: { licenses: License[] }) {
             <p className="mt-0.5 text-sm text-muted-foreground">
               {needsDownload
                 ? "Your theme is ready. Download it, then upload the zip to your Shopify store."
-                : `Enter ${pending.key} in Theme Settings, License Key to activate it on your store.`}
+                : `Enter ${target.key} in Theme Settings, License Key to activate it on your store.`}
             </p>
           </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-2 pl-5 sm:pl-0">
-          {needsDownload && pending.theme_file_path ? (
+          {needsDownload && target.theme_file_path ? (
             <Button size="sm" onClick={download} disabled={loading}>
               {loading ? <LoaderCircleIcon className="animate-spin" /> : <DownloadIcon />}
               {loading ? "Preparing…" : "Download theme"}

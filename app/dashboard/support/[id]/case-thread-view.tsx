@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { MoreHorizontalIcon, PaperclipIcon, ArrowUpIcon, ChevronDownIcon, ListChecksIcon, HeadsetIcon, UndoIcon } from "lucide-react";
+import { MoreHorizontalIcon, ArrowUpIcon, ChevronDownIcon, ListChecksIcon, HeadsetIcon, UndoIcon } from "lucide-react";
 import { useWebHaptics } from "web-haptics/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { sendClientMessage, markAdminMessagesRead, createFollowUpCase, closeCase, requestHuman, undoRequestHuman } from "../../actions";
 import { fmtDate, type Case, type Message } from "../../types";
 import { useSetPageCrumb, useSetPageActions } from "../../page-crumb-context";
+import { AttachButton, DraftAttachments, MessageAttachments, useAttachmentDraft } from "../attachments";
 
 function initials(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -251,6 +252,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [draft, setDraft] = useState("");
+  const files = useAttachmentDraft();
   const [sending, setSending] = useState(false);
   const [adminTyping, setAdminTyping] = useState(false);
   const [creatingFollowUp, setCreatingFollowUp] = useState(false);
@@ -400,10 +402,12 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
 
   const send = async () => {
     const body = draft.trim();
-    if (!body || sending || inputDisabled) return;
+    const attachments = files.ready;
+    if ((!body && attachments.length === 0) || files.uploading || sending || inputDisabled) return;
     trigger("light");
     setSending(true);
     setDraft("");
+    files.clear();
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     // Dismisses the mobile keyboard on send, so the layout (shifted up while
     // the input was focused) drops back to its resting position against the
@@ -421,11 +425,12 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
       case_id: caseData.id,
       sender: "client",
       body,
+      attachments,
       created_at: new Date().toISOString(),
       read_at: null,
     };
     setMessages(prev => [...prev, optimistic]);
-    const result = await sendClientMessage(body, caseData.id);
+    const result = await sendClientMessage(body, caseData.id, attachments);
     // Append the reply directly rather than waiting on Realtime to deliver
     // it — the INSERT subscription can occasionally miss or lag an event,
     // which is what made the reply intermittently not show up. The INSERT
@@ -574,7 +579,11 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
                     column sits on the right via items-end) is what signals
                     sender, not the text alignment inside it — same as how
                     iMessage's own right-side bubbles keep left-aligned text. */}
-                <MessageBody body={msg.body} animate={newAgentMessageIds.has(msg.id)} onProgress={keepScrolledDuringType} />
+                {msg.body && <MessageBody body={msg.body} animate={newAgentMessageIds.has(msg.id)} onProgress={keepScrolledDuringType} />}
+                <MessageAttachments
+                  attachments={msg.attachments}
+                  className={`mt-1 ${isClient ? "justify-start max-sm:justify-end" : "justify-end max-sm:justify-start"}`}
+                />
                 {/* The agent's own suggestion to close, attached to the
                     specific reply that made it — reuses the same
                     confirmation dialog as the "⋯" menu's Close case item,
@@ -683,6 +692,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
             </Avatar>
             <span className="text-[13px] font-medium tracking-tight">{clientName}</span>
           </div>
+          <DraftAttachments drafts={files.drafts} onRemove={files.remove} />
           {humanRequested ? (
             <span className="text-[15px] tracking-tight text-muted-foreground">Waiting on a reply&hellip;</span>
           ) : (
@@ -692,6 +702,7 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
               value={draft}
               onChange={onDraftChange}
               onKeyDown={onKeyDown}
+              onPaste={e => { if (e.clipboardData.files.length) { e.preventDefault(); files.add(e.clipboardData.files); } }}
               disabled={inputDisabled}
               placeholder="Send a message..."
               className="w-full resize-none tracking-tight placeholder:text-muted-foreground focus:outline-none leading-relaxed bg-transparent disabled:cursor-not-allowed"
@@ -699,19 +710,10 @@ export function CaseThreadView({ clientId, caseData, messages: initialMessages, 
             />
           )}
           <div className="flex items-center justify-between mt-auto">
-            {/* Attachments aren't wired up yet — see the matching placeholder
-                on /messages/new; swap both for a real file picker together. */}
-            <button
-              type="button"
-              disabled
-              title="Attachments coming soon"
-              className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground opacity-40 cursor-not-allowed"
-            >
-              <PaperclipIcon className="size-4" />
-            </button>
+            <AttachButton onFiles={files.add} disabled={inputDisabled || files.full} />
             <button
               type="submit"
-              disabled={!draft.trim() || sending || inputDisabled}
+              disabled={(!draft.trim() && files.ready.length === 0) || files.uploading || sending || inputDisabled}
               className="flex h-8 w-8 items-center justify-center rounded-full border bg-background text-foreground transition-opacity hover:bg-sidebar-accent/40 disabled:opacity-40 disabled:hover:bg-background"
             >
               <ArrowUpIcon className="size-4" />

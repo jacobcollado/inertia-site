@@ -4,6 +4,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logAiUsage } from "@/lib/ai-usage";
+import { LATEST_AETHER_VERSION } from "@/lib/aether-changelog";
+import type { Attachment } from "./types";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -64,10 +66,14 @@ export async function undoRequestHuman(caseId: string) {
    landing on a different connection than the one the client is
    subscribed through), which is what made the reply "sometimes not
    appear": the UI had no fallback path when that happened. */
-export async function sendClientMessage(body: string, caseId: string) {
+export async function sendClientMessage(body: string, caseId: string, attachments: Attachment[] = []) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  const files = checkAttachments(attachments, user.id);
+  if (!files) return { error: "Those attachments couldn't be sent." };
+  if (!body.trim() && files.length === 0) return { error: "Message is required" };
 
   // The client-facing input is disabled once human_requested is set, but
   // that's UI-only — re-check server-side so a stale page or a direct call
@@ -75,7 +81,7 @@ export async function sendClientMessage(body: string, caseId: string) {
   const { data: caseRow } = await supabase.from("cases").select("human_requested").eq("id", caseId).single();
   if (caseRow?.human_requested) return { error: "This case is waiting on a reply from our team." };
 
-  const { error } = await supabase.from("messages").insert({ client_id: user.id, case_id: caseId, sender: "client", body });
+  const { error } = await supabase.from("messages").insert({ client_id: user.id, case_id: caseId, sender: "client", body, attachments: files });
   if (error) return { error: error.message };
 
   const rateLimit = await checkAndApplyRateLimit(user.id);
@@ -85,16 +91,19 @@ export async function sendClientMessage(body: string, caseId: string) {
   if (!rateLimit.barred) {
     const { data: history } = await supabase
       .from("messages")
-      .select("sender, body")
+      .select("sender, body, attachments")
       .eq("case_id", caseId)
       .order("created_at", { ascending: true });
-    reply = await generateAutoReply(history ?? [{ sender: "client", body }], user.id);
+    reply = await generateAutoReply(
+      (history ?? [{ sender: "client", body, attachments: files }]).map(withAttachmentNote),
+      user.id,
+    );
   }
 
   const { data: replyRow, error: replyError } = await admin
     .from("messages")
     .insert({ client_id: user.id, case_id: caseId, sender: "admin", body: reply.body, suggest_close: reply.suggestClose, suggest_human: reply.suggestHuman })
-    .select("id, client_id, case_id, sender, body, created_at, read_at, suggest_close, suggest_human")
+    .select("id, client_id, case_id, sender, body, created_at, read_at, suggest_close, suggest_human, attachments")
     .single();
   // Logged rather than surfaced as a hard error: the client's own message
   // already saved successfully above, so failing the whole action here
@@ -122,6 +131,64 @@ export async function markAdminMessagesRead(caseId: string) {
     .eq("sender", "admin")
     .is("read_at", null);
   return { success: true };
+}
+
+/* ── Case attachments ─────────────────────────────────────────────── */
+
+const ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
+const ATTACHMENT_MAX_COUNT = 5;
+const ATTACHMENT_TYPES = new Set([
+  "image/png", "image/jpeg", "image/gif", "image/webp",
+  "application/pdf", "text/plain", "application/zip", "application/x-zip-compressed",
+]);
+
+/* Hands back a one-time signed upload URL so the browser sends the file
+   straight to storage. Posting it through a server action instead would hit
+   the action body limit well before a screenshot or zip does. Every upload
+   lands under the caller's own `${user.id}/cases/` prefix, which is also
+   what getSignedFileUrl lets them read back. */
+export async function createAttachmentUpload(name: string, size: number, type: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  if (!ATTACHMENT_TYPES.has(type)) return { error: "Images, PDFs, text files and zips only." };
+  if (size > ATTACHMENT_MAX_BYTES) return { error: "Files can be up to 10 MB." };
+
+  const safeName = name.replace(/[^\w.\-]+/g, "-").slice(-80) || "file";
+  const path = `${user.id}/cases/${crypto.randomUUID()}/${safeName}`;
+  const { data, error } = await createAdminClient().storage
+    .from("client-files")
+    .createSignedUploadUrl(path);
+  if (error || !data) return { error: error?.message ?? "Upload failed" };
+  return { path, token: data.token };
+}
+
+/* The attachment list arrives from the browser, so each entry is checked
+   against the caller's own upload prefix rather than trusted: otherwise a
+   message could reference someone else's file and have it signed for them. */
+function checkAttachments(attachments: Attachment[], userId: string): Attachment[] | null {
+  if (attachments.length > ATTACHMENT_MAX_COUNT) return null;
+  const prefix = `${userId}/cases/`;
+  const clean: Attachment[] = [];
+  for (const a of attachments) {
+    if (typeof a?.path !== "string" || !a.path.startsWith(prefix) || a.path.includes("..")) return null;
+    clean.push({
+      path: a.path,
+      name: String(a.name ?? "file").slice(0, 120),
+      size: Number(a.size) || 0,
+      type: String(a.type ?? ""),
+    });
+  }
+  return clean;
+}
+
+/* The agent can't open files, but knowing one was attached (and what it's
+   called) keeps it from asking for a screenshot the client just sent. */
+function withAttachmentNote(m: { sender: string; body: string; attachments?: Attachment[] | null }) {
+  const names = (m.attachments ?? []).map(a => a.name);
+  if (names.length === 0) return { sender: m.sender, body: m.body };
+  const note = `[Attached: ${names.join(", ")}]`;
+  return { sender: m.sender, body: m.body ? `${m.body}\n\n${note}` : note };
 }
 
 /* Derives a short case title from the client's opening message, since the
@@ -360,33 +427,36 @@ async function generateAutoReply(history: { sender: string; body: string }[], cl
    sender. The auto-reply requires the service-role client — clients have no
    insert policy for sender:"admin", which is intentional (only admins or
    this trusted server action should be able to post as support). */
-export async function createCaseWithMessage(body: string) {
+export async function createCaseWithMessage(body: string, attachments: Attachment[] = []) {
   const trimmed = body.trim();
-  if (!trimmed) return { error: "Message is required" };
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  const files = checkAttachments(attachments, user.id);
+  if (!files) return { error: "Those attachments couldn't be sent." };
+  if (!trimmed && files.length === 0) return { error: "Message is required" };
+
   const { data: caseNumber } = await supabase.rpc("generate_case_number");
 
   const { data: newCase, error: caseError } = await supabase
     .from("cases")
-    .insert({ client_id: user.id, title: titleFromMessage(trimmed), case_number: caseNumber ?? "00000000" })
+    .insert({ client_id: user.id, title: titleFromMessage(trimmed || files[0].name), case_number: caseNumber ?? "00000000" })
     .select("id")
     .single();
   if (caseError || !newCase) return { error: caseError?.message ?? "Could not create case" };
 
   const { error: msgError } = await supabase
     .from("messages")
-    .insert({ client_id: user.id, case_id: newCase.id, sender: "client", body: trimmed });
+    .insert({ client_id: user.id, case_id: newCase.id, sender: "client", body: trimmed, attachments: files });
   if (msgError) return { error: msgError.message };
 
   const rateLimit = await checkAndApplyRateLimit(user.id);
   const admin = createAdminClient();
   const reply = rateLimit.barred
     ? { body: BARRED_REPLY_BODY, suggestClose: false, suggestHuman: false }
-    : await generateAutoReply([{ sender: "client", body: trimmed }], user.id);
+    : await generateAutoReply([withAttachmentNote({ sender: "client", body: trimmed, attachments: files })], user.id);
   const { error: replyError } = await admin.from("messages").insert({
     client_id: user.id,
     case_id: newCase.id,
@@ -545,18 +615,28 @@ export async function getSignedFileUrl(storagePath: string) {
     // Through the admin client because buyers have no update policy on
     // licenses, and failures are ignored since a tracking write must never
     // cost someone the download they came for.
+    const tracker = createAdminClient();
     if (!license.downloaded_at) {
-      await createAdminClient()
+      await tracker
         .from("licenses")
         .update({ downloaded_at: new Date().toISOString() })
         .eq("id", license.id);
-
-      // The overview's setup banner reads this column, and the page is cached
-      // for 30s, so without this the banner would keep asking them to download
-      // something they just downloaded.
-      revalidatePath("/dashboard");
-      revalidatePath("/dashboard/licenses");
     }
+
+    // The version, by contrast, follows every download so "update available"
+    // clears once they've pulled the new zip. Every active license on the
+    // account gets it, since they all download the same build.
+    await tracker
+      .from("licenses")
+      .update({ downloaded_version: LATEST_AETHER_VERSION })
+      .eq("email", user.email!)
+      .eq("status", "active");
+
+    // The overview's setup banner and the license pages read these columns,
+    // and the pages are cached for 30s, so without this they'd keep asking
+    // for a download that just happened.
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/licenses", "layout");
   }
 
   const admin = createAdminClient();
