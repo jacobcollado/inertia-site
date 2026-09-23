@@ -1,6 +1,6 @@
 ---
 title: "Latency reads as indifference"
-subtitle: "Performance as a design decision, not an afterthought."
+subtitle: "Nobody thinks your site is slow. They think you didn't care."
 date: 2026-08-04
 summary: A slow site does not read as unfinished. It reads as uncared for, before a visitor reads a single word.
 tag: Infrastructure
@@ -10,13 +10,13 @@ Performance gets filed under engineering. It's a design problem, and treating it
 
 <mark>Someone forms an impression before your first paragraph renders.</mark> If the page hesitates, that impression is already set, and no amount of typography is walking it back.
 
-## Slow doesn't read as slow
+## Slow reads as careless
 
 Here's the part that gets missed. People rarely think "this site is slow." They think the brand is careless, or the company's tiny, or something's broken and they should try again later. The judgment lands on you. Never on the network.
 
 <mark>Latency reads as indifference.</mark> Three seconds to become usable says something about how much you care, and it says it to every single person who shows up, before one pixel of your actual work is visible.
 
-## The heaviest things are usually decorative
+## The ornament is the payload
 
 When a site drags, what's actually doing it? Almost never the content. It's the ornament.
 
@@ -24,7 +24,7 @@ An uncompressed hero image. Six font weights loaded for a design that uses two. 
 
 <mark>None of them were design decisions, which is the whole problem.</mark> They accumulated. Nobody weighed the cost against what came back, because nobody was watching the total.
 
-## Perceived speed is designable
+## Show the layout before the data
 
 Real speed matters. But perception is where design has direct leverage, and it's chronically underused.
 
@@ -40,7 +40,7 @@ Pick a page weight and a time-to-interactive you won't cross, then treat them li
 
 Most sites don't need to get faster. They need to stop getting slower, one entirely reasonable addition at a time. Different problem, different fix.
 
-## Where it actually shows
+## Test on the phone in their pocket
 
 Test on a mid-range phone on a normal connection, not on the machine you built the thing on. Your laptop on office wifi is the least representative device your site will ever run on, and it's the one you stare at all day.
 

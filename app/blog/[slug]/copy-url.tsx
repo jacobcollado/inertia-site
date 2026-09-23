@@ -30,7 +30,6 @@ export function CopyURL() {
       className="inline-flex items-center justify-center w-7 h-7 rounded-full shrink-0 text-sky-500 hover:text-sky-400 transition-colors"
       style={{
         background: "rgb(var(--fg) / 0.06)",
-        border: "1px solid rgb(var(--line))",
         // In on press, back out on release — a spring-ish ease so the return
         // overshoots very slightly instead of stopping dead.
         transform: pressed ? "scale(0.88)" : "scale(1)",

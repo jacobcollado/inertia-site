@@ -2,10 +2,10 @@
    has exactly one mark and the card the reader clicked is the header they
    land on. Pure SVG with no hooks, so it renders fine in a server component. */
 
-/* Panel tint per post. Every post now has its own hand-drawn sketch (see
-   POST_SKETCH below), so the tint no longer needs to carry per-post
-   identity through hue - that job moved to the drawing. One flat neutral
-   grey for every card keeps the row calm and lets the sketches read as the
+/* Panel tint per post. Every post now has its own cover drawing (see
+   PostCover in post-figures.tsx), so the tint no longer needs to carry
+   per-post identity through hue - that job moved to the drawing. One flat neutral
+   grey for every card keeps the row calm and lets the drawings read as the
    actual point of difference. Flattened rgba(26,26,26,0.06) on white (the
    Pill highlight's own background, see home-client.tsx) to a solid hex -
    at pill size the wash reads grey against dark body text, but the same
@@ -13,25 +13,6 @@
    white, so it needs to be opaque here to actually match. */
 export function postTint(_slug?: string): string {
   return "#f1f1f1";
-}
-
-/* Hand-drawn pencil sketches, one per post, replacing the vector PostGlyph
-   where one exists. Each is generated as an isolated drawing (no paper
-   background) so it composites directly onto the card's flat tint. Falls
-   back to PostGlyph below for any post without one yet. */
-export const POST_SKETCH: Record<string, string> = {
-  "taste-is-trained": "/blog/sketches/taste-is-trained.png",
-  "the-brief-is-the-product": "/blog/sketches/the-brief-is-the-product.png",
-  "judgment-over-output": "/blog/sketches/judgment-over-output.png",
-  "the-invisible-details": "/blog/sketches/the-invisible-details.png",
-  "speed-is-a-feature": "/blog/sketches/speed-is-a-feature.png",
-  "copy-is-design": "/blog/sketches/copy-is-design.png",
-  "consistency-beats-novelty": "/blog/sketches/consistency-beats-novelty.png",
-  "design-systems-that-scale": "/blog/sketches/design-systems-that-scale.png",
-};
-
-export function postSketch(slug?: string): string | undefined {
-  return slug ? POST_SKETCH[slug] : undefined;
 }
 
 /* ── Post glyphs ─────────────────────────────────────────

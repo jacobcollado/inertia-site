@@ -23,7 +23,13 @@ function CarouselLogoPreloads({ srcs }: { srcs: string[] }) {
 
 export default function Page() {
   const work = getAllWork();
-  const initialPosts = getAllPosts().slice(0, 6);
+  // Newest six, except posts marked `home: true` always make the cut; they
+  // take the place of the oldest ones and keep their usual position.
+  const allPosts = getAllPosts();
+  const homeSlugs = new Set(allPosts.filter(p => p.home).map(p => p.slug));
+  const fill = allPosts.filter(p => !p.home).slice(0, Math.max(0, 6 - homeSlugs.size)).map(p => p.slug);
+  const shown = new Set([...homeSlugs, ...fill]);
+  const initialPosts = allPosts.filter(p => shown.has(p.slug));
   // FT.GIOO stays on /work but is hidden from the homepage carousel.
   const initialWork = work.filter(w => w.slug !== "ft-gioo").map(w => ({
     slug: w.slug,

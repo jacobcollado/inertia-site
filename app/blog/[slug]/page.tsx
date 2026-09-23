@@ -6,7 +6,8 @@ import { notFound } from "next/navigation";
 import { TOCInline } from "./toc";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
-import { PostGlyph, postTint, postSketch } from "@/components/post-glyph";
+import { PostGlyph, postTint } from "@/components/post-glyph";
+import { PostCover, hasPostCover, postFigure } from "@/components/post-figures";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 import {
   getAllPosts,
@@ -38,77 +39,14 @@ const BODY_CLASSES = `px-0 pt-10 pb-8 rise prose-marker
   [&_hr]:border-none [&_hr]:h-px [&_hr]:bg-[rgb(var(--line))] [&_hr]:my-14
   [&_table]:w-full [&_table]:text-[1rem] [&_th]:text-left [&_th]:pb-2 [&_th]:border-b [&_th]:border-[rgb(var(--line))] [&_th]:font-medium [&_td]:py-2 [&_td]:border-b [&_td]:border-[rgb(var(--line))/0.5]`;
 
-const SECTION_SKETCHES: Record<string, React.ReactElement> = {
-  "covid-and-the-shift-we-do-not-talk-about-enough": (
-    <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <line x1="24" y1="72" x2="456" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.7" strokeDasharray="3 5" opacity="0.3" />
-      <path d="M 24 70 L 190 69 L 210 68" stroke="rgb(var(--muted))" strokeWidth="1.6" opacity="0.35" />
-      <path d="M 210 68 C 250 52 300 28 370 16 L 456 10" stroke="rgb(var(--blue))" strokeWidth="2.2" opacity="0.85" />
-      <circle cx="210" cy="68" r="4.5" fill="rgb(var(--blue))" opacity="0.9" />
-      <line x1="210" y1="68" x2="210" y2="80" stroke="rgb(var(--blue))" strokeWidth="1" strokeDasharray="2 3" opacity="0.5" />
-      <text x="30" y="86" fontSize="9.5" fill="rgb(var(--muted))" opacity="0.45" fontFamily="monospace">2019</text>
-      <text x="196" y="86" fontSize="9.5" fill="rgb(var(--blue))" opacity="0.6" fontFamily="monospace">2020</text>
-      <text x="370" y="86" fontSize="9.5" fill="rgb(var(--muted))" opacity="0.35" fontFamily="monospace">now</text>
-      <polyline points="449,5 456,10 449,15" stroke="rgb(var(--blue))" strokeWidth="1.6" opacity="0.75" />
-    </svg>
-  ),
-  "what-actually-kept-me-going": (
-    <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <line x1="24" y1="76" x2="456" y2="76" stroke="rgb(var(--muted))" strokeWidth="0.7" opacity="0.28" />
-      {[52, 96, 148, 200, 252, 304, 356, 408].map((x, i) => {
-        const heights = [12, 20, 15, 72, 22, 16, 11, 18];
-        const h = heights[i];
-        const accent = i === 3;
-        return (
-          <g key={x}>
-            <rect x={x - 8} y={76 - h} width={16} height={h} rx="2"
-              fill={accent ? "rgb(var(--green))" : "rgb(var(--muted))"}
-              opacity={accent ? 0.85 : 0.28} />
-          </g>
-        );
-      })}
-    </svg>
-  ),
-  "where-i-am-now": (
-    <svg viewBox="0 0 480 80" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <line x1="24" y1="54" x2="456" y2="54" stroke="rgb(var(--muted))" strokeWidth="0.8" opacity="0.3" />
-      <path d="M 240 18 C 240 18 226 30 226 40 C 226 48 232.7 54 240 54 C 247.3 54 254 48 254 40 C 254 30 240 18 240 18 Z"
-        fill="rgb(var(--green))" fillOpacity="0.18" stroke="rgb(var(--green))" strokeWidth="1.6" opacity="0.9" />
-      <circle cx="240" cy="40" r="3.5" fill="rgb(var(--green))" opacity="0.85" />
-    </svg>
-  ),
-  "the-current-plateau-is-misleading": (
-    <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <line x1="24" y1="72" x2="456" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.6" strokeDasharray="3 5" opacity="0.22" />
-      <path d="M 24 60 C 120 59 240 57 456 54" stroke="rgb(var(--muted))" strokeWidth="2" opacity="0.4" />
-      <path d="M 24 68 C 100 60 200 42 320 26 C 380 18 430 13 456 10" stroke="rgb(var(--blue))" strokeWidth="2" strokeDasharray="5 3" opacity="0.8" />
-      <text x="30" y="50" fontSize="9.5" fill="rgb(var(--muted))" opacity="0.5" fontFamily="monospace">visible</text>
-      <text x="30" y="86" fontSize="9.5" fill="rgb(var(--blue))" opacity="0.7" fontFamily="monospace">interior</text>
-      <polyline points="449,5 456,10 449,15" stroke="rgb(var(--blue))" strokeWidth="1.6" opacity="0.75" />
-    </svg>
-  ),
-  "three-trajectories-id-bet-on": (
-    <svg viewBox="0 0 480 96" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-full" aria-hidden="true">
-      <line x1="24" y1="72" x2="456" y2="72" stroke="rgb(var(--muted))" strokeWidth="0.6" opacity="0.2" />
-      <path d="M 60 68 C 180 60 300 28 448 10" stroke="rgb(var(--blue))" strokeWidth="2.2" opacity="0.85" />
-      <path d="M 60 68 C 180 65 300 52 448 40" stroke="rgb(var(--green))" strokeWidth="2.2" opacity="0.8" />
-      <path d="M 60 68 C 180 68 300 67 448 64" stroke="rgb(var(--amber))" strokeWidth="2.2" opacity="0.75" />
-      <circle cx="60" cy="68" r="4" fill="rgb(var(--muted))" opacity="0.4" />
-      <circle cx="448" cy="10" r="3.5" fill="rgb(var(--blue))" opacity="0.85" />
-      <circle cx="448" cy="40" r="3.5" fill="rgb(var(--green))" opacity="0.8" />
-      <circle cx="448" cy="64" r="3.5" fill="rgb(var(--amber))" opacity="0.75" />
-    </svg>
-  ),
-};
-
-function ArticleBody({ html }: { html: string }) {
+function ArticleBody({ html, slug }: { html: string; slug: string }) {
   const parts = html.split(/(?=<h[23] id=")/);
   const rendered: React.ReactNode[] = [];
 
   parts.forEach((chunk, i) => {
     const idMatch = chunk.match(/^<h[23] id="([^"]+)"/);
     const headingId = idMatch?.[1];
-    const sketch = headingId ? SECTION_SKETCHES[headingId] : null;
+    const sketch = headingId ? postFigure(slug, headingId) : null;
 
     if (sketch) {
       const firstPEnd = chunk.indexOf("</p>");
@@ -244,9 +182,8 @@ export default async function BlogPost({
           </div>
         </header>
 
-        {/* Header mark. The same glyph and tint the homepage card used, so
-            the card the reader clicked is the header they land on. Replaces
-            the old cover PNGs, which only four of eight posts had. */}
+        {/* Header cover: the post's own drawing on the shared tint (see
+            PostCover), falling back to its glyph for a post without one. */}
         <div className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
           <div
             className="relative w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] flex items-center justify-center"
@@ -255,15 +192,8 @@ export default async function BlogPost({
               background: postTint(slug),
             }}
           >
-            {postSketch(slug) ? (
-              <Image
-                src={postSketch(slug)!}
-                alt=""
-                fill
-                sizes="(max-width: 768px) 100vw, 768px"
-                className="object-cover"
-                style={{ mixBlendMode: "multiply" }}
-              />
+            {hasPostCover(slug) ? (
+              <PostCover slug={slug} />
             ) : (
               <PostGlyph slug={slug} tag={post.tag} className="w-28 h-28 sm:w-36 sm:h-36" />
             )}
@@ -271,7 +201,7 @@ export default async function BlogPost({
         </div>
 
         {/* Body */}
-        <ArticleBody html={html} />
+        <ArticleBody html={html} slug={slug} />
 
         <Highlighter slug={slug} />
 
@@ -290,7 +220,7 @@ export default async function BlogPost({
               CTA reads as the end of the post rather than a stray chip. */}
           <Link
             href="/"
-            className={`flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-3.5 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[rgb(var(--surface))] border border-[rgb(var(--line))] hover:text-[rgb(var(--fg))] hover:border-[rgb(var(--fg))/0.2] transition-colors`}
+            className={`flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-3.5 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[#f1f1f1] hover:bg-[#e9e9e9] hover:text-[rgb(var(--fg))] transition-colors`}
           >
             Back home
           </Link>

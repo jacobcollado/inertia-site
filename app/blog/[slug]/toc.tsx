@@ -266,7 +266,6 @@ export function TOCInline({ headings }: { headings: Heading[] }) {
         className="w-full overflow-hidden"
         style={{
           background: "rgb(var(--fg) / 0.04)",
-          border: "1px solid rgb(var(--line))",
           borderRadius: 6,
         }}
       >

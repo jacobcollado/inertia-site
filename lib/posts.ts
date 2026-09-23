@@ -13,6 +13,8 @@ export type PostMeta = {
   date: string;
   summary?: string;
   pinned?: boolean;
+  // Always gets a homepage slot, even when it's older than the newest six.
+  home?: boolean;
   image?: string;
   tag?: string;
   // The opening paragraph's highlighted line, or the paragraph itself when
@@ -46,6 +48,7 @@ export function getAllPosts(): PostMeta[] {
       date: data.date ?? "",
       summary: data.summary,
       pinned: data.pinned === true,
+      home: data.home === true,
       image: data.image,
       tag: data.tag,
       excerpt: openingExcerpt(content),
