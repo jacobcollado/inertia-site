@@ -281,7 +281,10 @@ export function InlinePricing() {
                 Add SMS setup <span className="text-[rgb(var(--fg))]">+$10</span>
               </span>
             </label>
-            <PolicyDisclaimer />
+            {/* Capped at the button's min width: this column never shrinks, so
+                an uncapped sentence sets the whole column's width and squeezes
+                the price beside it. */}
+            <PolicyDisclaimer className="sm:max-w-[14rem]" />
           </div>
           </div>
         </div>

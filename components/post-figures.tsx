@@ -61,7 +61,7 @@ function Figure({ viewBox, caption, children }: { viewBox: string; caption: stri
   );
 }
 
-/* ── judgment-over-output: forty directions, three kept ──────────────── */
+/* ── someone-still-has-to-pick: forty directions, three kept ──────────────── */
 function FortyDirections() {
   const cols = 10;
   const W = 46, Hh = 50, G = 8, X0 = 14, Y0 = 8;
@@ -173,7 +173,7 @@ function PerceivedSpeed() {
   );
 }
 
-/* ── the-brief-is-the-product: the request versus the problems ───────── */
+/* ── most-projects-fail-before-figma: the request versus the problems ───────── */
 function RequestVersusProblem() {
   const boxes = [
     { x: 10, label: "Traffic doesn't convert" },
@@ -208,7 +208,7 @@ function RequestVersusProblem() {
   );
 }
 
-/* ── the-invisible-details: optical versus mathematical centring ─────── */
+/* ── the-difference-you-feel: optical versus mathematical centring ─────── */
 function OpticalCentre() {
   const disc = (cx: number, nudge: number, label: string, math: boolean) => {
     const cy = 112;
@@ -332,11 +332,11 @@ function DriftAndGreys() {
 // Keyed by post slug, then by the id of the section heading the figure
 // belongs under (the slugified heading text, see renderMarkdown).
 const POST_FIGURES: Record<string, Record<string, () => React.ReactElement>> = {
-  "judgment-over-output": { "forty-options-is-its-own-problem": FortyDirections },
+  "someone-still-has-to-pick": { "forty-options-is-its-own-problem": FortyDirections },
   "taste-is-trained": { "years-mostly-spent-wrong": TasteGap },
   "speed-is-a-feature": { "show-the-layout-before-the-data": PerceivedSpeed },
-  "the-brief-is-the-product": { "nobody-actually-needs-a-redesign": RequestVersusProblem },
-  "the-invisible-details": { "nudge-the-play-button-right": OpticalCentre },
+  "most-projects-fail-before-figma": { "nobody-actually-needs-a-redesign": RequestVersusProblem },
+  "the-difference-you-feel": { "nudge-the-play-button-right": OpticalCentre },
   "copy-is-design": { "the-headline-that-runs-three-lines": LengthIsLayout },
   "design-systems-that-scale": { "page-one-always-fits": TenthPage },
   "consistency-beats-novelty": { "two-pixels-and-a-third-grey": DriftAndGreys },
@@ -430,7 +430,7 @@ function CoverFewerComponents() {
   );
 }
 
-// judgment-over-output: a scatter of attempts narrowing to one.
+// someone-still-has-to-pick: a scatter of attempts narrowing to one.
 function CoverNarrowing() {
   const rand = (n: number) => {
     const v = Math.sin(n * 12.9898) * 43758.5453;
@@ -522,7 +522,7 @@ function CoverYearApart() {
   );
 }
 
-// the-brief-is-the-product: a brief where the line that matters is the problem.
+// most-projects-fail-before-figma: a brief where the line that matters is the problem.
 function CoverBrief() {
   const X = 420, Y = 105, W = 360;
   const widths = [280, 250, 290, 0, 270, 230, 285, 200, 260, 150];
@@ -547,7 +547,7 @@ function CoverBrief() {
   );
 }
 
-// the-invisible-details: the spacing nobody sees, redlined.
+// the-difference-you-feel: the spacing nobody sees, redlined.
 function CoverRedlines() {
   // 278 tall so the bottom padding is a true 32, matching its redline.
   const X = 380, Y = 176, W = 440, H = 278;
@@ -590,11 +590,11 @@ const POST_COVERS: Record<string, () => React.ReactElement> = {
   "consistency-beats-novelty": CoverCoherence,
   "copy-is-design": CoverTone,
   "design-systems-that-scale": CoverFewerComponents,
-  "judgment-over-output": CoverNarrowing,
+  "someone-still-has-to-pick": CoverNarrowing,
   "speed-is-a-feature": CoverWeight,
   "taste-is-trained": CoverYearApart,
-  "the-brief-is-the-product": CoverBrief,
-  "the-invisible-details": CoverRedlines,
+  "most-projects-fail-before-figma": CoverBrief,
+  "the-difference-you-feel": CoverRedlines,
 };
 
 export function hasPostCover(slug: string) {

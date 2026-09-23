@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TableOfContents } from "../table-of-contents";
+import { PolicyText } from "../policy-text";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "How engagements with Inertia work. Ownership, payment, revisions, support, and the rest, in plain terms.",
 };
 
-const EFFECTIVE = "May 1, 2026";
+const EFFECTIVE = "September 23, 2026";
 const COMPANY = "Inertia Studio LLC";
 const CONTACT = "hello@byinertia.com";
 const JURISDICTION = "Illinois, United States";
@@ -26,7 +27,7 @@ const SECTIONS = [
   {
     id: "client-portal",
     title: "Client Portal",
-    body: "Active clients are given access to a private dashboard at byinertia.com/dashboard. You sign in via Google and will see tabs for your project status, invoices, shared files, and a direct message thread with your project team. The portal is provided as a convenience. All project-critical communications are also available via email. Access to the portal may be suspended if your account is in breach of these Terms, including non-payment of outstanding invoices. Portal access does not constitute a separate subscription; it is tied to your active or recently completed engagement with Inertia.",
+    body: "Active clients and Aether license holders are given access to a private dashboard at byinertia.com/dashboard. Aether buyers gain access upon purchase. Depending on what you have with us, you will see your project status, invoices, shared files, licenses and theme downloads, and a Support section for reaching our team. The portal is provided as a convenience. All project-critical communications are also available via email. Access to the portal may be suspended if your account is in breach of these Terms, including non-payment of outstanding invoices. Portal access does not constitute a separate subscription; it is tied to your engagement with Inertia or your Aether license.",
   },
   {
     id: "ip",
@@ -39,6 +40,11 @@ const SECTIONS = [
     body: "A non-refundable deposit of 50% of the total project fee is due before any work begins. The remaining 50% is due before the final deliverable is handed over or the site goes live, whichever comes first. Work does not start until the deposit has cleared. Invoices appear in the Billing section of your portal and are payable within 7 days of issue. You can pay directly through the portal using the Pay Now button on each invoice, which opens a secure checkout. Balances unpaid after 14 days accrue a late fee of 1.5% per month on the outstanding amount. If payment is not received within 30 days of the due date, Inertia reserves the right to pause all active work, suspend portal access, or terminate the project entirely. All deposits paid are non-refundable.",
   },
   {
+    id: "aether",
+    title: "Aether Theme Purchases",
+    body: "Aether is a digital product. Your theme download and license key are delivered immediately upon purchase, and because of that digital nature and immediate delivery, purchases are not eligible for a refund as standard. Refund requests are considered case by case, as set out in our Refund Policy. For 14 days from purchase, we go out of our way to help: we will fix any issue with the theme and help you set it up on your store. After this 14-day window, you are the sole owner and controller of your licensed copy of the theme and your store, including any changes made to either. We continue to provide support and advice through your personal dashboard at byinertia.com/dashboard, which you gain access to upon purchase. Your license covers use of the theme on the store it is activated on; the underlying theme remains Inertia's work, as set out under Intellectual Property & Ownership.",
+  },
+  {
     id: "revisions",
     title: "Revisions & Scope Changes",
     body: "Every project includes two rounds of revisions against the original agreed brief. A revision means adjusting or correcting something already built, not adding new features, redesigning sections, or changing the direction of the work. Revisions that fall outside the original brief are treated as scope changes. Additional revision rounds beyond the included two are billed at our current hourly rate, agreed in writing before proceeding. Any change that materially alters what was originally scoped requires a written change order. Projects that go quiet for more than 30 days without a scheduled pause will be treated as stalled: we will invoice for all completed work and close out the project.",
@@ -46,7 +52,7 @@ const SECTIONS = [
   {
     id: "post-launch",
     title: "Post-Delivery Support",
-    body: "Following handover, Inertia provides a 14-day correction window. During this period, we will fix any defects that prevent the delivered work from functioning as specified in the original brief, at no additional charge. You can report issues directly through the Messages tab in your portal. This correction window does not cover: new feature requests, design changes, content updates, issues caused by Shopify platform updates or third-party app changes, or any modifications made by your team or a third party after handover. If you need ongoing support beyond this window, we offer separate retainer arrangements.",
+    body: "Following handover, Inertia provides a 14-day correction window. During this period, we will fix any defects that prevent the delivered work from functioning as specified in the original brief, at no additional charge. You can report issues directly through the Support section of your portal. This correction window does not cover: new feature requests, design changes, content updates, issues caused by Shopify platform updates or third-party app changes, or any modifications made by your team or a third party after handover. If you need ongoing support beyond this window, we offer separate retainer arrangements.",
   },
   {
     id: "confidentiality",
@@ -66,7 +72,7 @@ const SECTIONS = [
   {
     id: "disputes",
     title: "Dispute Resolution",
-    body: `We have never had a dispute reach a formal stage, and we would like to keep it that way. If something goes wrong, the right first step is a direct conversation. The Messages tab in your portal is a good place to start. Most issues can be resolved quickly when both parties are straightforward about what happened. If a dispute cannot be resolved through direct communication within 30 days, both parties agree to attempt non-binding mediation before pursuing any legal action. These Terms are governed by the laws of ${JURISDICTION}. Any formal legal proceedings will be conducted in the appropriate courts of ${JURISDICTION}. The prevailing party is entitled to recover reasonable legal fees.`,
+    body: `We have never had a dispute reach a formal stage, and we would like to keep it that way. If something goes wrong, the right first step is a direct conversation. The Support section of your portal is a good place to start. Most issues can be resolved quickly when both parties are straightforward about what happened. If a dispute cannot be resolved through direct communication within 30 days, both parties agree to attempt non-binding mediation before pursuing any legal action. These Terms are governed by the laws of ${JURISDICTION}. Any formal legal proceedings will be conducted in the appropriate courts of ${JURISDICTION}. The prevailing party is entitled to recover reasonable legal fees.`,
   },
   {
     id: "changes",
@@ -99,7 +105,7 @@ export default function TermsPage() {
           <section key={s.id} id={s.id} className="scroll-mt-24">
             <h2 className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
             <p className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
-              {s.body}
+              <PolicyText text={s.body} self="terms" />
             </p>
           </section>
         ))}

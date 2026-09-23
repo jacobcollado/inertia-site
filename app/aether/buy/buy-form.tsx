@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ShieldCheck, MailCheck, PackageCheck } from "lucide-react";
 import { SiStripe } from "react-icons/si";
 import { trackMeta } from "../../meta-pixel";
+import { PolicyDisclaimer } from "../policy-disclaimer";
 
 type Status = "idle" | "submitting" | "sent" | "error";
 
@@ -18,7 +19,7 @@ const TIERS = [
       "Full Aether theme, all 41 sections",
       "1 year of updates",
       "Single store license",
-      "Support via client portal",
+      "14 days of setup help, then portal support",
     ],
     stripe: true,
   },
@@ -33,7 +34,7 @@ const TIERS = [
       "Full Aether theme, all 41 sections",
       "Lifetime updates, no renewals",
       "Single store license",
-      "Priority support",
+      "14 days of setup help, then priority support",
     ],
     stripe: true,
   },
@@ -275,6 +276,7 @@ export function BuyForm({ initialTier }: { initialTier?: string }) {
           {status === "error" && (
             <span className="text-[13px] tracking-tight text-red-500 text-center">{error || "Something went wrong."}</span>
           )}
+          <PolicyDisclaimer className="text-center" />
 
           <div className="flex items-center justify-center gap-2" style={{ opacity: 0.5 }}>
             <span className="text-[12px] tracking-tight text-[rgb(var(--muted))]">Powered and secured by</span>

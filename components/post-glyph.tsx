@@ -96,7 +96,7 @@ export function PostGlyph({
 
     // Many candidates, one chosen. The unpicked options stay light and the
     // selected one is ringed and solid: the choice is the whole mark.
-    case "judgment-over-output":
+    case "someone-still-has-to-pick":
       return (
         <svg {...common}>
           <circle cx="18" cy="20" r="4.5" strokeOpacity={0.32} />
@@ -137,7 +137,7 @@ export function PostGlyph({
 
     // A small brief at the top determining everything built beneath it. One
     // input, one bracket, three outcomes inheriting from it.
-    case "the-brief-is-the-product":
+    case "most-projects-fail-before-figma":
       return (
         <svg {...common}>
           <rect x="24" y="11" width="16" height="11" rx="2" />
@@ -151,7 +151,7 @@ export function PostGlyph({
 
     // A hundred decisions too small to name, and the shape they add up to.
     // The outline is barely there; the dots doing the work are solid.
-    case "the-invisible-details":
+    case "the-difference-you-feel":
       return (
         <svg {...common}>
           <rect x="12" y="12" width="40" height="40" rx="4" strokeOpacity={0.28} strokeDasharray="3 5" />

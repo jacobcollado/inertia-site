@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TableOfContents } from "../table-of-contents";
+import { PolicyText } from "../policy-text";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
   description: "Digital products are final sale, but we will always work to make things right. Here's how refunds work at Inertia.",
 };
 
-const EFFECTIVE = "June 1, 2026";
+const EFFECTIVE = "September 23, 2026";
 const COMPANY = "Inertia Studio LLC";
 const CONTACT = "hello@byinertia.com";
 
@@ -20,7 +21,7 @@ const SECTIONS = [
   {
     id: "our-commitment",
     title: "Our Commitment",
-    body: `That said, we stand behind everything we sell. If you run into a problem (a bug, something that isn't working as documented, or any other issue with your purchase), contact us at ${CONTACT} and we will do our best to make it right. We take every complaint seriously and will work with you to resolve the issue. We would rather spend the time fixing something than leave a customer frustrated.`,
+    body: `That said, we stand behind everything we sell. If you run into a problem (a bug, something that isn't working as documented, or any other issue with your purchase), contact us at ${CONTACT} and we will do our best to make it right. For the first 14 days after purchase, we will fix any issue with the theme and help you set it up on your store. After that, support and advice continue through your dashboard at byinertia.com/dashboard. We take every complaint seriously and will work with you to resolve the issue. We would rather spend the time fixing something than leave a customer frustrated.`,
   },
   {
     id: "exceptions",
@@ -41,19 +42,19 @@ const SECTIONS = [
 
 export default function RefundPolicyPage() {
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full pt-6 pb-24 px-3" style={{ maxWidth: "80rem" }}>
+    <main className="policy-body mx-auto w-full pt-6 pb-24 px-6 sm:px-8" style={{ maxWidth: "52rem" }}>
 
       <TableOfContents sections={SECTIONS} />
 
       {/* Document header */}
       <div className="mb-10">
-        <h1 className="text-[2.4rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
+        <h1 className="text-[2.1rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
           Inertia Refund Policy
         </h1>
         <div className="flex flex-wrap gap-x-8 gap-y-1">
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
-          <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {EFFECTIVE}</p>
-          <a href={`mailto:${CONTACT}`} className="text-[16px] tracking-tight text-[rgb(var(--muted))] hover:opacity-80 transition-opacity">{CONTACT}</a>
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
+          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {EFFECTIVE}</p>
+          <a href={`mailto:${CONTACT}`} className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:opacity-80 transition-opacity">{CONTACT}</a>
         </div>
       </div>
 
@@ -61,9 +62,9 @@ export default function RefundPolicyPage() {
       <div className="flex flex-col gap-12">
         {SECTIONS.map((s) => (
           <section key={s.id} id={s.id} className="scroll-mt-24">
-            <h2 className="text-[20px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
-            <p className="text-[17px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
-              {s.body}
+            <h2 className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
+            <p className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
+              <PolicyText text={s.body} self="refund" />
             </p>
           </section>
         ))}
@@ -71,13 +72,13 @@ export default function RefundPolicyPage() {
 
       {/* Footer */}
       <div className="mt-20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <p className="text-[16px] tracking-tight text-[rgb(var(--muted))] opacity-50">
+        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50">
           Questions?{" "}
           <a href={`mailto:${CONTACT}`} className="underline underline-offset-2 hover:opacity-80 transition-opacity">
             {CONTACT}
           </a>
         </p>
-        <Link href="/policies/terms-of-service" className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
+        <Link href="/policies/terms-of-service" className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
           Terms of Service →
         </Link>
       </div>

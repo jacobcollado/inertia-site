@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TableOfContents } from "../table-of-contents";
+import { PolicyText } from "../policy-text";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -88,7 +89,7 @@ export default function PrivacyPage() {
           <section key={s.id} id={s.id} className="scroll-mt-24">
             <h2 className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
             <p className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
-              {s.body}
+              <PolicyText text={s.body} self="privacy" />
             </p>
           </section>
         ))}
