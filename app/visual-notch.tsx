@@ -464,7 +464,7 @@ function ComponentsMobileMenu({ onClose }: { onClose: () => void }) {
         className="inline-flex items-center justify-center w-full rounded-full py-3 text-[15px] font-medium tracking-tight transition-opacity"
         style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", letterSpacing: "-0.01em" }}
       >
-        Get in touch
+        Reach out
       </a>
     </nav>
   );
@@ -666,7 +666,7 @@ function MergedCTA({
             }}
           >
             <CtaGrain />
-            <span className="relative">Get in touch</span>
+            <span className="relative">Reach out</span>
           </a>
           {/* Bridge — thin bar connecting the two pills, sits behind them via
               negative margins so it overlaps into each rather than floating in

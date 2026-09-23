@@ -559,7 +559,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               {...ctaScaleHoverOnSelf}
             >
               <CtaGrain />
-              <span className="relative">Get in touch</span>
+              <span className="relative">Reach out</span>
             </a>
             <ThemeToggle />
           </div>

@@ -2746,7 +2746,10 @@ h1:hover .redact > span.redact-inner,
 }
 
 .what-we-do-direction__mobile {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  /* Fills its carousel slide so it matches the other cards' height. */
+  height: 100%;
   border-radius: 6px;
   padding: 1rem;
   background: rgba(26, 26, 26, 0.03);
@@ -2760,8 +2763,12 @@ h1:hover .redact > span.redact-inner,
   position: static;
   width: 100%;
   max-width: 240px;
-  height: auto;
-  margin: 1rem auto 0;
+  /* Fixed 200px art box, shared with the other cards on mobile, pinned to
+     the bottom so the art lines up across the carousel. */
+  height: 200px;
+  margin: auto auto 0;
+  padding-top: 1rem;
+  box-sizing: content-box;
   object-fit: contain;
 }
 

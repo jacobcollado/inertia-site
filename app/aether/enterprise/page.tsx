@@ -219,7 +219,7 @@ export default function EnterprisePage() {
           Ready to ship more, build less?
         </h2>
         <p className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--muted))] mb-8 max-w-xs leading-relaxed" style={{ opacity: 0.6 }}>
-          We work with a small number of agencies. If you're serious about scaling, get in touch.
+          We work with a small number of agencies. If you're serious about scaling, reach out.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link

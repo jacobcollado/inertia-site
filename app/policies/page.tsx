@@ -83,7 +83,7 @@ export default function PoliciesPage() {
           rel="noreferrer"
           className="text-[13px] tracking-tight text-[rgb(var(--fg))] hover:text-[rgb(var(--muted))] transition-colors"
         >
-          Get in touch &rarr;
+          Reach out &rarr;
         </a>
       </section>
 

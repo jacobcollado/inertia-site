@@ -2493,11 +2493,11 @@ const WHAT_WE_DO_LABEL_CLASS =
 const WHAT_WE_DO_LABEL_STYLE = { color: "#1a1a1a", fontWeight: 500 } as const;
 const WHAT_WE_DO_DESC_STYLE = { color: "#5c5c5c" } as const;
 
-function WhatWeDoDirectionCell() {
+function WhatWeDoDirectionCell({ className }: { className?: string }) {
   const item = WHAT_WE_DO_ITEMS[0];
 
   return (
-    <div className="what-we-do-direction">
+    <div className={cn("what-we-do-direction", className)}>
       <div className="what-we-do-direction__mobile">
         <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
           {item.label}
@@ -2529,14 +2529,16 @@ function WhatWeDoDirectionCell() {
 
 function WhatWeDoStandardCell({
   item,
+  className,
 }: {
   item: (typeof WHAT_WE_DO_ITEMS)[number];
+  className?: string;
 }) {
   const hasImage = "image" in item && item.image;
 
   return (
     <div
-      className={cn(WHAT_WE_DO_CELL, item.bentoClass)}
+      className={cn(WHAT_WE_DO_CELL, item.bentoClass, className)}
       style={WHAT_WE_DO_CELL_STYLE}
     >
       <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
@@ -2546,7 +2548,9 @@ function WhatWeDoStandardCell({
         {item.description}
       </p>
       {hasImage ? (
-        <div className="mt-auto flex min-h-[120px] w-full min-w-0 flex-1 items-end justify-center pt-4 sm:min-h-[140px] sm:pt-5">
+        <div className="mt-auto flex min-h-[120px] w-full min-w-0 flex-1 items-end justify-center pt-4 max-sm:h-[216px] max-sm:flex-none sm:min-h-[140px] sm:pt-5">
+          {/* Mobile: the same 240x200 box as Direction's art, so every carousel
+              card lands at the same height whatever the art's shape. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={item.image}
@@ -2556,7 +2560,7 @@ function WhatWeDoStandardCell({
             // were sized by width like the landscape pieces, dragging its card
             // past the neighbour sharing its row. Cap the height instead and
             // let width follow, so every cell lands at the same art height.
-            className="h-auto max-h-[120px] w-auto max-w-[160px] object-contain sm:max-h-[140px] sm:max-w-[200px]"
+            className="h-auto max-h-[120px] w-auto max-w-[160px] object-contain max-sm:h-full max-sm:max-h-none max-sm:w-full max-sm:max-w-[240px] sm:max-h-[140px] sm:max-w-[200px]"
           />
         </div>
       ) : null}
@@ -2564,7 +2568,49 @@ function WhatWeDoStandardCell({
   );
 }
 
+// Below sm the cards become a swipeable row; each card is this wide so the
+// next one peeks in and reads as something to swipe to. h-auto undoes the
+// cells' h-full there: a set height (even 100% of an auto-height row) opts a
+// flex item out of stretching, so the cards would keep their own heights
+// instead of all matching the tallest.
+const WHAT_WE_DO_SLIDE = "max-sm:w-[82%] max-sm:shrink-0 max-sm:snap-start max-sm:h-auto";
+
 function WhatWeDo() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+
+  // Active dot follows whichever card is nearest the track's left edge.
+  // Desktop never scrolls this track, so it just stays at 0 there.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const slides = Array.from(track.children) as HTMLElement[];
+        const left = track.scrollLeft + track.offsetLeft;
+        let nearest = 0;
+        slides.forEach((el, i) => {
+          if (Math.abs(el.offsetLeft - left) < Math.abs(slides[nearest].offsetLeft - left)) nearest = i;
+        });
+        setActive(nearest);
+      });
+    };
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  const goTo = (i: number) => {
+    const track = trackRef.current;
+    const el = track?.children[i] as HTMLElement | undefined;
+    if (!track || !el) return;
+    track.scrollTo({ left: el.offsetLeft - track.offsetLeft, behavior: "smooth" });
+  };
+
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-none sm:mx-auto">
@@ -2583,10 +2629,35 @@ function WhatWeDo() {
               What we do
             </span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-4 sm:auto-rows-[minmax(11rem,auto)] gap-3 sm:gap-4">
-            <WhatWeDoDirectionCell />
+          {/* Mobile: a scroll-snap row that bleeds to the card's edges so
+              slides swipe in from the side. sm and up: the bento grid. */}
+          <div
+            ref={trackRef}
+            className="max-sm:-mx-5 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:snap-x max-sm:snap-mandatory max-sm:px-5 max-sm:scroll-px-5 max-sm:overscroll-x-contain no-scrollbar sm:grid sm:grid-cols-4 sm:auto-rows-[minmax(11rem,auto)] gap-3 sm:gap-4"
+          >
+            <WhatWeDoDirectionCell className={WHAT_WE_DO_SLIDE} />
             {WHAT_WE_DO_ITEMS.filter((item) => item.label !== "Direction").map((item) => (
-              <WhatWeDoStandardCell key={item.label} item={item} />
+              <WhatWeDoStandardCell key={item.label} item={item} className={WHAT_WE_DO_SLIDE} />
+            ))}
+          </div>
+          <div className="mt-5 flex justify-center gap-1.5 sm:hidden">
+            {WHAT_WE_DO_ITEMS.map((item, i) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`Show ${item.label}`}
+                aria-current={active === i}
+                className="flex h-6 items-center px-0.5"
+              >
+                <span
+                  className="block h-1.5 rounded-full transition-[width,background-color] duration-300"
+                  style={{
+                    width: active === i ? 18 : 6,
+                    background: active === i ? "#1a1a1a" : "rgba(26,26,26,0.2)",
+                  }}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -3718,7 +3789,7 @@ function ArrowGlyph({ className }: { className?: string }) {
       className={className}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.75"
+      strokeWidth="1.25"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
@@ -3836,7 +3907,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                     className="text-[clamp(0.8rem,1.8vw,0.9rem)] tabular-nums tracking-tight"
                     style={{ color: "#a3a3a3" }}
                   >
-                    {String(i + 2).padStart(2, "0")}
+                    {i + 2}
                   </span>
                   <span className="min-w-0">
                     <span

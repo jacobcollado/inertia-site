@@ -215,7 +215,7 @@ export default function CommercialPage() {
           Ship more, build less
         </h2>
         <p className="text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--muted))] mb-8 max-w-xs leading-relaxed" style={{ opacity: 0.6 }}>
-          We keep the roster small. If you are serious about scaling client work, get in touch.
+          We keep the roster small. If you are serious about scaling client work, reach out.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
