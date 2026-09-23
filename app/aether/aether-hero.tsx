@@ -11,8 +11,8 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
   return (
     <section className="flex flex-col">
       <div
-        className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center pt-12 sm:pt-20 lg:pt-40"
-        style={{ minHeight: 480, paddingBottom: 32 }}
+        className="flex flex-col items-center justify-center gap-4 px-4 sm:px-6 text-center pt-14 sm:pt-20 lg:pt-40 sm:min-h-[480px]"
+        style={{ paddingBottom: 32 }}
       >
         <h1 className="font-normal tracking-[-0.04em] leading-none m-0">
           <Image
