@@ -1210,7 +1210,7 @@ function VercelHero({
               <a
                 ref={ctaRef}
                 href="#start"
-                aria-label="Get in touch"
+                aria-label="Reach out"
                 onClick={e => {
                   const el = document.getElementById("start");
                   if (!el) return; // let the browser handle the hash
@@ -1230,7 +1230,7 @@ function VercelHero({
                 {...ctaScaleHoverOnParent}
               >
                 <CtaGrain />
-                <span className="relative whitespace-nowrap">Get in touch</span>
+                <span className="relative whitespace-nowrap">Reach out</span>
               </a>
             </span>
             <span
@@ -3640,52 +3640,49 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   );
 }
 
-/* Posts arrive sorted newest-first, which currently puts three Practice
-   posts at the front — three identical glyphs in a row. Rotate through the
-   tag groups instead: date order is preserved *within* each tag, but
-   consecutive cards pull from different tags, so the glyph changes card to
-   card. Deterministic (no reshuffle between renders or between server and
-   client) and it degrades to plain date order once one tag runs out. */
-function interleaveByTag(posts: PostMeta[]): PostMeta[] {
-  const groups = new Map<string, PostMeta[]>();
-  for (const post of posts) {
-    const key = post.tag ?? "";
-    const group = groups.get(key);
-    if (group) group.push(post);
-    else groups.set(key, [post]);
-  }
-  // Largest group first, so the tag with the most posts can't bunch up at
-  // the tail once the smaller groups are exhausted.
-  const queues = [...groups.values()].sort((a, b) => b.length - a.length);
-  const out: PostMeta[] = [];
-  while (out.length < posts.length) {
-    let placed = false;
-    for (const queue of queues) {
-      if (queue.length === 0) continue;
-      // Skip a queue whose next post repeats the previous card's tag,
-      // unless it's the only one left with posts remaining.
-      const remaining = queues.filter(q => q.length > 0);
-      if (
-        remaining.length > 1 &&
-        out.length > 0 &&
-        queue[0].tag === out[out.length - 1].tag
-      ) continue;
-      out.push(queue.shift() as PostMeta);
-      placed = true;
-    }
-    // No queue was eligible this pass (every remaining post repeats the
-    // last tag) — take the next one anyway rather than loop forever.
-    if (!placed) {
-      const queue = queues.find(q => q.length > 0);
-      if (!queue) break;
-      out.push(queue.shift() as PostMeta);
-    }
-  }
-  return out;
+function formatPostDate(date: string): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  // Front-matter dates are calendar days parsed as UTC midnight, so format in
+  // UTC or they slip back a day west of Greenwich (and mismatch on hydrate).
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
+function TagPill({ tag }: { tag: string }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5 text-[clamp(0.7rem,1.6vw,0.8rem)] leading-snug tracking-tight"
+      style={{
+        color: "#5c5c5c",
+        background: "rgba(26,26,26,0.04)",
+        boxShadow: "inset 0 1px 2px rgba(26,26,26,0.05), inset 0 0 0 1px rgba(26,26,26,0.08)",
+      }}
+    >
+      {tag}
+    </span>
+  );
+}
+
+function ArrowGlyph({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M3 8h10" />
+      <path d="M9 4l4 4-4 4" />
+    </svg>
+  );
+}
+
+// Newest essay leads as a quote card, the rest follow as a numbered index.
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
-  const [items] = useState<PostMeta[]>(() => interleaveByTag(posts));
   const sectionRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
 
@@ -3704,7 +3701,8 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
     return () => obs.disconnect();
   }, []);
 
-  if (items.length === 0) return null;
+  if (posts.length === 0) return null;
+  const [featured, ...rest] = posts;
 
   const rowReveal = (i: number): React.CSSProperties => ({
     willChange: "opacity, transform, filter",
@@ -3718,12 +3716,12 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
 
   return (
     <section ref={sectionRef} className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-3xl sm:max-w-5xl sm:mx-auto">
+      <div className="max-w-3xl sm:mx-auto">
         <header
           className="mb-8 sm:mb-10 text-center"
           style={rowReveal(0)}
         >
-          <h2 className="mb-5 sm:mb-6">
+          <h2>
             <span
               className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
               style={{ background: "#1a1a1a" }}
@@ -3731,68 +3729,114 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
               Our thoughts
             </span>
           </h2>
-          <p
-            className="text-[clamp(1.05rem,2.8vw,1.45rem)] leading-relaxed tracking-tight text-balance"
-            style={{ color: "#5c5c5c" }}
-          >
-            Essays on design and building.
-          </p>
         </header>
 
-        <ul className="grid grid-cols-2 gap-2 sm:gap-3">
-          {items.map((post, i) => (
-            <li
-              key={post.slug}
-              className="min-w-0"
-              style={rowReveal(i + 1)}
+        <div style={rowReveal(1)}>
+          <Link
+            href={`/blog/${featured.slug}`}
+            className="group block rounded-[6px] px-5 sm:px-8 py-6 sm:py-8 transition-colors duration-200 hover:bg-[rgba(26,26,26,0.05)]"
+            style={{
+              background: "rgba(26,26,26,0.03)",
+              boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.07)",
+            }}
+          >
+            <div
+              className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[clamp(0.75rem,1.8vw,0.875rem)] tracking-tight"
+              style={{ color: "#8a8a8a" }}
             >
-              <Link
-                href={`/blog/${post.slug}`}
-                className="group relative block h-full px-2 sm:px-3 py-4 sm:py-5 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
+              {featured.tag && <TagPill tag={featured.tag} />}
+              <span>{formatPostDate(featured.date)}</span>
+              <span aria-hidden>·</span>
+              <span>{featured.readMinutes} min read</span>
+            </div>
+            <p
+              className="mt-4 text-[clamp(1.35rem,3.6vw,2rem)] tracking-[-0.03em] leading-[1.15] text-pretty"
+              style={{ color: "#1a1a1a" }}
+            >
+              {featured.title}
+            </p>
+            {featured.excerpt && (
+              <p
+                className="mt-4 pl-4 text-[clamp(0.95rem,2.2vw,1.125rem)] leading-relaxed tracking-tight text-pretty"
+                style={{ color: "#5c5c5c", borderLeft: "2px solid rgba(26,26,26,0.12)" }}
               >
-                <div className="min-w-0 sm:pr-6">
+                {featured.excerpt}
+              </p>
+            )}
+            <span
+              className="mt-6 inline-flex items-center gap-1.5 text-[clamp(0.875rem,2vw,1rem)] tracking-tight"
+              style={{ color: "#1a1a1a" }}
+            >
+              Read essay
+              <ArrowGlyph className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+            </span>
+          </Link>
+        </div>
+
+        {rest.length > 0 && (
+          <ol className="mt-4 sm:mt-6">
+            {rest.map((post, i) => (
+              <li
+                key={post.slug}
+                style={{ ...rowReveal(i + 2), borderTop: "1px solid rgba(26,26,26,0.08)" }}
+              >
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="group grid grid-cols-[2rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_7rem_4rem] items-baseline gap-x-3 px-2 sm:px-3 py-4 sm:py-5 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
+                >
+                  <span
+                    className="text-[clamp(0.8rem,1.8vw,0.9rem)] tabular-nums tracking-tight"
+                    style={{ color: "#a3a3a3" }}
+                  >
+                    {String(i + 2).padStart(2, "0")}
+                  </span>
+                  <span className="min-w-0">
+                    <span
+                      className="block text-[clamp(1rem,2.4vw,1.2rem)] tracking-[-0.025em] leading-snug text-pretty"
+                      style={{ color: "#1a1a1a" }}
+                    >
+                      {post.title}
+                    </span>
                     {post.tag && (
                       <span
-                        className="mb-1.5 sm:mb-1 inline-flex items-center rounded-full px-2 py-0.5 text-[clamp(0.65rem,1.6vw,0.8rem)] font-normal leading-snug tracking-tight"
-                        style={{
-                          color: "#5c5c5c",
-                          fontWeight: 400,
-                          background: "rgba(26,26,26,0.04)",
-                          boxShadow: "inset 0 1px 2px rgba(26,26,26,0.05), inset 0 0 0 1px rgba(26,26,26,0.08)",
-                        }}
+                        className="sm:hidden mt-1 block text-[0.8rem] tracking-tight"
+                        style={{ color: "#8a8a8a" }}
                       >
                         {post.tag}
                       </span>
                     )}
-                    <p
-                      className="text-[clamp(0.9rem,2.5vw,1.3rem)] font-normal tracking-[-0.025em] leading-snug sm:leading-tight text-pretty"
-                      style={{ color: "#1a1a1a", fontWeight: 400 }}
-                    >
-                      {post.title}
-                    </p>
-                </div>
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
-                    style={{ color: "#5c5c5c" }}
-                  >
-                    <svg
-                      viewBox="0 0 16 16"
-                      className="size-4"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 8h10" />
-                      <path d="M9 4l4 4-4 4" />
-                    </svg>
                   </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                  <span
+                    className="hidden sm:block text-[0.875rem] tracking-tight"
+                    style={{ color: "#8a8a8a" }}
+                  >
+                    {post.tag}
+                  </span>
+                  <span
+                    className="text-right text-[clamp(0.8rem,1.8vw,0.875rem)] tabular-nums tracking-tight whitespace-nowrap"
+                    style={{ color: "#8a8a8a" }}
+                  >
+                    {formatPostDate(post.date)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        <div
+          className="pt-4 text-center"
+          style={{ ...rowReveal(rest.length + 2), borderTop: "1px solid rgba(26,26,26,0.08)" }}
+        >
+          <Link
+            href="/blog"
+            className="group inline-flex items-center gap-1.5 text-[clamp(0.875rem,2vw,1rem)] tracking-tight transition-colors duration-200 hover:text-[#1a1a1a]"
+            style={{ color: "#5c5c5c" }}
+          >
+            All essays
+            <ArrowGlyph className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </Link>
+        </div>
       </div>
     </section>
   );

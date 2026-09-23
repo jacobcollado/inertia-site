@@ -15,7 +15,20 @@ export type PostMeta = {
   pinned?: boolean;
   image?: string;
   tag?: string;
+  // The opening paragraph's highlighted line, or the paragraph itself when
+  // it has no <mark>. Used as the lead quote on the homepage.
+  excerpt?: string;
+  readMinutes: number;
 };
+
+function openingExcerpt(content: string): string | undefined {
+  const first = content.split(/\n\s*\n/).map((p) => p.trim()).find(Boolean);
+  if (!first) return undefined;
+  const marked = first.match(/<mark>([\s\S]*?)<\/mark>/);
+  const text = (marked ? marked[1] : first).replace(/<[^>]+>/g, "").trim();
+  // A mark can start mid-sentence, so lift its first letter.
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
 export type Post = PostMeta & { content: string };
 
@@ -25,7 +38,7 @@ export function getAllPosts(): PostMeta[] {
   const posts = files.map((file) => {
     const slug = file.replace(/\.(md|mdx)$/, "");
     const raw = fs.readFileSync(path.join(POSTS_DIR, file), "utf8");
-    const { data } = matter(raw);
+    const { data, content } = matter(raw);
     return {
       slug,
       title: data.title ?? slug,
@@ -35,6 +48,8 @@ export function getAllPosts(): PostMeta[] {
       pinned: data.pinned === true,
       image: data.image,
       tag: data.tag,
+      excerpt: openingExcerpt(content),
+      readMinutes: readingStats(content).minutes,
     } as PostMeta;
   });
   return posts.sort((a, b) => {
@@ -58,6 +73,8 @@ export function getPost(slug: string): Post | null {
         summary: data.summary,
         image: data.image,
         tag: data.tag,
+        excerpt: openingExcerpt(content),
+        readMinutes: readingStats(content).minutes,
         content,
       };
     }

@@ -33,7 +33,7 @@ type ArticleBlock =
   | { type: "h3"; text: string }
   | { type: "ol"; items: string[] }
   | { type: "ul"; items: string[] }
-  | { type: "note"; accent?: [number, number, number]; text: string }
+  | { type: "note"; accent?: [number, number, number]; label?: string; text: string }
   | { type: "code"; text: string }
   | { type: "sketch"; name: string; accent: [number, number, number]; image?: string; alt?: string; images?: { src: string; alt: string; label: string }[] };
 
@@ -575,31 +575,38 @@ const AETHER_DOCS: DocSection[] = [
               },
             ],
           },
-          { type: "p", text: "Aether is delivered as a standard Shopify theme zip. After purchase you receive a download link via email. No accounts, no dashboards. Installation takes under two minutes." },
-          { type: "h3", text: "Steps" },
+          { type: "p", text: "Installation is included with every license. You don't need to do anything technical." },
+          { type: "h3", text: "We install it for you" },
           { type: "ol", items: [
-            "In your Shopify admin, go to Online Store -º Themes.",
-            "Click Add theme -º Upload zip file.",
-            "Select the Aether .zip from your download.",
-            "Click Customize to configure, or Publish to go live.",
+            "After you buy, we send a collaborator request to your Shopify store.",
+            "Accept it in your Shopify admin. It takes one click.",
+            "We install Aether and set it up the same day.",
           ]},
-          { type: "note", accent: AETHER_ACCENT, text: "Your existing live theme stays untouched until you explicitly publish Aether. It's safe to upload and preview first." },
+          { type: "note", accent: AETHER_ACCENT, label: "Good to know", text: "Your current theme stays live the whole time. Nothing changes for your customers until you publish Aether." },
+          { type: "h3", text: "Install it yourself" },
+          { type: "p", text: "Prefer to do it on your own? It takes about two minutes." },
+          { type: "ol", items: [
+            "In your Inertia dashboard, open **Licenses** and download the Aether zip under your license.",
+            "In your Shopify admin, go to **Online Store → Themes**.",
+            "Click **Add theme → Upload zip file** and choose the zip.",
+            "Click **Customize** to set it up, or **Publish** to go live.",
+          ]},
+          { type: "note", accent: AETHER_ACCENT, label: "Tip", text: "No dashboard account yet? After purchase we email you a link to create one." },
         ],
       },
       {
         id: "aether-first-setup",
         title: "First-time setup",
         body: [
-          { type: "p", text: "After installing, a short setup sequence gets you from a blank install to something that looks like yours, before you touch a single section." },
-          { type: "h3", text: "Recommended order" },
+          { type: "p", text: "A few settings make Aether look like your brand. You can do all of this before editing a single section." },
           { type: "ol", items: [
-            "Open the theme editor and go to Theme settings.",
-            "Set your brand colors under Colors.",
-            "Upload your logo under Header.",
-            "Choose your type scale under Typography. The defaults work for most brands.",
-            "Review the Homepage template. Most sections already have presets loaded.",
+            "Open the theme editor and click **Theme settings**.",
+            "Set your brand colors under **Colors**.",
+            "Upload your logo under **Header**.",
+            "Pick a type size under **Typography**. The default suits most brands.",
+            "Look over the homepage. Most sections come filled in already.",
           ]},
-          { type: "p", text: "From here, most stores are ready to publish. The default section presets are designed to look good with any brand color out of the box." },
+          { type: "p", text: "That's usually enough to publish. The built-in sections are designed to look good with any brand color." },
         ],
       },
       {
@@ -613,21 +620,22 @@ const AETHER_DOCS: DocSection[] = [
             image: "/docs/aether-license.png",
             alt: "Aether license activation overlay showing the license key field and Activate button",
           },
-          { type: "p", text: "Each license covers a single Shopify store. After purchase you receive a license key by email in the format AETH-XXXX-XXXX-XXXX. You can also view your key any time at byinertia.com/dashboard." },
-          { type: "h3", text: "Activating your license" },
+          { type: "p", text: "Your license key arrives by email after purchase. It looks like AETH-XXXX-XXXX-XXXX. You can also find it any time in your Inertia dashboard under **Licenses**." },
+          { type: "h3", text: "Activate your license" },
           { type: "ol", items: [
-            "In your Shopify admin, go to Online Store → Themes → Customize.",
-            "Open Theme settings → License Key.",
-            "Paste your key and save.",
-            "The store reloads and the lock overlay disappears. Your store domain is assigned to the key automatically on first activation.",
+            "In your Shopify admin, go to **Online Store → Themes → Customize**.",
+            "Open **Theme settings → License Key**.",
+            "Paste your key and click **Save**.",
+            "The store reloads and the lock screen disappears. Your key is now linked to this store.",
           ]},
-          { type: "h3", text: "Core vs Forever" },
+          { type: "h3", text: "What your license covers" },
           { type: "ul", items: [
-            "Core: 1 year of updates, single store. The theme keeps working after the year ends — you just won't receive new releases.",
-            "Forever: updates for life on a single store, no renewals ever.",
-            "Custom: a bespoke version built around your brand. Includes direct access throughout.",
+            "One Shopify store.",
+            "Every future update, for life. No renewals.",
+            "Priority support from the people who built Aether.",
+            "Installation, done for you.",
           ]},
-          { type: "note", accent: AETHER_ACCENT, text: "Need to move the license to a different store? Reply to your purchase email and we'll handle it." },
+          { type: "note", accent: AETHER_ACCENT, text: "Moving to a different store? Reply to your purchase email and we'll move your license over." },
         ],
       },
     ],
@@ -657,16 +665,16 @@ const AETHER_DOCS: DocSection[] = [
               },
             ],
           },
-          { type: "p", text: "The header supports a standard nav, a mega menu, and a transparent mode for hero sections. All options live in Theme settings -º Header." },
+          { type: "p", text: "The header can be a simple menu, a mega menu, or see-through over your hero image. You'll find every option in **Theme settings → Header**." },
           { type: "h3", text: "Mega menu" },
-          { type: "p", text: "Any top-level nav item with child links renders a two-column mega menu. The right panel can show a featured image, a collection tile, or nothing at all." },
-          { type: "ul", items: [
-            "Set up nav links in Shopify Admin -º Navigation -º Main menu.",
-            "Add child links under any top-level item to trigger the mega menu.",
-            "Assign a right-panel block to each item under Header -º Mega menu panels in the theme editor.",
+          { type: "p", text: "Any menu item with links under it opens as a two-column mega menu. The right side can show a featured image, a collection, or nothing." },
+          { type: "ol", items: [
+            "Add your menu links in **Shopify admin → Navigation → Main menu**.",
+            "Nest links under a top-level item. That item now opens a mega menu.",
+            "In the theme editor, choose what shows on the right under **Header → Mega menu panels**.",
           ]},
-          { type: "h3", text: "Transparent mode" },
-          { type: "p", text: "Enable the transparent header when your homepage hero has a full-bleed image or dark background. The header becomes opaque on scroll." },
+          { type: "h3", text: "Transparent header" },
+          { type: "p", text: "Turn this on when your homepage hero is a full-width image or has a dark background. The header becomes solid as visitors scroll." },
         ],
       },
       {
@@ -690,14 +698,13 @@ const AETHER_DOCS: DocSection[] = [
               },
             ],
           },
-          { type: "p", text: "Aether ships with three hero variants: full-bleed, split, and text-only. Each has its own block options." },
-          { type: "h3", text: "Full-bleed" },
-          { type: "p", text: "A full-width media block with an overlay text column. Supports images and video. The overlay position is adjustable in six grid positions." },
-          { type: "h3", text: "Split" },
-          { type: "p", text: "50/50 or 60/40 split between media and text. Best for product-focused hero shots. The media side can be a product image, static image, or video." },
-          { type: "h3", text: "Text-only" },
-          { type: "p", text: "A centered or left-aligned headline with optional subtext and CTA. Good for campaign announcements or editorial intros." },
-          { type: "note", accent: AETHER_ACCENT, text: "All hero variants support the announcement bar above them. The bar inherits the brand color set in Theme settings." },
+          { type: "p", text: "The hero is the first thing visitors see. Aether has three layouts, each with its own settings." },
+          { type: "ul", items: [
+            "**Full width:** an image or video across the whole screen, with text on top. Place the text in any of six spots.",
+            "**Split:** media on one side, text on the other, at 50/50 or 60/40. Best for showing off a product.",
+            "**Text only:** a headline with optional text and a button, centered or left-aligned. Good for launches and announcements.",
+          ]},
+          { type: "note", accent: AETHER_ACCENT, text: "Every hero layout works with the announcement bar above it. The bar uses the brand color from Theme settings." },
         ],
       },
       {
@@ -711,13 +718,13 @@ const AETHER_DOCS: DocSection[] = [
             image: "/docs/aether-product-page.png",
             alt: "Shopify theme editor showing Product Page Desktop settings with back button, variant buttons, add to cart styling, and shipping info",
           },
-          { type: "p", text: "The product page is the most performance-tuned part of Aether. The layout follows a 7/5 media-to-form split with a sticky form column." },
-          { type: "h3", text: "Sticky add-to-cart" },
-          { type: "p", text: "A sticky bar appears once the native ATC button scrolls out of view. It shows the product title, selected variant, and a minimal button. Disable it per-template in the theme editor." },
+          { type: "p", text: "The product page is built to load fast and keep the buy button close. Images sit on the left and the product details stay in view on the right as visitors scroll." },
+          { type: "h3", text: "Sticky add to cart" },
+          { type: "p", text: "Once the main add to cart button scrolls out of view, a slim bar appears with the product name, the chosen option and a buy button. You can turn it off for any product template in the theme editor." },
           { type: "h3", text: "Trust badges" },
-          { type: "p", text: "A trust badge row sits directly beneath the ATC button. Upload up to four icons with short labels in the product page blocks." },
+          { type: "p", text: "A row of badges sits just below the add to cart button. Add up to four icons with short labels in the product page blocks." },
           { type: "h3", text: "Tabs" },
-          { type: "p", text: "Details, materials, shipping, and returns render as accordion tabs to keep the page compact. Reorder or rename tabs in the product page template." },
+          { type: "p", text: "Details, materials, shipping and returns fold into tabs to keep the page tidy. Rename or reorder them in the product page template." },
         ],
       },
       {
@@ -741,14 +748,14 @@ const AETHER_DOCS: DocSection[] = [
               },
             ],
           },
-          { type: "p", text: "Collection pages support two layouts: a standard grid and an editorial masonry mode. Both are configurable per template." },
+          { type: "p", text: "Collection pages come in two layouts: a standard grid and an editorial layout with mixed card sizes. Set either one per template." },
           { type: "h3", text: "Filters" },
-          { type: "p", text: "Aether uses Shopify's native Search & Discovery app for filtering. Enable it in your Shopify admin and the filter panel appears automatically. No code changes needed." },
+          { type: "p", text: "Filters use Shopify's free Search & Discovery app. Turn it on in your Shopify admin and the filters show up on their own. No code needed." },
           { type: "h3", text: "Product card options" },
           { type: "ul", items: [
-            "Quick-add: an add-to-cart button on hover. Works for single-variant products or with a variant flyout.",
-            "Color swatch: shows variant swatches on the card. Hovering prefetches the variant image.",
-            "Sold-out badge: overlaid on the card image when all variants are unavailable.",
+            "**Quick add:** an add to cart button that appears on hover. Products with options get a small picker.",
+            "**Color swatches:** shows each color option on the card. Hovering a swatch loads that color's image.",
+            "**Sold out badge:** appears on the image when every option is out of stock.",
           ]},
         ],
       },
@@ -773,29 +780,28 @@ const AETHER_DOCS: DocSection[] = [
               },
             ],
           },
-          { type: "p", text: "The announcement bar sits at the top of every page and supports multiple rotating messages. Each message can include an optional link." },
-          { type: "h3", text: "Setting up rotation" },
+          { type: "p", text: "The announcement bar runs across the top of every page. It can rotate through several messages, and each one can link somewhere." },
+          { type: "h3", text: "Add rotating messages" },
           { type: "ol", items: [
-            "In the theme editor, open the Announcement bar section.",
-            "Add message blocks — each block has a message field and an optional link.",
-            "Set the Rotate interval in seconds. The default is 4 seconds.",
-            "Toggle Show close to let visitors dismiss the bar.",
+            "In the theme editor, open the **Announcement bar** section.",
+            "Add a message block for each message. Each one has a text field and an optional link.",
+            "Set how many seconds each message shows under **Rotate interval**. The default is 4.",
+            "Turn on **Show close** if you want visitors to be able to hide the bar.",
           ]},
-          { type: "note", accent: AETHER_ACCENT, text: "Background color, text color, font size, padding, and letter case are all configurable per-store in the section settings." },
+          { type: "note", accent: AETHER_ACCENT, label: "Tip", text: "You can change the bar's colors, text size, spacing and capitalization in its section settings." },
         ],
       },
       {
         id: "aether-email-capture",
         title: "Email and SMS capture",
         body: [
-          { type: "p", text: "Aether ships with three separate capture mechanisms so you can choose what fits your brand." },
-          { type: "h3", text: "Signup notification card" },
-          { type: "p", text: "A slide-in card that appears after a configurable delay. It supports both email and SMS signups, an optional discount code reveal on success, and a suppress-for-N-days cookie so repeat visitors aren't nagged." },
-          { type: "h3", text: "Email popup" },
-          { type: "p", text: "A centered modal with a full set of typography and color controls. Trigger it on page load or after a scroll percentage threshold. Configurable dismiss cookie duration." },
-          { type: "h3", text: "SMS overlay widget" },
-          { type: "p", text: "A corner-anchored tab that expands into a small panel with a heading, body copy, and a link to your SMS signup flow. Position is configurable: top-left, middle-right, etc." },
-          { type: "note", accent: AETHER_ACCENT, text: "All three are independent sections. You can use one, two, or all three — just be mindful of how they layer for first-time visitors." },
+          { type: "p", text: "Aether has three ways to collect emails and phone numbers. Use whichever fits your brand." },
+          { type: "ul", items: [
+            "**Signup card:** slides in after a delay you choose. Takes email or SMS signups, can reveal a discount code, and won't show again to the same visitor for a set number of days.",
+            "**Email popup:** a centered window with full control over fonts and colors. Show it when the page loads or once visitors scroll part way down.",
+            "**SMS tab:** a small tab in a corner of the screen that opens into a panel linking to your SMS signup. Choose which corner or edge it sits on.",
+          ]},
+          { type: "note", accent: AETHER_ACCENT, label: "Tip", text: "Each one is its own section, so you can use one, two or all three. If you use more than one, check how they stack up for a first-time visitor." },
         ],
       },
     ],
@@ -808,49 +814,47 @@ const AETHER_DOCS: DocSection[] = [
         id: "aether-colors",
         title: "Colors",
         body: [
-          { type: "p", text: "All colors in Aether are defined as CSS custom properties. You set the base values in Theme settings -º Colors and everything else derives from them automatically." },
-          { type: "h3", text: "Color roles" },
+          { type: "p", text: "Set a few base colors in **Theme settings → Colors** and Aether works out the rest for you." },
           { type: "ul", items: [
-            "Primary: used for CTAs, links, and highlights. Should be your brand accent.",
-            "Surface: the background color of cards and overlays.",
-            "Foreground: text color, set automatically as a contrast-safe value relative to your background.",
-            "Line: border and divider color. Derives from foreground at low opacity.",
+            "**Primary:** buttons, links and highlights. Use your brand color.",
+            "**Surface:** the background of cards and popups.",
+            "**Foreground:** text. Aether keeps it readable against your background automatically.",
+            "**Line:** borders and dividers. Made from a light version of your text color.",
           ]},
           { type: "h3", text: "Dark mode" },
-          { type: "p", text: "Aether reads prefers-color-scheme and applies the right values on first load with no flash. You can expose a toggle to customers via Theme settings -º Colors. Both modes are fully designed, not just inverted." },
+          { type: "p", text: "Aether matches each visitor's device setting for light or dark mode, with no flash on load. You can also give customers a switch in **Theme settings → Colors**. Both modes are designed separately, not just inverted." },
         ],
       },
       {
         id: "aether-custom-fonts",
         title: "Custom fonts",
         body: [
-          { type: "p", text: "Aether supports custom fonts without any code changes. Enable them in Theme settings → Custom Font and provide a font name and a direct file URL for both heading and body typefaces." },
-          { type: "h3", text: "Hosted on Shopify CDN" },
+          { type: "p", text: "You can use your own fonts without touching code. Turn them on in **Theme settings → Custom Font**, then add a name and a file link for your heading and body fonts." },
+          { type: "h3", text: "Upload a font to Shopify" },
           { type: "ol", items: [
-            "In your Shopify admin, go to Content → Files.",
-            "Upload your font file (TTF, WOFF, or WOFF2).",
-            "Copy the CDN URL from the file list.",
-            "Paste it into Theme settings → Custom Font → Heading Font URL and/or Regular Font URL.",
-            "Enter the font family name exactly as it appears in the file.",
+            "In your Shopify admin, go to **Content → Files**.",
+            "Upload your font file (TTF, WOFF or WOFF2).",
+            "Copy the file's link from the list.",
+            "Paste it into **Theme settings → Custom Font → Heading Font URL** or **Regular Font URL**.",
+            "Type the font's name exactly as it appears in the file.",
           ]},
-          { type: "h3", text: "Using Google Fonts or external CDN" },
-          { type: "p", text: "Paste any direct font file URL into the URL fields. The theme uses @font-face to load it with font-display: swap, so body text stays visible while the font loads." },
-          { type: "note", accent: AETHER_ACCENT, text: "The heading and body fields are independent. You can mix two different typefaces, or use the same font for both." },
+          { type: "h3", text: "Use a font hosted elsewhere" },
+          { type: "p", text: "Any direct link to a font file works, including Google Fonts. Text stays visible while the font loads, so the page never looks blank." },
+          { type: "note", accent: AETHER_ACCENT, label: "Tip", text: "Heading and body fonts are set separately. Use two different fonts or the same one for both." },
         ],
       },
       {
         id: "aether-custom-css",
         title: "Custom CSS",
         body: [
-          { type: "p", text: "For anything beyond the theme editor, use the Custom CSS field in Theme settings -º Advanced." },
-          { type: "h3", text: "Available tokens" },
+          { type: "p", text: "For changes the theme editor can't make, add your own CSS in **Theme settings → Advanced → Custom CSS**. These variables match the theme's colors and corners:" },
           { type: "code", text: `--color-primary     your brand accent
 --color-surface     card and overlay background
 --color-fg          foreground text
 --color-bg          page background
 --color-line        borders and dividers
 --radius-sm / -md / -lg   border radii` },
-          { type: "note", accent: AETHER_ACCENT, text: "Custom CSS is preserved across theme updates as long as you don't overwrite the base files." },
+          { type: "note", accent: AETHER_ACCENT, text: "Your custom CSS stays in place when you update, as long as you don't overwrite the theme's base files." },
         ],
       },
     ],
@@ -864,40 +868,38 @@ const AETHER_DOCS: DocSection[] = [
         title: "How to update",
         body: [
           { type: "sketch", name: "update", accent: AETHER_ACCENT },
-          { type: "p", text: "Updates are delivered as a new .zip attached to an email from your license. Nothing updates automatically; you apply updates when you're ready." },
-          { type: "h3", text: "Update process" },
+          { type: "p", text: "Every new version shows up in your Inertia dashboard. Nothing changes on your store until you choose to update." },
           { type: "ol", items: [
-            "Download the new .zip from the update email.",
-            "In Shopify admin, go to Online Store -º Themes.",
-            "Click Add theme -º Upload zip. This creates a new unpublished copy; your live theme is untouched.",
-            "Preview the new version. If it looks right, publish.",
-            "Re-apply any custom code changes to the new version's files.",
+            "In your Inertia dashboard, open **Licenses** and download the latest zip under your license.",
+            "In your Shopify admin, go to **Online Store → Themes**.",
+            "Click **Add theme → Upload zip file**. This adds a new copy and leaves your live theme alone.",
+            "Preview the new version. If it looks right, publish it.",
+            "If you edited any theme code, copy those edits into the new version.",
           ]},
-          { type: "note", accent: AETHER_ACCENT, text: "Check the changelog before updating. Major releases list every changed file so you know exactly where to re-apply custom edits." },
+          { type: "note", accent: AETHER_ACCENT, label: "Tip", text: "Read the changelog first. Big releases list every file that changed, so you know where your edits need to go." },
         ],
       },
       {
         id: "aether-backup",
         title: "Backing up",
         body: [
-          { type: "p", text: "Shopify automatically keeps your previous theme as an unpublished copy when you publish a new one. Re-publish the old version from the theme list instantly if you need to roll back." },
-          { type: "p", text: "For custom code changes, keep a copy of your modified files outside Shopify. A private GitHub repo works well; it makes diffing an update against your version straightforward." },
+          { type: "p", text: "When you publish a new theme, Shopify keeps the old one in your theme list. To roll back, just publish the old one again." },
+          { type: "p", text: "If you've edited theme code, keep a copy of those files outside Shopify too. A private GitHub repo works well and makes it easy to compare against a new version." },
         ],
       },
       {
         id: "aether-merging",
-        title: "Merging custom code",
+        title: "Keeping your code edits",
         body: [
-          { type: "p", text: "If you've edited theme files directly, you'll need to re-apply those changes after updating. The changelog lists every touched file per release to keep this scoped." },
-          { type: "h3", text: "Workflow" },
+          { type: "p", text: "If you've changed theme files directly, you'll need to copy those changes into each new version. The changelog lists which files changed in every release, so you only check the ones that matter." },
           { type: "ol", items: [
-            "Note which files you edited. The diff between your version and stock Aether shows you this.",
-            "Download the new release zip.",
-            "Open both versions side by side.",
-            "Re-apply your changes to the new files, cross-referencing the changelog for that release.",
-            "Upload the merged version.",
+            "Find the files you edited by comparing your theme against the original Aether files.",
+            "Download the new version.",
+            "Open the old and new files side by side.",
+            "Copy your changes into the new files, using the changelog as a guide.",
+            "Upload the updated theme.",
           ]},
-          { type: "note", accent: AETHER_ACCENT, text: "For significant custom development, consider using Shopify CLI with a Git-based workflow. It makes merging updates much easier." },
+          { type: "note", accent: AETHER_ACCENT, label: "Tip", text: "Doing a lot of custom work? Shopify CLI with Git makes this much easier." },
         ],
       },
     ],
@@ -1145,6 +1147,18 @@ function SketchImageCarousel({
   );
 }
 
+// **Label** in doc copy marks an interface label or menu path, so readers can
+// spot what to click while following along in Shopify.
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") ? (
+      <strong key={i} className="font-medium text-[rgb(var(--fg))]">{part.slice(2, -2)}</strong>
+    ) : (
+      part
+    ),
+  );
+}
+
 function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, number, number] }) {
   return (
     <div className="flex flex-col gap-6">
@@ -1169,7 +1183,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
           );
         }
         if (block.type === "p") {
-          return <p key={i} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.75 }}>{block.text}</p>;
+          return <p key={i} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.75 }}>{renderInline(block.text)}</p>;
         }
         if (block.type === "h3") {
           return (
@@ -1180,9 +1194,18 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         }
         if (block.type === "ol") {
           return (
-            <ol key={i} className="flex flex-col gap-3 pl-4">
+            <ol key={i} className="flex flex-col gap-3">
               {block.items.map((item, j) => (
-                <li key={j} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))] list-decimal pl-1" style={{ opacity: 0.75 }}>{item}</li>
+                <li key={j} className="flex gap-3 text-[16px] leading-[1.85] tracking-tight">
+                  <span
+                    className="mt-[5px] flex size-[20px] shrink-0 items-center justify-center rounded-full text-[12px] font-medium tabular-nums leading-none"
+                    style={{ background: rgba(accent, 0.1), color: rgba(accent, 0.95) }}
+                    aria-hidden="true"
+                  >
+                    {j + 1}
+                  </span>
+                  <span className="min-w-0 text-[rgb(var(--fg))]" style={{ opacity: 0.75 }}>{renderInline(item)}</span>
+                </li>
               ))}
             </ol>
           );
@@ -1191,7 +1214,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
           return (
             <ul key={i} className="flex flex-col gap-3 pl-4">
               {block.items.map((item, j) => (
-                <li key={j} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))] list-disc pl-1" style={{ opacity: 0.75 }}>{item}</li>
+                <li key={j} className="text-[16px] leading-[1.85] tracking-tight text-[rgb(var(--fg))] list-disc pl-1" style={{ opacity: 0.75 }}>{renderInline(item)}</li>
               ))}
             </ul>
           );
@@ -1207,11 +1230,11 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
                   <line x1="7" y1="6.5" x2="7" y2="9.5" />
                   <circle cx="7" cy="4.5" r="0.55" fill={rgba(na, 0.8)} stroke="none" />
                 </svg>
-                <span className="text-[13px] font-semibold tracking-tight leading-none" style={{ color: rgba(na, 0.85) }}>Note</span>
+                <span className="text-[13px] font-semibold tracking-tight leading-none" style={{ color: rgba(na, 0.85) }}>{block.label ?? "Note"}</span>
               </div>
               {/* Body */}
               <div className="px-4 py-3">
-                <p className="text-[14.5px] leading-relaxed tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.8 }}>{block.text}</p>
+                <p className="text-[14.5px] leading-relaxed tracking-tight text-[rgb(var(--fg))]" style={{ opacity: 0.8 }}>{renderInline(block.text)}</p>
               </div>
             </div>
           );
@@ -1315,7 +1338,7 @@ function buildSearchIndex(): SearchResult[] {
       for (const article of section.articles) {
         const textBlocks = article.body
           .filter((b): b is { type: "p"; text: string } => b.type === "p")
-          .map((b) => b.text)
+          .map((b) => b.text.replace(/\*\*/g, ""))
           .join(" ");
         results.push({
           productId: product.id,

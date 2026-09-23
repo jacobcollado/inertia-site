@@ -63,7 +63,7 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
       </DropdownMenu>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+        <div data-tour="licenses-list" className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
             <KeyRoundIcon className="size-5 text-muted-foreground" />
           </div>
@@ -82,7 +82,7 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
+        <div data-tour="licenses-list" className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {filtered.map((l, i) => {
             const tierLabel = l.tier === "lifetime" ? "Forever" : "Core";
             return (

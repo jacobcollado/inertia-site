@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
+  CompassIcon,
   LogOutIcon,
   SettingsIcon,
   ArrowLeftIcon,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut } from "./actions";
 import { AccountDialog } from "./account-dialog";
+import { startDashboardTour } from "./welcome-tour";
 
 function initials(name: string) {
   return name.slice(0, 2).toUpperCase();
@@ -92,6 +94,10 @@ export function TopbarUser({
             <DropdownMenuItem onClick={() => router.push("/dashboard/settings")}>
               <SettingsIcon />
               Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={startDashboardTour}>
+              <CompassIcon />
+              Take the tour
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

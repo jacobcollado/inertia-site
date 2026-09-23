@@ -169,7 +169,7 @@ export default function AetherChangelog() {
           Not on Aether yet?
         </p>
         <p className="text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-sm" style={{ opacity: 0.6 }}>
-          Every update above ships to your store automatically when you renew. No manual installs.
+          Every update above lands in your Inertia dashboard, free for life. Update whenever you're ready.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
           <Link

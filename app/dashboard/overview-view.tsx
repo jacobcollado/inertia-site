@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRightIcon, FolderKanbanIcon, ReceiptIcon, FileIcon, LifeBuoyIcon, XIcon } from "lucide-react";
+import { ArrowUpRightIcon, FolderKanbanIcon, XIcon } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent, TabsIndicator } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { WelcomeDialog, startDashboardTour } from "./welcome-tour";
 import { StatusPill } from "./status-pill";
 import { getSignedFileUrl } from "./actions";
 import { WhopCheckoutModal } from "./invoices/whop-checkout-modal";
@@ -55,70 +55,6 @@ function QuickActionPill({ label, badge, badgeCount, badgeUrgent, onClick, href 
     <button type="button" onClick={onClick} className={className}>
       {content}
     </button>
-  );
-}
-
-/* Decorative header for the welcome dialog. An isometric box stands in for
-   "your project taking shape," annotated with dimension lines and a callout
-   label like a real architectural drawing. Pure line art in the dashboard's
-   own neutral tokens (border, muted foreground), no accent color, so it
-   reads as a diagram, not a logo. Dimension lines sit clear of the cube's
-   silhouette (widest point is x = +-42, y = +-48) so they never cross it. */
-function BlueprintHero() {
-  return (
-    <div
-      aria-hidden
-      className="relative -mx-4 -mt-4 mb-1 h-44 overflow-hidden rounded-t-xl border-b"
-      style={{ backgroundColor: "var(--sh-sidebar)" }}
-    >
-      <svg viewBox="0 0 220 176" className="absolute inset-0 h-full w-full" fill="none">
-        <g transform="translate(110 88)">
-          {/* dimension line, left edge, with tick marks and a measurement label */}
-          <g stroke="var(--sh-muted-foreground)" strokeOpacity="0.45" strokeWidth="1">
-            <line x1="-64" y1="-48" x2="-64" y2="48" />
-            <line x1="-67" y1="-48" x2="-61" y2="-48" />
-            <line x1="-67" y1="48" x2="-61" y2="48" />
-          </g>
-          <text x="-70" y="0" textAnchor="end" dominantBaseline="middle" fontSize="8" letterSpacing="0.02em" fill="var(--sh-muted-foreground)" fillOpacity="0.65">48</text>
-
-          {/* dimension line, bottom edge */}
-          <g stroke="var(--sh-muted-foreground)" strokeOpacity="0.45" strokeWidth="1">
-            <line x1="-42" y1="60" x2="42" y2="60" />
-            <line x1="-42" y1="57" x2="-42" y2="63" />
-            <line x1="42" y1="57" x2="42" y2="63" />
-          </g>
-          <text x="0" y="72" textAnchor="middle" fontSize="8" letterSpacing="0.02em" fill="var(--sh-muted-foreground)" fillOpacity="0.65">+84</text>
-
-          {/* the cube itself */}
-          <g stroke="var(--sh-foreground)" strokeOpacity="0.55" strokeWidth="1.5" strokeLinejoin="round">
-            <path d="M0 -48 L42 -24 L0 0 L-42 -24 Z" fill="var(--sh-sidebar)" />
-            <path d="M-42 -24 L0 0 L0 48 L-42 24 Z" fill="var(--sh-border)" fillOpacity="0.35" />
-            <path d="M42 -24 L0 0 L0 48 L42 24 Z" fill="var(--sh-border)" fillOpacity="0.6" />
-          </g>
-
-          {/* leader line + label, top face */}
-          <line x1="0" y1="-24" x2="48" y2="-45" stroke="var(--sh-muted-foreground)" strokeOpacity="0.45" strokeWidth="1" />
-          <circle cx="0" cy="-24" r="1.8" fill="var(--sh-muted-foreground)" fillOpacity="0.65" />
-          <text x="51" y="-43" fontSize="8" letterSpacing="0.02em" fill="var(--sh-muted-foreground)" fillOpacity="0.65">Project</text>
-        </g>
-      </svg>
-    </div>
-  );
-}
-
-/* Icon-led action tile for the welcome dialog. Distinct from QuickActionPill
-   (a pill-shaped filter/toggle used elsewhere on this page) since this needs
-   to read clearly as a button a first-time visitor should press, not a
-   filter chip. */
-function WelcomeAction({ label, href, icon: Icon }: { label: string; href: string; icon: React.ComponentType<{ className?: string }> }) {
-  return (
-    <Link
-      href={href}
-      className="flex flex-col items-center gap-1.5 rounded-lg border bg-sidebar px-2 py-3 text-center hover:bg-sidebar-accent/60 hover:border-foreground/20 transition-colors"
-    >
-      <Icon className="size-4 text-foreground" />
-      <span className="text-[12px] font-medium tracking-tight text-foreground">{label}</span>
-    </Link>
   );
 }
 
@@ -208,6 +144,18 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
       router.replace("/dashboard");
     }
   }, [searchParams, router]);
+
+  // Demo account sees the welcome dialog once per browser session, for
+  // previewing it without creating a fresh account. Once, not every mount:
+  // the tour navigates back here and must not have the dialog reopen on it.
+  useEffect(() => {
+    if (clientEmail !== "demo@byinertia.com") return;
+    try {
+      if (sessionStorage.getItem("demo-welcome-shown")) return;
+      sessionStorage.setItem("demo-welcome-shown", "1");
+    } catch {}
+    setShowWelcome(true);
+  }, [clientEmail]);
 
   const firstProject = projects[0] ?? null;
 
@@ -303,7 +251,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
         <FirstProjectBar project={firstProject} onDismiss={dismissFirstProjectBar} />
       )}
       <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] sm:[mask-image:none]">
-        <div className="flex items-center gap-2 w-max sm:w-fit sm:flex-wrap">
+        <div data-tour="overview-actions" className="flex items-center gap-2 w-max sm:w-fit sm:flex-wrap">
           {unpaidInvoices.length > 0 && (
             <QuickActionPill
               label="Pay now"
@@ -335,7 +283,7 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="overview-summary" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
           href="/dashboard/projects"
           description="Projects"
@@ -525,25 +473,12 @@ export function OverviewView({ client, clientEmail, projects, invoices, files, m
         <WhopCheckoutModal planId={checkoutPlanId} clientEmail={clientEmail} onClose={() => setCheckoutPlanId(null)} />
       )}
 
-      <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
-        <DialogContent className="sm:max-w-md text-center">
-          <BlueprintHero />
-          <DialogHeader>
-            <DialogTitle className="text-[1.4rem] font-semibold tracking-[-0.03em]">
-              Welcome{client?.name ? `, ${client.name.split(" ")[0]}` : ""}
-            </DialogTitle>
-            <DialogDescription className="text-[13px] tracking-tight leading-relaxed">
-              Your account is set up. This is your client portal, where your projects, invoices, files, and messages all live. Check back for updates as work progresses, and reach out anytime through Support if you have questions.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-4 gap-2">
-            <WelcomeAction label="Projects" href="/dashboard/projects" icon={FolderKanbanIcon} />
-            <WelcomeAction label="Invoices" href="/dashboard/invoices" icon={ReceiptIcon} />
-            <WelcomeAction label="Files" href="/dashboard/files" icon={FileIcon} />
-            <WelcomeAction label="Support" href="/dashboard/support" icon={LifeBuoyIcon} />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <WelcomeDialog
+        open={showWelcome}
+        onOpenChange={setShowWelcome}
+        firstName={client?.name?.split(" ")[0]}
+        onStartTour={startDashboardTour}
+      />
     </div>
   );
 }

@@ -388,6 +388,13 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
     else paintTrack(indexRef.current, false);
   };
 
+  // Shortest way round the loop to a logical variation.
+  const goTo = (target: number) => {
+    let delta = (target - active + count) % count;
+    if (delta > count / 2) delta -= count;
+    if (delta !== 0) shift(delta);
+  };
+
   const onCardClick = (rawIndex: number) => {
     if (didDragRef.current) {
       didDragRef.current = false;
@@ -414,6 +421,9 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
         <h2 className="text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
           Infinite variations
         </h2>
+        <p className="-mt-1 mb-1 text-center text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md [text-wrap:balance]">
+          Four starting points. Change colors, type and layout in the theme editor, no code.
+        </p>
         <div
           role="tablist"
           aria-label="Preview device"
@@ -450,7 +460,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-          className={`w-full overflow-hidden outline-none pb-14 sm:pb-16 ${dragging ? "select-none cursor-grabbing" : "cursor-grab"}`}
+          className={`w-full overflow-hidden outline-none pb-16 sm:pb-20 ${dragging ? "select-none cursor-grabbing" : "cursor-grab"}`}
         >
           <div
             ref={trackRef}
@@ -509,14 +519,41 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center">
           <div
-            className="flex items-center justify-between gap-4 pointer-events-auto px-4 sm:px-5"
-            style={slideWidth > 0 ? { width: slideWidth } : undefined}
+            className="flex items-center justify-between gap-4 pointer-events-auto mx-4 sm:mx-5 pt-3 border-t border-[rgb(var(--line))]"
+            style={slideWidth > 0 ? { width: slideWidth - 32 } : undefined}
           >
-            <VariationLabel
-              name={variations[active]?.name ?? ""}
-              reduceMotion={reduceMotion}
-            />
-            <div className="flex items-center gap-1.5 shrink-0 ml-4">
+            <div className="flex min-w-0 items-baseline gap-2.5">
+              <VariationLabel
+                name={variations[active]?.name ?? ""}
+                reduceMotion={reduceMotion}
+              />
+              <span className="shrink-0 text-[14px] tracking-tight tabular-nums text-[rgb(var(--muted))]">
+                {active + 1} of {count}
+              </span>
+            </div>
+            {/* Every variation at a glance, and a direct jump to any of them. */}
+            <div className="hidden sm:flex items-center gap-1.5" role="tablist" aria-label="Variations">
+              {variations.map((v, i) => (
+                <button
+                  key={v.name}
+                  type="button"
+                  role="tab"
+                  aria-selected={active === i}
+                  aria-label={v.name}
+                  onClick={() => goTo(i)}
+                  className="group flex h-[38px] items-center px-0.5 [-webkit-tap-highlight-color:transparent]"
+                >
+                  <span
+                    className={`block h-[3px] rounded-full transition-[width,background-color] duration-300 ${
+                      active === i
+                        ? "w-7 bg-[rgb(var(--fg))]"
+                        : "w-4 bg-[rgb(var(--fg)/0.18)] group-hover:bg-[rgb(var(--fg)/0.4)]"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 aria-label="Previous variation"

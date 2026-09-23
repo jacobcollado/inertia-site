@@ -61,7 +61,7 @@ export function InvoicesView({ invoices, clientEmail }: { invoices: Invoice[]; c
       </DropdownMenu>
 
       {filteredInvoices.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+        <div data-tour="invoices-list" className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
             <ReceiptIcon className="size-5 text-muted-foreground" />
           </div>
@@ -80,7 +80,7 @@ export function InvoicesView({ invoices, clientEmail }: { invoices: Invoice[]; c
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
+        <div data-tour="invoices-list" className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {filteredInvoices.map((inv, i) => {
             const unpaid = inv.status !== "paid" && inv.status !== "draft";
             const monthLabel = inv.due_date ? monthFmt.format(new Date(inv.due_date)) : inv.label;

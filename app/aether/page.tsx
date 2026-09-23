@@ -6,7 +6,7 @@ import { ConversionFeatures } from "./conversion-features";
 import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
 import { AetherFaq } from "./faq";
-import { SecondaryFeatures } from "./secondary-features";
+import { SetupSteps } from "./setup-steps";
 import { Comparison } from "./comparison";
 import { Testimonials } from "./testimonials";
 import { StickyCta } from "./sticky-cta";
@@ -15,19 +15,19 @@ import { AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
 
 export const metadata: Metadata = {
   title: "Aether",
-  description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. $125 once.",
+  description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and installed for you the same day. $125 once.",
   alternates: { canonical: "https://byinertia.com/aether" },
   openGraph: {
     type: "website",
     url: "https://byinertia.com/aether",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. $125 once.",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and installed for you the same day. $125 once.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Aether Shopify Theme" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and live in under an hour. $125 once.",
+    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and installed for you the same day. $125 once.",
     images: ["/og.png"],
   },
 };
@@ -108,10 +108,10 @@ export default function AetherPage() {
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
-      {/* Secondary features */}
+      {/* Setup effort, the last doubt before the comparison and price. */}
       <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
-        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">Built in, not bolted on</p>
-        <SecondaryFeatures features={SECONDARY_FEATURES} />
+        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">Set up for you, same day</p>
+        <SetupSteps />
       </div>
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />

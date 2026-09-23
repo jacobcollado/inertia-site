@@ -14,8 +14,8 @@ const ASSURANCES = [
     body: "Pay securely through Stripe. Your license key usually lands in your inbox within a minute.",
   },
   {
-    title: "After you launch",
-    body: "Install help and priority support from the people who built Aether, plus every future update, included.",
+    title: "After you buy",
+    body: "We install Aether for you the same day, or you can do it yourself. Priority support and every future update, included.",
   },
 ];
 

@@ -10,7 +10,7 @@ export function AetherFaq() {
         {" "}easier than it sounds.
       </h2>
       <p className="mt-3 max-w-xl text-[15px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-        No code needed. Live in under an hour, and we&apos;ll help if you get stuck.
+        We install Aether for you, the same day. Prefer to do it yourself? No code needed, and we&apos;ll help if you get stuck.
       </p>
       <Link
         href="/docs?from=aether"

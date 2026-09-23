@@ -66,6 +66,7 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
           />
         </div>
         <Link
+          data-tour="support-new"
           href="/dashboard/support/new"
           className="flex items-center justify-center gap-1.5 rounded-md border bg-sidebar text-foreground px-3.5 py-2 text-sm font-medium tracking-tight hover:bg-sidebar-accent/40 transition-colors shrink-0"
         >
@@ -119,7 +120,7 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+        <div data-tour="support-list" className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
             <MessageCircleIcon className="size-5 text-muted-foreground" />
           </div>
@@ -138,7 +139,7 @@ export function CasesView({ cases, messages }: { cases: Case[]; messages: Messag
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
+        <div data-tour="support-list" className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {filtered.map((c, i) => {
             const waitingOnClient = c.status !== "closed" && lastSenderByCase.get(c.id) === "admin";
             return (

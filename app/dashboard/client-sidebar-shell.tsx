@@ -38,6 +38,7 @@ import { NavUser } from "./nav-user";
 import { TopbarUser } from "./topbar-user";
 import { cn } from "@/lib/utils";
 import { PageCrumbProvider, usePageCrumbValues } from "./page-crumb-context";
+import { DashboardTour } from "./welcome-tour";
 
 const OVERVIEW_NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboardIcon },
@@ -69,7 +70,7 @@ function NavItems({ items, pathname, casesNeedingResponse }: { items: typeof WOR
         const active = href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
         const badge = label === "Support" ? casesNeedingResponse : undefined;
         return (
-          <SidebarMenuItem key={href}>
+          <SidebarMenuItem key={href} data-tour={label.toLowerCase()}>
             <SidebarMenuButton
               tooltip={label}
               isActive={active}
@@ -469,10 +470,11 @@ export function ClientSidebarShell({ children, casesNeedingResponse = 0, email, 
         <AppSidebar casesNeedingResponse={casesNeedingResponse} email={email} displayName={displayName} avatarUrl={avatarUrl} />
       </div>
       <MobileNavDock casesNeedingResponse={casesNeedingResponse} />
+      <DashboardTour />
       <SidebarInset>
         <PageCrumbProvider>
           <SiteHeader email={email} displayName={displayName} avatarUrl={avatarUrl} />
-          <main className="flex flex-1 flex-col gap-6 p-4 pb-24 md:pb-4 lg:p-6">
+          <main data-tour-page className="flex flex-1 flex-col gap-6 p-4 pb-24 md:pb-4 lg:p-6">
             {children}
           </main>
         </PageCrumbProvider>

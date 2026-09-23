@@ -63,7 +63,7 @@ export function ProjectsView({ projects, projectUpdates }: { projects: Project[]
       </DropdownMenu>
 
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
+        <div data-tour="projects-list" className="flex flex-col items-center gap-3 rounded-md border bg-sidebar px-6 py-14 text-center sm:rounded-sm">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
             <FolderIcon className="size-5 text-muted-foreground" />
           </div>
@@ -82,7 +82,7 @@ export function ProjectsView({ projects, projectUpdates }: { projects: Project[]
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
+        <div data-tour="projects-list" className="flex flex-col gap-3 sm:gap-0 sm:rounded-sm sm:border sm:bg-sidebar sm:overflow-hidden">
           {sorted.map((p, i) => {
             const updates = projectUpdates.filter(u => u.project_id === p.id);
             const latestStatus = updates[0]?.status ?? p.status;

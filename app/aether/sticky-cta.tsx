@@ -68,7 +68,7 @@ export function StickyCta() {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,0.61,0.36,1)] ${
+      className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-start sm:justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,0.61,0.36,1)] ${
         visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0"
       }`}
       // Hidden from assistive tech while off screen: the page already has real
