@@ -5,10 +5,10 @@ import { PolicyText } from "../policy-text";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
-  description: "Digital products are final sale, but we will always work to make things right. Here's how refunds work at Inertia.",
+  description: "If we can't get Aether working on your store within 14 days, you get a full refund. Here's how refunds work at Inertia.",
 };
 
-const EFFECTIVE = "September 23, 2026";
+const EFFECTIVE = "September 25, 2026";
 const COMPANY = "Inertia Studio LLC";
 const CONTACT = "hello@byinertia.com";
 
@@ -16,7 +16,7 @@ const SECTIONS = [
   {
     id: "digital-products",
     title: "Digital Products",
-    body: `All products sold by ${COMPANY} ("Inertia", "we", "us"), including Shopify themes such as Aether, are digital goods delivered electronically. Because the product is accessible immediately upon purchase and cannot be returned, all sales are final. We do not offer refunds as a matter of standard policy.`,
+    body: `All products sold by ${COMPANY} ("Inertia", "we", "us"), including Shopify themes such as Aether, are digital goods delivered electronically. Because the product is accessible immediately upon purchase and cannot be returned, we do not offer refunds for change of mind. Aether purchases are covered by the guarantee below.`,
   },
   {
     id: "our-commitment",
@@ -24,9 +24,9 @@ const SECTIONS = [
     body: `That said, we stand behind everything we sell. If you run into a problem (a bug, something that isn't working as documented, or any other issue with your purchase), contact us at ${CONTACT} and we will do our best to make it right. For the first 14 days after purchase, we will fix any issue with the theme and help you set it up on your store. After that, support and advice continue through your dashboard at byinertia.com/dashboard. We take every complaint seriously and will work with you to resolve the issue. We would rather spend the time fixing something than leave a customer frustrated.`,
   },
   {
-    id: "exceptions",
-    title: "Exceptions",
-    body: "In rare cases where a product is found to be materially defective or significantly not as described, and where we are unable to resolve the issue through support, we may issue a refund at our sole discretion. Refund requests of this kind must be submitted within 14 days of purchase. We do not issue refunds for: change of mind, purchases made by mistake, incompatibility with third-party apps or custom code not provided by Inertia, or issues arising from modifications made to the theme after purchase.",
+    id: "aether-guarantee",
+    title: "Aether Guarantee",
+    body: `If we can't get Aether working on your store, you get a full refund. To use it, contact us at ${CONTACT} within 14 days of purchase and give us the chance to fix the problem. If we can't resolve it, we refund the full purchase price and your license is deactivated. The guarantee does not cover: change of mind, purchases made by mistake, incompatibility with third-party apps or custom code not provided by Inertia, or issues arising from modifications made to the theme after purchase.`,
   },
   {
     id: "service-engagements",

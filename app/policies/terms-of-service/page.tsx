@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "How engagements with Inertia work. Ownership, payment, revisions, support, and the rest, in plain terms.",
 };
 
-const EFFECTIVE = "September 23, 2026";
+const EFFECTIVE = "September 25, 2026";
 const COMPANY = "Inertia Studio LLC";
 const CONTACT = "hello@byinertia.com";
 const JURISDICTION = "Illinois, United States";
@@ -42,7 +42,7 @@ const SECTIONS = [
   {
     id: "aether",
     title: "Aether Theme Purchases",
-    body: "Aether is a digital product. Your theme download and license key are delivered immediately upon purchase, and because of that digital nature and immediate delivery, purchases are not eligible for a refund as standard. Refund requests are considered case by case, as set out in our Refund Policy. For 14 days from purchase, we go out of our way to help: we will fix any issue with the theme and help you set it up on your store. After this 14-day window, you are the sole owner and controller of your licensed copy of the theme and your store, including any changes made to either. We continue to provide support and advice through your personal dashboard at byinertia.com/dashboard, which you gain access to upon purchase. Your license covers use of the theme on the store it is activated on; the underlying theme remains Inertia's work, as set out under Intellectual Property & Ownership.",
+    body: "Aether is a digital product. Your theme download and license key are delivered immediately upon purchase, and because of that digital nature and immediate delivery, purchases are not eligible for a refund for change of mind. If we can't get Aether working on your store within 14 days of purchase, you are entitled to a full refund, as set out in our Refund Policy. For 14 days from purchase, we go out of our way to help: we will fix any issue with the theme and help you set it up on your store. After this 14-day window, you are the sole owner and controller of your licensed copy of the theme and your store, including any changes made to either. We continue to provide support and advice through your personal dashboard at byinertia.com/dashboard, which you gain access to upon purchase. Your license covers use of the theme on the store it is activated on; the underlying theme remains Inertia's work, as set out under Intellectual Property & Ownership.",
   },
   {
     id: "revisions",

@@ -84,8 +84,15 @@ function usePostHogInstance(): PostHogHandle {
   }, []);
 
   const setConsent = (allowed: boolean) => {
-    if (ph) applyConsentTo(ph, allowed);
-    else pendingConsent.current = allowed;
+    if (ph) {
+      applyConsentTo(ph, allowed);
+      // The pageview for the page the banner was accepted on already fired
+      // while capture was opted out, so PostHog dropped it. Resend it, or a
+      // first visit's landing page (usually /aether from an ad) never shows.
+      if (allowed) ph.capture("$pageview");
+    } else {
+      pendingConsent.current = allowed;
+    }
   };
 
   return { instance: ph, setConsent };

@@ -189,7 +189,7 @@ export function AcceptInviteForm() {
                 Link expired
               </h1>
               <p className="text-[13px] tracking-tight text-muted-foreground">
-                This invite link is no longer valid. Contact us for a new one.
+                This link is no longer valid. Bought Aether? Open the setup link in your email again for a fresh one. Otherwise, contact us for a new invite.
               </p>
             </div>
             <Link href="/login" className="text-[13px] tracking-tight text-muted-foreground hover:text-foreground transition-colors text-center">

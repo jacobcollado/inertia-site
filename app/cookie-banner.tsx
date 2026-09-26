@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { usePostHog } from "./posthog-provider";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 
@@ -31,20 +32,30 @@ export function CookieBanner() {
   const [expanded, setExpanded] = useState(false);
   const [analytics, setAnalytics] = useState(true);
 
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem("cookie_consent")) {
-        const t = setTimeout(() => setVisible(true), 2500);
-        return () => clearTimeout(t);
-      }
-    } catch {}
-  }, []);
+  const pathname = usePathname();
 
   const applyConsent = (analyticsAllowed: boolean) => {
     try { localStorage.setItem("cookie_consent", analyticsAllowed ? "accepted" : "declined"); } catch {}
     setConsent(analyticsAllowed);
     setVisible(false);
   };
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("cookie_consent")) return;
+    } catch {}
+    // /aether is where ad traffic lands, and most of it bounced before
+    // answering the banner, so PostHog saw almost none of it. Visitors there
+    // are opted in without the banner. Temporary: remove this branch to put
+    // /aether back behind the banner.
+    if (pathname?.startsWith("/aether")) {
+      applyConsent(true);
+      return;
+    }
+    const t = setTimeout(() => setVisible(true), 2500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   if (!visible) return null;
 

@@ -5,14 +5,14 @@ import { renderInviteEmail } from "@/lib/invite-email";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-05-27.dahlia" });
 
-async function sendInviteEmail(email: string, actionLink: string): Promise<boolean> {
+async function sendInviteEmail(email: string, setupLink: string): Promise<boolean> {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     console.warn("[claim-purchase] RESEND_API_KEY not set, cannot send setup email");
     return false;
   }
 
-  const { subject, html, text } = renderInviteEmail({ actionLink });
+  const { subject, html, text } = renderInviteEmail({ actionLink: setupLink });
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -99,11 +99,26 @@ export async function POST(req: Request) {
     // so this is a refresh or a second visit to the success page.
     const { data: existingClient } = await admin
       .from("clients")
-      .select("id")
+      .select("id, name")
       .eq("email", email)
       .maybeSingle();
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
+    // The email links to /api/claim-link, which mints a fresh Supabase link
+    // on click. Emailing Supabase's own link meant it expired before slower
+    // buyers opened it. See that route for the full story.
+    const setupLink = `${siteUrl}/api/claim-link?session_id=${encodeURIComponent(session.id)}`;
+
     if (existingClient) {
+      // No name yet means they never finished setup, so "sign in" would be a
+      // dead end with no password. Send the setup email again instead.
+      if (!existingClient.name) {
+        const sent = await sendInviteEmail(email, setupLink);
+        if (!sent) {
+          return NextResponse.json({ error: "The setup email failed to send" }, { status: 500 });
+        }
+        return NextResponse.json({ state: "invite_sent" satisfies ClaimState, email });
+      }
       return NextResponse.json({ state: "already_claimed" satisfies ClaimState, email });
     }
 
@@ -113,7 +128,6 @@ export async function POST(req: Request) {
     // byinertia.com domain. Supabase's built-in mailer sends from a shared
     // Supabase domain that fails SPF/DKIM alignment for us, and those invites
     // land in spam while the license email (same domain as Resend) does not.
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? new URL(req.url).origin;
     const { data: invited, error: inviteError } = await admin.auth.admin.generateLink({
       type: "invite",
       email,
@@ -152,13 +166,9 @@ export async function POST(req: Request) {
       await admin.from("licenses").update({ email }).eq("id", license.id);
     }
 
-    const actionLink = invited.properties?.action_link;
-    if (!actionLink) {
-      console.error("[claim-purchase] generateLink returned no action_link");
-      return NextResponse.json({ error: "Could not create setup link" }, { status: 500 });
-    }
-
-    const sent = await sendInviteEmail(email, actionLink);
+    // generateLink is only here to create the user. Its action_link is not
+    // emailed; /api/claim-link mints a fresh one when the buyer clicks.
+    const sent = await sendInviteEmail(email, setupLink);
     if (!sent) {
       // The account exists either way; only the email failed. Say so rather
       // than reporting success for a message that never went out.

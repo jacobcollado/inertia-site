@@ -103,7 +103,7 @@ export default function AetherPage() {
 
       <VariationsScroll variations={THEME_VARIATIONS} />
 
-      {/* Renders its own leading rule, and nothing while reviews are placeholders. */}
+      {/* Renders its own leading rule. */}
       <Testimonials />
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />

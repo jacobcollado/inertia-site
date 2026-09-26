@@ -25,7 +25,10 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
           />
         </h1>
         <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md sm:max-w-xl">
-          A better Shopify theme for independent brands, made by real design engineers.
+          A premium Shopify theme for independent brands, installed on your store the same day.
+        </p>
+        <p className="-mt-1 text-[13px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.75 }}>
+          $125 once. No renewals. Full refund if we can&apos;t get it working.
         </p>
         <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link

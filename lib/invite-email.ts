@@ -56,7 +56,7 @@ export function renderInviteEmail({ actionLink }: InviteEmailInput) {
             </tr>
           </table>
 
-          <p style="margin:24px 0 0;font-size:12px;color:#8c8c8c;line-height:1.5;letter-spacing:-0.01em;">This link expires in 24 hours. If it stops working, you can request a fresh one from the sign-in page.</p>
+          <p style="margin:24px 0 0;font-size:12px;color:#8c8c8c;line-height:1.5;letter-spacing:-0.01em;">This link works for 30 days after your purchase, until your account is set up. After that, sign in at byinertia.com/login.</p>
 
         </td></tr>
 
@@ -75,7 +75,7 @@ export function renderInviteEmail({ actionLink }: InviteEmailInput) {
     "Finish setting up your Inertia account.",
     "Choose a password and your account is ready. Your license key, receipt, and theme downloads are already waiting inside.",
     actionLink,
-    "This link expires in 24 hours. If it stops working, you can request a fresh one from the sign-in page.",
+    "This link works for 30 days after your purchase, until your account is set up. After that, sign in at byinertia.com/login.",
     `Installation guide: ${docsUrl}`,
     "Didn't buy Aether? You can ignore this email.",
     "Inertia",
