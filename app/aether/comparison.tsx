@@ -73,7 +73,7 @@ export function Comparison() {
               aria-selected={i === index}
               aria-controls="compare-panel"
               onClick={() => setIndex(i)}
-              className={`relative h-9 whitespace-nowrap px-4 text-[13px] tracking-tight transition-colors [-webkit-tap-highlight-color:transparent] sm:px-5 sm:text-[14px] ${
+              className={`relative h-8 whitespace-nowrap px-4 text-[13px] tracking-tight transition-colors [-webkit-tap-highlight-color:transparent] sm:px-5 sm:text-[14px] ${
                 i === index ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
               }`}
             >
@@ -87,24 +87,26 @@ export function Comparison() {
         id="compare-panel"
         role="tabpanel"
         aria-labelledby={`compare-tab-${view.id}`}
-        className="rise rise--liquid mt-10"
+        className="rise rise--liquid mt-8"
         style={{ "--rise-delay": "80ms" } as React.CSSProperties}
       >
-        <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-3 pb-3 text-[12px] tracking-tight text-[rgb(var(--muted))] sm:gap-x-6 sm:text-[13px]">
+        {/* Kept quiet on purpose: one weight, one size, dashed rules like the
+            FAQ, and the other column faded back so Aether's reads first. */}
+        <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-3 pb-2.5 text-[12px] tracking-tight text-[rgb(var(--muted))] sm:gap-x-6 sm:text-[13px]">
           <span />
           <span className="text-[rgb(var(--fg))]">Aether</span>
-          <span>{view.tab}</span>
+          <span className="opacity-70">{view.tab}</span>
         </div>
         {/* Keyed by view so the rows fade in fresh on each switch. */}
-        <div key={view.id} className="animate-in fade-in duration-500 motion-reduce:animate-none">
+        <div key={view.id} className="animate-in fade-in duration-500 motion-reduce:animate-none divide-y divide-dashed divide-[rgb(var(--line))] border-y border-dashed border-[rgb(var(--line))]">
           {view.rows.map((row) => (
             <div
               key={row.label}
-              className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-3 border-t border-[rgb(var(--line))] py-4 text-[14px] leading-snug tracking-tight sm:gap-x-6 sm:py-5 sm:text-[16px]"
+              className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-3 py-3.5 text-[14px] leading-snug tracking-tight sm:gap-x-6 sm:py-4 sm:text-[15px]"
             >
               <span className="text-[rgb(var(--muted))]">{row.label}</span>
               <span className="text-[rgb(var(--fg))]">{row.aether}</span>
-              <span className="text-[rgb(var(--muted))]">{row.them}</span>
+              <span className="text-[rgb(var(--muted))] opacity-70">{row.them}</span>
             </div>
           ))}
         </div>

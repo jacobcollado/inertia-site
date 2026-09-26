@@ -78,7 +78,7 @@ export function LicensesView({ licenses }: { licenses: License[] }) {
             </p>
           </div>
           {filter === "all" && (
-            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/aether/buy" />}>
+            <Button variant="outline" size="sm" className="mt-1" nativeButton={false} render={<Link href="/aether#pricing" />}>
               Get a license
             </Button>
           )}

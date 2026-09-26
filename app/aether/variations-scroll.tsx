@@ -38,11 +38,6 @@ const EXTEND_THRESHOLD = 2;
 const NAV_BUTTON_CLASS =
   "relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface)/0.45)] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]";
 
-const LABEL_MOTION = `opacity ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, filter ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
-const LABEL_EXIT_MS = Math.round(AETHER_LIQUID_MS * 0.42);
-
-type LabelPhase = "visible" | "exit" | "enter-from";
-
 /**
  * One device-mode's render of a variation card. `src` swaps in place on a
  * mode switch; `visible` (driven by the caller's modeSettled flag) eases
@@ -90,58 +85,6 @@ function VariationShot({
       draggable={false}
       loading="eager"
     />
-  );
-}
-
-function VariationLabel({ name, reduceMotion }: { name: string; reduceMotion: boolean }) {
-  const [displayName, setDisplayName] = useState(name);
-  const [phase, setPhase] = useState<LabelPhase>("visible");
-  const nameRef = useRef(name);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  useEffect(() => {
-    if (name === nameRef.current) return;
-
-    if (reduceMotion) {
-      nameRef.current = name;
-      setDisplayName(name);
-      setPhase("visible");
-      return;
-    }
-
-    setPhase("exit");
-    clearTimeout(timerRef.current);
-
-    timerRef.current = setTimeout(() => {
-      nameRef.current = name;
-      setDisplayName(name);
-      setPhase("enter-from");
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setPhase("visible"));
-      });
-    }, LABEL_EXIT_MS);
-
-    return () => clearTimeout(timerRef.current);
-  }, [name, reduceMotion]);
-
-  const motion =
-    phase === "visible"
-      ? { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" }
-      : phase === "exit"
-        ? { opacity: 0, transform: "translateY(-5px)", filter: "blur(5px)" }
-        : { opacity: 0, transform: "translateY(5px)", filter: "blur(5px)" };
-
-  return (
-    <p
-      className="text-left text-[18px] sm:text-[20px] font-normal tracking-[-0.02em] text-[rgb(var(--fg))] min-w-0"
-      style={{
-        ...motion,
-        transition: phase === "enter-from" || reduceMotion ? "none" : LABEL_MOTION,
-        willChange: reduceMotion ? undefined : "opacity, transform, filter",
-      }}
-    >
-      {displayName}
-    </p>
   );
 }
 
@@ -419,30 +362,32 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
     <section className="relative py-16 sm:py-24 rise rise--liquid">
       <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] mb-8 sm:mb-10 flex flex-col items-center gap-4">
         <h2 className="text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-          Infinite variations
+          Make it yours
         </h2>
         <p className="-mt-1 mb-1 text-center text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md [text-wrap:balance]">
-          Four starting points. Change colors, type and layout in the theme editor, no code.
+          Start from one of four styles, then change colors, fonts and layout in the theme editor. No code.
         </p>
+        {/* The styles, by name, are the section's one obvious control. The
+            device switch is secondary and lives in the bar under the cards. */}
         <div
           role="tablist"
-          aria-label="Preview device"
-          className="inline-flex items-center gap-0.5 rounded-full bg-[rgb(var(--surface)/0.45)] p-1 text-[13px] tracking-tight"
+          aria-label="Aether styles"
+          className="inline-flex items-center gap-0.5 rounded-full bg-[rgb(var(--surface)/0.45)] p-1 text-[13px] sm:text-[14px] tracking-tight"
         >
-          {(viewportIsMobile ? (["mobile", "desktop"] as const) : (["desktop", "mobile"] as const)).map((option) => (
+          {variations.map((v, i) => (
             <button
-              key={option}
+              key={v.name}
               type="button"
               role="tab"
-              aria-selected={mode === option}
-              onClick={() => handleModeChange(option)}
-              className={`rounded-full px-4 py-1.5 capitalize transition-colors ${
-                mode === option
+              aria-selected={active === i}
+              onClick={() => goTo(i)}
+              className={`rounded-full px-3 sm:px-4 py-1.5 transition-colors [-webkit-tap-highlight-color:transparent] ${
+                active === i
                   ? "bg-[rgb(var(--fg))] text-[rgb(var(--bg))]"
                   : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
               }`}
             >
-              {option}
+              {v.name}
             </button>
           ))}
         </div>
@@ -522,34 +467,25 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
             className="flex items-center justify-between gap-4 pointer-events-auto mx-4 sm:mx-5 pt-3 border-t border-[rgb(var(--line))]"
             style={slideWidth > 0 ? { width: slideWidth - 32 } : undefined}
           >
-            <div className="flex min-w-0 items-baseline gap-2.5">
-              <VariationLabel
-                name={variations[active]?.name ?? ""}
-                reduceMotion={reduceMotion}
-              />
-              <span className="shrink-0 text-[14px] tracking-tight tabular-nums text-[rgb(var(--muted))]">
-                {active + 1} of {count}
-              </span>
-            </div>
-            {/* Every variation at a glance, and a direct jump to any of them. */}
-            <div className="hidden sm:flex items-center gap-1.5" role="tablist" aria-label="Variations">
-              {variations.map((v, i) => (
+            <div
+              role="tablist"
+              aria-label="Preview device"
+              className="inline-flex items-center gap-0.5 text-[13px] sm:text-[14px] tracking-tight"
+            >
+              {(viewportIsMobile ? (["mobile", "desktop"] as const) : (["desktop", "mobile"] as const)).map((option) => (
                 <button
-                  key={v.name}
+                  key={option}
                   type="button"
                   role="tab"
-                  aria-selected={active === i}
-                  aria-label={v.name}
-                  onClick={() => goTo(i)}
-                  className="group flex h-[38px] items-center px-0.5 [-webkit-tap-highlight-color:transparent]"
+                  aria-selected={mode === option}
+                  onClick={() => handleModeChange(option)}
+                  className={`h-[38px] px-2.5 first:pl-0 capitalize transition-colors [-webkit-tap-highlight-color:transparent] ${
+                    mode === option
+                      ? "text-[rgb(var(--fg))]"
+                      : "text-[rgb(var(--muted))] opacity-70 hover:opacity-100 hover:text-[rgb(var(--fg))]"
+                  }`}
                 >
-                  <span
-                    className={`block h-[3px] rounded-full transition-[width,background-color] duration-300 ${
-                      active === i
-                        ? "w-7 bg-[rgb(var(--fg))]"
-                        : "w-4 bg-[rgb(var(--fg)/0.18)] group-hover:bg-[rgb(var(--fg)/0.4)]"
-                    }`}
-                  />
+                  {option}
                 </button>
               ))}
             </div>

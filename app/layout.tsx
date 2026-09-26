@@ -140,9 +140,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "description": "A premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu.",
             "offers": {
               "@type": "Offer",
-              "price": "85",
+              "price": "125",
               "priceCurrency": "USD",
-              "url": "https://byinertia.com/aether/buy",
+              "url": "https://byinertia.com/aether#pricing",
             },
             "provider": {
               "@type": "Organization",

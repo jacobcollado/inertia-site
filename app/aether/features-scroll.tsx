@@ -605,7 +605,7 @@ export function FeaturesScroll({
     <section ref={sectionRef} className="relative py-16 sm:py-24 rise rise--liquid">
       <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex items-center justify-between gap-4 mb-16 sm:mb-16">
         <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-          Sell smarter
+          Built to sell
         </h2>
         <div className="shrink-0 w-auto [&>div]:w-auto [&_a]:w-auto">
           <DemoButton href={demoUrl} password="aether" />

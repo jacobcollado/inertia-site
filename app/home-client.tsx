@@ -5,6 +5,7 @@ import { createPortal, flushSync } from "react-dom";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { AskAiLinks } from "@/components/ask-ai-links";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -3759,6 +3760,31 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   );
 }
 
+const ASK_AI_PROMPT =
+  "What is Inertia (byinertia.com)? Tell me what the studio does, the kind of clients they work with, and why someone would hire them.";
+
+function AskAi() {
+  return (
+    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      <div className="max-w-2xl sm:max-w-3xl mx-auto text-center">
+        <h2
+          className="text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight"
+          style={{ color: "rgb(var(--fg))" }}
+        >
+          Don&rsquo;t take our word for it
+        </h2>
+        <p
+          className="mt-3.5 sm:mt-4 text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight text-balance"
+          style={{ color: "rgb(var(--muted))" }}
+        >
+          Ask your AI of choice about Inertia.
+        </p>
+        <AskAiLinks prompt={ASK_AI_PROMPT} className="mt-7 sm:mt-8" />
+      </div>
+    </section>
+  );
+}
+
 function formatPostDate(date: string): string {
   const d = new Date(date);
   if (Number.isNaN(d.getTime())) return "";
@@ -4330,6 +4356,10 @@ function VisualLayout({
           <div className="py-16 sm:py-24" />
 
           <ClientTypeList items={initialWork} onDark />
+
+          <div className="py-16 sm:py-24" />
+
+          <AskAi />
 
           <div className="py-24 sm:py-28" />
         </div>

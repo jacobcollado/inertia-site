@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import { renderLicenseEmail } from "@/lib/license-email";
+import { renderSetupEmail } from "@/lib/setup-email";
 import { CURRENT_THEME_FILE } from "@/lib/aether-theme";
 import { sendMetaEvent } from "@/lib/meta-capi";
 
@@ -45,16 +46,14 @@ function generateLicenseKey(): string {
   return `AETH-${part()}-${part()}-${part()}`;
 }
 
-async function sendLicenseEmail(email: string, key: string, tier: string, sessionId: string) {
+async function sendResendEmail(to: string, { subject, html, text }: { subject: string; html: string; text: string }) {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     console.warn("[stripe-webhook] RESEND_API_KEY not set, skipping email");
     return;
   }
 
-  const { subject, html, text } = renderLicenseEmail({ key, tier, sessionId });
-
-  await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${resendKey}`,
@@ -62,12 +61,15 @@ async function sendLicenseEmail(email: string, key: string, tier: string, sessio
     },
     body: JSON.stringify({
       from: "Inertia <hello@byinertia.com>",
-      to: [email],
+      to: [to],
       subject,
       html,
       text,
     }),
   });
+  if (!res.ok) {
+    console.error("[stripe-webhook] Resend send failed:", res.status, await res.text().catch(() => ""));
+  }
 }
 
 export async function POST(req: Request) {
@@ -133,10 +135,20 @@ export async function POST(req: Request) {
   }
 
   try {
-    await sendLicenseEmail(email, key, tier, session.id);
+    await sendResendEmail(email, renderLicenseEmail({ key, tier, sessionId: session.id }));
   } catch (err) {
     // Don't fail the webhook if email fails — license is already saved
     console.error("[stripe-webhook] email send failed", err);
+  }
+
+  // Sent second, so it lands just after the key it refers to. Asks for the
+  // store's .myshopify.com address and collaborator code so we can install.
+  // Runs after the duplicate guard above, so a Stripe redelivery can't send
+  // it twice.
+  try {
+    await sendResendEmail(email, renderSetupEmail());
+  } catch (err) {
+    console.error("[stripe-webhook] setup email send failed", err);
   }
 
   /* Meta Purchase, sent from here rather than the browser: this is the only

@@ -26,7 +26,7 @@ const LICENSE = {
     {
       // First: the delivery promise is the thing a buyer wants settled before
       // anything else, so it leads rather than naming a feature.
-      label: "Instant delivery, key in your inbox",
+      label: "License key in your inbox within a minute",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
           <circle cx="5" cy="8" r="3" />
@@ -76,7 +76,7 @@ const LICENSE = {
     },
     {
       label: "Theme install included",
-      bonus: "$50 value for free",
+      bonus: "Worth $50, free",
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
           <path d="M3 13 9.5 6.5" />
@@ -85,7 +85,22 @@ const LICENSE = {
         </svg>
       ),
     },
-  ] satisfies { label: string; icon: ReactNode; bonus?: string }[],
+    {
+      // Last, and full width on desktop: it's the seventh card in a two-column
+      // grid, and the width gives room to say what's inside.
+      label: "Personal dashboard included",
+      detail: "Your license key, the latest theme files and support, all in one place.",
+      wide: true,
+      icon: (
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
+          <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" />
+          <path d="M5.5 2.5v11" />
+          <path d="M8 6h4" />
+          <path d="M8 9h2.5" />
+        </svg>
+      ),
+    },
+  ] satisfies { label: string; icon: ReactNode; bonus?: string; detail?: string; wide?: boolean }[],
 };
 
 type Status = "idle" | "submitting" | "error";
@@ -126,10 +141,18 @@ function IncludeCard({ item, mobileFirst = false }: { item: IncludeItem; mobileF
     );
   }
 
+  const detail = "detail" in item ? item.detail : undefined;
+  const wide = "wide" in item && item.wide ? "sm:col-span-2" : "";
+
   return (
-    <div className={`${INCLUDE_CARD_CLASS} flex flex-col items-start justify-center ${INCLUDE_CAROUSEL_CLASS} ${orderClass}`}>
+    <div className={`${INCLUDE_CARD_CLASS} flex flex-col items-start justify-center ${INCLUDE_CAROUSEL_CLASS} ${wide} ${orderClass}`}>
       {icon}
       <p className={INCLUDE_LABEL_CLASS}>{item.label}</p>
+      {detail ? (
+        <p className="mt-1 text-[14px] sm:text-[15px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+          {detail}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -262,7 +285,7 @@ export function InlinePricing() {
               {...(status === "submitting" ? {} : ctaScalePressOnSelf)}
             >
               {status === "submitting" ? <Spinner /> : null}
-              {status === "submitting" ? "Redirecting…" : "Own Aether"}
+              {status === "submitting" ? "Redirecting…" : "Try Aether"}
             </button>
             <label
               className="flex w-full cursor-pointer items-center gap-2.5 sm:w-auto [-webkit-tap-highlight-color:transparent]"

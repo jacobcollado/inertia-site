@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { AskAiLinks } from "@/components/ask-ai-links";
 import { RevealDetail } from "./reveal-detail";
 
 /* Only the doubts that stop a purchase. Each one is closed until tapped, so
@@ -18,6 +19,10 @@ const QUESTIONS = [
     a: "Most Shopify apps add themselves to any theme. If one needs placing, we set it up while installing Aether.",
   },
   {
+    q: "What if something breaks?",
+    a: "For your first 14 days we fix anything that comes up. After that, support carries on in your dashboard.",
+  },
+  {
     q: "What does single store mean?",
     a: "One license covers one Shopify store. Moving to a different store? Reply to your purchase email and we'll move it over.",
   },
@@ -31,8 +36,10 @@ export function AetherFaq() {
         <br className="sm:hidden" aria-hidden="true" />
         {" "}easier than it sounds.
       </h2>
-      <p className="mt-3 max-w-xl text-[15px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-        We install Aether for you, the same day. Prefer to do it yourself? No code needed. For your first 14 days we&apos;ll fix anything that comes up, and after that, support carries on in your dashboard.
+      {/* Capped near the heading's own width on mobile so the two read as one
+          block; balance keeps the two lines even instead of leaving an orphan. */}
+      <p className="mt-3 max-w-[16.5rem] sm:max-w-xl text-balance text-[15px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+        We install it for you the same day, or you can do it yourself with no code.
       </p>
       <div className="mt-8 w-full max-w-xl divide-y divide-dashed divide-[rgb(var(--line))] border-y border-dashed border-[rgb(var(--line))] text-left">
         {QUESTIONS.map(({ q, a }) => (
@@ -55,6 +62,23 @@ export function AetherFaq() {
           <polyline points="9 4 13 8 9 12" />
         </svg>
       </Link>
+    </section>
+  );
+}
+
+const ASK_AI_PROMPT =
+  "Look at byinertia.com/aether and tell me what the Aether Shopify theme includes, what it costs, and whether it's a good fit for my store.";
+
+export function AetherAskAi() {
+  return (
+    <section className="flex flex-col items-center justify-center px-3 py-16 sm:py-24 text-center rise rise--liquid">
+      <h2 className="text-[28px] sm:text-[36px] font-normal tracking-[-0.04em] leading-tight text-[rgb(var(--fg))]">
+        Still deciding?
+      </h2>
+      <p className="mt-3 max-w-xl text-[15px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+        Ask your AI of choice about Aether.
+      </p>
+      <AskAiLinks prompt={ASK_AI_PROMPT} className="mt-8 w-full max-w-xl" />
     </section>
   );
 }

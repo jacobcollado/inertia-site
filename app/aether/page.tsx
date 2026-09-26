@@ -2,32 +2,31 @@ import type { Metadata } from "next";
 import { AetherHero } from "./aether-hero";
 import { HeroRule } from "./hero-rule";
 import { FeaturesScroll } from "./features-scroll";
-import { ConversionFeatures } from "./conversion-features";
+import { StoresOnAether } from "./stores-on-aether";
 import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
-import { AetherFaq } from "./faq";
+import { AetherAskAi, AetherFaq } from "./faq";
 import { SetupSteps } from "./setup-steps";
 import { Comparison } from "./comparison";
 import { Testimonials } from "./testimonials";
-import { StickyCta } from "./sticky-cta";
 import { TrackAetherViewContent } from "./track-view-content";
 import { AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
 
 export const metadata: Metadata = {
   title: "Aether",
-  description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and installed for you the same day. $125 once.",
+  description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
   alternates: { canonical: "https://byinertia.com/aether" },
   openGraph: {
     type: "website",
     url: "https://byinertia.com/aether",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and installed for you the same day. $125 once.",
+    description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Aether Shopify Theme" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Aether - Premium Shopify Theme for Independent Brands",
-    description: "Aether is a premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu, and installed for you the same day. $125 once.",
+    description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
     images: ["/og.png"],
   },
 };
@@ -35,16 +34,16 @@ export const metadata: Metadata = {
 const KEY_FEATURES = [
   {
     title: "Guided format",
-    desc: "Every landing sends visitors somewhere.",
+    desc: "Every page points shoppers to the next step.",
     visual: "guided",
     image: "/aether/guided.jpg",
-    imageMobile: "/aether/nocturne-mobile.png",
+    imageMobile: "/aether/hero-mobile-center-v3.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
   {
     title: "Upsell",
-    desc: "Free shipping thresholds that lift the basket.",
+    desc: "A free shipping bar that gets shoppers to add one more item.",
     visual: "upsell",
     image: "/aether/upsell.png",
     imageMobile: "/aether/feature-mobile-cart.png",
@@ -53,7 +52,7 @@ const KEY_FEATURES = [
   },
   {
     title: "Scarcity",
-    desc: "Sold-out sizes marked before the tap.",
+    desc: "Low stock and sold-out sizes show before anyone taps.",
     visual: "scarcity",
     image: "/aether/scarcity.png",
     imageMobile: "/aether/feature-mobile-product.png",
@@ -83,18 +82,14 @@ const THEME_VARIATIONS = [
 export default function AetherPage() {
   return (
     <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
-
       <TrackAetherViewContent />
-
-      <StickyCta />
 
       <AetherHero demoUrl={DEMO_URL} />
 
       <HeroRule />
 
-      {/* Proof first: cold traffic needs a reason to believe before a
-          feature list. */}
-      <ConversionFeatures demoUrl={DEMO_URL} />
+      {/* Proof first, and light: real stores before any feature list. */}
+      <StoresOnAether />
 
       {/* Key features — carousel */}
       <FeaturesScroll features={KEY_FEATURES} demoUrl={DEMO_URL} />
@@ -140,6 +135,10 @@ export default function AetherPage() {
 
       {/* FAQ */}
       <AetherFaq />
+
+      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+
+      <AetherAskAi />
 
     </main>
   );

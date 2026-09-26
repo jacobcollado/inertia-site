@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // "How much work is this?" answered right before the comparison. Install and
 // setup are done for the buyer, same day, through a Shopify collaborator
@@ -8,68 +8,29 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const LIVE_GREEN = "22 163 74";
 
-// Small, muted stand-ins for what the buyer actually sees at each step.
-// Decorative only: the step copy carries the meaning.
-function Chip({ children }: { children: ReactNode }) {
-  return (
-    <div
-      aria-hidden="true"
-      className="mt-3 inline-flex max-w-full items-center gap-2.5 rounded-[8px] border border-[rgb(var(--line))] bg-[rgb(var(--surface)/0.5)] px-2.5 py-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))]"
-    >
-      {children}
-    </div>
-  );
-}
-
-const STEPS: { title: string; desc: string; time: string; chip: ReactNode }[] = [
+// Written for store owners who have never heard of a collaborator request:
+// what they do, in plain words, and a clear line where their part ends.
+const STEPS: { title: string; desc: string; time: string }[] = [
   {
-    title: "Buy",
-    desc: "Pay once. Your license key arrives within a minute.",
+    title: "You buy",
+    desc: "Your license key arrives within a minute.",
     time: "1 min",
-    chip: (
-      <Chip>
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 shrink-0">
-          <circle cx="5" cy="11" r="3" />
-          <path d="M7.2 8.8 14 2M11.5 4.5l2 2" />
-        </svg>
-        <span className="tabular-nums">AETH-4F9K-····-····</span>
-      </Chip>
-    ),
   },
   {
-    title: "Accept our request",
-    desc: "We send a Shopify collaborator request. One click lets us in.",
+    title: "You tap accept",
+    desc: "We ask Shopify for access to your store. One tap lets us in.",
     time: "1 min",
-    chip: (
-      <Chip>
-        <span className="truncate">Inertia requested collaborator access</span>
-        <span className="shrink-0 rounded-[6px] bg-[rgb(var(--fg))] px-2 py-0.5 text-[12px] font-medium text-[rgb(var(--bg))]">
-          Accept
-        </span>
-      </Chip>
-    ),
   },
   {
     title: "We set it up",
-    desc: "We install Aether and set it up on your store.",
+    desc: "We install Aether and get it ready. Nothing for you to do.",
     time: "Same day",
-    chip: (
-      <Chip>
-        <span className="text-[rgb(var(--fg))]">Aether</span>
-        <span className="inline-flex items-center gap-1">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-3 shrink-0">
-            <polyline points="3 8.5 6.5 12 13 4.5" />
-          </svg>
-          Set up and ready
-        </span>
-      </Chip>
-    ),
   },
 ];
 
 const ROW = "grid grid-cols-[4.25rem_0.75rem_1fr] sm:grid-cols-[5rem_0.75rem_1fr] gap-x-4 sm:gap-x-5";
-const TITLE = "text-[19px] sm:text-[21px] font-medium tracking-tight leading-[1.35] text-[rgb(var(--fg))]";
-const DESC = "mt-1 text-[16px] sm:text-[17px] tracking-tight leading-snug text-[rgb(var(--muted))] [text-wrap:pretty]";
+const TITLE = "text-[18px] sm:text-[19px] font-normal tracking-tight leading-[1.35] text-[rgb(var(--fg))]";
+const DESC = "mt-0.5 text-[15px] sm:text-[16px] tracking-tight leading-snug text-[rgb(var(--muted))] [text-wrap:pretty]";
 
 // The rail draws down one segment at a time once the list is in view, and
 // each dot fills as the line reaches it, ending on the green "live" dot.
@@ -132,10 +93,9 @@ export function SetupSteps() {
               />
             </span>
           </span>
-          <div className="min-w-0 pb-8 sm:pb-10">
+          <div className="min-w-0 pb-7 sm:pb-8">
             <p className={TITLE}>{step.title}</p>
             <p className={DESC}>{step.desc}</p>
-            {step.chip}
           </div>
         </li>
       ))}
@@ -157,8 +117,8 @@ export function SetupSteps() {
           />
         </span>
         <div>
-          <p className={TITLE}>You&apos;re live</p>
-          <p className={DESC}>Your current theme stays up until you publish.</p>
+          <p className={TITLE}>You publish when ready</p>
+          <p className={DESC}>Your current theme stays live until you do.</p>
         </div>
       </li>
     </ol>

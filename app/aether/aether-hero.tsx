@@ -25,7 +25,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
           />
         </h1>
         <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md sm:max-w-xl">
-          A premium Shopify theme for independent brands, installed on your store the same day.
+          A Shopify theme for brands that care how their store looks. We install it for you the same day.
         </p>
         <p className="-mt-1 text-[13px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.75 }}>
           $125 once. No renewals. Full refund if we can&apos;t get it working.
@@ -65,7 +65,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             className="w-[28vw] shrink-0 h-auto relative z-0 mr-[-7vw]"
           />
           <Image
-            src="/aether/hero-mobile-center-v2.png"
+            src="/aether/hero-mobile-center-v3.png"
             alt="Aether storefront on iPhone"
             width={1349}
             height={2691}
@@ -75,10 +75,10 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             priority
           />
           <Image
-            src="/aether/nocturne-mobile.png"
-            alt="Aether Nocturne variation on iPhone"
-            width={1300}
-            height={2642}
+            src="/aether/hero-mobile-center-v2.png"
+            alt="Aether storefront on iPhone"
+            width={1349}
+            height={2691}
             sizes="(max-width: 639px) 28vw, 0px"
             quality={90}
             className="w-[28vw] shrink-0 h-auto relative z-0 ml-[-7vw]"
