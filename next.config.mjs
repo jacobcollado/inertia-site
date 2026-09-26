@@ -57,6 +57,9 @@ const nextConfig = {
       // The standalone buy page was retired; checkout lives in the pricing
       // section on /aether. /aether/buy/success and /claim are still live.
       { source: "/aether/buy", destination: "/aether#pricing", permanent: true },
+      // An older copy of /aether/commercial, the page the nav links to. One
+      // URL keeps search engines from splitting the page in two.
+      { source: "/aether/enterprise", destination: "/aether/commercial", permanent: true },
       // Blog posts renamed to match their retitled headlines.
       { source: "/blog/the-brief-is-the-product", destination: "/blog/most-projects-fail-before-figma", permanent: true },
       { source: "/blog/judgment-over-output", destination: "/blog/someone-still-has-to-pick", permanent: true },

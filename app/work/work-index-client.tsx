@@ -1032,6 +1032,7 @@ export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWi
       className={`mx-auto w-full px-6 sm:px-8 ${isDesktop ? "pt-0 pb-0" : "pt-10 pb-24"}`}
       style={{ maxWidth: "64rem" }}
     >
+      <h1 className="sr-only">Work by Inertia, a design studio for founders</h1>
 
       {/* Service filter pills temporarily removed. The filter state and the
           derived `filters` list below are intentionally left in place so this

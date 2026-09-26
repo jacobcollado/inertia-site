@@ -82,6 +82,8 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPost(slug);
   if (!post) return { title: "Not found" };
+  // blog/layout sets a plain title, so the root " - Inertia" template doesn't
+  // reach this page; the suffix is added here.
   const title = `${post.title} - Inertia`;
   const description = post.summary || post.subtitle || `Published ${formatDate(post.date)}.`;
   const canonical = `https://byinertia.com/blog/${slug}`;
@@ -95,6 +97,7 @@ export async function generateMetadata({
       type: "article",
       url: canonical,
       publishedTime: post.date,
+      authors: ["Inertia"],
       images: [{ url: post.image ?? "/og.png", width: 1200, height: 630, alt: post.title }],
     },
     twitter: { card: "summary_large_image", title, description, images: [post.image ?? "/og.png"] },
@@ -114,8 +117,28 @@ export default async function BlogPost({
   const headings = extractHeadings(post.content);
   const stats = readingStats(post.content);
 
+  // Article structured data: who wrote it, when, and where it lives, tied to
+  // the Organization defined in the root layout.
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.summary || post.subtitle,
+    "datePublished": post.date,
+    "url": `https://byinertia.com/blog/${slug}`,
+    "mainEntityOfPage": `https://byinertia.com/blog/${slug}`,
+    "image": `https://byinertia.com${post.image ?? "/og.png"}`,
+    "wordCount": stats.words,
+    "author": { "@id": "https://byinertia.com/#organization" },
+    "publisher": { "@id": "https://byinertia.com/#organization" },
+  };
+
   return (
     <main className="relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] px-3">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* Single centred column: the TOC that used to occupy the left gutter
           now sits inline above the title. */}
       <div className="mx-auto w-full max-w-[48rem]">

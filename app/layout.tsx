@@ -28,7 +28,9 @@ export const metadata: Metadata = {
     template: "%s - Inertia",
   },
   description: "Inertia is a design studio for founders and brands moving fast. Direction, design, and development, one focused team.",
-  keywords: ["Shopify theme", "Aether Shopify theme", "Shopify store design", "custom Shopify storefront", "Inertia studio", "Shopify agency", "Shopify development", "ecommerce design"],
+  // Studio first, product second: this is the default for every page that
+  // doesn't set its own, so it describes Inertia rather than Aether.
+  keywords: ["Inertia", "Inertia studio", "design studio", "design studio for founders", "brand direction", "web design", "product design", "Shopify storefront design", "Aether Shopify theme"],
   authors: [{ name: "Inertia" }],
   creator: "Inertia",
   openGraph: {
@@ -46,9 +48,6 @@ export const metadata: Metadata = {
     title: "Inertia | Design Studio for Founders",
     description: "Inertia is a design studio for founders and brands moving fast. Direction, design, and development, one focused team.",
     images: ["/og.png"],
-  },
-  alternates: {
-    canonical: BASE_URL,
   },
   robots: {
     index: true,
@@ -95,11 +94,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "alternateName": "Inertia Studio",
             "url": "https://byinertia.com",
             "publisher": { "@id": "https://byinertia.com/#organization" },
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": { "@type": "EntryPoint", "urlTemplate": "https://byinertia.com/blog?q={search_term_string}" },
-              "query-input": "required name=search_term_string",
-            },
           })}}
         />
         <script
@@ -113,10 +107,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "url": "https://byinertia.com",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://byinertia.com/logo.png",
-              "width": 200,
-              "height": 200,
+              "url": "https://byinertia.com/icon-512.png",
+              "width": 512,
+              "height": 512,
             },
+            "description": "Inertia is a design studio for founders and brands moving fast. Direction, design, and development, one focused team. Makers of Aether, a Shopify theme.",
+            "email": "hello@byinertia.com",
             "sameAs": [
               "https://www.instagram.com/by.inertia/",
               "https://x.com/inertia_dev",
@@ -125,29 +121,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "@type": "ContactPoint",
               "contactType": "customer support",
               "url": "https://cal.com/jacob-c-99otvp/15min",
-            },
-          })}}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": "Aether Shopify Theme",
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": "Shopify",
-            "url": "https://byinertia.com/aether",
-            "description": "A premium Shopify theme built for conversion and brand presence. 41 sections, dark mode, sticky cart, mega menu.",
-            "offers": {
-              "@type": "Offer",
-              "price": "125",
-              "priceCurrency": "USD",
-              "url": "https://byinertia.com/aether#pricing",
-            },
-            "provider": {
-              "@type": "Organization",
-              "name": "Inertia",
-              "url": "https://byinertia.com",
             },
           })}}
         />

@@ -6,6 +6,7 @@ import { PolicyText } from "../policy-text";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "How engagements with Inertia work. Ownership, payment, revisions, support, and the rest, in plain terms.",
+  alternates: { canonical: "https://byinertia.com/policies/terms-of-service" },
 };
 
 const EFFECTIVE = "September 25, 2026";

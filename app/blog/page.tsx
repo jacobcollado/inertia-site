@@ -1,31 +1,24 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import type { PostMeta } from "@/lib/posts";
+import { getAllPosts } from "@/lib/posts";
 
+// Rendered on the server so the post links are in the HTML itself. It used to
+// fetch them in the browser, which left crawlers (search and AI alike) an
+// empty page with nothing to follow.
 export default function BlogIndex() {
-  const [posts, setPosts] = useState<PostMeta[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/content").then((r) => r.json()).then((d) => {
-      setPosts(d.posts ?? []);
-      setLoaded(true);
-    });
-  }, []);
+  const posts = getAllPosts();
 
   return (
     <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col px-3">
+      <h1 className="sr-only">Inertia journal, essays on design and craft</h1>
 
       <div className="pt-12 sm:pt-16" />
 
       {/* Grid */}
-      {!loaded ? null : posts.length === 0 ? (
+      {posts.length === 0 ? (
         <p className="px-6 sm:px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing here yet.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
-          {posts.map((post, i) => (
+          {posts.map((post) => (
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}

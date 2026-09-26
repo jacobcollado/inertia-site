@@ -31,7 +31,8 @@ async function fetchPurchase(sessionId?: string) {
 }
 
 export const metadata: Metadata = {
-  title: "Purchase complete — Aether by Inertia",
+  title: "Purchase complete",
+  robots: { index: false, follow: false },
 };
 
 export default async function BuySuccessPage({

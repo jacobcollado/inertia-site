@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ClaimFlow } from "./claim-flow";
 
 export const metadata: Metadata = {
-  title: "Set up your account, Aether by Inertia",
+  title: "Set up your account",
   robots: { index: false, follow: false },
 };
 

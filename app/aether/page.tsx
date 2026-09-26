@@ -5,7 +5,7 @@ import { FeaturesScroll } from "./features-scroll";
 import { StoresOnAether } from "./stores-on-aether";
 import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
-import { AetherAskAi, AetherFaq } from "./faq";
+import { AetherAskAi, AetherFaq, QUESTIONS } from "./faq";
 import { SetupSteps } from "./setup-steps";
 import { Comparison } from "./comparison";
 import { Testimonials } from "./testimonials";
@@ -13,19 +13,19 @@ import { TrackAetherViewContent } from "./track-view-content";
 import { AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
 
 export const metadata: Metadata = {
-  title: "Aether",
+  title: { absolute: "Aether, a Shopify theme by Inertia" },
   description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
   alternates: { canonical: "https://byinertia.com/aether" },
   openGraph: {
     type: "website",
     url: "https://byinertia.com/aether",
-    title: "Aether - Premium Shopify Theme for Independent Brands",
+    title: { absolute: "Aether, a Shopify theme by Inertia" },
     description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Aether Shopify Theme" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Aether - Premium Shopify Theme for Independent Brands",
+    title: { absolute: "Aether, a Shopify theme by Inertia" },
     description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
     images: ["/og.png"],
   },
@@ -72,6 +72,39 @@ const SECONDARY_FEATURES = [
 
 const DEMO_URL = "https://aether-starter.myshopify.com";
 
+// Structured data for this page only: the product, and the FAQ as questions
+// and answers. Lived in the root layout before, which put a product offer on
+// every page of the studio site.
+const AETHER_JSON_LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Aether",
+    "alternateName": "Aether Shopify Theme",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Shopify",
+    "url": "https://byinertia.com/aether",
+    "description": "A Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day.",
+    "offers": {
+      "@type": "Offer",
+      "price": "125",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": "https://byinertia.com/aether#pricing",
+    },
+    "publisher": { "@id": "https://byinertia.com/#organization" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": QUESTIONS.map(({ q, a }) => ({
+      "@type": "Question",
+      "name": q,
+      "acceptedAnswer": { "@type": "Answer", "text": a },
+    })),
+  },
+];
+
 const THEME_VARIATIONS = [
   { name: "Ember", image: "/aether/ember-macbook.png", imageMobile: "/aether/ember-mobile.png" },
   { name: "Parisian", image: "/aether/parisian-macbook.png", imageMobile: "/aether/parisian-mobile.png" },
@@ -82,6 +115,10 @@ const THEME_VARIATIONS = [
 export default function AetherPage() {
   return (
     <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(AETHER_JSON_LD) }}
+      />
       <TrackAetherViewContent />
 
       <AetherHero demoUrl={DEMO_URL} />

@@ -1,6 +1,11 @@
 import { getAllPosts } from "@/lib/posts";
 import { getAllWork } from "@/lib/work";
+import type { Metadata } from "next";
 import Home from "./home-client";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "https://byinertia.com" },
+};
 
 // The carousel marks are rendered as CSS masks off their raw public path, not
 // through next/image, so preload the original file — warming the optimizer URL

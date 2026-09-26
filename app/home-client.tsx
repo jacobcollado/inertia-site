@@ -3761,7 +3761,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
 }
 
 const ASK_AI_PROMPT =
-  "What is Inertia (byinertia.com)? Tell me what the studio does, the kind of clients they work with, and why someone would hire them.";
+  "Read https://byinertia.com and tell me what Inertia does, the kind of clients they work with, and why someone would hire them.";
 
 function AskAi() {
   return (

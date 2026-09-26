@@ -14,8 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE,                        lastModified: mostRecentPost,          changeFrequency: "weekly",  priority: 1.0 },
-    { url: `${BASE}/aether`,            lastModified: new Date("2025-05-01"),  changeFrequency: "weekly",  priority: 0.9 },
-    { url: `${BASE}/aether/enterprise`, lastModified: new Date("2025-04-01"),  changeFrequency: "monthly", priority: 0.7 },
+    { url: `${BASE}/aether`,            lastModified: new Date("2026-09-26"),  changeFrequency: "weekly",  priority: 0.9 },
+    { url: `${BASE}/aether/commercial`, lastModified: new Date("2026-09-26"),  changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/aether/changelog`,  lastModified: new Date(),              changeFrequency: "weekly",  priority: 0.6 },
     { url: `${BASE}/work`,              lastModified: new Date("2025-04-01"),  changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/blog`,              lastModified: mostRecentPost,          changeFrequency: "weekly",  priority: 0.7 },
@@ -23,6 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/policies`,                      lastModified: new Date("2026-05-01"),  changeFrequency: "yearly",  priority: 0.3 },
     { url: `${BASE}/policies/terms-of-service`,     lastModified: new Date("2026-05-01"),  changeFrequency: "yearly",  priority: 0.3 },
     { url: `${BASE}/policies/privacy-policy`,       lastModified: new Date("2026-05-01"),  changeFrequency: "yearly",  priority: 0.3 },
+    { url: `${BASE}/policies/refund-policy`,        lastModified: new Date("2026-05-01"),  changeFrequency: "yearly",  priority: 0.3 },
   ];
 
   const postRoutes: MetadataRoute.Sitemap = posts.map((p) => ({

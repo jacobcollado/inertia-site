@@ -6,6 +6,7 @@ import { PolicyText } from "../policy-text";
 export const metadata: Metadata = {
   title: "Refund Policy",
   description: "If we can't get Aether working on your store within 14 days, you get a full refund. Here's how refunds work at Inertia.",
+  alternates: { canonical: "https://byinertia.com/policies/refund-policy" },
 };
 
 const EFFECTIVE = "September 25, 2026";

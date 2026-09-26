@@ -15,7 +15,9 @@ export async function generateMetadata({
   const { slug } = await params;
   const piece = getWork(slug);
   if (!piece) return { title: "Not found" };
-  const title = `${piece.client} - Inertia Work`;
+  const title = `${piece.client}, work by Inertia`;
+  // The project's own shot shares better than the generic card.
+  const image = piece.card ?? piece.cover ?? "/og.png";
   const description = piece.summary || `A project built by Inertia for ${piece.client}.`;
   const canonical = `https://byinertia.com/work/${slug}`;
   return {
@@ -27,9 +29,9 @@ export async function generateMetadata({
       description,
       type: "article",
       url: canonical,
-      images: [{ url: "/og.png", width: 1200, height: 630, alt: `${piece.client} - Inertia` }],
+      images: [{ url: image, alt: `${piece.client}, work by Inertia` }],
     },
-    twitter: { card: "summary_large_image", title, description, images: ["/og.png"] },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
   };
 }
 

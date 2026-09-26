@@ -5,7 +5,7 @@ import { RevealDetail } from "./reveal-detail";
 
 /* Only the doubts that stop a purchase. Each one is closed until tapped, so
  * the section still reads as one short line of reassurance at a glance. */
-const QUESTIONS = [
+export const QUESTIONS = [
   {
     q: "Will I lose my products or reviews?",
     a: "No. A Shopify theme only changes how your store looks. Products, orders, customers and reviews stay exactly where they are.",
@@ -67,7 +67,7 @@ export function AetherFaq() {
 }
 
 const ASK_AI_PROMPT =
-  "Look at byinertia.com/aether and tell me what the Aether Shopify theme includes, what it costs, and whether it's a good fit for my store.";
+  "Read https://byinertia.com/aether and tell me what the Aether Shopify theme includes, what it costs, and whether it's a good fit for my store.";
 
 export function AetherAskAi() {
   return (

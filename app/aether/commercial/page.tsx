@@ -4,8 +4,9 @@ import Link from "next/link";
 const CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
 
 export const metadata: Metadata = {
-  title: "Aether commercial",
+  title: "Aether commercial license for agencies",
   description: "Ship client stores faster on Aether. Per-store or unlimited commercial licences, lifetime updates, and clean client handoff. Built for agencies, brand studios, and operators.",
+  alternates: { canonical: "https://byinertia.com/aether/commercial" },
 };
 
 const WHO = [

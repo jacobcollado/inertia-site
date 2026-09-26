@@ -6,6 +6,7 @@ import { PolicyText } from "../policy-text";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "What data Inertia collects, why we collect it, and how long we keep it. No surprises.",
+  alternates: { canonical: "https://byinertia.com/policies/privacy-policy" },
 };
 
 const EFFECTIVE = "June 6, 2026";

@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/dashboard", "/api", "/auth"],
+        disallow: ["/admin", "/dashboard", "/portal", "/api", "/auth", "/login", "/reset-password", "/accept-invite", "/aether/buy/", "/og-lab"],
       },
     ],
     sitemap: "https://byinertia.com/sitemap.xml",
