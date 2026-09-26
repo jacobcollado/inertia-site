@@ -6,8 +6,9 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 interface Testimonial {
   quote: string;
   name: string;
-  /** Brand logo, a circular PNG in /public/reviews. */
-  logo: string;
+  /** Brand logo, a circular PNG in /public/reviews. Optional: without one
+   * the caption shows the name alone. */
+  logo?: string;
 }
 
 /* Real reviews from brands Inertia has worked with, quoted as sent. The
@@ -26,6 +27,15 @@ const TESTIMONIALS: Testimonial[] = [
     name: "defy.ca",
     logo: "/reviews/defy.png",
   },
+  {
+    // The review named the studio "Agentic Web Designer"; Inertia is the
+    // current name, swapped in at the owner's request. Em dashes replaced
+    // with a period, per the site's copy rules.
+    quote:
+      "Awesome customer service from start to finish! They worked directly with me and my team throughout the entire process, were responsive, professional, and made sure everything was exactly how we wanted it. Great experience overall. 100% recommend Inertia to anyone looking for a reliable web design team!",
+    name: "Awoken Dreams",
+    logo: "/reviews/awokendreams.png",
+  },
 ];
 
 /* Mobile: a scroll-snap row with the next card peeking in. sm and up: the
@@ -43,13 +53,15 @@ function Card({ t, index }: { t: Testimonial; index: number }) {
       </blockquote>
       <figcaption className="flex items-center gap-2.5">
         {/* The ring keeps a white logo from dissolving into a light card. */}
-        <Image
-          src={t.logo}
-          alt=""
-          width={32}
-          height={32}
-          className="size-8 shrink-0 rounded-full ring-1 ring-[rgb(var(--line))]"
-        />
+        {t.logo ? (
+          <Image
+            src={t.logo}
+            alt=""
+            width={32}
+            height={32}
+            className="size-8 shrink-0 rounded-full ring-1 ring-[rgb(var(--line))]"
+          />
+        ) : null}
         <span className="text-[13px] tracking-tight text-[rgb(var(--fg))] sm:text-[14px]">{t.name}</span>
       </figcaption>
     </figure>
@@ -99,7 +111,7 @@ export function Testimonials() {
         </p>
         <div
           ref={trackRef}
-          className="no-scrollbar mx-auto max-w-[56rem] gap-3 max-sm:-mx-3 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:snap-x max-sm:snap-mandatory max-sm:px-3 max-sm:scroll-px-3 sm:grid sm:grid-cols-2 sm:gap-4"
+          className="no-scrollbar mx-auto max-w-[56rem] lg:max-w-[76rem] gap-3 max-sm:-mx-3 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:snap-x max-sm:snap-mandatory max-sm:px-3 max-sm:scroll-px-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4"
         >
           {TESTIMONIALS.map((t, i) => (
             <Card key={t.name} t={t} index={i} />

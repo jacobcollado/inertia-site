@@ -11,7 +11,7 @@ const STORES: { name: string; src: string; w: number; h: number; optical?: numbe
   { name: "Ellora LA", src: "/aether/stores/ellora-la.png", w: 400, h: 89 },
   // Solid, dense ink reads heavier than the rest at the same area.
   { name: "vora.archive", src: "/aether/stores/vora-archive.png", w: 116, h: 109, optical: 0.84 },
-  { name: "AD", src: "/aether/stores/ad.png", w: 324, h: 288 },
+  { name: "Awoken Dreams", src: "/aether/stores/ad.png", w: 324, h: 288 },
   { name: "Defy", src: "/aether/stores/defy.png", w: 400, h: 389 },
   // Widest mark, so it closes the row.
   { name: "Allure New York", src: "/aether/stores/allure-new-york.png", w: 1000, h: 135 },
