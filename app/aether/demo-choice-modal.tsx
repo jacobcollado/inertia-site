@@ -9,7 +9,9 @@ export const DEMO_CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
 const INSTAGRAM_HANDLE = "by.inertia";
 // ig.me opens a DM thread straight away on mobile (app) and desktop (web).
 const INSTAGRAM_DM_LINK = `https://ig.me/m/${INSTAGRAM_HANDLE}`;
-const EXIT_MS = 180;
+// Mobile slides the sheet a full screen height, so it gets a little longer.
+const EXIT_MS = 220;
+const EXIT_EASE = "cubic-bezier(0.4, 0, 1, 1)";
 
 const OPTION_CLASS = `group flex w-full items-center gap-3.5 ${ACTION_RADIUS_CLASS} border border-[rgb(var(--line))] bg-[rgb(var(--bg))] px-4 py-3.5 text-left transition-colors hover:border-[rgb(var(--fg)/0.35)] [-webkit-tap-highlight-color:transparent]`;
 const OPTION_ICON_CLASS = `flex size-9 shrink-0 items-center justify-center ${ACTION_RADIUS_CLASS} bg-[rgb(var(--fg)/0.06)] text-[rgb(var(--fg))]`;
@@ -63,9 +65,9 @@ export function DemoChoiceModal({ open, onClose }: { open: boolean; onClose: () 
           background: "rgba(0,0,0,0.45)",
           backdropFilter: "blur(6px)",
           WebkitBackdropFilter: "blur(6px)",
-          opacity: closing ? 0 : 1,
-          transition: `opacity ${EXIT_MS}ms ease`,
-          animation: "fade-in 200ms ease both",
+          animation: closing
+            ? `overlay-out ${EXIT_MS}ms ease both`
+            : "overlay-in 200ms ease both",
         }}
       />
       <div
@@ -77,10 +79,9 @@ export function DemoChoiceModal({ open, onClose }: { open: boolean; onClose: () 
         data-lenis-prevent
         className="relative w-full max-w-[26rem] rounded-2xl bg-[rgb(var(--surface))] p-5 outline-none sm:p-6"
         style={{
-          animation: closing ? "none" : "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both",
-          opacity: closing ? 0 : 1,
-          transform: closing ? "translateY(8px)" : undefined,
-          transition: `opacity ${EXIT_MS}ms ease, transform ${EXIT_MS}ms ease`,
+          animation: closing
+            ? `modal-down ${EXIT_MS}ms ${EXIT_EASE} both`
+            : "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both",
         }}
       >
         <div className="flex items-start justify-between gap-4">

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DemoButton } from "./demo-button";
+import { HeroPhones } from "./hero-phones";
 import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
 import { AETHER_PRICING_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
 
@@ -54,35 +55,8 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
         </div>
       </div>
       <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">
-        <div className="sm:hidden flex items-center justify-center px-2">
-          <Image
-            src="/aether/hero-mobile-left.png"
-            alt="Aether storefront on iPhone"
-            width={1300}
-            height={2642}
-            sizes="(max-width: 639px) 28vw, 0px"
-            quality={90}
-            className="w-[28vw] shrink-0 h-auto relative z-0 mr-[-7vw]"
-          />
-          <Image
-            src="/aether/hero-mobile-center-v3.png"
-            alt="Aether storefront on iPhone"
-            width={1349}
-            height={2691}
-            sizes="(max-width: 639px) 46vw, 0px"
-            quality={100}
-            className="w-[46vw] max-w-[15.5rem] shrink-0 h-auto relative z-10"
-            priority
-          />
-          <Image
-            src="/aether/hero-mobile-center-v2.png"
-            alt="Aether storefront on iPhone"
-            width={1349}
-            height={2691}
-            sizes="(max-width: 639px) 28vw, 0px"
-            quality={90}
-            className="w-[28vw] shrink-0 h-auto relative z-0 ml-[-7vw]"
-          />
+        <div className="sm:hidden px-2">
+          <HeroPhones />
         </div>
         <div className="hidden sm:block relative">
           <Image

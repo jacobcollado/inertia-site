@@ -7,7 +7,8 @@ import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
 import { AetherAskAi, AetherFaq, QUESTIONS } from "./faq";
 import { SetupSteps } from "./setup-steps";
-import { Comparison } from "./comparison";
+import { Bonuses } from "./bonuses";
+import { DemoSection } from "./demo-section";
 import { Testimonials } from "./testimonials";
 import { TrackAetherViewContent } from "./track-view-content";
 import { AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
@@ -133,6 +134,11 @@ export default function AetherPage() {
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
+      {/* The store itself, moving, right after the features it just listed. */}
+      <DemoSection href={DEMO_URL} password="aether" />
+
+      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+
       <VariationsScroll variations={THEME_VARIATIONS} />
 
       {/* Renders its own leading rule. */}
@@ -140,7 +146,7 @@ export default function AetherPage() {
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
-      {/* Setup effort, the last doubt before the comparison and price. */}
+      {/* Setup effort, the last doubt before the bonuses and price. */}
       <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
         <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">Set up for you, same day</p>
         <SetupSteps />
@@ -148,13 +154,13 @@ export default function AetherPage() {
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
-      {/* Comparison — sits immediately before pricing so the case is made at
-          the moment the price is read, not paragraphs earlier. */}
+      {/* Bonuses sit immediately before pricing, so the extras are counted
+          at the moment the price is read. */}
       <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
         <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
-          How it compares
+          Bonuses, included with purchase
         </p>
-        <Comparison />
+        <Bonuses />
       </div>
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />

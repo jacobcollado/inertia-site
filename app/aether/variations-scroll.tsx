@@ -34,6 +34,8 @@ const CONTENT_MAX_PX = 1280;
 const MOBILE_GUTTER_PX = 12;
 const INITIAL_RUNWAY = 3;
 const EXTEND_THRESHOLD = 2;
+// A short flick counts as a swipe even when it travels less than half a card.
+const FLICK_PX = 40;
 
 const NAV_BUTTON_CLASS =
   "relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface)/0.45)] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]";
@@ -283,7 +285,7 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
   }, [measureLayout, paintTrack]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0 || e.pointerType === "touch") return;
+    if (e.button !== 0) return;
     const track = trackRef.current;
     if (!track || step <= 0) return;
     didDragRef.current = false;
@@ -326,7 +328,9 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
     if (!track || step <= 0) return;
     const matrix = new DOMMatrix(getComputedStyle(track).transform);
     const offset = translateForIndex(indexRef.current);
-    const delta = Math.round((offset - matrix.m41) / step);
+    let delta = Math.round((offset - matrix.m41) / step);
+    const dx = e.clientX - drag.startX;
+    if (delta === 0 && Math.abs(dx) > FLICK_PX) delta = dx < 0 ? 1 : -1;
     if (delta !== 0) shift(delta);
     else paintTrack(indexRef.current, false);
   };
@@ -405,6 +409,9 @@ export function VariationsScroll({ variations }: { variations: ThemeVariation[] 
           onPointerMove={onPointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
+          // pan-y leaves vertical scrolling to the browser and hands
+          // horizontal drags to the pointer handlers, so touch can swipe.
+          style={{ touchAction: "pan-y" }}
           className={`w-full overflow-hidden outline-none pb-16 sm:pb-20 ${dragging ? "select-none cursor-grabbing" : "cursor-grab"}`}
         >
           <div

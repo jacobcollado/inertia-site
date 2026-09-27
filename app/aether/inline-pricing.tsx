@@ -16,7 +16,7 @@ const PRICE_TIMING = { duration: 520, easing: PRICE_BOUNCE_EASING };
 
 const INCLUDE_ICON = "size-[1em] shrink-0 text-[rgb(var(--muted))]";
 const INCLUDE_LABEL_CLASS =
-  "text-[16px] sm:text-[17px] font-normal tracking-tight leading-snug text-[rgb(var(--fg))] [text-wrap:pretty]";
+  "text-[15px] sm:text-[17px] font-normal tracking-tight leading-snug text-[rgb(var(--fg))] [text-wrap:pretty]";
 
 const LICENSE = {
   id: "lifetime" as const,
@@ -107,20 +107,20 @@ type Status = "idle" | "submitting" | "error";
 
 type IncludeItem = (typeof LICENSE.includes)[number];
 
-const INCLUDE_CAROUSEL_CLASS =
-  "min-h-[9.5rem] w-[min(17.5rem,calc(100vw-2.5rem))] shrink-0 snap-start sm:min-h-0 sm:w-auto sm:shrink";
 const INCLUDE_CARD_CLASS =
-  "rounded-xl bg-[rgb(var(--surface)/0.45)] px-4 py-5 sm:px-5 sm:py-4";
+  "rounded-xl bg-[rgb(var(--surface)/0.45)] px-3.5 py-4 sm:px-5 sm:py-4";
 const INCLUDE_BONUS_INNER_CLASS =
   "block rounded-[5px] bg-black px-2.5 py-1 text-[12px] sm:text-[13px] font-medium tracking-tight text-white whitespace-nowrap";
 
+// On mobile the cards sit in a two-column grid so all seven show without a
+// swipe; the install bonus leads, full width, so its badge has room.
 function IncludeCard({ item, mobileFirst = false }: { item: IncludeItem; mobileFirst?: boolean }) {
-  const orderClass = mobileFirst ? "order-first sm:order-none" : "";
+  const orderClass = mobileFirst ? "order-first col-span-2 mb-3 sm:order-none sm:col-span-1 sm:mb-0" : "";
   const icon = (
     <span
       // Sized in em off the label's font size, so icon, gap and text scale
       // together: icon ~1.4x the cap line, gap ~1.3x.
-      className="mb-[1.3em] flex shrink-0 items-center text-[16px] text-[rgb(var(--muted))] sm:text-[17px] [&_svg]:size-[1.4em]"
+      className="mb-3 sm:mb-[1.3em] flex shrink-0 items-center text-[15px] text-[rgb(var(--muted))] sm:text-[17px] [&_svg]:size-[1.4em]"
       aria-hidden="true"
     >
       {item.icon}
@@ -130,7 +130,7 @@ function IncludeCard({ item, mobileFirst = false }: { item: IncludeItem; mobileF
   if (item.bonus) {
     return (
       <div
-        className={`relative ${INCLUDE_CARD_CLASS} flex flex-col items-start justify-center overflow-visible ${INCLUDE_CAROUSEL_CLASS} ${orderClass}`}
+        className={`relative ${INCLUDE_CARD_CLASS} flex flex-col items-start justify-center overflow-visible ${orderClass}`}
       >
         {icon}
         <p className={INCLUDE_LABEL_CLASS}>{item.label}</p>
@@ -145,11 +145,11 @@ function IncludeCard({ item, mobileFirst = false }: { item: IncludeItem; mobileF
   const wide = "wide" in item && item.wide ? "sm:col-span-2" : "";
 
   return (
-    <div className={`${INCLUDE_CARD_CLASS} flex flex-col items-start justify-center ${INCLUDE_CAROUSEL_CLASS} ${wide} ${orderClass}`}>
+    <div className={`${INCLUDE_CARD_CLASS} flex flex-col items-start justify-start sm:justify-center ${wide} ${orderClass}`}>
       {icon}
       <p className={INCLUDE_LABEL_CLASS}>{item.label}</p>
       {detail ? (
-        <p className="mt-1 text-[14px] sm:text-[15px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+        <p className="mt-1 hidden sm:block text-[14px] sm:text-[15px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
           {detail}
         </p>
       ) : null}
@@ -230,10 +230,8 @@ export function InlinePricing() {
     <div className="w-full rise rise--liquid">
       <div
         role="region"
-        aria-roledescription="carousel"
         aria-label="What's included"
-        className="no-scrollbar -mx-3 mb-8 flex gap-3 overflow-x-auto overscroll-x-contain px-3 pb-4 snap-x snap-proximity sm:mx-0 sm:mb-10 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0"
-        style={{ WebkitOverflowScrolling: "touch" }}
+        className="mb-8 grid grid-cols-2 gap-3 sm:mb-10"
       >
         {LICENSE.includes.map((item) => (
           <IncludeCard key={item.label} item={item} mobileFirst={item.label === "Theme install included"} />

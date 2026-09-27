@@ -22,6 +22,7 @@ import {
   CtaGrain,
 } from "@/lib/cta-chrome";
 import type { PostMeta } from "@/lib/posts";
+import { PostCover, hasPostCover } from "@/components/post-figures";
 
 export type ClientCarouselItem = {
   slug: string;
@@ -3785,29 +3786,6 @@ function AskAi() {
   );
 }
 
-function formatPostDate(date: string): string {
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return "";
-  // Front-matter dates are calendar days parsed as UTC midnight, so format in
-  // UTC or they slip back a day west of Greenwich (and mismatch on hydrate).
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-}
-
-function TagPill({ tag }: { tag: string }) {
-  return (
-    <span
-      className="inline-flex items-center rounded-full px-2 py-0.5 text-[clamp(0.7rem,1.6vw,0.8rem)] leading-snug tracking-tight"
-      style={{
-        color: "#5c5c5c",
-        background: "rgba(26,26,26,0.04)",
-        boxShadow: "inset 0 1px 2px rgba(26,26,26,0.05), inset 0 0 0 1px rgba(26,26,26,0.08)",
-      }}
-    >
-      {tag}
-    </span>
-  );
-}
-
 function ArrowGlyph({ className }: { className?: string }) {
   return (
     <svg
@@ -3826,7 +3804,162 @@ function ArrowGlyph({ className }: { className?: string }) {
   );
 }
 
-// Newest essay leads as a quote card, the rest follow as a numbered index.
+// "Our thoughts" as a bento, in the same soft panel as "What we do" so the
+// two sections read as one family. The newest essay leads as a 2x2 card with
+// its pull quote; the rest are tiles. Each shows its post's cover sketch;
+// a post without one falls back to its pull quote. Mobile gets its own layout,
+// see below.
+const BLOG_TILE =
+  "group relative flex flex-col overflow-hidden rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.05)]";
+const BLOG_TILE_STYLE = {
+  background: "rgba(26,26,26,0.03)",
+  boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
+} as const;
+// Spans for the tiles after the first four, which share the last row with the
+// "All essays" tile: whatever's left of four columns, split between them.
+const BLOG_TAIL_SPANS: Record<number, string[]> = {
+  1: ["sm:col-span-3"],
+  2: ["sm:col-span-2", "sm:col-span-1"],
+  3: ["sm:col-span-1", "sm:col-span-1", "sm:col-span-1"],
+};
+
+// Front-matter dates are calendar days parsed as UTC midnight, so format in
+// UTC or they slip back a day west of Greenwich (and mismatch on hydrate).
+function formatPostDate(date: string): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+}
+
+// The tag as a small square-cornered chip, matching the 6px language of the
+// cards, with the date beside it as plain muted text. Read time was dropped:
+// every essay runs 500 to 580 words, so it said "3 min" on every card.
+function BlogMeta({ post }: { post: PostMeta }) {
+  return (
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-[13px] leading-none tracking-tight">
+      {post.tag && (
+        <span
+          className="inline-flex items-center rounded-[4px] px-1.5 py-1"
+          style={{ color: "#3d3d3d", background: "rgba(26,26,26,0.06)" }}
+        >
+          {post.tag}
+        </span>
+      )}
+      <time dateTime={post.date} className="tabular-nums" style={{ color: "#8a8a8a" }}>
+        {formatPostDate(post.date)}
+      </time>
+    </span>
+  );
+}
+
+// The post's own cover sketch, the same drawing its page opens with, on the
+// flat panel the post figures use. Boxes are sized to the tight crop's
+// 860:440, so the sketch fills them edge to edge.
+function BlogArt({ slug, className }: { slug: string; className?: string }) {
+  return (
+    <div className={cn("relative overflow-hidden rounded-[4px]", className)} style={{ background: "#f1f1f1" }}>
+      <div className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]">
+        <PostCover slug={slug} tight />
+      </div>
+    </div>
+  );
+}
+
+function BlogArrow() {
+  return (
+    <ArrowGlyph className="size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
+  );
+}
+
+// Sketch across the top, like the small tiles, so the lead card reads as the
+// same object at a larger size.
+function BlogFeatured({ post, className, style }: { post: PostMeta; className?: string; style?: React.CSSProperties }) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className={cn(BLOG_TILE, "sm:col-span-2 sm:row-span-2", className)}
+      style={{ ...BLOG_TILE_STYLE, ...style }}
+    >
+      {hasPostCover(post.slug) && (
+        <BlogArt slug={post.slug} className="m-4 mb-0 aspect-[860/440] shrink-0 sm:m-5 sm:mb-0" />
+      )}
+      <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-6">
+        <BlogMeta post={post} />
+        <p
+          className="mt-2.5 text-[clamp(1.35rem,2.6vw,1.9rem)] tracking-[-0.03em] leading-[1.15] text-pretty"
+          style={{ color: "#1a1a1a", fontWeight: 500 }}
+        >
+          {post.title}
+        </p>
+        {post.excerpt && (
+          <p
+            className="mt-3 text-[15px] sm:text-[17px] leading-relaxed tracking-tight text-pretty line-clamp-4"
+            style={{ color: "#5c5c5c" }}
+          >
+            {post.excerpt}
+          </p>
+        )}
+        <span
+          className="mt-auto pt-6 inline-flex items-center gap-1.5 text-[15px] sm:text-[16px] tracking-tight"
+          style={{ color: "#1a1a1a" }}
+        >
+          Read essay
+          <BlogArrow />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
+function BlogTile({
+  post,
+  wide,
+  className,
+  style,
+}: {
+  post: PostMeta;
+  wide: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <Link
+      href={`/blog/${post.slug}`}
+      className={cn(BLOG_TILE, "p-4 sm:p-5", wide && "sm:flex-row sm:items-stretch sm:gap-5", className)}
+      style={{ ...BLOG_TILE_STYLE, ...style }}
+    >
+      {hasPostCover(post.slug) && (
+        <BlogArt
+          slug={post.slug}
+          className={cn("mb-4 aspect-[860/440] w-full shrink-0", wide && "sm:mb-0 sm:w-64 sm:self-center")}
+        />
+      )}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <BlogMeta post={post} />
+        <p
+          className="mt-1.5 text-[17px] sm:text-[19px] tracking-[-0.02em] leading-snug text-pretty"
+          style={{ color: "#1a1a1a", fontWeight: 500 }}
+        >
+          {post.title}
+        </p>
+        {/* Type-only tiles get the pull quote so they don't read as empty
+            next to the ones with artwork. */}
+        {!hasPostCover(post.slug) && post.excerpt && (
+          <p
+            className="mt-2 text-[14px] sm:text-[15px] leading-snug tracking-tight text-pretty line-clamp-3"
+            style={{ color: "#5c5c5c" }}
+          >
+            {post.excerpt}
+          </p>
+        )}
+        <span className="mt-auto flex justify-end pt-4" style={{ color: "#1a1a1a" }}>
+          <BlogArrow />
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
@@ -3848,8 +3981,11 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
 
   if (posts.length === 0) return null;
   const [featured, ...rest] = posts;
+  const head = rest.slice(0, 4);
+  const tail = rest.slice(4, 7);
+  const tailSpans = BLOG_TAIL_SPANS[tail.length] ?? [];
 
-  const rowReveal = (i: number): React.CSSProperties => ({
+  const reveal = (i: number): React.CSSProperties => ({
     willChange: "opacity, transform, filter",
     opacity: revealed ? 1 : 0,
     transform: revealed ? "translateY(0)" : "translateY(6px)",
@@ -3861,126 +3997,88 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
 
   return (
     <section ref={sectionRef} className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-3xl sm:mx-auto">
-        <header
-          className="mb-8 sm:mb-10 text-center"
-          style={rowReveal(0)}
-        >
-          <h2>
-            <span
-              className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
-              style={{ background: "#1a1a1a" }}
-            >
-              Our thoughts
-            </span>
-          </h2>
-        </header>
-
-        <div style={rowReveal(1)}>
-          <Link
-            href={`/blog/${featured.slug}`}
-            className="group block rounded-[6px] px-5 sm:px-8 py-6 sm:py-8 transition-colors duration-200 hover:bg-[rgba(26,26,26,0.05)]"
-            style={{
-              background: "rgba(26,26,26,0.03)",
-              boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.07)",
-            }}
+      <div
+        className="rounded-[6px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
+        style={{
+          background: "rgba(26,26,26,0.04)",
+          boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
+        }}
+      >
+        <h2 className="mb-8 sm:mb-10 text-center" style={reveal(0)}>
+          <span
+            className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
+            style={{ background: "#1a1a1a" }}
           >
-            <div
-              className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[clamp(0.75rem,1.8vw,0.875rem)] tracking-tight"
-              style={{ color: "#8a8a8a" }}
-            >
-              {featured.tag && <TagPill tag={featured.tag} />}
-              <span>{formatPostDate(featured.date)}</span>
-              <span aria-hidden>·</span>
-              <span>{featured.readMinutes} min read</span>
-            </div>
-            <p
-              className="mt-4 text-[clamp(1.35rem,3.6vw,2rem)] tracking-[-0.03em] leading-[1.15] text-pretty"
-              style={{ color: "#1a1a1a" }}
-            >
-              {featured.title}
-            </p>
-            {featured.excerpt && (
-              <p
-                className="mt-4 pl-4 text-[clamp(0.95rem,2.2vw,1.125rem)] leading-relaxed tracking-tight text-pretty"
-                style={{ color: "#5c5c5c", borderLeft: "2px solid rgba(26,26,26,0.12)" }}
-              >
-                {featured.excerpt}
-              </p>
-            )}
-            <span
-              className="mt-6 inline-flex items-center gap-1.5 text-[clamp(0.875rem,2vw,1rem)] tracking-tight"
-              style={{ color: "#1a1a1a" }}
-            >
-              Read essay
-              <ArrowGlyph className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </span>
+            Our thoughts
+          </span>
+        </h2>
+
+        {/* Desktop: the bento. */}
+        <div className="hidden sm:grid sm:grid-cols-4 sm:auto-rows-[minmax(12rem,auto)] sm:gap-4">
+          <BlogFeatured post={featured} style={reveal(1)} />
+          {head.map((post, i) => (
+            <BlogTile key={post.slug} post={post} wide={false} style={reveal(i + 2)} />
+          ))}
+          {tail.map((post, i) => (
+            <BlogTile
+              key={post.slug}
+              post={post}
+              wide={tailSpans[i] !== "sm:col-span-1"}
+              className={tailSpans[i]}
+              style={reveal(i + 6)}
+            />
+          ))}
+          <Link
+            href="/blog"
+            className={cn(BLOG_TILE, "items-center justify-center gap-1.5 p-5 text-[16px] tracking-tight sm:flex-row")}
+            style={{ ...BLOG_TILE_STYLE, ...reveal(tail.length + 6), color: "#1a1a1a" }}
+          >
+            All essays
+            <BlogArrow />
           </Link>
         </div>
 
-        {rest.length > 0 && (
-          <ol className="mt-4 sm:mt-6">
+        {/* Mobile: the lead essay as a full card, the rest as a short list
+            with each post's sketch as a thumbnail, so every essay is visible
+            without swiping. */}
+        <div className="sm:hidden">
+          <BlogFeatured post={featured} style={reveal(1)} />
+          <ul className="mt-3">
             {rest.map((post, i) => (
-              <li
-                key={post.slug}
-                style={{ ...rowReveal(i + 2), borderTop: "1px solid rgba(26,26,26,0.08)" }}
-              >
+              <li key={post.slug} style={reveal(i + 2)}>
                 <Link
                   href={`/blog/${post.slug}`}
-                  className="group grid grid-cols-[2rem_1fr_auto] sm:grid-cols-[2.5rem_1fr_7rem_4rem] items-baseline gap-x-3 px-2 sm:px-3 py-4 sm:py-5 rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.03)]"
+                  className="group flex items-center gap-4 py-3.5"
+                  style={{ borderTop: i === 0 ? undefined : "1px solid rgba(26,26,26,0.08)" }}
                 >
-                  <span
-                    className="text-[clamp(0.8rem,1.8vw,0.9rem)] tabular-nums tracking-tight"
-                    style={{ color: "#a3a3a3" }}
-                  >
-                    {i + 2}
-                  </span>
-                  <span className="min-w-0">
+                  <span className="min-w-0 flex-1">
                     <span
-                      className="block text-[clamp(1rem,2.4vw,1.2rem)] tracking-[-0.025em] leading-snug text-pretty"
-                      style={{ color: "#1a1a1a" }}
+                      className="block text-[16.5px] tracking-[-0.02em] leading-snug text-pretty"
+                      style={{ color: "#1a1a1a", fontWeight: 500 }}
                     >
                       {post.title}
                     </span>
-                    {post.tag && (
-                      <span
-                        className="sm:hidden mt-1 block text-[0.8rem] tracking-tight"
-                        style={{ color: "#8a8a8a" }}
-                      >
-                        {post.tag}
-                      </span>
-                    )}
+                    <span className="mt-1.5 block">
+                      <BlogMeta post={post} />
+                    </span>
                   </span>
-                  <span
-                    className="hidden sm:block text-[0.875rem] tracking-tight"
-                    style={{ color: "#8a8a8a" }}
-                  >
-                    {post.tag}
-                  </span>
-                  <span
-                    className="text-right text-[clamp(0.8rem,1.8vw,0.875rem)] tabular-nums tracking-tight whitespace-nowrap"
-                    style={{ color: "#8a8a8a" }}
-                  >
-                    {formatPostDate(post.date)}
-                  </span>
+                  {hasPostCover(post.slug) && (
+                    <BlogArt slug={post.slug} className="aspect-[860/440] w-[6.5rem] shrink-0" />
+                  )}
                 </Link>
               </li>
             ))}
-          </ol>
-        )}
-
-        <div
-          className="pt-4 text-center"
-          style={{ ...rowReveal(rest.length + 2), borderTop: "1px solid rgba(26,26,26,0.08)" }}
-        >
-          <Link
-            href="/blog"
-            className="group inline-flex items-center gap-1.5 text-[clamp(0.875rem,2vw,1rem)] tracking-tight transition-colors duration-200 hover:text-[#1a1a1a]"
-            style={{ color: "#5c5c5c" }}
-          >
-            All essays
-            <ArrowGlyph className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
+          </ul>
+          <div className="mt-3 pt-4 text-center" style={{ ...reveal(rest.length + 2), borderTop: "1px solid rgba(26,26,26,0.08)" }}>
+            <Link
+              href="/blog"
+              className="group inline-flex items-center gap-1.5 text-[15px] tracking-tight"
+              style={{ color: "#1a1a1a" }}
+            >
+              All essays
+              <BlogArrow />
+            </Link>
+          </div>
         </div>
       </div>
     </section>

@@ -1,106 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
+import { DemoVideoModal } from "./demo-video-modal";
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const sync = () => setIsMobile(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  return isMobile;
-}
-
+/* Opens the demo recording in a dialog. The live store, and the password
+ * copy that goes with it, moved into the dialog's footer. The href stays on
+ * the anchor so a middle click or a no-JS visit still reaches the store. */
 export function DemoButton({ href, password }: { href: string; password: string }) {
-  const [state, setState] = useState<"idle" | "copying" | "copied">("idle");
-  const [hovered, setHovered] = useState(false);
-  const isMobile = useIsMobile();
-
-  const handleClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    setState("copying");
-    try {
-      await navigator.clipboard.writeText(password);
-    } catch {}
-    setState("copied");
-    setTimeout(() => {
-      if (window.matchMedia("(max-width: 639px)").matches) {
-        window.location.assign(href);
-      } else {
-        window.open(href, "_blank", "noreferrer");
-      }
-      setState("idle");
-    }, 1000);
-  };
-
-  const showTooltip = hovered && state === "idle";
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="relative w-full">
       <a
         href={href}
-        {...(!isMobile ? { target: "_blank", rel: "noreferrer" } : {})}
-        onClick={handleClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+          e.preventDefault();
+          setOpen(true);
+        }}
         className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} border border-[rgb(var(--line))] px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.4)] transition-colors whitespace-nowrap`}
       >
-        {state === "copied" ? (
-          <>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-[rgb(var(--muted))]" aria-hidden="true">
-              <polyline points="2 8 6 12 14 4" />
-            </svg>
-            <span className="text-[rgb(var(--muted))]">Password copied</span>
-          </>
-        ) : (
-          <>
-            View demo
-            <span aria-hidden="true" className="text-[rgb(var(--muted))]">↗</span>
-          </>
-        )}
+        <svg viewBox="0 0 16 16" fill="currentColor" className="size-[0.7em] text-[rgb(var(--muted))]" aria-hidden="true">
+          <path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.3-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7Z" />
+        </svg>
+        View demo
       </a>
-
-      {/* Desktop tooltip — centered under the button via inset-x-0 + mx-auto */}
-      <div
-        className="pointer-events-none hidden sm:flex absolute top-full mt-2 inset-x-0 justify-center z-20"
-        style={{
-          opacity: showTooltip ? 1 : 0,
-          transform: showTooltip ? "translateY(0)" : "translateY(-4px)",
-          transition: "opacity 160ms ease, transform 160ms ease",
-        }}
-      >
-        <div
-          className="relative whitespace-nowrap rounded-lg px-3 py-1.5"
-          style={{
-            background: "rgb(var(--surface-elevated))",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgb(var(--line))",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-          }}
-        >
-          <div
-            className="absolute -top-[4px] left-1/2 w-2 h-2"
-            style={{
-              background: "rgb(var(--surface-elevated))",
-              border: "1px solid rgb(var(--line))",
-              borderBottom: "none",
-              borderRight: "none",
-              transform: "translateX(-50%) rotate(45deg)",
-            }}
-          />
-          <p className="text-[11.5px] tracking-tight text-[rgb(var(--muted))]">
-            Store password <span className="font-medium text-[rgb(var(--fg))]">{password}</span> will be copied
-          </p>
-        </div>
-      </div>
-
+      <DemoVideoModal open={open} onClose={() => setOpen(false)} href={href} password={password} />
     </div>
   );
 }

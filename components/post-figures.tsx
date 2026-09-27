@@ -436,7 +436,11 @@ function CoverNarrowing() {
     const v = Math.sin(n * 12.9898) * 43758.5453;
     return v - Math.floor(v);
   };
-  const tiles = Array.from({ length: 40 }, (_, i) => ({ x: 210 + rand(i + 1) * 330, y: 150 + rand(i + 101) * 320 }));
+  // Rounded to a tenth: Math.sin's last few digits differ between Node and
+  // browsers, and this cover also renders inside a hydrated client component
+  // (the homepage blog tiles), where unrounded values fail hydration.
+  const r1 = (n: number) => Math.round(n * 10) / 10;
+  const tiles = Array.from({ length: 40 }, (_, i) => ({ x: r1(210 + rand(i + 1) * 330), y: r1(150 + rand(i + 101) * 320) }));
   return (
     <>
       {tiles.map((t, i) => (
@@ -601,12 +605,18 @@ export function hasPostCover(slug: string) {
   return slug in POST_COVERS;
 }
 
+// The union of every cover's drawn area, with a little room to spare. Small
+// placements (the homepage blog tiles) crop to it so the mark fills the slot
+// instead of floating in the full panel's margin. Check a new cover stays
+// inside it.
+const COVER_TIGHT_VIEWBOX = "170 95 860 440";
+
 // Fills its parent, which sets the 1200/630 panel and tint.
-export function PostCover({ slug }: { slug: string }) {
+export function PostCover({ slug, tight = false }: { slug: string; tight?: boolean }) {
   const Cover = POST_COVERS[slug];
   if (!Cover) return null;
   return (
-    <svg viewBox="0 0 1200 630" className="absolute inset-0 h-full w-full" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox={tight ? COVER_TIGHT_VIEWBOX : "0 0 1200 630"} className="absolute inset-0 h-full w-full" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <Cover />
     </svg>
   );
