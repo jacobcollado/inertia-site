@@ -139,7 +139,7 @@ export default function AetherPage() {
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
-      <VariationsScroll variations={THEME_VARIATIONS} />
+      <VariationsScroll variations={THEME_VARIATIONS} initial="Vespers" />
 
       {/* Renders its own leading rule. */}
       <Testimonials />

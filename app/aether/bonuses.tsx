@@ -15,6 +15,9 @@ type Bonus = {
   title: string;
   desc: string;
   kind: "guide" | "list";
+  /** What it would cost on its own, in USD. Summed into BONUS_TOTAL, which
+   * the pricing block also shows. */
+  worth: number;
   icon: ReactNode;
   // Lists only: how many rows the roster cover shows.
   rows?: number;
@@ -25,6 +28,7 @@ const ICON = "size-4 shrink-0";
 const BONUSES: Bonus[] = [
   {
     title: "Getting the most from Aether",
+    worth: 29,
     desc: "Which sections to use where, and the settings most stores never touch.",
     kind: "guide",
     icon: (
@@ -35,6 +39,7 @@ const BONUSES: Bonus[] = [
   },
   {
     title: "Shooting your products",
+    worth: 39,
     desc: "Lighting, angles and backgrounds for clean shots, on a phone or a camera.",
     kind: "guide",
     icon: (
@@ -46,6 +51,7 @@ const BONUSES: Bonus[] = [
   },
   {
     title: "Imagery that converts",
+    worth: 39,
     desc: "The kinds of photos that sell best on product and collection pages, and why.",
     kind: "guide",
     icon: (
@@ -58,6 +64,7 @@ const BONUSES: Bonus[] = [
   },
   {
     title: "Manufacturers we trust",
+    worth: 39,
     desc: "The two manufacturers we've worked with and can recommend.",
     kind: "list",
     rows: 2,
@@ -69,6 +76,7 @@ const BONUSES: Bonus[] = [
   },
   {
     title: "Designers we trust",
+    worth: 44,
     desc: "Designers for your logo, graphics and product artwork.",
     kind: "list",
     rows: 3,
@@ -150,8 +158,9 @@ function BonusCard({ bonus, index }: { bonus: Bonus; index: number }) {
         {guide ? <GuideCover icon={bonus.icon} /> : <ListCover icon={bonus.icon} rows={bonus.rows ?? 2} />}
       </div>
       <div className="flex flex-1 flex-col border-t border-[rgb(var(--line))] px-4 pt-4 pb-5 sm:px-5">
-        <span className="text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))]">
-          {guide ? "Guide" : "List"}
+        <span className="flex items-center justify-between gap-3 text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))]">
+          <span>{guide ? "Guide" : "List"}</span>
+          <span className="tabular-nums">Worth ${bonus.worth}</span>
         </span>
         <p className="mt-1 text-[16px] sm:text-[17px] tracking-tight leading-snug text-[rgb(var(--fg))]">{bonus.title}</p>
         <p className="mt-1 text-[14px] sm:text-[15px] tracking-tight leading-snug text-[rgb(var(--muted))] [text-wrap:pretty]">
@@ -162,12 +171,22 @@ function BonusCard({ bonus, index }: { bonus: Bonus; index: number }) {
   );
 }
 
+export const BONUS_TOTAL = BONUSES.reduce((sum, b) => sum + b.worth, 0);
+
 export function Bonuses() {
   return (
-    <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-6">
-      {BONUSES.map((b, i) => (
-        <BonusCard key={b.title} bonus={b} index={i} />
-      ))}
-    </ul>
+    <div className="w-full">
+      <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-6">
+        {BONUSES.map((b, i) => (
+          <BonusCard key={b.title} bonus={b} index={i} />
+        ))}
+      </ul>
+      <p
+        className="rise rise--liquid mt-6 text-center text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]"
+        style={{ "--rise-delay": "400ms" } as React.CSSProperties}
+      >
+        <span className="tabular-nums text-[rgb(var(--fg))]">${BONUS_TOTAL}</span> in bonuses, free with every license.
+      </p>
+    </div>
   );
 }

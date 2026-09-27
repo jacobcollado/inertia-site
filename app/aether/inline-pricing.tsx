@@ -10,6 +10,11 @@ import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
 import { createCtaScalePressOnRef, ctaScalePressOnSelf } from "@/lib/cta-hover-motion";
 import { trackMeta } from "../meta-pixel";
 import { AETHER_CHECKOUT_ID } from "@/lib/scroll-to-hash";
+import { BONUS_TOTAL } from "./bonuses";
+
+// The install is included free (see its include card); counted in the total
+// value shown above the price along with the bonuses.
+const INSTALL_VALUE = 50;
 
 const PRICE_BOUNCE_EASING = "cubic-bezier(0.22, 1.18, 0.36, 1)";
 const PRICE_TIMING = { duration: 520, easing: PRICE_BOUNCE_EASING };
@@ -76,7 +81,7 @@ const LICENSE = {
     },
     {
       label: "Theme install included",
-      bonus: "Worth $50, free",
+      bonus: `Worth $${INSTALL_VALUE}, free`,
       icon: (
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={INCLUDE_ICON} aria-hidden="true">
           <path d="M3 13 9.5 6.5" />
@@ -246,6 +251,12 @@ export function InlinePricing() {
 
           <div className="flex flex-1 flex-col gap-5 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-7 lg:p-8">
           <div className="flex flex-col gap-2 sm:max-w-[22rem] text-left">
+            {/* Everything in the box at its own price: the license as charged,
+                plus the free install and bonuses. Labelled as a value, not a
+                former price. */}
+            <p className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
+              <s className="tabular-nums decoration-[rgb(var(--muted))]">${priceAmount + INSTALL_VALUE + BONUS_TOTAL}</s> value
+            </p>
             <p
               ref={priceScope}
               className="text-[clamp(2rem,4vw,2.75rem)] font-normal tabular-nums tracking-[-0.04em] leading-none text-[rgb(var(--fg))]"
@@ -259,7 +270,8 @@ export function InlinePricing() {
               {" once"}
             </p>
             <p className="text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-              {LICENSE.desc}
+              Includes <span className="tabular-nums text-[rgb(var(--fg))]">${BONUS_TOTAL}</span> in bonuses and a{" "}
+              <span className="tabular-nums text-[rgb(var(--fg))]">${INSTALL_VALUE}</span> install, free. {LICENSE.desc}
             </p>
           </div>
 
@@ -302,10 +314,6 @@ export function InlinePricing() {
                 Add SMS setup <span className="text-[rgb(var(--fg))]">+$10</span>
               </span>
             </label>
-            {/* Capped at the button's min width: this column never shrinks, so
-                an uncapped sentence sets the whole column's width and squeezes
-                the price beside it. */}
-            <PolicyDisclaimer className="sm:max-w-[14rem]" />
           </div>
           </div>
         </div>
@@ -332,6 +340,10 @@ export function InlinePricing() {
       {status === "error" && (
         <span className="mt-3 block text-[13px] tracking-tight text-red-500">{error || "Something went wrong."}</span>
       )}
+
+      {/* Under the card rather than in it, so the checkout column is just
+          the button and its one option. */}
+      <PolicyDisclaimer className="mx-auto mt-4 max-w-[36rem] text-center [text-wrap:balance]" />
     </div>
   );
 }

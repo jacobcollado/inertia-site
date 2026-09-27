@@ -96,9 +96,17 @@ function copyVariations(variations: ThemeVariation[]): SlideItem[] {
   return variations.map((v) => ({ ...v, uid: `slide-${uidCounter++}` }));
 }
 
-export function VariationsScroll({ variations }: { variations: ThemeVariation[] }) {
+export function VariationsScroll({
+  variations,
+  initial,
+}: {
+  variations: ThemeVariation[];
+  /** Name of the style to open on. Defaults to the middle one. */
+  initial?: string;
+}) {
   const count = variations.length;
-  const startLogical = Math.floor(count / 2);
+  const named = initial ? variations.findIndex((v) => v.name === initial) : -1;
+  const startLogical = named >= 0 ? named : Math.floor(count / 2);
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
