@@ -12,6 +12,7 @@ import {
   BadgeCheckIcon,
   SettingsIcon,
   HistoryIcon,
+  GiftIcon,
   MenuIcon,
   SearchIcon,
   ArrowLeftIcon,
@@ -36,6 +37,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { NavUser } from "./nav-user";
 import { TopbarUser } from "./topbar-user";
+import { NotificationsBell } from "./notifications-bell";
+import type { Notice } from "./notifications";
 import { cn } from "@/lib/utils";
 import { PageCrumbProvider, usePageCrumbValues } from "./page-crumb-context";
 import { DashboardTour } from "./welcome-tour";
@@ -48,6 +51,7 @@ const WORKSPACE_NAV_ITEMS = [
   { href: "/dashboard/projects", label: "Projects", icon: FolderIcon },
   { href: "/dashboard/support", label: "Support", icon: LifeBuoyIcon },
   { href: "/dashboard/licenses", label: "Licenses", icon: BadgeCheckIcon },
+  { href: "/dashboard/bonuses", label: "Bonuses", icon: GiftIcon },
   { href: "/dashboard/changelog", label: "Changelog", icon: HistoryIcon },
 ];
 
@@ -300,6 +304,7 @@ const TITLES: Record<string, string> = {
   "/dashboard/files": "Files",
   "/dashboard/support": "Support",
   "/dashboard/licenses": "Licenses",
+  "/dashboard/bonuses": "Bonuses",
   "/dashboard/changelog": "Changelog",
   "/dashboard/settings": "Settings",
 };
@@ -311,11 +316,13 @@ const TITLES: Record<string, string> = {
 const CRUMB_SECTIONS: { prefix: string; base: string }[] = [
   { prefix: "/dashboard/support", base: "Support" },
   { prefix: "/dashboard/licenses", base: "Licenses" },
+  { prefix: "/dashboard/bonuses", base: "Bonuses" },
   { prefix: "/dashboard/invoices", base: "Invoices" },
   { prefix: "/dashboard/projects", base: "Projects" },
 ];
 
-function SiteHeader({ email, displayName, avatarUrl }: {
+function SiteHeader({ email, displayName, avatarUrl, notices }: {
+  notices: Notice[];
   email: string;
   displayName: string;
   avatarUrl: string | null;
@@ -373,7 +380,8 @@ function SiteHeader({ email, displayName, avatarUrl }: {
             {actions}
             {/* Mobile only: on desktop the sidebar footer's NavUser already
                 offers this menu, so showing both would duplicate it. */}
-            <span className="-mr-1 flex shrink-0 items-center md:hidden">
+            <span className="-mr-1 flex shrink-0 items-center gap-2.5 md:hidden">
+              <NotificationsBell notices={notices} />
               <TopbarUser email={email} displayName={displayName} avatarUrl={avatarUrl} />
             </span>
           </div>
@@ -429,7 +437,8 @@ function SiteHeader({ email, displayName, avatarUrl }: {
             centered title stays balanced whichever one is showing. */}
         <div className="ml-auto -mr-1 flex shrink-0 items-center">
           <SidebarTrigger className="invisible pointer-events-none hidden md:flex" />
-          <span className="flex items-center md:hidden">
+          <span className="flex items-center gap-2.5 md:hidden">
+            <NotificationsBell notices={notices} />
             <TopbarUser email={email} displayName={displayName} avatarUrl={avatarUrl} />
           </span>
         </div>
@@ -438,8 +447,9 @@ function SiteHeader({ email, displayName, avatarUrl }: {
   );
 }
 
-export function ClientSidebarShell({ children, casesNeedingResponse = 0, email, displayName, avatarUrl }: {
+export function ClientSidebarShell({ children, casesNeedingResponse = 0, notices = [], email, displayName, avatarUrl }: {
   children: React.ReactNode;
+  notices?: Notice[];
   casesNeedingResponse?: number;
   email: string;
   displayName: string;
@@ -473,7 +483,7 @@ export function ClientSidebarShell({ children, casesNeedingResponse = 0, email, 
       <DashboardTour />
       <SidebarInset>
         <PageCrumbProvider>
-          <SiteHeader email={email} displayName={displayName} avatarUrl={avatarUrl} />
+          <SiteHeader email={email} displayName={displayName} avatarUrl={avatarUrl} notices={notices} />
           <main data-tour-page className="flex flex-1 flex-col gap-6 p-4 pb-24 md:pb-4 lg:p-6">
             {children}
           </main>

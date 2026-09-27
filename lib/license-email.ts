@@ -3,6 +3,8 @@
  * function of its inputs: no Resend call, no env reads beyond the asset and
  * site URLs the markup embeds. */
 
+import { getAllBonuses } from "./bonuses";
+
 export type LicenseEmailInput = {
   key: string;
   tier: string;
@@ -26,6 +28,11 @@ export function renderLicenseEmail({ key, tier, sessionId }: LicenseEmailInput) 
   // Installation guidance, linked right under the activation steps so someone
   // who gets stuck there has somewhere to go without hunting through the site.
   const docsUrl = `${siteUrl}/aether/docs`;
+
+  // Bonuses live in the dashboard behind the license, so the email only says
+  // where they are and what they're worth.
+  const bonusesUrl = `${siteUrl}/dashboard/bonuses`;
+  const bonusTotal = getAllBonuses().reduce((sum, b) => sum + b.worth, 0);
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -73,10 +80,16 @@ export function renderLicenseEmail({ key, tier, sessionId }: LicenseEmailInput) 
 
           <p style="margin:0;font-size:13px;color:#6e6e6e;line-height:1.6;letter-spacing:-0.01em;">Not sure where to start? The <a href="${docsUrl}" style="color:#121212;text-decoration:underline;">installation guide</a> walks through it step by step.</p>
 
+          <!-- Bonuses -->
+          <div style="border-top:1px solid #e1e1e1;margin-top:28px;padding-top:24px;">
+            <p style="margin:0 0 6px;font-size:14px;font-weight:500;letter-spacing:-0.02em;color:#121212;">Your $${bonusTotal} in bonuses</p>
+            <p style="margin:0;font-size:13px;color:#6e6e6e;line-height:1.6;letter-spacing:-0.01em;">Guides for getting the most from Aether, shooting your products and imagery that converts, plus the manufacturers and designers we trust. They're waiting in your dashboard under <a href="${bonusesUrl}" style="color:#121212;text-decoration:underline;">Bonuses</a>.</p>
+          </div>
+
           <!-- Account recommendation -->
           <div style="border-top:1px solid #e1e1e1;margin-top:28px;padding-top:24px;">
             <p style="margin:0 0 6px;font-size:14px;font-weight:500;letter-spacing:-0.02em;color:#121212;">Set up your account</p>
-            <p style="margin:0;font-size:13px;color:#6e6e6e;line-height:1.6;letter-spacing:-0.01em;">Create a free account to keep this key, your receipt, and your theme downloads in one place. It takes a moment and you only need to do it once.</p>
+            <p style="margin:0;font-size:13px;color:#6e6e6e;line-height:1.6;letter-spacing:-0.01em;">Create a free account to keep this key, your receipt, your theme downloads and your bonuses in one place. It takes a moment and you only need to do it once.</p>
 
             <!-- CTA -->
             <table cellpadding="0" cellspacing="0" style="margin-top:20px;">
@@ -108,7 +121,7 @@ export function renderLicenseEmail({ key, tier, sessionId }: LicenseEmailInput) 
 
   const text = `Thanks for your purchase.
 
-We appreciate you choosing Aether ${tierLabel}. Your license key is below, ready to activate whenever you are.\n\nYour license key: ${key}\n\nInstall Aether on your Shopify store and enter this key in Theme Settings → License Key.\n\nNot sure where to start? The installation guide walks through it step by step:\n${docsUrl}\n\nSet up your account\nCreate a free account to keep this key, your receipt, and your theme downloads in one place:\n${claimUrl}\n\nAlready have an account? Sign in at ${siteUrl}/login and your license will be waiting.\n\nInertia`;
+We appreciate you choosing Aether ${tierLabel}. Your license key is below, ready to activate whenever you are.\n\nYour license key: ${key}\n\nInstall Aether on your Shopify store and enter this key in Theme Settings → License Key.\n\nNot sure where to start? The installation guide walks through it step by step:\n${docsUrl}\n\nYour $${bonusTotal} in bonuses\nGuides for getting the most from Aether, shooting your products and imagery that converts, plus the manufacturers and designers we trust. They're waiting in your dashboard under Bonuses:\n${bonusesUrl}\n\nSet up your account\nCreate a free account to keep this key, your receipt, your theme downloads and your bonuses in one place:\n${claimUrl}\n\nAlready have an account? Sign in at ${siteUrl}/login and your license will be waiting.\n\nInertia`;
 
   return { subject: "Your Aether license key", html, text };
 }
