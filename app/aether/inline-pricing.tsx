@@ -26,7 +26,6 @@ const INCLUDE_LABEL_CLASS =
 const LICENSE = {
   id: "lifetime" as const,
   price: "$125 once",
-  desc: "Lifetime updates, priority support, single store.",
   includes: [
     {
       // First: the delivery promise is the thing a buyer wants settled before
@@ -253,9 +252,11 @@ export function InlinePricing() {
           <div className="flex flex-col gap-2 sm:max-w-[22rem] text-left">
             {/* Everything in the box at its own price: the license as charged,
                 plus the free install and bonuses. Labelled as a value, not a
-                former price. */}
+                former price. The breakdown lives in the include cards and the
+                bonuses section, so the card is just the price. */}
             <p className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
-              <s className="tabular-nums decoration-[rgb(var(--muted))]">${priceAmount + INSTALL_VALUE + BONUS_TOTAL}</s> value
+              <s className="tabular-nums decoration-[rgb(var(--muted))]">${priceAmount + INSTALL_VALUE + BONUS_TOTAL}</s> value, includes{" "}
+              <span className="tabular-nums text-[rgb(var(--fg))]">${BONUS_TOTAL}</span> in bonuses
             </p>
             <p
               ref={priceScope}
@@ -269,9 +270,11 @@ export function InlinePricing() {
               />
               {" once"}
             </p>
-            <p className="text-[14px] sm:text-[15px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-              Includes <span className="tabular-nums text-[rgb(var(--fg))]">${BONUS_TOTAL}</span> in bonuses and a{" "}
-              <span className="tabular-nums text-[rgb(var(--fg))]">${INSTALL_VALUE}</span> install, free. {LICENSE.desc}
+            {/* Klarna's pay in 4, offered in Stripe Checkout; follows the SMS
+                add-on. Sits with the price so the checkout column stays short. */}
+            <p className="-mt-0.5 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
+              or 4 interest-free payments of{" "}
+              <span className="tabular-nums text-[rgb(var(--fg))]">${(priceAmount / 4).toFixed(2)}</span> with Klarna
             </p>
           </div>
 
