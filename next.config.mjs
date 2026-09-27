@@ -78,6 +78,15 @@ const nextConfig = {
   turbopack: {
     root: path.resolve("."),
   },
+  // lib/bonuses.ts reads content/bonuses from disk at request time. These
+  // routes render per request, so make sure the files ship with them: the
+  // dashboard pages list them, and the webhook's license email totals them.
+  outputFileTracingIncludes: {
+    "/dashboard/bonuses": ["./content/bonuses/**/*"],
+    "/dashboard/bonuses/[slug]": ["./content/bonuses/**/*"],
+    "/api/stripe-webhook": ["./content/bonuses/**/*"],
+    "/api/dev/license-email": ["./content/bonuses/**/*"],
+  },
   productionBrowserSourceMaps: false,
   experimental: {
     optimizePackageImports: ["@supabase/supabase-js", "@supabase/ssr", "lucide-react", "react-icons"],
