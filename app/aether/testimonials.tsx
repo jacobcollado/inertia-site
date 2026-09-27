@@ -33,14 +33,14 @@ const TESTIMONIALS: Testimonial[] = [
     // with a period, per the site's copy rules.
     quote:
       "Awesome customer service from start to finish! They worked directly with me and my team throughout the entire process, were responsive, professional, and made sure everything was exactly how we wanted it. Great experience overall. 100% recommend Inertia to anyone looking for a reliable web design team!",
-    name: "Awoken Dreams",
+    name: "awoken__dreams",
     logo: "/reviews/awokendreams.png",
   },
 ];
 
 /* Mobile: a scroll-snap row with the next card peeking in. sm and up: the
  * two-column grid. Same pattern as the homepage's "What we do" carousel. */
-const SLIDE = "max-sm:w-[85%] max-sm:shrink-0 max-sm:snap-start";
+const SLIDE = "max-sm:w-[88%] max-sm:shrink-0 max-sm:snap-start";
 
 function Card({ t, index }: { t: Testimonial; index: number }) {
   return (
@@ -111,7 +111,7 @@ export function Testimonials() {
         </p>
         <div
           ref={trackRef}
-          className="no-scrollbar mx-auto max-w-[56rem] lg:max-w-[76rem] gap-3 max-sm:-mx-3 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:snap-x max-sm:snap-mandatory max-sm:px-3 max-sm:scroll-px-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4"
+          className="no-scrollbar mx-auto max-w-[64rem] lg:max-w-[80rem] gap-3 max-sm:-mx-3 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:snap-x max-sm:snap-mandatory max-sm:px-3 max-sm:scroll-px-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4"
         >
           {TESTIMONIALS.map((t, i) => (
             <Card key={t.name} t={t} index={i} />
