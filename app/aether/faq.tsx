@@ -67,7 +67,10 @@ export function AetherFaq() {
 }
 
 const ASK_AI_PROMPT =
-  "Read https://byinertia.com/aether and tell me what the Aether Shopify theme includes, what it costs, and whether it's a good fit for my store.";
+  // /aether/overview is the same page at an address Claude and Perplexity
+  // will fetch (see the rewrite in next.config.mjs); llms.txt is the plain
+  // text fallback with the same facts.
+  "Read https://byinertia.com/aether/overview (if it won't load, use https://byinertia.com/llms.txt) and tell me what the Aether Shopify theme includes, what it costs, and whether it's a good fit for my store.";
 
 export function AetherAskAi() {
   return (

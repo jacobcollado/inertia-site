@@ -3762,7 +3762,7 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
 }
 
 const ASK_AI_PROMPT =
-  "Read https://byinertia.com and tell me what Inertia does, the kind of clients they work with, and why someone would hire them.";
+  "Read https://byinertia.com (if it won't load, use https://byinertia.com/llms.txt) and tell me what Inertia does, the kind of clients they work with, and why someone would hire them.";
 
 function AskAi() {
   return (

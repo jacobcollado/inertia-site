@@ -36,6 +36,12 @@ const nextConfig = {
   },
   async rewrites() {
     return [
+      // A second address for the Aether page, used by the Ask AI prompts.
+      // Claude's and Perplexity's fetchers refuse /aether itself without ever
+      // requesting it (a verdict held on their side), while every other page
+      // fetches fine. Same HTML, and its canonical still points at /aether, so
+      // search engines treat this as the same page.
+      { source: "/aether/overview", destination: "/aether" },
       {
         source: "/ingest/static/:path*",
         destination: "https://us-assets.i.posthog.com/static/:path*",
