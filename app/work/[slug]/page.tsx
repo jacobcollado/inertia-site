@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import type React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllWork, getWork, renderWorkMarkdown } from "@/lib/work";
+import { ACTION_RADIUS_CLASS, CTA_PILL_CLASS } from "@/lib/cta-chrome";
+import { FigmaSelectionFrame, SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 
 export function generateStaticParams() {
   return getAllWork().map((w) => ({ slug: w.slug }));
@@ -35,11 +38,18 @@ export async function generateMetadata({
   };
 }
 
-function serviceTag(s: string | undefined) {
-  if (!s) return "";
-  return s.replace(/^An?\s+/i, "").replace(/\s+for\s+.+$/i, "").trim()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
+// Handles sit on the page background so they read as cut-outs in the stroke.
+const HANDLE_FILL = "rgb(var(--bg))";
+
+// Homepage-style liquid reveal, staggered by a delay in ms.
+const reveal = (delay = 0) =>
+  ({ "--rise-delay": `${delay}ms` }) as React.CSSProperties;
+
+const SPEC_COLS: Record<number, string> = {
+  1: "sm:grid-cols-1",
+  2: "sm:grid-cols-2",
+  3: "sm:grid-cols-3",
+};
 
 export default async function WorkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -51,58 +61,64 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   const idx = all.findIndex((w) => w.slug === slug);
   const next = idx >= 0 ? all[(idx + 1) % all.length] : null;
 
-  return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+  // The spec strip, like an inspector panel: only the fields this piece has.
+  const specs = [
+    piece.service && { label: "Service", value: piece.service },
+    piece.year && { label: "Year", value: piece.year },
+    piece.role && { label: "Scope", value: piece.role },
+  ].filter(Boolean) as { label: string; value: string }[];
 
-      {/* Hero */}
-      <section className="px-3 pt-16 sm:pt-24 pb-14 rise">
+  const shots = [
+    piece.cover && { src: piece.cover, alt: piece.client },
+    piece.preview && { src: piece.preview, alt: `${piece.client} preview` },
+  ].filter(Boolean) as { src: string; alt: string }[];
+
+  return (
+    <main className="mx-auto w-full max-w-[80rem] px-6 sm:px-8 min-h-screen flex flex-col pb-20 sm:pb-28">
+      <div className="pt-8 sm:pt-10">
         <Link
           href="/work"
-          className="inline-flex items-center gap-1.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors mb-10"
-          style={{ opacity: 0.5 }}
+          className="inline-flex items-center gap-1.5 text-[14px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
         >
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5" aria-hidden="true">
             <path d="M13 8H3M7 4L3 8l4 4" />
           </svg>
-          Work
+          All work
         </Link>
+      </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
-          <div className="flex flex-col gap-4">
-            {piece.logo && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={piece.logo} alt={piece.client} className="h-8 w-auto object-contain object-left" style={{ filter: "var(--logo-filter, none)" }} />
-            )}
-            <h1 className="text-[clamp(2.6rem,6vw,4rem)] font-normal tracking-[-0.04em] leading-none text-[rgb(var(--fg))]">
-              {piece.client}
-            </h1>
-            <div className="flex items-center gap-3 flex-wrap">
-              {piece.service && (
-                <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none">
-                  {serviceTag(piece.service)}
-                </span>
-              )}
-              {piece.year && (
-                <span className="text-[12px] tabular-nums tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>
-                  {piece.year.match(/\d{4}/)?.[0]}
-                </span>
-              )}
-            </div>
-          </div>
+      {/* Hero, set like the homepage hero: centred name, muted subline, the
+          same pair of actions. */}
+      <section className="flex flex-col items-center text-center gap-6 sm:gap-7 pt-14 sm:pt-20 pb-12 sm:pb-16">
+        <h1
+          className="rise rise--liquid max-w-3xl text-balance text-[clamp(2.5rem,7.8vw,3.55rem)] sm:text-[clamp(2.6rem,6vw,4.2rem)] tracking-tight leading-none text-[rgb(var(--fg))]"
+          style={{ ...reveal(0), fontWeight: 450 }}
+        >
+          {piece.client}
+        </h1>
 
-          {/* Links */}
-          <div className="flex items-center gap-4 shrink-0">
+        {piece.summary && (
+          <p
+            className="rise rise--liquid -mt-1 max-w-md sm:max-w-xl text-balance text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-[rgb(var(--muted))]"
+            style={reveal(80)}
+          >
+            {piece.summary}
+          </p>
+        )}
+
+        {(piece.url || piece.instagram) && (
+          <div className="rise rise--liquid flex flex-wrap items-center justify-center gap-3" style={reveal(160)}>
             {piece.url && (
               <a
                 href={piece.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[13px] font-medium tracking-tight text-[rgb(var(--bg))] hover:opacity-85 transition-opacity"
-                style={{ background: "var(--accent-gradient)" }}
+                className={`${CTA_PILL_CLASS} gap-1.5 transition-transform duration-150 active:scale-[0.97]`}
+                style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
               >
                 Visit site
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3" aria-hidden="true">
-                  <path d="M4 12L12 4M7 4h5v5"/>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5" aria-hidden="true">
+                  <path d="M4 12L12 4M7 4h5v5" />
                 </svg>
               </a>
             )}
@@ -111,102 +127,93 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
                 href={`https://instagram.com/${piece.instagram}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-[rgb(var(--line))] px-5 py-2.5 text-[13px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
+                className={`${CTA_PILL_CLASS} transition-[transform,background-color] duration-150 active:scale-[0.97] bg-[rgb(var(--fg)/0.06)] hover:bg-[rgb(var(--fg)/0.1)]`}
+                style={{ color: "rgb(var(--fg))", fontWeight: 450 }}
               >
                 @{piece.instagram}
               </a>
             )}
           </div>
-        </div>
+        )}
       </section>
 
-      <div className="grid-rule" aria-hidden="true" />
-
-      {/* Summary */}
-      {piece.summary && (
-        <>
-          <section className="px-3 pt-12 sm:pt-16 pb-12 rise">
-            <p className="text-[clamp(1.1rem,2vw,1.4rem)] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-2xl" style={{ opacity: 0.8 }}>
-              {piece.summary}
-            </p>
-          </section>
-          <div className="grid-rule" aria-hidden="true" />
-        </>
+      {specs.length > 0 && (
+        <div className="rise rise--liquid" style={reveal(240)}>
+          <FigmaSelectionFrame handleFill={HANDLE_FILL}>
+            <dl
+              className={`grid grid-cols-1 ${SPEC_COLS[specs.length]} divide-y sm:divide-y-0 sm:divide-x divide-[color:var(--rail)]`}
+              style={{ ["--rail" as string]: SELECTION_FRAME_COLOR }}
+            >
+              {specs.map((s) => (
+                <div key={s.label} className="min-w-0 px-4 py-4 sm:px-6 sm:py-6">
+                  <dt className="text-[13px] leading-none tracking-tight text-[rgb(var(--muted))]">{s.label}</dt>
+                  <dd
+                    className="mt-2 text-[16px] sm:text-[18px] leading-snug tracking-tight text-[rgb(var(--fg))]"
+                    style={{ fontWeight: 450 }}
+                  >
+                    {s.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </FigmaSelectionFrame>
+        </div>
       )}
 
-      {/* Cover image */}
-      {piece.cover && (
-        <>
-          <section className="rise">
+      {shots.map((shot) => (
+        <div key={shot.src} className="rise rise--liquid mt-10 sm:mt-14">
+          <FigmaSelectionFrame handleFill={HANDLE_FILL}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={piece.cover}
-              alt={piece.client}
-              className="w-full h-auto"
-              style={{ display: "block" }}
-            />
-          </section>
-          <div className="grid-rule" aria-hidden="true" />
-        </>
-      )}
+            <img src={shot.src} alt={shot.alt} className="block w-full h-auto" />
+          </FigmaSelectionFrame>
+        </div>
+      ))}
 
-      {/* Preview image */}
-      {piece.preview && (
-        <>
-          <section className="rise">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={piece.preview}
-              alt={`${piece.client} preview`}
-              className="w-full h-auto"
-              style={{ display: "block" }}
-            />
-          </section>
-          <div className="grid-rule" aria-hidden="true" />
-        </>
-      )}
-
-      {/* Markdown body */}
       {html && html.trim() !== "" && (
-        <>
-          <section className="px-3 py-12 sm:py-16 rise">
-            <div
-              className="text-[15px] leading-relaxed tracking-tight max-w-2xl space-y-5
-                [&_h2]:text-[20px] [&_h2]:font-medium [&_h2]:tracking-tight [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:text-[rgb(var(--fg))]
-                [&_h3]:text-[15px] [&_h3]:font-medium [&_h3]:tracking-tight [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-[rgb(var(--fg))]
-                [&_p]:text-[rgb(var(--muted))]
-                [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-[rgb(var(--line))] hover:[&_a]:decoration-[rgb(var(--fg))]
-                [&_img]:w-full [&_img]:border [&_img]:border-[rgb(var(--line))] [&_img]:my-6"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
-          </section>
-          <div className="grid-rule" aria-hidden="true" />
-        </>
+        <section className="rise rise--liquid mx-auto w-full max-w-2xl mt-14 sm:mt-20">
+          <div
+            className="text-[16px] sm:text-[17px] leading-relaxed tracking-tight space-y-5
+              [&_h2]:text-[clamp(1.35rem,3.2vw,1.75rem)] [&_h2]:font-[450] [&_h2]:tracking-[-0.025em] [&_h2]:leading-tight [&_h2]:mt-12 [&_h2]:mb-3 [&_h2]:text-[rgb(var(--fg))]
+              [&_h3]:text-[17px] [&_h3]:font-[450] [&_h3]:tracking-tight [&_h3]:mt-8 [&_h3]:mb-2 [&_h3]:text-[rgb(var(--fg))]
+              [&_p]:text-[rgb(var(--muted))]
+              [&_a]:text-[rgb(var(--fg))] [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-[#6bb8ef] hover:[&_a]:decoration-[rgb(var(--fg))]
+              [&_img]:w-full [&_img]:border [&_img]:border-[#6bb8ef] [&_img]:my-8"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </section>
       )}
 
-      {/* Next project */}
       {next && next.slug !== slug && (
-        <Link
-          href={`/work/${next.slug}`}
-          className="group flex items-center justify-between gap-6 px-3 py-10 hover:bg-[rgb(var(--fg)/0.02)] transition-colors rise"
-        >
-          <div className="flex flex-col gap-2">
-            <p className="text-[12px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.4 }}>Next project</p>
-            <span className="text-[clamp(1.4rem,3vw,2rem)] font-normal tracking-[-0.03em] text-[rgb(var(--fg))]">
-              {next.client}
-            </span>
-            {next.service && (
-              <span className="text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-                {serviceTag(next.service)}
+        <section className="rise rise--liquid mt-16 sm:mt-24">
+          <p className="mb-6 sm:mb-8 text-center text-[13px] sm:text-[14px] leading-snug tracking-tight text-[rgb(var(--muted))]">
+            Next project
+          </p>
+          <FigmaSelectionFrame handleFill={HANDLE_FILL}>
+            {/* Hover takes the selected-layer tint from the homepage grid. */}
+            <Link
+              href={`/work/${next.slug}`}
+              className="group flex items-center justify-between gap-6 px-4 py-6 sm:px-6 sm:py-8 transition-colors duration-200 hover:bg-[rgb(107_184_239/0.08)]"
+            >
+              <span
+                className="min-w-0 text-[clamp(1.4rem,4.6vw,2rem)] tracking-tight leading-none text-[rgb(var(--fg))]"
+                style={{ fontWeight: 450 }}
+              >
+                {next.client}
               </span>
-            )}
-          </div>
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[rgb(var(--muted))] opacity-30 group-hover:opacity-70 group-hover:translate-x-1 transition-all duration-200 shrink-0" aria-hidden="true">
-            <path d="M3 8h10M9 4l4 4-4 4" />
-          </svg>
-        </Link>
+              <span className="flex shrink-0 items-center gap-3 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
+                {next.service && <span className="hidden sm:inline">{next.service}</span>}
+                <span
+                  className={`inline-flex size-9 items-center justify-center ${ACTION_RADIUS_CLASS} bg-[rgb(var(--fg)/0.06)] text-[rgb(var(--fg))] transition-transform duration-200 ease-out group-hover:translate-x-0.5`}
+                >
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5" aria-hidden="true">
+                    <path d="M3 8h10M9 4l4 4-4 4" />
+                  </svg>
+                </span>
+              </span>
+            </Link>
+          </FigmaSelectionFrame>
+        </section>
       )}
-
     </main>
   );
 }

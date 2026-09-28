@@ -1,5 +1,5 @@
 import { getImageProps } from "next/image";
-import { getAllWork, getWorkGalleryImages } from "@/lib/work";
+import { getAllWork } from "@/lib/work";
 import { getWorkIndexThumb } from "@/lib/work-thumb";
 import WorkIndexPage from "./work-index-client";
 
@@ -45,8 +45,6 @@ function WorkThumbPreloads({
 
 export default async function Page() {
   const work = getAllWork();
-  const galleries = await Promise.all(work.map((w) => getWorkGalleryImages(w)));
-  const workWithGalleries = work.map((w, i) => ({ ...w, gallery: galleries[i] }));
 
   const thumbSrcs = Array.from(
     new Set(
@@ -61,7 +59,7 @@ export default async function Page() {
   return (
     <>
       <WorkThumbPreloads srcs={thumbSrcs} />
-      <WorkIndexPage initialWork={workWithGalleries} />
+      <WorkIndexPage initialWork={work} />
     </>
   );
 }

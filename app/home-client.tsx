@@ -9,6 +9,7 @@ import { AskAiLinks } from "@/components/ask-ai-links";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { FigmaSelectionFrame, SELECTION_FILL, SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 import { ShapeProvider } from "@/lib/shape-context";
 import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
@@ -86,17 +87,18 @@ function useLiquidReveal(active: boolean, delayMs = 0) {
 function ServicesSection() {
   return (
     <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl mx-auto text-center">
-        <p
-          className="rise rise--liquid text-[clamp(1.8rem,4vw,2.5rem)] font-normal tracking-tight max-sm:tracking-[-0.05em] sm:tracking-tight leading-snug text-[rgb(var(--fg))]"
-          style={{ fontVariationSettings: "'wght' 400, 'opsz' 32" }}
+      <div className="max-w-3xl mx-auto text-center">
+        {/* Set close to the hero heading so it lands as the page's second
+            statement, not a caption. The payoff is marked like a text
+            selection in Figma, swept in once the line has resolved (see
+            .selection-sweep), echoing the hero's "design" frame. */}
+        <h2
+          className="rise rise--liquid text-balance text-[clamp(2.25rem,7vw,3.2rem)] sm:text-[clamp(2.6rem,5.4vw,3.9rem)] tracking-tight max-sm:tracking-[-0.05em] sm:tracking-tight leading-[1.08] text-[rgb(var(--fg))]"
+          style={{ fontWeight: 450 }}
         >
-          We build the version of your business (and product){" "}
-          <span className="box-decoration-clone border-b border-dashed border-[rgb(var(--fg))]/50 [border-bottom-width:1px] pb-[0.12em]">
-            people fall
-          </span>{" "}
-          for.
-        </p>
+          We build the version of your business{" "}
+          <span className="selection-sweep box-decoration-clone px-[0.06em]">people fall for</span>.
+        </h2>
       </div>
     </section>
   );
@@ -475,11 +477,10 @@ function heroLiquidStyle(
 // itself in clockwise from the top-left, then pops the four square resize
 // handles. Rendered as an inset overlay so it never affects the heading's
 // layout or the per-word reveal transform.
-// Figma's own selection blue, so the affordance reads as the tool it's
-// quoting rather than as a brand accent. (The earlier neutral grey was chosen
-// to stay clear of the antislow mark above; the mark is currently hidden, and
-// the blue is distinct enough from the work accents not to read as one.)
-const SELECTION_FRAME_COLOR = "#6bb8ef";
+// The frame uses SELECTION_FRAME_COLOR (Figma's selection blue, from
+// components/figma-frame). The earlier neutral grey was chosen to stay clear
+// of the antislow mark above; the mark is currently hidden, and the blue is
+// distinct enough from the work accents not to read as one.
 const SELECTION_EDGE_MS = 170;
 const SELECTION_HANDLE_MS = 160;
 
@@ -715,6 +716,7 @@ function SelectionBox({
 // How far the frame sits outside the word box (SelectionBox's insets), in em.
 // The neighbours are pushed by how far the frame edges travel, not the glyphs.
 const SELECTION_INSET_X_EM = 0.1;
+const SELECTION_INSET_TOP_EM = 0.08;
 const SELECTION_INSET_BOTTOM_EM = 0.2;
 
 // How far the line under "design" moves while the frame resizes, so the
@@ -722,6 +724,11 @@ const SELECTION_INSET_BOTTOM_EM = 0.2;
 // word box is 1em tall and its bottom edge sits half of that below centre.
 function selectionPushBelowEm(scale: number) {
   return (scale - 1) * (0.5 + SELECTION_INSET_BOTTOM_EM);
+}
+
+// Same for a line above "design", against the frame's top edge.
+function selectionPushAboveEm(scale: number) {
+  return (scale - 1) * (0.5 + SELECTION_INSET_TOP_EM);
 }
 
 // "design" plus its selection frame, scaled as one unit so the word is
@@ -809,268 +816,6 @@ function DesignSelectionWord({
   );
 }
 
-// Static Figma-style frame — same stroke and corner handles as the hero's
-// "design" selection, without the draw-in or resize animation.
-function FigmaSelectionFrame({
-  children,
-  className,
-  frameRef,
-  style,
-  strokeColor = SELECTION_FRAME_COLOR,
-  handleFill = "#fff",
-}: {
-  children: React.ReactNode;
-  className?: string;
-  frameRef?: React.RefObject<HTMLDivElement | null>;
-  style?: React.CSSProperties;
-  strokeColor?: string;
-  handleFill?: string;
-}) {
-  const color = strokeColor;
-  const HANDLE = 5;
-  const corners = [
-    { top: -HANDLE / 2, left: -HANDLE / 2 },
-    { top: -HANDLE / 2, right: -HANDLE / 2 },
-    { bottom: -HANDLE / 2, right: -HANDLE / 2 },
-    { bottom: -HANDLE / 2, left: -HANDLE / 2 },
-  ] as const;
-
-  return (
-    <div
-      ref={frameRef}
-      className={cn("relative w-full", className)}
-      style={{ border: `1px solid ${color}`, ...style }}
-    >
-      {children}
-      {corners.map((pos, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            width: HANDLE,
-            height: HANDLE,
-            background: handleFill,
-            border: `1px solid ${color}`,
-            pointerEvents: "none",
-            ...pos,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function FigmaHorizontalRule({
-  strokeColor = SELECTION_FRAME_COLOR,
-  handleFill = "rgb(var(--bg))",
-}: {
-  strokeColor?: string;
-  handleFill?: string;
-}) {
-  const color = strokeColor;
-  const HANDLE = 5;
-  const handleStyle: React.CSSProperties = {
-    position: "absolute",
-    top: -HANDLE / 2,
-    width: HANDLE,
-    height: HANDLE,
-    background: handleFill,
-    border: `1px solid ${color}`,
-    pointerEvents: "none",
-    zIndex: 2,
-  };
-
-  return (
-    <div
-      className="relative z-20 w-full shrink-0"
-      aria-hidden="true"
-      style={{ borderTop: `1px solid ${color}` }}
-    >
-      <span style={{ ...handleStyle, left: -HANDLE / 2 }} />
-      <span style={{ ...handleStyle, right: -HANDLE / 2 }} />
-    </div>
-  );
-}
-
-function sampleImageAmbientTone(data: Uint8ClampedArray) {
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  const n = data.length / 4;
-  for (let i = 0; i < data.length; i += 4) {
-    r += data[i];
-    g += data[i + 1];
-    b += data[i + 2];
-  }
-
-  // Pull dark screenshot averages toward a light wash while keeping hue.
-  let rr = r / n;
-  let gg = g / n;
-  let bb = b / n;
-  const lift = 0.55;
-  rr += (255 - rr) * lift;
-  gg += (255 - gg) * lift;
-  bb += (255 - bb) * lift;
-
-  const gray = (rr + gg + bb) / 3;
-  const satBoost = 1.45;
-  rr = gray + (rr - gray) * satBoost;
-  gg = gray + (gg - gray) * satBoost;
-  bb = gray + (bb - gray) * satBoost;
-
-  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
-  return `rgb(${clamp(rr)}, ${clamp(gg)}, ${clamp(bb)})`;
-}
-
-function clientAmbientSolid(color: string) {
-  return {
-    field: `radial-gradient(ellipse 110% 95% at 50% 36%, ${color} 0%, transparent 74%)`,
-    fade: "linear-gradient(to bottom, transparent 0%, transparent 50%, rgb(var(--bg) / 0.42) 78%, rgb(var(--bg)) 100%)",
-  };
-}
-
-const CLIENT_DIALOG_STROKE = "rgb(var(--line))";
-
-const CLIENT_DIALOG_AMBIENT: Record<string, { field: string; fade: string }> = {
-  "mood-swings": clientAmbientSolid("rgb(106 34 53 / 0.44)"),
-  "trippie-redd": clientAmbientSolid("rgb(20 31 82 / 0.46)"),
-  inboundly: clientAmbientSolid("rgb(74 45 122 / 0.44)"),
-  "allure-new-york": clientAmbientSolid("rgb(155 45 63 / 0.42)"),
-};
-
-function resolveClientDialogAmbient(slug: string, sampled: string) {
-  const custom = CLIENT_DIALOG_AMBIENT[slug];
-  if (custom) return custom;
-  return {
-    field: `radial-gradient(ellipse 95% 75% at 50% 18%, ${sampled} 0%, transparent 68%), radial-gradient(ellipse 90% 70% at 72% 72%, ${sampled} 0%, transparent 70%)`,
-    fade: `linear-gradient(to bottom, transparent 0%, transparent 40%, rgb(var(--bg) / 0.6) 74%, rgb(var(--bg)) 100%)`,
-  };
-}
-
-function useImageAmbientTone(src: string | undefined) {
-  const [tone, setTone] = useState("rgb(var(--bg))");
-
-  useEffect(() => {
-    if (!src) return;
-    let cancelled = false;
-    const img = document.createElement("img");
-    img.decoding = "async";
-    img.onload = () => {
-      if (cancelled) return;
-      try {
-        const canvas = document.createElement("canvas");
-        const size = 32;
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext("2d", { willReadFrequently: true });
-        if (!ctx) return;
-        ctx.drawImage(img, 0, 0, size, size);
-        const { data } = ctx.getImageData(0, 0, size, size);
-        setTone(sampleImageAmbientTone(data));
-      } catch {
-        // Same-origin only; fall back to page background.
-      }
-    };
-    img.src = src;
-    return () => {
-      cancelled = true;
-    };
-  }, [src]);
-
-  return tone;
-}
-
-function ClientDialogDragHandle({
-  dragging,
-  dragY,
-}: {
-  dragging: boolean;
-  dragY: number;
-}) {
-  const progress = Math.min(Math.max(dragY, 0) / 110, 1);
-  const active = dragging || progress > 0;
-
-  return (
-    <div className="sm:hidden flex justify-center pt-4 pb-2.5 cursor-grab active:cursor-grabbing touch-none">
-      <div
-        className="rounded-full"
-        style={{
-          width: 36 + progress * 32,
-          height: active ? 5 : 4,
-          background:
-            progress > 0.45
-              ? `rgb(var(--fg) / ${0.28 + progress * 0.42})`
-              : active
-                ? "rgb(var(--muted))"
-                : "rgb(var(--line))",
-          opacity: 0.55 + progress * 0.45,
-          transition: dragging
-            ? "none"
-            : "width 280ms cubic-bezier(0.22,1,0.36,1), height 180ms ease, background-color 180ms ease, opacity 180ms ease",
-        }}
-      />
-    </div>
-  );
-}
-
-function ClientDialogMediaBlock({
-  slug,
-  src,
-  dragging,
-  dragY,
-}: {
-  slug: string;
-  src: string;
-  dragging: boolean;
-  dragY: number;
-}) {
-  const sampled = useImageAmbientTone(src);
-  const ambient = resolveClientDialogAmbient(slug, sampled);
-  const customAmbient = Boolean(CLIENT_DIALOG_AMBIENT[slug]);
-
-  return (
-    <>
-      <div className="relative overflow-hidden sm:overflow-visible">
-        <div className="sm:hidden absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
-          <img
-            src={src}
-            alt=""
-            className="absolute left-1/2 top-1/2 h-[165%] w-[165%] max-w-none -translate-x-1/2 -translate-y-1/2 object-cover blur-[40px] saturate-135"
-            style={{ opacity: customAmbient ? 0.68 : 0.74 }}
-            draggable={false}
-          />
-          <div
-            className="absolute inset-0"
-            style={{ background: ambient.field }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "radial-gradient(ellipse 120% 90% at 50% 40%, rgb(var(--bg) / 0.02) 0%, rgb(var(--bg) / 0.18) 100%)",
-            }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{ background: ambient.fade }}
-          />
-        </div>
-
-        <ClientDialogDragHandle dragging={dragging} dragY={dragY} />
-
-        <div className="relative px-3 pb-3 sm:px-0 sm:pb-4">
-          <div
-            className="relative w-full overflow-hidden rounded-2xl sm:rounded-none aspect-[16/10]"
-            style={{ background: "#0a0a0a" }}
-          >
-            <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
 function VercelHero({
   accentColor,
   ctaRef,
@@ -1103,11 +848,13 @@ function VercelHero({
     heroLiquidStyle(visible, delay, opts);
 
   // Heading words stagger with a soft blur+scale dissolve so each token
-  // flows into focus rather than rising, building to "the development" as
+  // flows into focus rather than rising, building to "as well as it looks." as
   // the payoff line, then the CTA follows.
-  const HEADING_LINE_ONE = ["We", "do", "the", "design"];
-  const HEADING_LINE_TWO = ["and", "the", "development."];
-  const HEADING_WORDS = [...HEADING_LINE_ONE, ...HEADING_LINE_TWO];
+  // Fixed lines so the break is the same at every width and the lines stay
+  // close in length.
+  const HEADING_LINES = [["Design", "that", "works"], ["as", "well", "as", "it", "looks."]];
+  const DESIGN_LINE = 0;
+  const HEADING_WORDS = HEADING_LINES.flat();
   // Heading itself no longer animates in — it's present immediately so the
   // page doesn't feel like it's waiting on text. The word-reveal stagger
   // stays available for other callers of heroLiquidStyle below.
@@ -1186,38 +933,48 @@ function VercelHero({
             className="tracking-tight max-sm:tracking-[-0.05em] leading-none max-w-2xl text-[clamp(2.5rem,7.8vw,3.55rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a", fontWeight: 450 }}
           >
-            <span className="flex flex-wrap justify-center items-baseline" style={{ columnGap: "0.3em" }}>
-              {HEADING_LINE_ONE.map((word, i) => (
-                <span key={word + i} style={wordReveal(i)}>
-                  {word === "design" ? (
-                    <DesignSelectionWord visible={visible} delay={selectionDelay} word={word} selection={selection} />
-                  ) : (
-                    word
-                  )}
+            {HEADING_LINES.map((line, lineIndex) => {
+              const before = HEADING_LINES.slice(0, lineIndex).flat().length;
+              // Lines either side of the "design" line move with the frame's
+              // top and bottom edges, as a transform so the rest of the hero
+              // doesn't shift with them.
+              const push =
+                lineIndex < DESIGN_LINE ? -selectionPushAboveEm(selection.scale)
+                : lineIndex > DESIGN_LINE ? selectionPushBelowEm(selection.scale)
+                : 0;
+              return (
+                <span
+                  key={lineIndex}
+                  className={`flex justify-center items-baseline whitespace-nowrap${lineIndex > 0 ? " mt-1.5 sm:mt-2" : ""}`}
+                  style={{
+                    columnGap: "0.3em",
+                    transform: push ? `translateY(${push}em)` : undefined,
+                    transition: selection.reduced ? "none" : `transform ${selection.resizeMs}ms ${HERO_LIQUID_EASE}`,
+                  }}
+                >
+                  {line.map((word, i) => (
+                    <span key={word + i} style={wordReveal(before + i)}>
+                      {word.toLowerCase().startsWith("design") ? (
+                        // Any trailing punctuation sits outside the frame so only the word is selected.
+                        <>
+                          <DesignSelectionWord visible={visible} delay={selectionDelay} word={word.slice(0, "design".length)} selection={selection} />
+                          {word.slice("design".length)}
+                        </>
+                      ) : (
+                        word
+                      )}
+                    </span>
+                  ))}
                 </span>
-              ))}
-            </span>
-            {/* Moves with the bottom edge of the "design" frame above it, as a
-                transform so the rest of the hero doesn't shift with it. */}
-            <span
-              className="mt-1.5 sm:mt-2 flex flex-wrap justify-center"
-              style={{
-                columnGap: "0.3em",
-                transform: `translateY(${selectionPushBelowEm(selection.scale)}em)`,
-                transition: selection.reduced ? "none" : `transform ${selection.resizeMs}ms ${HERO_LIQUID_EASE}`,
-              }}
-            >
-              {HEADING_LINE_TWO.map((word, i) => (
-                <span key={word + i} style={wordReveal(HEADING_LINE_ONE.length + i)}>{word}</span>
-              ))}
-            </span>
+              );
+            })}
           </h1>
 
           <p
-            className="max-w-md sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight"
+            className="max-w-md sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-balance"
             style={{ ...liquid(120), color: "#5c5c5c" }}
           >
-            For brand owners and startups.
+            From local shops to growing startups, designed and built in-house.
           </p>
 
           {false && (
@@ -1647,24 +1404,24 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         const el = document.getElementById("questionnaire-flow");
         if (!el) return;
 
+        // Centre the quiz in the viewport. If it's taller than the screen
+        // (small phones), centring would push its first question off the top,
+        // so pin its top a little below the edge instead.
         const isMobile = window.matchMedia("(max-width: 639px)").matches;
-        const offset = isMobile ? 24 : 80;
-        const rect = el.getBoundingClientRect();
-        const needsScroll =
-          isMobile ||
-          rect.top > offset ||
-          rect.bottom > window.innerHeight - 40;
-        if (!needsScroll) return;
-
+        const edge = isMobile ? 24 : 80;
         const lenis = window.__lenis;
+        lenis?.resize();
+        const rect = el.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const fits = rect.height <= vh - edge * 2;
+        const delta = fits ? rect.top + rect.height / 2 - vh / 2 : rect.top - edge;
+        if (Math.abs(delta) < 4) return;
+        const targetY = window.scrollY + delta;
+
         if (lenis) {
-          lenis.resize();
-          lenis.scrollTo(el, { offset: -offset, duration: 1.1 });
+          lenis.scrollTo(targetY, { duration: 1.1 });
         } else {
-          window.scrollTo({
-            top: window.scrollY + rect.top - offset,
-            behavior: "smooth",
-          });
+          window.scrollTo({ top: targetY, behavior: "smooth" });
         }
       });
     });
@@ -2823,316 +2580,12 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
   "allure-new-york": "#d9c39c",
 };
 
-// Client detail dialog, opened from a name in the type list. Lenis drives the
-// page scroll, so a plain body-overflow lock isn't enough — the wheel has to be
-// handed to the dialog via lenis:lock plus data-lenis-prevent, or the panel
-// won't scroll internally.
-function ClientDialog({
-  item,
-  onClose,
-}: {
-  item: ClientCarouselItem | null;
-  onClose: () => void;
-}) {
-  const open = item !== null;
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const restoreFocusRef = useRef<HTMLElement | null>(null);
-  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Live swipe offset, in px. Written during a drag and animated back to 0 (or
-  // out) on release.
-  const [dragY, setDragY] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [dismissing, setDismissing] = useState(false);
-  // Mirrors dragY for the touch handlers: touchend needs the latest offset
-  // synchronously, and reading the state variable there would close over the
-  // value from the render that installed the handler.
-  const dragYRef = useRef(0);
-  const dragRef = useRef<{ startY: number; startX: number; active: boolean } | null>(null);
-  // Single writer for the offset, so the ref can never drift from the state.
-  const applyDragY = (v: number) => { dragYRef.current = v; setDragY(v); };
-  // The portal target only exists on the client. Gating on `typeof document`
-  // renders null on the server but a real portal on the very first client
-  // render, which is a hydration mismatch — so gate on an effect instead, and
-  // let the first client render agree with the server's null.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  // Reset the sheet position whenever it reopens, so a previous swipe doesn't
-  // leave the next open offset.
-  useEffect(() => {
-    if (open) {
-      applyDragY(0);
-      setDragging(false);
-      setDismissing(false);
-      dismissDoneRef.current = false;
-      dragRef.current = null;
-      if (dismissTimerRef.current) {
-        clearTimeout(dismissTimerRef.current);
-        dismissTimerRef.current = null;
-      }
-    }
-  }, [open]);
-
-  useEffect(() => () => {
-    if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-  }, []);
-
-  const dismissDoneRef = useRef(false);
-  const finishDismiss = () => {
-    if (dismissDoneRef.current) return;
-    dismissDoneRef.current = true;
-    if (dismissTimerRef.current) {
-      clearTimeout(dismissTimerRef.current);
-      dismissTimerRef.current = null;
-    }
-    onClose();
-  };
-
-  const CLOSE_THRESHOLD = 110;
-  const DISMISS_MS = 420;
-  // Finger has to travel this far down before the touch is treated as a
-  // dismiss drag at all. Below it the gesture stays a candidate: nothing
-  // moves, no transform is written, and a tap on a link or button inside the
-  // sheet behaves like a plain tap. Without this, touchstart alone armed the
-  // drag, so every press read as "about to close".
-  const DRAG_SLOP = 8;
-  // Past the slop, a gesture is only a dismiss if it is mostly vertical.
-  // A mostly-horizontal swipe keeps the sheet still.
-  const DIRECTION_RATIO = 1.2;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    // Only a drag that begins at the very top of the scroll area can dismiss;
-    // otherwise a normal upward scroll inside the panel would read as one.
-    const textScroll = panelRef.current?.querySelector("[data-client-dialog-text]");
-    if ((textScroll instanceof HTMLElement ? textScroll.scrollTop : 0) > 0) return;
-    const t = e.touches[0];
-    // `active` starts false: this is a candidate, not yet a drag. It is
-    // promoted in touchmove once the finger clears the slop downward.
-    dragRef.current = { startY: t.clientY, startX: t.clientX, active: false };
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    const d = dragRef.current;
-    if (!d) return;
-    const t = e.touches[0];
-    const delta = t.clientY - d.startY;
-
-    if (!d.active) {
-      const absY = Math.abs(delta);
-      const absX = Math.abs(t.clientX - d.startX);
-      // Not moved enough yet — stay a tap.
-      if (absY < DRAG_SLOP) return;
-      // Moved, but sideways or upward: this gesture is not a dismiss. Drop the
-      // candidate so the rest of the touch is left alone.
-      if (delta < 0 || absY < absX * DIRECTION_RATIO) {
-        dragRef.current = null;
-        return;
-      }
-      d.active = true;
-      setDragging(true);
-    }
-
-    // Measure from where the drag was promoted, not from touchstart, so the
-    // sheet does not jump by DRAG_SLOP the moment it engages.
-    const dragDelta = delta - DRAG_SLOP;
-    applyDragY(dragDelta > 0 ? dragDelta : dragDelta * 0.2);
-  };
-
-  const onTouchEnd = () => {
-    const d = dragRef.current;
-    dragRef.current = null;
-    // Never became a real drag (a tap, or a sideways swipe): leave the sheet
-    // exactly as it was rather than running a settle animation.
-    if (!d?.active) return;
-    setDragging(false);
-    // Read the committed offset rather than deciding inside a setDragY
-    // updater. React treats updaters as pure and may run them during render,
-    // so calling onClose() in there sets state on the parent mid-render
-    // ("Cannot update a component while rendering a different component").
-    if (dragYRef.current > CLOSE_THRESHOLD) {
-      setDismissing(true);
-      const rect = sheetRef.current?.getBoundingClientRect();
-      // translateY is measured from rest, not from the current drag offset — add
-      // the remaining distance from the finger-released position to off-screen.
-      const exitY = rect
-        ? dragYRef.current + (window.innerHeight - rect.top) + 56
-        : window.innerHeight;
-      requestAnimationFrame(() => applyDragY(exitY));
-      dismissTimerRef.current = setTimeout(finishDismiss, DISMISS_MS + 80);
-      return;
-    }
-    applyDragY(0);
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    restoreFocusRef.current = document.activeElement as HTMLElement | null;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    window.dispatchEvent(new Event("lenis:lock"));
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-      window.dispatchEvent(new Event("lenis:unlock"));
-      restoreFocusRef.current?.focus?.();
-    };
-  }, [open, onClose]);
-
-  if (!mounted) return null;
-  // Idle: render nothing at all. The container below is fixed/inset-0/100dvh,
-  // so leaving it mounted with an invisible backdrop still parks a painted
-  // layer against the bottom viewport edge — and iOS 26 Safari tints its
-  // toolbar from fixed elements near that edge in preference to the body,
-  // finding no colour here and falling back to white. `dismissing` keeps it
-  // alive through the exit animation.
-  // See .home-dark-root in globals.css and
-  // https://nasedk.in/blog/ios26-safari-toolbar-colors/
-  if (!open && !dismissing) return null;
-
-  const dragFade = Math.min(Math.max(dragY, 0) / 280, 0.45);
-
-  return createPortal(
-    <div
-      className="fixed z-50 flex items-end sm:items-center justify-center px-4 pt-6 pb-4 sm:p-6"
-      style={{ inset: 0, height: "100dvh", pointerEvents: open && !dismissing ? "auto" : "none" }}
-    >
-      <div
-        ref={backdropRef}
-        className="absolute inset-0"
-        style={{
-          background: "rgba(0,0,0,0.55)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          opacity: open ? (dismissing ? 0 : 1 - dragFade) : 0,
-          transition: dismissing
-            ? `opacity ${DISMISS_MS}ms ease`
-            : dragging
-              ? "none"
-              : "opacity 220ms ease",
-        }}
-        onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
-      />
-      {item && (
-        <div
-          ref={sheetRef}
-          className="relative w-full min-w-0 max-w-[520px] p-[3px] max-h-[calc(100dvh-2.5rem)] sm:max-h-none"
-          onTransitionEnd={(e) => {
-            if (e.target !== e.currentTarget || e.propertyName !== "transform" || !dismissing) return;
-            finishDismiss();
-          }}
-          style={{
-            animation: open && dragY === 0 && !dragging && !dismissing
-              ? "modal-up 320ms cubic-bezier(0.22,1,0.36,1) both"
-              : "none",
-            transform: dragY !== 0 ? `translateY(${dragY}px)` : undefined,
-            transition: dragging
-              ? "none"
-              : dismissing
-                ? `transform ${DISMISS_MS}ms cubic-bezier(0.32, 0, 0.67, 0)`
-                : "transform 420ms cubic-bezier(0.22,1,0.36,1)",
-          }}
-        >
-          <FigmaSelectionFrame
-            className="bg-[rgb(var(--bg))] min-w-0 flex max-h-[calc(100dvh-3rem-6px)] flex-col sm:max-h-none"
-            strokeColor={CLIENT_DIALOG_STROKE}
-            handleFill="rgb(var(--bg))"
-          >
-          <div
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label={item.client}
-            data-lenis-prevent
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-            onTouchCancel={onTouchEnd}
-            className="relative flex min-h-0 min-w-0 max-w-full flex-1 flex-col"
-            style={{
-              touchAction: "pan-y",
-              WebkitUserSelect: dragging ? "none" : undefined,
-              userSelect: dragging ? "none" : undefined,
-            }}
-          >
-          {item.image ? (
-            <ClientDialogMediaBlock slug={item.slug} src={item.image} dragging={dragging} dragY={dragY} />
-          ) : (
-            <ClientDialogDragHandle dragging={dragging} dragY={dragY} />
-          )}
-
-          {item.image && (
-            <FigmaHorizontalRule strokeColor={CLIENT_DIALOG_STROKE} handleFill="rgb(var(--bg))" />
-          )}
-
-          <button
-            onClick={onClose}
-            className="absolute sm:top-4 sm:right-4 z-10 w-8 h-8 hidden sm:flex items-center justify-center rounded-full text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-            style={{ background: "rgb(var(--fg)/0.06)" }}
-            aria-label="Close"
-          >
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5">
-              <path d="M3 3l10 10M13 3L3 13" />
-            </svg>
-          </button>
-
-          <div
-            data-client-dialog-text
-            className="min-h-0 min-w-0 max-w-full flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-5 py-6 sm:overflow-visible sm:px-6 sm:py-5"
-          >
-            <p
-              className="min-w-0 break-words text-[clamp(1.6rem,5vw,2.1rem)] tracking-tight leading-none text-[rgb(var(--fg))]"
-              style={{ fontWeight: 450, overflowWrap: "anywhere" }}
-            >
-              {item.client}
-            </p>
-
-            {(item.service || item.year) && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] tracking-tight min-w-0">
-                {item.service && (
-                  <span
-                    className="inline-flex items-center rounded-[6px] px-2.5 py-1 leading-none"
-                    style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--muted))" }}
-                  >
-                    {item.service}
-                  </span>
-                )}
-                {item.year && (
-                  <span style={{ color: "rgb(var(--muted))" }}>{item.year}</span>
-                )}
-              </div>
-            )}
-
-            {item.summary && (
-              <p className="mt-4 sm:mt-3 min-w-0 break-words text-[15px] sm:text-[16px] leading-relaxed tracking-[-0.02em]" style={{ color: "rgb(var(--muted))", overflowWrap: "anywhere" }}>
-                {item.summary}
-              </p>
-            )}
-
-            <Link
-              href={`/work/${item.slug}`}
-              className={`mt-6 sm:mt-5 inline-flex items-center ${ACTION_RADIUS_CLASS} px-5 h-10 text-[15px] tracking-tight`}
-              style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
-            >
-              View case study
-            </Link>
-          </div>
-          </div>
-          </FigmaSelectionFrame>
-        </div>
-      )}
-    </div>,
-    document.body,
-  );
-}
-
-// Type-only client list. No logos, no cards: the names carry it, which
-// sidesteps the whole class of logo problems (mismatched source artwork,
-// per-mark optical sizing, tinting an alpha PNG). Each row is a link to the
-// case study; the brand colour shows up only on hover so the resting state
-// stays quiet.
+// Type-only client list. No logos: the names carry it, which sidesteps the
+// whole class of logo problems (mismatched source artwork, per-mark optical
+// sizing, tinting an alpha PNG). Selecting a name works like selecting a
+// layer in Figma: the cell takes the selection tint and handles, and an
+// inspector row opens under it with the cover, a short summary and a link to
+// the case study. The brand colour shows on hover and on the selected name.
 const CLIENT_NAME_ACCENT: Record<string, string> = {
   aether: "#5fa8d8",
   inboundly: "#8f7cf5",
@@ -3147,15 +2600,31 @@ const CLIENT_NAME_ACCENT: Record<string, string> = {
 // Darker than the global --line token: a 1px dashed rule at 225 grey nearly
 // disappears, and this grid is built from rails so they have to read.
 const CLIENT_GRID_LINE = `1px solid ${SELECTION_FRAME_COLOR}`;
+// The selection blue at low alpha, the way Figma tints a selected layer.
+const CLIENT_SELECTED_FILL = SELECTION_FILL;
+const CLIENT_INSPECTOR_EASE = "cubic-bezier(0.22,1,0.36,1)";
+const CLIENT_INSPECTOR_OPEN_MS = 440;
+const CLIENT_INSPECTOR_CLOSE_MS = 300;
 
-function ClientName({ name, slug, onDark = false }: { name: string; slug: string; onDark?: boolean }) {
+function ClientName({
+  name,
+  slug,
+  onDark = false,
+  selected = false,
+}: {
+  name: string;
+  slug: string;
+  onDark?: boolean;
+  selected?: boolean;
+}) {
   const accent = CLIENT_NAME_ACCENT[slug] ?? "#1a1a1a";
+  const base = onDark ? "rgb(var(--fg))" : "#1a1a1a";
   return (
     <span
       className="block text-[clamp(1.15rem,4.6vw,1.75rem)] tracking-tight leading-none min-w-0 hyphens-none transition-colors duration-200 group-hover:text-[color:var(--client-accent)]"
       style={{
         fontWeight: 450,
-        color: onDark ? "rgb(var(--fg))" : "#1a1a1a",
+        color: selected ? accent : base,
         overflowWrap: "break-word",
         ["--client-accent" as string]: accent,
       }}
@@ -3165,8 +2634,166 @@ function ClientName({ name, slug, onDark = false }: { name: string; slug: string
   );
 }
 
+// Corner handles for the selected cell, popped in one after another.
+function ClientCellHandles({ visible, fill }: { visible: boolean; fill: string }) {
+  const HANDLE = 5;
+  const corners = [
+    { top: -HANDLE / 2, left: -HANDLE / 2 },
+    { top: -HANDLE / 2, right: -HANDLE / 2 },
+    { bottom: -HANDLE / 2, right: -HANDLE / 2 },
+    { bottom: -HANDLE / 2, left: -HANDLE / 2 },
+  ] as const;
+  return (
+    <>
+      {corners.map((pos, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            width: HANDLE,
+            height: HANDLE,
+            background: fill,
+            border: `1px solid ${SELECTION_FRAME_COLOR}`,
+            pointerEvents: "none",
+            zIndex: 2,
+            ...pos,
+            opacity: visible ? 1 : 0,
+            transform: visible ? "scale(1)" : "scale(0.4)",
+            transition: visible
+              ? `transform 220ms ${CLIENT_INSPECTOR_EASE} ${i * 35}ms, opacity 160ms ease ${i * 35}ms`
+              : "transform 120ms ease, opacity 120ms ease",
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+// The row that opens under a selected name. Height runs on grid-template-rows
+// (0fr to 1fr) so it animates to the content's real height with no measuring.
+// It keeps showing the last client while it collapses, and keys the content on
+// the slug so switching between the two names in a row replays the entrance.
+function ClientInspector({
+  item,
+  id,
+  labelledBy,
+}: {
+  item: ClientCarouselItem | null;
+  id: string;
+  labelledBy?: string;
+}) {
+  const reduced = useReducedMotion();
+  const open = item !== null;
+  const [shown, setShown] = useState(item);
+  useEffect(() => {
+    if (item) setShown(item);
+  }, [item]);
+  const current = item ?? shown;
+
+  // Content settles in just behind the row. `backwards` fill only holds the
+  // start frame during the delay, so nothing is pinned once it has played.
+  const enter = (i: number): React.CSSProperties | undefined =>
+    reduced || !open
+      ? undefined
+      : { animation: `client-card-item 420ms ${CLIENT_INSPECTOR_EASE} ${120 + i * 50}ms backwards` };
+
+  return (
+    <div
+      id={id}
+      role="region"
+      aria-labelledby={labelledBy}
+      aria-hidden={!open}
+      inert={!open}
+      className="grid"
+      style={{
+        gridTemplateRows: open ? "1fr" : "0fr",
+        transition: reduced
+          ? "none"
+          : open
+            ? `grid-template-rows ${CLIENT_INSPECTOR_OPEN_MS}ms ${CLIENT_INSPECTOR_EASE}`
+            : `grid-template-rows ${CLIENT_INSPECTOR_CLOSE_MS}ms cubic-bezier(0.4,0,0.2,1)`,
+      }}
+    >
+      <div className="min-h-0 overflow-hidden">
+        {current && (
+          <div
+            key={current.slug}
+            className="grid sm:grid-cols-2"
+            style={{
+              borderTop: CLIENT_GRID_LINE,
+              opacity: open ? 1 : 0,
+              transition: `opacity ${open ? 200 : 140}ms ease`,
+              ["--client-rail" as string]: SELECTION_FRAME_COLOR,
+            }}
+          >
+            {current.image && (
+              // Same rail as the column divider above, so the image fills the
+              // left column exactly.
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#0a0a0a] max-sm:border-b sm:border-r border-[color:var(--client-rail)]">
+                <img
+                  src={current.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                  draggable={false}
+                  style={reduced || !open ? undefined : { animation: `client-card-media 640ms ${CLIENT_INSPECTOR_EASE} backwards` }}
+                />
+              </div>
+            )}
+
+            <div className="flex min-w-0 flex-col px-4 py-5 sm:px-6 sm:py-6">
+              {(current.service || current.year) && (
+                <p
+                  className="flex items-center justify-between gap-4 text-[13px] leading-none tracking-tight"
+                  style={{ ...enter(0), color: "rgb(var(--muted))" }}
+                >
+                  {current.service && <span className="min-w-0">{current.service}</span>}
+                  {current.year && <span className="ml-auto shrink-0 tabular-nums">{current.year}</span>}
+                </p>
+              )}
+
+              {current.summary && (
+                <p
+                  className="mt-3 min-w-0 break-words text-[15px] sm:text-[16px] leading-relaxed tracking-[-0.02em]"
+                  style={{ ...enter(1), color: "rgb(var(--fg))", overflowWrap: "anywhere" }}
+                >
+                  {current.summary}
+                </p>
+              )}
+
+              <div className="mt-5 sm:mt-auto sm:pt-5" style={enter(2)}>
+                <Link
+                  href={`/work/${current.slug}`}
+                  className={`group/cta inline-flex w-full sm:w-auto items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} px-5 h-10 text-[15px] tracking-tight transition-transform duration-150 active:scale-[0.97]`}
+                  style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
+                >
+                  View case study
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 transition-transform duration-200 ease-out group-hover/cta:translate-x-0.5" aria-hidden>
+                    <path d="M3 8h10M9 4l4 4-4 4" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ClientTypeList({ items, onDark = false }: { items: ClientCarouselItem[]; onDark?: boolean }) {
-  const [openItem, setOpenItem] = useState<ClientCarouselItem | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const handleFill = onDark ? "rgb(var(--bg))" : "#fff";
+
+  const rows: ClientCarouselItem[][] = [];
+  for (let i = 0; i < items.length; i += 2) rows.push(items.slice(i, i + 2));
+
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSelected(null); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [selected]);
 
   return (
     <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
@@ -3177,33 +2804,50 @@ function ClientTypeList({ items, onDark = false }: { items: ClientCarouselItem[]
       >
         Some names we&rsquo;ve worked with.
       </p>
-      <FigmaSelectionFrame handleFill={onDark ? "rgb(var(--bg))" : "#fff"}>
-      <ul className="grid grid-cols-2">
-        {items.map((item, i) => {
+      <FigmaSelectionFrame handleFill={handleFill}>
+        {rows.map((row, r) => {
+          const active = row.find(it => it.slug === selected) ?? null;
+          const inspectorId = `client-inspector-${r}`;
           return (
-            <li
-              key={item.slug}
-              className="px-4 sm:px-6"
-              style={{
-                borderTop: i >= 2 ? CLIENT_GRID_LINE : undefined,
-                borderRight: i % 2 === 0 ? CLIENT_GRID_LINE : undefined,
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setOpenItem(item)}
-                aria-haspopup="dialog"
-                className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
-              >
-                <ClientName name={item.client} slug={item.slug} onDark={onDark} />
-              </button>
-            </li>
+            <div key={r} style={{ borderTop: r > 0 ? CLIENT_GRID_LINE : undefined }}>
+              <ul className="grid grid-cols-2">
+                {row.map((item, i) => {
+                  const isSelected = item.slug === selected;
+                  return (
+                    <li
+                      key={item.slug}
+                      className="relative px-4 sm:px-6"
+                      style={{
+                        borderRight: i === 0 ? CLIENT_GRID_LINE : undefined,
+                        background: isSelected ? CLIENT_SELECTED_FILL : "transparent",
+                        transition: "background-color 200ms ease",
+                      }}
+                    >
+                      <ClientCellHandles visible={isSelected} fill={handleFill} />
+                      <button
+                        type="button"
+                        id={`client-name-${item.slug}`}
+                        onClick={() => setSelected(isSelected ? null : item.slug)}
+                        aria-expanded={isSelected}
+                        aria-controls={inspectorId}
+                        className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
+                      >
+                        <ClientName name={item.client} slug={item.slug} onDark={onDark} selected={isSelected} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <ClientInspector
+                item={active}
+                id={inspectorId}
+                labelledBy={active ? `client-name-${active.slug}` : undefined}
+              />
+            </div>
           );
         })}
-      </ul>
       </FigmaSelectionFrame>
       </div>
-      <ClientDialog item={openItem} onClose={() => setOpenItem(null)} />
     </section>
   );
 }

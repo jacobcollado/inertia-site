@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useLayoutEffect, useState, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
-import type { WorkMeta, SizedImage } from "@/lib/work";
+import type { WorkMeta } from "@/lib/work";
 import { getWorkIndexThumb } from "@/lib/work-thumb";
-
-type WorkMetaWithGallery = WorkMeta & { gallery: SizedImage[] };
+import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { FigmaSelectionFrame, SELECTION_RAIL } from "@/components/figma-frame";
 
 const SERVICE_SHORT: Record<string, string> = {
   "Web development": "Development",
@@ -27,8 +27,8 @@ const CAROUSEL_THUMB_OVERRIDE: Record<string, string> = {
 };
 
 // Live link + status overrides for the /work index, keyed by slug. Kept here
-// rather than in each project's MDX since /work is the only surface these
-// still drive (individual /work/[slug] pages are no longer in active use).
+// rather than in each project's MDX. Currently unreferenced: cards now link
+// straight to /work/[slug] instead of opening a dialog that showed these.
 const WORK_LINKS: Record<string, { url?: string; status?: string; year?: string; yearLabel?: string }> = {
   "trippie-redd": { status: "Inactive", year: "June 2025" },
   "ellora-la": { url: "https://ellora.la", year: "Early 2026" },
@@ -58,258 +58,9 @@ function resolveLink(slug: string, w: WorkMeta) {
   return { url, status, yearLabel };
 }
 
-function WorkDialog({
-  work,
-  onClose,
-}: {
-  work: WorkMetaWithGallery | null;
-  onClose: () => void;
-}) {
-  const [mounted, setMounted] = useState(false);
-  const [visible, setVisible] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-  // Swipe-down-to-close (mobile). dragY is the live downward offset while
-  // dragging; dragging tracks whether a close-drag is actually in progress
-  // (only started when the panel is scrolled to the top and the finger pulls
-  // down, so it never fights normal content scrolling).
-  const [dragY, setDragY] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const touchState = useRef<{ startY: number; active: boolean } | null>(null);
-  // Tracks which gallery images have finished loading, keyed by index, so
-  // each one can show a shimmering skeleton in its own aspect-ratio box
-  // until it paints rather than the flat static surface fill it had before.
-  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-  useEffect(() => setMounted(true), []);
-
-  // Reset the loaded set when a new project opens — otherwise an index that
-  // was already marked loaded for the previous project's gallery would skip
-  // straight past the skeleton for the new one.
-  useEffect(() => {
-    setLoadedImages(new Set());
-  }, [work?.slug]);
-
-  // Drive an enter/exit transition off `visible` so opening fades/rises in and
-  // closing plays out before the portal unmounts (kept simple: parent controls
-  // mount via `work`, this only animates the in/out state).
-  useEffect(() => {
-    if (work) {
-      setDragY(0);
-      setDragging(false);
-      const id = requestAnimationFrame(() => setVisible(true));
-      return () => cancelAnimationFrame(id);
-    }
-    setVisible(false);
-  }, [work]);
-
-  // Swipe-down-to-close handlers. A close-drag only begins when the panel is
-  // scrolled to the very top and the finger moves downward; up to that point
-  // (and any time the panel isn't at the top) touches fall through to native
-  // scrolling untouched.
-  const CLOSE_THRESHOLD = 110; // px dragged to dismiss on release
-  const onTouchStart = (e: React.TouchEvent) => {
-    const panel = panelRef.current;
-    if (!panel || panel.scrollTop > 0) { touchState.current = null; return; }
-    touchState.current = { startY: e.touches[0].clientY, active: false };
-  };
-  const onTouchMove = (e: React.TouchEvent) => {
-    const st = touchState.current;
-    const panel = panelRef.current;
-    if (!st || !panel) return;
-    const dy = e.touches[0].clientY - st.startY;
-    // Only engage on a downward pull from the top. If the panel has since
-    // scrolled (shouldn't, at top) or the pull is upward, bail out.
-    if (!st.active) {
-      if (dy > 6 && panel.scrollTop <= 0) { st.active = true; setDragging(true); }
-      else return;
-    }
-    if (dy <= 0) { setDragY(0); return; }
-    setDragY(dy);
-  };
-  const onTouchEnd = () => {
-    const st = touchState.current;
-    touchState.current = null;
-    if (!st?.active) return;
-    setDragging(false);
-    if (dragY > CLOSE_THRESHOLD) {
-      onClose();
-    } else {
-      setDragY(0);
-    }
-  };
-
-  useEffect(() => {
-    if (!work) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", onKey);
-
-    // This site runs Lenis smooth-scroll (see app/lenis-provider.tsx), which
-    // hijacks wheel events globally with a non-passive preventDefault. That's
-    // why, without stopping it, the page still scrolled behind the dialog and
-    // the wheel wouldn't scroll the panel (only the scrollbar / middle-click
-    // autoscroll, which don't go through wheel events, worked). Lenis exposes a
-    // `lenis:lock` / `lenis:unlock` event pair that stops/starts it; stopping
-    // it releases the wheel so the panel (marked data-lenis-prevent below)
-    // scrolls natively and nothing behind moves.
-    window.dispatchEvent(new Event("lenis:lock"));
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-      window.dispatchEvent(new Event("lenis:unlock"));
-    };
-  }, [work, onClose]);
-
-  if (!mounted || !work) return null;
-
-  const { url, status, yearLabel } = resolveLink(work.slug, work);
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      style={{
-        background: "rgba(0,0,0,0.55)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
-        opacity: visible ? 1 : 0,
-        transition: "opacity 360ms ease",
-      }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      <div
-        ref={panelRef}
-        data-lenis-prevent
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        onTouchCancel={onTouchEnd}
-        className="relative w-full sm:max-w-[560px] bg-[rgb(var(--bg))] border border-[rgb(var(--line))] rounded-t-2xl sm:rounded-b-none mx-0 sm:mx-4 overflow-y-auto overscroll-contain"
-        style={{
-          maxHeight: "92dvh",
-          transform: visible ? `translateY(${dragY}px)` : "translateY(24px)",
-          opacity: visible ? 1 : 0,
-          // No transition while actively dragging so the panel tracks the
-          // finger 1:1; restore a slow, fluid ease for the enter/exit and the
-          // snap-back so the release settles gently rather than snapping.
-          transition: dragging
-            ? "opacity 220ms ease"
-            : "transform 560ms cubic-bezier(0.22,1,0.36,1), opacity 300ms ease",
-        }}
-      >
-        {/* Mobile grabber */}
-        <div className="sm:hidden flex justify-center pt-3 pb-1 sticky top-0 z-20 bg-[rgb(var(--bg))]">
-          <div className="w-8 h-1 rounded-full bg-[rgb(var(--line))]" />
-        </div>
-
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-8 h-8 flex items-center justify-center rounded-full bg-[rgb(var(--surface))] text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors"
-          aria-label="Close"
-        >
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-4 h-4">
-            <path d="M3 3l10 10M13 3L3 13" />
-          </svg>
-        </button>
-
-        <div className="px-6 sm:px-8 pt-5 sm:pt-8 pb-8">
-          {/* Header */}
-          <div className="flex flex-col gap-3 pr-10">
-            <h2 className="text-[clamp(1.6rem,4vw,2.1rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-              {work.client}
-            </h2>
-          </div>
-
-          {/* Meta row: service + year/status */}
-          <div className="flex items-center gap-2.5 flex-wrap mt-4">
-            {work.service && (
-              <span className="text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none">
-                {serviceShort(work.service)}
-              </span>
-            )}
-            {(status || yearLabel) && (
-              <span className="text-[11px] tabular-nums tracking-tight rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none" style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))" }}>
-                {status && yearLabel ? `${status} - ${yearLabel}` : status || yearLabel}
-              </span>
-            )}
-          </div>
-
-          {/* Summary */}
-          {work.summary && (
-            <p className="text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] mt-5">
-              {work.summary}
-            </p>
-          )}
-
-          {/* Live link */}
-          {url && (
-            <a
-              href={url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full pl-4 pr-1.5 py-1.5 mt-6 text-[13px] font-medium tracking-tight text-white hover:opacity-85 transition-opacity"
-              style={{ background: "#000" }}
-            >
-              Open live site
-              <span className="flex items-center justify-center w-7 h-7 rounded-full bg-white/15">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
-                  <line x1="4" y1="12" x2="12" y2="4" /><polyline points="5 4 12 4 12 11" />
-                </svg>
-              </span>
-            </a>
-          )}
-
-          {/* Gallery */}
-          {work.gallery.length > 0 && (
-            <div className="flex flex-col gap-3 mt-7">
-              {work.gallery.map((img, i) => {
-                const loaded = loadedImages.has(i);
-                return (
-                  <div
-                    key={i}
-                    className="relative w-full overflow-hidden rounded-xl"
-                    style={{ aspectRatio: `${img.width} / ${img.height}` }}
-                  >
-                    {/* Shimmering skeleton — fades out once the image has
-                        loaded rather than being removed outright, so the
-                        handoff to the real photo is a soft cross-fade
-                        instead of a hard swap. */}
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 skeleton-shimmer"
-                      style={{
-                        opacity: loaded ? 0 : 1,
-                        transition: "opacity 400ms ease",
-                        pointerEvents: "none",
-                      }}
-                    />
-                    <Image
-                      src={img.src}
-                      alt={`${work.client} ${i + 1}`}
-                      width={img.width}
-                      height={img.height}
-                      sizes="(max-width: 640px) 100vw, 560px"
-                      quality={78}
-                      className="w-full h-auto block relative"
-                      style={{ opacity: loaded ? 1 : 0, transition: "opacity 400ms ease" }}
-                      loading={i === 0 ? undefined : "lazy"}
-                      draggable={false}
-                      onLoad={() => setLoadedImages((prev) => new Set(prev).add(i))}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
 function WorkCard({
   work,
-  onOpen,
+  shouldBlockClick,
   wide,
   cardRef,
   carousel,
@@ -318,8 +69,10 @@ function WorkCard({
   suppressThumbTransition,
   cardWidthCss,
 }: {
-  work: WorkMetaWithGallery;
-  onOpen: () => void;
+  work: WorkMeta;
+  // Carousel only: true straight after a drag, so letting go of a dragged
+  // card doesn't also follow its link.
+  shouldBlockClick?: () => boolean;
   // Spans both grid columns on desktop and uses a landscape aspect, so a
   // wide/landscape thumbnail (e.g. FT.GIOO) isn't cropped down into a square.
   wide?: boolean;
@@ -345,9 +98,13 @@ function WorkCard({
   const objectPosition = THUMB_OBJECT_POSITION[work.slug] ?? "center top";
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
+    <Link
+      href={`/work/${work.slug}`}
+      // A native link drag would hijack the carousel's pointer drag with the
+      // browser's ghost image.
+      draggable={false}
+      onDragStart={(e) => e.preventDefault()}
+      onClick={(e) => { if (shouldBlockClick?.()) e.preventDefault(); }}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
       className={`group flex flex-col text-left${wide && !carousel ? " sm:col-span-2" : ""}${carousel ? " shrink-0" : ""}`}
@@ -357,66 +114,66 @@ function WorkCard({
       // laptop viewport gets a proportionally narrower card instead of one
       // clipped at the top and bottom.
       style={carousel && cardWidthCss ? { width: cardWidthCss } : undefined}
-      aria-label={`Open ${work.client}`}
     >
-      <div
-        ref={cardRef}
-        className={`work-card-thumb relative w-full overflow-hidden rounded-xl bg-[rgb(var(--surface))]${carousel ? " work-card-thumb--carousel" : ""}`}
-        style={{
-          // Mobile grid (non-carousel) uses a shorter frame than the old 4/3
-          // so the list scrolls less and the in-card title/service overlay
-          // doesn't sit on a tall empty crop.
-          aspectRatio: carousel
-            ? `${CAROUSEL_AR_W} / ${CAROUSEL_AR_H}`
-            : wide
-              ? "16 / 9"
-              : "3 / 2",
-          ...(suppressThumbTransition ? { transition: "none" } : {}),
-        }}
+      {/* Framed like a selected layer: the shot, a rail, then a caption bar
+          with the name and service, the same split as the homepage inspector. */}
+      <FigmaSelectionFrame
+        frameRef={cardRef}
+        handleFill="rgb(var(--bg))"
+        className={`work-card-thumb bg-[rgb(var(--bg))]${carousel ? " work-card-thumb--carousel" : ""}`}
+        style={suppressThumbTransition ? { transition: "none" } : undefined}
       >
-        {thumb ? (
-          <Image
-            src={thumb}
-            alt={work.client}
-            fill
-            // Carousel cards render up to 760px CSS, so request the largest
-            // candidate available. An earlier 512px cap here meant Next served a
-            // half-size image the browser then upscaled, which is what made
-            // these read as low-resolution once the cards got bigger.
-            sizes={carousel ? "1536px" : wide ? "(max-width: 640px) 100vw, 1024px" : "(max-width: 640px) 100vw, 512px"}
-            quality={90}
-            // /work is an image-first page — skip lazy-load so thumbs don't
-            // pop in after the card shells paint. Paired with <link rel=preload>
-            // in page.tsx for the optimized next/image URLs.
-            priority
-            className="object-cover"
-            style={{ objectPosition }}
-            draggable={false}
-          />
-        ) : null}
         <div
-          className="flex absolute inset-x-0 bottom-0 items-center justify-between gap-3 px-3.5 sm:px-4 pt-16 pb-3 pointer-events-none"
+          className="relative w-full overflow-hidden bg-[rgb(var(--surface))]"
           style={{
-            background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.52) 32%, rgba(0,0,0,0.22) 62%, transparent 100%)",
+            // Mobile grid (non-carousel) uses a shorter frame than the old 4/3
+            // so the list scrolls less.
+            aspectRatio: carousel
+              ? `${CAROUSEL_AR_W} / ${CAROUSEL_AR_H}`
+              : wide
+                ? "16 / 9"
+                : "3 / 2",
           }}
         >
+          {thumb ? (
+            <Image
+              src={thumb}
+              alt={work.client}
+              fill
+              // Carousel cards render up to 760px CSS, so request the largest
+              // candidate available. An earlier 512px cap here meant Next served a
+              // half-size image the browser then upscaled, which is what made
+              // these read as low-resolution once the cards got bigger.
+              sizes={carousel ? "1536px" : wide ? "(max-width: 640px) 100vw, 1024px" : "(max-width: 640px) 100vw, 512px"}
+              quality={90}
+              // /work is an image-first page — skip lazy-load so thumbs don't
+              // pop in after the card shells paint. Paired with <link rel=preload>
+              // in page.tsx for the optimized next/image URLs.
+              priority
+              className="object-cover"
+              style={{ objectPosition }}
+              draggable={false}
+            />
+          ) : null}
+        </div>
+        <div
+          className="flex items-center justify-between gap-3 px-3.5 sm:px-4 h-11 sm:h-12 transition-colors duration-200 group-hover:bg-[rgb(107_184_239/0.08)]"
+          style={{ borderTop: SELECTION_RAIL }}
+        >
           <span
-            className="text-[15px] sm:text-[16px] font-normal tracking-tight text-white"
-            style={{ textShadow: "0 1px 12px rgba(0,0,0,0.45)" }}
+            className="min-w-0 truncate text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))]"
+            style={{ fontWeight: 450 }}
           >
             {work.client}
           </span>
           {work.service && (
-            <span
-              className="text-[12px] tracking-tight shrink-0 rounded-[6px] px-2.5 pt-[3px] pb-[4px] leading-none"
-              style={{ background: "rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.92)" }}
-            >
-              {serviceShort(work.service)}
+            <span className="shrink-0 text-[13px] tracking-tight text-[rgb(var(--muted))]">
+              {work.service}
             </span>
           )}
         </div>
-      </div>
-    </button>
+      </FigmaSelectionFrame>
+    </Link>
   );
 }
 
@@ -461,7 +218,7 @@ const CAROUSEL_GAP = 32;
 // Subtracted in absolute pixels rather than folded into a dvh percentage,
 // because the share of the viewport this chrome occupies changes with viewport
 // height, a fixed percentage that fit a 1080px screen overflowed an 800px one.
-const CAROUSEL_CHROME_PX = 148;
+const CAROUSEL_CHROME_PX = 196;
 // The centered card scales up from its own center, so the height budget has to
 // be divided by this before converting to a width, or the grown card overflows.
 const CAROUSEL_FOCUS_SCALE = 1.045;
@@ -495,11 +252,9 @@ function carouselCardWidthCss(headerPx: number) {
 // render, then hands off to a CSS transition once the drag settles.
 function WorkCarousel({
   items,
-  onOpen,
   headerPx,
 }: {
-  items: WorkMetaWithGallery[];
-  onOpen: (slug: string) => void;
+  items: WorkMeta[];
   // Height of everything above the carousel, so card sizing can subtract it.
   headerPx: number;
 }) {
@@ -522,6 +277,10 @@ function WorkCarousel({
   // old spring, or the two fight over track.style.transform every frame.
   const settleRafRef = useRef<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // Set on the release of a real drag and cleared on the next tick. The
+  // browser fires the card's click right after pointerup, in the same task,
+  // so this is still true when the link checks it.
+  const suppressClickRef = useRef(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const rafRef = useRef<number | null>(null);
   // The track's leading inset, so the first card starts aligned with the page's
@@ -811,6 +570,8 @@ function WorkCarousel({
     const viewport = viewportRef.current;
     if (viewport?.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
     if (!d?.moved) return;
+    suppressClickRef.current = true;
+    setTimeout(() => { suppressClickRef.current = false; }, 0);
     // Snap the nearest card to center so the track always comes to rest with
     // one card in focus rather than stranded between two.
     const nearest = nearestIndex();
@@ -861,8 +622,7 @@ function WorkCarousel({
           type="button"
           onClick={() => step(-1)}
           aria-label="Previous"
-          className="pointer-events-auto flex items-center justify-center w-11 h-11 rounded-full transition-opacity hover:opacity-80"
-          style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))", border: "1px solid rgb(var(--line))", boxShadow: "var(--shadow-popover)" }}
+          className={`pointer-events-auto flex items-center justify-center size-10 ${ACTION_RADIUS_CLASS} bg-[rgb(var(--fg)/0.06)] hover:bg-[rgb(var(--fg)/0.1)] text-[rgb(var(--fg))] transition-[background-color,transform] duration-150 active:scale-[0.94]`}
         >
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
             <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
@@ -872,8 +632,7 @@ function WorkCarousel({
           type="button"
           onClick={() => step(1)}
           aria-label="Next"
-          className="pointer-events-auto flex items-center justify-center w-11 h-11 rounded-full transition-opacity hover:opacity-80"
-          style={{ background: "rgb(var(--surface))", color: "rgb(var(--fg))", border: "1px solid rgb(var(--line))", boxShadow: "var(--shadow-popover)" }}
+          className={`pointer-events-auto flex items-center justify-center size-10 ${ACTION_RADIUS_CLASS} bg-[rgb(var(--fg)/0.06)] hover:bg-[rgb(var(--fg)/0.1)] text-[rgb(var(--fg))] transition-[background-color,transform] duration-150 active:scale-[0.94]`}
         >
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5" aria-hidden="true">
             <line x1="3" y1="8" x2="13" y2="8" /><polyline points="9 4 13 8 9 12" />
@@ -903,7 +662,7 @@ function WorkCarousel({
             cardWidthCss={cardWidthCss}
             onPointerEnter={() => setHoveredIndex(i)}
             onPointerLeave={() => setHoveredIndex((prev) => (prev === i ? null : prev))}
-            onOpen={() => { if (!dragRef.current?.moved) onOpen(w.slug); }}
+            shouldBlockClick={() => suppressClickRef.current}
           />
         ))}
         {/* Mirror of the lead spacer, so the last card can be dragged all the
@@ -934,7 +693,7 @@ function FloatingBackToTop() {
     <button
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       aria-label="Back to top"
-      className="fixed bottom-6 right-6 sm:right-8 z-40 flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300"
+      className={`fixed bottom-6 right-6 sm:right-8 z-40 flex items-center justify-center size-10 ${ACTION_RADIUS_CLASS} transition-[opacity,transform] duration-300`}
       style={{
         background: "rgb(var(--bg))",
         border: "1px solid rgb(var(--line))",
@@ -965,9 +724,8 @@ const FILTER_LABEL: Record<string, string> = {
   "UI/UX design": "UI/UX",
 };
 
-export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWithGallery[] }) {
-  const [work] = useState<WorkMetaWithGallery[]>(initialWork);
-  const [openSlug, setOpenSlug] = useState<string | null>(null);
+export default function WorkIndexPage({ initialWork }: { initialWork: WorkMeta[] }) {
+  const [work] = useState<WorkMeta[]>(initialWork);
   // Filter pills are temporarily removed from the render, so this stays fixed
   // at "All" and its setter is unused for now (kept, along with the `filters`
   // derivation below, so restoring the pills is a single-block change).
@@ -1007,8 +765,6 @@ export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWi
     return () => window.removeEventListener("resize", measure);
   }, [isDesktop]);
 
-  const close = useCallback(() => setOpenSlug(null), []);
-  const openWork = openSlug ? work.find((w) => w.slug === openSlug) ?? null : null;
 
   // Distinct services, in the order they first appear, with an "All" option
   // up front. Derived from the data so the pills stay in sync with content.
@@ -1063,17 +819,16 @@ export default function WorkIndexPage({ initialWork }: { initialWork: WorkMetaWi
           // that may now exceed the shorter track's bounds.
           key={filter}
         >
-          <WorkCarousel items={visibleWork} onOpen={(slug) => setOpenSlug(slug)} headerPx={frameTop} />
+          <WorkCarousel items={visibleWork} headerPx={frameTop} />
         </div>
       ) : isDesktop === false ? (
-        <div className="grid grid-cols-1 gap-x-6 gap-y-5">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-6">
           {visibleWork.map((w) => (
-            <WorkCard key={w.slug} work={w} onOpen={() => setOpenSlug(w.slug)} wide={w.slug === "ft-gioo"} />
+            <WorkCard key={w.slug} work={w} wide={w.slug === "ft-gioo"} />
           ))}
         </div>
       ) : null}
 
-      <WorkDialog work={openWork} onClose={close} />
       <FloatingBackToTop />
 
     </main>
