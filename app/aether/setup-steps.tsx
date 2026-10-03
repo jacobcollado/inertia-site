@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
+import { IllustratedCard } from "@/components/illustrated-card";
 
 // "How much work is this?" answered right before the bonuses. Install and
 // setup are done for the buyer, same day, through a Shopify collaborator
 // request.
 //
-// Built from the same parts as the bonus cards (surface card, small drawn
-// cover, muted tag, title, line of copy) so the two sections read as one
-// family instead of a timeline dropped into a page of cards.
+// Same IllustratedCard as the bonuses, with its own covers, so the two
+// sections read as one family instead of a timeline dropped into a page of
+// cards.
 
 const LIVE_GREEN = "22 163 74";
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -14,19 +15,19 @@ const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const BAR = "block h-[5px] rounded-full bg-[rgb(var(--fg)/0.12)]";
 const BAR_STRONG = "block h-[5px] rounded-full bg-[rgb(var(--fg)/0.22)]";
 const SHEET =
-  "rounded-lg bg-[rgb(var(--bg))] shadow-[0_0_0_1px_rgb(var(--line)),0_10px_24px_-12px_rgb(0_0_0/0.25)]";
+  "rounded-[6px] bg-[rgb(var(--bg))] shadow-[0_0_0_1px_rgb(var(--line)),0_10px_24px_-12px_rgb(0_0_0/0.25)]";
 
 // Step one: the license email landing on top of an older message. The new
 // one lifts a little on hover.
 function InboxCover() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 px-6">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 px-3 sm:px-6">
       <div
-        className={`${SHEET} flex w-full max-w-[15rem] items-center gap-2.5 px-3 py-2.5 motion-safe:group-hover:-translate-y-1`}
+        className={`${SHEET} flex w-full max-w-[15rem] items-center gap-2.5 px-3 py-2.5 motion-safe:group-hover:-translate-y-1 motion-safe:group-data-[play]:-translate-y-1`}
         style={{ transition: `transform 500ms ${EASE}` }}
       >
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--surface))] text-[rgb(var(--fg))]">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="size-3" aria-hidden="true">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-[6px] bg-[rgb(var(--surface))] text-[rgb(var(--fg))] [&_svg]:size-[50%]">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="5" cy="8" r="3" />
             <path d="M8 8h6.5M12 8v2.5M14.5 8v2" />
           </svg>
@@ -38,7 +39,7 @@ function InboxCover() {
         <span className="text-[10px] tracking-tight text-[rgb(var(--muted))]">now</span>
       </div>
       <div className={`${SHEET} flex w-[88%] max-w-[13.25rem] items-center gap-2.5 px-3 py-2 opacity-50`}>
-        <span className="size-5 shrink-0 rounded-full bg-[rgb(var(--surface))]" />
+        <span className="size-5 shrink-0 rounded-[6px] bg-[rgb(var(--surface))]" />
         <span className="flex-1">
           <span className={`${BAR} w-[48%]`} />
         </span>
@@ -51,7 +52,7 @@ function InboxCover() {
 // the one button that matters. The button presses in on hover.
 function RequestCover() {
   return (
-    <div className="flex h-full w-full items-center justify-center px-6">
+    <div className="flex h-full w-full items-center justify-center px-3 sm:px-6">
       <div className={`${SHEET} w-full max-w-[15rem] p-3`}>
         <span className={`${BAR_STRONG} w-[58%]`} />
         <span className={`${BAR} mt-2 w-full`} />
@@ -61,7 +62,7 @@ function RequestCover() {
             Decline
           </span>
           <span
-            className="flex h-6 items-center rounded-[6px] bg-[rgb(var(--fg))] px-2.5 text-[10px] tracking-tight text-[rgb(var(--bg))] motion-safe:group-hover:scale-95"
+            className="flex h-6 items-center rounded-[6px] bg-[rgb(var(--fg))] px-2.5 text-[10px] tracking-tight text-[rgb(var(--bg))] motion-safe:group-hover:scale-95 motion-safe:group-data-[play]:scale-95"
             style={{ transition: `transform 300ms ${EASE}` }}
           >
             Accept
@@ -76,7 +77,7 @@ function RequestCover() {
 // and turns the dot green on hover.
 function InstallCover() {
   return (
-    <div className="flex h-full w-full items-center justify-center px-6">
+    <div className="flex h-full w-full items-center justify-center px-3 sm:px-6">
       <div className={`${SHEET} w-full max-w-[15rem] overflow-hidden`}>
         <div className="flex items-center gap-1 border-b border-[rgb(var(--line))] px-2.5 py-1.5">
           <span className="size-1.5 rounded-full bg-[rgb(var(--fg)/0.15)]" />
@@ -84,7 +85,7 @@ function InstallCover() {
           <span className="size-1.5 rounded-full bg-[rgb(var(--fg)/0.15)]" />
         </div>
         <div className="flex gap-2.5 p-2.5">
-          <span className="h-10 w-12 shrink-0 rounded-md bg-[rgb(var(--surface))]" />
+          <span className="h-10 w-12 shrink-0 rounded-[6px] bg-[rgb(var(--surface))]" />
           <span className="flex-1 pt-0.5">
             <span className={`${BAR_STRONG} w-[70%]`} />
             <span className={`${BAR} mt-1.5 w-full`} />
@@ -94,12 +95,12 @@ function InstallCover() {
         <div className="flex items-center gap-2 px-2.5 pb-2.5">
           <span className="relative h-[5px] flex-1 overflow-hidden rounded-full bg-[rgb(var(--fg)/0.08)]">
             <span
-              className="absolute inset-y-0 left-0 w-[68%] rounded-full bg-[rgb(var(--fg)/0.35)] motion-safe:group-hover:w-full"
+              className="absolute inset-y-0 left-0 w-[68%] rounded-full bg-[rgb(var(--fg)/0.35)] motion-safe:group-hover:w-full motion-safe:group-data-[play]:w-full"
               style={{ transition: `width 700ms ${EASE}` }}
             />
           </span>
           <span
-            className="size-2 shrink-0 rounded-full bg-[rgb(var(--fg)/0.15)] motion-safe:group-hover:bg-[rgb(22_163_74)]"
+            className="size-2 shrink-0 rounded-full bg-[rgb(var(--fg)/0.15)] motion-safe:group-hover:bg-[rgb(22_163_74)] motion-safe:group-data-[play]:bg-[rgb(22_163_74)]"
             style={{ transition: "background-color 300ms ease 500ms" }}
           />
         </div>
@@ -132,31 +133,22 @@ const STEPS: { title: string; desc: string; time: string; cover: ReactNode }[] =
 export function SetupSteps() {
   return (
     <div className="w-full">
-      {/* A swipeable row on mobile, three columns from sm up. */}
-      <ol
-        className="no-scrollbar -mx-3 flex gap-3 overflow-x-auto overscroll-x-contain px-3 pb-1 snap-x snap-mandatory sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0"
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
+      {/* Phones: two up, step one full width so the three fill two rows.
+          Three columns from sm up. */}
+      <ol className="grid w-full grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
         {STEPS.map((step, i) => (
-          <li
+          <IllustratedCard
             key={step.title}
-            className="group rise rise--liquid flex w-[calc(100vw-4rem)] shrink-0 snap-start flex-col overflow-hidden rounded-xl bg-[rgb(var(--surface)/0.45)] sm:w-auto sm:shrink"
+            as="li"
+            compactOnMobile
+            className={`rise rise--liquid ${i === 0 ? "col-span-2 sm:col-span-1" : ""}`}
             style={{ "--rise-delay": `${80 + i * 60}ms` } as React.CSSProperties}
-          >
-            <div className="h-32 sm:h-36 overflow-hidden" aria-hidden="true">
-              {step.cover}
-            </div>
-            <div className="flex flex-1 flex-col border-t border-[rgb(var(--line))] px-4 pt-4 pb-5 sm:px-5">
-              <span className="flex items-baseline justify-between gap-3 text-[12px] sm:text-[13px] tracking-tight tabular-nums text-[rgb(var(--muted))]">
-                <span>Step {i + 1}</span>
-                <span>{step.time}</span>
-              </span>
-              <p className="mt-1 text-[16px] sm:text-[17px] tracking-tight leading-snug text-[rgb(var(--fg))]">{step.title}</p>
-              <p className="mt-1 text-[14px] sm:text-[15px] tracking-tight leading-snug text-[rgb(var(--muted))] [text-wrap:pretty]">
-                {step.desc}
-              </p>
-            </div>
-          </li>
+            cover={step.cover}
+            eyebrow={`Step ${i + 1}`}
+            meta={step.time}
+            title={step.title}
+            desc={step.desc}
+          />
         ))}
       </ol>
 

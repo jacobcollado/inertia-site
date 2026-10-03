@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { HiMiniArrowLeft, HiMiniArrowRight } from "react-icons/hi2";
-import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS, aetherLiquidTransition } from "./motion";
+import { useEffect, useState } from "react";
+import { FigmaSelectionFrame, SELECTION_FILL, SELECTION_FRAME_COLOR } from "@/components/figma-frame";
+import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS } from "./motion";
 
 export interface ThemeVariation {
   name: string;
@@ -11,524 +11,171 @@ export interface ThemeVariation {
   imageMobile: string;
 }
 
-interface SlideItem extends ThemeVariation {
-  uid: string;
-}
-
 type ViewMode = "desktop" | "mobile";
 
 // MacBook renders are landscape (~1.59:1); the phone renders are portrait
-// (1280x2642, ~0.48:1) — the card box has to switch aspect ratio with mode,
-// not just swap which src loads into the same box.
+// (~0.49:1).
 const SHOT_W = 1365;
 const SHOT_H = 858;
 const SHOT_W_MOBILE = 1300;
 const SHOT_H_MOBILE = 2642;
-const CARD_TRANSITION = aetherLiquidTransition();
-const TRACK_TRANSITION = `transform ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
-const GAP_PX = 20;
-const GAP_PX_MOBILE = 12;
-const PEEK_PX_MOBILE = 0;
-const PEEK_PX_DESKTOP = 32;
-const CONTENT_MAX_PX = 1280;
-const MOBILE_GUTTER_PX = 12;
-const INITIAL_RUNWAY = 3;
-const EXTEND_THRESHOLD = 2;
-// A short flick counts as a swipe even when it travels less than half a card.
-const FLICK_PX = 40;
 
-const NAV_BUTTON_CLASS =
-  "relative h-[38px] w-[38px] rounded-full bg-[rgb(var(--surface)/0.45)] text-[rgb(var(--fg))] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]";
+const FADE = `opacity ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
 
-/**
- * One device-mode's render of a variation card. `src` swaps in place on a
- * mode switch; `visible` (driven by the caller's modeSettled flag) eases
- * its opacity/blur so the swap crossfades instead of cutting instantly.
- */
-function VariationShot({
-  variation,
-  shotMode,
-  visible,
-  reduceMotion,
-}: {
-  variation: ThemeVariation;
-  shotMode: ViewMode;
-  visible: boolean;
-  reduceMotion: boolean;
-}) {
-  const isMobileShot = shotMode === "mobile";
-  // Its wrapper (see the caller) is the source of truth for real height —
-  // this max-h-[55vh] is just a sane pre-layout ceiling for first paint.
-  return (
-    <Image
-      src={isMobileShot ? variation.imageMobile : variation.image}
-      alt={`${variation.name} hero, ${shotMode} view`}
-      width={isMobileShot ? SHOT_W_MOBILE : SHOT_W}
-      height={isMobileShot ? SHOT_H_MOBILE : SHOT_H}
-      sizes="(max-width: 640px) 92vw, min(70rem, 90vw)"
-      quality={90}
-      className={
-        isMobileShot
-          ? "block w-auto h-auto mx-auto max-w-[50%] max-h-[55vh]"
-          : "block w-full h-auto scale-[1.2] sm:scale-100 origin-bottom"
-      }
-      style={
-        reduceMotion
-          ? undefined
-          : {
-              // Only opacity/filter go inline — the crop-scale for desktop
-              // shots lives in the scale-[...] utility class above, and an
-              // inline transform here would silently override it.
-              opacity: visible ? 1 : 0,
-              filter: visible ? "blur(0px)" : "blur(6px)",
-              transition: `opacity ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}, filter ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`,
-            }
-      }
-      draggable={false}
-      loading="eager"
-    />
-  );
-}
+const SEGMENT_TRACK = "inline-flex gap-1 rounded-[6px] bg-[rgb(var(--surface)/0.6)] p-1";
+const segmentClass = (selected: boolean) =>
+  `shrink-0 whitespace-nowrap rounded-[6px] px-3 py-1.5 text-[13px] sm:text-[14px] tracking-tight capitalize transition-colors duration-200 [-webkit-tap-highlight-color:transparent] ${
+    selected
+      ? "bg-[rgb(var(--bg))] text-[rgb(var(--fg))] shadow-[0_0_0_1px_rgb(var(--line)),0_1px_2px_rgb(0_0_0/0.06)]"
+      : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
+  }`;
 
-let uidCounter = 0;
-
-function copyVariations(variations: ThemeVariation[]): SlideItem[] {
-  return variations.map((v) => ({ ...v, uid: `slide-${uidCounter++}` }));
-}
-
+/* "Make it yours" as a Figma canvas: the styles are layers, the preview is
+ * the selected frame. Desktop lists the styles on the left like Figma's
+ * layers panel; phones get them as a segmented control above. Switching a
+ * style or device crossfades the preview in place, nothing slides. */
 export function VariationsScroll({
   variations,
   initial,
 }: {
   variations: ThemeVariation[];
-  /** Name of the style to open on. Defaults to the middle one. */
+  /** Name of the style to open on. Defaults to the first one. */
   initial?: string;
 }) {
-  const count = variations.length;
   const named = initial ? variations.findIndex((v) => v.name === initial) : -1;
-  const startLogical = named >= 0 ? named : Math.floor(count / 2);
-
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<(HTMLElement | null)[]>([]);
-  const indexRef = useRef(count + startLogical);
-  const didDragRef = useRef(false);
-  const dragRef = useRef<{
-    pointerId: number;
-    startX: number;
-    startTranslate: number;
-    moved: boolean;
-  } | null>(null);
-  const pendingPaintRef = useRef(false);
-
-  const [slides, setSlides] = useState<SlideItem[]>(() =>
-    Array.from({ length: INITIAL_RUNWAY }, () => copyVariations(variations)).flat(),
-  );
-  const [active, setActive] = useState(startLogical);
-  const [dragging, setDragging] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const [slideWidth, setSlideWidth] = useState(0);
-  const [edgePad, setEdgePad] = useState(0);
-  const [gapPx, setGapPx] = useState(GAP_PX);
-  // Defaults to "desktop" for a stable SSR render, then flips to "mobile"
-  // on mount if the visitor's own viewport is mobile-sized — someone on a
-  // phone almost certainly wants to preview the mobile mockups first.
+  const [active, setActive] = useState(named >= 0 ? named : 0);
+  // Desktop for a stable SSR render, then mobile on mount for phones, who
+  // almost certainly want to see the phone layout first.
   const [mode, setMode] = useState<ViewMode>("desktop");
-  // Briefly false right after a mode switch so the cards crossfade/settle
-  // into their new aspect ratio instead of snapping to it instantly.
-  const [modeSettled, setModeSettled] = useState(true);
-  // Tracks the *site's own* viewport (not the toggle's mode) so the tab
-  // order can lead with "Mobile" there, matching the default above.
-  const [viewportIsMobile, setViewportIsMobile] = useState(false);
-  const modeInitRef = useRef(false);
-  const innerIdRef = useRef<number | undefined>(undefined);
-
-  const handleModeChange = useCallback((next: ViewMode) => {
-    setMode((prevMode) => (prevMode === next ? prevMode : next));
-    setModeSettled(false);
-  }, []);
 
   useEffect(() => {
-    const media = window.matchMedia("(max-width: 639px)");
-    const sync = () => setViewportIsMobile(media.matches);
-    sync();
-    if (!modeInitRef.current) {
-      modeInitRef.current = true;
-      if (media.matches) setMode("mobile");
-    }
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
+    if (window.matchMedia("(max-width: 639px)").matches) setMode("mobile");
   }, []);
 
-  useEffect(() => {
-    if (modeSettled) return;
-    // Double rAF: a single one can fire before the browser has actually
-    // painted the "hidden" starting frame, so the opacity/blur transition
-    // has no committed before-state to animate from and the swap looks
-    // instant. Waiting a full extra frame guarantees that paint happened.
-    const outer = requestAnimationFrame(() => {
-      const inner = requestAnimationFrame(() => setModeSettled(true));
-      innerIdRef.current = inner;
-    });
-    return () => {
-      cancelAnimationFrame(outer);
-      if (innerIdRef.current) cancelAnimationFrame(innerIdRef.current);
-    };
-  }, [modeSettled, mode]);
+  const current = variations[active];
+  const modes: ViewMode[] = ["desktop", "mobile"];
 
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduceMotion(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-
-  const step = slideWidth + gapPx;
-
-  const measureLayout = useCallback(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const vw = viewport.clientWidth;
-    const desktop = window.matchMedia("(min-width: 640px)").matches;
-    const contentWidth = Math.min(CONTENT_MAX_PX, vw);
-    const cardAreaWidth = desktop
-      ? contentWidth - MOBILE_GUTTER_PX * 2
-      : vw;
-    const peek = desktop ? PEEK_PX_DESKTOP : PEEK_PX_MOBILE;
-    const nextGap = desktop ? GAP_PX : GAP_PX_MOBILE;
-    const nextSlideWidth = Math.max(0, cardAreaWidth - peek * 2 - nextGap);
-    setGapPx(nextGap);
-    setSlideWidth(nextSlideWidth);
-    setEdgePad(Math.max(0, (vw - nextSlideWidth) / 2));
-  }, []);
-
-  useLayoutEffect(() => {
-    measureLayout();
-  }, [measureLayout]);
-
-  const translateForIndex = useCallback((index: number) => {
-    const viewport = viewportRef.current;
-    if (!viewport || step <= 0) return 0;
-    const slideCenter = edgePad + index * step + slideWidth / 2;
-    return viewport.clientWidth / 2 - slideCenter;
-  }, [edgePad, slideWidth, step]);
-
-  const applyCardProximity = useCallback((centerIndex: number, animate: boolean) => {
-    cardRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const dist = Math.abs(i - centerIndex);
-      const proximity = Math.max(0, 1 - dist);
-      el.style.transition = animate ? CARD_TRANSITION : "none";
-      el.style.opacity = String(0.28 + 0.72 * proximity);
-      el.style.transform = `scale(${0.96 + 0.04 * proximity})`;
-      el.style.transformOrigin = "center center";
-    });
-    setActive(((centerIndex % count) + count) % count);
-  }, [count]);
-
-  const paintTrack = useCallback((index: number, animate: boolean) => {
-    const track = trackRef.current;
-    if (!track || step <= 0) return;
-    track.style.transition = animate && !reduceMotion ? TRACK_TRANSITION : "none";
-    track.style.transform = `translate3d(${translateForIndex(index)}px, 0, 0)`;
-    applyCardProximity(index, animate);
-  }, [applyCardProximity, reduceMotion, step, translateForIndex]);
-
-  const extendForward = useCallback(() => {
-    setSlides((prev) => [...prev, ...copyVariations(variations)]);
-  }, [variations]);
-
-  const extendBackward = useCallback(() => {
-    pendingPaintRef.current = true;
-    setSlides((prev) => [...copyVariations(variations), ...prev]);
-  }, [variations]);
-
-  const shift = useCallback((delta: number) => {
-    if (count <= 0 || step <= 0) return;
-
-    let next = indexRef.current + delta;
-
-    if (delta > 0 && next >= slides.length - EXTEND_THRESHOLD) {
-      extendForward();
-    } else if (delta < 0 && next < EXTEND_THRESHOLD) {
-      extendBackward();
-      next += count;
-    }
-
-    indexRef.current = next;
-    if (pendingPaintRef.current) return;
-    paintTrack(next, !reduceMotion);
-  }, [count, extendBackward, extendForward, paintTrack, reduceMotion, slides.length, step]);
-
-  useLayoutEffect(() => {
-    if (pendingPaintRef.current) {
-      pendingPaintRef.current = false;
-      paintTrack(indexRef.current, false);
-    }
-  }, [slides, paintTrack]);
-
-  useLayoutEffect(() => {
-    if (slideWidth <= 0 || count <= 0) return;
-    indexRef.current = count + startLogical;
-    paintTrack(indexRef.current, false);
-  }, [count, paintTrack, slideWidth, startLogical]);
-
-  useEffect(() => {
-    const onResize = () => {
-      measureLayout();
-      requestAnimationFrame(() => paintTrack(indexRef.current, false));
-    };
-    window.addEventListener("resize", onResize);
-    // Mobile browsers can settle their real layout (font swap, address-bar
-    // collapse, viewport unit changes) a frame or two after mount, after the
-    // initial measureLayout() already ran — re-measuring once more here
-    // self-corrects the track position if that happened, the same way the
-    // resize handler above does mid-session.
-    const settleId = requestAnimationFrame(() => requestAnimationFrame(onResize));
-    return () => {
-      window.removeEventListener("resize", onResize);
-      cancelAnimationFrame(settleId);
-    };
-  }, [measureLayout, paintTrack]);
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    const track = trackRef.current;
-    if (!track || step <= 0) return;
-    didDragRef.current = false;
-    const matrix = new DOMMatrix(getComputedStyle(track).transform);
-    dragRef.current = {
-      pointerId: e.pointerId,
-      startX: e.clientX,
-      startTranslate: matrix.m41,
-      moved: false,
-    };
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    const track = trackRef.current;
-    const viewport = viewportRef.current;
-    if (!drag || !track || !viewport || e.pointerId !== drag.pointerId) return;
-    const dx = e.clientX - drag.startX;
-    if (!drag.moved) {
-      if (Math.abs(dx) <= 4) return;
-      drag.moved = true;
-      didDragRef.current = true;
-      viewport.setPointerCapture(e.pointerId);
-      track.style.transition = "none";
-      setDragging(true);
-    }
-    e.preventDefault();
-    track.style.transform = `translate3d(${drag.startTranslate + dx}px, 0, 0)`;
-  };
-
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    const viewport = viewportRef.current;
-    dragRef.current = null;
-    if (!viewport) return;
-    if (viewport.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId);
-    if (!drag?.moved) return;
-    setDragging(false);
-    const track = trackRef.current;
-    if (!track || step <= 0) return;
-    const matrix = new DOMMatrix(getComputedStyle(track).transform);
-    const offset = translateForIndex(indexRef.current);
-    let delta = Math.round((offset - matrix.m41) / step);
-    const dx = e.clientX - drag.startX;
-    if (delta === 0 && Math.abs(dx) > FLICK_PX) delta = dx < 0 ? 1 : -1;
-    if (delta !== 0) shift(delta);
-    else paintTrack(indexRef.current, false);
-  };
-
-  // Shortest way round the loop to a logical variation.
-  const goTo = (target: number) => {
-    let delta = (target - active + count) % count;
-    if (delta > count / 2) delta -= count;
-    if (delta !== 0) shift(delta);
-  };
-
-  const onCardClick = (rawIndex: number) => {
-    if (didDragRef.current) {
-      didDragRef.current = false;
-      return;
-    }
-    if (rawIndex === indexRef.current) return;
-    const delta = rawIndex - indexRef.current;
-    shift(delta);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      shift(1);
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      shift(-1);
-    }
-  };
+  const deviceToggle = (
+    <div role="tablist" aria-label="Preview device" className={SEGMENT_TRACK}>
+      {modes.map((m) => (
+        <button
+          key={m}
+          type="button"
+          role="tab"
+          aria-selected={mode === m}
+          onClick={() => setMode(m)}
+          className={segmentClass(mode === m)}
+        >
+          {m}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
-    <section className="relative py-16 sm:py-24 rise rise--liquid">
-      <div className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] mb-8 sm:mb-10 flex flex-col items-center gap-4">
-        <h2 className="text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
+    <section className="px-3 py-16 sm:py-24 rise rise--liquid">
+      <div className="mb-10 flex flex-col items-center gap-3 text-center">
+        <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
           Make it yours
         </h2>
-        <p className="-mt-1 mb-1 text-center text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))] max-w-md [text-wrap:balance]">
+        <p className="max-w-md text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:balance]">
           Start from one of four styles, then change colors, fonts and layout in the theme editor. No code.
         </p>
-        {/* The styles, by name, are the section's one obvious control. The
-            device switch is secondary and lives in the bar under the cards. */}
-        <div
-          role="tablist"
-          aria-label="Aether styles"
-          className="inline-flex items-center gap-0.5 rounded-full bg-[rgb(var(--surface)/0.45)] p-1 text-[13px] sm:text-[14px] tracking-tight"
-        >
-          {variations.map((v, i) => (
-            <button
-              key={v.name}
-              type="button"
-              role="tab"
-              aria-selected={active === i}
-              onClick={() => goTo(i)}
-              className={`rounded-full px-3 sm:px-4 py-1.5 transition-colors [-webkit-tap-highlight-color:transparent] ${
-                active === i
-                  ? "bg-[rgb(var(--fg))] text-[rgb(var(--bg))]"
-                  : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
-              }`}
-            >
-              {v.name}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="relative w-screen left-1/2 -translate-x-1/2">
-        <div
-          ref={viewportRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label="Aether theme variations"
-          tabIndex={0}
-          onKeyDown={onKeyDown}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={endDrag}
-          onPointerCancel={endDrag}
-          // pan-y leaves vertical scrolling to the browser and hands
-          // horizontal drags to the pointer handlers, so touch can swipe.
-          style={{ touchAction: "pan-y" }}
-          className={`w-full overflow-hidden outline-none pb-16 sm:pb-20 ${dragging ? "select-none cursor-grabbing" : "cursor-grab"}`}
-        >
-          <div
-            ref={trackRef}
-            className="flex items-start w-max will-change-transform"
-            style={{ paddingLeft: edgePad, paddingRight: edgePad }}
-          >
-            {slides.map((v, i) => {
-              const logical = i % count;
-              const isActive = active === logical;
+      <div className="mx-auto grid w-full max-w-[64rem] gap-6 lg:grid-cols-[12rem_1fr] lg:gap-8">
+        {/* Layers panel, desktop: each style with a small thumbnail, the
+            selected one tinted the way Figma marks a selected layer. */}
+        <div className="hidden lg:block">
+          <p className="mb-2 px-2 text-[13px] tracking-tight text-[rgb(var(--muted))]">Styles</p>
+          <div role="tablist" aria-label="Aether styles" aria-orientation="vertical" className="flex flex-col gap-0.5">
+            {variations.map((v, i) => {
+              const selected = i === active;
               return (
-                <article
-                  key={v.uid}
-                  ref={(el) => { cardRefs.current[i] = el; }}
-                  role="group"
-                  aria-label={`${v.name}, ${logical + 1} of ${count}`}
-                  aria-current={isActive ? "true" : undefined}
-                  onClick={() => onCardClick(i)}
-                  className="shrink-0 flex flex-col gap-3 sm:gap-4"
-                  style={{
-                    width: slideWidth || undefined,
-                    marginRight: i < slides.length - 1 ? gapPx : 0,
-                    transformOrigin: "center center",
-                  }}
+                <button
+                  key={v.name}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setActive(i)}
+                  className={`flex items-center gap-2.5 rounded-[6px] px-2 py-1.5 text-left text-[15px] tracking-tight transition-colors duration-200 ${
+                    selected ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:bg-[rgb(var(--surface)/0.6)] hover:text-[rgb(var(--fg))]"
+                  }`}
+                  style={selected ? { background: SELECTION_FILL, boxShadow: `inset 0 0 0 1px ${SELECTION_FRAME_COLOR}` } : undefined}
                 >
-                  <div
-                    className="relative w-full overflow-hidden rounded-xl flex items-center justify-center"
-                    style={{
-                      transition: reduceMotion ? "none" : `max-height ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`,
-                      // Desktop viewport only: cap the mobile shot at the
-                      // same height the desktop shot actually renders at
-                      // (its card-width-driven aspect ratio), so toggling
-                      // modes doesn't change the card's height there. Mobile
-                      // viewport is untouched — same 55vh cap as before.
-                      maxHeight:
-                        mode !== "mobile"
-                          ? "60rem"
-                          : viewportIsMobile
-                            ? "55vh"
-                            : slideWidth > 0
-                              ? `${(slideWidth * SHOT_H) / SHOT_W}px`
-                              : "38rem",
-                    }}
-                  >
-                    <VariationShot
-                      variation={v}
-                      shotMode={mode}
-                      visible={modeSettled}
-                      reduceMotion={reduceMotion}
-                    />
-                  </div>
-                </article>
+                  <span className="relative h-7 w-11 shrink-0 overflow-hidden rounded-[6px] bg-[rgb(var(--surface))]">
+                    <Image src={v.image} alt="" fill sizes="44px" className="object-cover object-top" />
+                  </span>
+                  {v.name}
+                </button>
               );
             })}
           </div>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center">
-          <div
-            className="flex items-center justify-between gap-4 pointer-events-auto mx-4 sm:mx-5 pt-3 border-t border-[rgb(var(--line))]"
-            style={slideWidth > 0 ? { width: slideWidth - 32 } : undefined}
-          >
-            <div
-              role="tablist"
-              aria-label="Preview device"
-              className="inline-flex items-center gap-0.5 text-[13px] sm:text-[14px] tracking-tight"
-            >
-              {(viewportIsMobile ? (["mobile", "desktop"] as const) : (["desktop", "mobile"] as const)).map((option) => (
+        <div className="min-w-0">
+          {/* Phones and tablets: the styles as a segmented control. */}
+          <div className="no-scrollbar mb-6 flex justify-center overflow-x-auto lg:hidden">
+            <div role="tablist" aria-label="Aether styles" className={SEGMENT_TRACK}>
+              {variations.map((v, i) => (
                 <button
-                  key={option}
+                  key={v.name}
                   type="button"
                   role="tab"
-                  aria-selected={mode === option}
-                  onClick={() => handleModeChange(option)}
-                  className={`h-[38px] px-2.5 first:pl-0 capitalize transition-colors [-webkit-tap-highlight-color:transparent] ${
-                    mode === option
-                      ? "text-[rgb(var(--fg))]"
-                      : "text-[rgb(var(--muted))] opacity-70 hover:opacity-100 hover:text-[rgb(var(--fg))]"
-                  }`}
+                  aria-selected={i === active}
+                  onClick={() => setActive(i)}
+                  className={segmentClass(i === active)}
                 >
-                  {option}
+                  {v.name}
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                aria-label="Previous variation"
-                onClick={() => shift(-1)}
-                className={NAV_BUTTON_CLASS}
-              >
-                <HiMiniArrowLeft
-                  className="absolute left-1/2 top-1/2 block h-[17px] w-[17px] -translate-x-1/2 -translate-y-1/2"
-                  aria-hidden="true"
-                />
-              </button>
-              <button
-                type="button"
-                aria-label="Next variation"
-                onClick={() => shift(1)}
-                className={NAV_BUTTON_CLASS}
-              >
-                <HiMiniArrowRight
-                  className="absolute left-1/2 top-1/2 block h-[17px] w-[17px] -translate-x-1/2 -translate-y-1/2"
-                  aria-hidden="true"
-                />
-              </button>
-            </div>
           </div>
+
+          {/* Frame name on the left, like Figma labels a selected frame; the
+              device switch on the right on desktop. Below lg it moves under
+              the frame, so it isn't stacked against the style switcher. */}
+          <div className="mb-2 flex items-end justify-between gap-3">
+            <p className="text-[13px] sm:text-[14px] tracking-tight capitalize" style={{ color: SELECTION_FRAME_COLOR }}>
+              {current.name} / {mode}
+            </p>
+            <div className="hidden lg:block">{deviceToggle}</div>
+          </div>
+
+          <FigmaSelectionFrame handleFill="rgb(var(--bg))" style={{ background: SELECTION_FILL }}>
+            <div
+              className={`relative w-full overflow-hidden ${
+                mode === "mobile" ? "aspect-[4/5] sm:aspect-[1365/858]" : "aspect-[1365/858]"
+              }`}
+            >
+              {/* Every style of the current device stays mounted and fades,
+                  so switching never waits on a fresh image. */}
+              {variations.map((v, i) => {
+                const shown = i === active;
+                const mobile = mode === "mobile";
+                return (
+                  <Image
+                    key={`${v.name}-${mode}`}
+                    src={mobile ? v.imageMobile : v.image}
+                    alt={shown ? `${v.name} style, ${mode} view` : ""}
+                    aria-hidden={!shown}
+                    width={mobile ? SHOT_W_MOBILE : SHOT_W}
+                    height={mobile ? SHOT_H_MOBILE : SHOT_H}
+                    sizes={mobile ? "(min-width: 640px) 20rem, 60vw" : "(min-width: 1024px) 52rem, 94vw"}
+                    quality={90}
+                    loading={shown ? "eager" : "lazy"}
+                    draggable={false}
+                    className={`absolute inset-0 m-auto motion-reduce:transition-none ${
+                      mobile ? "h-[92%] w-auto" : "h-full w-full object-contain"
+                    }`}
+                    style={{ opacity: shown ? 1 : 0, transition: FADE }}
+                  />
+                );
+              })}
+            </div>
+          </FigmaSelectionFrame>
+
+          <div className="mt-5 flex justify-center lg:hidden">{deviceToggle}</div>
         </div>
       </div>
     </section>

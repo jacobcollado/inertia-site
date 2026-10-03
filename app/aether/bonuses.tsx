@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { IllustratedCard, RosterCover, SheetCover } from "@/components/illustrated-card";
 
 /* The extras that come with a license: guides for getting the most out of the
  * store, and short lists of people we'd send a buyer to. Sits right before
@@ -7,9 +8,8 @@ import type { ReactNode } from "react";
  * Each card carries a small drawn "cover" so the bonuses read as real things
  * you get, not another feature list: guides as a sheet peeking up from the
  * card, lists as a short roster. Cards match the pricing include cards.
+ * The card and covers live in components/illustrated-card.
  */
-
-const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 type Bonus = {
   title: string;
@@ -23,7 +23,8 @@ type Bonus = {
   rows?: number;
 };
 
-const ICON = "size-4 shrink-0";
+// Sized by the chip that holds it, see components/illustrated-card.
+const ICON = "shrink-0";
 
 const BONUSES: Bonus[] = [
   {
@@ -88,86 +89,20 @@ const BONUSES: Bonus[] = [
   },
 ];
 
-const BAR = "block h-[5px] rounded-full bg-[rgb(var(--fg)/0.12)]";
-
-// A sheet peeking up from the bottom of the cover, with a second one fanned
-// out behind it. The front sheet lifts a little when the card is hovered.
-function GuideCover({ icon }: { icon: ReactNode }) {
-  return (
-    <div className="relative h-full w-full">
-      <span
-        aria-hidden="true"
-        className="absolute left-1/2 top-7 h-[140%] w-[58%] -translate-x-1/2 rotate-[-5deg] rounded-lg bg-[rgb(var(--bg)/0.6)] shadow-[0_0_0_1px_rgb(var(--line))]"
-      />
-      <div
-        className="absolute left-1/2 top-5 h-[140%] w-[58%] -translate-x-1/2 rounded-lg bg-[rgb(var(--bg))] p-3.5 shadow-[0_0_0_1px_rgb(var(--line)),0_10px_24px_-12px_rgb(0_0_0/0.25)] motion-safe:group-hover:-translate-y-1.5"
-        style={{ transition: `transform 500ms ${EASE}` }}
-      >
-        <span className="flex size-7 items-center justify-center rounded-md bg-[rgb(var(--surface))] text-[rgb(var(--fg))]">
-          {icon}
-        </span>
-        <span className={`${BAR} mt-3.5 w-[80%] !bg-[rgb(var(--fg)/0.22)]`} />
-        <span className={`${BAR} mt-2 w-full`} />
-        <span className={`${BAR} mt-1.5 w-[92%]`} />
-        <span className={`${BAR} mt-1.5 w-[70%]`} />
-      </div>
-    </div>
-  );
-}
-
-// A short roster: one row per entry, each with a mark, a name bar and a
-// small check. The rows slide apart slightly on hover.
-function ListCover({ icon, rows }: { icon: ReactNode; rows: number }) {
-  return (
-    <div className="flex h-full w-full items-center justify-center px-6">
-      <div className="flex w-full max-w-[15rem] flex-col gap-0.5 motion-safe:group-hover:gap-1.5 rounded-lg bg-[rgb(var(--bg))] p-2 shadow-[0_0_0_1px_rgb(var(--line)),0_10px_24px_-12px_rgb(0_0_0/0.25)]"
-        style={{ transition: `gap 500ms ${EASE}` }}
-      >
-        {Array.from({ length: rows }, (_, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-2.5 rounded-md px-2 py-2"
-          >
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgb(var(--surface))] text-[rgb(var(--fg))] [&_svg]:size-3">
-              {icon}
-            </span>
-            <span className="flex-1">
-              <span className={`${BAR} !bg-[rgb(var(--fg)/0.22)]`} style={{ width: `${[64, 48, 56][i % 3]}%` }} />
-              <span className={`${BAR} mt-1.5`} style={{ width: `${[40, 52, 36][i % 3]}%` }} />
-            </span>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
-              <polyline points="3.5 8.5 6.5 11.5 12.5 4.5" />
-            </svg>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function BonusCard({ bonus, index }: { bonus: Bonus; index: number }) {
   const guide = bonus.kind === "guide";
   return (
-    <li
-      className={`group rise rise--liquid flex flex-col overflow-hidden rounded-xl bg-[rgb(var(--surface)/0.45)] ${
-        guide ? "sm:col-span-2" : "sm:col-span-3"
-      }`}
+    <IllustratedCard
+      as="li"
+      compactOnMobile
+      className={`rise rise--liquid ${index === 0 ? "col-span-2" : ""} ${guide ? "sm:col-span-2" : "sm:col-span-3"}`}
       style={{ "--rise-delay": `${80 + index * 60}ms` } as React.CSSProperties}
-    >
-      <div className="h-32 sm:h-36 overflow-hidden" aria-hidden="true">
-        {guide ? <GuideCover icon={bonus.icon} /> : <ListCover icon={bonus.icon} rows={bonus.rows ?? 2} />}
-      </div>
-      <div className="flex flex-1 flex-col border-t border-[rgb(var(--line))] px-4 pt-4 pb-5 sm:px-5">
-        <span className="flex items-center justify-between gap-3 text-[12px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))]">
-          <span>{guide ? "Guide" : "List"}</span>
-          <span className="tabular-nums">Worth ${bonus.worth}</span>
-        </span>
-        <p className="mt-1 text-[16px] sm:text-[17px] tracking-tight leading-snug text-[rgb(var(--fg))]">{bonus.title}</p>
-        <p className="mt-1 text-[14px] sm:text-[15px] tracking-tight leading-snug text-[rgb(var(--muted))] [text-wrap:pretty]">
-          {bonus.desc}
-        </p>
-      </div>
-    </li>
+      cover={guide ? <SheetCover icon={bonus.icon} /> : <RosterCover icon={bonus.icon} rows={bonus.rows ?? 2} />}
+      eyebrow={guide ? "Guide" : "List"}
+      meta={`Worth $${bonus.worth}`}
+      title={bonus.title}
+      desc={bonus.desc}
+    />
   );
 }
 
@@ -176,7 +111,9 @@ export const BONUS_TOTAL = BONUSES.reduce((sum, b) => sum + b.worth, 0);
 export function Bonuses() {
   return (
     <div className="w-full">
-      <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-6">
+      {/* Phones: two up, the first guide full width so the five fill three
+          rows (one, then two guides, then two lists). */}
+      <ul className="grid w-full grid-cols-2 gap-2.5 sm:grid-cols-6 sm:gap-3">
         {BONUSES.map((b, i) => (
           <BonusCard key={b.title} bonus={b} index={i} />
         ))}

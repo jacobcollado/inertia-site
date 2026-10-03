@@ -13,6 +13,10 @@ interface Testimonial {
   logo?: string;
   /** The brand's store, shown as a bare domain under the name. */
   site?: string;
+  /** An exact substring of the quote, marked with the Figma-style selection
+   * the homepage statement uses, so each card has one line that scans.
+   * Keep it inside the first four lines, which is all the card shows. */
+  highlight?: string;
 }
 
 /* Real reviews from brands Inertia has worked with, quoted as sent. The
@@ -25,6 +29,7 @@ const TESTIMONIALS: Testimonial[] = [
     name: "vora.archive",
     logo: "/reviews/voraarchive.png",
     site: "voraarchive.com",
+    highlight: "super happy with how our website turned out",
   },
   {
     quote:
@@ -32,6 +37,7 @@ const TESTIMONIALS: Testimonial[] = [
     name: "defy.ca",
     logo: "/reviews/defy.png",
     site: "defytheodds.co",
+    highlight: "turn around time was good",
   },
   {
     // The review named the studio "Agentic Web Designer"; Inertia is the
@@ -42,6 +48,7 @@ const TESTIMONIALS: Testimonial[] = [
     name: "awoken__dreams",
     logo: "/reviews/awokendreams.png",
     site: "awokendreams.shop",
+    highlight: "Awesome customer service from start to finish!",
   },
 ];
 
@@ -52,6 +59,20 @@ const SLIDE = "max-sm:w-[88%] max-sm:shrink-0 max-sm:snap-start";
 // Mobile slides the sheet a full screen height, so it gets a little longer.
 const EXIT_MS = 220;
 const EXIT_EASE = "cubic-bezier(0.4, 0, 1, 1)";
+
+// The quote with its highlight wrapped in the selection sweep. Falls back to
+// plain text if the phrase isn't found, so an edited quote can't break.
+function QuoteText({ t }: { t: Testimonial }) {
+  const at = t.highlight ? t.quote.indexOf(t.highlight) : -1;
+  if (!t.highlight || at < 0) return <>{t.quote}</>;
+  return (
+    <>
+      {t.quote.slice(0, at)}
+      <span className="selection-sweep [-webkit-box-decoration-break:clone] [box-decoration-break:clone]">{t.highlight}</span>
+      {t.quote.slice(at + t.highlight.length)}
+    </>
+  );
+}
 
 function Byline({ t }: { t: Testimonial }) {
   return (
@@ -104,7 +125,7 @@ function Card({ t, index, onOpen }: { t: Testimonial; index: number; onOpen: () 
 
   return (
     <figure
-      className={`group relative rise rise--liquid flex flex-col justify-between gap-6 rounded-xl bg-[rgb(var(--surface)/0.45)] p-5 sm:p-7 ${SLIDE}`}
+      className={`group relative rise rise--liquid flex flex-col justify-between gap-6 rounded-[6px] bg-[rgb(var(--surface)/0.45)] p-5 sm:p-7 sm:last:col-span-2 lg:last:col-span-1 ${SLIDE}`}
       style={{ "--rise-delay": `${80 + index * 70}ms` } as CSSProperties}
     >
       <div>
@@ -112,17 +133,17 @@ function Card({ t, index, onOpen }: { t: Testimonial; index: number; onOpen: () 
           ref={quoteRef}
           className="line-clamp-4 text-[16px] leading-snug tracking-tight text-[rgb(var(--fg))] [text-wrap:pretty] sm:text-[19px]"
         >
-          {t.quote}
+          <QuoteText t={t} />
         </blockquote>
         {clamped ? (
           // The button's ::after covers the card, so a tap anywhere opens it.
           <button
             type="button"
             onClick={onOpen}
-            className="mt-3 inline-flex items-center gap-1 text-[13px] tracking-tight text-[rgb(var(--muted))] transition-colors after:absolute after:inset-0 after:rounded-xl after:content-[''] group-hover:text-[rgb(var(--fg))] sm:text-[14px] [-webkit-tap-highlight-color:transparent]"
+            className="mt-3 inline-flex items-center gap-1 text-[13px] tracking-tight text-[rgb(var(--muted))] transition-colors after:absolute after:inset-0 after:rounded-[6px] after:content-[''] group-hover:text-[rgb(var(--fg))] sm:text-[14px] [-webkit-tap-highlight-color:transparent]"
           >
             Read full review
-            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-[0.9em] transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true">
               <path d="M4.5 2.5 8 6l-3.5 3.5" />
             </svg>
           </button>
@@ -193,7 +214,7 @@ function ReviewDialog({ t, onClose }: { t: Testimonial | null; onClose: () => vo
         aria-label={`Review from ${t.name}`}
         tabIndex={-1}
         data-lenis-prevent
-        className="relative max-h-[85dvh] w-full max-w-[34rem] overflow-y-auto rounded-2xl bg-[rgb(var(--surface))] p-5 outline-none sm:p-7"
+        className="relative max-h-[85dvh] w-full max-w-[34rem] overflow-y-auto rounded-[6px] bg-[rgb(var(--surface))] p-5 outline-none sm:p-7"
         style={{
           animation: closing
             ? `modal-down ${EXIT_MS}ms ${EXIT_EASE} both`
@@ -208,14 +229,14 @@ function ReviewDialog({ t, onClose }: { t: Testimonial | null; onClose: () => vo
             aria-label="Close"
             className={`-mr-1 inline-flex size-8 shrink-0 items-center justify-center ${ACTION_RADIUS_CLASS} border border-transparent text-[rgb(var(--muted))] transition-colors hover:border-[rgb(var(--fg)/0.35)] hover:bg-[rgb(var(--bg))] hover:text-[rgb(var(--fg))] [-webkit-tap-highlight-color:transparent]`}
           >
-            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="size-3.5" aria-hidden="true">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="size-[45%]" aria-hidden="true">
               <line x1="2.5" y1="2.5" x2="9.5" y2="9.5" />
               <line x1="9.5" y1="2.5" x2="2.5" y2="9.5" />
             </svg>
           </button>
         </div>
-        <blockquote className="mt-5 text-[17px] leading-snug tracking-tight text-[rgb(var(--fg))] [text-wrap:pretty] sm:text-[20px]">
-          {t.quote}
+        <blockquote className="mt-5 [&_.selection-sweep]:[background-size:100%_88%] text-[17px] leading-snug tracking-tight text-[rgb(var(--fg))] [text-wrap:pretty] sm:text-[20px]">
+          <QuoteText t={t} />
         </blockquote>
       </div>
     </div>,

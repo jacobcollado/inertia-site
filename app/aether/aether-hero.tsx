@@ -74,9 +74,9 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             alt="Aether cart drawer on MacBook"
             width={4500}
             height={3000}
-            sizes="(min-width: 1024px) 60vw, 0px"
+            sizes="(min-width: 1536px) 52rem, 0px"
             quality={90}
-            className="hero-float hero-float--left hidden lg:block absolute left-0 top-[8%] w-[min(52rem,60vw)] h-auto pointer-events-none select-none"
+            className="hero-float hero-float--left hidden 2xl:block absolute left-0 top-[8%] w-[min(52rem,60vw)] h-auto pointer-events-none select-none"
             priority
           />
           <Image
@@ -84,9 +84,9 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             alt="Aether product page on MacBook"
             width={4500}
             height={3000}
-            sizes="(min-width: 1024px) 60vw, 0px"
+            sizes="(min-width: 1536px) 52rem, 0px"
             quality={90}
-            className="hero-float hero-float--right hidden lg:block absolute right-0 top-[8%] w-[min(52rem,60vw)] h-auto pointer-events-none select-none"
+            className="hero-float hero-float--right hidden 2xl:block absolute right-0 top-[8%] w-[min(52rem,60vw)] h-auto pointer-events-none select-none"
             priority
           />
         </div>

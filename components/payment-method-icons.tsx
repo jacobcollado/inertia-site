@@ -45,7 +45,7 @@ export function PaymentMethodIcons({ className }: { className?: string }) {
     >
       {METHODS.map(({ name, Icon, chip, className: iconClass }) => (
         <li key={name}>
-          <span className={cn("inline-flex h-7 min-w-[2.75rem] items-center justify-center rounded-[5px] border px-2", chip)}>
+          <span className={cn("inline-flex h-7 min-w-[2.75rem] items-center justify-center rounded-[6px] border px-2", chip)}>
             <Icon className={iconClass} aria-hidden="true" />
             <span className="sr-only">{name}</span>
           </span>
