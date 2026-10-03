@@ -918,13 +918,6 @@ h1:hover .redact > span.redact-inner,
   .rise.is-visible .selection-sweep { animation: none; }
 }
 
-/* "Built to sell" on /aether: the line under the active feature that fills
-   while it holds, then hands off to the next one. */
-@keyframes feature-progress {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-
 @keyframes client-card-item {
   from { opacity: 0; transform: translateY(6px); filter: blur(3px); }
   to   { opacity: 1; transform: none; filter: none; }

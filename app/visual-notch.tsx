@@ -19,7 +19,6 @@ import {
   CtaWell,
 } from "@/lib/cta-chrome";
 import { SiShopify } from "react-icons/si";
-import { AetherDemoBanner } from "./aether/demo-banner";
 import {
   HiOutlineSparkles,
   HiOutlineChatBubbleLeftRight,
@@ -813,7 +812,6 @@ export function VisualNotch() {
           className={`site-header${mobileOpen ? " site-header--open" : ""}${isAetherLanding ? " site-header--pinned" : ""}`}
           ref={headerRef}
         >
-          {isAetherLanding ? <AetherDemoBanner embedded /> : null}
           <svg width="0" height="0" className="absolute" aria-hidden="true">
             <filter id="header-glass" colorInterpolationFilters="sRGB">
               <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="2" seed="4" result="noise" />

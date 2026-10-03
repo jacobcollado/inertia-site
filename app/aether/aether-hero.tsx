@@ -25,13 +25,14 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             priority
           />
         </h1>
-        <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-md sm:max-w-xl">
-          A Shopify theme for brands that care how their store looks. We install it for you the same day.
+        {/* One clear line under the logo, in the page's ink, balanced so it
+            breaks evenly. The practical details (price, install) move under
+            the buttons as small print, so the stack reads logo, promise,
+            action, reassurance. */}
+        <p className="max-w-[20rem] sm:max-w-[30rem] text-[19px] sm:text-[24px] leading-snug tracking-[-0.02em] text-[rgb(var(--fg))] [text-wrap:balance]">
+          A Shopify theme for brands that care how their store looks.
         </p>
-        <p className="-mt-1 text-[13px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.75 }}>
-          $125 once. No renewals. Full refund if we can&apos;t get it working.
-        </p>
-        <div className="flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
+        <div className="mt-3 flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
           <Link
             href={`/aether#${AETHER_PRICING_ID}`}
             data-aether-cta
@@ -52,6 +53,9 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
               Docs
             </Link>
           </div>
+          <p className="mt-1.5 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
+            $125 once, installed for you the same day.
+          </p>
         </div>
       </div>
       <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">

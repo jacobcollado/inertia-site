@@ -21,9 +21,6 @@ export function DemoButton({ href, password }: { href: string; password: string 
         }}
         className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} border border-[rgb(var(--line))] px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.4)] transition-colors whitespace-nowrap`}
       >
-        <svg viewBox="0 0 16 16" fill="currentColor" className="size-[0.7em] text-[rgb(var(--muted))]" aria-hidden="true">
-          <path d="M4.5 2.8v10.4a.8.8 0 0 0 1.2.7l8.3-5.2a.8.8 0 0 0 0-1.4L5.7 2.1a.8.8 0 0 0-1.2.7Z" />
-        </svg>
         View demo
       </a>
       <DemoVideoModal open={open} onClose={() => setOpen(false)} href={href} password={password} />

@@ -120,13 +120,13 @@ const ASK_AI_PROMPT =
 export function AetherAskAi() {
   return (
     <section className="flex flex-col items-center justify-center px-3 py-16 sm:py-24 text-center rise rise--liquid">
-      <h2 className="text-[28px] sm:text-[36px] font-normal tracking-[-0.04em] leading-tight text-[rgb(var(--fg))]">
+      <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
         Still deciding?
       </h2>
-      <p className="mt-3 max-w-xl text-[15px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+      <p className="mt-3 max-w-xl text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))]">
         Ask your AI of choice about Aether.
       </p>
-      <AskAiLinks prompt={ASK_AI_PROMPT} className="mt-8 w-full max-w-xl" />
+      <AskAiLinks prompt={ASK_AI_PROMPT} variant="wall" className="mt-8 w-full max-w-2xl" />
     </section>
   );
 }

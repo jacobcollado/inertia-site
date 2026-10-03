@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AetherHero } from "./aether-hero";
+import { AetherDemoBanner } from "./demo-banner";
 import { HeroRule } from "./hero-rule";
 import { FeaturesScroll } from "./features-scroll";
 import { StoresOnAether } from "./stores-on-aether";
@@ -121,6 +122,7 @@ export default function AetherPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(AETHER_JSON_LD) }}
       />
       <TrackAetherViewContent />
+      <AetherDemoBanner />
 
       <AetherHero demoUrl={DEMO_URL} />
 

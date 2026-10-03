@@ -16,8 +16,43 @@ const PLATFORMS: {
   { name: "Google AI", href: (q) => `https://www.google.com/search?udm=50&q=${q}`, Icon: SiGoogle },
 ];
 
-export function AskAiLinks({ prompt, className = "" }: { prompt: string; className?: string }) {
+/** `wall` lays the assistants out as a logo wall: even cells split by
+ * hairlines, a large mark over each name, like the stores wall on /aether. */
+export function AskAiLinks({
+  prompt,
+  className = "",
+  variant = "buttons",
+}: {
+  prompt: string;
+  className?: string;
+  variant?: "buttons" | "wall";
+}) {
   const q = encodeURIComponent(prompt);
+
+  if (variant === "wall") {
+    return (
+      <ul
+        className={`grid grid-cols-2 gap-px overflow-hidden rounded-[6px] bg-[rgb(var(--line))] shadow-[0_0_0_1px_rgb(var(--line))] sm:grid-cols-4 ${className}`}
+      >
+        {PLATFORMS.map(({ name, href, Icon }) => (
+          <li key={name} className="bg-[rgb(var(--bg))]">
+            <a
+              href={href(q)}
+              target="_blank"
+              rel="noopener"
+              className="group flex h-28 w-full flex-col items-center justify-center gap-3 transition-colors duration-200 hover:bg-[rgb(var(--surface)/0.6)] sm:h-32 [-webkit-tap-highlight-color:transparent]"
+            >
+              <Icon className="size-7 shrink-0 text-[rgb(var(--fg))] opacity-70 transition-opacity duration-200 group-hover:opacity-100" />
+              <span className="text-[14px] sm:text-[15px] tracking-tight leading-none text-[rgb(var(--muted))] transition-colors duration-200 group-hover:text-[rgb(var(--fg))]">
+                {name}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <ul className={`grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 ${className}`}>
       {PLATFORMS.map(({ name, href, Icon }) => (
