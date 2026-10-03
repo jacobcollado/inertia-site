@@ -225,7 +225,12 @@ function buildColumns(onDeleted: (id: string) => void, onToast: (message: string
               <AvatarFallback className="text-[11px]">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col min-w-0">
-              <span className="text-[14px] font-medium tracking-tight text-foreground truncate leading-snug">{displayName}</span>
+              <span className="flex items-center gap-2 min-w-0">
+                <span className="text-[14px] font-medium tracking-tight text-foreground truncate leading-snug">{displayName}</span>
+                {c.is_demo && (
+                  <Badge variant="outline" className="shrink-0 border-transparent bg-muted text-muted-foreground">Demo</Badge>
+                )}
+              </span>
               <span className="text-[12px] tracking-tight text-muted-foreground truncate">{c.email}</span>
             </div>
           </Link>

@@ -14,7 +14,13 @@ export type Client = {
   projects: Project[];
   in_clients_table: boolean;
   banned: boolean;
+  is_demo: boolean;
 };
+
+// Seeded accounts (scripts/seed-demo-client.ts) that exist to preview the
+// client dashboard. They stay in the clients list so they can be managed,
+// but their sample invoices and projects must not count toward real totals.
+const DEMO_EMAILS = new Set(["demo@byinertia.com"]);
 
 export async function getClients(): Promise<Client[]> {
   const admin = createAdminClient();
@@ -49,6 +55,7 @@ export async function getClients(): Promise<Client[]> {
         projects: (row?.projects as { id: string; status: string }[]) ?? [],
         in_clients_table: !!row,
         banned: !!u.banned_until && new Date(u.banned_until) > new Date(),
+        is_demo: DEMO_EMAILS.has((u.email ?? "").toLowerCase()),
       };
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
-import { createPortal, flushSync } from "react-dom";
+import React, { Fragment, useRef, useEffect, useLayoutEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,13 +9,15 @@ import { AskAiLinks } from "@/components/ask-ai-links";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { FigmaSelectionFrame, SELECTION_FILL, SELECTION_FRAME_COLOR } from "@/components/figma-frame";
-import { ShapeProvider } from "@/lib/shape-context";
-import { AskUserQuestions, type AskUserQuestion, type AskUserAnswer } from "@/components/ui/ask-user-questions";
-import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf, CTA_SCALE_PRESS, CTA_SCALE_RESET, CTA_SCALE_SPRING } from "@/lib/cta-hover-motion";
+import { SELECTION_FRAME_COLOR } from "@/components/figma-frame";
+import { HeroDragHeading } from "@/components/hero-drag-heading";
+import { SectionHeading } from "@/components/section-heading";
+import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
+import type { AskUserQuestion, AskUserAnswer } from "@/components/ui/ask-user-questions";
+import { InquirySteps } from "@/components/inquiry-steps";
+import { ctaScaleHoverOnParent } from "@/lib/cta-hover-motion";
 import {
   ACTION_RADIUS_CLASS,
-  ACTION_RADIUS_PX,
   CTA_FILL,
   CTA_INSET_SHADOW,
   CTA_OUTER_SHADOW,
@@ -84,21 +86,82 @@ function useLiquidReveal(active: boolean, delayMs = 0) {
   return ref;
 }
 
+const STATEMENT_LEAD = ["We", "build", "the", "version", "of", "your", "business"];
+const STATEMENT_PAYOFF = ["people", "fall", "for."];
+const STATEMENT_WORDS = STATEMENT_LEAD.length + STATEMENT_PAYOFF.length;
+// Share of the pinned scroll spent lighting words; the rest holds the read
+// line, then settles it to two tones.
+const STATEMENT_READ_END = 0.7;
+const STATEMENT_SETTLE_AT = 0.8;
+
+// The page's second statement, pinned and read as you scroll. The section is
+// a few screens tall and the line sticks in the middle of the view while its
+// words light up in order (scrubbing back if you scroll back). Once it's
+// read, the lead settles to grey and "people fall for" stays bright, so the
+// payoff is what's left standing. Set large and centred.
 function ServicesSection() {
+  const ref = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion() ?? false;
+  const [lit, setLit] = useState(0);
+  const [settled, setSettled] = useState(false);
+
+  // Polled every frame while on screen rather than on scroll events: Lenis
+  // moves the page in its own rAF loop, so scroll events lag what's drawn
+  // (same reason as LightCard below).
+  useEffect(() => {
+    if (reduced) {
+      setLit(STATEMENT_WORDS);
+      setSettled(true);
+      return;
+    }
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const tick = () => {
+      const r = el.getBoundingClientRect();
+      const travel = r.height - window.innerHeight;
+      const p = travel > 0 ? Math.min(1, Math.max(0, -r.top / travel)) : 1;
+      const n = Math.min(STATEMENT_WORDS, Math.ceil((p / STATEMENT_READ_END) * STATEMENT_WORDS));
+      setLit((prev) => (prev === n ? prev : n));
+      const s = p >= STATEMENT_SETTLE_AT;
+      setSettled((prev) => (prev === s ? prev : s));
+      raf = requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(([e]) => {
+      cancelAnimationFrame(raf);
+      if (e.isIntersecting) raf = requestAnimationFrame(tick);
+    });
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+    };
+  }, [reduced]);
+
+  const opacity = (i: number) => {
+    if (i >= lit) return 0.16;
+    if (settled && i < STATEMENT_LEAD.length) return 0.4;
+    return 1;
+  };
+
   return (
-    <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-3xl mx-auto text-center">
-        {/* Set close to the hero heading so it lands as the page's second
-            statement, not a caption. The payoff is marked like a text
-            selection in Figma, swept in once the line has resolved (see
-            .selection-sweep), echoing the hero's "design" frame. */}
-        <h2
-          className="rise rise--liquid text-balance text-[clamp(2.25rem,7vw,3.2rem)] sm:text-[clamp(2.6rem,5.4vw,3.9rem)] tracking-tight max-sm:tracking-[-0.05em] sm:tracking-tight leading-[1.08] text-[rgb(var(--fg))]"
-          style={{ fontWeight: 450 }}
-        >
-          We build the version of your business{" "}
-          <span className="selection-sweep box-decoration-clone px-[0.06em]">people fall for</span>.
-        </h2>
+    <section ref={ref} className={reduced ? "w-full py-16" : "relative h-[220vh] sm:h-[260vh]"}>
+      <div className={reduced ? "" : "sticky top-0 flex h-[100dvh] items-center"}>
+        <div className="mx-auto w-full max-w-[80rem] px-6 sm:px-8">
+          <h2
+            className="mx-auto max-w-5xl text-center text-balance text-[clamp(2.6rem,8.4vw,6rem)] leading-[1.02] tracking-[-0.045em] text-[rgb(var(--fg))]"
+            style={{ fontWeight: 450 }}
+          >
+            <span className="sr-only">We build the version of your business people fall for.</span>
+            <span aria-hidden="true">
+              {[...STATEMENT_LEAD, ...STATEMENT_PAYOFF].map((w, i) => (
+                <Fragment key={w + i}>
+                  <span style={{ opacity: opacity(i), transition: "opacity 320ms ease" }}>{w}</span>{" "}
+                </Fragment>
+              ))}
+            </span>
+          </h2>
+        </div>
       </div>
     </section>
   );
@@ -473,349 +536,6 @@ function heroLiquidStyle(
   };
 }
 
-// Figma-style selection chrome around a word: a 1px accent frame that draws
-// itself in clockwise from the top-left, then pops the four square resize
-// handles. Rendered as an inset overlay so it never affects the heading's
-// layout or the per-word reveal transform.
-// The frame uses SELECTION_FRAME_COLOR (Figma's selection blue, from
-// components/figma-frame). The earlier neutral grey was chosen to stay clear
-// of the antislow mark above; the mark is currently hidden, and the blue is
-// distinct enough from the work accents not to read as one.
-const SELECTION_EDGE_MS = 170;
-const SELECTION_HANDLE_MS = 160;
-
-// After the handles pop, the frame performs a resize gesture: it's dragged
-// out past the word, pulled back in under it, then released to its true
-// bounds. Reads as someone sizing the selection rather than a decorative
-// pulse. Only the overlay scales, never the word, so the heading never
-// reflows. Timings are the beats of that gesture, in order.
-const SELECTION_RESIZE_HOLD_MS = 520;   // beat before the drag starts
-const SELECTION_RESIZE_OUT_MS = 900;    // drag outward
-const SELECTION_RESIZE_IN_MS = 800;     // pull back in past the resting size
-const SELECTION_RESIZE_BACK_MS = 900;   // settle to the real bounds
-const SELECTION_RESIZE_SETTLE_MS = 500; // pause at each extreme before moving on
-const SELECTION_RESIZE_GROW = 1.14;     // how far past the word it's dragged
-const SELECTION_RESIZE_SHRINK = 0.9;    // how far under it's pulled
-const SELECTION_SOLID_AFTER_RESIZE_MS = 240;
-const SELECTION_SOLID_EDGE_MS = 320;
-const SELECTION_SOLID_EDGES = ["top", "left"] as const;
-
-// Drives the resize gesture. Lifted out of SelectionBox so the word and the
-// frame around it read from one source of truth and scale in lockstep — the
-// selection is sizing the word, so the two must never drift apart.
-function useSelectionResize(visible: boolean, delay: number) {
-  // motion/react returns null until it has read the media query; treat that
-  // as "not reduced" so the gesture behaves normally on first paint.
-  const reduced = useReducedMotion() ?? false;
-  const [phase, setPhase] = useState<"idle" | "out" | "in" | "rest">("idle");
-
-  // 4 edges draw in sequence, then the handles pop.
-  const handlesDone = delay + 4 * SELECTION_EDGE_MS + SELECTION_HANDLE_MS;
-
-  useEffect(() => {
-    if (!visible || reduced) return;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const startAt = handlesDone + SELECTION_RESIZE_HOLD_MS;
-    const inAt = startAt + SELECTION_RESIZE_OUT_MS + SELECTION_RESIZE_SETTLE_MS;
-    const restAt = inAt + SELECTION_RESIZE_IN_MS + SELECTION_RESIZE_SETTLE_MS;
-    timers.push(setTimeout(() => setPhase("out"), startAt));
-    timers.push(setTimeout(() => setPhase("in"), inAt));
-    timers.push(setTimeout(() => setPhase("rest"), restAt));
-    return () => timers.forEach(clearTimeout);
-  }, [visible, reduced, handlesDone]);
-
-  const scale =
-    reduced || phase === "idle" || phase === "rest"
-      ? 1
-      : phase === "out"
-        ? SELECTION_RESIZE_GROW
-        : SELECTION_RESIZE_SHRINK;
-  const resizeMs =
-    phase === "out"
-      ? SELECTION_RESIZE_OUT_MS
-      : phase === "in"
-        ? SELECTION_RESIZE_IN_MS
-        : SELECTION_RESIZE_BACK_MS;
-
-  return { phase, scale, resizeMs, reduced };
-}
-
-function SelectionBox({
-  color,
-  visible,
-  delay,
-  phase,
-  scale,
-  resizeMs,
-  reduced,
-}: {
-  color: string;
-  visible: boolean;
-  delay: number;
-  phase: "idle" | "out" | "in" | "rest";
-  scale: number;
-  resizeMs: number;
-  reduced: boolean;
-}) {
-  const HANDLE = 5;
-
-  // The word and this frame are both scaled by a shared parent, so the frame
-  // itself no longer scales. It only needs to undo that parent scale on its
-  // 1px edges and square handles, so the stroke weight and handle size stay
-  // true at every step of the resize.
-  const sx = scale;
-  const sy = scale;
-
-  // Each edge scales from the corner the previous edge finished at, so the
-  // line reads as one continuous stroke travelling around the box.
-  const edges = [
-    { side: "top", origin: "left center", axis: "scaleX" },
-    { side: "right", origin: "center top", axis: "scaleY" },
-    { side: "bottom", origin: "right center", axis: "scaleX" },
-    { side: "left", origin: "center bottom", axis: "scaleY" },
-  ] as const;
-
-  const dashGradient = (side: string) => {
-    const horizontal = side === "top" || side === "bottom";
-    return horizontal
-      ? `repeating-linear-gradient(to right, ${color} 0, ${color} 3px, transparent 3px, transparent 7px)`
-      : `repeating-linear-gradient(to bottom, ${color} 0, ${color} 3px, transparent 3px, transparent 7px)`;
-  };
-
-  const edgeBase = (side: string): React.CSSProperties => {
-    const t = { position: "absolute" as const, backgroundImage: dashGradient(side) };
-    if (side === "top") return { ...t, top: 0, left: 0, right: 0, height: 1 };
-    if (side === "bottom") return { ...t, bottom: 0, left: 0, right: 0, height: 1 };
-    if (side === "left") return { ...t, left: 0, top: 0, bottom: 0, width: 1 };
-    return { ...t, right: 0, top: 0, bottom: 0, width: 1 };
-  };
-
-  const corners = [
-    { top: -HANDLE / 2, left: -HANDLE / 2 },
-    { top: -HANDLE / 2, right: -HANDLE / 2 },
-    { bottom: -HANDLE / 2, right: -HANDLE / 2 },
-    { bottom: -HANDLE / 2, left: -HANDLE / 2 },
-  ];
-
-  const handlesDelay = delay + edges.length * SELECTION_EDGE_MS;
-  const [solidEdges, setSolidEdges] = useState<ReadonlySet<string>>(() => new Set());
-
-  useEffect(() => {
-    if (!visible || reduced) {
-      setSolidEdges(new Set());
-      return;
-    }
-    if (phase !== "rest") return;
-
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    const solidStart = SELECTION_RESIZE_BACK_MS + SELECTION_SOLID_AFTER_RESIZE_MS;
-    SELECTION_SOLID_EDGES.forEach((side, i) => {
-      timers.push(
-        setTimeout(() => {
-          setSolidEdges((prev) => new Set(prev).add(side));
-        }, solidStart + i * SELECTION_SOLID_EDGE_MS),
-      );
-    });
-    return () => timers.forEach(clearTimeout);
-  }, [visible, reduced, phase]);
-
-  const edgeTransform = (edge: (typeof edges)[number], draw: number) => {
-    const counter = edge.axis === "scaleX" ? 1 / sy : 1 / sx;
-    return edge.axis === "scaleX"
-      ? `scaleX(${draw}) scaleY(${counter})`
-      : `scaleY(${draw}) scaleX(${counter})`;
-  };
-
-  const edgeTransition = (i: number, ms: number) =>
-    reduced
-      ? "none"
-      : phase === "idle"
-        ? `transform ${ms}ms linear ${delay + i * SELECTION_EDGE_MS}ms`
-        : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`;
-
-  const solidEdgeTransition = () =>
-    reduced
-      ? "none"
-      : `transform ${SELECTION_SOLID_EDGE_MS}ms ${HERO_LIQUID_EASE}, opacity ${SELECTION_SOLID_EDGE_MS}ms ${HERO_LIQUID_EASE}`;
-
-  return (
-    <span
-      aria-hidden="true"
-      style={{
-        position: "absolute",
-        top: "-0.08em",
-        right: "-0.1em",
-        bottom: "-0.2em",
-        left: "-0.1em",
-        pointerEvents: "none",
-      }}
-    >
-      {edges.map((edge, i) => {
-        const dashedDraw = visible || reduced ? 1 : 0;
-        const solidDraw = solidEdges.has(edge.side) || reduced ? 1 : 0;
-        const solidEligible = (SELECTION_SOLID_EDGES as readonly string[]).includes(edge.side);
-
-        return (
-          <span key={edge.side} aria-hidden="true">
-            <span
-              style={{
-                ...edgeBase(edge.side),
-                transformOrigin: edge.origin,
-                transform: edgeTransform(edge, dashedDraw),
-                opacity: solidEligible && solidDraw ? 0.35 : 1,
-                transition: [
-                  edgeTransition(i, SELECTION_EDGE_MS),
-                  solidEligible ? `opacity ${SELECTION_SOLID_EDGE_MS}ms ${HERO_LIQUID_EASE}` : "none",
-                ].join(", "),
-              }}
-            />
-            {solidEligible && (
-              <span
-                style={{
-                  ...edgeBase(edge.side),
-                  background: color,
-                  transformOrigin: edge.origin,
-                  transform: edgeTransform(edge, solidDraw),
-                  opacity: solidDraw,
-                  transition: solidEdgeTransition(),
-                }}
-              />
-            )}
-          </span>
-        );
-      })}
-      {corners.map((pos, i) => (
-        <span
-          key={i}
-          style={{
-            position: "absolute",
-            width: HANDLE,
-            height: HANDLE,
-            background: "#fff",
-            border: `1px solid ${color}`,
-            ...pos,
-            opacity: visible || reduced ? 1 : 0,
-            // Counter-scale keeps the square 5px and un-stretched while the
-            // box around it is being resized.
-            transform: `${visible || reduced ? "scale(1)" : "scale(0.4)"} scale(${1 / sx}, ${1 / sy})`,
-            transition: reduced
-              ? "none"
-              : phase === "idle"
-                ? [
-                    `opacity ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
-                    `transform ${SELECTION_HANDLE_MS}ms ${HERO_LIQUID_EASE} ${handlesDelay}ms`,
-                  ].join(", ")
-                : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`,
-          }}
-        />
-      ))}
-    </span>
-  );
-}
-
-// How far the frame sits outside the word box (SelectionBox's insets), in em.
-// The neighbours are pushed by how far the frame edges travel, not the glyphs.
-const SELECTION_INSET_X_EM = 0.1;
-const SELECTION_INSET_TOP_EM = 0.08;
-const SELECTION_INSET_BOTTOM_EM = 0.2;
-
-// How far the line under "design" moves while the frame resizes, so the
-// frame's bottom edge never runs into it. The heading is leading-none, so the
-// word box is 1em tall and its bottom edge sits half of that below centre.
-function selectionPushBelowEm(scale: number) {
-  return (scale - 1) * (0.5 + SELECTION_INSET_BOTTOM_EM);
-}
-
-// Same for a line above "design", against the frame's top edge.
-function selectionPushAboveEm(scale: number) {
-  return (scale - 1) * (0.5 + SELECTION_INSET_TOP_EM);
-}
-
-// "design" plus its selection frame, scaled as one unit so the word is
-// visibly being sized by the selection rather than sitting inert inside it.
-//
-// Layout note: the scaled copy is absolutely positioned over an invisible
-// spacer that holds the word's resting footprint. The spacer's side margins
-// then grow and shrink with the frame, so the words either side are pushed
-// away as it's dragged out and follow it back in, instead of the frame
-// sliding over them. The resize state lives in the hero, which also moves the
-// line below by selectionPushBelowEm.
-function DesignSelectionWord({
-  visible,
-  delay,
-  word,
-  selection,
-}: {
-  visible: boolean;
-  delay: number;
-  word: string;
-  selection: ReturnType<typeof useSelectionResize>;
-}) {
-  const { phase, scale, resizeMs, reduced } = selection;
-  const spacerRef = useRef<HTMLSpanElement>(null);
-  // Half the resting word width, in em, so the push is right at any size.
-  const [halfWidthEm, setHalfWidthEm] = useState(0);
-
-  useLayoutEffect(() => {
-    const el = spacerRef.current;
-    if (!el) return;
-    const measure = () => {
-      const fontSize = parseFloat(getComputedStyle(el).fontSize) || 16;
-      setHalfWidthEm(el.offsetWidth / fontSize / 2);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const pushSideEm = (scale - 1) * (halfWidthEm + SELECTION_INSET_X_EM);
-
-  return (
-    <span
-      style={{
-        position: "relative",
-        display: "inline-block",
-        marginInline: `${pushSideEm}em`,
-        transition: reduced ? "none" : `margin ${resizeMs}ms ${HERO_LIQUID_EASE}`,
-      }}
-    >
-      {/* Spacer: holds the line's true width at rest. */}
-      <span ref={spacerRef} style={{ visibility: "hidden" }} aria-hidden="true">
-        {word}
-      </span>
-
-      {/* The part that actually moves. Centre origin so it grows and shrinks
-          around the word rather than dragging off one edge. */}
-      <span
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "inline-block",
-          // The absolute box is exactly the resting word width, so without
-          // this the glyphs can wrap inside it at narrow widths.
-          whiteSpace: "nowrap",
-          transform: `scale(${scale})`,
-          transformOrigin: "center center",
-          transition: reduced ? "none" : `transform ${resizeMs}ms ${HERO_LIQUID_EASE}`,
-          willChange: "transform",
-        }}
-      >
-        {word}
-        <SelectionBox
-          color={SELECTION_FRAME_COLOR}
-          visible={visible}
-          delay={delay}
-          phase={phase}
-          scale={scale}
-          resizeMs={resizeMs}
-          reduced={reduced}
-        />
-      </span>
-    </span>
-  );
-}
-
 function VercelHero({
   accentColor,
   ctaRef,
@@ -847,28 +567,15 @@ function VercelHero({
   const liquid = (delay: number, opts?: { blur?: number; scaleFrom?: number }) =>
     heroLiquidStyle(visible, delay, opts);
 
-  // Heading words stagger with a soft blur+scale dissolve so each token
-  // flows into focus rather than rising, building to "as well as it looks." as
-  // the payoff line, then the CTA follows.
   // Fixed lines so the break is the same at every width and the lines stay
-  // close in length.
-  const HEADING_LINES = [["Design", "that", "works"], ["as", "well", "as", "it", "looks."]];
-  const DESIGN_LINE = 0;
+  // close in length. The words are draggable (see HeroDragHeading).
+  const HEADING_LINES = [["Your", "site", "should", "be"], ["the", "easy", "part."]];
   const HEADING_WORDS = HEADING_LINES.flat();
-  // Heading itself no longer animates in — it's present immediately so the
-  // page doesn't feel like it's waiting on text. The word-reveal stagger
-  // stays available for other callers of heroLiquidStyle below.
-  const wordReveal = (_i: number) => undefined;
   const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
   const ctaFadeDelay = headingEnd + 644;
   // Cloud pill waits until the CTA has actually finished landing —
   // ctaFadeDelay is only when that transition *starts*.
   const cloudDelay = ctaFadeDelay + HERO_LIQUID_MS;
-  // Selection chrome no longer waits on the heading/CTA/pill chain since the
-  // heading is visible immediately — it only needs a short beat after mount
-  // so the frame reads as drawing itself rather than appearing pre-formed.
-  const selectionDelay = 260;
-  const selection = useSelectionResize(visible, selectionDelay);
 
   useEffect(() => {
     if (!visible) return;
@@ -930,51 +637,22 @@ function VercelHero({
           )}
 
           <h1
-            className="tracking-tight max-sm:tracking-[-0.05em] leading-none max-w-2xl text-[clamp(2.5rem,7.8vw,3.55rem)] sm:tracking-tight sm:text-[clamp(2.6rem,6vw,4.2rem)] flex flex-col items-center"
+            className="tracking-[-0.05em] leading-[0.98] text-[clamp(2.4rem,9.4vw,3.6rem)] sm:tracking-[-0.045em] sm:text-[clamp(3.4rem,7vw,6.5rem)] flex flex-col items-center"
             style={{ color: "#1a1a1a", fontWeight: 450 }}
           >
-            {HEADING_LINES.map((line, lineIndex) => {
-              const before = HEADING_LINES.slice(0, lineIndex).flat().length;
-              // Lines either side of the "design" line move with the frame's
-              // top and bottom edges, as a transform so the rest of the hero
-              // doesn't shift with them.
-              const push =
-                lineIndex < DESIGN_LINE ? -selectionPushAboveEm(selection.scale)
-                : lineIndex > DESIGN_LINE ? selectionPushBelowEm(selection.scale)
-                : 0;
-              return (
-                <span
-                  key={lineIndex}
-                  className={`flex justify-center items-baseline whitespace-nowrap${lineIndex > 0 ? " mt-1.5 sm:mt-2" : ""}`}
-                  style={{
-                    columnGap: "0.3em",
-                    transform: push ? `translateY(${push}em)` : undefined,
-                    transition: selection.reduced ? "none" : `transform ${selection.resizeMs}ms ${HERO_LIQUID_EASE}`,
-                  }}
-                >
-                  {line.map((word, i) => (
-                    <span key={word + i} style={wordReveal(before + i)}>
-                      {word.toLowerCase().startsWith("design") ? (
-                        // Any trailing punctuation sits outside the frame so only the word is selected.
-                        <>
-                          <DesignSelectionWord visible={visible} delay={selectionDelay} word={word.slice(0, "design".length)} selection={selection} />
-                          {word.slice("design".length)}
-                        </>
-                      ) : (
-                        word
-                      )}
-                    </span>
-                  ))}
-                </span>
-              );
-            })}
+            <HeroDragHeading lines={HEADING_LINES} />
           </h1>
 
           <p
             className="max-w-md sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-balance"
             style={{ ...liquid(120), color: "#5c5c5c" }}
           >
-            From local shops to growing startups, designed and built in-house.
+            {/* The full sentence is about 66 characters, which can't fit one
+                line at phone widths at a readable size, so it wrapped into two
+                uneven lines under the heading. Mobile gets a shorter line that
+                sits on one row; desktop keeps the full sentence. */}
+            <span className="sm:hidden">Designed and built in-house.</span>
+            <span className="hidden sm:inline">From local shops to growing startups, designed and built in-house.</span>
           </p>
 
           {false && (
@@ -1083,81 +761,119 @@ function VercelHero({
   );
 }
 
-// A short, opinionated questionnaire that replaces the old Cal.com embed at
-// the foot of the homepage. It's not a real qualifier — it's a tone check.
-// The questions surface how someone thinks about design so the visitor either
-// nods along (and reaches for the CTA) or realizes we're not their studio. The
-// stepped flow itself is the shadcn `ask-user-questions` component; no data is
-// stored — onComplete just reflects the first answer back and offers the CTA
-// that opens the existing contact modal.
-// NB: `skippable` defaults to true in the component (`skippable !== false`), so
-// each question opts out explicitly — it's a three-question tone check, and a
-// skipped first answer would leave the result with nothing to reflect back.
+// The enquiry flow at the foot of the homepage, in two stages. First three
+// quick questions: what they're building first, then two that show how they think about the
+// work. We reflect that back in a short typed reply, then collect the details
+// we need to come back to them. Each stage is stepped through by InquirySteps
+// (components/inquiry-steps.tsx); answers post to /api/inquiry.
+// `skippable: false` is kept from the shared question type, which skips by
+// default; InquirySteps never offers a skip either way.
 const QUIZ_QUESTIONS: AskUserQuestion[] = [
   {
+    id: "project",
+    title: "What are you building?",
+    skippable: false,
+    allowOther: true,
+    otherPlaceholder: "Something else...",
+    chipPosition: "left",
+    options: [
+      { id: "new_site", title: "A new website" },
+      { id: "redesign", title: "A redesign of the site we have" },
+      { id: "store", title: "A Shopify store" },
+      { id: "product", title: "A product or app" },
+    ],
+  },
+  {
     id: "ownership",
-    title: "The site went live and it doesn't feel like your brand. Whose problem is it?",
+    title: "Your site launches, but it doesn't feel like your brand. Whose problem is that?",
     skippable: false,
     chipPosition: "left",
     options: [
-      { id: "designer", title: "The designer's. That was the whole job." },
-      { id: "team", title: "Everyone's. Identity slips one decision at a time." },
-      { id: "ship", title: "Nobody's. It works, that's what counts." },
+      { id: "designer", title: "The designer's. That was the job." },
+      { id: "team", title: "Everyone's. A brand slips one small decision at a time." },
+      { id: "ship", title: "Nobody's, as long as it works." },
     ],
   },
   {
     id: "detail",
-    title: "A detail is off by two pixels. Nobody will consciously notice. You...",
+    title: "Something is two pixels off. Nobody will consciously notice. What do you do?",
     skippable: false,
     chipPosition: "left",
     options: [
-      { id: "fix", title: "Fix it. Effortless is built out of invisible calls like this." },
-      { id: "leave", title: "Leave it. Perfection is procrastination." },
+      { id: "fix", title: "Fix it. Small calls like that are why things feel right." },
+      { id: "leave", title: "Leave it. There are bigger things to do." },
       { id: "depends", title: "Depends what else is on fire." },
-    ],
-  },
-  {
-    id: "taste",
-    title: "What separates a good site from a great one?",
-    skippable: false,
-    chipPosition: "left",
-    options: [
-      { id: "convert", title: "The numbers. Great means it converts." },
-      { id: "feel", title: "It feels inevitable, like it couldn't be any other way." },
-      { id: "different", title: "It refuses to look like everyone else." },
     ],
   },
 ];
 
-// Result copy keyed off the first answer — enough to feel like it read you,
-// without pretending to be a real assessment.
+// Short labels for the answers recap in the chat, so the full questions
+// aren't repeated back. Looked up by question title, which is what the
+// transcript stores.
+const QUIZ_SHORT_LABELS: Record<string, string> = {
+  project: "Building",
+  ownership: "Whose problem",
+  detail: "Two pixels off",
+};
+const QUIZ_SHORT_BY_TITLE: Record<string, string> = Object.fromEntries(
+  QUIZ_QUESTIONS.map((q) => [q.title, QUIZ_SHORT_LABELS[q.id ?? ""] ?? q.title])
+);
+
+// Who's speaking in the enquiry chat: "You" on the right, Inertia on the
+// left with the In mark.
+function ChatSpeaker({ who }: { who: "you" | "inertia" }) {
+  if (who === "you") {
+    return (
+      <span className="text-[13px] tracking-tight leading-none" style={{ color: "rgb(var(--muted))" }}>
+        You
+      </span>
+    );
+  }
+  return (
+    <span className="flex items-center gap-3 text-[13px] tracking-tight leading-none" style={{ color: "rgb(var(--muted))" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/icon-512.png"
+        alt=""
+        aria-hidden="true"
+        className="size-6 rounded-[6px]"
+        style={{ boxShadow: "0 0 0 1px rgb(var(--line))" }}
+      />
+      Inertia
+    </span>
+  );
+}
+
+// Our reply, keyed off how they answered "whose problem is that". Honest
+// about where we stand rather than pretending to assess them.
 const QUIZ_RESULTS: Record<string, { title: string; body: string }> = {
   designer: {
-    title: "So you'd expect the designer to own it.",
-    body: "So would we. Carrying your identity through is the whole job, and when the work ships under our name, it's ours to answer for.",
+    title: "You expect the designer to own it.",
+    body: "So do we. When the work goes out under our name, getting it right is on us, not you.",
   },
   team: {
-    title: "So you see identity as a shared standard.",
-    body: "We agree, though someone still has to hold the line. That's usually what we're brought in for.",
+    title: "You see a brand as a shared standard.",
+    body: "Agreed. Someone still has to hold the line, and that's usually why people bring us in.",
   },
   ship: {
-    title: "So you'd rather move than fuss.",
-    body: "Speed matters and we move fast too. But a site that works and doesn't feel like you is half done. We ship both.",
+    title: "You'd rather ship than fuss.",
+    body: "Fair, and we move fast too. But a site that works and doesn't feel like you is only half done, so we ship both.",
   },
 };
 
 const QUIZ_RESULT_FALLBACK = {
-  title: "Sounds like we'd get along.",
-  body: "The way you think about the work lines up with how we approach it.",
+  title: "Sounds like we'd work well together.",
+  body: "How you think about the work lines up with how we do it.",
 };
 
-// Stage two: once the tone-check questions are answered, the same component
-// collects the details we actually need. Free-text where the answer is theirs
-// to write, single-select where we're qualifying.
+// Stage two: the details we need to come back to them, in the order a
+// conversation would go: who you are, what you have, what you want, where
+// it stands. Free text where the answer is theirs to write, options where
+// we're qualifying.
 const INTAKE_QUESTIONS: AskUserQuestion[] = [
   {
     id: "name",
-    title: "First, what's your name?",
+    title: "What should we call you?",
     skippable: false,
     freeText: true,
     freeTextMultiline: false,
@@ -1166,7 +882,7 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
   },
   {
     id: "email",
-    title: "Where can we reach you?",
+    title: "And the best email to reach you?",
     skippable: false,
     freeText: true,
     freeTextMultiline: false,
@@ -1175,8 +891,46 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? null : "Please enter a valid email.",
   },
   {
+    id: "website",
+    title: "Is there a site we should look at?",
+    skippable: false,
+    freeText: true,
+    freeTextMultiline: false,
+    freeTextPlaceholder: "yoursite.com, or none yet",
+  },
+  {
+    id: "goals",
+    title: "When we're done, what should be different?",
+    skippable: false,
+    freeText: true,
+    freeTextPlaceholder: "The outcome you're after, in your own words.",
+  },
+  {
+    id: "company_stage",
+    title: "Where's the business today?",
+    skippable: false,
+    chipPosition: "left",
+    options: [
+      { id: "idea", title: "Just an idea, or pre-seed" },
+      { id: "bootstrapped", title: "Bootstrapped" },
+      { id: "funded", title: "Funded" },
+      { id: "established", title: "Established" },
+    ],
+  },
+  {
+    id: "readiness",
+    title: "Where's the budget at?",
+    skippable: false,
+    chipPosition: "left",
+    options: [
+      { id: "allocated", title: "Set aside and ready to go" },
+      { id: "unlockable", title: "Serious, and I can make it happen" },
+      { id: "exploring", title: "Still working out what this would cost" },
+    ],
+  },
+  {
     id: "referral_source",
-    title: "How did you find us?",
+    title: "Last one. How did you hear about us?",
     skippable: false,
     // allowOther appends a free-text row beneath the options, so "somewhere
     // else" is typed rather than picked.
@@ -1184,60 +938,10 @@ const INTAKE_QUESTIONS: AskUserQuestion[] = [
     otherPlaceholder: "Somewhere else...",
     chipPosition: "left",
     options: [
-      { id: "twitter", title: "X (Twitter)" },
-      { id: "recommendation", title: "Someone recommended us" },
+      { id: "recommendation", title: "Someone recommended you" },
       { id: "search", title: "Google or search" },
+      { id: "twitter", title: "X (Twitter)" },
       { id: "instagram", title: "Instagram" },
-    ],
-  },
-  {
-    id: "role",
-    title: "What's your role?",
-    skippable: false,
-    chipPosition: "left",
-    options: [
-      { id: "founder", title: "Founder or co-founder" },
-      { id: "exec", title: "Exec or department lead" },
-      { id: "product", title: "Product or engineering" },
-      { id: "other", title: "Something else" },
-    ],
-  },
-  {
-    id: "company_stage",
-    title: "Where's the company right now?",
-    skippable: false,
-    chipPosition: "left",
-    options: [
-      { id: "idea", title: "Pre-seed or idea stage" },
-      { id: "bootstrapped", title: "Bootstrapped" },
-      { id: "funded", title: "Funded" },
-      { id: "established", title: "Established" },
-    ],
-  },
-  {
-    id: "website",
-    title: "Do you have a site today?",
-    skippable: false,
-    freeText: true,
-    freeTextMultiline: false,
-    freeTextPlaceholder: "yoursite.com, or 'none yet'",
-  },
-  {
-    id: "goals",
-    title: "What do you want to be true when we're done?",
-    skippable: false,
-    freeText: true,
-    freeTextPlaceholder: "The outcome you're actually after, not just the deliverable.",
-  },
-  {
-    id: "readiness",
-    title: "Which sounds most like you?",
-    skippable: false,
-    chipPosition: "left",
-    options: [
-      { id: "allocated", title: "Budget's allocated and I'm ready to move" },
-      { id: "unlockable", title: "I'm serious and can unlock a budget" },
-      { id: "exploring", title: "Exploring what this would take" },
     ],
   },
 ];
@@ -1301,51 +1005,23 @@ function useTypewriter(text: string, active: boolean, speed = 18) {
 // chat box that becomes the real question component once the text lands.
 type Stage = "quiz" | "typing" | "intake" | "done";
 
-const QUIZ_FRAME_INNER_CLASS = "mx-auto max-w-none border-0 bg-transparent rounded-none";
 
-function Questionnaire({ onStartConversation }: { onStartConversation: () => void }) {
-  const [disclosed, setDisclosed] = useState(false);
+function Questionnaire() {
+  const [open, setOpen] = useState(false);
+  const reducedMotion = useReducedMotion() ?? false;
   const [stage, setStage] = useState<Stage>("quiz");
   const [result, setResult] = useState<{ title: string; body: string } | null>(null);
   const [transcript, setTranscript] = useState<{ question: string; answer: string }[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [resetKey, setResetKey] = useState(0);
+  const [firstName, setFirstName] = useState("");
   const intakeRef = useRef<HTMLDivElement>(null);
-  const inquiryBorderRef = useRef<HTMLDivElement>(null);
 
-  const flowRevealRef = useLiquidReveal(disclosed, 60);
-  const transcriptRevealRef = useLiquidReveal(disclosed && stage !== "quiz");
-  const typingRevealRef = useLiquidReveal(stage === "typing");
+  const flowRevealRef = useLiquidReveal(open, 60);
+  const transcriptRevealRef = useLiquidReveal(open && stage !== "quiz");
   const intakeRevealRef = useLiquidReveal(stage === "intake");
   const doneRevealRef = useLiquidReveal(stage === "done");
-
-  const scaleInquiryBorder = (transform: string, transition: string) => {
-    const el = inquiryBorderRef.current;
-    if (!el) return;
-    el.style.transition = transition;
-    el.style.transform = transform;
-  };
-
-  const inquiryCtaHover = {
-    onMouseEnter(e: React.MouseEvent<HTMLButtonElement>) {
-      ctaScaleHoverOnSelf.onMouseEnter(e);
-      scaleInquiryBorder("scale(1.015)", CTA_SCALE_SPRING);
-    },
-    onMouseLeave(e: React.MouseEvent<HTMLButtonElement>) {
-      ctaScaleHoverOnSelf.onMouseLeave(e);
-      scaleInquiryBorder("scale(1)", CTA_SCALE_RESET);
-    },
-    onMouseDown(e: React.MouseEvent<HTMLButtonElement>) {
-      ctaScaleHoverOnSelf.onMouseDown(e);
-      scaleInquiryBorder("scale(0.992)", CTA_SCALE_PRESS);
-    },
-    onMouseUp(e: React.MouseEvent<HTMLButtonElement>) {
-      ctaScaleHoverOnSelf.onMouseUp(e);
-      scaleInquiryBorder("scale(1.015)", CTA_SCALE_SPRING);
-    },
-  };
 
   const onQuizComplete = (answers: Record<string, AskUserAnswer>) => {
     const first = answers["ownership"]?.selectedIds[0];
@@ -1360,11 +1036,19 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
 
   // Full response text, typed out during the "typing" stage.
   const responseText = result
-    ? `${result.title} ${result.body} A few quick questions so we can tell if we're a fit.`
+    ? `${result.title} ${result.body} Now a few details so we can come back to you properly.`
     : "";
+  // A short "typing" beat before the reply starts, like someone replying.
+  const [thinking, setThinking] = useState(false);
+  useEffect(() => {
+    if (stage !== "typing") return;
+    setThinking(true);
+    const t = setTimeout(() => setThinking(false), reducedMotion ? 0 : 900);
+    return () => clearTimeout(t);
+  }, [stage, reducedMotion]);
   const { shown: typedResponse, done: typingDone } = useTypewriter(
     responseText,
-    stage === "typing"
+    stage === "typing" && !thinking
   );
 
   // Hand off to the real questions once the response has finished typing.
@@ -1394,38 +1078,30 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     return () => cancelAnimationFrame(raf);
   }, [stage]);
 
-  const onBegin = () => {
-    flushSync(() => setDisclosed(true));
-
-    // Two frames: first lets the quiz mount, second lets Lenis pick up the
-    // taller page after resize() (see route-fade.tsx).
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+  // Once the flow opens, bring it into view if it landed low on the screen.
+  // Two frames: the first lets it mount, the second lets Lenis pick up the
+  // taller page after resize() (see route-fade.tsx).
+  useEffect(() => {
+    if (!open) return;
+    let inner = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => {
         const el = document.getElementById("questionnaire-flow");
         if (!el) return;
-
-        // Centre the quiz in the viewport. If it's taller than the screen
-        // (small phones), centring would push its first question off the top,
-        // so pin its top a little below the edge instead.
-        const isMobile = window.matchMedia("(max-width: 639px)").matches;
-        const edge = isMobile ? 24 : 80;
         const lenis = window.__lenis;
         lenis?.resize();
-        const rect = el.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const fits = rect.height <= vh - edge * 2;
-        const delta = fits ? rect.top + rect.height / 2 - vh / 2 : rect.top - edge;
-        if (Math.abs(delta) < 4) return;
-        const targetY = window.scrollY + delta;
-
-        if (lenis) {
-          lenis.scrollTo(targetY, { duration: 1.1 });
-        } else {
-          window.scrollTo({ top: targetY, behavior: "smooth" });
-        }
+        const top = el.getBoundingClientRect().top;
+        if (top < window.innerHeight * 0.6) return;
+        const targetY = window.scrollY + top - (window.innerWidth < 640 ? 32 : 120);
+        if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
+        else window.scrollTo({ top: targetY, behavior: "smooth" });
       });
     });
-  };
+    return () => {
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+    };
+  }, [open]);
 
   const setIntakeRef = (node: HTMLDivElement | null) => {
     intakeRef.current = node;
@@ -1457,7 +1133,6 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         body: JSON.stringify({
           name: value("name"),
           email: value("email"),
-          role: value("role"),
           company_stage: value("company_stage"),
           website: value("website"),
           goals: value("goals"),
@@ -1467,6 +1142,7 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
+      setFirstName(value("name").split(/\s+/)[0] ?? "");
       setStage("done");
     } catch {
       setSubmitError("Something went wrong. Try again, or email us directly.");
@@ -1475,103 +1151,59 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
     }
   };
 
-  const reset = () => {
-    setStage("quiz");
-    setResult(null);
-    setTranscript([]);
-    setQuizAnswers({});
-    setSubmitError("");
-    setResetKey((k) => k + 1);
-  };
-
   return (
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="relative max-w-3xl mx-auto">
-      <FigmaSelectionFrame
-        frameRef={inquiryBorderRef}
-        className={cn("origin-center py-8 sm:py-10 px-6 sm:px-10", LIQUID_REVEAL)}
-        style={{ background: "transparent" }}
-      >
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-          <div className={`min-w-0 text-center ${LIQUID_REVEAL}`} style={liquidRevealDelay(0)}>
-            {/* Transparent fill now, so the card sits on the dark zone's own
-                ground and takes the zone's ink — the hardcoded near-black
-                these used while the card was white would be invisible here. */}
-            <h2
-              className="text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight"
-              style={{ color: "rgb(var(--fg))" }}
-            >
-              What are you building?
-            </h2>
-            <p
-              className="mt-3.5 sm:mt-4 text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight"
-              style={{ color: "rgb(var(--muted))" }}
-            >
-              Three quick questions to start. We&rsquo;ll take it from there.
-            </p>
-          </div>
-
-        {!disclosed && (
-          <span
-            className={`relative w-full sm:w-auto self-stretch sm:self-center shrink-0 flex sm:inline-flex ${ACTION_RADIUS_CLASS} ${LIQUID_REVEAL}`}
-            style={{ ...liquidRevealDelay(80), transformOrigin: "center" }}
-          >
+      {/* An inverted band: the one light panel in the dark zone, so the ask
+          stands apart from everything around it. Large two-tone line and the
+          site's main black CTA. The flow opens below it when asked for. */}
+      <div className="rise rise--liquid rounded-[6px] bg-white px-6 py-16 text-center sm:px-10 sm:py-24">
+        <h2
+          className="mx-auto max-w-3xl text-balance text-[clamp(2.2rem,5.4vw,4rem)] leading-[1.05] tracking-[-0.04em] text-[#1a1a1a]"
+          style={{ fontWeight: 450 }}
+        >
+          Working on something? <span className="text-[#9a9a9a]">Tell us a little about it.</span>
+        </h2>
+        {!open && (
+          <span className="relative mt-9 sm:mt-11 inline-flex rounded-[6px]">
             <button
               type="button"
-              onClick={onBegin}
-              aria-expanded="false"
+              onClick={() => setOpen(true)}
+              aria-expanded={false}
               aria-controls="questionnaire-flow"
-              className={`relative w-full sm:w-auto inline-flex items-center justify-center overflow-hidden ${ACTION_RADIUS_CLASS} h-11 sm:h-12 px-6 sm:px-7 text-[17px] sm:text-[18px] tracking-tight leading-none [-webkit-tap-highlight-color:transparent]`}
-              // White rather than the shared black CTA_FILL. This one sits on
-              // the light page rather than inside the dark quiz card, so it
-              // needs a hairline to hold its edge - a borderless white pill on
-              // a near-white ground has nothing to read against.
-              style={{
-                background: "#ffffff",
-                color: "#1a1a1a",
-                border: "1px solid rgb(var(--line))",
-                fontWeight: 450,
-              }}
-              {...inquiryCtaHover}
+              className={CTA_PILL_CLASS}
+              style={{ background: CTA_FILL, color: "#fff", fontWeight: 450 }}
+              {...ctaScaleHoverOnParent}
             >
-              Begin
+              <span className="relative whitespace-nowrap">Tell us about it</span>
             </button>
           </span>
         )}
-        </div>
-      </FigmaSelectionFrame>
+        <p className={`${open ? "mt-8" : "mt-5"} text-[14px] sm:text-[15px] tracking-tight text-[#5c5c5c]`}>
+          {open ? "Answer below. It takes about two minutes." : "About two minutes. We read every answer."}
+        </p>
       </div>
 
-      {disclosed && (
+      {open && (
         <div
           id="questionnaire-flow"
           ref={flowRevealRef}
-          className={cn(
-            "quiz-dark mt-10 sm:mt-12 w-full mx-auto transition-[max-width] duration-500 ease-out",
-            LIQUID_REVEAL,
-            // Narrow on mobile so the options stay in an easy column; from sm
-            // up both stages match the begin card's max-w-3xl, so the flow
-            // sits in the same measure as the card it opened from.
-            stage === "quiz" ? "max-w-md sm:max-w-3xl" : "max-w-2xl sm:max-w-3xl"
-          )}
+          className={cn("quiz-dark mt-10 sm:mt-14 w-full mx-auto max-w-3xl", LIQUID_REVEAL)}
         >
-        <ShapeProvider defaultShape="action">
+        {/* Your answers, as your side of the conversation: right-aligned,
+            each answer under a short label instead of the full question. */}
         {stage !== "quiz" && (
-          <div ref={transcriptRevealRef} className={`flex justify-end ${LIQUID_REVEAL}`}>
-            {/* --sh-muted, not --sh-card: the card token is pure white in
-                light mode, which made this read as a lit panel rather than a
-                quiet transcript. Muted is the neutral step and resolves
-                correctly in both themes. */}
+          <div ref={transcriptRevealRef} className={`flex flex-col items-end ${LIQUID_REVEAL}`}>
+            <ChatSpeaker who="you" />
             <div
-              className="max-w-[85%] sm:max-w-[80%] rounded-3xl px-5 py-5 sm:px-6 sm:py-6 flex flex-col gap-4"
-              style={{ background: "var(--sh-muted)" }}
+              className="mt-2.5 w-full max-w-[88%] sm:max-w-[70%] rounded-[6px] px-4 py-3.5 sm:px-5 sm:py-4 flex flex-col gap-3"
+              style={{ background: "rgb(var(--surface))" }}
             >
               {transcript.map((t) => (
                 <div key={t.question}>
-                  <p className="text-[14.5px] sm:text-[15px] tracking-tight text-foreground leading-snug">
-                    {t.question}
+                  <p className="text-[12.5px] tracking-tight leading-none" style={{ color: "rgb(var(--muted))" }}>
+                    {QUIZ_SHORT_BY_TITLE[t.question] ?? t.question}
                   </p>
-                  <p className="mt-1 text-[14.5px] sm:text-[15px] tracking-tight text-muted-foreground leading-snug">
+                  <p className="mt-1.5 text-[15px] sm:text-[16px] tracking-tight leading-snug" style={{ color: "rgb(var(--fg))" }}>
                     {t.answer}
                   </p>
                 </div>
@@ -1580,116 +1212,94 @@ function Questionnaire({ onStartConversation }: { onStartConversation: () => voi
           </div>
         )}
 
-        {/* Our reply, aligned to the LEFT edge. During "typing" it fills in a
-            character at a time with a caret; afterwards it just sits there. */}
+        {/* Our reply. A typing indicator first, then the text types itself
+            out with a caret, then it just sits there. */}
         {stage !== "quiz" && result && (
-          <div className={`flex justify-start ${LIQUID_REVEAL}`} style={liquidRevealDelay(80)}>
-            <p className="mt-6 sm:mt-7 max-w-[92%] sm:max-w-[85%] text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-foreground">
-              {stage === "typing" ? typedResponse : responseText}
-              {stage === "typing" && !typingDone && (
-                <span
-                  aria-hidden
-                  className="inline-block w-[2px] h-[1em] align-text-bottom ml-0.5"
-                  style={{ background: "currentColor", opacity: 0.6 }}
-                />
+          <div className={`mt-8 sm:mt-10 ${LIQUID_REVEAL}`} style={liquidRevealDelay(80)}>
+            <ChatSpeaker who="inertia" />
+            <div className="mt-2.5 pl-9">
+              {stage === "typing" && thinking ? (
+                <span aria-label="Inertia is typing" className="inline-flex h-6 items-center gap-1">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="size-1.5 rounded-full"
+                      style={{ background: "rgb(var(--fg))", animation: `chat-dot 1s ease-in-out ${i * 150}ms infinite` }}
+                    />
+                  ))}
+                </span>
+              ) : (
+                <p className="max-w-xl text-[16px] sm:text-[18px] leading-relaxed tracking-tight" style={{ color: "rgb(var(--fg))" }}>
+                  {stage === "typing" ? typedResponse : responseText}
+                  {stage === "typing" && !typingDone && (
+                    <span
+                      aria-hidden
+                      className="inline-block w-[2px] h-[1em] align-text-bottom ml-0.5"
+                      style={{ background: "currentColor", opacity: 0.6 }}
+                    />
+                  )}
+                </p>
               )}
-            </p>
+            </div>
           </div>
         )}
 
         {stage === "quiz" && (
-          <FigmaSelectionFrame>
-            <AskUserQuestions
-              key={`quiz-${resetKey}`}
-              questions={QUIZ_QUESTIONS}
-              onComplete={onQuizComplete}
-              className={QUIZ_FRAME_INNER_CLASS}
-            />
-          </FigmaSelectionFrame>
-        )}
-
-        {/* Inert chat input while the reply types: it holds the space the real
-            questions are about to occupy, so the swap doesn't jump. */}
-        {stage === "typing" && (
-          <div
-            ref={typingRevealRef}
-            aria-hidden
-            className={`mt-8 sm:mt-10 w-full rounded-[6px] border border-border px-4 py-3 flex items-center gap-3 ${LIQUID_REVEAL}`}
-            style={{ background: "var(--sh-card)", opacity: 0.55 }}
-          >
-            <span className="text-[14px] tracking-tight text-muted-foreground flex-1">
-              Type your answer...
-            </span>
-            <span
-              className="inline-flex h-7 w-7 items-center justify-center rounded-[6px] shrink-0"
-              style={{ background: "var(--sh-muted)" }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-muted-foreground">
-                <line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" />
-              </svg>
-            </span>
-          </div>
+          <InquirySteps key="quiz" questions={QUIZ_QUESTIONS} onComplete={onQuizComplete} />
         )}
 
         {stage === "intake" && (
-          <div ref={setIntakeRef} className={`mt-8 sm:mt-10 ${LIQUID_REVEAL}`}>
-            <FigmaSelectionFrame>
-              <AskUserQuestions
-                key={`intake-${resetKey}`}
-                questions={INTAKE_QUESTIONS}
-                onComplete={onIntakeComplete}
-                className={QUIZ_FRAME_INNER_CLASS}
-              />
-            </FigmaSelectionFrame>
+          <div ref={setIntakeRef} className={`mt-8 sm:mt-10 sm:pl-9 ${LIQUID_REVEAL}`}>
+            <InquirySteps key="intake" questions={INTAKE_QUESTIONS} onComplete={onIntakeComplete} />
             {submitting && (
-              <p className="mt-4 text-[13px] tracking-tight text-muted-foreground text-center">
+              <p className="mt-4 text-[13px] tracking-tight" style={{ color: "rgb(var(--muted))" }}>
                 Sending...
               </p>
             )}
             {submitError && (
-              <p className="mt-4 text-[13px] tracking-tight text-center" style={{ color: "var(--sh-destructive)" }}>
+              <p className="mt-4 text-[13px] tracking-tight" style={{ color: "#ff7a7a" }}>
                 {submitError}
               </p>
             )}
           </div>
         )}
 
+        {/* Done: Inertia's last message in the same thread. */}
         {stage === "done" && (
-          <div
-            ref={doneRevealRef}
-            className={`mt-8 sm:mt-10 w-full rounded-3xl border border-border px-6 py-8 sm:px-8 sm:py-9 ${LIQUID_REVEAL}`}
-            style={{ background: "var(--sh-card)" }}
-          >
-            <p className="text-[20px] sm:text-[22px] font-normal tracking-tight text-foreground leading-snug mb-2.5">
-              That&rsquo;s everything. Thanks.
-            </p>
-            <p className="text-[14.5px] sm:text-[15px] tracking-tight text-muted-foreground leading-relaxed mb-7">
-              We read every one of these ourselves. If it looks like a fit you&rsquo;ll
-              hear from us within a couple of days to set up a call.
-            </p>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <button
-                type="button"
-                onClick={onStartConversation}
-                className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[15px] tracking-tight font-medium transition-opacity duration-200 hover:opacity-90"
-                style={{ background: "var(--sh-primary)", color: "var(--sh-primary-foreground)" }}
-              >
-                Start the conversation
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={reset}
-                className="text-[13px] tracking-tight text-muted-foreground hover:text-foreground transition-colors self-center sm:self-auto"
-              >
-                Start over
-              </button>
+          <div ref={doneRevealRef} className={`mt-8 sm:mt-10 ${LIQUID_REVEAL}`}>
+            <ChatSpeaker who="inertia" />
+            <div className="mt-2.5 pl-9">
+              <p className="text-[20px] sm:text-[24px] tracking-[-0.02em] leading-snug" style={{ color: "rgb(var(--fg))", fontWeight: 450 }}>
+                {firstName ? `Thanks, ${firstName}. That’s everything.` : "Thanks. That’s everything."}
+              </p>
+              <p className="mt-2.5 max-w-xl text-[15px] sm:text-[17px] leading-relaxed tracking-tight" style={{ color: "rgb(var(--muted))" }}>
+                We read every one of these ourselves. If we&rsquo;re a good fit, you&rsquo;ll hear from us within
+                a couple of days to set up a call. If we&rsquo;re not, we&rsquo;ll tell you that too.
+              </p>
+              {/* The next step is our email, so instead of another CTA, two
+                  things worth a look while they wait. */}
+              <div className="mt-7 flex flex-wrap items-center gap-2.5">
+                {[
+                  { href: "/work", label: "See our work" },
+                  { href: "/blog", label: "Read our essays" },
+                ].map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="group inline-flex h-10 items-center gap-2 rounded-[6px] px-4 text-[15px] tracking-tight transition-colors duration-200 bg-[rgb(var(--surface))] hover:bg-[rgb(var(--surface-elevated))]"
+                    style={{ color: "rgb(var(--fg))" }}
+                  >
+                    {label}
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
+                      <path d="M3 8h10" />
+                      <path d="M9 4l4 4-4 4" />
+                    </svg>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         )}
-        </ShapeProvider>
         </div>
       )}
     </section>
@@ -2040,166 +1650,142 @@ function LiquidText({
   );
 }
 
+// How long each principle stays up while the list plays on its own.
+const EXECUTION_PERIOD_MS = 6500;
+
 function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
   const [active, setActive] = useState(0);
-  const bodyRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | "auto">("auto");
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
+  const [auto, setAuto] = useState(true);
+  const [inView, setInView] = useState(false);
+  const blockRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion() ?? false;
   const intro =
     "Ideas and identity are rarely the problem. Execution is. We take what a company, brand, or person stands for and carry it through every [[detail]], until the result feels effortless to the people moving through it.";
-  // Each segment is one way of finishing "how we think about execution" — the
-  // label names the idea, the panel argues it. Kept parallel in length so the
-  // panel height barely moves between segments.
+  // Each principle is one way of finishing "how we think about execution":
+  // the label names it, the line argues it, the illustration acts it out.
   const segments = [
     {
       label: "Restraint",
       text: "The best design disappears into the experience. Nobody applauds the [[restraint]], and that's exactly how you know it landed.",
+      Art: RestraintArt,
     },
     {
       label: "Agreement",
       text: "Identity isn't expressed in one big gesture. It's carried in a hundred small decisions that all [[agree]] with each other.",
+      Art: AgreementArt,
     },
     {
       label: "Follow-through",
       text: "Taste sets the direction, but finishing is what people actually feel. We stay on a thing until the last [[detail]] stops asking for attention.",
+      Art: FollowThroughArt,
     },
   ];
 
-  // Drive the sliding pill off measured tab geometry rather than percentages,
-  // so it stays correct with variable-width labels and after a font swap.
-  useLayoutEffect(() => {
-    const el = tabRefs.current[active];
+  // Plays only while on screen, so it's on the first principle when you
+  // arrive and doesn't cycle unseen.
+  useEffect(() => {
+    const el = blockRef.current;
     if (!el) return;
-    const measure = () => setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    if (el.parentElement) ro.observe(el.parentElement);
-    return () => ro.disconnect();
-  }, [active]);
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.4 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
-  // Animate the panel between segment heights instead of letting the section
-  // jump — measure the new content, then settle back to auto so a resize or
-  // font swap can still reflow it.
-  useLayoutEffect(() => {
-    const el = bodyRef.current;
-    if (!el) return;
-    const next = el.scrollHeight;
-    setHeight(prev => (prev === "auto" ? next : prev));
-    const id = requestAnimationFrame(() => setHeight(next));
-    return () => cancelAnimationFrame(id);
-  }, [active]);
+  const playing = auto && inView && !reduced;
+  useEffect(() => {
+    if (!playing) return;
+    const t = setTimeout(() => setActive((a) => (a + 1) % segments.length), EXECUTION_PERIOD_MS);
+    return () => clearTimeout(t);
+  }, [playing, active, segments.length]);
 
-  // Roving arrow-key navigation, which is what makes this read as a real
-  // tablist to a keyboard or screen reader rather than a row of buttons.
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const last = segments.length - 1;
-    let next: number | null = null;
-    if (e.key === "ArrowRight") next = active === last ? 0 : active + 1;
-    else if (e.key === "ArrowLeft") next = active === 0 ? last : active - 1;
-    else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = last;
-    if (next === null) return;
-    e.preventDefault();
-    setActive(next);
-    tabRefs.current[next]?.focus();
+  // Picking one by hand takes over from the autoplay for good.
+  const pick = (i: number) => {
+    setAuto(false);
+    setActive(i);
   };
 
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-        <h2 className="mb-5 sm:mb-6 text-center">
-          <span
-            className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
-            style={{ background: "#1a1a1a" }}
-          >
-            How we think about execution
-          </span>
-        </h2>
+        <SectionHeading className="mb-5 sm:mb-6">How we think about execution</SectionHeading>
         <LiquidText
           pRef={introRef}
           text={intro}
           className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
           style={{ color: "#5c5c5c" }}
         />
-        <div className="mt-8">
-          {/* Segmented control: one bordered track, a sliding fill behind the
-              active segment. The track is the affordance — it reads as a
-              control at a glance, before anything is hovered. */}
-          <div
-            role="tablist"
-            aria-label="How we think about execution"
-            onKeyDown={onKeyDown}
-            className={`relative inline-flex items-stretch p-[3px] ${ACTION_RADIUS_CLASS} max-w-full overflow-x-auto`}
-            style={{
-              background: "rgba(26,26,26,0.04)",
-              boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
-            }}
-          >
-            {indicator && (
-              <span
-                aria-hidden="true"
-                className={`absolute top-[3px] bottom-[3px] ${ACTION_RADIUS_CLASS}`}
-                style={{
-                  left: indicator.left,
-                  width: indicator.width,
-                  background: "#ffffff",
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(26,26,26,0.06)",
-                  transition:
-                    "left 320ms cubic-bezier(0.22,1,0.36,1), width 320ms cubic-bezier(0.22,1,0.36,1)",
-                }}
-              />
-            )}
-            {segments.map((seg, i) => {
-              const selected = i === active;
-              return (
+      </div>
+
+      <div ref={blockRef} className="mx-auto mt-10 grid max-w-2xl gap-6 sm:mt-14 sm:max-w-5xl sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
+        <ul className="flex flex-col gap-1.5">
+          {segments.map((seg, i) => {
+            const selected = i === active;
+            return (
+              <li
+                key={seg.label}
+                className="relative overflow-hidden rounded-[6px] transition-colors duration-300"
+                style={{ background: selected ? "#f4f4f4" : "transparent" }}
+              >
                 <button
-                  key={seg.label}
-                  ref={el => {
-                    tabRefs.current[i] = el;
-                  }}
                   type="button"
-                  role="tab"
-                  id={`execution-tab-${i}`}
-                  aria-selected={selected}
-                  aria-controls="execution-panel"
-                  tabIndex={selected ? 0 : -1}
-                  onClick={() => setActive(i)}
-                  className="relative z-[1] whitespace-nowrap px-3.5 sm:px-4 py-1.5 text-[14px] sm:text-[17px] tracking-tight leading-none transition-colors duration-200"
-                  style={{
-                    color: selected ? "#1a1a1a" : "#7a7a7a",
-                    fontWeight: selected ? 450 : 400,
-                    borderRadius: ACTION_RADIUS_PX,
-                  }}
+                  onClick={() => pick(i)}
+                  aria-expanded={selected}
+                  aria-controls={`execution-text-${i}`}
+                  className="flex w-full items-baseline gap-3 px-4 py-4 text-left sm:px-5 sm:py-5"
                 >
-                  {seg.label}
+                  <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "#9a9a9a" }}>
+                    {i + 1}
+                  </span>
+                  <span
+                    className="text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug transition-colors duration-300"
+                    style={{ color: selected ? "#1a1a1a" : "#9a9a9a", fontWeight: 500 }}
+                  >
+                    {seg.label}
+                  </span>
                 </button>
-              );
-            })}
-          </div>
-          <div
-            style={{
-              height,
-              overflow: "hidden",
-              transition: "height 320ms cubic-bezier(0.22,1,0.36,1)",
-            }}
-          >
+                <div
+                  id={`execution-text-${i}`}
+                  className="grid px-4 sm:px-5"
+                  style={{ gridTemplateRows: selected ? "1fr" : "0fr", transition: "grid-template-rows 420ms cubic-bezier(0.22,1,0.36,1)" }}
+                >
+                  <div className="overflow-hidden">
+                    <div className="-mt-2 pb-5 pl-7 sm:pb-6">
+                      {selected && (
+                        <LiquidText
+                          key={seg.label}
+                          text={seg.text}
+                          className="text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-left"
+                          style={{ color: "#5c5c5c" }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {/* Time left on this principle while the list plays itself. */}
+                {selected && playing && (
+                  <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "rgba(26,26,26,0.06)" }}>
+                    <span
+                      key={active}
+                      className="block h-full origin-left"
+                      style={{ background: "#1a1a1a", animation: `execution-progress ${EXECUTION_PERIOD_MS}ms linear both` }}
+                    />
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+
+        <div aria-hidden="true" className="relative aspect-[4/3] overflow-hidden rounded-[6px]" style={{ background: "#f4f4f4" }}>
+          {segments.map(({ label, Art }, i) => (
             <div
-              ref={bodyRef}
-              id="execution-panel"
-              role="tabpanel"
-              aria-labelledby={`execution-tab-${active}`}
-              className="pt-4 sm:max-w-xl"
+              key={label}
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ opacity: i === active ? 1 : 0, transition: "opacity 400ms ease" }}
             >
-              <LiquidText
-                key={segments[active].label}
-                text={segments[active].text}
-                className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
-                style={{ color: "#5c5c5c" }}
-              />
+              <Art play={i === active && (inView || reduced)} />
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
@@ -2218,209 +1804,126 @@ const WHAT_WE_DO_ITEMS = [
     label: "Direction",
     description: "We figure out what the product or brand actually needs to be before anything gets designed.",
     image: "/what-we-do/direction.png",
-    bentoClass: "sm:col-span-2 sm:row-span-2 sm:min-h-[28rem] lg:min-h-[32rem]",
   },
   {
     label: "Design",
     description: "Interfaces, identity, and the small decisions in between, held to one standard of taste.",
     image: "/what-we-do/design.png",
-    bentoClass: "sm:col-span-2 sm:row-span-1",
   },
   {
     label: "Development",
     description: "We build what we design ourselves, so nothing is lost translating one team's vision to another's code.",
     image: "/what-we-do/development.png",
-    bentoClass: "sm:col-span-1 sm:row-span-1",
   },
   {
     label: "Launch",
     description: "We ship what we build and stay through launch, so what goes live matches what was designed.",
     image: "/what-we-do/launch.png",
-    bentoClass: "sm:col-span-1 sm:row-span-1",
   },
 ] as const;
 
-const WHAT_WE_DO_CELL =
-  "flex flex-col rounded-[6px] p-4 sm:p-5 min-h-[168px] sm:min-h-0 h-full";
-const WHAT_WE_DO_CELL_STYLE = {
-  background: "rgba(26,26,26,0.03)",
-  boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
-} as const;
+// How long each step takes to light up, and the dashed connector to the next
+// one to draw, once the section scrolls in.
+const WHAT_WE_DO_STEP_MS = 420;
 
-const WHAT_WE_DO_LABEL_CLASS =
-  "text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight";
-const WHAT_WE_DO_LABEL_STYLE = { color: "#1a1a1a", fontWeight: 500 } as const;
-const WHAT_WE_DO_DESC_STYLE = { color: "#5c5c5c" } as const;
-
-function WhatWeDoDirectionCell({ className }: { className?: string }) {
-  const item = WHAT_WE_DO_ITEMS[0];
-
-  return (
-    <div className={cn("what-we-do-direction", className)}>
-      <div className="what-we-do-direction__mobile">
-        <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
-          {item.label}
-        </p>
-        <p className={cn(WHAT_WE_DO_LABEL_CLASS, "mt-2")} style={WHAT_WE_DO_DESC_STYLE}>
-          {item.description}
-        </p>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.image} alt="" aria-hidden="true" />
-      </div>
-
-      <div className="what-we-do-direction__desktop">
-        <div className="what-we-do-direction__desktop-copy">
-          <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
-            {item.label}
-          </p>
-          <p className={cn(WHAT_WE_DO_LABEL_CLASS, "mt-2")} style={WHAT_WE_DO_DESC_STYLE}>
-            {item.description}
-          </p>
-        </div>
-        <div className="what-we-do-direction__desktop-art">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.image} alt="" aria-hidden="true" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function WhatWeDoStandardCell({
-  item,
-  className,
-}: {
-  item: (typeof WHAT_WE_DO_ITEMS)[number];
-  className?: string;
-}) {
-  const hasImage = "image" in item && item.image;
-
-  return (
-    <div
-      className={cn(WHAT_WE_DO_CELL, item.bentoClass, className)}
-      style={WHAT_WE_DO_CELL_STYLE}
-    >
-      <p className={WHAT_WE_DO_LABEL_CLASS} style={WHAT_WE_DO_LABEL_STYLE}>
-        {item.label}
-      </p>
-      <p className={cn(WHAT_WE_DO_LABEL_CLASS, "mt-2")} style={WHAT_WE_DO_DESC_STYLE}>
-        {item.description}
-      </p>
-      {hasImage ? (
-        <div className="mt-auto flex min-h-[120px] w-full min-w-0 flex-1 items-end justify-center pt-4 max-sm:h-[216px] max-sm:flex-none sm:min-h-[140px] sm:pt-5">
-          {/* Mobile: the same 240x200 box as Direction's art, so every carousel
-              card lands at the same height whatever the art's shape. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={item.image}
-            alt=""
-            aria-hidden="true"
-            // Portrait art (Launch) would run ~1.5x taller than the box if it
-            // were sized by width like the landscape pieces, dragging its card
-            // past the neighbour sharing its row. Cap the height instead and
-            // let width follow, so every cell lands at the same art height.
-            className="h-auto max-h-[120px] w-auto max-w-[160px] object-contain max-sm:h-full max-sm:max-h-none max-sm:w-full max-sm:max-w-[240px] sm:max-h-[140px] sm:max-w-[200px]"
-          />
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-// Below sm the cards become a swipeable row; each card is this wide so the
-// next one peeks in and reads as something to swipe to. h-auto undoes the
-// cells' h-full there: a set height (even 100% of an auto-height row) opts a
-// flex item out of stretching, so the cards would keep their own heights
-// instead of all matching the tallest.
-const WHAT_WE_DO_SLIDE = "max-sm:w-[82%] max-sm:shrink-0 max-sm:snap-start max-sm:h-auto";
-
+// "What we do" as the process it is: four stages in order, each with its
+// drawing on a matching tile, a numbered step track underneath, then the
+// stage name over its description. On first view the steps fill in one after
+// another and the dashed connector (echoing the dashes in the drawings) draws
+// between them on desktop. Stacks to a single column on phones.
 function WhatWeDo() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLOListElement>(null);
+  const [on, setOn] = useState(false);
+  const reduced = useReducedMotion() ?? false;
 
-  // Active dot follows whichever card is nearest the track's left edge.
-  // Desktop never scrolls this track, so it just stays at 0 there.
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    let frame = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const slides = Array.from(track.children) as HTMLElement[];
-        const left = track.scrollLeft + track.offsetLeft;
-        let nearest = 0;
-        slides.forEach((el, i) => {
-          if (Math.abs(el.offsetLeft - left) < Math.abs(slides[nearest].offsetLeft - left)) nearest = i;
-        });
-        setActive(nearest);
-      });
-    };
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      track.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(frame);
-    };
+    const el = listRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        setOn(true);
+      },
+      { threshold: 0.35 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
-  const goTo = (i: number) => {
-    const track = trackRef.current;
-    const el = track?.children[i] as HTMLElement | undefined;
-    if (!track || !el) return;
-    track.scrollTo({ left: el.offsetLeft - track.offsetLeft, behavior: "smooth" });
-  };
+  const lit = on || reduced;
+  const last = WHAT_WE_DO_ITEMS.length - 1;
 
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:max-w-none sm:mx-auto">
-        <div
-          className="rounded-[6px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
-          style={{
-            background: "rgba(26,26,26,0.04)",
-            boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
-          }}
-        >
-          <h2 className="mb-8 sm:mb-10 text-center">
-            <span
-              className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
-              style={{ background: "#1a1a1a" }}
-            >
-              What we do
-            </span>
-          </h2>
-          {/* Mobile: a scroll-snap row that bleeds to the card's edges so
-              slides swipe in from the side. sm and up: the bento grid. */}
-          <div
-            ref={trackRef}
-            className="max-sm:-mx-5 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:snap-x max-sm:snap-mandatory max-sm:px-5 max-sm:scroll-px-5 max-sm:overscroll-x-contain no-scrollbar sm:grid sm:grid-cols-4 sm:auto-rows-[minmax(11rem,auto)] gap-3 sm:gap-4"
-          >
-            <WhatWeDoDirectionCell className={WHAT_WE_DO_SLIDE} />
-            {WHAT_WE_DO_ITEMS.filter((item) => item.label !== "Direction").map((item) => (
-              <WhatWeDoStandardCell key={item.label} item={item} className={WHAT_WE_DO_SLIDE} />
-            ))}
-          </div>
-          <div className="mt-5 flex justify-center gap-1.5 sm:hidden">
-            {WHAT_WE_DO_ITEMS.map((item, i) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => goTo(i)}
-                aria-label={`Show ${item.label}`}
-                aria-current={active === i}
-                className="flex h-6 items-center px-0.5"
-              >
-                <span
-                  className="block h-1.5 rounded-full transition-[width,background-color] duration-300"
-                  style={{
-                    width: active === i ? 18 : 6,
-                    background: active === i ? "#1a1a1a" : "rgba(26,26,26,0.2)",
-                  }}
+      <SectionHeading className="mb-10 sm:mb-14">What we do</SectionHeading>
+      <ol ref={listRef} className="grid gap-12 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 lg:grid-cols-4">
+        {WHAT_WE_DO_ITEMS.map((item, i) => {
+          const delay = reduced ? 0 : i * WHAT_WE_DO_STEP_MS;
+          return (
+            <li key={item.label} className="group flex flex-col">
+              {/* The drawings are black line art on white, so multiply melts
+                  their white into the tile instead of leaving a box. */}
+              <div className="flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[6px] sm:aspect-[4/3]" style={{ background: "#f4f4f4" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-[74%] w-auto max-w-[82%] object-contain mix-blend-multiply transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
                 />
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+              </div>
+
+              {/* Step track. On desktop each step owns the stretch of track
+                  from its marker's centre to the next one's (its column plus
+                  the gap), so the pieces join into one continuous line. A
+                  light dashed rail sits underneath; the solid ink line draws
+                  over it at the same pace the markers fill, reaching each
+                  marker as it lights. The markers are solid, so the line
+                  runs behind them and meets each circle edge to edge. */}
+              <div className="relative mt-5 flex items-center">
+                {i < last && (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1.5rem)] max-lg:hidden"
+                      style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(26,26,26,0.28) 0 4px, transparent 4px 8px)" }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1.5rem)] max-lg:hidden"
+                      style={{
+                        background: "#1a1a1a",
+                        transformOrigin: "left",
+                        transform: lit ? "scaleX(1)" : "scaleX(0)",
+                        transition: reduced ? "none" : `transform ${WHAT_WE_DO_STEP_MS}ms linear ${delay}ms`,
+                      }}
+                    />
+                  </>
+                )}
+                <span
+                  className="relative z-[1] flex size-7 items-center justify-center rounded-full text-[13px] leading-none tabular-nums"
+                  style={{
+                    background: lit ? "#1a1a1a" : "#fff",
+                    color: lit ? "#fff" : "#1a1a1a",
+                    boxShadow: "inset 0 0 0 1px #1a1a1a",
+                    transition: reduced ? "none" : `background 300ms ease ${delay}ms, color 300ms ease ${delay}ms`,
+                  }}
+                >
+                  {i + 1}
+                </span>
+              </div>
+
+              <h3 className="mt-4 text-[22px] sm:text-[26px] tracking-[-0.025em] leading-tight" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+                {item.label}
+              </h3>
+              <p className="mt-2 text-[15.5px] sm:text-[16.5px] leading-relaxed tracking-tight text-pretty" style={{ color: "#5c5c5c" }}>
+                {item.description}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
     </section>
   );
 }
@@ -2434,14 +1937,7 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
     <>
       <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
         <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-            <h2 className="mb-5 sm:mb-6 text-center">
-              <span
-                className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
-                style={{ background: "#1a1a1a" }}
-              >
-                How we think about AI
-              </span>
-            </h2>
+            <SectionHeading className="mb-5 sm:mb-6">How we think about AI</SectionHeading>
             <LiquidText
               text={first}
               className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
@@ -2580,273 +2076,80 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
   "allure-new-york": "#d9c39c",
 };
 
-// Type-only client list. No logos: the names carry it, which sidesteps the
-// whole class of logo problems (mismatched source artwork, per-mark optical
-// sizing, tinting an alpha PNG). Selecting a name works like selecting a
-// layer in Figma: the cell takes the selection tint and handles, and an
-// inspector row opens under it with the cover, a short summary and a link to
-// the case study. The brand colour shows on hover and on the selected name.
-const CLIENT_NAME_ACCENT: Record<string, string> = {
-  aether: "#5fa8d8",
-  inboundly: "#8f7cf5",
-  "trippie-redd": "#d4484f",
-  "ellora-la": "#e0762f",
-  "allure-new-york": "#c2a878",
-  "mood-swings": "#3f8f6a",
-  "samuel-norris": "#b8353c",
-  "subtle-goods": "#6aa9d9",
-};
-
-// Darker than the global --line token: a 1px dashed rule at 225 grey nearly
-// disappears, and this grid is built from rails so they have to read.
-const CLIENT_GRID_LINE = `1px solid ${SELECTION_FRAME_COLOR}`;
-// The selection blue at low alpha, the way Figma tints a selected layer.
-const CLIENT_SELECTED_FILL = SELECTION_FILL;
-const CLIENT_INSPECTOR_EASE = "cubic-bezier(0.22,1,0.36,1)";
-const CLIENT_INSPECTOR_OPEN_MS = 440;
-const CLIENT_INSPECTOR_CLOSE_MS = 300;
-
-function ClientName({
-  name,
-  slug,
-  onDark = false,
-  selected = false,
-}: {
-  name: string;
-  slug: string;
-  onDark?: boolean;
-  selected?: boolean;
-}) {
-  const accent = CLIENT_NAME_ACCENT[slug] ?? "#1a1a1a";
-  const base = onDark ? "rgb(var(--fg))" : "#1a1a1a";
-  return (
-    <span
-      className="block text-[clamp(1.15rem,4.6vw,1.75rem)] tracking-tight leading-none min-w-0 hyphens-none transition-colors duration-200 group-hover:text-[color:var(--client-accent)]"
-      style={{
-        fontWeight: 450,
-        color: selected ? accent : base,
-        overflowWrap: "break-word",
-        ["--client-accent" as string]: accent,
-      }}
-    >
-      {name}
-    </span>
-  );
-}
-
-// Corner handles for the selected cell, popped in one after another.
-function ClientCellHandles({ visible, fill }: { visible: boolean; fill: string }) {
-  const HANDLE = 5;
-  const corners = [
-    { top: -HANDLE / 2, left: -HANDLE / 2 },
-    { top: -HANDLE / 2, right: -HANDLE / 2 },
-    { bottom: -HANDLE / 2, right: -HANDLE / 2 },
-    { bottom: -HANDLE / 2, left: -HANDLE / 2 },
-  ] as const;
-  return (
-    <>
-      {corners.map((pos, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            width: HANDLE,
-            height: HANDLE,
-            background: fill,
-            border: `1px solid ${SELECTION_FRAME_COLOR}`,
-            pointerEvents: "none",
-            zIndex: 2,
-            ...pos,
-            opacity: visible ? 1 : 0,
-            transform: visible ? "scale(1)" : "scale(0.4)",
-            transition: visible
-              ? `transform 220ms ${CLIENT_INSPECTOR_EASE} ${i * 35}ms, opacity 160ms ease ${i * 35}ms`
-              : "transform 120ms ease, opacity 120ms ease",
-          }}
-        />
-      ))}
-    </>
-  );
-}
-
-// The row that opens under a selected name. Height runs on grid-template-rows
-// (0fr to 1fr) so it animates to the content's real height with no measuring.
-// It keeps showing the last client while it collapses, and keys the content on
-// the slug so switching between the two names in a row replays the entrance.
-function ClientInspector({
-  item,
-  id,
-  labelledBy,
-}: {
-  item: ClientCarouselItem | null;
-  id: string;
-  labelledBy?: string;
-}) {
-  const reduced = useReducedMotion();
-  const open = item !== null;
-  const [shown, setShown] = useState(item);
-  useEffect(() => {
-    if (item) setShown(item);
-  }, [item]);
-  const current = item ?? shown;
-
-  // Content settles in just behind the row. `backwards` fill only holds the
-  // start frame during the delay, so nothing is pinned once it has played.
-  const enter = (i: number): React.CSSProperties | undefined =>
-    reduced || !open
-      ? undefined
-      : { animation: `client-card-item 420ms ${CLIENT_INSPECTOR_EASE} ${120 + i * 50}ms backwards` };
-
-  return (
-    <div
-      id={id}
-      role="region"
-      aria-labelledby={labelledBy}
-      aria-hidden={!open}
-      inert={!open}
-      className="grid"
-      style={{
-        gridTemplateRows: open ? "1fr" : "0fr",
-        transition: reduced
-          ? "none"
-          : open
-            ? `grid-template-rows ${CLIENT_INSPECTOR_OPEN_MS}ms ${CLIENT_INSPECTOR_EASE}`
-            : `grid-template-rows ${CLIENT_INSPECTOR_CLOSE_MS}ms cubic-bezier(0.4,0,0.2,1)`,
-      }}
-    >
-      <div className="min-h-0 overflow-hidden">
-        {current && (
-          <div
-            key={current.slug}
-            className="grid sm:grid-cols-2"
-            style={{
-              borderTop: CLIENT_GRID_LINE,
-              opacity: open ? 1 : 0,
-              transition: `opacity ${open ? 200 : 140}ms ease`,
-              ["--client-rail" as string]: SELECTION_FRAME_COLOR,
-            }}
-          >
-            {current.image && (
-              // Same rail as the column divider above, so the image fills the
-              // left column exactly.
-              <div className="relative aspect-[16/10] overflow-hidden bg-[#0a0a0a] max-sm:border-b sm:border-r border-[color:var(--client-rail)]">
-                <img
-                  src={current.image}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
-                  draggable={false}
-                  style={reduced || !open ? undefined : { animation: `client-card-media 640ms ${CLIENT_INSPECTOR_EASE} backwards` }}
-                />
-              </div>
-            )}
-
-            <div className="flex min-w-0 flex-col px-4 py-5 sm:px-6 sm:py-6">
-              {(current.service || current.year) && (
-                <p
-                  className="flex items-center justify-between gap-4 text-[13px] leading-none tracking-tight"
-                  style={{ ...enter(0), color: "rgb(var(--muted))" }}
-                >
-                  {current.service && <span className="min-w-0">{current.service}</span>}
-                  {current.year && <span className="ml-auto shrink-0 tabular-nums">{current.year}</span>}
-                </p>
-              )}
-
-              {current.summary && (
-                <p
-                  className="mt-3 min-w-0 break-words text-[15px] sm:text-[16px] leading-relaxed tracking-[-0.02em]"
-                  style={{ ...enter(1), color: "rgb(var(--fg))", overflowWrap: "anywhere" }}
-                >
-                  {current.summary}
-                </p>
-              )}
-
-              <div className="mt-5 sm:mt-auto sm:pt-5" style={enter(2)}>
-                <Link
-                  href={`/work/${current.slug}`}
-                  className={`group/cta inline-flex w-full sm:w-auto items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} px-5 h-10 text-[15px] tracking-tight transition-transform duration-150 active:scale-[0.97]`}
-                  style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
-                >
-                  View case study
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3.5 transition-transform duration-200 ease-out group-hover/cta:translate-x-0.5" aria-hidden>
-                    <path d="M3 8h10M9 4l4 4-4 4" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+// "In good company": the client names as a slow ticker, two large rows
+// drifting in opposite directions across the full width, fading out at the
+// edges. Type only, no logos and no brand colours, which sidesteps the whole
+// class of logo problems (mismatched artwork, optical sizing, tinting).
+// Hovering a row pauses it; each name links to its case study.
+//
+// Each row's track holds two identical copies and slides by exactly one copy
+// width, so the loop is seamless. A short row is repeated inside each copy so
+// a copy is always wider than the screen. The moving track is decorative
+// (aria-hidden, links out of the tab order); a visually hidden list carries
+// the real links for keyboards and screen readers.
+const CLIENT_TICKER_MIN_NAMES = 6;
+const CLIENT_TICKER_SECONDS_PER_NAME = 7;
 
 function ClientTypeList({ items, onDark = false }: { items: ClientCarouselItem[]; onDark?: boolean }) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const handleFill = onDark ? "rgb(var(--bg))" : "#fff";
-
-  const rows: ClientCarouselItem[][] = [];
-  for (let i = 0; i < items.length; i += 2) rows.push(items.slice(i, i + 2));
-
-  useEffect(() => {
-    if (!selected) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSelected(null); };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [selected]);
+  if (items.length === 0) return null;
+  const ink = onDark ? "rgb(var(--fg))" : "#1a1a1a";
+  const half = Math.ceil(items.length / 2);
+  const rows = [items.slice(0, half), items.slice(half)].filter((r) => r.length > 0);
+  const edgeFade = "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)";
 
   return (
-    <section className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-      <p
-        className="mb-6 sm:mb-8 text-center text-[13px] sm:text-[14px] leading-snug tracking-tight text-balance"
-        style={{ color: onDark ? "rgb(var(--muted))" : "#5c5c5c" }}
+    <section className="w-full">
+      <h2
+        className="px-6 text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none"
+        style={{ color: ink }}
       >
-        Some names we&rsquo;ve worked with.
-      </p>
-      <FigmaSelectionFrame handleFill={handleFill}>
+        In good company
+      </h2>
+
+      <ul className="sr-only">
+        {items.map((item) => (
+          <li key={item.slug}>
+            <Link href={`/work/${item.slug}`}>{item.client}</Link>
+          </li>
+        ))}
+      </ul>
+
+      {/* Full-bleed: out of the page column to the screen edges. */}
+      <div
+        aria-hidden="true"
+        className="mt-10 sm:mt-14 flex flex-col gap-2 sm:gap-4"
+        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
+      >
         {rows.map((row, r) => {
-          const active = row.find(it => it.slug === selected) ?? null;
-          const inspectorId = `client-inspector-${r}`;
+          const repeat = Math.max(1, Math.ceil(CLIENT_TICKER_MIN_NAMES / row.length));
+          const copy = Array.from({ length: repeat }, () => row).flat();
           return (
-            <div key={r} style={{ borderTop: r > 0 ? CLIENT_GRID_LINE : undefined }}>
-              <ul className="grid grid-cols-2">
-                {row.map((item, i) => {
-                  const isSelected = item.slug === selected;
-                  return (
-                    <li
-                      key={item.slug}
-                      className="relative px-4 sm:px-6"
-                      style={{
-                        borderRight: i === 0 ? CLIENT_GRID_LINE : undefined,
-                        background: isSelected ? CLIENT_SELECTED_FILL : "transparent",
-                        transition: "background-color 200ms ease",
-                      }}
-                    >
-                      <ClientCellHandles visible={isSelected} fill={handleFill} />
-                      <button
-                        type="button"
-                        id={`client-name-${item.slug}`}
-                        onClick={() => setSelected(isSelected ? null : item.slug)}
-                        aria-expanded={isSelected}
-                        aria-controls={inspectorId}
-                        className="group flex items-baseline py-4 sm:py-7 min-w-0 w-full text-left"
-                      >
-                        <ClientName name={item.client} slug={item.slug} onDark={onDark} selected={isSelected} />
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-              <ClientInspector
-                item={active}
-                id={inspectorId}
-                labelledBy={active ? `client-name-${active.slug}` : undefined}
-              />
+            <div key={r} className="client-ticker-row overflow-hidden" style={{ maskImage: edgeFade, WebkitMaskImage: edgeFade }}>
+              <div
+                className={`client-ticker flex w-max${r % 2 === 1 ? " client-ticker--reverse" : ""}`}
+                style={{ ["--ticker-duration" as string]: `${copy.length * CLIENT_TICKER_SECONDS_PER_NAME}s` }}
+              >
+                {[0, 1].map((c) => (
+                  <ul key={c} className="flex shrink-0 items-center">
+                    {copy.map((item, i) => (
+                      <li key={`${item.slug}-${i}`}>
+                        <Link
+                          href={`/work/${item.slug}`}
+                          tabIndex={-1}
+                          draggable={false}
+                          className="block whitespace-nowrap px-[0.45em] text-[clamp(2.2rem,6.4vw,5rem)] leading-[1.15] tracking-[-0.04em] opacity-40 transition-opacity duration-300 hover:opacity-100"
+                          style={{ color: ink, fontWeight: 450 }}
+                        >
+                          {item.client}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ))}
+              </div>
             </div>
           );
         })}
-      </FigmaSelectionFrame>
       </div>
     </section>
   );
@@ -3408,24 +2711,18 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
 const ASK_AI_PROMPT =
   "Read https://byinertia.com (if it won't load, use https://byinertia.com/llms.txt) and tell me what Inertia does, the kind of clients they work with, and why someone would hire them.";
 
+// Same layout as Aether's "Still deciding?" (AetherAskAi in app/aether/faq.tsx):
+// the larger heading and subline over the assistants as a logo wall.
 function AskAi() {
   return (
-    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:max-w-3xl mx-auto text-center">
-        <h2
-          className="text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight"
-          style={{ color: "rgb(var(--fg))" }}
-        >
-          Don&rsquo;t take our word for it
-        </h2>
-        <p
-          className="mt-3.5 sm:mt-4 text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight text-balance"
-          style={{ color: "rgb(var(--muted))" }}
-        >
-          Ask your AI of choice about Inertia.
-        </p>
-        <AskAiLinks prompt={ASK_AI_PROMPT} className="mt-7 sm:mt-8" />
-      </div>
+    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8 flex flex-col items-center text-center">
+      <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
+        Don&rsquo;t take our word for it
+      </h2>
+      <p className="mt-3 max-w-xl text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))]">
+        Ask your AI of choice about Inertia.
+      </p>
+      <AskAiLinks prompt={ASK_AI_PROMPT} variant="wall" className="mt-8 w-full max-w-2xl" />
     </section>
   );
 }
@@ -3448,64 +2745,17 @@ function ArrowGlyph({ className }: { className?: string }) {
   );
 }
 
-// "Our thoughts" as a bento, in the same soft panel as "What we do" so the
-// two sections read as one family. The newest essay leads as a 2x2 card with
-// its pull quote; the rest are tiles. Each shows its post's cover sketch;
-// a post without one falls back to its pull quote. Mobile gets its own layout,
-// see below.
-const BLOG_TILE =
-  "group relative flex flex-col overflow-hidden rounded-[6px] transition-colors duration-200 hover:bg-[rgba(26,26,26,0.05)]";
-const BLOG_TILE_STYLE = {
-  background: "rgba(26,26,26,0.03)",
-  boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
-} as const;
-// Spans for the tiles after the first four, which share the last row with the
-// "All essays" tile: whatever's left of four columns, split between them.
-const BLOG_TAIL_SPANS: Record<number, string[]> = {
-  1: ["sm:col-span-3"],
-  2: ["sm:col-span-2", "sm:col-span-1"],
-  3: ["sm:col-span-1", "sm:col-span-1", "sm:col-span-1"],
-};
-
-// Front-matter dates are calendar days parsed as UTC midnight, so format in
-// UTC or they slip back a day west of Greenwich (and mismatch on hydrate).
-function formatPostDate(date: string): string {
-  const d = new Date(date);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-}
-
-// The tag as a small square-cornered chip, matching the 6px language of the
-// cards, with the date beside it as plain muted text. Read time was dropped:
-// every essay runs 500 to 580 words, so it said "3 min" on every card.
+// The tag as a small square-cornered chip. No date or read time: every essay
+// runs 500 to 580 words, so read time said "3 min" on every row.
 function BlogMeta({ post }: { post: PostMeta }) {
+  if (!post.tag) return null;
   return (
-    <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] sm:text-[13px] leading-none tracking-tight">
-      {post.tag && (
-        <span
-          className="inline-flex items-center rounded-[4px] px-1.5 py-1"
-          style={{ color: "#3d3d3d", background: "rgba(26,26,26,0.06)" }}
-        >
-          {post.tag}
-        </span>
-      )}
-      <time dateTime={post.date} className="tabular-nums" style={{ color: "#8a8a8a" }}>
-        {formatPostDate(post.date)}
-      </time>
+    <span
+      className="inline-flex items-center rounded-[4px] px-1.5 py-1 text-[12px] sm:text-[13px] leading-none tracking-tight"
+      style={{ color: "#3d3d3d", background: "rgba(26,26,26,0.06)" }}
+    >
+      {post.tag}
     </span>
-  );
-}
-
-// The post's own cover sketch, the same drawing its page opens with, on the
-// flat panel the post figures use. Boxes are sized to the tight crop's
-// 860:440, so the sketch fills them edge to edge.
-function BlogArt({ slug, className }: { slug: string; className?: string }) {
-  return (
-    <div className={cn("relative overflow-hidden rounded-[4px]", className)} style={{ background: "#f1f1f1" }}>
-      <div className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]">
-        <PostCover slug={slug} tight />
-      </div>
-    </div>
   );
 }
 
@@ -3515,98 +2765,16 @@ function BlogArrow() {
   );
 }
 
-// Sketch across the top, like the small tiles, so the lead card reads as the
-// same object at a larger size.
-function BlogFeatured({ post, className, style }: { post: PostMeta; className?: string; style?: React.CSSProperties }) {
-  return (
-    <Link
-      href={`/blog/${post.slug}`}
-      className={cn(BLOG_TILE, "sm:col-span-2 sm:row-span-2", className)}
-      style={{ ...BLOG_TILE_STYLE, ...style }}
-    >
-      {hasPostCover(post.slug) && (
-        <BlogArt slug={post.slug} className="m-4 mb-0 aspect-[860/440] shrink-0 sm:m-5 sm:mb-0" />
-      )}
-      <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-6">
-        <BlogMeta post={post} />
-        <p
-          className="mt-2.5 text-[clamp(1.35rem,2.6vw,1.9rem)] tracking-[-0.03em] leading-[1.15] text-pretty"
-          style={{ color: "#1a1a1a", fontWeight: 500 }}
-        >
-          {post.title}
-        </p>
-        {post.excerpt && (
-          <p
-            className="mt-3 text-[15px] sm:text-[17px] leading-relaxed tracking-tight text-pretty line-clamp-4"
-            style={{ color: "#5c5c5c" }}
-          >
-            {post.excerpt}
-          </p>
-        )}
-        <span
-          className="mt-auto pt-6 inline-flex items-center gap-1.5 text-[15px] sm:text-[16px] tracking-tight"
-          style={{ color: "#1a1a1a" }}
-        >
-          Read essay
-          <BlogArrow />
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-function BlogTile({
-  post,
-  wide,
-  className,
-  style,
-}: {
-  post: PostMeta;
-  wide: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <Link
-      href={`/blog/${post.slug}`}
-      className={cn(BLOG_TILE, "p-4 sm:p-5", wide && "sm:flex-row sm:items-stretch sm:gap-5", className)}
-      style={{ ...BLOG_TILE_STYLE, ...style }}
-    >
-      {hasPostCover(post.slug) && (
-        <BlogArt
-          slug={post.slug}
-          className={cn("mb-4 aspect-[860/440] w-full shrink-0", wide && "sm:mb-0 sm:w-64 sm:self-center")}
-        />
-      )}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <BlogMeta post={post} />
-        <p
-          className="mt-1.5 text-[17px] sm:text-[19px] tracking-[-0.02em] leading-snug text-pretty"
-          style={{ color: "#1a1a1a", fontWeight: 500 }}
-        >
-          {post.title}
-        </p>
-        {/* Type-only tiles get the pull quote so they don't read as empty
-            next to the ones with artwork. */}
-        {!hasPostCover(post.slug) && post.excerpt && (
-          <p
-            className="mt-2 text-[14px] sm:text-[15px] leading-snug tracking-tight text-pretty line-clamp-3"
-            style={{ color: "#5c5c5c" }}
-          >
-            {post.excerpt}
-          </p>
-        )}
-        <span className="mt-auto flex justify-end pt-4" style={{ color: "#1a1a1a" }}>
-          <BlogArrow />
-        </span>
-      </div>
-    </Link>
-  );
-}
-
+// "Our thoughts" as a horizontal shelf, so it breaks the page's run of
+// stacked, centred sections: heading on the left, arrows on the right, then
+// the essays as cover cards in a row that swipes or scrolls sideways and runs
+// off the edge, ending on a tile to the full list. Covers sit on the same soft
+// tile as the What we do drawings. No dates and no rules.
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
+  const [edges, setEdges] = useState({ start: true, end: false });
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -3623,11 +2791,28 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
     return () => obs.disconnect();
   }, []);
 
+  const updateEdges = () => {
+    const t = trackRef.current;
+    if (!t) return;
+    setEdges({ start: t.scrollLeft < 4, end: t.scrollLeft + t.clientWidth >= t.scrollWidth - 4 });
+  };
+
+  useEffect(() => {
+    updateEdges();
+    window.addEventListener("resize", updateEdges);
+    return () => window.removeEventListener("resize", updateEdges);
+  }, []);
+
+  // One card per press, measured so it stays right at every breakpoint.
+  const step = (dir: 1 | -1) => {
+    const t = trackRef.current;
+    const card = t?.firstElementChild as HTMLElement | null;
+    if (!t || !card) return;
+    t.scrollBy({ left: dir * (card.offsetWidth + 16), behavior: "smooth" });
+  };
+
   if (posts.length === 0) return null;
-  const [featured, ...rest] = posts;
-  const head = rest.slice(0, 4);
-  const tail = rest.slice(4, 7);
-  const tailSpans = BLOG_TAIL_SPANS[tail.length] ?? [];
+  const list = posts.slice(0, 8);
 
   const reveal = (i: number): React.CSSProperties => ({
     willChange: "opacity, transform, filter",
@@ -3639,93 +2824,93 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
       : "none",
   });
 
+  const arrowButton = (dir: 1 | -1, disabled: boolean) => (
+    <button
+      type="button"
+      onClick={() => step(dir)}
+      disabled={disabled}
+      aria-label={dir === 1 ? "Next essays" : "Previous essays"}
+      className="flex size-9 sm:size-10 items-center justify-center rounded-[6px] transition-opacity duration-200 disabled:opacity-30"
+      style={{ background: "rgba(26,26,26,0.06)", color: "#1a1a1a" }}
+    >
+      <ArrowGlyph className={cn("size-4", dir === -1 && "rotate-180")} />
+    </button>
+  );
+
   return (
     <section ref={sectionRef} className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div
-        className="rounded-[6px] px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-10"
-        style={{
-          background: "rgba(26,26,26,0.04)",
-          boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.08)",
-        }}
-      >
-        <h2 className="mb-8 sm:mb-10 text-center" style={reveal(0)}>
-          <span
-            className="inline-block rounded-[6px] px-3 py-1 text-[clamp(1.35rem,3.2vw,2.05rem)] font-normal tracking-[-0.025em] leading-tight text-white"
-            style={{ background: "#1a1a1a" }}
-          >
-            Our thoughts
-          </span>
-        </h2>
-
-        {/* Desktop: the bento. */}
-        <div className="hidden sm:grid sm:grid-cols-4 sm:auto-rows-[minmax(12rem,auto)] sm:gap-4">
-          <BlogFeatured post={featured} style={reveal(1)} />
-          {head.map((post, i) => (
-            <BlogTile key={post.slug} post={post} wide={false} style={reveal(i + 2)} />
-          ))}
-          {tail.map((post, i) => (
-            <BlogTile
-              key={post.slug}
-              post={post}
-              wide={tailSpans[i] !== "sm:col-span-1"}
-              className={tailSpans[i]}
-              style={reveal(i + 6)}
-            />
-          ))}
-          <Link
-            href="/blog"
-            className={cn(BLOG_TILE, "items-center justify-center gap-1.5 p-5 text-[16px] tracking-tight sm:flex-row")}
-            style={{ ...BLOG_TILE_STYLE, ...reveal(tail.length + 6), color: "#1a1a1a" }}
-          >
-            All essays
-            <BlogArrow />
-          </Link>
-        </div>
-
-        {/* Mobile: the lead essay as a full card, the rest as a short list
-            with each post's sketch as a thumbnail, so every essay is visible
-            without swiping. */}
-        <div className="sm:hidden">
-          <BlogFeatured post={featured} style={reveal(1)} />
-          <ul className="mt-3">
-            {rest.map((post, i) => (
-              <li key={post.slug} style={reveal(i + 2)}>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="group flex items-center gap-4 py-3.5"
-                  style={{ borderTop: i === 0 ? undefined : "1px solid rgba(26,26,26,0.08)" }}
-                >
-                  <span className="min-w-0 flex-1">
-                    <span
-                      className="block text-[16.5px] tracking-[-0.02em] leading-snug text-pretty"
-                      style={{ color: "#1a1a1a", fontWeight: 500 }}
-                    >
-                      {post.title}
-                    </span>
-                    <span className="mt-1.5 block">
-                      <BlogMeta post={post} />
-                    </span>
-                  </span>
-                  {hasPostCover(post.slug) && (
-                    <BlogArt slug={post.slug} className="aspect-[860/440] w-[6.5rem] shrink-0" />
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-3 pt-4 text-center" style={{ ...reveal(rest.length + 2), borderTop: "1px solid rgba(26,26,26,0.08)" }}>
-            <Link
-              href="/blog"
-              className="group inline-flex items-center gap-1.5 text-[15px] tracking-tight"
-              style={{ color: "#1a1a1a" }}
-            >
-              All essays
-              <BlogArrow />
-            </Link>
-          </div>
+      <div className="mb-8 flex items-end justify-between gap-6 sm:mb-10" style={reveal(0)}>
+        <SectionHeading align="left">Our thoughts</SectionHeading>
+        <div className="flex shrink-0 items-center gap-2">
+          {arrowButton(-1, edges.start)}
+          {arrowButton(1, edges.end)}
         </div>
       </div>
+
+      <div
+        ref={trackRef}
+        onScroll={updateEdges}
+        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:-mx-8 sm:scroll-px-8 sm:px-8"
+      >
+        {list.map((post, i) => (
+          <Link
+            key={post.slug}
+            href={`/blog/${post.slug}`}
+            className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
+            style={reveal(i + 1)}
+          >
+            <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px] p-5" style={{ background: "#f4f4f4" }}>
+              {hasPostCover(post.slug) ? (
+                <div className="relative aspect-[860/440] w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]">
+                  <div className="absolute inset-0">
+                    <PostCover slug={post.slug} tight />
+                  </div>
+                </div>
+              ) : (
+                // No sketch: the pull quote fills the tile instead.
+                <p className="text-[16px] leading-snug tracking-tight text-pretty line-clamp-5" style={{ color: "#5c5c5c" }}>
+                  {post.excerpt}
+                </p>
+              )}
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              {i === 0 && <NewChip />}
+              <BlogMeta post={post} />
+            </div>
+            <p className="mt-2.5 text-[19px] sm:text-[21px] tracking-[-0.02em] leading-snug text-pretty" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+              {post.title}
+            </p>
+          </Link>
+        ))}
+        {/* The shelf ends on the way to the rest: one more tile, same size
+            and grey as the covers, instead of a separate "All essays" link. */}
+        <Link
+          href="/blog"
+          className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
+          style={reveal(list.length + 1)}
+        >
+          <div className="flex aspect-[4/3] flex-col justify-between rounded-[6px] bg-[#f4f4f4] p-5 transition-colors duration-200 group-hover:bg-[#ececec]">
+            <span className="text-[13px] tracking-tight" style={{ color: "#8a8a8a" }}>
+              {posts.length} essays
+            </span>
+            <span className="flex items-end justify-between gap-4">
+              <span className="text-[clamp(1.4rem,2.4vw,1.75rem)] tracking-[-0.03em] leading-[1.1]" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+                Read the rest
+              </span>
+              <ArrowGlyph className="mb-1 size-5 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
+            </span>
+          </div>
+        </Link>
+      </div>
     </section>
+  );
+}
+
+function NewChip() {
+  return (
+    <span className="inline-flex items-center rounded-[4px] px-1.5 py-1 text-[12px] sm:text-[13px] leading-none tracking-tight text-white" style={{ background: "#1a1a1a" }}>
+      New
+    </span>
   );
 }
 
@@ -4040,13 +3225,11 @@ function VisualLayout({
   initialWork: ClientCarouselItem[];
   initialPosts: PostMeta[];
 }) {
-  const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
   const [accentColor, setAccentColor] = useState(WORK_ITEMS[0].accent);
   const ctaRef = useRef<HTMLAnchorElement>(null);
   const introRef = useRef<HTMLParagraphElement>(null);
   return (
     <>
-    <DashboardModal open={dashboardModalOpen} onClose={() => setDashboardModalOpen(false)} />
     <main className="page-container relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex flex-col">
       <LightCard>
         <div className="mx-auto w-full max-w-[80rem] flex flex-col">
@@ -4093,7 +3276,7 @@ function VisualLayout({
 
           <div className="py-16 sm:py-28" />
 
-          <Questionnaire onStartConversation={() => setDashboardModalOpen(true)} />
+          <Questionnaire />
 
           <div className="py-16 sm:py-24" />
 
