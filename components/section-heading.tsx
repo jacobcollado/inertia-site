@@ -19,11 +19,15 @@ export function SectionHeading({
   className = "",
   style,
   align = "center",
+  tone = "light",
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
   align?: "center" | "left";
+  // "dark" for the sections on the black zone: ink and handle fill follow
+  // the zone's --fg / --surface (the grey panels they sit on).
+  tone?: "light" | "dark";
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const reduced = useReducedMotion() ?? false;
@@ -46,6 +50,8 @@ export function SectionHeading({
 
   const shown = on || reduced;
   const h = -HANDLE / 2;
+  const ink = tone === "dark" ? "rgb(var(--fg))" : "#1a1a1a";
+  const paper = tone === "dark" ? "rgb(var(--surface))" : "#fff";
 
   return (
     <h2 className={`${align === "left" ? "text-left" : "text-center"} ${className}`} style={style}>
@@ -54,7 +60,7 @@ export function SectionHeading({
         // Same scale as the other section headings on the page ("In good
         // company", "Don't take our word for it"), so they read as one set.
         className="relative inline-block px-[0.32em] py-[0.12em] text-[clamp(1.8rem,3vw,2.5rem)] tracking-[-0.03em] leading-[1.1]"
-        style={{ color: "#1a1a1a", fontWeight: 450 }}
+        style={{ color: ink, fontWeight: 450 }}
       >
         {children}
         <span
@@ -70,9 +76,10 @@ export function SectionHeading({
           <span
             key={i}
             aria-hidden="true"
-            className="pointer-events-none absolute bg-white"
+            className="pointer-events-none absolute"
             style={{
               ...pos,
+              background: paper,
               width: HANDLE,
               height: HANDLE,
               border: `1px solid ${SELECTION_FRAME_COLOR}`,

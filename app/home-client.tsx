@@ -25,7 +25,6 @@ import {
   CtaGrain,
 } from "@/lib/cta-chrome";
 import type { PostMeta } from "@/lib/posts";
-import { PostCover, hasPostCover } from "@/components/post-figures";
 
 export type ClientCarouselItem = {
   slug: string;
@@ -1153,41 +1152,36 @@ function Questionnaire() {
 
   return (
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      {/* An inverted band: the one light panel in the dark zone, so the ask
-          stands apart from everything around it. Large two-tone line and the
-          site's main black CTA. The flow opens below it when asked for. */}
-      <div className="rise rise--liquid rounded-[6px] bg-white px-6 py-16 text-center sm:px-10 sm:py-24">
-        <h2
-          className="mx-auto max-w-3xl text-balance text-[clamp(2.2rem,5.4vw,4rem)] leading-[1.05] tracking-[-0.04em] text-[#1a1a1a]"
-          style={{ fontWeight: 450 }}
-        >
-          Working on something? <span className="text-[#9a9a9a]">Tell us a little about it.</span>
-        </h2>
+      {/* Built from the same pieces as the sections on the white card above:
+          a framed heading, a muted paragraph at the body size, and the CTA
+          (inverted for the dark zone). The flow opens below it. */}
+      <div className="rise rise--liquid mx-auto max-w-2xl sm:max-w-3xl text-center">
+        <SectionHeading tone="dark" className="mb-5 sm:mb-6">Working on something?</SectionHeading>
+        <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-balance">
+          Tell us a little about it. It takes about two minutes, and we read every answer.
+        </p>
         {!open && (
-          <span className="relative mt-9 sm:mt-11 inline-flex rounded-[6px]">
+          <span className="relative mt-8 sm:mt-10 inline-flex rounded-[6px]">
             <button
               type="button"
               onClick={() => setOpen(true)}
               aria-expanded={false}
               aria-controls="questionnaire-flow"
               className={CTA_PILL_CLASS}
-              style={{ background: CTA_FILL, color: "#fff", fontWeight: 450 }}
+              style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", fontWeight: 450 }}
               {...ctaScaleHoverOnParent}
             >
               <span className="relative whitespace-nowrap">Tell us about it</span>
             </button>
           </span>
         )}
-        <p className={`${open ? "mt-8" : "mt-5"} text-[14px] sm:text-[15px] tracking-tight text-[#5c5c5c]`}>
-          {open ? "Answer below. It takes about two minutes." : "About two minutes. We read every answer."}
-        </p>
       </div>
 
       {open && (
         <div
           id="questionnaire-flow"
           ref={flowRevealRef}
-          className={cn("quiz-dark mt-10 sm:mt-14 w-full mx-auto max-w-3xl", LIQUID_REVEAL)}
+          className={cn("quiz-dark mt-10 sm:mt-14 pb-16 sm:pb-24 w-full mx-auto max-w-3xl", LIQUID_REVEAL)}
         >
         {/* Your answers, as your side of the conversation: right-aligned,
             each answer under a short label instead of the full question. */}
@@ -2076,81 +2070,56 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
   "allure-new-york": "#d9c39c",
 };
 
-// "In good company": the client names as a slow ticker, two large rows
-// drifting in opposite directions across the full width, fading out at the
-// edges. Type only, no logos and no brand colours, which sidesteps the whole
-// class of logo problems (mismatched artwork, optical sizing, tinting).
-// Hovering a row pauses it; each name links to its case study.
-//
-// Each row's track holds two identical copies and slides by exactly one copy
-// width, so the loop is seamless. A short row is repeated inside each copy so
-// a copy is always wider than the screen. The moving track is decorative
-// (aria-hidden, links out of the tab order); a visually hidden list carries
-// the real links for keyboards and screen readers.
-const CLIENT_TICKER_MIN_NAMES = 6;
-const CLIENT_TICKER_SECONDS_PER_NAME = 7;
-
-function ClientTypeList({ items, onDark = false }: { items: ClientCarouselItem[]; onDark?: boolean }) {
+// "In good company": the clients as a grid of tiles, the dark-zone twin of
+// the What we do and Our thoughts tiles on the white card: a flat surface
+// tile with 6px corners holding the mark, name and service underneath. Marks
+// are masked in the zone's ink rather than brand colours, so the grid stays
+// as monochrome as the drawings above it. Each tile links to its case study.
+function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
   if (items.length === 0) return null;
-  const ink = onDark ? "rgb(var(--fg))" : "#1a1a1a";
-  const half = Math.ceil(items.length / 2);
-  const rows = [items.slice(0, half), items.slice(half)].filter((r) => r.length > 0);
-  const edgeFade = "linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent)";
-
   return (
-    <section className="w-full">
-      <h2
-        className="px-6 text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none"
-        style={{ color: ink }}
-      >
-        In good company
-      </h2>
-
-      <ul className="sr-only">
+    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      <SectionHeading tone="dark" className="mb-10 sm:mb-14">In good company</SectionHeading>
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-12">
         {items.map((item) => (
           <li key={item.slug}>
-            <Link href={`/work/${item.slug}`}>{item.client}</Link>
+            <Link href={`/work/${item.slug}`} className="group block">
+              <div className="flex aspect-[4/3] items-center justify-center rounded-[6px] bg-[rgb(var(--surface))] transition-colors duration-200 group-hover:bg-[rgb(var(--surface-elevated))]">
+                {item.logo ? (
+                  <span className="flex aspect-square h-[78%] items-center justify-center" role="img" aria-label={item.client}>
+                    <span
+                      className="block opacity-80 transition-opacity duration-200 group-hover:opacity-100"
+                      style={{
+                        width: carouselLogoStyle(item.slug).width,
+                        aspectRatio: "1 / 1",
+                        backgroundColor: "rgb(var(--fg))",
+                        WebkitMaskImage: `url(${item.logo})`,
+                        maskImage: `url(${item.logo})`,
+                        WebkitMaskRepeat: "no-repeat",
+                        maskRepeat: "no-repeat",
+                        WebkitMaskPosition: "center",
+                        maskPosition: "center",
+                        WebkitMaskSize: "contain",
+                        maskSize: "contain",
+                      }}
+                    />
+                  </span>
+                ) : (
+                  <span className="text-[18px] tracking-tight text-[rgb(var(--fg))]">{item.client}</span>
+                )}
+              </div>
+              <p className="mt-4 text-[18px] sm:text-[22px] tracking-[-0.02em] leading-snug text-[rgb(var(--fg))]">
+                {item.client}
+              </p>
+              {item.service && (
+                <p className="mt-1 text-[14px] sm:text-[16px] leading-snug tracking-tight text-[rgb(var(--muted))]">
+                  {item.service}
+                </p>
+              )}
+            </Link>
           </li>
         ))}
       </ul>
-
-      {/* Full-bleed: out of the page column to the screen edges. */}
-      <div
-        aria-hidden="true"
-        className="mt-10 sm:mt-14 flex flex-col gap-2 sm:gap-4"
-        style={{ width: "100vw", marginLeft: "calc(50% - 50vw)" }}
-      >
-        {rows.map((row, r) => {
-          const repeat = Math.max(1, Math.ceil(CLIENT_TICKER_MIN_NAMES / row.length));
-          const copy = Array.from({ length: repeat }, () => row).flat();
-          return (
-            <div key={r} className="client-ticker-row overflow-hidden" style={{ maskImage: edgeFade, WebkitMaskImage: edgeFade }}>
-              <div
-                className={`client-ticker flex w-max${r % 2 === 1 ? " client-ticker--reverse" : ""}`}
-                style={{ ["--ticker-duration" as string]: `${copy.length * CLIENT_TICKER_SECONDS_PER_NAME}s` }}
-              >
-                {[0, 1].map((c) => (
-                  <ul key={c} className="flex shrink-0 items-center">
-                    {copy.map((item, i) => (
-                      <li key={`${item.slug}-${i}`}>
-                        <Link
-                          href={`/work/${item.slug}`}
-                          tabIndex={-1}
-                          draggable={false}
-                          className="block whitespace-nowrap px-[0.45em] text-[clamp(2.2rem,6.4vw,5rem)] leading-[1.15] tracking-[-0.04em] opacity-40 transition-opacity duration-300 hover:opacity-100"
-                          style={{ color: ink, fontWeight: 450 }}
-                        >
-                          {item.client}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </section>
   );
 }
@@ -2716,13 +2685,11 @@ const ASK_AI_PROMPT =
 function AskAi() {
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8 flex flex-col items-center text-center">
-      <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-        Don&rsquo;t take our word for it
-      </h2>
-      <p className="mt-3 max-w-xl text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))]">
+      <SectionHeading tone="dark" className="mb-5 sm:mb-6">Don&rsquo;t take our word for it</SectionHeading>
+      <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
         Ask your AI of choice about Inertia.
       </p>
-      <AskAiLinks prompt={ASK_AI_PROMPT} variant="wall" className="mt-8 w-full max-w-2xl" />
+      <AskAiLinks prompt={ASK_AI_PROMPT} variant="tiles" className="mt-10 sm:mt-14 w-full max-w-3xl" />
     </section>
   );
 }
@@ -2768,8 +2735,9 @@ function BlogArrow() {
 // "Our thoughts" as a horizontal shelf, so it breaks the page's run of
 // stacked, centred sections: heading on the left, arrows on the right, then
 // the essays as cover cards in a row that swipes or scrolls sideways and runs
-// off the edge, ending on a tile to the full list. Covers sit on the same soft
-// tile as the What we do drawings. No dates and no rules.
+// off the edge, ending on a tile to the full list. Each essay is a type-only
+// tile, the same as that last one, with the excerpt underneath. No sketches,
+// dates or rules.
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -2859,27 +2827,23 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
             className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
             style={reveal(i + 1)}
           >
-            <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px] p-5" style={{ background: "#f4f4f4" }}>
-              {hasPostCover(post.slug) ? (
-                <div className="relative aspect-[860/440] w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]">
-                  <div className="absolute inset-0">
-                    <PostCover slug={post.slug} tight />
-                  </div>
-                </div>
-              ) : (
-                // No sketch: the pull quote fills the tile instead.
-                <p className="text-[16px] leading-snug tracking-tight text-pretty line-clamp-5" style={{ color: "#5c5c5c" }}>
-                  {post.excerpt}
-                </p>
-              )}
+            <div className="flex aspect-[4/3] flex-col justify-between rounded-[6px] bg-[#f4f4f4] p-5 transition-colors duration-200 group-hover:bg-[#ececec]">
+              <div className="flex items-center gap-2">
+                {i === 0 && <NewChip />}
+                <BlogMeta post={post} />
+              </div>
+              <span className="flex items-end justify-between gap-4">
+                <span className="text-[clamp(1.25rem,2vw,1.5rem)] tracking-[-0.03em] leading-[1.15] text-pretty" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+                  {post.title}
+                </span>
+                <ArrowGlyph className="mb-1 size-5 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
+              </span>
             </div>
-            <div className="mt-4 flex items-center gap-2">
-              {i === 0 && <NewChip />}
-              <BlogMeta post={post} />
-            </div>
-            <p className="mt-2.5 text-[19px] sm:text-[21px] tracking-[-0.02em] leading-snug text-pretty" style={{ color: "#1a1a1a", fontWeight: 500 }}>
-              {post.title}
-            </p>
+            {post.excerpt && (
+              <p className="mt-3 text-[15px] leading-snug tracking-tight text-pretty line-clamp-2" style={{ color: "#5c5c5c" }}>
+                {post.excerpt}
+              </p>
+            )}
           </Link>
         ))}
         {/* The shelf ends on the way to the rest: one more tile, same size
@@ -3274,13 +3238,13 @@ function VisualLayout({
 
           <ServicesSection />
 
-          <div className="py-16 sm:py-28" />
+          <div className="py-16 sm:py-24" />
 
           <Questionnaire />
 
           <div className="py-16 sm:py-24" />
 
-          <ClientTypeList items={initialWork} onDark />
+          <ClientGrid items={initialWork} />
 
           <div className="py-16 sm:py-24" />
 

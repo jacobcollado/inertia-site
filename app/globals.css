@@ -918,19 +918,6 @@ h1:hover .redact > span.redact-inner,
   .rise.is-visible .selection-sweep { animation: none; }
 }
 
-/* "In good company" client ticker (ClientTypeList). Each track holds two
-   identical copies, so sliding by half its width loops seamlessly. Hovering
-   a row pauses it. */
-@keyframes client-ticker {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.client-ticker { animation: client-ticker var(--ticker-duration, 50s) linear infinite; }
-.client-ticker--reverse { animation-direction: reverse; }
-.client-ticker-row:hover .client-ticker { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) {
-  .client-ticker { animation: none; }
-}
 
 /* Enquiry chat: Inertia's typing indicator. */
 @keyframes chat-dot {

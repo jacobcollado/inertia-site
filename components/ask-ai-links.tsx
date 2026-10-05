@@ -17,7 +17,9 @@ const PLATFORMS: {
 ];
 
 /** `wall` lays the assistants out as a logo wall: even cells split by
- * hairlines, a large mark over each name, like the stores wall on /aether. */
+ * hairlines, a large mark over each name, like the stores wall on /aether.
+ * `tiles` is the same layout as separate raised tiles with no hairlines, for
+ * the homepage's dark zone, where they match the grey tiles above. */
 export function AskAiLinks({
   prompt,
   className = "",
@@ -25,9 +27,31 @@ export function AskAiLinks({
 }: {
   prompt: string;
   className?: string;
-  variant?: "buttons" | "wall";
+  variant?: "buttons" | "wall" | "tiles";
 }) {
   const q = encodeURIComponent(prompt);
+
+  if (variant === "tiles") {
+    return (
+      <ul className={`grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3 ${className}`}>
+        {PLATFORMS.map(({ name, href, Icon }) => (
+          <li key={name}>
+            <a
+              href={href(q)}
+              target="_blank"
+              rel="noopener"
+              className="group flex h-28 w-full flex-col items-center justify-center gap-3 rounded-[6px] bg-[rgb(var(--surface))] transition-colors duration-200 hover:bg-[rgb(var(--surface-elevated))] sm:h-32 [-webkit-tap-highlight-color:transparent]"
+            >
+              <Icon className="size-7 shrink-0 text-[rgb(var(--fg))] opacity-70 transition-opacity duration-200 group-hover:opacity-100" />
+              <span className="text-[14px] sm:text-[15px] tracking-tight leading-none text-[rgb(var(--muted))] transition-colors duration-200 group-hover:text-[rgb(var(--fg))]">
+                {name}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   if (variant === "wall") {
     return (
