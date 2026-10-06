@@ -856,6 +856,31 @@ h1:hover .redact > span.redact-inner,
   animation-delay: var(--rise-delay, 0ms);
 }
 
+/* Staggered section reveal (app/scroll-reveal.tsx tags the parts). The
+   section itself doesn't move; its parts dissolve in one after another with
+   the same blur and settle as the hero, --i apart, capped so long grids
+   don't drag. */
+.rise.rise-stagger,
+.rise.rise-stagger.is-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  animation: none;
+  will-change: auto;
+}
+.rise-item {
+  opacity: 0;
+  transform: translateY(8px) scale(0.995);
+  filter: blur(8px);
+}
+.rise-stagger.is-visible .rise-item {
+  animation: rise-item 720ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation-delay: calc(min(var(--i, 0), 8) * 90ms);
+}
+@keyframes rise-item {
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+
 /* Viscous blur+scale dissolve (hero + index scroll reveals) — no upward
    travel, so content flows into focus rather than rising into place. */
 .rise--liquid {
@@ -1764,7 +1789,9 @@ h1:hover .redact > span.redact-inner,
   .fade-in,
   .rise,
   .rise.is-visible,
-  .rise--liquid.is-visible {
+  .rise--liquid.is-visible,
+  .rise-item,
+  .rise-stagger.is-visible .rise-item {
     animation: none;
     opacity: 1;
     transform: none;
@@ -2993,26 +3020,31 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .wwd-march { animation: none; }
 }
 
-/* Hero canvas (components/hero-canvas.tsx): Inertia's cursor idles over the
-   selected headline; You carries the last card into its dashed slot
-   (its offset is in % of its own size, so it lands the same at any panel
-   width), it settles, fades, and starts over. Transform and opacity only,
-   so it stays on the compositor. */
-.hero-cursor { position: relative; will-change: transform; }
-.hero-cursor--a { animation: hero-cursor-a 8s ease-in-out infinite; }
-@keyframes hero-cursor-a {
-  0%, 100% { transform: translate(0, 0); }
-  35% { transform: translate(-18px, 14px); }
-  65% { transform: translate(-6px, 26px); }
+/* Hero canvas (components/hero-canvas.tsx): the staircase builds itself on
+   landing. Floor fades in, steps rise left to right (--i is the step), the
+   objects drop onto their treads, the flag raises from its pole, and the
+   ghost step fades in last. --hs-base is when it starts. Transform and
+   opacity only, so it stays on the compositor. */
+.hero-stair :is(.hs-floor, .hs-step, .hs-obj, .hs-flag, .hs-ghost) { opacity: 0; }
+.hero-stair.is-on .hs-floor { animation: hs-fade 600ms ease both; animation-delay: var(--hs-base); }
+.hero-stair.is-on .hs-step {
+  animation: hs-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--hs-base) + 150ms + var(--i) * 140ms);
 }
-.hero-held { will-change: transform, opacity; animation: hero-held 9s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
-@keyframes hero-held {
-  0%, 12% { transform: translate(0, 0) rotate(-6deg); opacity: 1; }
-  48%, 72% { transform: translate(-24.4%, 87.7%) rotate(0deg); opacity: 1; }
-  80% { transform: translate(-24.4%, 87.7%) rotate(0deg); opacity: 0; }
-  81% { transform: translate(0, 0) rotate(-6deg); opacity: 0; }
-  92%, 100% { transform: translate(0, 0) rotate(-6deg); opacity: 1; }
+.hero-stair.is-on .hs-obj {
+  animation: hs-drop 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--hs-base) + 560ms + var(--i) * 140ms);
 }
+.hero-stair .hs-flag { transform-box: fill-box; transform-origin: 50% 100%; }
+.hero-stair.is-on .hs-flag {
+  animation: hs-raise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--hs-base) + 1100ms);
+}
+.hero-stair.is-on .hs-ghost { animation: hs-fade 800ms ease both; animation-delay: calc(var(--hs-base) + 1500ms); }
+@keyframes hs-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hs-rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@keyframes hs-drop { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+@keyframes hs-raise { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .hero-cursor--a, .hero-held { animation: none; }
+  .hero-stair :is(.hs-floor, .hs-step, .hs-obj, .hs-flag, .hs-ghost) { opacity: 1; animation: none !important; }
 }

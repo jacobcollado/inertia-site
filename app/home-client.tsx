@@ -586,6 +586,9 @@ function VercelHero({
   const HEADING_WORDS = HEADING_LINES.flat();
   const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
   const ctaFadeDelay = headingEnd + 644;
+  // The canvas comes in while the heading is still landing, about four words
+  // in, so the hero reads as one fluid stagger rather than heading-then-art.
+  const canvasDelay = HERO_START + HERO_WORD_STEP * 4;
   // Cloud pill waits until the CTA has actually finished landing —
   // ctaFadeDelay is only when that transition *starts*.
   const cloudDelay = ctaFadeDelay + HERO_LIQUID_MS;
@@ -641,7 +644,7 @@ function VercelHero({
           </h1>
 
           <p
-            className="max-w-md sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-balance"
+            className="max-w-none sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-pretty sm:text-balance"
             style={{ ...liquid(120), color: "var(--ink-2)" }}
           >
             <span className="sm:hidden">
@@ -674,7 +677,8 @@ function VercelHero({
           </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-start gap-3">
+          {/* Buttons join the same liquid stagger as the heading and subline. */}
+          <div className="flex flex-wrap items-center justify-start gap-3" style={{ ...liquid(240), display: "flex" }}>
             {/* Points at the quiz at the foot of the page rather than straight
                 to Cal: answering a few questions is a lower commitment than
                 putting a meeting on the calendar, and the quiz hands off to
@@ -754,11 +758,13 @@ function VercelHero({
           </div>
 
           <HeroCanvas
+            play={visible}
+            delay={canvasDelay + 120}
             style={{
               marginTop: 8,
               opacity: visible ? 1 : 0,
               transform: visible ? "none" : "translateY(18px)",
-              transition: `opacity 900ms ${HERO_LIQUID_EASE} ${ctaFadeDelay + 200}ms, transform 900ms ${HERO_LIQUID_EASE} ${ctaFadeDelay + 200}ms`,
+              transition: `opacity 900ms ${HERO_LIQUID_EASE} ${canvasDelay}ms, transform 900ms ${HERO_LIQUID_EASE} ${canvasDelay}ms`,
             }}
           />
         </div>
@@ -1162,7 +1168,7 @@ function Questionnaire() {
       {/* Built from the same pieces as the sections on the white card above:
           a framed heading, a muted paragraph at the body size, and the CTA
           (inverted for the dark zone). The flow opens below it. */}
-      <div className="rise rise--liquid mx-auto max-w-2xl sm:max-w-3xl text-center">
+      <div className="rise rise-stagger mx-auto max-w-2xl sm:max-w-3xl text-center">
         <SectionHeading tone="dark" className="mb-5 sm:mb-6">Working on something?</SectionHeading>
         <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-balance">
           Tell us a little about it. It takes about two minutes, and we read every answer.
@@ -1706,8 +1712,8 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   };
 
   return (
-    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:max-w-3xl">
+    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      <div data-stagger className="max-w-2xl sm:max-w-3xl">
         <SectionHeading align="left" className="mb-5 sm:mb-6">How we think about execution</SectionHeading>
         <LiquidText
           pRef={introRef}
@@ -1720,7 +1726,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
       {/* Desktop: the accordion list beside the illustration. Phones: the
           illustration on top, three tabs under it, then the line, in a box
           sized to the longest line so the autoplay never shifts the page. */}
-      <div ref={blockRef} className="mt-8 grid gap-5 sm:mt-14 sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
+      <div ref={blockRef} data-stagger className="mt-8 grid gap-5 sm:mt-14 sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
         <ul className="hidden sm:flex flex-col gap-1.5">
           {segments.map((seg, i) => {
             const selected = i === active;
@@ -1949,10 +1955,11 @@ function WhatWeDo() {
   const stepDelay = (i: number) => (reduced ? 0 : phone ? (i > 0 ? WHAT_WE_DO_STEP_MS : 0) : i * WHAT_WE_DO_STEP_MS);
 
   return (
-    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <SectionHeading align="left" className="mb-10 sm:mb-14">What we do</SectionHeading>
       <ol
         ref={listRef}
+        data-stagger
         className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 sm:overflow-visible sm:px-0 lg:gap-x-8 lg:gap-y-16"
       >
         {WHAT_WE_DO_ITEMS.map((item, i) => {
@@ -2037,8 +2044,8 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
     "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
     <>
-      <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-        <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
+      <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+        <div data-stagger className="max-w-2xl sm:max-w-3xl sm:mx-auto">
             <SectionHeading className="mb-5 sm:mb-6">How we think about AI</SectionHeading>
             <LiquidText
               text={first}
@@ -2192,9 +2199,9 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
 function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
   if (items.length === 0) return null;
   return (
-    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <SectionHeading tone="dark" align="left" className="mb-10 sm:mb-14">In good company</SectionHeading>
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-12">
+      <ul data-stagger className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-12">
         {items.map((item) => (
           <li key={item.slug}>
             <Link href={`/work/${item.slug}`} className="group block">
@@ -2798,7 +2805,7 @@ const ASK_AI_PROMPT =
 // the larger heading and subline over the assistants as a logo wall.
 function AskAi() {
   return (
-    <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8 flex flex-col items-center text-center">
+    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8 flex flex-col items-center text-center">
       <SectionHeading tone="dark" className="mb-5 sm:mb-6">Don&rsquo;t take our word for it</SectionHeading>
       <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
         Ask your AI of choice about Inertia.

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { THEME_SCRIPT, ThemeProvider } from "./theme-provider";
 import { RouteFade } from "./route-fade";
@@ -84,7 +85,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={cn(satoshi.variable, "font-sans", "dark")} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        {/* Sets the theme before first paint (see theme-provider.tsx).
+            next/script with beforeInteractive, since React won't run a
+            bare <script> it renders. */}
+        <Script id="theme-init" strategy="beforeInteractive">{THEME_SCRIPT}</Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify({
