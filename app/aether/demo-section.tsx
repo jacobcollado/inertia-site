@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { DemoFrame, DemoToggle, LiveStoreButton, PasswordNote, PlayPauseButton, hostOf, type DemoMode } from "./demo-player";
 
 /* The demo recording inline on the page, for visitors who scroll past the
- * "View demo" buttons. The video only starts downloading as the section
- * nears the viewport, and pauses once it's scrolled away. */
+ * "View demo" buttons. The video starts downloading well ahead of the
+ * section and starts playing just before it scrolls into view, so it's
+ * already running when you get there; it pauses once it's scrolled away. */
 export function DemoSection({ href, password }: { href: string; password: string }) {
   const ref = useRef<HTMLElement>(null);
   const [mode, setMode] = useState<DemoMode>("desktop");
@@ -24,9 +25,10 @@ export function DemoSection({ href, password }: { href: string; password: string
         setLoad(true);
         near.disconnect();
       },
-      { rootMargin: "400px 0px" },
+      { rootMargin: "1200px 0px" },
     );
-    const visible = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.25 });
+    // Counts as in view from 300px before it reaches the screen.
+    const visible = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { rootMargin: "300px 0px", threshold: 0 });
     near.observe(el);
     visible.observe(el);
     return () => {

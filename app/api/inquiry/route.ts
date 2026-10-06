@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError, INVALID_JSON, TOO_MANY_REQUESTS } from "@/lib/api-error";
 import { createClient } from "@supabase/supabase-js";
 
 // Mirrors app/api/contact/route.ts: same in-memory rate limit shape and the
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
 
   if (!checkRate(ip)) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return apiError(429, ...TOO_MANY_REQUESTS);
   }
 
   try {
@@ -56,15 +57,15 @@ export async function POST(req: Request) {
     } = body ?? {};
 
     if (!name || !email) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+      return apiError(400, "missing_fields", "Missing fields", "Send at least name and email.");
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+      return apiError(400, "invalid_email", "Invalid email", "Send a valid email address, like name@example.com.");
     }
     // Cheap abuse guard: no single free-text answer should run long.
     for (const v of [goals, website, referral_source, role]) {
       if (typeof v === "string" && v.length > 2000) {
-        return NextResponse.json({ error: "Answer too long" }, { status: 400 });
+        return apiError(400, "answer_too_long", "Answer too long", "Keep each free-text answer to 2000 characters or fewer.");
       }
     }
 
@@ -143,6 +144,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+    return apiError(400, ...INVALID_JSON);
   }
 }

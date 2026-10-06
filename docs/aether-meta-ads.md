@@ -24,6 +24,12 @@ Product: Aether Shopify theme, $125 once ($135 with SMS setup).
   - `vora-testimonial`: vora.archive review quote ("Super happy with how our website turned out and how quickly you were able to do everything."), their live storefront in a phone mockup, "Aether theme" pill with Shopify bag. No price on the image.
   - `phone-mockup`: original "Stop looking like every other Shopify store" creative with Aether demo content. Still running in its own ad set at $15/day, separate from the vora ad set's $15/day ($30/day total across both).
   - `laptop-voiceover-a` / `laptop-voiceover-b` (prepared 2026-10-03, not live yet): 36s 9:16 video, voiceover with captions over a laptop showing the Aether demo store under changing colored light. "Aether, your new favorite theme" title throughout. Same video in both, only the copy differs (see below). Source file: `Desktop/Youtube Videos/Meta.mp4`.
+  - `orders-static` (prepared 2026-10-06): 9:16 static. White background, Aether wordmark, "Your Shopify store, but it sells" ("sells" in green), "$125 once, installed for you same day", the demo store in a phone mockup with two tilted "New order" notification cards ($75.50 and $149.50). URL parameters hardcoded: `utm_source=meta&utm_medium=paid&utm_campaign=aether-cold&utm_content=orders-static`. The notification cards use the Shopify app icon, which Meta's review may flag as a fake system notification; if it's rejected, swap the icon for a plain bag or check mark and resubmit.
+- Ad copy, `orders-static`:
+  - Primary text: "Run a fashion brand on Shopify? Your store should sell as well as your product looks. / Aether is a Shopify theme built to turn visits into orders. Every page guides shoppers to the next step, with a free-shipping bar and low-stock alerts built in. / $125 once, no monthly fees. We install it on your store the same day, and if we can't get it working, you get a full refund." (slashes are paragraph breaks)
+  - Headline: "The Shopify theme that sells for you"
+  - Description: "$125 once. Installed same day."
+  - CTA: Learn More
 - Ad copy:
   - Primary text: "Aether is a premium Shopify theme for fashion and streetwear brands. $125 once, no monthly fees. We install it on your store the same day, and if we can't get it working, you get a full refund."
   - Headline: "The Shopify theme for fashion brands"
@@ -59,6 +65,8 @@ Pull these from Ads Manager (add the Landing page views, ViewContent and Initiat
 - 2026-09-26: Launched new ad set at $15/day with the `vora-testimonial` creative (see Current setup). The old `phone-mockup` ad is still running in its own separate ad set. Optimizing for InitiateCheckout instead of Purchase, 9:16 placements only, UTMs tagged per ad via `{{ad.name}}`. Reason: the old creative got a decent CTR but no purchases, likely because it read as a clothing ad and drew shoppers instead of store owners. Judge on cost per InitiateCheckout, not CTR.
 
 - 2026-10-03: Prepared the `laptop-voiceover` video ad with two copy variants (a: product-led, b: offer-led), same video, same UTMs. Both name Shopify store owners in the first line and show the price early, to keep filtering out shoppers. Known gaps in the video: the voiceover says setup "literally takes 30 minutes" while the page promises same-day install done for you, and it has no end card with price and URL. Judge a vs b on cost per InitiateCheckout once each has 200+ landing page views.
+
+- 2026-10-06: Prepared the `orders-static` creative (see Current setup). Store-owner framing: order notifications show the outcome rather than the clothing, to keep filtering out shoppers. Judge on cost per InitiateCheckout against the other creatives once it has 200+ landing page views.
 
 ## Benchmarks to judge against
 

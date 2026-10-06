@@ -2,6 +2,7 @@
 
 import { Fragment, useState, type CSSProperties } from "react";
 import { motion } from "motion/react";
+import { useMounted } from "@/hooks/use-mounted";
 
 // The homepage hero heading, where the visitor is the collaborator: every
 // word can be picked up and thrown, gets a green "You" frame while it's held,
@@ -85,6 +86,9 @@ export function HeroDragHeading({
 }) {
   const [held, setHeld] = useState<string | null>(null);
   const slots = layout(lines, mobileLines);
+  // The frame and label only ever show on a held word, so they're added
+  // after hydration: in the server HTML they'd outweigh the heading's words.
+  const mounted = useMounted();
 
   return (
     <span className={`flex w-full flex-wrap items-baseline ${align === "left" ? "justify-start" : "justify-center"}`} style={{ columnGap: "0.28em" }}>
@@ -109,7 +113,11 @@ export function HeroDragHeading({
               {/* The wave rides an inner span so it never fights the drag
                   transform on the outer one. */}
               <span className="hero-wave inline-block" style={{ animationDelay: `${delay}ms` }}>
-                {mobile !== null && mobile !== word ? (
+                {mobile !== null && mobile !== word && mobile.toLowerCase() === word.toLowerCase() ? (
+                  // Only the case differs (a word starting the phone line):
+                  // one word, capitalised by CSS, so the text reads once.
+                  <span className="max-sm:capitalize">{word}</span>
+                ) : mobile !== null && mobile !== word ? (
                   <>
                     <span className="sm:hidden">{mobile}</span>
                     <span className="hidden sm:inline">{word}</span>
@@ -118,14 +126,16 @@ export function HeroDragHeading({
                   word
                 )}
               </span>
-              <HeldFrame show={held === id} />
-              <span
-                aria-hidden="true"
-                className={`${LABEL} bottom-full`}
-                style={{ background: YOU, left: `-${FRAME.x}em`, marginBottom: `calc(${FRAME.top}em + 5px)`, ...fade(held === id) }}
-              >
-                You
-              </span>
+              {mounted && <HeldFrame show={held === id} />}
+              {mounted && (
+                <span
+                  aria-hidden="true"
+                  className={`${LABEL} bottom-full`}
+                  style={{ background: YOU, left: `-${FRAME.x}em`, marginBottom: `calc(${FRAME.top}em + 5px)`, ...fade(held === id) }}
+                >
+                  You
+                </span>
+              )}
             </motion.span>
             {brk && <span aria-hidden="true" className={`${brk} h-0 basis-full my-0.5 sm:my-1`} />}
           </Fragment>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error("[stripe-webhook] signature verification failed", err);
-    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+    return apiError(400, "invalid_signature", "Invalid signature", "Only Stripe calls this endpoint, signed with the webhook secret.");
   }
 
   if (event.type !== "checkout.session.completed") {
@@ -131,7 +132,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ received: true, duplicate: true });
     }
     console.error("[stripe-webhook] failed to insert license", error);
-    return NextResponse.json({ error: "DB insert failed" }, { status: 500 });
+    return apiError(500, "db_insert_failed", "DB insert failed", "Stripe retries the event automatically.");
   }
 
   try {

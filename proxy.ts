@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isKnownPath, MARKDOWN_HEADERS, markdownNotFound, prefersMarkdown } from "@/lib/agent-negotiation";
 
 const BLOCKED_EXTENSIONS = /\.(php|asp|aspx|jsp|cgi|pl|sh|bash|env|git|svn|htaccess|htpasswd|bak|sql|tar|gz|log|cfg|conf|pem|key|crt)$/i;
 const BLOCKED_PATHS = /^\/(wp-|xmlrpc|phpmyadmin|cpanel|webmail)/i;
@@ -7,8 +8,24 @@ const BLOCKED_PATHS = /^\/(wp-|xmlrpc|phpmyadmin|cpanel|webmail)/i;
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const wantsMarkdown = prefersMarkdown(request.headers.get("accept"));
+
   if (BLOCKED_EXTENSIONS.test(pathname) || BLOCKED_PATHS.test(pathname)) {
-    return new NextResponse(null, { status: 404 });
+    return wantsMarkdown
+      ? new NextResponse(markdownNotFound(pathname), { status: 404, headers: MARKDOWN_HEADERS })
+      : new NextResponse(null, { status: 404 });
+  }
+
+  // Agents that ask for Markdown (Accept: text/markdown) get the homepage as
+  // Markdown (app/index.md), and a Markdown 404 with links onward for paths
+  // nothing on the site answers. Browsers never ask, so they're unaffected.
+  if (wantsMarkdown) {
+    if (pathname === "/") {
+      return NextResponse.rewrite(new URL("/index.md", request.url), { headers: { Vary: "Accept" } });
+    }
+    if (!isKnownPath(pathname)) {
+      return new NextResponse(markdownNotFound(pathname), { status: 404, headers: MARKDOWN_HEADERS });
+    }
   }
 
   let supabaseResponse = NextResponse.next({ request });

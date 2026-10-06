@@ -163,8 +163,15 @@ export function HeroCanvas({ style, play = true, delay = 200 }: { style?: CSSPro
       className={`hero-stair relative w-full overflow-hidden rounded-[6px] aspect-[4/3] sm:aspect-[12/5]${play && mounted ? " is-on" : ""}`}
       style={{ background: TILE, ["--hs-base" as string]: `${delay}ms`, ...style }}
     >
-      <Board c={MOBILE} className="absolute inset-0 h-full w-full sm:hidden" />
-      <Board c={DESKTOP} className="absolute inset-0 hidden h-full w-full sm:block" />
+      {/* Client only: the drawings are decoration, and leaving them out of
+          the server HTML keeps the homepage's markup mostly words. The tile
+          holds the space, and the build starts after mount anyway. */}
+      {mounted && (
+        <>
+          <Board c={MOBILE} className="absolute inset-0 h-full w-full sm:hidden" />
+          <Board c={DESKTOP} className="absolute inset-0 hidden h-full w-full sm:block" />
+        </>
+      )}
     </div>
   );
 }

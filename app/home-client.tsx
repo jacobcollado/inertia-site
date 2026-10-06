@@ -17,6 +17,17 @@ import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
 import { HeroCanvas } from "@/components/hero-canvas";
 import { MaterialCover } from "@/components/post-covers";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
+import { useMounted } from "@/hooks/use-mounted";
+import {
+  AI_APPROACH,
+  EXECUTION_INTRO,
+  EXECUTION_PRINCIPLES,
+  HERO_HEADING_LINES,
+  HERO_HEADING_LINES_MOBILE,
+  HERO_SUBLINE,
+  HERO_SUBLINE_MOBILE,
+  WHAT_WE_DO_ITEMS,
+} from "@/lib/home-copy";
 import type { AskUserQuestion, AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { InquirySteps } from "@/components/inquiry-steps";
 import { ctaScaleHoverOnParent } from "@/lib/cta-hover-motion";
@@ -28,7 +39,11 @@ import {
   CTA_PILL_CLASS,
   CtaGrain,
 } from "@/lib/cta-chrome";
-import type { PostMeta } from "@/lib/posts";
+import type { PostMeta as FullPostMeta } from "@/lib/posts";
+
+// The fields of a post the homepage shows. app/page.tsx sends only these, so
+// the rest of each post doesn't ride along in the page's HTML.
+export type PostMeta = Pick<FullPostMeta, "slug" | "title" | "tag" | "excerpt">;
 
 export type ClientCarouselItem = {
   slug: string;
@@ -575,14 +590,8 @@ function VercelHero({
   // Two lines from sm up. Phones get the short form on two lines at a
   // headline size (the full sentence would need four lines, or two at body
   // size); the phone subline carries the "design and build" instead.
-  const HEADING_LINES = [
-    ["A", "design", "and", "development", "studio"],
-    ["making", "websites", "people", "actually", "remember."],
-  ];
-  const HEADING_LINES_MOBILE = [
-    ["Websites", "people"],
-    ["actually", "remember."],
-  ];
+  const HEADING_LINES = HERO_HEADING_LINES;
+  const HEADING_LINES_MOBILE = HERO_HEADING_LINES_MOBILE;
   const HEADING_WORDS = HEADING_LINES.flat();
   const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
   const ctaFadeDelay = headingEnd + 644;
@@ -647,12 +656,8 @@ function VercelHero({
             className="max-w-none sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-pretty sm:text-balance"
             style={{ ...liquid(120), color: "var(--ink-2)" }}
           >
-            <span className="sm:hidden">
-              We design and build websites for local shops, artists and growing startups, from first idea to launch, all in-house.
-            </span>
-            <span className="hidden sm:inline">
-              We work with local shops, artists and growing startups, taking each project from first idea to launch, all in-house.
-            </span>
+            <span className="sm:hidden">{HERO_SUBLINE_MOBILE}</span>
+            <span className="hidden sm:inline">{HERO_SUBLINE}</span>
           </p>
 
           {false && (
@@ -1660,27 +1665,14 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   const [inView, setInView] = useState(false);
   const blockRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion() ?? false;
-  const intro =
-    "Ideas and identity are rarely the problem. [[Execution is.]] We take what a company, brand, or person stands for and carry it through every detail, until the result feels effortless to the people moving through it.";
+  const mounted = useMounted();
+  const intro = EXECUTION_INTRO;
   // Each principle is one way of finishing "how we think about execution":
   // the label names it, the line argues it, the illustration acts it out.
-  const segments = [
-    {
-      label: "Restraint",
-      text: "[[The best design disappears into the experience.]] Nobody applauds the restraint, and that's exactly how you know it landed.",
-      Art: RestraintArt,
-    },
-    {
-      label: "Agreement",
-      text: "Identity isn't expressed in one big gesture. It's carried in [[a hundred small decisions that all agree with each other]].",
-      Art: AgreementArt,
-    },
-    {
-      label: "Follow-through",
-      text: "Taste sets the direction, but [[finishing is what people actually feel]]. We stay on a thing until the last detail stops asking for attention.",
-      Art: FollowThroughArt,
-    },
-  ];
+  const segments = EXECUTION_PRINCIPLES.map((p, i) => ({
+    ...p,
+    Art: [RestraintArt, AgreementArt, FollowThroughArt][i],
+  }));
 
   // Plays only while on screen, so it's on the first principle when you
   // arrive and doesn't cycle unseen.
@@ -1787,7 +1779,9 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
               className="absolute inset-0 flex items-center justify-center"
               style={{ opacity: i === active ? 1 : 0, transition: "opacity 400ms ease" }}
             >
-              <Art play={i === active && (inView || reduced)} />
+              {/* Drawn after hydration only: decoration, kept out of the
+                  server HTML so the page's text isn't buried in markup. */}
+              {mounted && <Art play={i === active && (inView || reduced)} />}
             </div>
           ))}
         </div>
@@ -1862,25 +1856,6 @@ function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-const WHAT_WE_DO_ITEMS = [
-  {
-    label: "Direction",
-    description: "We figure out what the product or brand actually needs to be before anything gets designed.",
-  },
-  {
-    label: "Design",
-    description: "Interfaces, identity, and the small decisions in between, held to one standard of taste.",
-  },
-  {
-    label: "Development",
-    description: "We build what we design ourselves, so nothing is lost translating one team's vision to another's code.",
-  },
-  {
-    label: "Launch",
-    description: "We ship what we build and stay through launch, so what goes live matches what was designed.",
-  },
-] as const;
-
 // How far apart the four drawings start building, once the section scrolls in.
 const WHAT_WE_DO_STEP_MS = 420;
 
@@ -1893,6 +1868,7 @@ const WHAT_WE_DO_STEP_MS = 420;
 // builds as it's swiped in.
 function WhatWeDo() {
   const listRef = useRef<HTMLOListElement>(null);
+  const mounted = useMounted();
   const [on, setOn] = useState(false);
   const reduced = useReducedMotion() ?? false;
 
@@ -1960,13 +1936,13 @@ function WhatWeDo() {
           return (
             <li key={item.label} data-index={i} className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-auto">
               <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
-                <WhatWeDoSketch
+                {mounted && <WhatWeDoSketch
                   stage={item.label}
                   play={stepOn(i)}
                   delay={phone ? Math.max(0, delay - 200) : delay}
                   still={reduced}
                   className="h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
-                />
+                />}
               </div>
               <div className="mt-4 flex items-baseline gap-3">
                 <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
@@ -1988,10 +1964,7 @@ function WhatWeDo() {
 }
 
 function AiApproach({ posts }: { posts: PostMeta[] }) {
-  const first =
-    "AI hasn't changed what we believe about execution; [[it's changed how much of it we can afford]]. A studio our size can now explore more directions, discard the wrong ones sooner, and spend the saved time where it counts: on the version worth shipping.";
-  const second =
-    "None of that works without judgment, and [[judgment comes from reps]]. Years of projects have built our grip on the fundamentals: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
+  const [first, second] = AI_APPROACH;
   return (
     <>
       <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
@@ -2812,6 +2785,7 @@ function BlogArrow() {
 // rules.
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const mounted = useMounted();
   const trackRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [edges, setEdges] = useState({ start: true, end: false });
@@ -2900,10 +2874,10 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
             style={reveal(i + 1)}
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-[var(--tile)]">
-              <MaterialCover
+              {mounted && <MaterialCover
                 slug={post.slug}
                 className="transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
-              />
+              />}
             </div>
             <div className="mt-4 flex items-center gap-2">
               {i === 0 && <NewChip />}

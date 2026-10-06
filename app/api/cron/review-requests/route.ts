@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { renderReviewEmail } from "@/lib/review-email";
 
@@ -19,7 +20,7 @@ const ASK_BEFORE_DAYS = 30;
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return apiError(401, "unauthorized", "Unauthorized", "This endpoint is for the scheduled job. Send Authorization: Bearer <CRON_SECRET>.");
   }
 
   const resendKey = process.env.RESEND_API_KEY;
@@ -42,7 +43,7 @@ export async function GET(req: Request) {
 
   if (error) {
     console.error("[review-requests] query failed", error);
-    return NextResponse.json({ error: "Query failed" }, { status: 500 });
+    return apiError(500, "query_failed", "Query failed", "Retry the run. Check the database if it keeps failing.");
   }
 
   const { subject, html, text } = renderReviewEmail();

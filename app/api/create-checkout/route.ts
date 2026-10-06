@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2026-05-27.dahlia" });
@@ -25,13 +26,13 @@ export async function POST(req: Request) {
   try {
     const { tier, smsSetup } = await req.json();
     if (tier !== "standard" && tier !== "lifetime") {
-      return NextResponse.json({ error: "Invalid tier" }, { status: 400 });
+      return apiError(400, "invalid_tier", "Invalid tier", 'Send "tier": "standard" or "lifetime".');
     }
 
     const priceKey = tier === "lifetime" && smsSetup ? "lifetime_sms" : tier;
     const priceId = PRICES[priceKey];
     if (!priceId) {
-      return NextResponse.json({ error: "Price not configured" }, { status: 500 });
+      return apiError(500, "price_not_configured", "Price not configured", "Checkout is unavailable right now. Email hello@byinertia.com to buy.");
     }
 
     const origin = req.headers.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://byinertia.com";
@@ -52,6 +53,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url });
   } catch (err) {
     console.error("[create-checkout]", err);
-    return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+    return apiError(500, "checkout_failed", "Failed to create session", "Try again shortly. If it keeps failing, email hello@byinertia.com.");
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError, SERVER_ERROR } from "@/lib/api-error";
 import Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { renderInviteEmail } from "@/lib/invite-email";
@@ -61,14 +62,14 @@ export async function POST(req: Request) {
   try {
     const { session_id } = await req.json();
     if (!session_id || typeof session_id !== "string") {
-      return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
+      return apiError(400, "missing_session_id", "Missing session_id", "Send the session_id from the checkout success URL.");
     }
 
     let session: Stripe.Checkout.Session;
     try {
       session = await stripe.checkout.sessions.retrieve(session_id);
     } catch {
-      return NextResponse.json({ error: "Unknown session" }, { status: 404 });
+      return apiError(404, "unknown_session", "Unknown session", "Check the session_id. It comes from the checkout success URL.");
     }
 
     if (session.payment_status !== "paid") {
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
 
     const email = session.customer_details?.email?.trim();
     if (!email) {
-      return NextResponse.json({ error: "No email on session" }, { status: 409 });
+      return apiError(409, "no_email", "No email on session", "Email hello@byinertia.com with your receipt to claim the purchase.");
     }
 
     const admin = createAdminClient();
@@ -115,7 +116,7 @@ export async function POST(req: Request) {
       if (!existingClient.name) {
         const sent = await sendInviteEmail(email, setupLink);
         if (!sent) {
-          return NextResponse.json({ error: "The setup email failed to send" }, { status: 500 });
+          return apiError(500, "email_failed", "The setup email failed to send", "Try again shortly, or email hello@byinertia.com.");
         }
         return NextResponse.json({ state: "invite_sent" satisfies ClaimState, email });
       }
@@ -141,7 +142,7 @@ export async function POST(req: Request) {
       const { data: list } = await admin.auth.admin.listUsers();
       const match = list?.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
       if (!match) {
-        return NextResponse.json({ error: inviteError?.message ?? "Could not create account" }, { status: 500 });
+        return apiError(500, "account_failed", inviteError?.message ?? "Could not create account", "Try again shortly, or email hello@byinertia.com.");
       }
       await admin.from("clients").upsert({ id: match.id, email }, { onConflict: "id" });
       await admin.from("profiles").upsert({ id: match.id, role: "client" }, { onConflict: "id" });
@@ -153,7 +154,7 @@ export async function POST(req: Request) {
     // clients must exist before they complete auth (see header comment).
     const { error: clientError } = await admin.from("clients").insert({ id: userId, email });
     if (clientError) {
-      return NextResponse.json({ error: "Could not set up account" }, { status: 500 });
+      return apiError(500, "account_failed", "Could not set up account", "Try again shortly, or email hello@byinertia.com.");
     }
 
     // handle_new_user already inserted this row via trigger with role
@@ -172,12 +173,12 @@ export async function POST(req: Request) {
     if (!sent) {
       // The account exists either way; only the email failed. Say so rather
       // than reporting success for a message that never went out.
-      return NextResponse.json({ error: "Account created, but the setup email failed to send" }, { status: 500 });
+      return apiError(500, "email_failed", "Account created, but the setup email failed to send", "Sign in with Forgot password at /login, or email hello@byinertia.com.");
     }
 
     return NextResponse.json({ state: "invite_sent" satisfies ClaimState, email });
   } catch (err) {
     console.error("[claim-purchase]", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return apiError(500, ...SERVER_ERROR);
   }
 }

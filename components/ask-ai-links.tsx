@@ -1,6 +1,9 @@
+"use client";
+
 import type { ComponentType } from "react";
 import { SiClaude, SiGoogle, SiOpenai, SiPerplexity } from "react-icons/si";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { useMounted } from "@/hooks/use-mounted";
 
 // Opens each assistant with the question already typed, so visitors can hear
 // about us from a source they trust, and every run nudges the model to crawl
@@ -30,6 +33,7 @@ export function AskAiLinks({
   variant?: "buttons" | "wall" | "tiles";
 }) {
   const q = encodeURIComponent(prompt);
+  const mounted = useMounted();
 
   if (variant === "tiles") {
     return (
@@ -42,7 +46,14 @@ export function AskAiLinks({
               rel="noopener"
               className="group flex h-28 w-full flex-col items-center justify-center gap-3 rounded-[6px] bg-[rgb(var(--surface))] transition-colors duration-200 hover:bg-[rgb(var(--surface-elevated))] sm:h-32 [-webkit-tap-highlight-color:transparent]"
             >
-              <Icon className="size-7 shrink-0 text-[rgb(var(--fg))] opacity-70 transition-opacity duration-200 group-hover:opacity-100" />
+              {/* The marks are drawn after hydration (the tile keeps their
+                  space): on the homepage they'd be most of the section's
+                  server HTML, and the names already say which is which. */}
+              {mounted ? (
+                <Icon className="size-7 shrink-0 text-[rgb(var(--fg))] opacity-70 transition-opacity duration-200 group-hover:opacity-100" />
+              ) : (
+                <span className="size-7 shrink-0" />
+              )}
               <span className="text-[14px] sm:text-[15px] tracking-tight leading-none text-[rgb(var(--muted))] transition-colors duration-200 group-hover:text-[rgb(var(--fg))]">
                 {name}
               </span>

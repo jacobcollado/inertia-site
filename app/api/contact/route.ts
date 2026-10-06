@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError, INVALID_JSON, TOO_MANY_REQUESTS } from "@/lib/api-error";
 
 const hits = new Map<string, { count: number; reset: number }>();
 const LIMIT = 5;
@@ -21,19 +22,19 @@ export async function POST(req: Request) {
     (req as Request & { headers: Headers }).headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
 
   if (!checkRate(ip)) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return apiError(429, ...TOO_MANY_REQUESTS);
   }
   try {
     const { name, email, message, subject, kind } = await req.json();
 
     if (!name || !email || !message) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+      return apiError(400, "missing_fields", "Missing fields", "Send name, email and message.");
     }
     if (typeof message !== "string" || message.length > 5000) {
-      return NextResponse.json({ error: "Message too long" }, { status: 400 });
+      return apiError(400, "message_too_long", "Message too long", "Send a message of 5000 characters or fewer.");
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
-      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+      return apiError(400, "invalid_email", "Invalid email", "Send a valid email address, like name@example.com.");
     }
 
     const webhook = process.env.CONTACT_WEBHOOK_URL;
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         console.error("Resend error:", res.status, text);
-        return NextResponse.json({ error: "Send failed" }, { status: 502 });
+        return apiError(502, "send_failed", "Send failed", "Try again shortly, or email hello@byinertia.com directly.");
       }
     } else if (webhook) {
       const res = await fetch(webhook, {
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({ name, email, message, subject, kind }),
       });
       if (!res.ok) {
-        return NextResponse.json({ error: "Send failed" }, { status: 502 });
+        return apiError(502, "send_failed", "Send failed", "Try again shortly, or email hello@byinertia.com directly.");
       }
     } else {
       console.log("[contact]", { name, email, message, subject, kind });
@@ -75,6 +76,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+    return apiError(400, ...INVALID_JSON);
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError, SERVER_ERROR } from "@/lib/api-error";
 import { createClient } from "@supabase/supabase-js";
 
 const CORS = {
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
     const { key, domain } = await req.json();
     if (!key || !domain) {
       await log(supabase, { status: 400, ip, error: "Missing key or domain" });
-      return NextResponse.json({ valid: false, error: "Missing key or domain" }, { status: 400, headers: CORS });
+      return apiError(400, "missing_fields", "Missing key or domain", 'Send a JSON body with "key" (your license key) and "domain" (the store domain).', { headers: CORS, extra: { valid: false } });
     }
 
     const { data, error } = await supabase
@@ -70,6 +71,6 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("[validate-license]", err);
     await log(supabase, { status: 500, ip, error: "Server error" });
-    return NextResponse.json({ valid: false, error: "Server error" }, { status: 500, headers: CORS });
+    return apiError(500, ...SERVER_ERROR, { headers: CORS, extra: { valid: false } });
   }
 }
