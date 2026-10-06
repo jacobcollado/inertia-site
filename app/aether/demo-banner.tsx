@@ -99,7 +99,7 @@ export function AetherDemoBanner() {
             type="button"
             onClick={() => setChoiceOpen(true)}
             aria-haspopup="dialog"
-            className={`mt-3 inline-flex h-9 w-full items-center justify-center ${ACTION_RADIUS_CLASS} bg-black px-4 text-[14px] font-medium tracking-tight leading-none text-[#ededed] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]`}
+            className={`mt-3 inline-flex h-9 w-full items-center justify-center ${ACTION_RADIUS_CLASS} bg-[var(--cta-fill)] px-4 text-[14px] font-medium tracking-tight leading-none text-[var(--cta-fg)] transition-opacity hover:opacity-80 [-webkit-tap-highlight-color:transparent]`}
           >
             Get a free demo
           </button>

@@ -16,9 +16,10 @@ import { SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 // (which the entrance animations and hover zoom would trigger), keeping
 // these cheap on phones.
 
-export const INK = "#1a1a1a";
-export const PAPER = "#fff";
-export const TILE = "#f4f4f4";
+// CSS variables (globals.css) so the homepage's dark theme can flip them.
+export const INK = "var(--ink)";
+export const PAPER = "var(--paper)";
+export const TILE = "var(--tile)";
 export const SEL = SELECTION_FRAME_COLOR;
 
 export type Ids = Record<"grain" | "halftone" | "fade" | "fadeMask" | "dither" | "fine", string>;

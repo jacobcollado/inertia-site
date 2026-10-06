@@ -33,7 +33,7 @@ function applyHighlights(articleEl: HTMLElement, highlights: Highlight[]) {
       const mark = document.createElement("mark");
       mark.dataset.hid = h.id;
       mark.style.background = h.color;
-      mark.style.color = "inherit";
+      mark.style.color = "#1a1a1a";
       mark.style.borderRadius = "3px";
       mark.style.padding = "0 1px";
       mark.style.cursor = "pointer";

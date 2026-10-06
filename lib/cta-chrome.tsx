@@ -4,7 +4,8 @@
 export const ACTION_RADIUS_PX = 6;
 export const ACTION_RADIUS_CLASS = "rounded-[6px]";
 
-export const CTA_FILL = "#000000";
+// A CSS variable so the homepage's dark theme can flip it (globals.css).
+export const CTA_FILL = "var(--cta-fill)";
 
 export const CTA_INSET_SHADOW = "none";
 

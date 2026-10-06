@@ -21,7 +21,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             alt="Aether"
             width={220}
             height={55}
-            className="h-[clamp(3.25rem,7.5vw,5rem)] sm:h-[clamp(2.9rem,6vw,4.25rem)] w-auto mx-auto"
+            className="theme-invert h-[clamp(3.25rem,7.5vw,5rem)] sm:h-[clamp(2.9rem,6vw,4.25rem)] w-auto mx-auto"
             priority
           />
         </h1>
@@ -38,7 +38,7 @@ export function AetherHero({ demoUrl }: { demoUrl: string }) {
             data-aether-cta
             onClick={navigateToAetherCheckout}
             className={`w-full inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none hover:opacity-80 transition-opacity`}
-            style={{ background: "#000", color: "#ededed" }}
+            style={{ background: "var(--cta-fill)", color: "var(--cta-fg)" }}
           >
             Get Aether
           </Link>

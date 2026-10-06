@@ -50,8 +50,8 @@ export function SectionHeading({
 
   const shown = on || reduced;
   const h = -HANDLE / 2;
-  const ink = tone === "dark" ? "rgb(var(--fg))" : "#1a1a1a";
-  const paper = tone === "dark" ? "rgb(var(--surface))" : "#fff";
+  const ink = tone === "dark" ? "rgb(var(--fg))" : "var(--ink)";
+  const paper = tone === "dark" ? "rgb(var(--surface))" : "var(--paper)";
 
   return (
     <h2 className={`${align === "left" ? "text-left" : "text-center"} ${className}`} style={style}>

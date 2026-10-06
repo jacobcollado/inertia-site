@@ -23,10 +23,10 @@ import {
 // A grid every 120px for the page beside the title block, and ruler ticks
 // for the strips down both screen edges.
 const GUTTER_GRID = [
-  "repeating-linear-gradient(to bottom, transparent 0 119px, rgba(26,26,26,0.07) 119px 120px)",
-  "repeating-linear-gradient(to right, transparent 0 119px, rgba(26,26,26,0.05) 119px 120px)",
+  "repeating-linear-gradient(to bottom, transparent 0 119px, rgb(var(--ink-rgb) / 0.07) 119px 120px)",
+  "repeating-linear-gradient(to right, transparent 0 119px, rgb(var(--ink-rgb) / 0.05) 119px 120px)",
 ].join(", ");
-const RULER = "repeating-linear-gradient(to bottom, rgba(26,26,26,0.18) 0 1px, transparent 1px 6px)";
+const RULER = "repeating-linear-gradient(to bottom, rgb(var(--ink-rgb) / 0.18) 0 1px, transparent 1px 6px)";
 
 const BODY_CLASSES = `px-0 pt-10 pb-8 rise prose-marker
   text-[15px] sm:text-[19px] leading-[1.75] sm:leading-[1.85] tracking-[0em] text-[rgb(var(--fg))]
@@ -174,7 +174,7 @@ export default async function BlogPost({
         <div className="absolute inset-y-0 right-0 w-[10px]" style={{ backgroundImage: RULER }} />
       </div>
 
-      <article className="relative mx-auto w-full max-w-[56rem] bg-white sm:border-x sm:border-[rgba(26,26,26,0.09)]">
+      <article className="relative mx-auto w-full max-w-[56rem] bg-[var(--paper)] sm:border-x sm:border-[rgb(var(--ink-rgb)/0.09)]">
         {/* Title block, centred. */}
         <header
           className="flex min-h-[var(--post-head)] flex-col items-center justify-center px-6 py-16 text-center sm:px-16 rise"
@@ -203,7 +203,7 @@ export default async function BlogPost({
         {/* Cover: the post's own drawing in the material kit, falling back
             to its glyph for a post without one. Full sheet width. */}
         <div className="relative rise" style={{ ["--rise-delay" as any]: "80ms" }}>
-          <div className="relative flex w-full items-center justify-center overflow-hidden" style={{ aspectRatio: "1200/630", background: "#f4f4f4" }}>
+          <div className="relative flex w-full items-center justify-center overflow-hidden" style={{ aspectRatio: "1200/630", background: "var(--tile)" }}>
             {hasMaterialCover(slug) ? (
               <MaterialCover slug={slug} />
             ) : (
@@ -215,8 +215,8 @@ export default async function BlogPost({
             <span
               key={pos}
               aria-hidden="true"
-              className={`absolute z-[1] hidden size-[7px] bg-white sm:block ${pos}`}
-              style={{ boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.28)" }}
+              className={`absolute z-[1] hidden size-[7px] bg-[var(--paper)] sm:block ${pos}`}
+              style={{ boxShadow: "inset 0 0 0 1px rgb(var(--ink-rgb) / 0.28)" }}
             />
           ))}
         </div>
@@ -255,12 +255,12 @@ export default async function BlogPost({
 
           {/* Closes the article: a hairline across the full sheet, with the
               same handles as the cover where it meets the sheet's edges. */}
-          <div aria-hidden="true" className="relative -mx-6 mt-12 h-px bg-[rgba(26,26,26,0.09)] sm:-mx-12">
+          <div aria-hidden="true" className="relative -mx-6 mt-12 h-px bg-[rgb(var(--ink-rgb)/0.09)] sm:-mx-12">
             {["-left-[3.5px]", "-right-[3.5px]"].map((pos) => (
               <span
                 key={pos}
-                className={`absolute -top-[3px] hidden size-[7px] bg-white sm:block ${pos}`}
-                style={{ boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.28)" }}
+                className={`absolute -top-[3px] hidden size-[7px] bg-[var(--paper)] sm:block ${pos}`}
+                style={{ boxShadow: "inset 0 0 0 1px rgb(var(--ink-rgb) / 0.28)" }}
               />
             ))}
           </div>
@@ -270,7 +270,7 @@ export default async function BlogPost({
                 as the end of the post rather than a stray chip. */}
             <Link
               href="/"
-              className={`flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-3.5 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[#f1f1f1] hover:bg-[#e9e9e9] hover:text-[rgb(var(--fg))] transition-colors`}
+              className={`flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-3.5 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[var(--tile-2)] hover:bg-[var(--tile-3)] hover:text-[rgb(var(--fg))] transition-colors`}
             >
               Back home
             </Link>

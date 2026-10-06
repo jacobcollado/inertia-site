@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { VisualNotch } from "./visual-notch";
 import { MinimalFooter } from "./site-footer";
 import { FrameColumnRails } from "@/components/page-frame";
+import { isThemedPath } from "./theme-provider";
 
 const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password", "/accept-invite", "/docs"];
 
@@ -26,6 +27,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // light footer.
   const isHome = pathname === "/";
   const isBlogPost = pathname.startsWith("/blog/");
+  // Routes that follow the light / dark switch (see theme-provider.tsx).
+  // Bare routes like /docs can be themed too; they place their own switch.
+  const themed = isThemedPath(pathname);
 
   // The footer's dark zone only covers page content, not the <html> element
   // itself — so overscroll/rubber-band past the bottom (Safari, and anywhere
@@ -51,6 +55,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     const on = isHome && !bare;
     root.classList.toggle("home-dark-root", on);
+    root.classList.toggle("themed", themed);
     // Clear any stale homepage theme-color meta left by an earlier version.
     document.getElementById("home-theme-color")?.remove();
     if (!on) {
@@ -71,8 +76,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         root.style.background = "";
         document.body.style.background = "";
       } else {
-        root.style.background = "rgb(255 255 255)";
-        document.body.style.background = "rgb(255 255 255)";
+        // The page's own --bg: white, or the dark palette on themed routes.
+        root.style.background = "rgb(var(--bg))";
+        document.body.style.background = "rgb(var(--bg))";
       }
     } else {
       // Back on the homepage — clear any inline override left by a previous
@@ -83,7 +89,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     return () => {
       root.classList.remove("home-dark-root");
     };
-  }, [isHome, bare, ownsRootBackground]);
+  }, [isHome, bare, ownsRootBackground, themed]);
 
   if (bare) return <>{children}</>;
 
@@ -96,18 +102,18 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       {noFooter ? null : isHome ? (
         <div className="homepage-dark-zone relative" style={{ background: "rgb(var(--bg))" }}>
           <FrameColumnRails tone="dark" />
-          <MinimalFooter />
+          <MinimalFooter themeSwitch />
         </div>
       ) : isBlogPost ? (
         <div className="relative">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[56rem] -translate-x-1/2 border-x border-[rgba(26,26,26,0.09)] sm:block"
+            className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[56rem] -translate-x-1/2 border-x border-[rgb(var(--ink-rgb)/0.09)] sm:block"
           />
-          <MinimalFooter />
+          <MinimalFooter themeSwitch={themed} />
         </div>
       ) : (
-        <MinimalFooter />
+        <MinimalFooter themeSwitch={themed} />
       )}
     </>
   );

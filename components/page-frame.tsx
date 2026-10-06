@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 // viewport below that, where the column runs edge to edge.
 export const FRAME_INSET = "inset-x-0 sm:inset-x-3 xl:inset-x-0";
 export const FRAME_TONES = {
-  light: { line: "rgba(26,26,26,0.09)", handle: "rgba(26,26,26,0.28)", paper: "#fff" },
+  light: { line: "rgb(var(--ink-rgb) / 0.09)", handle: "rgb(var(--ink-rgb) / 0.28)", paper: "var(--paper)" },
   dark: { line: "rgb(255 255 255 / 0.09)", handle: "rgb(255 255 255 / 0.3)", paper: "rgb(var(--bg))" },
 } as const;
 export type FrameTone = keyof typeof FRAME_TONES;

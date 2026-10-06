@@ -18,7 +18,7 @@ export function FigmaSelectionFrame({
   frameRef,
   style,
   strokeColor = SELECTION_FRAME_COLOR,
-  handleFill = "#fff",
+  handleFill = "var(--paper)",
 }: {
   children: React.ReactNode;
   className?: string;

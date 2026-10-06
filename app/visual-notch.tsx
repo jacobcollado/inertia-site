@@ -10,7 +10,6 @@ import { TOC_ITEMS } from "./components/shared";
 import { useWebHaptics } from "web-haptics/react";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 import {
-  CTA_FILL,
   CTA_HEADER_PILL_CLASS,
   CTA_HEADER_SHELL_HEIGHT_CLASS,
   CTA_HEADER_SIGNIN_SHELL_CLASS,
@@ -26,7 +25,6 @@ import {
   HiOutlineNewspaper,
   HiOutlineBookOpen,
   HiOutlineClipboardDocumentList,
-  HiOutlineBuildingOffice,
   HiOutlinePuzzlePiece,
   HiOutlineQuestionMarkCircle,
   HiOutlineShieldCheck,
@@ -57,7 +55,6 @@ const NAV: NavItem[] = [
     children: [
       { label: "Aether theme", description: "One-time purchase, lifetime updates.", href: "/aether", icon: <SiShopify /> },
       { label: "Live demo", description: "See Aether running on a real store.", href: "https://aether-starter.myshopify.com", icon: <HiOutlineSparkles />, external: true },
-      { label: "Commercial", description: "Licensing for agencies and studios building client stores.", href: "/aether/commercial", icon: <HiOutlineBuildingOffice /> },
       { label: "Add-ons", description: "Extend your theme with optional modules.", disabled: true, icon: <HiOutlinePuzzlePiece /> },
     ],
   },
@@ -586,7 +583,7 @@ function InertiaLogo() {
     <img
       src="/logo.png"
       alt="Inertia"
-      className="h-6 w-auto"
+      className="inertia-logo h-6 w-auto"
       style={{ display: "block" }}
     />
   );
@@ -660,8 +657,8 @@ function MergedCTA({
             className={CTA_HEADER_PILL_CLASS}
             style={{
               zIndex: 1,
-              background: CTA_FILL,
-              color: "#fff",
+              background: "var(--hdr-fill)",
+              color: "var(--hdr-fg)",
               boxShadow: "none",
               textDecoration: "none",
               whiteSpace: "nowrap",
@@ -680,7 +677,7 @@ function MergedCTA({
               marginLeft: -4,
               marginRight: -4,
               height: 16,
-              background: "#000",
+              background: "var(--hdr-fill)",
               zIndex: 0,
               flexShrink: 0,
             }}
@@ -694,8 +691,8 @@ function MergedCTA({
         style={{
           zIndex: 1,
           borderRadius: 6,
-          background: CTA_FILL,
-          color: "#fff",
+          background: "var(--hdr-fill)",
+          color: "var(--hdr-fg)",
           boxShadow: "none",
         }}
       >
@@ -817,7 +814,7 @@ export function VisualNotch() {
           className={`site-header${mobileOpen ? " site-header--open" : ""}${isAetherLanding ? " site-header--pinned" : ""}`}
           ref={headerRef}
           // On blog posts a hairline underneath, so the sheet starts below it.
-          style={isBlogPost ? { borderBottom: "1px solid rgba(26,26,26,0.09)" } : undefined}
+          style={isBlogPost ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
         >
           <svg width="0" height="0" className="absolute" aria-hidden="true">
             <filter id="header-glass" colorInterpolationFilters="sRGB">

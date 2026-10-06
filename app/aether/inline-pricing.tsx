@@ -12,6 +12,7 @@ import { createCtaScalePressOnRef, ctaScalePressOnSelf } from "@/lib/cta-hover-m
 import { trackMeta } from "../meta-pixel";
 import { AETHER_CHECKOUT_ID } from "@/lib/scroll-to-hash";
 import { BONUS_TOTAL } from "./bonuses";
+import { InstallVideo } from "./install-video";
 
 /* Checkout on the site's Figma language: the price as a selected frame, the
  * button and guarantee right under it, then what's in the box as a quiet
@@ -203,8 +204,8 @@ export function InlinePricing() {
           data-aether-cta
           className={`scroll-mt-24 inline-flex w-full items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-8 text-[17px] sm:text-[19px] font-medium tracking-tight leading-none disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
           style={{
-            background: "#000",
-            color: "#ededed",
+            background: "var(--cta-fill)",
+            color: "var(--cta-fg)",
             // Warm edge: a faint inner light in the heading shimmer's warm
             // tone (#ded2c2), marking this as the final CTA without a new
             // color. Top highlight, bottom glow, hairline ring.
@@ -228,6 +229,10 @@ export function InlinePricing() {
         {status === "error" && (
           <span className="block text-center text-[13px] tracking-tight text-red-500">{error || "Something went wrong."}</span>
         )}
+
+        <div className="mt-3">
+          <InstallVideo />
+        </div>
 
         {/* One line of proof at the moment of decision, right under the
             guarantee. An exact excerpt of the review in testimonials.tsx,

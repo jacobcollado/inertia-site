@@ -42,7 +42,7 @@ function HeldFrame({ show }: { show: boolean }) {
       }}
     >
       {[{ top: h, left: h }, { top: h, right: h }, { bottom: h, right: h }, { bottom: h, left: h }].map((p, i) => (
-        <span key={i} className="absolute size-[6px] bg-white" style={{ border: `1px solid ${YOU}`, ...p }} />
+        <span key={i} className="absolute size-[6px] bg-[var(--paper)]" style={{ border: `1px solid ${YOU}`, ...p }} />
       ))}
     </span>
   );

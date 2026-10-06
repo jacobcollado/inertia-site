@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
+import { ThemeSwitch } from "@/app/site-footer";
 
 // â"€â"€â"€ Types â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
@@ -42,7 +43,7 @@ function rgba([r, g, b]: [number, number, number], a = 1) {
 }
 
 const SIDEBAR_HOVER_OVERLAY =
-  "pointer-events-none absolute inset-0 rounded-lg bg-[rgb(var(--fg)/0.06)] opacity-0 transition-opacity duration-200 group-hover:opacity-100";
+  "pointer-events-none absolute inset-0 rounded-[6px] bg-[rgb(var(--fg)/0.06)] opacity-0 transition-opacity duration-200 group-hover:opacity-100";
 
 function SidebarNavLink({
   href,
@@ -51,7 +52,7 @@ function SidebarNavLink({
   onClick,
   children,
   className = "text-[13.5px] tracking-tight",
-  rounded = "rounded-lg",
+  rounded = "rounded-[6px]",
 }: {
   href: string;
   active: boolean;
@@ -65,7 +66,7 @@ function SidebarNavLink({
     <a
       href={href}
       onClick={onClick}
-      className={`group relative block px-3 py-1.5 transition-opacity duration-200 hover:opacity-100 ${rounded} ${className}`}
+      className={`group relative block px-2.5 py-1.5 transition-opacity duration-200 hover:opacity-100 ${rounded} ${className}`}
       style={{
         color: "rgb(var(--fg))",
         fontWeight: active ? 600 : 400,
@@ -1107,7 +1108,7 @@ function SketchImageCarousel({
 
   return (
     <div
-      className="w-full rounded-xl overflow-hidden border border-[rgb(var(--line))]"
+      className="w-full rounded-[6px] overflow-hidden border border-[rgb(var(--line))]"
       style={{ background: "rgb(var(--fg) / 0.02)" }}
       role="region"
       aria-roledescription="carousel"
@@ -1159,7 +1160,12 @@ function renderInline(text: string) {
   );
 }
 
-function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, number, number] }) {
+// Anchor for a subheading inside an article, for the "On this page" rail.
+function headingId(articleId: string, text: string) {
+  return `${articleId}--${text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+}
+
+function ArticleBody({ body, accent, articleId }: { body: ArticleBlock[]; accent: [number, number, number]; articleId: string }) {
   return (
     <div className="flex flex-col gap-6">
       {body.map((block, i) => {
@@ -1169,7 +1175,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
           }
           if (block.image) {
             return (
-              <div key={i} className="w-full rounded-xl overflow-hidden border border-[rgb(var(--line))]" style={{ background: "rgb(var(--fg) / 0.02)" }}>
+              <div key={i} className="w-full rounded-[6px] overflow-hidden border border-[rgb(var(--line))]" style={{ background: "rgb(var(--fg) / 0.02)" }}>
                 <img src={block.image} alt={block.alt ?? ""} className="block w-full h-auto" loading="lazy" decoding="async" />
               </div>
             );
@@ -1177,7 +1183,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
           const Sketch = SKETCH_MAP[block.name];
           if (!Sketch) return null;
           return (
-            <div key={i} className="w-full rounded-xl overflow-hidden border border-[rgb(var(--line))] py-8 px-6" style={{ background: "rgb(var(--fg) / 0.02)" }}>
+            <div key={i} className="w-full rounded-[6px] overflow-hidden border border-[rgb(var(--line))] py-8 px-6" style={{ background: "rgb(var(--fg) / 0.02)" }}>
               <Sketch accent={block.accent} />
             </div>
           );
@@ -1187,7 +1193,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         }
         if (block.type === "h3") {
           return (
-            <h3 key={i} className="text-[15px] font-semibold tracking-tight text-[rgb(var(--fg))] pt-2 pb-1">
+            <h3 key={i} id={headingId(articleId, block.text)} className="scroll-mt-20 lg:scroll-mt-6 text-[17px] font-medium tracking-tight text-[rgb(var(--fg))] pt-3">
               {block.text}
             </h3>
           );
@@ -1222,7 +1228,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         if (block.type === "note") {
           const na = block.accent ?? accent;
           return (
-            <div key={i} className="rounded-xl overflow-hidden" style={{ border: `1px solid ${rgba(na, 0.25)}` }}>
+            <div key={i} className="rounded-[6px] overflow-hidden" style={{ border: `1px solid ${rgba(na, 0.25)}` }}>
               {/* Label bar */}
               <div className="flex items-center gap-1.5 px-4 py-2" style={{ borderBottom: `1px solid ${rgba(na, 0.15)}`, background: rgba(na, 0.07) }}>
                 <svg viewBox="0 0 14 14" fill="none" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ stroke: rgba(na, 0.8) }} strokeWidth="1.5" aria-hidden="true">
@@ -1242,7 +1248,7 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         if (block.type === "code") {
           return (
             <div key={i} className="relative">
-              <pre className="text-[14px] leading-relaxed font-mono rounded-xl border border-[rgb(var(--line))] pl-5 pr-[5.75rem] py-4 overflow-x-auto whitespace-pre text-[rgb(var(--muted))] select-text" style={{ background: "rgb(var(--fg) / 0.03)" }}>
+              <pre className="text-[14px] leading-relaxed font-mono rounded-[6px] border border-[rgb(var(--line))] pl-5 pr-[5.75rem] py-4 overflow-x-auto whitespace-pre text-[rgb(var(--muted))] select-text" style={{ background: "rgb(var(--fg) / 0.03)" }}>
                 <code>{block.text}</code>
               </pre>
               <CopyButton text={block.text} />
@@ -1251,78 +1257,6 @@ function ArticleBody({ body, accent }: { body: ArticleBlock[]; accent: [number, 
         }
         return null;
       })}
-    </div>
-  );
-}
-
-function SidebarNav({
-  products,
-  activeProductId,
-  activeArticleId,
-  onSelectProduct,
-  onNav,
-}: {
-  products: Product[];
-  activeProductId: string;
-  activeArticleId: string;
-  onSelectProduct: (id: string) => void;
-  onNav?: () => void;
-}) {
-  const product = products.find((p) => p.id === activeProductId)!;
-  return (
-    <div className="flex flex-col py-6">
-
-      {/* Product switcher */}
-      <div className="flex flex-col gap-1 mb-6 pb-6 border-b border-[rgb(var(--line))]">
-        {products.map((p) => {
-          const active = p.id === activeProductId;
-          return (
-            <button
-              key={p.id}
-              onClick={() => onSelectProduct(p.id)}
-              className="flex items-center gap-2.5 py-1.5 text-left rounded px-2 -mx-2 transition-colors"
-              style={active ? { background: rgba(p.accent, 0.07) } : {}}
-            >
-              <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: rgba(p.accent, active ? 0.9 : 0.3) }} />
-              <span className="text-[13px] tracking-tight" style={{ color: active ? rgba(p.accent, 1) : "rgb(var(--fg))", opacity: active ? 1 : 0.6 }}>
-                {p.name}
-              </span>
-              <span className="text-[11px] tracking-tight text-[rgb(var(--muted))] ml-0.5" style={{ opacity: 0.38 }}>
-                {p.description}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Sections + articles */}
-      <div className="flex flex-col gap-5">
-        {product.sections.map((section) => (
-          <div key={section.id} className="flex flex-col gap-0.5">
-            <p className="text-[11px] tracking-tight font-medium text-[rgb(var(--muted))] mb-1.5 px-2" style={{ opacity: 0.45 }}>
-              {section.title}
-            </p>
-            {section.articles.map((article) => {
-              const active = activeArticleId === article.id;
-              return (
-                <a
-                  key={article.id}
-                  href={`#${article.id}`}
-                  onClick={onNav}
-                  className="block py-1.5 text-[13px] tracking-tight transition-colors rounded px-2 -mx-2"
-                  style={{
-                    color: "rgb(var(--fg))",
-                    opacity: active ? 1 : 0.55,
-                    background: active ? rgba(product.accent, 0.12) : undefined,
-                  }}
-                >
-                  {article.title}
-                </a>
-              );
-            })}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
@@ -1420,6 +1354,12 @@ function DocsPageInner() {
 
   const product = PRODUCTS.find((p) => p.id === activeProductId)!;
   const allArticles = product.sections.flatMap((s) => s.articles);
+  const flatArticles = product.sections.flatMap((section) => section.articles.map((article) => ({ article, section })));
+  const activeArticle = allArticles.find((a) => a.id === activeArticleId);
+  const activeTitle = activeArticle?.title ?? "Introduction";
+  const headings = (activeArticle?.body ?? [])
+    .filter((b): b is Extract<ArticleBlock, { type: "h3" }> => b.type === "h3")
+    .map((b) => ({ id: headingId(activeArticle!.id, b.text), text: b.text }));
 
   const handleSelectProduct = (id: string) => {
     setActiveProductId(id);
@@ -1473,128 +1413,120 @@ function DocsPageInner() {
     <>
     <div className="min-h-screen flex flex-col" style={{ background: "rgb(var(--bg))" }}>
 
-      {/* Docs header — desktop hidden, mobile only */}
-      <header className="lg:hidden flex items-center justify-between px-3 shrink-0" style={{ height: 72, background: "rgb(var(--bg))" }}>
-        <div className="flex items-center gap-3 pl-3">
-          <Link href="/">
-            <img src="/logo.png" alt="Inertia" className="h-5 w-auto" />
-          </Link>
-          {fromAether && (
-            <Link href="/aether" className="flex items-center gap-1 text-[12px] tracking-tight transition-colors" style={{ color: "rgb(var(--muted))", opacity: 0.6 }}>
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
-                <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
-              </svg>
-              Aether
-            </Link>
-          )}
-        </div>
-        <Link href="/aether#pricing" className="hidden sm:inline-flex items-center gap-1.5 rounded-[6px] px-3.5 py-1.5 text-[12px] tracking-tight font-medium transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
-          Get Aether
+      {/* Docs header, phones only: sticky, with where you are on the right.
+          Tapping it opens the full contents. */}
+      <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between gap-3 px-6 shrink-0 border-b border-[rgb(var(--line))]" style={{ height: 60, background: "rgb(var(--bg) / 0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
+        <Link href="/" className="shrink-0">
+          <img src="/logo.png" alt="Inertia" className="inertia-logo h-5 w-auto" />
         </Link>
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          aria-label="Open contents"
+          className="flex min-w-0 items-center gap-2 rounded-[6px] py-1.5 pl-3 pr-2.5 text-[13.5px] tracking-tight [-webkit-tap-highlight-color:transparent]"
+          style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--fg))" }}
+        >
+          <span className="truncate">{activeTitle}</span>
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-3 shrink-0 opacity-60" aria-hidden="true">
+            <polyline points="3 4.5 6 7.5 9 4.5" />
+          </svg>
+        </button>
       </header>
 
       <div className="flex flex-1 min-h-0">
 
-        {/* Sidebar */}
-        <aside className="hidden lg:flex flex-col w-56 xl:w-64 shrink-0 p-3">
-          <div className="sticky top-3 max-h-[calc(100vh-24px)] overflow-y-auto rounded-2xl border border-[rgb(var(--line))] px-3 py-4 flex flex-col gap-4 transition-[border-color] duration-200 hover:border-[rgb(var(--fg)/0.12)]" style={{ background: "rgb(var(--surface))" }}>
-
-            {/* Back to Aether */}
-            {fromAether && (
-              <Link href="/aether" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] tracking-tight transition-colors hover:bg-[rgb(var(--fg)/0.05)]" style={{ color: "rgb(var(--muted))", opacity: 0.7 }}>
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
-                  <line x1="13" y1="8" x2="3" y2="8" /><polyline points="7 4 3 8 7 12" />
-                </svg>
-                Back to Aether
+        {/* Sidebar: flat, pinned to the left edge, scrolls on its own. */}
+        <aside className="hidden lg:flex sticky top-0 h-screen w-60 xl:w-64 shrink-0 flex-col border-r border-[rgb(var(--line))]">
+          <div className="flex items-center justify-between px-5 pt-5 pb-4">
+            <Link href="/">
+              <img src="/logo.png" alt="Inertia" className="inertia-logo h-5 w-auto" />
+            </Link>
+            {fromAether ? (
+              <Link href="/aether" className="text-[12px] tracking-tight transition-colors hover:text-[rgb(var(--fg))]" style={{ color: "rgb(var(--muted))" }}>
+                ← Aether
               </Link>
-            )}
+            ) : null}
+          </div>
 
-            {/* Logo */}
-            <div className="flex items-center justify-between px-3 py-2 mb-1">
-              <Link href="/">
-                <img src="/logo.png" alt="Inertia" className="h-5 w-auto" />
-              </Link>
-              <Link href="/aether#pricing" className="text-[11px] tracking-tight font-medium transition-opacity hover:opacity-70" style={{ color: "rgb(var(--muted))", opacity: 0.5 }}>
-                Get Aether
-              </Link>
-            </div>
-
+          <div className="flex flex-col gap-3 px-3 pb-4">
             {/* Search trigger */}
             <button
               onClick={() => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] w-full transition-colors hover:border-[rgb(var(--fg)/0.3)] hover:bg-[rgb(var(--fg)/0.04)] hover:text-[rgb(var(--fg))]"
+              className="flex items-center gap-2 px-2.5 h-8 rounded-[6px] text-[13px] tracking-tight text-[rgb(var(--muted))] border border-[rgb(var(--line))] w-full transition-colors hover:border-[rgb(var(--fg)/0.25)] hover:text-[rgb(var(--fg))]"
             >
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" aria-hidden="true">
                 <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
               </svg>
               <span className="flex-1 text-left">Search</span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] border border-[rgb(var(--line))]">⌘K</span>
+              <span className="text-[11px] opacity-70">⌘K</span>
             </button>
 
-            <div className="h-px" style={{ background: "rgb(var(--line))" }} />
-
             {/* Product switcher */}
-            <div className="flex flex-col gap-0.5">
+            <div className="grid grid-cols-2 gap-0.5 p-0.5 rounded-[6px]" style={{ background: "rgb(var(--fg) / 0.05)" }}>
               {PRODUCTS.map((p) => {
                 const active = p.id === activeProductId;
                 return (
                   <button
                     key={p.id}
                     onClick={() => handleSelectProduct(p.id)}
-                    className="group relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-opacity duration-200 hover:opacity-100"
-                    style={{ background: active ? rgba(p.accent, 0.12) : "transparent" }}
+                    className="h-7 rounded-[5px] text-[13px] tracking-tight transition-colors"
+                    style={{
+                      background: active ? "rgb(var(--bg))" : "transparent",
+                      color: "rgb(var(--fg))",
+                      opacity: active ? 1 : 0.55,
+                      fontWeight: active ? 500 : 400,
+                      boxShadow: active ? "0 0 0 1px rgb(var(--line))" : "none",
+                    }}
                   >
-                    <span aria-hidden className={SIDEBAR_HOVER_OVERLAY} />
-                    <span className="relative text-[14px] tracking-tight" style={{ color: "rgb(var(--fg))", fontWeight: active ? 600 : 400, opacity: active ? 1 : 0.5 }}>{p.name}</span>
-                    <span className="relative text-[12px] tracking-tight" style={{ color: "rgb(var(--muted))", opacity: 0.5 }}>{p.description}</span>
+                    {p.name}
                   </button>
                 );
               })}
             </div>
+          </div>
 
-            <div className="h-px" style={{ background: "rgb(var(--line))" }} />
-
-            {/* Intro link */}
-            <div className="flex flex-col gap-0.5">
-              <SidebarNavLink
-                href={`#${INTRO_ID}`}
-                active={activeArticleId === INTRO_ID}
-                accent={product.accent}
-              >
+          {/* Contents */}
+          <nav aria-label="Contents" className="flex-1 min-h-0 overflow-y-auto px-3 pb-6 flex flex-col gap-5" data-lenis-prevent>
+            <div className="flex flex-col">
+              <SidebarNavLink href={`#${INTRO_ID}`} active={activeArticleId === INTRO_ID} accent={product.accent}>
                 Introduction
               </SidebarNavLink>
             </div>
-
-            {/* Nav sections */}
             {product.sections.map((section) => (
-              <div key={section.id} className="flex flex-col gap-0.5">
-                <p className="text-[12px] font-semibold tracking-tight px-3 mb-1 mt-2" style={{ color: "rgb(var(--fg))", opacity: 0.55 }}>
+              <div key={section.id} className="flex flex-col">
+                <p className="text-[12px] font-medium tracking-tight px-2.5 mb-1" style={{ color: "rgb(var(--muted))" }}>
                   {section.title}
                 </p>
-                {section.articles.map((article) => {
-                  const active = activeArticleId === article.id;
-                  return (
-                    <SidebarNavLink
-                      key={article.id}
-                      href={`#${article.id}`}
-                      active={active}
-                      accent={product.accent}
-                    >
-                      {article.title}
-                    </SidebarNavLink>
-                  );
-                })}
+                {section.articles.map((article) => (
+                  <SidebarNavLink key={article.id} href={`#${article.id}`} active={activeArticleId === article.id} accent={product.accent}>
+                    {article.title}
+                  </SidebarNavLink>
+                ))}
               </div>
             ))}
+          </nav>
+
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-[rgb(var(--line))]">
+            <ThemeSwitch />
+            {product.id === "aether" && (
+              <Link href="/aether#pricing" className="text-[12.5px] tracking-tight transition-colors hover:text-[rgb(var(--fg))]" style={{ color: "rgb(var(--muted))" }}>
+                Get Aether
+              </Link>
+            )}
           </div>
         </aside>
 
-        {/* Content — centered with max-width */}
-        <div ref={scrollElRef} className="docs-scroll flex-1 min-w-0 pb-32 lg:pb-24 overflow-y-auto">
-          <div className="mx-auto max-w-4xl px-6 sm:px-10">
+        {/* Content: one reading column centred beside the sidebar, and on
+            wide screens (2xl) an "On this page" rail for the current article. */}
+        <div ref={scrollElRef} className="docs-scroll flex-1 min-w-0 pb-32 lg:pb-24">
+          <div className="flex justify-center gap-12 xl:gap-16 px-6 sm:px-10 xl:px-14">
+          {/* Matches the "On this page" rail's width, so the column stays
+              centred in the space beside the sidebar. */}
+          <div aria-hidden="true" className="hidden 2xl:block w-52 shrink-0" />
+          <div className="min-w-0 flex-1 max-w-[46rem]">
 
           {/* Introduction */}
-          <article id={INTRO_ID} className="scroll-mt-4 py-12 sm:py-16 border-b border-[rgb(var(--line))]">
+          <article id={INTRO_ID} className="scroll-mt-20 lg:scroll-mt-6 py-12 sm:py-16 border-b border-[rgb(var(--line))]">
               <p className="text-[14px] tracking-tight mb-4 font-medium" style={{ color: rgba(product.accent, 1) }}>
                 {product.name}
               </p>
@@ -1607,43 +1539,41 @@ function DocsPageInner() {
                   : "Inertia is a small design and development studio. This documentation covers our services, how we work, and what to expect when working with us."}
               </p>
 
-              {/* Quick start cards */}
+              {/* Every section with its articles, so the intro doubles as a
+                  table of contents. */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-                {product.sections.slice(0, 4).map((section) => {
-                  const first = section.articles[0];
-                  return (
-                    <a
-                      key={section.id}
-                      href={`#${first.id}`}
-                      className="group flex flex-col gap-1.5 p-4 rounded-xl border border-[rgb(var(--line))] transition-all hover:border-[rgb(var(--fg)/0.25)] hover:bg-[rgb(var(--fg)/0.03)] hover:shadow-sm"
-                      style={{ background: "rgb(var(--fg) / 0.02)" }}
-                    >
-                      <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{section.title}</span>
-                      <span className="text-[13px] tracking-tight leading-snug" style={{ color: "rgb(var(--muted))", opacity: 0.65 }}>
-                        {section.articles.length} {section.articles.length === 1 ? "article" : "articles"}
-                      </span>
-                      <span className="text-[13px] tracking-tight mt-1 transition-colors" style={{ color: rgba(product.accent, 0.9) }}>
-                        Start with {first.title} →
-                      </span>
-                    </a>
-                  );
-                })}
+                {product.sections.map((section) => (
+                  <div key={section.id} className="flex flex-col gap-2 p-4 rounded-[6px] border border-[rgb(var(--line))]">
+                    <span className="text-[15px] font-medium tracking-tight text-[rgb(var(--fg))]">{section.title}</span>
+                    <ul className="flex flex-col gap-1">
+                      {section.articles.map((a) => (
+                        <li key={a.id}>
+                          <a href={`#${a.id}`} className="text-[14px] tracking-tight transition-colors hover:text-[rgb(var(--fg))]" style={{ color: "rgb(var(--muted))" }}>
+                            {a.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
 
               {product.id === "aether" && (
-                <Link href="/aether#pricing" className="inline-flex items-center gap-1.5 rounded-[6px] px-4 py-2 text-[13px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: rgba(product.accent, 0.12), color: rgba(product.accent, 1) }}>
+                <Link href="/aether#pricing" className="inline-flex items-center gap-1.5 rounded-[6px] px-4 h-9 text-[14px] font-medium tracking-tight transition-opacity hover:opacity-80" style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}>
                   Get Aether
                 </Link>
               )}
           </article>
 
           {/* Articles */}
-          {product.sections.map((section) =>
-            section.articles.map((article) => (
+          {flatArticles.map(({ article, section }, idx) => {
+            const prev = flatArticles[idx - 1];
+            const next = flatArticles[idx + 1];
+            return (
               <article
                 key={article.id}
                 id={article.id}
-                className="scroll-mt-4 py-10 sm:py-14 border-b border-[rgb(var(--line))]"
+                className="scroll-mt-20 lg:scroll-mt-6 py-10 sm:py-14 border-b border-[rgb(var(--line))]"
               >
                 <div>
                   <p className="text-[14px] tracking-tight mb-3 font-medium" style={{ color: rgba(product.accent, 1) }}>
@@ -1652,26 +1582,77 @@ function DocsPageInner() {
                   <h2 className="text-[1.75rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))] mb-8">
                     {article.title}
                   </h2>
-                  <ArticleBody body={article.body} accent={product.accent} />
+                  <ArticleBody body={article.body} accent={product.accent} articleId={article.id} />
                 </div>
+                {/* Previous / next, so the docs read as a sequence. */}
+                <nav aria-label="Article" className="mt-12 grid grid-cols-2 gap-3">
+                  {prev ? (
+                    <a href={`#${prev.article.id}`} className="flex flex-col gap-1 rounded-[6px] border border-[rgb(var(--line))] px-4 py-3 transition-colors hover:border-[rgb(var(--fg)/0.25)]">
+                      <span className="text-[12px] tracking-tight" style={{ color: "rgb(var(--muted))" }}>← Previous</span>
+                      <span className="text-[14.5px] tracking-tight text-[rgb(var(--fg))]">{prev.article.title}</span>
+                    </a>
+                  ) : <span />}
+                  {next ? (
+                    <a href={`#${next.article.id}`} className="flex flex-col items-end gap-1 rounded-[6px] border border-[rgb(var(--line))] px-4 py-3 text-right transition-colors hover:border-[rgb(var(--fg)/0.25)]">
+                      <span className="text-[12px] tracking-tight" style={{ color: "rgb(var(--muted))" }}>Next →</span>
+                      <span className="text-[14.5px] tracking-tight text-[rgb(var(--fg))]">{next.article.title}</span>
+                    </a>
+                  ) : <span />}
+                </nav>
               </article>
-            ))
-          )}
-          {/* End of docs */}
-          <div className="flex flex-col items-center gap-5 py-20 text-center">
-            <div className="w-8 h-px" style={{ background: "rgb(var(--line))" }} />
-            <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
-              You've reached the end of the {product.name} docs.
+            );
+          })}
+          {/* End of docs: where to go if the answer wasn't here. Left
+              aligned with the column, like everything above it. */}
+          <div className="py-16 sm:py-20">
+            <p className="text-[13px] tracking-tight mb-3" style={{ color: "rgb(var(--muted))" }}>
+              End of the {product.name} docs
             </p>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] tracking-tight transition-all hover:opacity-80"
-              style={{ background: "rgb(var(--fg) / 0.06)", border: "1px solid rgb(var(--line))", color: "rgb(var(--muted))" }}
-            >
-              <ArrowUpIcon />
-              Back to top
-            </button>
+            <h2 className="text-[1.5rem] font-medium tracking-tight leading-tight text-[rgb(var(--fg))]">
+              Didn't find what you needed?
+            </h2>
+            <p className="mt-2 max-w-md text-[16px] leading-relaxed tracking-tight" style={{ color: "rgb(var(--muted))" }}>
+              Email us and we'll help you sort it out.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <a
+                href="mailto:hello@byinertia.com"
+                className="inline-flex h-9 items-center rounded-[6px] px-4 text-[14px] font-medium tracking-tight transition-opacity hover:opacity-80"
+                style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+              >
+                Email hello@byinertia.com
+              </a>
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="inline-flex h-9 items-center gap-1.5 rounded-[6px] border border-[rgb(var(--line))] px-4 text-[14px] tracking-tight text-[rgb(var(--fg))] transition-colors hover:border-[rgb(var(--fg)/0.25)]"
+              >
+                <ArrowUpIcon className="size-[0.9em]" />
+                Back to top
+              </button>
+            </div>
           </div>
+          </div>
+
+          {/* On this page: the current article's subheadings. */}
+          <aside className="hidden 2xl:block w-52 shrink-0">
+            <div className="sticky top-0 pt-16 pb-8">
+              {headings.length > 0 && (
+                <>
+                  <p className="text-[12px] font-medium tracking-tight mb-2" style={{ color: "rgb(var(--muted))" }}>On this page</p>
+                  <ul className="flex flex-col gap-1.5 border-l border-[rgb(var(--line))]">
+                    {headings.map((h) => (
+                      <li key={h.id}>
+                        <a href={`#${h.id}`} className="-ml-px block border-l border-transparent pl-3 text-[13px] leading-snug tracking-tight transition-colors hover:border-[rgb(var(--fg)/0.4)] hover:text-[rgb(var(--fg))]" style={{ color: "rgb(var(--muted))" }}>
+                          {h.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          </aside>
           </div>
         </div>
       </div>
@@ -1703,7 +1684,7 @@ function DocsPageInner() {
 
       {/* Nudge notification — bottom-left on mobile, centered on desktop */}
       <div
-        className={`fixed bottom-7 left-6 lg:left-1/2 z-50 flex items-center gap-2.5 px-3.5 py-2.5 rounded-[14px] border border-[rgb(var(--line))] bg-[rgb(var(--surface))] shadow-[0_8px_32px_rgba(0,0,0,0.12)] whitespace-nowrap transition-[opacity,transform] duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] lg:-translate-x-1/2 ${
+        className={`fixed bottom-7 left-6 lg:left-1/2 z-50 flex items-center gap-3 px-3 py-2 rounded-[6px] border border-[rgb(var(--line))] bg-[rgb(var(--surface))] whitespace-nowrap transition-[opacity,transform] duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] lg:-translate-x-1/2 ${
           showNudge && !nudgeDismissed
             ? "translate-y-0 opacity-100 pointer-events-auto"
             : "translate-y-4 opacity-0 pointer-events-none"
@@ -1712,10 +1693,9 @@ function DocsPageInner() {
         <Link
           href="/"
           className="text-[13px] tracking-tight text-[rgb(var(--fg))]"
-          style={{ opacity: 0.75 }}
           onClick={() => setNudgeDismissed(true)}
         >
-          Done reading? Head back to the site →
+          Back to the site
         </Link>
         <button
           onClick={() => { setShowNudge(false); setNudgeDismissed(true); }}
@@ -1729,25 +1709,6 @@ function DocsPageInner() {
         </button>
       </div>
 
-      {/* Fixed mobile menu button */}
-      {!sheetOpen && (
-        <button
-          onClick={() => setSheetOpen(true)}
-          className="lg:hidden fixed z-40 flex flex-col gap-[5px] items-center justify-center [-webkit-tap-highlight-color:transparent]"
-          style={{
-            top: 10,
-            right: 16,
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            background: "rgb(var(--fg) / 0.08)",
-          }}
-          aria-label="Open navigation"
-        >
-          <span className="block h-px" style={{ width: 16, background: "rgb(var(--fg))" }} />
-          <span className="block h-px" style={{ width: 16, background: "rgb(var(--fg))" }} />
-        </button>
-      )}
 
       {/* Search modal */}
       {searchOpen && (
@@ -1758,18 +1719,18 @@ function DocsPageInner() {
         >
           <div
             ref={searchRef}
-            className="w-full max-w-2xl mx-4 mt-[10vh] rounded-xl overflow-hidden flex flex-col"
+            className="w-full max-w-2xl mx-4 mt-[10vh] rounded-[6px] overflow-hidden flex flex-col"
             style={{
-              background: "rgba(255,255,255,0.92)",
+              background: "rgb(var(--bg) / 0.92)",
               backdropFilter: "blur(20px)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid rgb(var(--fg) / 0.08)",
               boxShadow: "0 32px 80px rgba(0,0,0,0.25)",
               maxHeight: "72vh",
             }}
           >
             {/* Search input */}
             <div className="flex items-center gap-3 px-5 py-4">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0" style={{ color: "rgb(var(--fg) / 0.3)" }} aria-hidden="true">
                 <circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l2.5 2.5" />
               </svg>
               <input
@@ -1779,12 +1740,12 @@ function DocsPageInner() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search documentation..."
                 className="flex-1 bg-transparent text-[15px] tracking-tight outline-none"
-                style={{ color: "rgba(0,0,0,0.8)", caretColor: "black" }}
+                style={{ color: "rgb(var(--fg) / 0.8)", caretColor: "rgb(var(--fg))" }}
               />
               {searchQuery ? (
                 <button
                   onClick={() => setSearchQuery("")}
-                  style={{ color: "rgba(0,0,0,0.3)" }}
+                  style={{ color: "rgb(var(--fg) / 0.3)" }}
                   className="hover:text-black transition-colors"
                   aria-label="Clear"
                 >
@@ -1795,14 +1756,14 @@ function DocsPageInner() {
               ) : (
                 <span
                   className="text-[11px] tracking-tight px-1.5 py-0.5 rounded"
-                  style={{ color: "rgba(0,0,0,0.3)", border: "1px solid rgba(0,0,0,0.12)" }}
+                  style={{ color: "rgb(var(--fg) / 0.3)", border: "1px solid rgb(var(--fg) / 0.12)" }}
                 >
                   Esc
                 </span>
               )}
             </div>
 
-            <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }} />
+            <div style={{ borderTop: "1px solid rgb(var(--fg) / 0.08)" }} />
 
             {/* Results list */}
             <div className="overflow-y-auto flex-1 py-3">
@@ -1811,7 +1772,7 @@ function DocsPageInner() {
                   <div key={p.id} className="mb-2">
                     <p
                       className="text-[11px] tracking-tight font-medium px-5 py-2"
-                      style={{ color: "rgba(0,0,0,0.4)" }}
+                      style={{ color: "rgb(var(--fg) / 0.4)" }}
                     >
                       {p.name}
                     </p>
@@ -1825,11 +1786,11 @@ function DocsPageInner() {
                           setTimeout(() => document.getElementById(a.id)?.scrollIntoView({ behavior: "smooth" }), 80);
                         }}
                         className="flex items-center gap-3 w-full text-left px-5 py-2.5 transition-colors"
-                        style={{ color: "rgba(0,0,0,0.78)" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.045)")}
+                        style={{ color: "rgb(var(--fg) / 0.78)" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = "rgb(var(--fg) / 0.045)")}
                         onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                       >
-                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ color: "rgba(0,0,0,0.3)" }} aria-hidden="true">
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0" style={{ color: "rgb(var(--fg) / 0.3)" }} aria-hidden="true">
                           <rect x="3" y="2" width="10" height="12" rx="1.5" />
                           <line x1="5.5" y1="6" x2="10.5" y2="6" />
                           <line x1="5.5" y1="9" x2="9" y2="9" />
@@ -1840,7 +1801,7 @@ function DocsPageInner() {
                   </div>
                 ))
               ) : searchResults.length === 0 ? (
-                <p className="px-5 py-8 text-[13px] tracking-tight text-center" style={{ color: "rgba(0,0,0,0.35)" }}>
+                <p className="px-5 py-8 text-[13px] tracking-tight text-center" style={{ color: "rgb(var(--fg) / 0.35)" }}>
                   No results for &ldquo;{searchQuery}&rdquo;
                 </p>
               ) : (
@@ -1856,17 +1817,17 @@ function DocsPageInner() {
                         setTimeout(() => document.getElementById(r.articleId)?.scrollIntoView({ behavior: "smooth" }), 80);
                       }}
                       className="flex items-start gap-3 w-full text-left px-5 py-3 transition-colors"
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.045)")}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgb(var(--fg) / 0.045)")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 mt-[3px]" style={{ color: "rgba(0,0,0,0.3)" }} aria-hidden="true">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 mt-[3px]" style={{ color: "rgb(var(--fg) / 0.3)" }} aria-hidden="true">
                         <rect x="3" y="2" width="10" height="12" rx="1.5" />
                         <line x1="5.5" y1="6" x2="10.5" y2="6" />
                         <line x1="5.5" y1="9" x2="9" y2="9" />
                       </svg>
                       <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[13.5px] tracking-tight" style={{ color: "rgba(0,0,0,0.75)" }}>{r.articleTitle}</span>
-                        <span className="text-[11.5px] tracking-tight" style={{ color: "rgba(0,0,0,0.32)" }}>{r.productName} / {r.sectionTitle}</span>
+                        <span className="text-[13.5px] tracking-tight" style={{ color: "rgb(var(--fg) / 0.75)" }}>{r.articleTitle}</span>
+                        <span className="text-[11.5px] tracking-tight" style={{ color: "rgb(var(--fg) / 0.32)" }}>{r.productName} / {r.sectionTitle}</span>
                       </div>
                     </button>
                   );
@@ -1896,7 +1857,7 @@ function DocsPageInner() {
           right: 12,
           background: "rgb(var(--surface))",
           border: "1px solid rgb(var(--line))",
-          borderRadius: "20px",
+          borderRadius: "8px",
           display: sheetOpen ? "flex" : "none",
           boxShadow: "0 20px 60px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.12)",
         }}
@@ -1906,8 +1867,13 @@ function DocsPageInner() {
           {/* Top row: logo + close */}
           <div className="flex items-center justify-between">
             <Link href="/" onClick={() => setSheetOpen(false)}>
-              <img src="/logo.png" alt="Inertia" className="h-6 w-auto" />
+              <img src="/logo.png" alt="Inertia" className="inertia-logo h-6 w-auto" />
             </Link>
+            {/* Theme switch lives here on phones: the header's right edge is
+                under the fixed menu button. */}
+            <div className="ml-auto mr-2">
+              <ThemeSwitch />
+            </div>
             <button
               onClick={() => setSheetOpen(false)}
               className="h-8 w-8 flex items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent]"
@@ -1921,14 +1887,14 @@ function DocsPageInner() {
           </div>
 
           {/* Product tabs */}
-          <div className="flex gap-1.5 p-1 rounded-xl" style={{ background: "rgb(var(--fg) / 0.05)" }}>
+          <div className="flex gap-1.5 p-1 rounded-[6px]" style={{ background: "rgb(var(--fg) / 0.05)" }}>
             {PRODUCTS.map((p) => {
               const active = p.id === activeProductId;
               return (
                 <button
                   key={p.id}
                   onClick={() => handleSelectProduct(p.id)}
-                  className="flex-1 py-1.5 rounded-lg text-[13px] font-medium tracking-tight transition-all [-webkit-tap-highlight-color:transparent]"
+                  className="flex-1 py-1.5 rounded-[6px] text-[13px] font-medium tracking-tight transition-all [-webkit-tap-highlight-color:transparent]"
                   style={{
                     background: active ? "rgb(var(--surface))" : "transparent",
                     color: active ? rgba(p.accent, 1) : "rgb(var(--fg))",
@@ -1945,7 +1911,7 @@ function DocsPageInner() {
           {/* Search */}
           <button
             onClick={() => { setSheetOpen(false); setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[rgb(var(--line))] w-full text-left [-webkit-tap-highlight-color:transparent]"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-[6px] border border-[rgb(var(--line))] w-full text-left [-webkit-tap-highlight-color:transparent]"
             style={{ background: "rgb(var(--bg))" }}
           >
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 text-[rgb(var(--muted))]" aria-hidden="true">
@@ -1969,7 +1935,7 @@ function DocsPageInner() {
             accent={product.accent}
             onClick={() => setSheetOpen(false)}
             className="text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent]"
-            rounded="rounded-xl"
+            rounded="rounded-[6px]"
           >
             Introduction
           </SidebarNavLink>
@@ -1989,7 +1955,7 @@ function DocsPageInner() {
                     accent={product.accent}
                     onClick={() => setSheetOpen(false)}
                     className="text-[14px] tracking-tight [-webkit-tap-highlight-color:transparent]"
-                    rounded="rounded-xl"
+                    rounded="rounded-[6px]"
                   >
                     {article.title}
                   </SidebarNavLink>

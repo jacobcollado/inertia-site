@@ -83,6 +83,100 @@
   background: rgb(var(--bg));
 }
 
+/* Homepage palette. The homepage's light sections and the material
+   illustrations (components/material-art.tsx) read these rather than
+   hardcoded hex, so the theme switch in the footer can flip them. Light
+   values are the original colours. */
+:root {
+  --ink: #1a1a1a;
+  --ink-rgb: 26 26 26;
+  --ink-soft: #3d3d3d;
+  --ink-2: #5c5c5c;
+  --ink-3: #8a8a8a;
+  --ink-4: #9a9a9a;
+  --paper: #fff;
+  --tile: #f4f4f4;
+  --tile-2: #f0f0f0;
+  --tile-3: #ececec;
+  --cta-fill: #000000;
+  --cta-fg: #fff;
+  /* Header CTAs (Reach out + sign-in arrow): same as the page CTA in light,
+     quieter in dark so they don't glare from the top of every page. */
+  --hdr-fill: #000000;
+  --hdr-fg: #fff;
+  --home-top: 255 255 255;
+  --shimmer-mid: #9a9a9a;
+  --shimmer-peak: #c9c9c9;
+  --fig-grey: #e2e2e2;
+  --fig-grey-2: #dfdfe4;
+  /* The login card's recessed surface (app/login/login-form.tsx). */
+  --login-card-bg:
+    radial-gradient(55% 85% at 0% 55%, rgba(0,0,0,0.022) 0%, transparent 58%),
+    radial-gradient(55% 85% at 100% 55%, rgba(0,0,0,0.022) 0%, transparent 58%),
+    radial-gradient(90% 50% at 50% 100%, rgba(255,255,255,0.7) 0%, transparent 72%),
+    linear-gradient(180deg, #fcfcfc 0%, #ffffff 22%);
+  --login-card-shadow:
+    var(--shadow-raised),
+    0 10px 28px -14px rgba(0,0,0,0.14),
+    inset 0 1px 2px rgba(0,0,0,0.04),
+    inset 3px 0 3px -3px rgba(0,0,0,0.035),
+    inset 0 -1.5px 2px rgba(255,255,255,0.95),
+    inset 0 0 0 1px rgba(0,0,0,0.04);
+  --login-card-edge:
+    linear-gradient(90deg, rgba(0,0,0,0.016) 0%, transparent 14%, transparent 86%, rgba(0,0,0,0.016) 100%),
+    linear-gradient(0deg, rgba(0,0,0,0.02) 0%, transparent 18%);
+}
+
+/* Dark mode on the routes that follow the theme switch (data-theme and
+   .themed come from THEME_SCRIPT in app/theme-provider.tsx). The page goes
+   to a soft near-black; the homepage's dark zone keeps its deeper #0a0a0a,
+   so there's still a quiet shift into it. */
+html.themed[data-theme="dark"] {
+  --ink: #ececec;
+  --ink-rgb: 236 236 236;
+  --ink-soft: #c6c6c6;
+  --ink-2: #a3a3a3;
+  --ink-3: #7d7d7d;
+  --ink-4: #6c6c6c;
+  --paper: #141414;
+  --tile: #1c1c1c;
+  --tile-2: #222222;
+  --tile-3: #262626;
+  --cta-fill: #ececec;
+  --cta-fg: #141414;
+  --hdr-fill: #2a2a2a;
+  --hdr-fg: #ececec;
+  --home-top: 20 20 20;
+  --shimmer-mid: #8a8a8a;
+  --shimmer-peak: #5e5e5e;
+  --fig-grey: #2e2e2e;
+  --fig-grey-2: #2c2c33;
+  --login-card-bg: linear-gradient(180deg, #1e1e1e 0%, #1a1a1a 60%);
+  --login-card-shadow:
+    0 10px 28px -14px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+  --login-card-edge: none;
+
+  --bg: 20 20 20;
+  --surface: 28 28 28;
+  --surface-elevated: 36 36 36;
+  --fg: 236 236 236;
+  --muted: 150 150 150;
+  --line: 48 48 48;
+  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
+  --scrollbar-thumb: 72 72 72;
+  --scrollbar-thumb-hover: 110 110 110;
+  --scrollbar-track: 20 20 20;
+  color-scheme: dark;
+}
+/* Black PNG wordmarks flip light; the cookie card is white everywhere else. */
+html.themed[data-theme="dark"] :is(.inertia-logo, .theme-invert) { filter: invert(1); }
+html.themed[data-theme="dark"] .cb-card { background: #1c1c1c; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.4); }
+html.themed[data-theme="dark"] .shimmer-word--warm {
+  background-image: linear-gradient(100deg, #ddd4c8 0%, #ddd4c8 42%, #9a9083 48%, #6f675d 50%, #9a9083 52%, #ddd4c8 58%, #ddd4c8 100%);
+}
+
 /* Bento grid: neutral grey in light mode */
 :root:not(.dark) .bento-light-invert {
   --fg: 18 18 18;
@@ -321,7 +415,7 @@ html {
   }
 }
 @keyframes home-overscroll-base {
-  0%, 88% { background-color: rgb(255 255 255); }
+  0%, 88% { background-color: rgb(var(--home-top)); }
   100%    { background-color: rgb(10 10 10); }
 }
 /* Fallback for engines without scroll-driven animations: a viewport-fixed
@@ -330,8 +424,8 @@ html {
   html.home-dark-root {
     background: linear-gradient(
       to bottom,
-      rgb(255 255 255) 0%,
-      rgb(255 255 255) 50%,
+      rgb(var(--home-top)) 0%,
+      rgb(var(--home-top)) 50%,
       rgb(10 10 10) 50%,
       rgb(10 10 10) 100%
     );
@@ -1213,13 +1307,13 @@ h1:hover .redact > span.redact-inner,
   padding-right: 0.05em;
   background-image: linear-gradient(
     100deg,
-    #1a1a1a 0%,
-    #1a1a1a 42%,
-    #9a9a9a 48%,
-    #c9c9c9 50%,
-    #9a9a9a 52%,
-    #1a1a1a 58%,
-    #1a1a1a 100%
+    var(--ink) 0%,
+    var(--ink) 42%,
+    var(--shimmer-mid) 48%,
+    var(--shimmer-peak) 50%,
+    var(--shimmer-mid) 52%,
+    var(--ink) 58%,
+    var(--ink) 100%
   );
   background-size: 600% 100%;
   background-repeat: no-repeat;
@@ -1235,13 +1329,13 @@ h1:hover .redact > span.redact-inner,
 .shimmer-word--muted {
   background-image: linear-gradient(
     100deg,
-    #5c5c5c 0%,
-    #5c5c5c 42%,
+    var(--ink-2) 0%,
+    var(--ink-2) 42%,
     #8f8f8f 48%,
     #b4b4b4 50%,
     #8f8f8f 52%,
-    #5c5c5c 58%,
-    #5c5c5c 100%
+    var(--ink-2) 58%,
+    var(--ink-2) 100%
   );
 }
 
@@ -2805,20 +2899,19 @@ h1:hover .redact > span.redact-inner,
 .prose-marker > p:nth-of-type(4n + 4) > strong:first-child { --marker-pen: 140 189 107; } /* olive */
 
 /* Dark mode: a translucent wash over a dark page turns muddy, so pull the
-   stroke back and let the label's own ink stay bright on top. */
-@media (prefers-color-scheme: dark) {
-  .prose-marker > p > strong:first-child {
-    background-image: linear-gradient(
-      to right,
-      rgb(var(--marker-pen) / 0) 0%,
-      rgb(var(--marker-pen) / 0.34) 1.5%,
-      rgb(var(--marker-pen) / 0.4) 12%,
-      rgb(var(--marker-pen) / 0.3) 46%,
-      rgb(var(--marker-pen) / 0.42) 74%,
-      rgb(var(--marker-pen) / 0.32) 96%,
-      rgb(var(--marker-pen) / 0) 100%
-    );
-  }
+   stroke back and let the label's own ink stay bright on top. Keyed to the
+   site's theme switch rather than the OS setting. */
+html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
+  background-image: linear-gradient(
+    to right,
+    rgb(var(--marker-pen) / 0) 0%,
+    rgb(var(--marker-pen) / 0.34) 1.5%,
+    rgb(var(--marker-pen) / 0.4) 12%,
+    rgb(var(--marker-pen) / 0.3) 46%,
+    rgb(var(--marker-pen) / 0.42) 74%,
+    rgb(var(--marker-pen) / 0.32) 96%,
+    rgb(var(--marker-pen) / 0) 100%
+  );
 }
 
 /* Aether pricing — ocean gradient outline on include bonus badge */
@@ -2901,7 +2994,7 @@ h1:hover .redact > span.redact-inner,
 }
 
 /* Hero canvas (components/hero-canvas.tsx): Inertia's cursor idles over the
-   selected square; You carries the halftone square into the dashed slot
+   selected headline; You carries the last card into its dashed slot
    (its offset is in % of its own size, so it lands the same at any panel
    width), it settles, fades, and starts over. Transform and opacity only,
    so it stays on the compositor. */
@@ -2915,8 +3008,8 @@ h1:hover .redact > span.redact-inner,
 .hero-held { will-change: transform, opacity; animation: hero-held 9s cubic-bezier(0.45, 0, 0.25, 1) infinite; }
 @keyframes hero-held {
   0%, 12% { transform: translate(0, 0) rotate(-6deg); opacity: 1; }
-  48%, 72% { transform: translate(22.7%, 139.4%) rotate(0deg); opacity: 1; }
-  80% { transform: translate(22.7%, 139.4%) rotate(0deg); opacity: 0; }
+  48%, 72% { transform: translate(-24.4%, 87.7%) rotate(0deg); opacity: 1; }
+  80% { transform: translate(-24.4%, 87.7%) rotate(0deg); opacity: 0; }
   81% { transform: translate(0, 0) rotate(-6deg); opacity: 0; }
   92%, 100% { transform: translate(0, 0) rotate(-6deg); opacity: 1; }
 }

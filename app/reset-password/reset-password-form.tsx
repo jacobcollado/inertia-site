@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { ThemeToggle } from "@/app/theme-toggle";
+import { ThemeSwitch } from "@/app/site-footer";
 
 type Phase = "checking" | "request" | "sent" | "verifying" | "expired" | "set-password" | "done";
 
@@ -116,9 +116,9 @@ export function ResetPasswordForm() {
       <div className="fixed top-0 inset-x-0 z-10 px-6" style={{ height: 72 }}>
         <div className="flex items-center justify-between h-full mx-auto" style={{ maxWidth: "80rem" }}>
           <Link href="/">
-            <img src="/logo.png" alt="Inertia" className="h-6 w-auto" style={{ display: "block" }} />
+            <img src="/logo.png" alt="Inertia" className="inertia-logo h-6 w-auto" style={{ display: "block" }} />
           </Link>
-          <ThemeToggle />
+          <ThemeSwitch />
         </div>
       </div>
 

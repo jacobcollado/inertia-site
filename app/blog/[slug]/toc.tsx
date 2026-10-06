@@ -354,11 +354,11 @@ export function TOCSticky({ headings }: { headings: Heading[] }) {
           re-render would wipe that mark and hide it. The stuck padding
           change goes through style instead. */}
       <div
-        className="rise max-sm:sticky max-sm:top-0 max-sm:z-30 max-sm:-mx-6 max-sm:px-6 max-sm:bg-white max-sm:pb-3 pt-[var(--toc-pt)] transition-[box-shadow,padding] duration-200"
+        className="rise max-sm:sticky max-sm:top-0 max-sm:z-30 max-sm:-mx-6 max-sm:px-6 max-sm:bg-[var(--paper)] max-sm:pb-3 pt-[var(--toc-pt)] transition-[box-shadow,padding] duration-200"
         style={
           {
             "--toc-pt": stuck ? "12px" : "32px",
-            boxShadow: stuck ? "0 1px 0 rgba(26,26,26,0.09)" : "0 1px 0 transparent",
+            boxShadow: stuck ? "0 1px 0 rgb(var(--ink-rgb) / 0.09)" : "0 1px 0 transparent",
           } as React.CSSProperties
         }
       >

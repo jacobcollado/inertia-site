@@ -12,7 +12,7 @@
    translucent value over a whole card's white backdrop reads as plain
    white, so it needs to be opaque here to actually match. */
 export function postTint(_slug?: string): string {
-  return "#f1f1f1";
+  return "var(--tile-2)";
 }
 
 /* ── Post glyphs ─────────────────────────────────────────
@@ -34,7 +34,7 @@ export function PostGlyph({
   tag?: string;
   className?: string;
 }) {
-  const stroke = "rgba(26,26,26,0.46)";
+  const stroke = "rgb(var(--ink-rgb) / 0.46)";
   const common = {
     viewBox: "0 0 64 64",
     fill: "none" as const,

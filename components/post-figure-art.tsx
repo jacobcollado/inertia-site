@@ -292,7 +292,7 @@ function TenthPage({ ids }: P) {
 
 /* consistency-beats-novelty: the button that drifted, and the third grey. */
 function DriftAndGreys({ ids }: P) {
-  const greys = ["#e2e2e2", "#e2e2e2", "#dfdfe4"];
+  const greys = ["var(--fig-grey)", "var(--fig-grey)", "var(--fig-grey-2)"];
   return (
     <>
       <line x1={60} y1={16} x2={60} y2={196} stroke={SEL} strokeWidth={1.4} strokeDasharray="3 4" />
@@ -342,8 +342,8 @@ export function PostFigureArt({ name }: { name: string }) {
       <div
         className="rounded-[6px] px-4 py-6 sm:px-8 sm:py-8"
         style={{
-          backgroundColor: "#f4f4f4",
-          backgroundImage: "radial-gradient(ellipse at 50% 45%, rgb(255 255 255 / 0.55), transparent 70%), url(/textures/grain.png)",
+          backgroundColor: "var(--tile)",
+          backgroundImage: "radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--paper) 55%, transparent), transparent 70%), url(/textures/grain.png)",
           backgroundSize: "100% 100%, 96px 96px",
         }}
       >

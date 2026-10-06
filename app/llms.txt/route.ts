@@ -54,7 +54,6 @@ export function GET() {
 ## Aether, our Shopify theme
 
 - [Aether](${BASE}/aether): a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once for a single store, with lifetime updates.
-- [Aether for agencies](${BASE}/aether/commercial): per-store or unlimited commercial licenses for agencies, studios, and operators building client stores
 - [Changelog](${BASE}/aether/changelog): theme updates and release notes
 - [Docs](${BASE}/docs): setup and customization guides
 

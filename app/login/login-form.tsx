@@ -5,9 +5,9 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
-import { ThemeToggle } from "@/app/theme-toggle";
+import { ThemeSwitch } from "@/app/site-footer";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
-import { CTA_FILL, CTA_HEADER_PILL_CLASS, CtaGrain } from "@/lib/cta-chrome";
+import { CTA_HEADER_PILL_CLASS, CtaGrain } from "@/lib/cta-chrome";
 
 // Typography aligned with homepage index cards (questionnaire, body copy, inputs).
 const LOGIN_TITLE =
@@ -539,7 +539,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
           className="flex items-center justify-between h-full mx-auto w-full max-w-[80rem]"
         >
           <Link href="/">
-            <img src="/logo.png" alt="Inertia" className="h-6 w-auto" style={{ display: "block" }} />
+            <img src="/logo.png" alt="Inertia" className="inertia-logo h-6 w-auto" style={{ display: "block" }} />
           </Link>
           <div className="flex items-center gap-3">
             <a
@@ -549,8 +549,8 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               className={CTA_HEADER_PILL_CLASS}
               style={{
                 justifyContent: "center",
-                background: CTA_FILL,
-                color: "#fff",
+                background: "var(--hdr-fill)",
+                color: "var(--hdr-fg)",
                 boxShadow: "none",
                 textDecoration: "none",
                 whiteSpace: "nowrap",
@@ -561,7 +561,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               <CtaGrain />
               <span className="relative">Reach out</span>
             </a>
-            <ThemeToggle />
+            <ThemeSwitch />
           </div>
         </div>
       </div>
@@ -571,24 +571,25 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         <div className="h-[72px] shrink-0" aria-hidden="true" />
         <div className="flex flex-1 flex-col items-center justify-center pb-[10vh]">
           <div className="w-full max-w-3xl mx-auto flex flex-col items-center -translate-y-3 sm:-translate-y-4">
-        {/* Sign-ups closed notice. Sits above the card so it reads as
-            page-level context rather than something the card itself offers. */}
+        {/* Who has an account: Aether owners and studio clients. There's no
+            open sign-up, so this says who it's for rather than how to get in.
+            Sits above the card so it reads as page-level context. */}
         {!SIGNUPS_ENABLED && (
           <div
             className={`flex items-center justify-center gap-2 pl-1 pr-3.5 py-1 rounded-full ${LOGIN_CAPTION} mb-6`}
             style={{ background: "rgb(var(--fg) / 0.05)", color: "rgb(var(--muted))" }}
           >
             <span
-              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-white"
+              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[var(--paper)]"
               style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.18), inset 0 1px 2px rgba(0,0,0,0.12), inset 0 -1px 1px rgba(255,255,255,0.8)" }}
             >
-              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="#18181b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3.5" y="7.25" width="9" height="6.25" rx="1.25" />
-                <path d="M5.25 7.25V5a2.75 2.75 0 0 1 5.5 0v2.25" />
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="8" cy="5.5" r="2.5" />
+                <path d="M3.25 13.5a4.75 4.75 0 0 1 9.5 0" />
               </svg>
             </span>
             <span className="leading-none">
-              Currently <span style={{ color: "rgb(var(--fg))" }}>invite only</span>
+              For <span style={{ color: "rgb(var(--fg))" }}>Aether owners</span> and <span style={{ color: "rgb(var(--fg))" }}>Inertia clients</span>
             </span>
           </div>
         )}
@@ -601,18 +602,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             overflow: "hidden",
             // Keep depth but bias it away from the top — the heading area
             // should stay clean white, with recession only at the edges.
-            background:
-              "radial-gradient(55% 85% at 0% 55%, rgba(0,0,0,0.022) 0%, transparent 58%)," +
-              "radial-gradient(55% 85% at 100% 55%, rgba(0,0,0,0.022) 0%, transparent 58%)," +
-              "radial-gradient(90% 50% at 50% 100%, rgba(255,255,255,0.7) 0%, transparent 72%)," +
-              "linear-gradient(180deg, #fcfcfc 0%, #ffffff 22%)",
-            boxShadow:
-              "var(--shadow-raised)," +
-              "0 10px 28px -14px rgba(0,0,0,0.14)," +
-              "inset 0 1px 2px rgba(0,0,0,0.04)," +
-              "inset 3px 0 3px -3px rgba(0,0,0,0.035)," +
-              "inset 0 -1.5px 2px rgba(255,255,255,0.95)," +
-              "inset 0 0 0 1px rgba(0,0,0,0.04)",
+            // Surfaces live in globals.css (--login-card-*) so dark mode
+            // can swap them.
+            background: "var(--login-card-bg)",
+            boxShadow: "var(--login-card-shadow)",
             animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
           }}
         >
@@ -621,9 +614,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             aria-hidden="true"
             className="absolute inset-0 pointer-events-none rounded-2xl"
             style={{
-              background:
-                "linear-gradient(90deg, rgba(0,0,0,0.016) 0%, transparent 14%, transparent 86%, rgba(0,0,0,0.016) 100%)," +
-                "linear-gradient(0deg, rgba(0,0,0,0.02) 0%, transparent 18%)",
+              background: "var(--login-card-edge)",
             }}
           />
           <div className="relative z-[1] flex flex-col gap-6">
@@ -687,7 +678,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                 {!revealed ? (
                   <>
                     <p className={`${LOGIN_SUBTITLE} text-[rgb(var(--muted))] opacity-50 text-center`}>
-                      Existing client?
+                      Own Aether or working with us?
                     </p>
                     <button
                       type="button"

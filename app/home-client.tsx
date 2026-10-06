@@ -599,7 +599,7 @@ function VercelHero({
     <section
       ref={ref}
       className="relative"
-      style={{ color: "#1a1a1a" }}
+      style={{ color: "var(--ink)" }}
     >
       <div
         className="relative flex items-center"
@@ -613,8 +613,8 @@ function VercelHero({
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
             style={{
               ...liquid(0),
-              background: "rgba(26,26,26,0.06)",
-              color: "rgba(26,26,26,0.7)",
+              background: "rgb(var(--ink-rgb) / 0.06)",
+              color: "rgb(var(--ink-rgb) / 0.7)",
             }}
           >
             900+ clients served since 2022
@@ -627,7 +627,7 @@ function VercelHero({
           {false && (
           <p
             className="inline-flex items-center text-[19px] sm:text-[22px] tracking-tight -mb-4 sm:-mb-6"
-            style={{ ...liquid(60), color: "#1a1a1a" }}
+            style={{ ...liquid(60), color: "var(--ink)" }}
           >
             anti<AntiSlowMark color={accentColor} />slow
           </p>
@@ -635,14 +635,14 @@ function VercelHero({
 
           <h1
             className="tracking-[-0.05em] leading-[0.98] text-[clamp(2.2rem,10.5vw,3rem)] sm:tracking-[-0.045em] sm:text-[clamp(1.8rem,4.2vw,4rem)] flex flex-col items-start"
-            style={{ color: "#1a1a1a", fontWeight: 450 }}
+            style={{ color: "var(--ink)", fontWeight: 450 }}
           >
             <HeroDragHeading lines={HEADING_LINES} mobileLines={HEADING_LINES_MOBILE} align="left" />
           </h1>
 
           <p
             className="max-w-md sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-balance"
-            style={{ ...liquid(120), color: "#5c5c5c" }}
+            style={{ ...liquid(120), color: "var(--ink-2)" }}
           >
             <span className="sm:hidden">
               We design and build websites for local shops, artists and growing startups, from first idea to launch, all in-house.
@@ -656,7 +656,7 @@ function VercelHero({
           <div className="hidden sm:flex flex-col gap-5 max-w-md absolute inset-y-0 right-0 justify-center">
             <p
               className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-right"
-              style={{ ...liquid(300), color: "#5c5c5c" }}
+              style={{ ...liquid(300), color: "var(--ink-2)" }}
             >
               We do design and development ourselves, so you're not stuck explaining your vision twice.
             </p>
@@ -667,7 +667,7 @@ function VercelHero({
           <div className="flex flex-col gap-5 max-w-lg sm:hidden">
             <p
               className="text-[16.5px] leading-relaxed tracking-tight"
-              style={{ ...liquid(300), color: "#5c5c5c" }}
+              style={{ ...liquid(300), color: "var(--ink-2)" }}
             >
               We do design and development ourselves, so you're not stuck explaining your vision twice.
             </p>
@@ -705,7 +705,7 @@ function VercelHero({
                 className={CTA_PILL_CLASS}
                 style={{
                   background: CTA_FILL,
-                  color: "#fff",
+                  color: "var(--cta-fg)",
                   boxShadow: CTA_INSET_SHADOW,
                   fontWeight: 450,
                 }}
@@ -727,8 +727,8 @@ function VercelHero({
                 aria-label="View Aether"
                 className={CTA_PILL_CLASS}
                 style={{
-                  background: "#f0f0f0",
-                  color: "#1a1a1a",
+                  background: "var(--tile-2)",
+                  color: "var(--ink)",
                   boxShadow: CTA_INSET_SHADOW,
                   fontWeight: 450,
                 }}
@@ -743,7 +743,7 @@ function VercelHero({
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center rounded-full px-4 py-2 text-[15px] font-medium tracking-tight"
-              style={{ ...liquid(720), background: "#f0f0f0", color: "#1a1a1a" }}
+              style={{ ...liquid(720), background: "var(--tile-2)", color: "var(--ink)" }}
               onMouseEnter={e => { e.currentTarget.style.transition = "opacity 150ms ease, transform 150ms ease"; e.currentTarget.style.opacity = "0.8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "translateY(0)"; }}
               onMouseDown={e => { e.currentTarget.style.transform = "translateY(0px)"; }}
@@ -1553,7 +1553,7 @@ function Pill({ children }: { children: React.ReactNode }) {
     <span
       className="inline rounded-[6px] px-[0.4em] py-px whitespace-nowrap align-baseline leading-none"
       style={{
-        background: "rgba(26,26,26,0.06)",
+        background: "rgb(var(--ink-rgb) / 0.06)",
         color: "inherit",
       }}
     >
@@ -1713,19 +1713,22 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
           pRef={introRef}
           text={intro}
           className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
-          style={{ color: "#5c5c5c" }}
+          style={{ color: "var(--ink-2)" }}
         />
       </div>
 
-      <div ref={blockRef} className="mt-10 grid gap-6 sm:mt-14 sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
-        <ul className="flex flex-col gap-1.5">
+      {/* Desktop: the accordion list beside the illustration. Phones: the
+          illustration on top, three tabs under it, then the line, in a box
+          sized to the longest line so the autoplay never shifts the page. */}
+      <div ref={blockRef} className="mt-8 grid gap-5 sm:mt-14 sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
+        <ul className="hidden sm:flex flex-col gap-1.5">
           {segments.map((seg, i) => {
             const selected = i === active;
             return (
               <li
                 key={seg.label}
                 className="relative overflow-hidden rounded-[6px] transition-colors duration-300"
-                style={{ background: selected ? "#f4f4f4" : "transparent" }}
+                style={{ background: selected ? "var(--tile)" : "transparent" }}
               >
                 <button
                   type="button"
@@ -1734,12 +1737,12 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
                   aria-controls={`execution-text-${i}`}
                   className="flex w-full items-baseline gap-3 px-4 py-4 text-left sm:px-5 sm:py-5"
                 >
-                  <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "#9a9a9a" }}>
+                  <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
                     {i + 1}
                   </span>
                   <span
                     className="text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug transition-colors duration-300"
-                    style={{ color: selected ? "#1a1a1a" : "#9a9a9a", fontWeight: 500 }}
+                    style={{ color: selected ? "var(--ink)" : "var(--ink-4)", fontWeight: 500 }}
                   >
                     {seg.label}
                   </span>
@@ -1756,7 +1759,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
                           key={seg.label}
                           text={seg.text}
                           className="text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-left"
-                          style={{ color: "#5c5c5c" }}
+                          style={{ color: "var(--ink-2)" }}
                         />
                       )}
                     </div>
@@ -1764,11 +1767,11 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
                 </div>
                 {/* Time left on this principle while the list plays itself. */}
                 {selected && playing && (
-                  <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "rgba(26,26,26,0.06)" }}>
+                  <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "rgb(var(--ink-rgb) / 0.06)" }}>
                     <span
                       key={active}
                       className="block h-full origin-left"
-                      style={{ background: "#1a1a1a", animation: `execution-progress ${EXECUTION_PERIOD_MS}ms linear both` }}
+                      style={{ background: "var(--ink)", animation: `execution-progress ${EXECUTION_PERIOD_MS}ms linear both` }}
                     />
                   </span>
                 )}
@@ -1777,7 +1780,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
           })}
         </ul>
 
-        <div aria-hidden="true" className="relative aspect-[4/3] overflow-hidden rounded-[6px]" style={{ background: "#f4f4f4" }}>
+        <div aria-hidden="true" className="relative aspect-[4/3] overflow-hidden rounded-[6px] order-first sm:order-none" style={{ background: "var(--tile)" }}>
           {segments.map(({ label, Art }, i) => (
             <div
               key={label}
@@ -1787,6 +1790,65 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
               <Art play={i === active && (inView || reduced)} />
             </div>
           ))}
+        </div>
+
+        <div className="sm:hidden">
+          <div role="tablist" aria-label="How we think about execution" className="grid grid-cols-3 gap-1.5">
+            {segments.map((seg, i) => {
+              const selected = i === active;
+              return (
+                <button
+                  key={seg.label}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls="execution-text-mobile"
+                  onClick={() => pick(i)}
+                  className="relative flex flex-col items-start gap-1 overflow-hidden rounded-[6px] px-3 py-2.5 text-left transition-colors duration-300"
+                  style={{ background: selected ? "var(--tile)" : "transparent" }}
+                >
+                  <span className="text-[12.5px] tabular-nums leading-none tracking-tight" style={{ color: "var(--ink-4)" }}>
+                    {i + 1}
+                  </span>
+                  <span
+                    className="whitespace-nowrap text-[15px] leading-snug tracking-[-0.02em] transition-colors duration-300"
+                    style={{ color: selected ? "var(--ink)" : "var(--ink-4)", fontWeight: 500 }}
+                  >
+                    {seg.label}
+                  </span>
+                  {selected && playing && (
+                    <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "rgb(var(--ink-rgb) / 0.06)" }}>
+                      <span
+                        key={active}
+                        className="block h-full origin-left"
+                        style={{ background: "var(--ink)", animation: `execution-progress ${EXECUTION_PERIOD_MS}ms linear both` }}
+                      />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div id="execution-text-mobile" role="tabpanel" className="mt-4 grid px-1">
+            {/* Every line laid out invisibly in the same cell, so the box
+                holds the tallest one. */}
+            {segments.map((seg) => (
+              <p key={seg.label} aria-hidden="true" className="invisible [grid-area:1/1] text-[16px] leading-relaxed tracking-tight">
+                {tokenizeCopy(seg.text).map((t, i, all) => (
+                  <React.Fragment key={t.key}>
+                    {t.node}
+                    {i < all.length - 1 ? " " : ""}
+                  </React.Fragment>
+                ))}
+              </p>
+            ))}
+            <LiquidText
+              key={segments[active].label}
+              text={segments[active].text}
+              className="[grid-area:1/1] text-[16px] leading-relaxed tracking-tight text-left"
+              style={{ color: "var(--ink-2)" }}
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -1904,7 +1966,7 @@ function WhatWeDo() {
           const trackDelay = phone ? 0 : delay;
           return (
             <li key={item.label} data-index={i} className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-auto">
-              <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px]" style={{ background: "#f4f4f4" }}>
+              <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
                 <WhatWeDoSketch
                   stage={item.label}
                   play={active}
@@ -1927,13 +1989,13 @@ function WhatWeDo() {
                     <span
                       aria-hidden="true"
                       className={`absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] ${rowStart ? "sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+2rem)]" : "sm:hidden"}`}
-                      style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(26,26,26,0.28) 0 4px, transparent 4px 8px)" }}
+                      style={{ backgroundImage: "repeating-linear-gradient(90deg, rgb(var(--ink-rgb) / 0.28) 0 4px, transparent 4px 8px)" }}
                     />
                     <span
                       aria-hidden="true"
                       className={`absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] ${rowStart ? "sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+2rem)]" : "sm:hidden"}`}
                       style={{
-                        background: "#1a1a1a",
+                        background: "var(--ink)",
                         transformOrigin: "left",
                         transform: trackOn ? "scaleX(1)" : "scaleX(0)",
                         transition: reduced ? "none" : `transform ${WHAT_WE_DO_STEP_MS}ms linear ${trackDelay}ms`,
@@ -1944,9 +2006,9 @@ function WhatWeDo() {
                 <span
                   className="relative z-[1] flex size-7 items-center justify-center rounded-full text-[13px] leading-none tabular-nums"
                   style={{
-                    background: active ? "#1a1a1a" : "#fff",
-                    color: active ? "#fff" : "#1a1a1a",
-                    boxShadow: "inset 0 0 0 1px #1a1a1a",
+                    background: active ? "var(--ink)" : "var(--paper)",
+                    color: active ? "var(--paper)" : "var(--ink)",
+                    boxShadow: "inset 0 0 0 1px var(--ink)",
                     transition: reduced ? "none" : `background 300ms ease ${delay}ms, color 300ms ease ${delay}ms`,
                   }}
                 >
@@ -1954,10 +2016,10 @@ function WhatWeDo() {
                 </span>
               </div>
 
-              <h3 className="mt-4 text-[22px] sm:text-[26px] tracking-[-0.025em] leading-tight" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+              <h3 className="mt-4 text-[22px] sm:text-[26px] tracking-[-0.025em] leading-tight" style={{ color: "var(--ink)", fontWeight: 500 }}>
                 {item.label}
               </h3>
-              <p className="mt-2 text-[15.5px] sm:text-[16.5px] leading-relaxed tracking-tight text-pretty" style={{ color: "#5c5c5c" }}>
+              <p className="mt-2 text-[15.5px] sm:text-[16.5px] leading-relaxed tracking-tight text-pretty" style={{ color: "var(--ink-2)" }}>
                 {item.description}
               </p>
             </li>
@@ -1981,13 +2043,13 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
             <LiquidText
               text={first}
               className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
-              style={{ color: "#5c5c5c" }}
+              style={{ color: "var(--ink-2)" }}
             />
             <LiquidText
               text={second}
               delayMs={160}
               className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left mt-5"
-              style={{ color: "#5c5c5c" }}
+              style={{ color: "var(--ink-2)" }}
             />
         </div>
       </section>
@@ -2085,7 +2147,7 @@ function LightCard({ children }: { children: React.ReactNode }) {
         ref={cardRef}
         className="relative"
         style={{
-          background: "#fff",
+          background: "var(--paper)",
           borderBottomLeftRadius: 32,
           borderBottomRightRadius: 32,
           overflow: "hidden",
@@ -2099,7 +2161,7 @@ function LightCard({ children }: { children: React.ReactNode }) {
           own top edge from sub-pixel rounding — a fixed-height white strip
           that never moves or scales, so there's nothing dynamic left to
           misalign against the wrapper's black background. */}
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: 6, background: "#fff", zIndex: 1 }} />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: 6, background: "var(--paper)", zIndex: 1 }} />
       {/* ...and the rails carried over that strip, so the frame stays
           unbroken from the header into the card. */}
       <FrameColumnRails tone="light" className="bottom-auto z-[2] h-[6px]" />
@@ -2771,7 +2833,7 @@ function BlogMeta({ post }: { post: PostMeta }) {
   return (
     <span
       className="inline-flex items-center rounded-[4px] px-1.5 py-1 text-[12px] sm:text-[13px] leading-none tracking-tight"
-      style={{ color: "#3d3d3d", background: "rgba(26,26,26,0.06)" }}
+      style={{ color: "var(--ink-soft)", background: "rgb(var(--ink-rgb) / 0.06)" }}
     >
       {post.tag}
     </span>
@@ -2852,7 +2914,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
       disabled={disabled}
       aria-label={dir === 1 ? "Next essays" : "Previous essays"}
       className="flex size-9 sm:size-10 items-center justify-center rounded-[6px] transition-opacity duration-200 disabled:opacity-30"
-      style={{ background: "rgba(26,26,26,0.06)", color: "#1a1a1a" }}
+      style={{ background: "rgb(var(--ink-rgb) / 0.06)", color: "var(--ink)" }}
     >
       <ArrowGlyph className={cn("size-4", dir === -1 && "rotate-180")} />
     </button>
@@ -2880,7 +2942,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
             className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
             style={reveal(i + 1)}
           >
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-[#f4f4f4]">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-[var(--tile)]">
               <MaterialCover
                 slug={post.slug}
                 className="transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
@@ -2891,13 +2953,13 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
               <BlogMeta post={post} />
             </div>
             <span className="mt-2.5 flex items-start justify-between gap-4">
-              <span className="text-[19px] sm:text-[21px] tracking-[-0.02em] leading-snug text-pretty" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+              <span className="text-[19px] sm:text-[21px] tracking-[-0.02em] leading-snug text-pretty" style={{ color: "var(--ink)", fontWeight: 500 }}>
                 {post.title}
               </span>
               <ArrowGlyph className="mt-1.5 size-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
             </span>
             {post.excerpt && (
-              <p className="mt-1.5 text-[15px] leading-snug tracking-tight text-pretty line-clamp-2" style={{ color: "#5c5c5c" }}>
+              <p className="mt-1.5 text-[15px] leading-snug tracking-tight text-pretty line-clamp-2" style={{ color: "var(--ink-2)" }}>
                 {post.excerpt}
               </p>
             )}
@@ -2910,12 +2972,12 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
           className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
           style={reveal(list.length + 1)}
         >
-          <div className="flex aspect-[4/3] flex-col justify-between rounded-[6px] bg-[#f4f4f4] p-5 transition-colors duration-200 group-hover:bg-[#ececec]">
-            <span className="text-[13px] tracking-tight" style={{ color: "#8a8a8a" }}>
+          <div className="flex aspect-[4/3] flex-col justify-between rounded-[6px] bg-[var(--tile)] p-5 transition-colors duration-200 group-hover:bg-[var(--tile-3)]">
+            <span className="text-[13px] tracking-tight" style={{ color: "var(--ink-3)" }}>
               {posts.length} essays
             </span>
             <span className="flex items-end justify-between gap-4">
-              <span className="text-[clamp(1.4rem,2.4vw,1.75rem)] tracking-[-0.03em] leading-[1.1]" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+              <span className="text-[clamp(1.4rem,2.4vw,1.75rem)] tracking-[-0.03em] leading-[1.1]" style={{ color: "var(--ink)", fontWeight: 500 }}>
                 Read the rest
               </span>
               <ArrowGlyph className="mb-1 size-5 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
@@ -2929,7 +2991,7 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
 
 function NewChip() {
   return (
-    <span className="inline-flex items-center rounded-[4px] px-1.5 py-1 text-[12px] sm:text-[13px] leading-none tracking-tight text-white" style={{ background: "#1a1a1a" }}>
+    <span className="inline-flex items-center rounded-[4px] px-1.5 py-1 text-[12px] sm:text-[13px] leading-none tracking-tight" style={{ background: "var(--ink)", color: "var(--paper)" }}>
       New
     </span>
   );

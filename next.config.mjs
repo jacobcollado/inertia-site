@@ -23,7 +23,7 @@ const securityHeaders = [
       // www.facebook.com: the Meta Pixel injects a hidden iframe there to sync
       // cookies across the facebook.com origin. Without it the pixel still
       // reports, but every page logs a CSP violation and match quality drops.
-      "frame-src https://js.stripe.com https://hooks.stripe.com https://app.cal.com https://cal.com https://www.facebook.com",
+      "frame-src https://js.stripe.com https://hooks.stripe.com https://app.cal.com https://cal.com https://www.facebook.com https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
     ].join("; "),
   },
@@ -63,9 +63,10 @@ const nextConfig = {
       // The standalone buy page was retired; checkout lives in the pricing
       // section on /aether. /aether/buy/success and /claim are still live.
       { source: "/aether/buy", destination: "/aether#pricing", permanent: true },
-      // An older copy of /aether/commercial, the page the nav links to. One
-      // URL keeps search engines from splitting the page in two.
-      { source: "/aether/enterprise", destination: "/aether/commercial", permanent: true },
+      // The agency licensing pages (and an older copy, /aether/enterprise)
+      // were retired; send anything still pointing at them to the theme.
+      { source: "/aether/commercial", destination: "/aether", permanent: true },
+      { source: "/aether/enterprise", destination: "/aether", permanent: true },
       // Blog posts renamed to match their retitled headlines.
       { source: "/blog/the-brief-is-the-product", destination: "/blog/most-projects-fail-before-figma", permanent: true },
       { source: "/blog/judgment-over-output", destination: "/blog/someone-still-has-to-pick", permanent: true },

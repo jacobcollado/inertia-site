@@ -1,7 +1,7 @@
 "use client";
 
-// The site is permanently dark, so the theme toggle is removed. This stub keeps
-// the existing import sites working without rendering any control.
+// Old header/login toggle slot. The theme switch now lives in the footer
+// (ThemeSwitch in site-footer.tsx); this stub keeps the import sites working.
 export function ThemeToggle() {
   return null;
 }
