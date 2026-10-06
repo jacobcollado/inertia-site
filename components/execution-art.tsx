@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { Box, EASE, LineBoard as Board } from "@/components/line-art";
+import { Box, EASE, Flag, LineBoard as Board, enter, raise } from "@/components/line-art";
 
 // Illustrations for the homepage's "How we think about execution"
 // principles, in the hero staircase's line style (components/line-art.tsx).
@@ -102,35 +102,29 @@ export function AgreementArt({ play }: { play: boolean }) {
   );
 }
 
-// Follow-through: a stack with its last slab missing. The slab drops into its
-// dashed slot, the slot's outline goes, and one small last detail is set on
-// top.
+// Follow-through: a staircase carried to the end. Three steps are built and
+// the last is only a dashed outline; on play it fills in solid, then a flag
+// goes up on top. The hero's staircase in miniature, where the top step is
+// Launch.
+const STEP = { x0: 84, w: 58, rise: 34, base: 244 };
+
 export function FollowThroughArt({ play }: { play: boolean }) {
   const done = useDone(play);
+  const step = (i: number) => ({ x: STEP.x0 + i * STEP.w, y: STEP.base - STEP.rise * (i + 1), w: STEP.w, h: STEP.rise * (i + 1) });
+  const last = step(3);
   return (
     <Board>
-      <Box x={104} y={220} w={192} h={32} d={0.26} />
-      <Box x={126} y={188} w={148} h={32} d={0.22} />
-      <g style={fade(!done, 600)}>
-        <Box x={148} y={156} w={104} h={32} d={0.18} ghost />
+      {[0, 1, 2].map((i) => (
+        <Box key={i} {...step(i)} d={0.14} />
+      ))}
+      <g style={fade(!done)}>
+        <Box {...last} d={0.14} ghost />
       </g>
-      <g
-        style={{
-          opacity: done ? 1 : 0,
-          transform: done ? "none" : "translateY(-60px)",
-          transition: `transform 650ms ${EASE}, opacity 300ms ${EASE}`,
-        }}
-      >
-        <Box x={148} y={156} w={104} h={32} d={0.18} />
+      <g style={enter(done, "translateY(24px)", 0, 700)}>
+        <Box {...last} d={0.14} />
       </g>
-      <g
-        style={{
-          opacity: done ? 1 : 0,
-          transform: done ? "none" : "translateY(-14px)",
-          transition: `transform 450ms ${EASE} 900ms, opacity 300ms ${EASE} 900ms`,
-        }}
-      >
-        <Box x={226} y={140} w={16} h={16} d={0.1} />
+      <g style={raise(done, 650)}>
+        <Flag x={last.x + last.w * 0.55} y={last.y - 6} h={64} />
       </g>
     </Board>
   );

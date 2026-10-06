@@ -77,11 +77,15 @@ export function DemoFrame({
   host,
   load = true,
   playing = true,
+  compact = false,
 }: {
   mode: DemoMode;
   host: string;
   load?: boolean;
   playing?: boolean;
+  /** Smaller phone recording, for the inline section, so it never fills the
+   * screen. */
+  compact?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const video = VIDEOS[mode];
@@ -102,6 +106,10 @@ export function DemoFrame({
     if (playing) void el.play().catch(() => {});
     else el.pause();
   }, [playing, load, mode]);
+
+  const sizeClass = `pointer-events-none select-none ${
+    mode === "desktop" ? "block h-auto w-full" : `block w-auto rounded-[1.4rem] ${compact ? "h-[min(50dvh,28rem)]" : "h-[min(62dvh,36rem)]"}`
+  }`;
 
   const player = (
     <video
@@ -124,7 +132,7 @@ export function DemoFrame({
       disableRemotePlayback
       preload={load ? "auto" : "none"}
       aria-label={`Screen recording of the Aether demo store on ${mode}`}
-      className={`pointer-events-none select-none ${mode === "desktop" ? "block h-auto w-full" : "block h-[min(62dvh,36rem)] w-auto rounded-[1.4rem]"}`}
+      className={sizeClass}
     />
   );
 

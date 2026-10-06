@@ -1548,29 +1548,16 @@ function WorkScrollGallery({ onActiveAccent }: { onActiveAccent?: (color: string
   );
 }
 
-// Neutral-toned pill for emphasising a phrase inline in body copy. Grey on a
-// soft grey wash rather than an accent colour, so it reads as a highlight
-// without competing with the work thumbnails' accent tinting.
-//
-// Inline (not inline-flex): flex centering + align-middle sit the pill below
-// the paragraph baseline. inherit keeps the highlight the same tone as body copy.
-function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="inline rounded-[6px] px-[0.4em] py-px whitespace-nowrap align-baseline leading-none"
-      style={{
-        background: "rgb(var(--ink-rgb) / 0.06)",
-        color: "inherit",
-      }}
-    >
-      {children}
-    </span>
-  );
+// A key phrase in body copy: the paragraph is set muted, the phrase in the
+// page's full ink, so it scans before the rest is read. The same treatment
+// as the reviews on /aether.
+function KeyPhrase({ children }: { children: React.ReactNode }) {
+  return <span style={{ color: "rgb(var(--fg))" }}>{children}</span>;
 }
 
 // Splits copy on [[double brackets]] into word-level tokens, wrapping
-// bracketed phrases in a Pill. Pills stay as one atomic token (never split
-// across words) so a highlighted phrase reveals as a single unit rather than
+// bracketed phrases in a KeyPhrase. A key phrase stays one atomic token
+// (never split across words) so it reveals as a single unit rather than
 // word-by-word. Plain words are split on spaces so LiquidText can stagger
 // them individually.
 type CopyToken = { key: string; node: React.ReactNode };
@@ -1580,11 +1567,18 @@ function tokenizeCopy(text: string): CopyToken[] {
   const parts = text.split(/\[\[(.+?)\]\]/g);
   parts.forEach((part, i) => {
     if (i % 2 === 1) {
-      tokens.push({ key: `${i}`, node: <Pill>{part}</Pill> });
+      tokens.push({ key: `${i}`, node: <KeyPhrase>{part}</KeyPhrase> });
       return;
     }
     part.split(/(\s+)/).forEach((word, j) => {
       if (word === "" || /^\s+$/.test(word)) return;
+      // Punctuation straight after a key phrase ("afford.", "reps.") joins
+      // the phrase's token, so no space opens up before it.
+      const prev = tokens[tokens.length - 1];
+      if (j === 0 && prev && /^[.,;:!?)]/.test(word)) {
+        prev.node = <>{prev.node}{word}</>;
+        return;
+      }
       tokens.push({ key: `${i}-${j}`, node: word });
     });
   });
@@ -1667,23 +1661,23 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
   const blockRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion() ?? false;
   const intro =
-    "Ideas and identity are rarely the problem. Execution is. We take what a company, brand, or person stands for and carry it through every [[detail]], until the result feels effortless to the people moving through it.";
+    "Ideas and identity are rarely the problem. [[Execution is.]] We take what a company, brand, or person stands for and carry it through every detail, until the result feels effortless to the people moving through it.";
   // Each principle is one way of finishing "how we think about execution":
   // the label names it, the line argues it, the illustration acts it out.
   const segments = [
     {
       label: "Restraint",
-      text: "The best design disappears into the experience. Nobody applauds the [[restraint]], and that's exactly how you know it landed.",
+      text: "[[The best design disappears into the experience.]] Nobody applauds the restraint, and that's exactly how you know it landed.",
       Art: RestraintArt,
     },
     {
       label: "Agreement",
-      text: "Identity isn't expressed in one big gesture. It's carried in a hundred small decisions that all [[agree]] with each other.",
+      text: "Identity isn't expressed in one big gesture. It's carried in [[a hundred small decisions that all agree with each other]].",
       Art: AgreementArt,
     },
     {
       label: "Follow-through",
-      text: "Taste sets the direction, but finishing is what people actually feel. We stay on a thing until the last [[detail]] stops asking for attention.",
+      text: "Taste sets the direction, but [[finishing is what people actually feel]]. We stay on a thing until the last detail stops asking for attention.",
       Art: FollowThroughArt,
     },
   ];
@@ -1995,9 +1989,9 @@ function WhatWeDo() {
 
 function AiApproach({ posts }: { posts: PostMeta[] }) {
   const first =
-    "AI hasn't changed what we believe about execution; it's changed how much of it we can afford. A studio our size can now explore [[more]] directions, discard the wrong ones sooner, and spend the saved time where it counts: on the version worth shipping.";
+    "AI hasn't changed what we believe about execution; [[it's changed how much of it we can afford]]. A studio our size can now explore more directions, discard the wrong ones sooner, and spend the saved time where it counts: on the version worth shipping.";
   const second =
-    "None of that works without judgment, and judgment comes from reps. Years of projects have built our grip on the [[fundamentals]]: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
+    "None of that works without judgment, and [[judgment comes from reps]]. Years of projects have built our grip on the fundamentals: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.";
   return (
     <>
       <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">

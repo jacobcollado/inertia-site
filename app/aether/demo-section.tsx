@@ -35,10 +35,11 @@ export function DemoSection({ href, password }: { href: string; password: string
     };
   }, []);
 
-  // Laid out like "Built to sell" above it: the heading and its line on the
-  // left with the controls beside them, the recording on a plain tile, then
-  // one row under it with the store password and the way into the live
-  // store. Comes in with the site's staggered reveal.
+  // Two columns from lg up: on the left the heading, the tour the recording
+  // takes, the controls and the way into the live store; on the right the
+  // recording on a plain tile, at a moderate size so it never fills the
+  // screen. Phones read heading, recording, then the rest. Comes in with the
+  // site's staggered reveal.
   const controls = (
     <div className="flex items-center gap-2">
       <DemoToggle mode={mode} onChange={setMode} />
@@ -47,32 +48,40 @@ export function DemoSection({ href, password }: { href: string; password: string
   );
   return (
     <section ref={ref} className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24" aria-labelledby="demo-section-title">
-      <div className="mb-10 flex items-end justify-between gap-6 sm:mb-12">
-        <div>
+      <div data-stagger className="grid items-center gap-x-16 gap-y-8 lg:grid-cols-[minmax(0,22rem)_1fr] lg:grid-rows-[auto_1fr]">
+        <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
           <h2
             id="demo-section-title"
             className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal leading-[1.1] tracking-[-0.03em] text-[rgb(var(--fg))]"
           >
             See it in action
           </h2>
-          <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+          <p className="mt-2 max-w-md text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
             Our demo store running Aether, from the home page to the cart.
           </p>
         </div>
-        <div className="hidden shrink-0 sm:block">{controls}</div>
-      </div>
 
-      <div className="rounded-[6px] bg-[var(--tile)] px-3 py-5 sm:px-10 sm:py-10">
-        <div className="mx-auto w-full max-w-[64rem]">
-          <DemoFrame mode={mode} host={hostOf(href)} load={load} playing={inView && !paused} />
+        <div className="rounded-[6px] bg-[var(--tile)] px-3 py-5 sm:px-8 sm:py-8 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <div className="mx-auto w-full max-w-[46rem]">
+            <DemoFrame mode={mode} host={hostOf(href)} load={load} playing={inView && !paused} compact />
+          </div>
         </div>
-        {/* Phones: the controls in one centred row under the recording. */}
-        <div className="mt-5 flex justify-center sm:hidden">{controls}</div>
-      </div>
 
-      <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-        <PasswordNote password={password} className="text-center sm:text-left" />
-        <LiveStoreButton href={href} password={password} />
+        <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
+          <ol className="border-t border-[rgb(var(--fg)/0.08)]">
+            {["Home page", "Collections", "Product page", "Cart"].map((stop, i) => (
+              <li key={stop} className="flex items-baseline gap-3 border-b border-[rgb(var(--fg)/0.08)] py-2.5 text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg))]">
+                <span className="w-4 shrink-0 text-[13px] tabular-nums text-[rgb(var(--muted))] opacity-70">{i + 1}</span>
+                {stop}
+              </li>
+            ))}
+          </ol>
+          <div className="mt-6">{controls}</div>
+          <div className="mt-6 flex flex-col items-start gap-3">
+            <PasswordNote password={password} className="text-left" />
+            <LiveStoreButton href={href} password={password} />
+          </div>
+        </div>
       </div>
     </section>
   );
