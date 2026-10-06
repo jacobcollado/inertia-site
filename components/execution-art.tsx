@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { Box, EASE, Floor, LineBoard as Board } from "@/components/line-art";
+import { Box, EASE, LineBoard as Board } from "@/components/line-art";
 
 // Illustrations for the homepage's "How we think about execution"
 // principles, in the hero staircase's line style (components/line-art.tsx).
@@ -24,23 +24,24 @@ const fade = (on: boolean, delay = 0): CSSProperties => ({
 });
 
 // Restraint: a crowd of pieces around the pair that matters. One at a time
-// the extras turn to dashed ghosts, until only the pair is solid.
+// the extras fade back to faint, set-aside outlines, until only the pair
+// reads. No floor or dashes, so nothing competes with that one change.
+// Listed outside-in, so nearer side faces cover farther ones.
 const EXTRAS = [
-  { x: 52, y: 168, w: 44, h: 82, d: 0.12 },
-  { x: 106, y: 220, w: 34, h: 30, d: 0.14 },
-  { x: 270, y: 194, w: 58, h: 56, d: 0.14 },
-  { x: 336, y: 224, w: 28, h: 26, d: 0.12 },
+  { x: 36, y: 172, w: 42, h: 78, d: 0.12 },
+  { x: 346, y: 224, w: 26, h: 26, d: 0.12 },
+  { x: 94, y: 218, w: 36, h: 32, d: 0.14 },
+  { x: 274, y: 196, w: 54, h: 54, d: 0.14 },
 ];
 
 export function RestraintArt({ play }: { play: boolean }) {
   const done = useDone(play);
   return (
     <Board>
-      <Floor y={250} />
       {EXTRAS.map((b, i) => (
         <g key={i}>
           <g style={fade(done, i * 220)}>
-            <Box {...b} ghost />
+            <Box {...b} light />
           </g>
           <g style={fade(!done, i * 220)}>
             <Box {...b} />
@@ -79,7 +80,6 @@ export function AgreementArt({ play }: { play: boolean }) {
   const done = useDone(play);
   return (
     <Board>
-      <Floor y={240} />
       <g style={fade(!done, 900)}>
         <Box x={U.x} y={U.y} w={U.w * 4} h={U.h * 3} d={0.18} ghost />
       </g>
@@ -109,7 +109,6 @@ export function FollowThroughArt({ play }: { play: boolean }) {
   const done = useDone(play);
   return (
     <Board>
-      <Floor y={252} />
       <Box x={104} y={220} w={192} h={32} d={0.26} />
       <Box x={126} y={188} w={148} h={32} d={0.22} />
       <g style={fade(!done, 600)}>

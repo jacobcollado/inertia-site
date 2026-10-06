@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { FigmaSelectionFrame, SELECTION_FILL, SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS } from "./motion";
 
 export interface ThemeVariation {
@@ -30,10 +29,12 @@ const segmentClass = (selected: boolean) =>
       : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
   }`;
 
-/* "Make it yours" as a Figma canvas: the styles are layers, the preview is
- * the selected frame. Desktop lists the styles on the left like Figma's
- * layers panel; phones get them as a segmented control above. Switching a
- * style or device crossfades the preview in place, nothing slides. */
+/* "Make it yours", laid out like "Built to sell" and "See it in action"
+ * above it: the heading and its line on the left with the device switch
+ * beside them, the selected style's preview on a plain tile, then the four
+ * styles as small thumbnail cards under it, the selected one outlined in
+ * ink. Switching a style or device crossfades the preview in place, nothing
+ * slides. */
 export function VariationsScroll({
   variations,
   initial,
@@ -73,111 +74,83 @@ export function VariationsScroll({
   );
 
   return (
-    <section className="px-3 py-16 sm:py-24 rise rise--liquid">
-      <div className="mb-10 flex flex-col items-center gap-3 text-center">
-        <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-          Make it yours
-        </h2>
-        <p className="max-w-md text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:balance]">
-          Start from one of four styles, then change colors, fonts and layout in the theme editor. No code.
-        </p>
+    <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24">
+      <div className="mb-10 flex items-end justify-between gap-6 sm:mb-12">
+        <div>
+          <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
+            Make it yours
+          </h2>
+          <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+            Start from one of four styles, then change colors, fonts and layout in the theme editor. No code.
+          </p>
+        </div>
+        <div className="hidden shrink-0 sm:block">{deviceToggle}</div>
       </div>
 
-      <div className="mx-auto grid w-full max-w-[64rem] gap-6 lg:grid-cols-[12rem_1fr] lg:gap-8">
-        {/* Layers panel, desktop: each style with a small thumbnail, the
-            selected one tinted the way Figma marks a selected layer. */}
-        <div className="hidden lg:block">
-          <p className="mb-2 px-2 text-[13px] tracking-tight text-[rgb(var(--muted))]">Styles</p>
-          <div role="tablist" aria-label="Aether styles" aria-orientation="vertical" className="flex flex-col gap-0.5">
-            {variations.map((v, i) => {
-              const selected = i === active;
-              return (
-                <button
-                  key={v.name}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => setActive(i)}
-                  className={`flex items-center gap-2.5 rounded-[6px] px-2 py-1.5 text-left text-[15px] tracking-tight transition-colors duration-200 ${
-                    selected ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:bg-[rgb(var(--surface)/0.6)] hover:text-[rgb(var(--fg))]"
-                  }`}
-                  style={selected ? { background: SELECTION_FILL, boxShadow: `inset 0 0 0 1px ${SELECTION_FRAME_COLOR}` } : undefined}
-                >
-                  <span className="relative h-7 w-11 shrink-0 overflow-hidden rounded-[6px] bg-[rgb(var(--surface))]">
-                    <Image src={v.image} alt="" fill sizes="44px" className="object-cover object-top" />
-                  </span>
-                  {v.name}
-                </button>
-              );
-            })}
-          </div>
+      <div className="rounded-[6px] bg-[var(--tile)] px-3 py-5 sm:px-10 sm:py-10">
+        <div
+          className={`relative mx-auto w-full max-w-[64rem] overflow-hidden ${
+            mode === "mobile" ? "aspect-[4/5] sm:aspect-[1365/858]" : "aspect-[1365/858]"
+          }`}
+        >
+          {/* Every style of the current device stays mounted and fades, so
+              switching never waits on a fresh image. */}
+          {variations.map((v, i) => {
+            const shown = i === active;
+            const mobile = mode === "mobile";
+            return (
+              <Image
+                key={`${v.name}-${mode}`}
+                src={mobile ? v.imageMobile : v.image}
+                alt={shown ? `${v.name} style, ${mode} view` : ""}
+                aria-hidden={!shown}
+                width={mobile ? SHOT_W_MOBILE : SHOT_W}
+                height={mobile ? SHOT_H_MOBILE : SHOT_H}
+                sizes={mobile ? "(min-width: 640px) 20rem, 60vw" : "(min-width: 1024px) 64rem, 94vw"}
+                quality={90}
+                loading={shown ? "eager" : "lazy"}
+                draggable={false}
+                className={`absolute inset-0 m-auto motion-reduce:transition-none ${mobile ? "h-[96%] w-auto" : "h-full w-full object-contain"}`}
+                style={{ opacity: shown ? 1 : 0, transition: FADE }}
+              />
+            );
+          })}
         </div>
+      </div>
 
-        <div className="min-w-0">
-          {/* Phones and tablets: the styles as a segmented control. */}
-          <div className="no-scrollbar mb-6 flex justify-center overflow-x-auto lg:hidden">
-            <div role="tablist" aria-label="Aether styles" className={SEGMENT_TRACK}>
-              {variations.map((v, i) => (
-                <button
-                  key={v.name}
-                  type="button"
-                  role="tab"
-                  aria-selected={i === active}
-                  onClick={() => setActive(i)}
-                  className={segmentClass(i === active)}
-                >
-                  {v.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Frame name on the left, like Figma labels a selected frame; the
-              device switch on the right on desktop. Below lg it moves under
-              the frame, so it isn't stacked against the style switcher. */}
-          <div className="mb-2 flex items-end justify-between gap-3">
-            <p className="text-[13px] sm:text-[14px] tracking-tight capitalize" style={{ color: SELECTION_FRAME_COLOR }}>
-              {current.name} / {mode}
-            </p>
-            <div className="hidden lg:block">{deviceToggle}</div>
-          </div>
-
-          <FigmaSelectionFrame handleFill="rgb(var(--bg))" style={{ background: SELECTION_FILL }}>
-            <div
-              className={`relative w-full overflow-hidden ${
-                mode === "mobile" ? "aspect-[4/5] sm:aspect-[1365/858]" : "aspect-[1365/858]"
-              }`}
+      {/* The styles: a thumbnail of each with its name, the selected one
+          outlined in ink. */}
+      <div role="tablist" aria-label="Aether styles" className="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
+        {variations.map((v, i) => {
+          const selected = i === active;
+          return (
+            <button
+              key={v.name}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              onClick={() => setActive(i)}
+              className="group text-left [-webkit-tap-highlight-color:transparent]"
             >
-              {/* Every style of the current device stays mounted and fades,
-                  so switching never waits on a fresh image. */}
-              {variations.map((v, i) => {
-                const shown = i === active;
-                const mobile = mode === "mobile";
-                return (
-                  <Image
-                    key={`${v.name}-${mode}`}
-                    src={mobile ? v.imageMobile : v.image}
-                    alt={shown ? `${v.name} style, ${mode} view` : ""}
-                    aria-hidden={!shown}
-                    width={mobile ? SHOT_W_MOBILE : SHOT_W}
-                    height={mobile ? SHOT_H_MOBILE : SHOT_H}
-                    sizes={mobile ? "(min-width: 640px) 20rem, 60vw" : "(min-width: 1024px) 52rem, 94vw"}
-                    quality={90}
-                    loading={shown ? "eager" : "lazy"}
-                    draggable={false}
-                    className={`absolute inset-0 m-auto motion-reduce:transition-none ${
-                      mobile ? "h-[92%] w-auto" : "h-full w-full object-contain"
-                    }`}
-                    style={{ opacity: shown ? 1 : 0, transition: FADE }}
-                  />
-                );
-              })}
-            </div>
-          </FigmaSelectionFrame>
-
-          <div className="mt-5 flex justify-center lg:hidden">{deviceToggle}</div>
-        </div>
+              <span
+                className="relative block aspect-[16/10] overflow-hidden rounded-[6px] bg-[var(--tile)] transition-shadow duration-200"
+                style={{ boxShadow: selected ? "0 0 0 1px rgb(var(--fg))" : "0 0 0 1px transparent" }}
+              >
+                <Image src={v.image} alt="" fill sizes="(min-width: 640px) 18rem, 24vw" className="object-cover object-top transition-opacity duration-200 group-hover:opacity-90" />
+              </span>
+              <span
+                className={`mt-2 block text-[13px] sm:text-[15px] tracking-tight transition-colors duration-200 ${
+                  selected ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] group-hover:text-[rgb(var(--fg))]"
+                }`}
+              >
+                {v.name}
+              </span>
+            </button>
+          );
+        })}
       </div>
+
+      <div className="mt-6 flex justify-center sm:hidden">{deviceToggle}</div>
     </section>
   );
 }

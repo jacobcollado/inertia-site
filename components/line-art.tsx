@@ -55,12 +55,6 @@ export function Box({ x, y, w, h, d, ghost, light, vp = VP, fill = TILE }: { x: 
   );
 }
 
-// The floor plane things stand on, front edge at `y`.
-export function Floor({ y, x0 = 34, x1 = 366, d = 0.32 }: { y: number; x0?: number; x1?: number; d?: number }) {
-  const f: Pt[] = [[x0, y], [x1, y]];
-  return <polygon points={poly([f[0], f[1], proj(f[1], d), proj(f[0], d)])} {...DASH} />;
-}
-
 // A flag on a pole standing at (x, y), `h` tall.
 export function Flag({ x, y, h }: { x: number; y: number; h: number }) {
   return (

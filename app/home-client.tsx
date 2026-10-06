@@ -1887,16 +1887,16 @@ const WHAT_WE_DO_ITEMS = [
   },
 ] as const;
 
-// How long each step takes to light up, and the dashed connector to the next
-// one to draw, once the section scrolls in.
+// How far apart the four drawings start building, once the section scrolls in.
 const WHAT_WE_DO_STEP_MS = 420;
 
-// "What we do" as the process it is: four stages in order, each with its
-// drawing on a matching tile, a numbered step track underneath, then the
-// stage name over its description. From sm up it's a 2x2 grid, so the
-// drawings get room; on first view the steps fill in one after another and
-// the connector draws across each row. On phones the stages sit in a row that
-// swipes sideways, like Our thoughts, with the track joining every step.
+// "What we do" as the process it is: the four stages of the hero's stair, in
+// order, each a line drawing on its tile, then a small step number beside the
+// stage name and the description under it (the same pattern as How we think
+// about execution). One row of four on wide screens, two by two below that.
+// On first view the drawings build one after another. On phones the stages
+// sit in a row that swipes sideways, like Our thoughts, and each drawing
+// builds as it's swiped in.
 function WhatWeDo() {
   const listRef = useRef<HTMLOListElement>(null);
   const [on, setOn] = useState(false);
@@ -1948,9 +1948,8 @@ function WhatWeDo() {
   }, [phone]);
 
   const lit = on || reduced;
-  const last = WHAT_WE_DO_ITEMS.length - 1;
-  // Per step: is it lit, and when. On phones a step lights when its card is
-  // swiped in, after the track has drawn across to it.
+  // Per step: does its drawing build, and when. On phones a drawing builds
+  // when its card is swiped in.
   const stepOn = (i: number) => (phone ? lit && (seen[i] || reduced) : lit);
   const stepDelay = (i: number) => (reduced ? 0 : phone ? (i > 0 ? WHAT_WE_DO_STEP_MS : 0) : i * WHAT_WE_DO_STEP_MS);
 
@@ -1960,73 +1959,30 @@ function WhatWeDo() {
       <ol
         ref={listRef}
         data-stagger
-        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 sm:overflow-visible sm:px-0 lg:gap-x-8 lg:gap-y-16"
+        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-12 sm:overflow-visible sm:px-0 lg:grid-cols-4 lg:gap-x-5"
       >
         {WHAT_WE_DO_ITEMS.map((item, i) => {
-          const active = stepOn(i);
           const delay = stepDelay(i);
-          // In the 2x2 grid the track only joins steps across a row (1 to 2,
-          // 3 to 4); on phones it joins every step in the swipe row.
-          const rowStart = i % 2 === 0;
-          // The track out of this step draws when the next one lights.
-          const trackOn = phone ? stepOn(i + 1) : lit;
-          const trackDelay = phone ? 0 : delay;
           return (
             <li key={item.label} data-index={i} className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-auto">
               <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
                 <WhatWeDoSketch
                   stage={item.label}
-                  play={active}
+                  play={stepOn(i)}
                   delay={phone ? Math.max(0, delay - 200) : delay}
                   still={reduced}
                   className="h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
                 />
               </div>
-
-              {/* Step track. On desktop each step owns the stretch of track
-                  from its marker's centre to the next one's (its column plus
-                  the gap), so the pieces join into one continuous line. A
-                  light dashed rail sits underneath; the solid ink line draws
-                  over it at the same pace the markers fill, reaching each
-                  marker as it lights. The markers are solid, so the line
-                  runs behind them and meets each circle edge to edge. */}
-              <div className="relative mt-5 flex items-center">
-                {i < last && (
-                  <>
-                    <span
-                      aria-hidden="true"
-                      className={`absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] ${rowStart ? "sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+2rem)]" : "sm:hidden"}`}
-                      style={{ backgroundImage: "repeating-linear-gradient(90deg, rgb(var(--ink-rgb) / 0.28) 0 4px, transparent 4px 8px)" }}
-                    />
-                    <span
-                      aria-hidden="true"
-                      className={`absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] ${rowStart ? "sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+2rem)]" : "sm:hidden"}`}
-                      style={{
-                        background: "var(--ink)",
-                        transformOrigin: "left",
-                        transform: trackOn ? "scaleX(1)" : "scaleX(0)",
-                        transition: reduced ? "none" : `transform ${WHAT_WE_DO_STEP_MS}ms linear ${trackDelay}ms`,
-                      }}
-                    />
-                  </>
-                )}
-                <span
-                  className="relative z-[1] flex size-7 items-center justify-center rounded-full text-[13px] leading-none tabular-nums"
-                  style={{
-                    background: active ? "var(--ink)" : "var(--paper)",
-                    color: active ? "var(--paper)" : "var(--ink)",
-                    boxShadow: "inset 0 0 0 1px var(--ink)",
-                    transition: reduced ? "none" : `background 300ms ease ${delay}ms, color 300ms ease ${delay}ms`,
-                  }}
-                >
+              <div className="mt-4 flex items-baseline gap-3">
+                <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
                   {i + 1}
                 </span>
+                <h3 className="text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)", fontWeight: 500 }}>
+                  {item.label}
+                </h3>
               </div>
-
-              <h3 className="mt-4 text-[22px] sm:text-[26px] tracking-[-0.025em] leading-tight" style={{ color: "var(--ink)", fontWeight: 500 }}>
-                {item.label}
-              </h3>
-              <p className="mt-2 text-[15.5px] sm:text-[16.5px] leading-relaxed tracking-tight text-pretty" style={{ color: "var(--ink-2)" }}>
+              <p className="mt-1.5 pl-7 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-pretty" style={{ color: "var(--ink-2)" }}>
                 {item.description}
               </p>
             </li>
@@ -2145,7 +2101,7 @@ function LightCard({ children }: { children: React.ReactNode }) {
     // any sub-pixel rounding the scale()'d bottom edge introduces.
     <div
       className="relative"
-      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#0a0a0a" }}
+      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--zone-bg))" }}
     >
       {/* Dark rails on the backdrop, in the same column as the dark zone's,
           so the frame runs unbroken into it where the card pulls away. */}

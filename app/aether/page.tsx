@@ -149,32 +149,20 @@ export default function AetherPage() {
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
       {/* Setup effort, the last doubt before the bonuses and price. */}
-      <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
-        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">Set up for you, same day</p>
-        <SetupSteps />
-      </div>
+      <SetupSteps />
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
       {/* Bonuses sit immediately before pricing, so the extras are counted
           at the moment the price is read. */}
-      <div className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24">
-        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
-          Bonuses, included with purchase
-        </p>
-        <Bonuses />
-      </div>
+      <Bonuses />
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
       {/* Pricing */}
-      <div id={AETHER_PRICING_ID} className="px-3 pt-16 sm:pt-24 pb-16 sm:pb-24 scroll-mt-16 w-full">
-        <p className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10 text-center rise rise--liquid">
-          Get everything, pay <span className="shimmer-word shimmer-word--warm">once</span>
-        </p>
-
+      <section id={AETHER_PRICING_ID} className="py-16 sm:py-24 scroll-mt-16 w-full">
         <InlinePricing />
-      </div>
+      </section>
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 

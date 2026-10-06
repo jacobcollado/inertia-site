@@ -4,7 +4,6 @@ import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { VisualNotch } from "./visual-notch";
 import { MinimalFooter } from "./site-footer";
-import { FrameColumnRails } from "@/components/page-frame";
 import { isThemedPath } from "./theme-provider";
 
 const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password", "/accept-invite", "/docs"];
@@ -101,8 +100,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           or a blog post's sheet edges. */}
       {noFooter ? null : isHome ? (
         <div className="homepage-dark-zone relative" style={{ background: "rgb(var(--bg))" }}>
-          <FrameColumnRails tone="dark" />
-          <MinimalFooter themeSwitch />
+          <MinimalFooter themeSwitch tone="dark" />
         </div>
       ) : isBlogPost ? (
         <div className="relative">
@@ -110,7 +108,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             aria-hidden="true"
             className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[56rem] -translate-x-1/2 border-x border-[rgb(var(--ink-rgb)/0.09)] sm:block"
           />
-          <MinimalFooter themeSwitch={themed} />
+          <MinimalFooter themeSwitch={themed} rails={false} />
         </div>
       ) : (
         <MinimalFooter themeSwitch={themed} />

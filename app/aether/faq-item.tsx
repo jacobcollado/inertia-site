@@ -3,36 +3,33 @@
 import { useId, useState } from "react";
 import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS } from "./motion";
 
-/* One FAQ question as a full-width card: the question reads at body size on
- * the left, a plus on the right turns into a close mark, and the answer opens
- * under it in place. Height animates via grid rows (0fr to 1fr) so there's no
- * measuring, same as RevealDetail. */
+/* One FAQ question as a hairline row: the question at body size on the
+ * left, a plus on the right that turns into a close mark, and the answer
+ * opening under it in place. Height animates via grid rows (0fr to 1fr) so
+ * there's no measuring, same as RevealDetail. */
 export function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   const id = useId();
   const transition = `${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE}`;
 
   return (
-    <div
-      className="rounded-[6px] bg-[rgb(var(--surface)/0.45)] transition-colors hover:bg-[rgb(var(--surface)/0.8)]"
-      style={{ transitionDuration: "200ms" }}
-    >
+    <div className="border-b border-[rgb(var(--fg)/0.08)]">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left text-[16px] sm:px-5 sm:text-[17px] tracking-tight leading-snug text-[rgb(var(--fg))] [-webkit-tap-highlight-color:transparent]"
+        className="group flex w-full items-center justify-between gap-6 py-5 text-left text-[16px] sm:text-[18px] tracking-tight leading-snug text-[rgb(var(--fg))] [-webkit-tap-highlight-color:transparent]"
       >
         {q}
         <span
           aria-hidden="true"
-          className="flex size-[1.4em] shrink-0 items-center justify-center rounded-[6px] bg-[rgb(var(--bg))] text-[rgb(var(--muted))] shadow-[0_0_0_1px_rgb(var(--line))] motion-reduce:transition-none [&_svg]:size-[50%]"
+          className="flex size-5 shrink-0 items-center justify-center text-[rgb(var(--muted))] transition-colors group-hover:text-[rgb(var(--fg))] motion-reduce:transition-none"
           style={{ transform: open ? "rotate(45deg)" : "none", transition: `transform ${transition}` }}
         >
-          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <line x1="6" y1="2" x2="6" y2="10" />
-            <line x1="2" y1="6" x2="10" y2="6" />
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" className="size-3.5">
+            <line x1="6" y1="1.5" x2="6" y2="10.5" />
+            <line x1="1.5" y1="6" x2="10.5" y2="6" />
           </svg>
         </span>
       </button>
@@ -47,7 +44,7 @@ export function FaqItem({ q, a }: { q: string; a: string }) {
         }}
       >
         <div className="overflow-hidden" inert={!open}>
-          <p className="px-4 pb-4 text-[15px] sm:px-5 sm:pb-5 sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+          <p className="max-w-2xl pb-5 pr-10 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
             {a}
           </p>
         </div>
@@ -57,59 +54,75 @@ export function FaqItem({ q, a }: { q: string; a: string }) {
 }
 
 /* The questions split by topic, one topic at a time, so the section shows
- * three or four questions instead of the whole list. A segmented control
- * picks the topic; the first one is open by default. */
+ * three or four questions instead of the whole list. The topics are a
+ * vertical list in the left column from lg up (pass `aside` for what sits
+ * under them), and a sideways row of text tabs above the questions below
+ * that. */
 export function FaqTabs({
   groups,
   questions,
+  intro,
+  aside,
 }: {
   groups: readonly string[];
   questions: { q: string; a: string; group: string }[];
+  intro: React.ReactNode;
+  aside?: React.ReactNode;
 }) {
   const [active, setActive] = useState(groups[0]);
   const id = useId();
+  const count = (g: string) => questions.filter((x) => x.group === g).length;
+
+  const tab = (g: string, vertical: boolean) => {
+    const selected = g === active;
+    return (
+      <button
+        key={g}
+        type="button"
+        role="tab"
+        id={vertical ? `${id}-${g}` : undefined}
+        aria-selected={selected}
+        aria-controls={`${id}-panel`}
+        onClick={() => setActive(g)}
+        className={`flex shrink-0 items-baseline justify-between gap-6 whitespace-nowrap tracking-tight transition-colors duration-200 [-webkit-tap-highlight-color:transparent] ${
+          vertical ? "py-2 text-[17px] text-left" : "pb-2 text-[15px] border-b"
+        } ${selected ? "text-[rgb(var(--fg))]" : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"} ${
+          !vertical ? (selected ? "border-[rgb(var(--fg))]" : "border-transparent") : ""
+        }`}
+      >
+        {g}
+        {vertical && <span className="tabular-nums text-[13px] text-[rgb(var(--muted))] opacity-70">{count(g)}</span>}
+      </button>
+    );
+  };
 
   return (
-    <div className="w-full">
-      <div
-        role="tablist"
-        aria-label="Question topics"
-        className="no-scrollbar mx-auto flex w-fit max-w-full gap-1 overflow-x-auto rounded-[6px] bg-[rgb(var(--surface)/0.6)] p-1"
-      >
-        {groups.map((g) => {
-          const selected = g === active;
-          return (
-            <button
-              key={g}
-              type="button"
-              role="tab"
-              id={`${id}-${g}`}
-              aria-selected={selected}
-              aria-controls={`${id}-panel`}
-              onClick={() => setActive(g)}
-              className={`shrink-0 whitespace-nowrap rounded-[6px] px-3 py-1.5 text-[14px] sm:px-4 sm:text-[15px] tracking-tight transition-colors duration-200 [-webkit-tap-highlight-color:transparent] ${
-                selected
-                  ? "bg-[rgb(var(--bg))] text-[rgb(var(--fg))] shadow-[0_0_0_1px_rgb(var(--line)),0_1px_2px_rgb(0_0_0/0.06)]"
-                  : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
-              }`}
-            >
-              {g}
-            </button>
-          );
-        })}
+    <div className="grid w-full items-start gap-8 lg:grid-cols-[minmax(0,24rem)_1fr] lg:gap-20">
+      <div>
+        {intro}
+        <div role="tablist" aria-label="Question topics" aria-orientation="vertical" className="mt-8 hidden flex-col border-t border-[rgb(var(--fg)/0.08)] pt-3 lg:flex">
+          {groups.map((g) => tab(g, true))}
+        </div>
+        {aside && <div className="mt-8 hidden lg:block">{aside}</div>}
       </div>
 
-      <div
-        id={`${id}-panel`}
-        role="tabpanel"
-        aria-labelledby={`${id}-${active}`}
-        className="mt-6 flex flex-col gap-2"
-      >
-        {questions
-          .filter((x) => x.group === active)
-          .map(({ q, a }) => (
-            <FaqItem key={q} q={q} a={a} />
-          ))}
+      <div className="min-w-0">
+        <div role="tablist" aria-label="Question topics" className="no-scrollbar -mx-3 flex gap-5 overflow-x-auto px-3 lg:hidden">
+          {groups.map((g) => tab(g, false))}
+        </div>
+        <div
+          id={`${id}-panel`}
+          role="tabpanel"
+          aria-labelledby={`${id}-${active}`}
+          className="mt-2 border-t border-[rgb(var(--fg)/0.08)] lg:mt-0"
+        >
+          {questions
+            .filter((x) => x.group === active)
+            .map(({ q, a }) => (
+              <FaqItem key={q} q={q} a={a} />
+            ))}
+        </div>
+        {aside && <div className="mt-8 lg:hidden">{aside}</div>}
       </div>
     </div>
   );

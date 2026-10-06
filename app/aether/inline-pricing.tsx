@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAnimate, useReducedMotion } from "motion/react";
 import { AnimatedNumber } from "@/components/animated-number";
 import { PolicyDisclaimer } from "./policy-disclaimer";
-import { FigmaSelectionFrame, SELECTION_FILL, SELECTION_FRAME_COLOR, SELECTION_RAIL } from "@/components/figma-frame";
 import { PaymentMethodIcons } from "@/components/payment-method-icons";
 import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
 import { createCtaScalePressOnRef, ctaScalePressOnSelf } from "@/lib/cta-hover-motion";
@@ -14,9 +13,12 @@ import { AETHER_CHECKOUT_ID } from "@/lib/scroll-to-hash";
 import { BONUS_TOTAL } from "./bonuses";
 import { InstallVideo } from "./install-video";
 
-/* Checkout on the site's Figma language: the price as a selected frame, the
- * button and guarantee right under it, then what's in the box as a quiet
- * list, then proof and payment, all on one centered column. */
+/* Checkout, laid out like the sections above it: the heading and one line on
+ * the left, then two columns from lg up. On the left the decision: the price
+ * on a plain tile with the SMS add-on, the button and the guarantee in the
+ * same card, then the install video and one line of proof under it. On the
+ * right what's in the box, then payment and the fine print. Phones stack
+ * them, decision first. Comes in with the site's staggered reveal. */
 
 // The install is included free; counted in the total value along with the
 // bonuses.
@@ -136,159 +138,149 @@ export function InlinePricing() {
   const totalValue = priceAmount + INSTALL_VALUE + BONUS_TOTAL;
 
   return (
-    <div className="mx-auto flex w-full max-w-[26rem] flex-col items-center rise rise--liquid">
-      {/* The price as a selected Figma frame, the same chrome as the homepage
-          statement and the work pages: frame name above, handles on the
-          corners, the selected-layer tint inside. */}
-      <div className="w-full">
-        <p className="mb-1.5 text-left text-[12px] sm:text-[13px] tracking-tight" style={{ color: SELECTION_FRAME_COLOR }}>
-          Aether license
+    <div className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem]">
+      <div className="mb-10 sm:mb-12">
+        <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
+          Get everything, pay once
+        </h2>
+        <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+          One license for one store: the full theme, installed for you, with lifetime updates.
         </p>
-        <FigmaSelectionFrame handleFill="rgb(var(--bg))" style={{ background: SELECTION_FILL }}>
-          <div className="flex flex-col items-center gap-2.5 px-5 py-8 sm:py-10 text-center">
+      </div>
+
+      <div data-stagger className="grid items-start gap-10 lg:grid-cols-[minmax(0,27rem)_1fr] lg:gap-20">
+        {/* The decision. */}
+        <div className="flex w-full flex-col gap-3">
+          <div className="rounded-[6px] bg-[var(--tile)] px-5 py-6 sm:px-7 sm:py-8">
             <p
               ref={priceScope}
-              className="text-[clamp(2.75rem,6vw,3.75rem)] font-normal tabular-nums tracking-[-0.045em] leading-none text-[rgb(var(--fg))]"
+              className="text-[clamp(2.75rem,6vw,3.5rem)] font-normal tabular-nums tracking-[-0.045em] leading-none text-[rgb(var(--fg))]"
             >
               $
-              <AnimatedNumber
-                value={priceAmount}
-                transformTiming={PRICE_TIMING}
-                spinTiming={PRICE_TIMING}
-              />
-              {" once"}
+              <AnimatedNumber value={priceAmount} transformTiming={PRICE_TIMING} spinTiming={PRICE_TIMING} />
+              <span className="text-[rgb(var(--muted))]">{" once"}</span>
             </p>
-            <p className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
+            <p className="mt-3 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
               <s className="tabular-nums decoration-[rgb(var(--muted))]">${totalValue}</s> total value, for one store
             </p>
-            {/* Klarna's pay in 4, offered in Stripe Checkout. It's another way
-                to read the price, so it lives with the price and follows the
-                SMS add-on below. */}
-            <p className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
+            {/* Klarna's pay in 4, offered in Stripe Checkout. Another way to
+                read the price, so it lives with it and follows the add-on. */}
+            <p className="mt-1 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
               or 4 interest-free payments of{" "}
               <span className="tabular-nums text-[rgb(var(--fg))]">${(priceAmount / 4).toFixed(2)}</span> with Klarna
             </p>
-          </div>
-          {/* The add-on changes the price, so it sits in the frame with it,
-              split off by a rail the way Figma divides a selected group. */}
-          <div className="flex justify-center px-5 py-3" style={{ borderTop: SELECTION_RAIL }}>
+
+            {/* The add-on changes the price, so it sits in the card with it. */}
             <label
-              className="flex cursor-pointer items-center gap-2.5 [-webkit-tap-highlight-color:transparent]"
+              className="mt-5 flex cursor-pointer items-center gap-2.5 border-t border-[rgb(var(--fg)/0.08)] pt-4 [-webkit-tap-highlight-color:transparent]"
               {...(status === "submitting" ? {} : smsCheckPress)}
             >
-              <span ref={smsCheckRef} className="inline-flex shrink-0">
+              <span ref={smsCheckRef} className="relative inline-flex size-4 shrink-0">
                 <input
                   type="checkbox"
                   checked={smsSetup}
                   disabled={status === "submitting"}
                   onChange={(e) => setSmsSetup(e.target.checked)}
-                  className="h-4 w-4 appearance-none rounded-[6px] border border-[rgb(var(--line))] bg-transparent transition-colors checked:border-[#0a84ff] checked:bg-[#0a84ff] checked:bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%223.5%208.5%206.5%2011.5%2012.5%204.5%22%2F%3E%3C%2Fsvg%3E')] checked:bg-[length:0.65rem_0.65rem] checked:bg-center checked:bg-no-repeat disabled:cursor-not-allowed disabled:opacity-50"
+                  className="absolute inset-0 appearance-none rounded-[4px] border border-[rgb(var(--fg)/0.3)] bg-transparent transition-colors checked:border-[rgb(var(--fg))] checked:bg-[rgb(var(--fg))] disabled:cursor-not-allowed disabled:opacity-50"
                 />
+                {smsSetup && (
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute inset-0 m-auto size-3 text-[rgb(var(--bg))]" aria-hidden="true">
+                    <polyline points="3.5 8.5 6.5 11.5 12.5 4.5" />
+                  </svg>
+                )}
               </span>
-              <span className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
+              <span className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
                 Add SMS setup <span className="text-[rgb(var(--fg))]">+$10</span>
               </span>
             </label>
+
+            <button
+              id={AETHER_CHECKOUT_ID}
+              type="button"
+              onClick={handleCheckout}
+              disabled={status === "submitting"}
+              data-aether-cta
+              // The one buy button: the live price on it, an arrow that
+              // nudges forward on hover, and a soft sheen that sweeps across
+              // every few seconds (.cta-sheen in globals.css).
+              className={`cta-sheen group relative scroll-mt-24 mt-6 inline-flex w-full items-center justify-center gap-2 overflow-hidden ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-8 text-[17px] sm:text-[19px] font-medium tracking-tight leading-none shadow-[0_8px_24px_-12px_rgb(0_0_0/0.45)] transition-shadow duration-300 hover:shadow-[0_12px_28px_-12px_rgb(0_0_0/0.55)] disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
+              style={{ background: "var(--cta-fill)", color: "var(--cta-fg)" }}
+              {...(status === "submitting" ? {} : ctaScalePressOnSelf)}
+            >
+              {status === "submitting" ? (
+                <>
+                  <Spinner />
+                  Redirecting…
+                </>
+              ) : (
+                <>
+                  <span className="relative">
+                    Get Aether for <span className="tabular-nums">${priceAmount}</span>
+                  </span>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="relative size-[0.9em] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1" aria-hidden="true">
+                    <line x1="3" y1="8" x2="13" y2="8" />
+                    <polyline points="9 4 13 8 9 12" />
+                  </svg>
+                </>
+              )}
+            </button>
+
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-[1.1em] shrink-0" aria-hidden="true">
+                <path d="M8 1.5 13.5 3.5V8c0 3.2-2.3 5.6-5.5 6.5C4.8 13.6 2.5 11.2 2.5 8V3.5Z" />
+                <polyline points="5.5 8 7.3 9.8 10.5 6.3" />
+              </svg>
+              Full refund if we can&apos;t get it working
+            </p>
+
+            {status === "error" && (
+              <span className="mt-2 block text-center text-[13px] tracking-tight text-red-500">{error || "Something went wrong."}</span>
+            )}
           </div>
-        </FigmaSelectionFrame>
-      </div>
 
-      {/* Action, then the guarantee right after it, where the hesitation is. */}
-      <div className="mt-6 flex w-full flex-col items-stretch gap-3">
-
-        <button
-          id={AETHER_CHECKOUT_ID}
-          type="button"
-          onClick={handleCheckout}
-          disabled={status === "submitting"}
-          data-aether-cta
-          className={`scroll-mt-24 inline-flex w-full items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-8 text-[17px] sm:text-[19px] font-medium tracking-tight leading-none disabled:opacity-50 disabled:cursor-not-allowed [-webkit-tap-highlight-color:transparent]`}
-          style={{
-            background: "var(--cta-fill)",
-            color: "var(--cta-fg)",
-            // Warm edge: a faint inner light in the heading shimmer's warm
-            // tone (#ded2c2), marking this as the final CTA without a new
-            // color. Top highlight, bottom glow, hairline ring.
-            boxShadow:
-              "inset 0 1px 0 rgba(222,210,194,0.35), inset 0 -12px 22px -10px rgba(222,210,194,0.7), 0 0 0 1px rgba(222,210,194,0.28), 0 6px 22px -8px rgba(184,173,160,0.55)",
-          }}
-          {...(status === "submitting" ? {} : ctaScalePressOnSelf)}
-        >
-          {status === "submitting" ? <Spinner /> : null}
-          {status === "submitting" ? "Redirecting…" : "Get Aether"}
-        </button>
-
-        <p className="flex items-center justify-center gap-1.5 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-[1.1em] shrink-0" aria-hidden="true">
-            <path d="M8 1.5 13.5 3.5V8c0 3.2-2.3 5.6-5.5 6.5C4.8 13.6 2.5 11.2 2.5 8V3.5Z" />
-            <polyline points="5.5 8 7.3 9.8 10.5 6.3" />
-          </svg>
-          Full refund if we can&apos;t get it working
-        </p>
-
-        {status === "error" && (
-          <span className="block text-center text-[13px] tracking-tight text-red-500">{error || "Something went wrong."}</span>
-        )}
-
-        <div className="mt-3">
           <InstallVideo />
+
+          {/* One line of proof at the moment of decision. An exact excerpt of
+              the review in testimonials.tsx, first letter capitalised. */}
+          <figure className="flex items-center gap-3 rounded-[6px] bg-[var(--tile)] px-4 py-3">
+            <Image src="/reviews/voraarchive.png" alt="" width={64} height={64} className="size-8 shrink-0 rounded-full" />
+            <div className="min-w-0 text-[13px] sm:text-[14px] tracking-tight leading-snug">
+              <blockquote className="text-[rgb(var(--fg))]">&ldquo;Super happy with how our website turned out.&rdquo;</blockquote>
+              <figcaption className="text-[rgb(var(--muted))]">vora.archive</figcaption>
+            </div>
+          </figure>
         </div>
 
-        {/* One line of proof at the moment of decision, right under the
-            guarantee. An exact excerpt of the review in testimonials.tsx,
-            first letter capitalised. */}
-        <figure className="mt-3 flex items-center gap-3 rounded-[6px] bg-[rgb(var(--surface)/0.45)] px-4 py-3">
-          <Image
-            src="/reviews/voraarchive.png"
-            alt=""
-            width={64}
-            height={64}
-            className="size-8 shrink-0 rounded-full"
-          />
-          <div className="min-w-0 text-[13px] sm:text-[14px] tracking-tight leading-snug">
-            <blockquote className="text-[rgb(var(--fg))]">
-              &ldquo;Super happy with how our website turned out.&rdquo;
-            </blockquote>
-            <figcaption className="text-[rgb(var(--muted))]">vora.archive</figcaption>
+        {/* What's in the box, then payment and the fine print. */}
+        <div className="w-full lg:pt-2">
+          <p className="mb-2 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">What&apos;s included</p>
+          <ul role="list" className="w-full border-t border-[rgb(var(--fg)/0.08)] pt-2">
+            {LICENSE.lines.map((line) => (
+              <IncludeLine key={line.label} line={line} />
+            ))}
+          </ul>
+
+          <div className="mt-10 flex w-full flex-col items-start gap-4 border-t border-[rgb(var(--fg)/0.08)] pt-6">
+            <PaymentMethodIcons />
+            <PolicyDisclaimer
+              className="!justify-start"
+              lead={
+                <span className="inline-flex items-center gap-1.5">
+                  Secured by
+                  <img
+                    src="/stripe-wordmark.svg"
+                    alt="Stripe"
+                    width={46}
+                    height={20}
+                    className="h-[1.5em] w-auto"
+                    draggable={false}
+                    style={{ filter: "grayscale(1) brightness(0) invert(0.42)" }}
+                  />
+                </span>
+              }
+            />
           </div>
-        </figure>
-      </div>
-
-      {/* What's in the box, one quiet column on the same axis as the frame
-          and button, under the decision rather than in front of it. A small
-          label names the block so it reads as its own tier. */}
-      <div className="mt-14 w-full sm:mt-16">
-        <p className="mb-2 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">What&apos;s included</p>
-        <ul
-          role="list"
-          className="w-full border-t border-[rgb(var(--line))] pt-2"
-        >
-          {LICENSE.lines.map((line) => (
-            <IncludeLine key={line.label} line={line} />
-          ))}
-        </ul>
-      </div>
-
-      {/* Payment, then the fine print folded into one line with the Stripe
-          mark, so the section ends on two quiet rows instead of a stack. */}
-      <div className="mt-10 flex w-full flex-col items-center gap-4 border-t border-[rgb(var(--line))] pt-8">
-        <PaymentMethodIcons className="justify-center" />
-        <PolicyDisclaimer
-          lead={
-            <span className="inline-flex items-center gap-1.5">
-              Secured by
-              <img
-                src="/stripe-wordmark.svg"
-                alt="Stripe"
-                width={46}
-                height={20}
-                className="h-[1.5em] w-auto"
-                draggable={false}
-                style={{ filter: "grayscale(1) brightness(0) invert(0.42)" }}
-              />
-            </span>
-          }
-        />
+        </div>
       </div>
     </div>
   );

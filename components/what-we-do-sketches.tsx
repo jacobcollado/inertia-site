@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Box, Floor, Flag, enter, raise } from "@/components/line-art";
+import { Box, Flag, enter, raise } from "@/components/line-art";
 
 // The What we do drawings, in the hero staircase's line style
 // (components/line-art.tsx). One per step, each building itself once `play`
@@ -21,7 +21,6 @@ function Direction({ play, delay, still }: Anim) {
   const d = still ? 0 : delay;
   return (
     <>
-      <Floor y={240} />
       <Box x={110} y={96} w={180} h={144} d={0.2} ghost />
       <g style={enter(on, "translateY(40px)", d + 200, 700)}>
         <Box x={160} y={150} w={80} h={90} d={0.14} />
@@ -35,7 +34,6 @@ function Design({ play, delay, still }: Anim) {
   const d = still ? 0 : delay;
   return (
     <>
-      <Floor y={240} />
       <Box x={120} y={170} w={160} h={70} d={0.2} />
       <g style={enter(on, "translateY(-30px)", d + 150)}>
         <Box x={136} y={160} w={70} h={10} d={0.14} />
@@ -62,7 +60,6 @@ function Development({ play, delay, still }: Anim) {
   const d = still ? 0 : delay;
   return (
     <>
-      <Floor y={240} />
       {BRICKS.map((b, i) => (
         <g key={i} style={enter(on, "translateY(-36px)", d + 120 + i * 170, 560)}>
           <Box {...b} d={0.14} />
@@ -77,7 +74,6 @@ function Launch({ play, delay, still }: Anim) {
   const d = still ? 0 : delay;
   return (
     <>
-      <Floor y={240} />
       <Box x={110} y={208} w={180} h={32} d={0.24} />
       <g style={enter(on, "translateY(30px)", d + 150, 650)}>
         <Box x={150} y={140} w={100} h={68} d={0.17} />

@@ -214,7 +214,7 @@ export function InquirySteps({
                 )}
               </div>
               <div className="mt-3 flex items-center justify-between gap-4">
-                <p role="alert" className="min-w-0 text-[13px] tracking-tight" style={{ color: "#ff7a7a" }}>
+                <p role="alert" className="min-w-0 text-[13px] tracking-tight" style={{ color: "#e5484d" }}>
                   {error}
                 </p>
                 <button

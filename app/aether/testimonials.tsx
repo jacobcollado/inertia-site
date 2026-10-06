@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
 
@@ -13,9 +13,9 @@ interface Testimonial {
   logo?: string;
   /** The brand's store, shown as a bare domain under the name. */
   site?: string;
-  /** An exact substring of the quote, marked with the Figma-style selection
-   * the homepage statement uses, so each card has one line that scans.
-   * Keep it inside the first four lines, which is all the card shows. */
+  /** An exact substring of the quote, set in full ink against the rest of
+   * the quote in muted grey, so each card has one line that scans. Keep it
+   * inside the first four lines, which is all the card shows. */
   highlight?: string;
 }
 
@@ -60,15 +60,16 @@ const SLIDE = "max-sm:w-[88%] max-sm:shrink-0 max-sm:snap-start";
 const EXIT_MS = 220;
 const EXIT_EASE = "cubic-bezier(0.4, 0, 1, 1)";
 
-// The quote with its highlight wrapped in the selection sweep. Falls back to
-// plain text if the phrase isn't found, so an edited quote can't break.
+// The quote with its highlight in full ink (the quote around it is muted).
+// Falls back to plain text if the phrase isn't found, so an edited quote
+// can't break.
 function QuoteText({ t }: { t: Testimonial }) {
   const at = t.highlight ? t.quote.indexOf(t.highlight) : -1;
   if (!t.highlight || at < 0) return <>{t.quote}</>;
   return (
     <>
       {t.quote.slice(0, at)}
-      <span className="selection-sweep [-webkit-box-decoration-break:clone] [box-decoration-break:clone]">{t.highlight}</span>
+      <span className="text-[rgb(var(--fg))]">{t.highlight}</span>
       {t.quote.slice(at + t.highlight.length)}
     </>
   );
@@ -109,7 +110,7 @@ function Byline({ t }: { t: Testimonial }) {
 /* Cards show the opening lines only, so a long review doesn't stretch the
  * whole row. The full text opens in a dialog. Only reviews that actually
  * overflow the clamp get the "Read full review" affordance. */
-function Card({ t, index, onOpen }: { t: Testimonial; index: number; onOpen: () => void }) {
+function Card({ t, onOpen }: { t: Testimonial; onOpen: () => void }) {
   const quoteRef = useRef<HTMLQuoteElement>(null);
   const [clamped, setClamped] = useState(false);
 
@@ -125,13 +126,12 @@ function Card({ t, index, onOpen }: { t: Testimonial; index: number; onOpen: () 
 
   return (
     <figure
-      className={`group relative rise rise--liquid flex flex-col justify-between gap-6 rounded-[6px] bg-[rgb(var(--surface)/0.45)] p-5 sm:p-7 sm:last:col-span-2 lg:last:col-span-1 ${SLIDE}`}
-      style={{ "--rise-delay": `${80 + index * 70}ms` } as CSSProperties}
+      className={`group relative flex flex-col justify-between gap-8 rounded-[6px] bg-[var(--tile)] p-5 sm:p-7 sm:last:col-span-2 lg:last:col-span-1 ${SLIDE}`}
     >
       <div>
         <blockquote
           ref={quoteRef}
-          className="line-clamp-4 text-[16px] leading-snug tracking-tight text-[rgb(var(--fg))] [text-wrap:pretty] sm:text-[19px]"
+          className="line-clamp-4 text-[16px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty] sm:text-[19px]"
         >
           <QuoteText t={t} />
         </blockquote>
@@ -235,7 +235,7 @@ function ReviewDialog({ t, onClose }: { t: Testimonial | null; onClose: () => vo
             </svg>
           </button>
         </div>
-        <blockquote className="mt-5 [&_.selection-sweep]:[background-size:100%_88%] text-[17px] leading-snug tracking-tight text-[rgb(var(--fg))] [text-wrap:pretty] sm:text-[20px]">
+        <blockquote className="mt-5 text-[17px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty] sm:text-[20px]">
           <QuoteText t={t} />
         </blockquote>
       </div>
@@ -282,16 +282,25 @@ export function Testimonials() {
   return (
     <>
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
-      <section className="px-3 py-16 sm:py-24" aria-label="What brands say">
-        <p className="rise rise--liquid mb-10 text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal leading-none tracking-[-0.03em] text-[rgb(var(--fg))]">
-          From brands we&apos;ve worked with
-        </p>
+      {/* Laid out like the sections around it: the heading and one line on
+          the left, then the reviews as plain tiles. Comes in with the site's
+          staggered reveal. */}
+      <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24" aria-label="What brands say">
+        <div className="mb-10 sm:mb-12">
+          <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal leading-[1.1] tracking-[-0.03em] text-[rgb(var(--fg))]">
+            From brands we&apos;ve worked with
+          </h2>
+          <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+            Quoted as sent, from three of the 500+ brands we&apos;ve worked with.
+          </p>
+        </div>
         <div
           ref={trackRef}
-          className="no-scrollbar mx-auto max-w-[64rem] lg:max-w-[80rem] gap-3 max-sm:-mx-3 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:snap-x max-sm:snap-mandatory max-sm:px-3 max-sm:scroll-px-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4"
+          data-stagger
+          className="no-scrollbar gap-3 max-sm:-mx-3 max-sm:flex max-sm:items-stretch max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:snap-x max-sm:snap-mandatory max-sm:px-3 max-sm:scroll-px-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4"
         >
           {TESTIMONIALS.map((t, i) => (
-            <Card key={t.name} t={t} index={i} onOpen={() => setOpen(t)} />
+            <Card key={t.name} t={t} onOpen={() => setOpen(t)} />
           ))}
         </div>
         <div className="mt-4 flex justify-center gap-1.5 sm:hidden">
@@ -314,9 +323,6 @@ export function Testimonials() {
             </button>
           ))}
         </div>
-        <p className="rise rise--liquid mt-6 text-center text-[14px] tracking-tight text-[rgb(var(--muted))] sm:text-[15px]">
-          And 500+ other brands
-        </p>
       </section>
       <ReviewDialog t={open} onClose={() => setOpen(null)} />
     </>

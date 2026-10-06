@@ -1624,12 +1624,12 @@ const AskUserQuestions = forwardRef<HTMLDivElement, AskUserQuestionsProps>(
                           // symmetric padding there. Sits between the stock sm
                           // and lg sizes: more presence than sm without
                           // dominating the card.
-                          // Pure white rather than the card's off-white
-                          // --sh-primary (#ededed): as the one commit action on
-                          // a near-black card, it should read as the brightest
-                          // thing there, and the token sits a step under that.
+                          // The card's ink as the fill and its paper as the
+                          // text, so the one commit action is the strongest
+                          // thing on the card in either theme: near-black on a
+                          // light card, near-white on a dark one.
                           className={cn(
-                            "h-8 text-[13.5px] pl-4 pr-3 sm:pr-2 bg-white text-black hover:bg-white/90",
+                            "h-8 text-[13.5px] pl-4 pr-3 sm:pr-2 bg-[var(--sh-foreground)] text-[var(--sh-background)] hover:opacity-90",
                             shape.bgRadius === 6 ? "!rounded-[6px]" : shape.button
                           )}
                         >
@@ -1681,7 +1681,7 @@ function ShortcutChip({
       className={cn(
         "inline-flex shrink-0 items-center justify-center min-w-[20px] h-5 px-1 text-[11px] leading-none font-sans tracking-wide",
         tone === "onLight"
-          ? "bg-black/10 text-black/75 ring-1 ring-inset ring-black/15"
+          ? "bg-[color-mix(in_srgb,currentColor_14%,transparent)] ring-1 ring-inset ring-[color-mix(in_srgb,currentColor_20%,transparent)] opacity-80"
           : tone === "inverted"
             ? "bg-background/15 text-background"
             : "bg-foreground/10 text-muted-foreground",

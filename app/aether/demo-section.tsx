@@ -35,42 +35,44 @@ export function DemoSection({ href, password }: { href: string; password: string
     };
   }, []);
 
+  // Laid out like "Built to sell" above it: the heading and its line on the
+  // left with the controls beside them, the recording on a plain tile, then
+  // one row under it with the store password and the way into the live
+  // store. Comes in with the site's staggered reveal.
+  const controls = (
+    <div className="flex items-center gap-2">
+      <DemoToggle mode={mode} onChange={setMode} />
+      <PlayPauseButton paused={paused} onToggle={() => setPaused((p) => !p)} />
+    </div>
+  );
   return (
-    <section ref={ref} className="px-3 py-16 sm:py-24" aria-labelledby="demo-section-title">
-      <div className="mb-10 flex flex-col items-center gap-3">
-        <h2
-          id="demo-section-title"
-          className="rise rise--liquid text-center text-[clamp(1.8rem,3vw,2.5rem)] font-normal leading-none tracking-[-0.03em] text-[rgb(var(--fg))]"
-        >
-          See it in action
-        </h2>
-        <p className="rise rise--liquid max-w-md text-center text-[16px] leading-snug tracking-tight text-[rgb(var(--muted))] [text-wrap:balance] sm:text-[19px]">
-          Our demo store running Aether, from the home page to the cart.
-        </p>
+    <section ref={ref} className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24" aria-labelledby="demo-section-title">
+      <div className="mb-10 flex items-end justify-between gap-6 sm:mb-12">
+        <div>
+          <h2
+            id="demo-section-title"
+            className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal leading-[1.1] tracking-[-0.03em] text-[rgb(var(--fg))]"
+          >
+            See it in action
+          </h2>
+          <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+            Our demo store running Aether, from the home page to the cart.
+          </p>
+        </div>
+        <div className="hidden shrink-0 sm:block">{controls}</div>
       </div>
 
-      {/* Same shape as "Make it yours" below it: a control row above the
-          frame from sm up, both controls under the frame on phones, then one
-          strip that hands off to the live store. */}
-      <div className="rise rise--liquid mx-auto w-full max-w-[64rem]">
-        <div className="mb-3 hidden items-center justify-between gap-3 sm:flex">
-          <PlayPauseButton paused={paused} onToggle={() => setPaused((p) => !p)} />
-          <DemoToggle mode={mode} onChange={setMode} />
+      <div className="rounded-[6px] bg-[var(--tile)] px-3 py-5 sm:px-10 sm:py-10">
+        <div className="mx-auto w-full max-w-[64rem]">
+          <DemoFrame mode={mode} host={hostOf(href)} load={load} playing={inView && !paused} />
         </div>
+        {/* Phones: the controls in one centred row under the recording. */}
+        <div className="mt-5 flex justify-center sm:hidden">{controls}</div>
+      </div>
 
-        <DemoFrame mode={mode} host={hostOf(href)} load={load} playing={inView && !paused} />
-
-        {/* Phones: both controls in one centered row under the video, so
-            neither sits alone at an edge. */}
-        <div className="mt-5 flex items-center justify-center gap-2 sm:hidden">
-          <DemoToggle mode={mode} onChange={setMode} />
-          <PlayPauseButton paused={paused} onToggle={() => setPaused((p) => !p)} />
-        </div>
-
-        <div className="mt-5 flex flex-col items-center gap-3 rounded-[6px] bg-[rgb(var(--surface)/0.45)] px-4 py-4 sm:flex-row sm:justify-between sm:px-5">
-          <PasswordNote password={password} className="text-center sm:text-left" />
-          <LiveStoreButton href={href} password={password} />
-        </div>
+      <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+        <PasswordNote password={password} className="text-center sm:text-left" />
+        <LiveStoreButton href={href} password={password} />
       </div>
     </section>
   );

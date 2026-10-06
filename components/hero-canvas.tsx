@@ -6,12 +6,11 @@ import { INK, TILE } from "@/components/material-art";
 // The hero's visual: a line-drawn staircase, one step for each thing the
 // studio does (Direction, Design, Development, Launch, the same steps as
 // "What we do"), rising left to right from first idea to launch. Monoline
-// strokes, with a dashed floor plane and a dashed ghost of the next step
-// past Launch. A few small objects sit on the treads: sheets on Design, a
+// strokes, with a dashed ghost of the next step past Launch. A few small objects sit on the treads: sheets on Design, a
 // block on Development, a flag on Launch. Drawn in the page's ink on its
 // tile, so it flips with the light / dark theme.
 //
-// On landing it builds itself: the floor fades in, the steps rise into place
+// On landing it builds itself: the steps rise into place
 // left to right with their labels, the objects drop onto the treads, the
 // flag raises, and the ghost step fades in last (CSS in globals.css, under
 // "Hero canvas"). Transform and opacity only; reduced motion shows it built.
@@ -96,12 +95,6 @@ function Board({ c, className }: { c: Comp; className: string }) {
     <svg viewBox={view} preserveAspectRatio="xMidYMid meet" className={className} fill="none">
       <g ref={drawing}>
 
-      {/* Floor plane the stair stands on. */}
-      <polygon
-        className="hs-floor"
-        points={poly([[c.x0 - 60, c.base], [xEnd + 60, c.base], back([xEnd + 60, c.base]), back([c.x0 - 60, c.base])].map(([x, y]): Pt => [x, y]))}
-        {...DASH}
-      />
 
       {STEPS.map((label, i) => {
         const x = c.x0 + c.run * i;

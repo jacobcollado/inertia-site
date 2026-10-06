@@ -9,7 +9,8 @@ import { cn } from "@/lib/utils";
 export const FRAME_INSET = "inset-x-0 sm:inset-x-3 xl:inset-x-0";
 export const FRAME_TONES = {
   light: { line: "rgb(var(--ink-rgb) / 0.09)", handle: "rgb(var(--ink-rgb) / 0.28)", paper: "var(--paper)" },
-  dark: { line: "rgb(255 255 255 / 0.09)", handle: "rgb(255 255 255 / 0.3)", paper: "rgb(var(--bg))" },
+  // The homepage's lower panel, which follows the theme: lines in its own ink.
+  dark: { line: "rgb(var(--fg) / 0.09)", handle: "rgb(var(--fg) / 0.3)", paper: "rgb(var(--bg))" },
 } as const;
 export type FrameTone = keyof typeof FRAME_TONES;
 

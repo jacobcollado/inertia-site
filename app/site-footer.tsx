@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme, type ThemePref } from "./theme-provider";
+import { FrameColumnRails, FrameRule, type FrameTone } from "@/components/page-frame";
 
 const THEME_OPTIONS: { pref: ThemePref; label: string; Icon: typeof Sun }[] = [
   { pref: "light", label: "Light", Icon: Sun },
@@ -39,26 +40,120 @@ export function ThemeSwitch() {
   );
 }
 
-export function MinimalFooter({ themeSwitch = false }: { themeSwitch?: boolean }) {
-  return (
-    <footer className="w-full max-w-[80rem] mx-auto px-6 sm:px-8 py-8 flex flex-col items-start text-left sm:items-center sm:text-center gap-4">
-      <div className="rise flex flex-wrap items-center gap-x-5 gap-y-2" style={{ "--rise-delay": "80ms" } as React.CSSProperties}>
-        <Link href="/policies/terms-of-service" className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.4 }}>
-          Terms of service
-        </Link>
-        <Link href="/policies/privacy-policy" className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.4 }}>
-          Privacy policy
-        </Link>
-        <Link href="/policies/refund-policy" className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors" style={{ opacity: 0.4 }}>
-          Refund policy
-        </Link>
-      </div>
-      {themeSwitch && (
-        <div className="rise" style={{ "--rise-delay": "120ms" } as React.CSSProperties}>
-          <ThemeSwitch />
-        </div>
-      )}
-    </footer>
+type FooterLink = { label: string; href: string; external?: boolean };
+
+const FOOTER_COLUMNS: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "Studio",
+    links: [
+      { label: "Our work", href: "/work" },
+      { label: "Our thoughts", href: "/blog" },
+      { label: "Guides & docs", href: "/docs" },
+    ],
+  },
+  {
+    title: "Aether",
+    links: [
+      { label: "Aether", href: "/aether" },
+      { label: "Changelog", href: "/aether/changelog" },
+      { label: "Live demo", href: "https://aether-starter.myshopify.com", external: true },
+    ],
+  },
+  {
+    title: "Contact",
+    links: [
+      { label: "hello@byinertia.com", href: "mailto:hello@byinertia.com", external: true },
+      { label: "Instagram", href: "https://www.instagram.com/by.inertia/", external: true },
+      { label: "X", href: "https://x.com/inertia_dev", external: true },
+    ],
+  },
+];
+
+const LEGAL: FooterLink[] = [
+  { label: "Terms", href: "/policies/terms-of-service" },
+  { label: "Privacy", href: "/policies/privacy-policy" },
+  { label: "Refunds", href: "/policies/refund-policy" },
+];
+
+const LINK = "text-[15px] tracking-tight text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]";
+
+function FooterAnchor({ link, className = LINK }: { link: FooterLink; className?: string }) {
+  return link.external ? (
+    <a href={link.href} className={className} {...(link.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}>
+      {link.label}
+    </a>
+  ) : (
+    <Link href={link.href} className={className}>
+      {link.label}
+    </Link>
   );
 }
 
+// The Inertia wordmark, as a mask filled with the page's text colour, so it
+// reads on light pages, in dark mode and on the homepage's dark zone without
+// inverting the image.
+function Wordmark() {
+  return (
+    <span
+      role="img"
+      aria-label="Inertia"
+      className="block h-[22px] w-[72px]"
+      style={{
+        background: "rgb(var(--fg))",
+        WebkitMaskImage: "url(/logo.png)",
+        maskImage: "url(/logo.png)",
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+      }}
+    />
+  );
+}
+
+// The site footer, in the page frame: the column's two rails run through it,
+// and a frame rule with square handles separates the bottom row. Above it,
+// the wordmark on the left and three short link columns on the right; below,
+// the year, the policies and (where the route follows the theme) the theme
+// switch. Plain type in the theme's tokens, so it reads on the light pages,
+// in dark mode and on the homepage's dark zone (tone="dark") alike. Comes in
+// with the same staggered reveal as the homepage sections. `rails` is off on
+// blog posts, which frame their own narrower sheet.
+export function MinimalFooter({ themeSwitch = false, tone = "light", rails = true }: { themeSwitch?: boolean; tone?: FrameTone; rails?: boolean }) {
+  return (
+    <footer className="relative w-full">
+      {rails && <FrameColumnRails tone={tone} />}
+      <div className="rise rise-stagger relative w-full max-w-[80rem] mx-auto px-6 sm:px-8 pt-16 sm:pt-20">
+        <div data-stagger className="grid gap-10 sm:grid-cols-[1fr_auto] sm:gap-16">
+          <div>
+            <Wordmark />
+          </div>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 sm:gap-x-14">
+            {FOOTER_COLUMNS.map((col) => (
+              <div key={col.title} className="flex flex-col gap-2">
+                <p className="mb-1 text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{col.title}</p>
+                {col.links.map((link) => (
+                  <FooterAnchor key={link.label} link={link} />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="-mx-6 sm:-mx-8">
+          <FrameRule tone={tone} className="py-8 sm:py-10" />
+        </div>
+
+        <div className="flex flex-col-reverse items-start gap-4 pb-8 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">&copy; {new Date().getFullYear()} Inertia</span>
+            {LEGAL.map((link) => (
+              <FooterAnchor key={link.label} link={link} className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 transition-opacity hover:opacity-100" />
+            ))}
+          </div>
+          {themeSwitch && <ThemeSwitch />}
+        </div>
+      </div>
+    </footer>
+  );
+}

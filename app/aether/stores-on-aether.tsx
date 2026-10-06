@@ -24,47 +24,54 @@ const STORES: { name: string; src: string; w: number; h: number; optical?: numbe
 const markHeight = (w: number, h: number, optical = 1) =>
   `calc(var(--mark) * ${(optical / Math.sqrt(w / h)).toFixed(3)})`;
 
-/* Laid out as a logo wall: one even cell per store, split by hairlines, so
- * the marks line up instead of wrapping into a ragged row. Five across from
- * sm up; two across on phones, with Allure's wide wordmark taking the last
- * row on its own. */
+function Mark({ s }: { s: (typeof STORES)[number] }) {
+  return (
+    <span
+      role="img"
+      aria-label={s.name}
+      className="block shrink-0 bg-[rgb(var(--fg))] opacity-60"
+      style={{
+        height: markHeight(s.w, s.h, s.optical),
+        aspectRatio: `${s.w} / ${s.h}`,
+        WebkitMaskImage: `url(${s.src})`,
+        maskImage: `url(${s.src})`,
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskPosition: "center",
+      }}
+    />
+  );
+}
+
+/* A slow marquee under the label: the marks drift sideways in a continuous
+ * loop (the set is drawn twice, the track slides by one set), fading out at
+ * both edges, and pause while hovered. With reduced motion the track stands
+ * still and the one set sits centred. CSS in globals.css (.stores-marquee). */
 export function StoresOnAether() {
   return (
-    <section className="px-3 py-14 sm:py-20" aria-label="Stores running Aether">
-      <p className="rise rise--liquid text-center text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
+    <section className="rise rise--liquid py-14 sm:py-20" aria-label="Stores running Aether">
+      <p className="px-3 text-center text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
         Stores running Aether
       </p>
-      <ul
-        className="rise rise--liquid mx-auto mt-6 sm:mt-8 grid max-w-[64rem] grid-cols-2 gap-px overflow-hidden rounded-[6px] bg-[rgb(var(--line))] shadow-[0_0_0_1px_rgb(var(--line))] sm:grid-cols-5"
-        style={{ "--mark": "clamp(2.6rem, 7vw, 3.4rem)" } as CSSProperties}
+      <div
+        className="stores-marquee mt-8 sm:mt-10 overflow-hidden"
+        style={{ "--mark": "clamp(3rem, 6.5vw, 4rem)" } as CSSProperties}
       >
-        {STORES.map((s, i) => (
-          <li
-            key={s.name}
-            className={`group flex h-24 items-center justify-center bg-[rgb(var(--bg))] px-4 sm:h-28 ${
-              i === STORES.length - 1 ? "col-span-2 sm:col-span-1" : ""
-            }`}
-          >
-            <span
-              role="img"
-              aria-label={s.name}
-              className="block max-w-full bg-[rgb(var(--fg))] opacity-70 transition-opacity duration-300 group-hover:opacity-100"
-              style={{
-                height: markHeight(s.w, s.h, s.optical),
-                aspectRatio: `${s.w} / ${s.h}`,
-                WebkitMaskImage: `url(${s.src})`,
-                maskImage: `url(${s.src})`,
-                WebkitMaskSize: "contain",
-                maskSize: "contain",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-                WebkitMaskPosition: "center",
-                maskPosition: "center",
-              }}
-            />
-          </li>
-        ))}
-      </ul>
+        <div className="stores-marquee__track flex w-max items-center">
+          {[0, 1].map((copy) => (
+            <ul key={copy} aria-hidden={copy === 1} className="flex shrink-0 items-center gap-16 pr-16 sm:gap-24 sm:pr-24">
+              {STORES.map((s) => (
+                <li key={s.name} className="flex items-center">
+                  <Mark s={s} />
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

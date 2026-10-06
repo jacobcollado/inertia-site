@@ -81,32 +81,44 @@ export const QUESTIONS: { q: string; a: string; group: (typeof FAQ_GROUPS)[numbe
     a: "One license covers one Shopify store. Moving to a different store? Reply to your purchase email and we'll move it over.",
   },
 ];
+// Laid out like the sections above it: the heading, one line and the
+// topics on the left, the questions on the right as hairline rows, with the
+// way to set it up yourself under the topics. Comes in with the site's
+// staggered reveal.
 export function AetherFaq() {
   return (
-    <section className="flex flex-col items-center justify-center px-3 pt-16 sm:pt-24 pb-16 sm:pb-24 text-center rise rise--liquid">
-      {/* Named for what it is, in the same heading style as the sections
-          above, so it's read as answers rather than another pitch. */}
-      <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))] mb-10">
-        Questions, answered
-      </h2>
+    <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24">
       {/* One topic at a time, so only three or four questions show at once.
           Every question still ships in the FAQ JSON-LD and llms.txt. */}
-      <div className="w-full max-w-xl text-left">
-        <FaqTabs groups={FAQ_GROUPS} questions={QUESTIONS} />
-      </div>
-      <p className="mt-8 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
-        Prefer to set it up yourself? It takes no code.
-      </p>
-      <Link
-        href="/docs?from=aether"
-        className={`mt-3 inline-flex items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} border border-[rgb(var(--line))] px-5 py-2.5 text-[15px] sm:text-[16px] font-medium tracking-tight text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors`}
-      >
-        See the setup guide
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
-          <line x1="3" y1="8" x2="13" y2="8" />
-          <polyline points="9 4 13 8 9 12" />
-        </svg>
-      </Link>
+      <FaqTabs
+        groups={FAQ_GROUPS}
+        questions={QUESTIONS}
+        intro={
+          <>
+            <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
+              Questions, answered
+            </h2>
+            <p className="mt-2 max-w-sm text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+              What buyers ask before they buy, by topic.
+            </p>
+          </>
+        }
+        aside={
+          <div>
+            <p className="text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">Prefer to set it up yourself? It takes no code.</p>
+            <Link
+              href="/docs?from=aether"
+              className={`mt-3 inline-flex items-center justify-center gap-1.5 ${ACTION_RADIUS_CLASS} border border-[rgb(var(--line))] px-4 py-2 text-[15px] font-medium tracking-tight text-[rgb(var(--fg))] hover:border-[rgb(var(--fg)/0.3)] transition-colors`}
+            >
+              See the setup guide
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true">
+                <line x1="3" y1="8" x2="13" y2="8" />
+                <polyline points="9 4 13 8 9 12" />
+              </svg>
+            </Link>
+          </div>
+        }
+      />
     </section>
   );
 }
@@ -117,16 +129,20 @@ const ASK_AI_PROMPT =
   // text fallback with the same facts.
   "Read https://byinertia.com/aether/overview (if it won't load, use https://byinertia.com/llms.txt) and tell me what the Aether Shopify theme includes, what it costs, and whether it's a good fit for my store.";
 
+// Laid out like the sections above it: the heading and one line on the
+// left, the assistants as tiles under them.
 export function AetherAskAi() {
   return (
-    <section className="flex flex-col items-center justify-center px-3 py-16 sm:py-24 text-center rise rise--liquid">
-      <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-none text-[rgb(var(--fg))]">
-        Still deciding?
-      </h2>
-      <p className="mt-3 max-w-xl text-[16px] sm:text-[19px] leading-snug tracking-tight text-[rgb(var(--muted))]">
-        Ask your AI of choice about Aether.
-      </p>
-      <AskAiLinks prompt={ASK_AI_PROMPT} variant="wall" className="mt-8 w-full max-w-2xl" />
+    <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24">
+      <div className="mb-8 sm:mb-10">
+        <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
+          Still deciding?
+        </h2>
+        <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+          Ask your AI of choice about Aether. Each one opens with the question already asked.
+        </p>
+      </div>
+      <AskAiLinks prompt={ASK_AI_PROMPT} variant="tiles" className="w-full" />
     </section>
   );
 }

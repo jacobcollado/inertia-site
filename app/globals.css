@@ -60,27 +60,40 @@
   color-scheme: light;
 }
 
-/* Scroll-triggered black section on the homepage, from the AI paragraph
-   down through the FAQ and booking section (and the footer, applied
-   separately in SiteShell for the "/" route only). Every component in that
-   range already consumes rgb(var(--x)) tokens rather than hardcoded hex, so
-   overriding the tokens here is enough to re-color them with no per-
-   component edits. */
+/* The homepage's lower panel, from the services section down through the
+   footer (the footer's part is applied in SiteShell for "/" only), set off
+   from the white card above it. It follows the theme: a light grey a step
+   below the card's white in light mode, a deeper near-black than the page in
+   dark mode. --zone-bg is its colour, also used by the backdrop behind the
+   card's rounded bottom and the overscroll below the page. Every component
+   in the range consumes rgb(var(--x)) tokens, so overriding them here
+   re-colours it with no per-component edits. */
+:root { --zone-bg: 244 244 244; }
 .homepage-dark-zone {
-  --bg: 10 10 10;
+  --bg: var(--zone-bg);
+  --surface: 234 234 234;
+  --surface-elevated: 226 226 226;
+  --fg: 18 18 18;
+  --muted: 110 110 110;
+  --line: 218 218 218;
+  --btn-bg: rgb(var(--fg) / 0.92);
+  --btn-fg: rgb(var(--bg));
+  --btn-border: color-mix(in srgb, var(--btn-bg) 55%, white);
+  color-scheme: light;
+  background: rgb(var(--bg));
+}
+html.themed[data-theme="dark"] { --zone-bg: 10 10 10; }
+html.themed[data-theme="dark"] .homepage-dark-zone {
   --surface: 24 24 24;
   --surface-elevated: 34 34 34;
   --fg: 245 245 245;
   --muted: 150 150 150;
   --line: 55 55 55;
-  --btn-bg: rgb(var(--fg) / 0.92);
-  --btn-fg: rgb(var(--bg));
   --btn-border: color-mix(in srgb, var(--btn-bg) 55%, black);
   color-scheme: dark;
   --scrollbar-thumb: 72 72 72;
   --scrollbar-thumb-hover: 110 110 110;
   --scrollbar-track: 18 18 18;
-  background: rgb(var(--bg));
 }
 
 /* Homepage palette. The homepage's light sections and the material
@@ -358,10 +371,11 @@ html.themed[data-theme="dark"] .shimmer-word--warm {
 
 /* Dark scope for the homepage questionnaire (ask-user-questions). The component
    uses shadcn tokens (bg-card, text-foreground, border-border, bg-accent...)
-   which map to --sh-* — light by default. The quiz sits in the homepage's dark
-   zone, so override those tokens to dark values here rather than site-wide. Row
+   which map to --sh-* — light by default, which suits the homepage's lower
+   panel in light mode. In dark mode the panel goes near-black, so override
+   those tokens to dark values here rather than site-wide. Row
    hover/selected radii come from ShapeProvider defaultShape="action" (6px). */
-.quiz-dark {
+html.themed[data-theme="dark"] .quiz-dark {
   --sh-background: #0a0a0a;
   --sh-foreground: #ededed;
   --sh-card: #141414;
@@ -416,7 +430,7 @@ html {
 }
 @keyframes home-overscroll-base {
   0%, 88% { background-color: rgb(var(--home-top)); }
-  100%    { background-color: rgb(10 10 10); }
+  100%    { background-color: rgb(var(--zone-bg)); }
 }
 /* Fallback for engines without scroll-driven animations: a viewport-fixed
    hard-stop gradient, light top half / dark bottom half. */
@@ -426,8 +440,8 @@ html {
       to bottom,
       rgb(var(--home-top)) 0%,
       rgb(var(--home-top)) 50%,
-      rgb(10 10 10) 50%,
-      rgb(10 10 10) 100%
+      rgb(var(--zone-bg)) 50%,
+      rgb(var(--zone-bg)) 100%
     );
     background-attachment: fixed;
   }
@@ -856,6 +870,58 @@ h1:hover .redact > span.redact-inner,
   animation-delay: var(--rise-delay, 0ms);
 }
 
+/* /aether "Stores running Aether": the marks drift left in a loop. The
+   track holds the set twice and slides by half its width, so the loop is
+   seamless; the edges fade out; hovering pauses it. Reduced motion: no
+   drift, the second copy hidden, the first centred. */
+.stores-marquee {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.stores-marquee__track { animation: stores-marquee 38s linear infinite; }
+.stores-marquee:hover .stores-marquee__track { animation-play-state: paused; }
+@keyframes stores-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stores-marquee { -webkit-mask-image: none; mask-image: none; }
+  .stores-marquee__track { animation: none; margin-inline: auto; }
+  .stores-marquee__track > ul[aria-hidden="true"] { display: none; }
+  .stores-marquee__track > ul { padding-right: 0; flex-wrap: wrap; justify-content: center; }
+}
+
+/* The /aether hero's scroll cue: the chevron under "See what's inside"
+   bobs gently, so it reads as "keep going". Transform only. */
+.scroll-cue { animation: scroll-cue 1.8s ease-in-out infinite; }
+@keyframes scroll-cue {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue { animation: none; }
+}
+
+/* The checkout's buy button (app/aether/inline-pricing.tsx): a soft band of
+   light sweeps across it every few seconds, so the eye finds it without it
+   shouting. Transform only. */
+.cta-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--cta-fg) 22%, transparent) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: cta-sheen 4.5s cubic-bezier(0.4, 0, 0.2, 1) 1.2s infinite;
+  pointer-events: none;
+}
+@keyframes cta-sheen {
+  0% { transform: translateX(-120%); }
+  28%, 100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cta-sheen::after { animation: none; display: none; }
+}
+
 /* Staggered section reveal (app/scroll-reveal.tsx tags the parts). The
    section itself doesn't move; its parts dissolve in one after another with
    the same blur and settle as the hero, --i apart, capped so long grids
@@ -1181,6 +1247,44 @@ h1:hover .redact > span.redact-inner,
     animation: none;
     transform: perspective(1800px) rotateY(-9deg) rotateX(2deg) rotateZ(1.2deg);
   }
+}
+
+/* Aether hero mockups (app/aether/aether-hero.tsx). A slow float on the
+   main laptop and the phones, and a scroll parallax as the hero leaves the
+   screen: the laptop rises a little and grows slightly, the side laptops
+   rise faster, for depth. The parallax is a scroll-driven animation, so it
+   needs no JS; browsers without it keep the float. Transform only. */
+.hero-bob { will-change: transform; animation: hero-bob 10s ease-in-out infinite; }
+@keyframes hero-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@supports (animation-timeline: view()) {
+  .hero-par {
+    will-change: transform;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: cover 45% cover 100%;
+  }
+  .hero-par--main { animation-name: hero-par-main; }
+  .hero-par--left { animation-name: hero-par-left; }
+  .hero-par--right { animation-name: hero-par-right; }
+}
+@keyframes hero-par-main {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-56px) scale(1.04); }
+}
+@keyframes hero-par-left {
+  from { transform: translateY(0); }
+  to { transform: translateY(-130px); }
+}
+@keyframes hero-par-right {
+  from { transform: translateY(0); }
+  to { transform: translateY(-96px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-bob, .hero-par { animation: none !important; }
 }
 
 /* ── Cookie banner ─────────────────────────────────────────────────────────
@@ -3021,12 +3125,11 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 }
 
 /* Hero canvas (components/hero-canvas.tsx): the staircase builds itself on
-   landing. Floor fades in, steps rise left to right (--i is the step), the
+   landing. Steps rise left to right (--i is the step), the
    objects drop onto their treads, the flag raises from its pole, and the
    ghost step fades in last. --hs-base is when it starts. Transform and
    opacity only, so it stays on the compositor. */
-.hero-stair :is(.hs-floor, .hs-step, .hs-obj, .hs-flag, .hs-ghost) { opacity: 0; }
-.hero-stair.is-on .hs-floor { animation: hs-fade 600ms ease both; animation-delay: var(--hs-base); }
+.hero-stair :is(.hs-step, .hs-obj, .hs-flag, .hs-ghost) { opacity: 0; }
 .hero-stair.is-on .hs-step {
   animation: hs-rise 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--hs-base) + 150ms + var(--i) * 140ms);
@@ -3046,5 +3149,5 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 @keyframes hs-drop { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
 @keyframes hs-raise { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
-  .hero-stair :is(.hs-floor, .hs-step, .hs-obj, .hs-flag, .hs-ghost) { opacity: 1; animation: none !important; }
+  .hero-stair :is(.hs-step, .hs-obj, .hs-flag, .hs-ghost) { opacity: 1; animation: none !important; }
 }
