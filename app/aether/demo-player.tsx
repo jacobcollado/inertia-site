@@ -86,6 +86,16 @@ export function DemoFrame({
   const videoRef = useRef<HTMLVideoElement>(null);
   const video = VIDEOS[mode];
 
+  // React sets `muted` as a property only, so the attribute never reaches
+  // the markup; iOS needs it there to play inline without taking over.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    el.muted = true;
+    el.defaultMuted = true;
+    el.setAttribute("muted", "");
+  }, [mode]);
+
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !load) return;
@@ -103,9 +113,18 @@ export function DemoFrame({
       muted
       loop
       playsInline
+      // Keep the recording inside its device frame on every phone browser:
+      // the prefixed attribute for older iOS Safari, no fullscreen, picture
+      // in picture or casting controls, and no pointer events, so a tap
+      // can't hand the video to the system player.
+      {...{ "webkit-playsinline": "true", "x-webkit-airplay": "deny" }}
+      controls={false}
+      controlsList="nofullscreen nodownload noremoteplayback"
+      disablePictureInPicture
+      disableRemotePlayback
       preload={load ? "auto" : "none"}
       aria-label={`Screen recording of the Aether demo store on ${mode}`}
-      className={mode === "desktop" ? "block h-auto w-full" : "block h-[min(62dvh,36rem)] w-auto rounded-[1.4rem]"}
+      className={`pointer-events-none select-none ${mode === "desktop" ? "block h-auto w-full" : "block h-[min(62dvh,36rem)] w-auto rounded-[1.4rem]"}`}
     />
   );
 
