@@ -91,18 +91,6 @@ export function Framing({ ids, w = 400, h = 300 }: { ids: Ids; w?: number; h?: n
   );
 }
 
-// The framing alone as a backdrop, filling its positioned parent. Used
-// behind the blog post cover drawing.
-export function MaterialBackdrop({ w, h, className = "" }: { w: number; h: number; className?: string }) {
-  const ids = useMaterialIds();
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid slice" className={`absolute inset-0 h-full w-full ${className}`} aria-hidden="true">
-      <Defs ids={ids} />
-      <Framing ids={ids} w={w} h={h} />
-    </svg>
-  );
-}
-
 // Filter and pattern ids, scoped per SVG since several share the page.
 export function useMaterialIds(): Ids {
   const id = useId().replace(/:/g, "");

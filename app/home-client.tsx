@@ -14,6 +14,8 @@ import { SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 import { HeroDragHeading } from "@/components/hero-drag-heading";
 import { SectionHeading } from "@/components/section-heading";
 import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
+import { HeroCanvas } from "@/components/hero-canvas";
+import { MaterialCover } from "@/components/post-covers";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
 import type { AskUserQuestion, AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { InquirySteps } from "@/components/inquiry-steps";
@@ -570,7 +572,17 @@ function VercelHero({
 
   // Fixed lines so the break is the same at every width and the lines stay
   // close in length. The words are draggable (see HeroDragHeading).
-  const HEADING_LINES = [["Your", "site", "should", "be"], ["the", "easy", "part."]];
+  // Two lines from sm up. Phones get the short form on two lines at a
+  // headline size (the full sentence would need four lines, or two at body
+  // size); the phone subline carries the "design and build" instead.
+  const HEADING_LINES = [
+    ["A", "design", "and", "development", "studio"],
+    ["making", "websites", "people", "actually", "remember."],
+  ];
+  const HEADING_LINES_MOBILE = [
+    ["Websites", "people"],
+    ["actually", "remember."],
+  ];
   const HEADING_WORDS = HEADING_LINES.flat();
   const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
   const ctaFadeDelay = headingEnd + 644;
@@ -592,26 +604,10 @@ function VercelHero({
       <div
         className="relative flex items-center"
       >
-        {/* Vertically centered in the space BELOW the header.
-            .site-header is `position: static` — it sits in normal flow and is
-            72px tall — so a plain 100dvh box here starts 72px down and its
-            centre lands ~36px below the viewport's true centre. That offset
-            is what read as "not nicely centered"; the flex centering itself
-            was always working. Subtracting the header height makes the box
-            occupy exactly the visible area under it.
-
-            Desktop padding is deliberately ASYMMETRIC (pt-0 / pb-18dvh): in a
-            justify-center box, extra bottom padding lifts the visible content
-            above the geometric centre. Dead centre read as too low here, which
-            is the usual optical-centring result — a headline sits better a bit
-            above the true middle. Raise sm:pb-[18dvh] to lift it further.
-
-            max-sm:pb-[40dvh] scopes the large mobile bottom pad to
-            mobile only — as a bare pb-[40dvh] it applied at every width and
-            pulled desktop content off centre, and a later sm:pb-10 does not
-            reliably beat it (Tailwind orders utilities itself, so arbitrary
-            value vs. responsive variant is not settled by source order). */}
-        <div className="relative max-w-[80rem] mx-auto w-full px-3 sm:px-8 max-sm:pt-16 sm:pt-0 max-sm:pb-[40dvh] sm:pb-[18dvh] flex flex-col items-center text-center gap-10 min-h-[100dvh] justify-center sm:min-h-[calc(100dvh-72px)] sm:justify-center">
+        {/* Heading, subline and buttons from the top, left-aligned on the
+            same edge as the canvas under them, which runs off the bottom of
+            the first screen so there's something to scroll into. */}
+        <div className="relative max-w-[80rem] mx-auto w-full px-6 sm:px-8 pt-[12dvh] sm:pt-[14dvh] flex flex-col items-start text-left gap-10">
           {false && (
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
@@ -638,22 +634,22 @@ function VercelHero({
           )}
 
           <h1
-            className="tracking-[-0.05em] leading-[0.98] text-[clamp(2.4rem,9.4vw,3.6rem)] sm:tracking-[-0.045em] sm:text-[clamp(3.4rem,7vw,6.5rem)] flex flex-col items-center"
+            className="tracking-[-0.05em] leading-[0.98] text-[clamp(2.2rem,10.5vw,3rem)] sm:tracking-[-0.045em] sm:text-[clamp(1.8rem,4.2vw,4rem)] flex flex-col items-start"
             style={{ color: "#1a1a1a", fontWeight: 450 }}
           >
-            <HeroDragHeading lines={HEADING_LINES} />
+            <HeroDragHeading lines={HEADING_LINES} mobileLines={HEADING_LINES_MOBILE} align="left" />
           </h1>
 
           <p
             className="max-w-md sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-balance"
             style={{ ...liquid(120), color: "#5c5c5c" }}
           >
-            {/* The full sentence is about 66 characters, which can't fit one
-                line at phone widths at a readable size, so it wrapped into two
-                uneven lines under the heading. Mobile gets a shorter line that
-                sits on one row; desktop keeps the full sentence. */}
-            <span className="sm:hidden">Designed and built in-house.</span>
-            <span className="hidden sm:inline">From local shops to growing startups, designed and built in-house.</span>
+            <span className="sm:hidden">
+              We design and build websites for local shops, artists and growing startups, from first idea to launch, all in-house.
+            </span>
+            <span className="hidden sm:inline">
+              We work with local shops, artists and growing startups, taking each project from first idea to launch, all in-house.
+            </span>
           </p>
 
           {false && (
@@ -678,7 +674,7 @@ function VercelHero({
           </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-start gap-3">
             {/* Points at the quiz at the foot of the page rather than straight
                 to Cal: answering a few questions is a lower commitment than
                 putting a meeting on the calendar, and the quiz hands off to
@@ -756,6 +752,15 @@ function VercelHero({
             </a>
             )}
           </div>
+
+          <HeroCanvas
+            style={{
+              marginTop: 8,
+              opacity: visible ? 1 : 0,
+              transform: visible ? "none" : "translateY(18px)",
+              transition: `opacity 900ms ${HERO_LIQUID_EASE} ${ctaFadeDelay + 200}ms, transform 900ms ${HERO_LIQUID_EASE} ${ctaFadeDelay + 200}ms`,
+            }}
+          />
         </div>
       </div>
     </section>
@@ -1820,10 +1825,10 @@ const WHAT_WE_DO_STEP_MS = 420;
 
 // "What we do" as the process it is: four stages in order, each with its
 // drawing on a matching tile, a numbered step track underneath, then the
-// stage name over its description. On first view the steps fill in one after
-// another and the dashed connector (echoing the dashes in the drawings) draws
-// between them on desktop. On phones the stages sit in a row that swipes
-// sideways, like Our thoughts, with the track still joining the steps.
+// stage name over its description. From sm up it's a 2x2 grid, so the
+// drawings get room; on first view the steps fill in one after another and
+// the connector draws across each row. On phones the stages sit in a row that
+// swipes sideways, like Our thoughts, with the track joining every step.
 function WhatWeDo() {
   const listRef = useRef<HTMLOListElement>(null);
   const [on, setOn] = useState(false);
@@ -1886,11 +1891,14 @@ function WhatWeDo() {
       <SectionHeading align="left" className="mb-10 sm:mb-14">What we do</SectionHeading>
       <ol
         ref={listRef}
-        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 sm:overflow-visible sm:px-0 lg:grid-cols-4"
+        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 sm:overflow-visible sm:px-0 lg:gap-x-8 lg:gap-y-16"
       >
         {WHAT_WE_DO_ITEMS.map((item, i) => {
           const active = stepOn(i);
           const delay = stepDelay(i);
+          // In the 2x2 grid the track only joins steps across a row (1 to 2,
+          // 3 to 4); on phones it joins every step in the swipe row.
+          const rowStart = i % 2 === 0;
           // The track out of this step draws when the next one lights.
           const trackOn = phone ? stepOn(i + 1) : lit;
           const trackDelay = phone ? 0 : delay;
@@ -1918,12 +1926,12 @@ function WhatWeDo() {
                   <>
                     <span
                       aria-hidden="true"
-                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] sm:hidden lg:block lg:w-[calc(100%+1.5rem)]"
+                      className={`absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] ${rowStart ? "sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+2rem)]" : "sm:hidden"}`}
                       style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(26,26,26,0.28) 0 4px, transparent 4px 8px)" }}
                     />
                     <span
                       aria-hidden="true"
-                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] sm:hidden lg:block lg:w-[calc(100%+1.5rem)]"
+                      className={`absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] ${rowStart ? "sm:w-[calc(100%+1.5rem)] lg:w-[calc(100%+2rem)]" : "sm:hidden"}`}
                       style={{
                         background: "#1a1a1a",
                         transformOrigin: "left",
@@ -2779,9 +2787,10 @@ function BlogArrow() {
 // "Our thoughts" as a horizontal shelf, so it breaks the page's run of
 // stacked, centred sections: heading on the left, arrows on the right, then
 // the essays as cover cards in a row that swipes or scrolls sideways and runs
-// off the edge, ending on a tile to the full list. Each essay is a type-only
-// tile, the same as that last one, with the excerpt underneath. No sketches,
-// dates or rules.
+// off the edge, ending on a tile to the full list. Each essay shows the
+// middle of its own cover (the same drawing as its post page; see
+// MaterialCover) with the tag, title and excerpt underneath. No dates or
+// rules.
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -2871,20 +2880,24 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
             className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
             style={reveal(i + 1)}
           >
-            <div className="flex aspect-[4/3] flex-col justify-between rounded-[6px] bg-[#f4f4f4] p-5 transition-colors duration-200 group-hover:bg-[#ececec]">
-              <div className="flex items-center gap-2">
-                {i === 0 && <NewChip />}
-                <BlogMeta post={post} />
-              </div>
-              <span className="flex items-end justify-between gap-4">
-                <span className="text-[clamp(1.25rem,2vw,1.5rem)] tracking-[-0.03em] leading-[1.15] text-pretty" style={{ color: "#1a1a1a", fontWeight: 500 }}>
-                  {post.title}
-                </span>
-                <ArrowGlyph className="mb-1 size-5 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
-              </span>
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-[#f4f4f4]">
+              <MaterialCover
+                slug={post.slug}
+                className="transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
+              />
             </div>
+            <div className="mt-4 flex items-center gap-2">
+              {i === 0 && <NewChip />}
+              <BlogMeta post={post} />
+            </div>
+            <span className="mt-2.5 flex items-start justify-between gap-4">
+              <span className="text-[19px] sm:text-[21px] tracking-[-0.02em] leading-snug text-pretty" style={{ color: "#1a1a1a", fontWeight: 500 }}>
+                {post.title}
+              </span>
+              <ArrowGlyph className="mt-1.5 size-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
+            </span>
             {post.excerpt && (
-              <p className="mt-3 text-[15px] leading-snug tracking-tight text-pretty line-clamp-2" style={{ color: "#5c5c5c" }}>
+              <p className="mt-1.5 text-[15px] leading-snug tracking-tight text-pretty line-clamp-2" style={{ color: "#5c5c5c" }}>
                 {post.excerpt}
               </p>
             )}
@@ -3251,13 +3264,7 @@ function VisualLayout({
           {/* <div className="py-1 sm:py-0" />
           <WorkScrollGallery onActiveAccent={(c) => setAccentColor(c)} /> */}
 
-          {/* The hero carries its own large bottom padding (pb-[18dvh]
-              desktop / pb-[40dvh] mobile) meant to be reclaimed by whatever
-              follows — the work gallery normally did that with its own
-              negative top margin. With it hidden, pull DesignPhilosophy back
-              up toward the hero, but not all the way — a full reclaim sat
-              too close underneath it. */}
-          <div className="py-10 sm:py-16 max-sm:-mt-[18dvh] sm:-mt-[7dvh]" />
+          <FrameRule tone="light" />
 
           <DesignPhilosophy introRef={introRef} />
 

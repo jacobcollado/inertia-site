@@ -3,13 +3,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { TOCInline } from "./toc";
+import { TOCSticky } from "./toc";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
 import { PostGlyph } from "@/components/post-glyph";
-import { PostCover, hasPostCover, postFigure } from "@/components/post-figures";
+import { postFigure } from "@/components/post-figures";
+import { MaterialCover } from "@/components/post-covers";
+import { hasMaterialCover } from "@/components/post-cover-slugs";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
-import { MaterialBackdrop } from "@/components/material-art";
 import {
   getAllPosts,
   getPost,
@@ -199,13 +200,12 @@ export default async function BlogPost({
           )}
         </header>
 
-        {/* Cover: the post's own drawing on the material backdrop, falling
-            back to its glyph for a post without one. Full sheet width. */}
+        {/* Cover: the post's own drawing in the material kit, falling back
+            to its glyph for a post without one. Full sheet width. */}
         <div className="relative rise" style={{ ["--rise-delay" as any]: "80ms" }}>
           <div className="relative flex w-full items-center justify-center overflow-hidden" style={{ aspectRatio: "1200/630", background: "#f4f4f4" }}>
-            <MaterialBackdrop w={800} h={420} />
-            {hasPostCover(slug) ? (
-              <PostCover slug={slug} />
+            {hasMaterialCover(slug) ? (
+              <MaterialCover slug={slug} />
             ) : (
               <PostGlyph slug={slug} tag={post.tag} className="relative w-28 h-28 sm:w-36 sm:h-36" />
             )}
@@ -241,23 +241,31 @@ export default async function BlogPost({
                 <span className="text-[13px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">Jacob Collado</span>
                 <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>
                   <span>Founder, Inertia</span>
-                  <span aria-hidden="true">/</span>
-                  <span>{stats.minutes} min read</span>
                 </div>
               </div>
             </div>
             <CopyURL />
           </div>
 
-          <div className="pt-8 rise">
-            <TOCInline headings={headings} />
-          </div>
+          <TOCSticky headings={headings} />
 
           <ArticleBody html={html} slug={slug} />
 
           <Highlighter slug={slug} />
 
-          <div className="pt-4 pb-16">
+          {/* Closes the article: a hairline across the full sheet, with the
+              same handles as the cover where it meets the sheet's edges. */}
+          <div aria-hidden="true" className="relative -mx-6 mt-12 h-px bg-[rgba(26,26,26,0.09)] sm:-mx-12">
+            {["-left-[3.5px]", "-right-[3.5px]"].map((pos) => (
+              <span
+                key={pos}
+                className={`absolute -top-[3px] hidden size-[7px] bg-white sm:block ${pos}`}
+                style={{ boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.28)" }}
+              />
+            ))}
+          </div>
+
+          <div className="pt-10 pb-16">
             {/* Full width of the sheet, with the label centred: the CTA reads
                 as the end of the post rather than a stray chip. */}
             <Link

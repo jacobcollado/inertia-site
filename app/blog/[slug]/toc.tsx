@@ -234,7 +234,7 @@ export function TOC({ headings }: { headings: Heading[] }) {
 
 // Collapsed "Contents" tab that sits inline above the post title. Expands in
 // place rather than overlaying, so it never covers the heading it introduces.
-export function TOCInline({ headings }: { headings: Heading[] }) {
+export function TOCInline({ headings, scrollable = false }: { headings: Heading[]; scrollable?: boolean }) {
   const [open, setOpen] = useState(false);
   const [height, setHeight] = useState(0);
   const bodyRef = useRef<HTMLUListElement>(null);
@@ -300,6 +300,10 @@ export function TOCInline({ headings }: { headings: Heading[] }) {
             height,
             overflow: "hidden",
             transition: "height 320ms cubic-bezier(0.22,1,0.36,1)",
+            // While stuck to the top, a long list scrolls inside itself
+            // rather than running off the screen.
+            maxHeight: scrollable ? "60vh" : undefined,
+            overflowY: scrollable ? "auto" : "hidden",
           }}
         >
           <ul ref={bodyRef} className="flex flex-col px-4 pb-3">
@@ -319,5 +323,47 @@ export function TOCInline({ headings }: { headings: Heading[] }) {
         </div>
       </div>
     </nav>
+  );
+}
+
+// The Contents bar as it sits in the post: on phones it sticks to the top of
+// the screen once scrolled past, on a white strip across the sheet with a
+// hairline under it while stuck, so the contents stay one tap away while
+// reading. From sm up it scrolls away with the page as before. The sticky
+// element is this wrapper, a direct child of the long body column, so it
+// stays stuck for the whole article.
+export function TOCSticky({ headings }: { headings: Heading[] }) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < 0));
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  if (headings.length === 0) return null;
+
+  return (
+    <>
+      <div ref={sentinelRef} aria-hidden="true" className="h-0" />
+      {/* The class list stays fixed: the page's .rise observer marks this
+          element visible by adding a class, and swapping classNames on
+          re-render would wipe that mark and hide it. The stuck padding
+          change goes through style instead. */}
+      <div
+        className="rise max-sm:sticky max-sm:top-0 max-sm:z-30 max-sm:-mx-6 max-sm:px-6 max-sm:bg-white max-sm:pb-3 pt-[var(--toc-pt)] transition-[box-shadow,padding] duration-200"
+        style={
+          {
+            "--toc-pt": stuck ? "12px" : "32px",
+            boxShadow: stuck ? "0 1px 0 rgba(26,26,26,0.09)" : "0 1px 0 transparent",
+          } as React.CSSProperties
+        }
+      >
+        <TOCInline headings={headings} scrollable={stuck} />
+      </div>
+    </>
   );
 }

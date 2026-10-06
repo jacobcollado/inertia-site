@@ -3,7 +3,7 @@
    land on. Pure SVG with no hooks, so it renders fine in a server component. */
 
 /* Panel tint per post. Every post now has its own cover drawing (see
-   PostCover in post-figures.tsx), so the tint no longer needs to carry
+   MaterialCover in post-covers.tsx), so the tint no longer needs to carry
    per-post identity through hue - that job moved to the drawing. One flat neutral
    grey for every card keeps the row calm and lets the drawings read as the
    actual point of difference. Flattened rgba(26,26,26,0.06) on white (the
