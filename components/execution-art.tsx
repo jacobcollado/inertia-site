@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { Defs, Framing, INK, PAPER, SEL, useMaterialIds, type Ids } from "@/components/material-art";
+import { Defs, Framing, GrainRect, INK, PAPER, SEL, useMaterialIds, type Ids } from "@/components/material-art";
 
 // Illustrations for the homepage's "How we think about execution"
 // principles, in the same material kit as the What we do drawings
@@ -16,11 +16,7 @@ const SPRING = "cubic-bezier(0.34, 1.4, 0.64, 1)";
 function useDone(play: boolean, delay = 450) {
   const [done, setDone] = useState(false);
   useEffect(() => {
-    if (!play) {
-      setDone(false);
-      return;
-    }
-    const t = setTimeout(() => setDone(true), delay);
+    const t = setTimeout(() => setDone(play), play ? delay : 0);
     return () => clearTimeout(t);
   }, [play, delay]);
   return done;
@@ -77,8 +73,10 @@ export function RestraintArt({ play }: { play: boolean }) {
           />
         </g>
       ))}
-      <rect x={188} y={86} width={96} height={96} fill={SEL} filter={`url(#${ids.grain})`} />
-      <rect x={150} y={134} width={80} height={80} fill={INK} filter={`url(#${ids.grain})`} />
+      <rect x={188} y={86} width={96} height={96} fill={SEL} />
+      <GrainRect ids={ids} x={188} y={86} w={96} h={96} />
+      <rect x={150} y={134} width={80} height={80} fill={INK} />
+      <GrainRect ids={ids} x={150} y={134} w={80} h={80} />
     </Board>
   );
 }
@@ -130,15 +128,10 @@ export function AgreementArt({ play }: { play: boolean }) {
               strokeDasharray={c.fill === "outline" ? "4 4" : undefined}
               style={{ opacity: done ? 0 : 1, transition: `opacity 400ms ease ${i * 70}ms` }}
             />
-            <rect
-              x={x}
-              y={y}
-              width={s}
-              height={s}
-              fill={INK}
-              filter={`url(#${ids.grain})`}
-              style={{ opacity: done ? 1 : 0, transition: `opacity 400ms ease ${i * 70 + 120}ms` }}
-            />
+            <g style={{ opacity: done ? 1 : 0, transition: `opacity 400ms ease ${i * 70 + 120}ms` }}>
+              <rect x={x} y={y} width={s} height={s} fill={INK} />
+              <GrainRect ids={ids} x={x} y={y} w={s} h={s} />
+            </g>
           </g>
         );
       })}
@@ -156,16 +149,14 @@ export function FollowThroughArt({ play }: { play: boolean }) {
   const [filled, setFilled] = useState(0);
   const total = GRID * GRID;
 
+  // One step per timeout: each fill schedules the next, and turning `play`
+  // off resets. The last step waits longer.
   useEffect(() => {
-    if (!play) {
-      setFilled(0);
-      return;
-    }
-    const timers = Array.from({ length: total }, (_, i) =>
-      setTimeout(() => setFilled(i + 1), 400 + i * 55 + (i === total - 1 ? 900 : 0)),
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [play, total]);
+    const next = play ? Math.min(filled + 1, total) : 0;
+    const wait = !play ? 0 : filled === 0 ? 400 : filled === total - 1 ? 955 : 55;
+    const t = setTimeout(() => setFilled(next), wait);
+    return () => clearTimeout(t);
+  }, [play, filled, total]);
 
   const x0 = 200 - (GRID * CELL) / 2;
   const y0 = 150 - (GRID * CELL) / 2;
@@ -205,15 +196,10 @@ export function FollowThroughArt({ play }: { play: boolean }) {
         style={{ opacity: waiting ? 1 : 0, transition: "opacity 200ms ease" }}
       />
       {/* Once complete, one solid piece: no seams between the pixels. */}
-      <rect
-        x={x0}
-        y={y0}
-        width={GRID * CELL}
-        height={GRID * CELL}
-        fill={INK}
-        filter={`url(#${ids.grain})`}
-        style={{ opacity: filled === total ? 1 : 0, transition: "opacity 400ms ease 150ms" }}
-      />
+      <g style={{ opacity: filled === total ? 1 : 0, transition: "opacity 400ms ease 150ms" }}>
+        <rect x={x0} y={y0} width={GRID * CELL} height={GRID * CELL} fill={INK} />
+        <GrainRect ids={ids} x={x0} y={y0} w={GRID * CELL} h={GRID * CELL} />
+      </g>
       <rect x={x0} y={y0} width={GRID * CELL} height={GRID * CELL} fill="none" stroke={INK} strokeWidth={1} />
     </Board>
   );

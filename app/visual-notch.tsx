@@ -228,7 +228,6 @@ function SharedDropdown({
 }) {
   const isOpen = openIndex !== null;
   const item = openIndex !== null ? NAV[openIndex] : null;
-  const prevItemRef = useRef<NavItem | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const tabRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
@@ -244,8 +243,11 @@ function SharedDropdown({
   const visibleIndexRef = useRef<number | null>(null);
 
   // Keep rendering last item while closing so content doesn't vanish mid-fade
-  const displayItem = item ?? prevItemRef.current;
-  if (item) prevItemRef.current = item;
+  // (held in state and updated during render, the pattern React allows for
+  // derived state, rather than by writing a ref mid-render)
+  const [lastItem, setLastItem] = useState(item);
+  if (item && item !== lastItem) setLastItem(item);
+  const displayItem = item ?? lastItem;
 
   // Drive content exit → swap → enter when sliding between items
   useEffect(() => {

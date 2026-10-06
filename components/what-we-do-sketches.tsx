@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties, ReactElement } from "react";
-import { Defs, Framing, INK, PAPER, SEL, useMaterialIds, type Ids } from "@/components/material-art";
+import { Defs, Framing, GrainRect, INK, PAPER, SEL, tornSquare, useMaterialIds, type Ids } from "@/components/material-art";
 
 // "What we do" drawings: the same two overlapping squares in every stage,
 // inside the shared material framing (components/material-art.tsx). Only the
@@ -16,17 +16,36 @@ import { Defs, Framing, INK, PAPER, SEL, useMaterialIds, type Ids } from "@/comp
 const BACK = { x: 182, y: 62, s: 126 };
 const FRONT = { x: 132, y: 128, s: 104 };
 
-function Square({ sq, fill, filter, mask }: { sq: typeof BACK; fill: string; filter?: string; mask?: string }) {
+// One of the pair, optionally with grain over it or torn at the edges.
+function Square({
+  sq,
+  fill,
+  mask,
+  ids,
+  grain = false,
+  torn = 0,
+}: {
+  sq: typeof BACK;
+  fill: string;
+  mask?: string;
+  ids?: Ids;
+  grain?: boolean;
+  torn?: number;
+}) {
+  if (torn && ids) {
+    const d = tornSquare(sq.x, sq.y, sq.s, torn);
+    return (
+      <>
+        <path d={d} fill={fill} />
+        <path d={d} fill={`url(#${ids.grain})`} />
+      </>
+    );
+  }
   return (
-    <rect
-      x={sq.x}
-      y={sq.y}
-      width={sq.s}
-      height={sq.s}
-      fill={fill}
-      filter={filter ? `url(#${filter})` : undefined}
-      mask={mask ? `url(#${mask})` : undefined}
-    />
+    <>
+      <rect x={sq.x} y={sq.y} width={sq.s} height={sq.s} fill={fill} mask={mask ? `url(#${mask})` : undefined} />
+      {grain && ids && <GrainRect ids={ids} x={sq.x} y={sq.y} w={sq.s} h={sq.s} />}
+    </>
   );
 }
 
@@ -89,10 +108,10 @@ function Design(a: Anim) {
     <>
       <Framing ids={ids} />
       <g style={piece(a, "translate(18px, -10px)", 800, 0)}>
-        <Square sq={BACK} fill={SEL} filter={ids.grain} />
+        <Square sq={BACK} fill={SEL} ids={ids} grain />
       </g>
       <g style={piece(a, "translateY(-16px)", 700, 200)}>
-        <Square sq={FRONT} fill={PAPER} filter={ids.grain} />
+        <Square sq={FRONT} fill={PAPER} ids={ids} grain />
       </g>
       <g style={piece(a, "scale(1.06)", 500, 520)}>
         <rect x={x} y={y} width={s} height={s} fill="none" stroke={SEL} strokeWidth={1.3} />
@@ -156,10 +175,10 @@ function Launch(a: Anim) {
     <>
       <Framing ids={ids} />
       <g style={piece(a, "translateY(-22px) rotate(-4deg) scale(1.04)", 750, 0, SPRING)}>
-        <Square sq={BACK} fill={SEL} filter={ids.torn} />
+        <Square sq={BACK} fill={SEL} ids={ids} torn={11} />
       </g>
       <g style={piece(a, "translateY(-26px) rotate(5deg) scale(1.05)", 750, 220, SPRING)}>
-        <Square sq={FRONT} fill={INK} filter={ids.torn} />
+        <Square sq={FRONT} fill={INK} ids={ids} torn={29} />
       </g>
     </>
   );
