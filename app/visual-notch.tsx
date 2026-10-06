@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FrameColumnRails, FrameRule } from "@/components/page-frame";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -803,6 +804,8 @@ export function VisualNotch() {
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
   const isBlog = pathname.startsWith("/blog");
+  // Blog posts are laid out as a sheet (see app/blog/[slug]/page.tsx).
+  const isBlogPost = pathname.startsWith("/blog/");
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
   if (useMinimalHeader) {
@@ -811,6 +814,8 @@ export function VisualNotch() {
         <div
           className={`site-header${mobileOpen ? " site-header--open" : ""}${isAetherLanding ? " site-header--pinned" : ""}`}
           ref={headerRef}
+          // On blog posts a hairline underneath, so the sheet starts below it.
+          style={isBlogPost ? { borderBottom: "1px solid rgba(26,26,26,0.09)" } : undefined}
         >
           <svg width="0" height="0" className="absolute" aria-hidden="true">
             <filter id="header-glass" colorInterpolationFilters="sRGB">
@@ -820,6 +825,18 @@ export function VisualNotch() {
           </svg>
           <div className="site-header__bg" aria-hidden="true" />
           <div className="site-header__bg-fill" aria-hidden="true" />
+          {/* The homepage's frame rails start here, above the hero. */}
+          {isHome && (
+            <>
+              <FrameColumnRails tone="light" className="z-[1]" />
+              {/* The header's own boundary, closing the frame above the page. */}
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]">
+                <div className="relative mx-auto w-full max-w-[80rem]">
+                  <FrameRule tone="light" className="" />
+                </div>
+              </div>
+            </>
+          )}
           <div className="site-header__inner" style={isComponents ? { maxWidth: "96rem" } : undefined}>
             <Link href="/" className="site-header__brand">
               <InertiaLogo />

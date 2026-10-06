@@ -9,9 +9,11 @@ import { AskAiLinks } from "@/components/ask-ai-links";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { FrameColumnRails, FrameRails, FrameRule } from "@/components/page-frame";
 import { SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 import { HeroDragHeading } from "@/components/hero-drag-heading";
 import { SectionHeading } from "@/components/section-heading";
+import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
 import type { AskUserQuestion, AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { InquirySteps } from "@/components/inquiry-steps";
@@ -1700,8 +1702,8 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
 
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-        <SectionHeading className="mb-5 sm:mb-6">How we think about execution</SectionHeading>
+      <div className="max-w-2xl sm:max-w-3xl">
+        <SectionHeading align="left" className="mb-5 sm:mb-6">How we think about execution</SectionHeading>
         <LiquidText
           pRef={introRef}
           text={intro}
@@ -1710,7 +1712,7 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
         />
       </div>
 
-      <div ref={blockRef} className="mx-auto mt-10 grid max-w-2xl gap-6 sm:mt-14 sm:max-w-5xl sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
+      <div ref={blockRef} className="mt-10 grid gap-6 sm:mt-14 sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
         <ul className="flex flex-col gap-1.5">
           {segments.map((seg, i) => {
             const selected = i === active;
@@ -1797,22 +1799,18 @@ const WHAT_WE_DO_ITEMS = [
   {
     label: "Direction",
     description: "We figure out what the product or brand actually needs to be before anything gets designed.",
-    image: "/what-we-do/direction.png",
   },
   {
     label: "Design",
     description: "Interfaces, identity, and the small decisions in between, held to one standard of taste.",
-    image: "/what-we-do/design.png",
   },
   {
     label: "Development",
     description: "We build what we design ourselves, so nothing is lost translating one team's vision to another's code.",
-    image: "/what-we-do/development.png",
   },
   {
     label: "Launch",
     description: "We ship what we build and stay through launch, so what goes live matches what was designed.",
-    image: "/what-we-do/launch.png",
   },
 ] as const;
 
@@ -1824,7 +1822,8 @@ const WHAT_WE_DO_STEP_MS = 420;
 // drawing on a matching tile, a numbered step track underneath, then the
 // stage name over its description. On first view the steps fill in one after
 // another and the dashed connector (echoing the dashes in the drawings) draws
-// between them on desktop. Stacks to a single column on phones.
+// between them on desktop. On phones the stages sit in a row that swipes
+// sideways, like Our thoughts, with the track still joining the steps.
 function WhatWeDo() {
   const listRef = useRef<HTMLOListElement>(null);
   const [on, setOn] = useState(false);
@@ -1845,26 +1844,65 @@ function WhatWeDo() {
     return () => obs.disconnect();
   }, []);
 
+  // On phones the stages are a swipe row, so each one plays when it's swiped
+  // into view instead of all four at once while three are off screen. The
+  // row is the observer's root; `on` above still gates it on the section
+  // being in view vertically.
+  const [phone, setPhone] = useState(false);
+  const [seen, setSeen] = useState<boolean[]>(() => WHAT_WE_DO_ITEMS.map(() => false));
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  useEffect(() => {
+    const root = listRef.current;
+    if (!phone || !root) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const i = Number((e.target as HTMLElement).dataset.index);
+          setSeen((prev) => (prev[i] ? prev : prev.map((v, k) => v || k === i)));
+        }
+      },
+      { root, threshold: 0.6 },
+    );
+    Array.from(root.children).forEach((c) => obs.observe(c));
+    return () => obs.disconnect();
+  }, [phone]);
+
   const lit = on || reduced;
   const last = WHAT_WE_DO_ITEMS.length - 1;
+  // Per step: is it lit, and when. On phones a step lights when its card is
+  // swiped in, after the track has drawn across to it.
+  const stepOn = (i: number) => (phone ? lit && (seen[i] || reduced) : lit);
+  const stepDelay = (i: number) => (reduced ? 0 : phone ? (i > 0 ? WHAT_WE_DO_STEP_MS : 0) : i * WHAT_WE_DO_STEP_MS);
 
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <SectionHeading className="mb-10 sm:mb-14">What we do</SectionHeading>
-      <ol ref={listRef} className="grid gap-12 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 lg:grid-cols-4">
+      <SectionHeading align="left" className="mb-10 sm:mb-14">What we do</SectionHeading>
+      <ol
+        ref={listRef}
+        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 sm:overflow-visible sm:px-0 lg:grid-cols-4"
+      >
         {WHAT_WE_DO_ITEMS.map((item, i) => {
-          const delay = reduced ? 0 : i * WHAT_WE_DO_STEP_MS;
+          const active = stepOn(i);
+          const delay = stepDelay(i);
+          // The track out of this step draws when the next one lights.
+          const trackOn = phone ? stepOn(i + 1) : lit;
+          const trackDelay = phone ? 0 : delay;
           return (
-            <li key={item.label} className="group flex flex-col">
-              {/* The drawings are black line art on white, so multiply melts
-                  their white into the tile instead of leaving a box. */}
-              <div className="flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[6px] sm:aspect-[4/3]" style={{ background: "#f4f4f4" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.image}
-                  alt=""
-                  aria-hidden="true"
-                  className="h-[74%] w-auto max-w-[82%] object-contain mix-blend-multiply transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
+            <li key={item.label} data-index={i} className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-auto">
+              <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px]" style={{ background: "#f4f4f4" }}>
+                <WhatWeDoSketch
+                  stage={item.label}
+                  play={active}
+                  delay={phone ? Math.max(0, delay - 200) : delay}
+                  still={reduced}
+                  className="h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
                 />
               </div>
 
@@ -1880,17 +1918,17 @@ function WhatWeDo() {
                   <>
                     <span
                       aria-hidden="true"
-                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1.5rem)] max-lg:hidden"
+                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] sm:hidden lg:block lg:w-[calc(100%+1.5rem)]"
                       style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(26,26,26,0.28) 0 4px, transparent 4px 8px)" }}
                     />
                     <span
                       aria-hidden="true"
-                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1.5rem)] max-lg:hidden"
+                      className="absolute left-[14px] top-1/2 h-px w-[calc(100%+1rem)] sm:hidden lg:block lg:w-[calc(100%+1.5rem)]"
                       style={{
                         background: "#1a1a1a",
                         transformOrigin: "left",
-                        transform: lit ? "scaleX(1)" : "scaleX(0)",
-                        transition: reduced ? "none" : `transform ${WHAT_WE_DO_STEP_MS}ms linear ${delay}ms`,
+                        transform: trackOn ? "scaleX(1)" : "scaleX(0)",
+                        transition: reduced ? "none" : `transform ${WHAT_WE_DO_STEP_MS}ms linear ${trackDelay}ms`,
                       }}
                     />
                   </>
@@ -1898,8 +1936,8 @@ function WhatWeDo() {
                 <span
                   className="relative z-[1] flex size-7 items-center justify-center rounded-full text-[13px] leading-none tabular-nums"
                   style={{
-                    background: lit ? "#1a1a1a" : "#fff",
-                    color: lit ? "#fff" : "#1a1a1a",
+                    background: active ? "#1a1a1a" : "#fff",
+                    color: active ? "#fff" : "#1a1a1a",
                     boxShadow: "inset 0 0 0 1px #1a1a1a",
                     transition: reduced ? "none" : `background 300ms ease ${delay}ms, color 300ms ease ${delay}ms`,
                   }}
@@ -1945,9 +1983,9 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
             />
         </div>
       </section>
-      <div className="py-16 sm:py-24" />
+      <FrameRule tone="light" />
       <WhatWeDo />
-      <div className="py-16 sm:py-24" />
+      <FrameRule tone="light" />
       <BlogCarousel posts={posts} />
     </>
   );
@@ -2032,6 +2070,9 @@ function LightCard({ children }: { children: React.ReactNode }) {
       className="relative"
       style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "#0a0a0a" }}
     >
+      {/* Dark rails on the backdrop, in the same column as the dark zone's,
+          so the frame runs unbroken into it where the card pulls away. */}
+      <FrameColumnRails tone="dark" />
       <div
         ref={cardRef}
         className="relative"
@@ -2051,6 +2092,9 @@ function LightCard({ children }: { children: React.ReactNode }) {
           that never moves or scales, so there's nothing dynamic left to
           misalign against the wrapper's black background. */}
       <div aria-hidden="true" className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: 6, background: "#fff", zIndex: 1 }} />
+      {/* ...and the rails carried over that strip, so the frame stays
+          unbroken from the header into the card. */}
+      <FrameColumnRails tone="light" className="bottom-auto z-[2] h-[6px]" />
     </div>
   );
 }
@@ -2079,7 +2123,7 @@ function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
   if (items.length === 0) return null;
   return (
     <section className="rise rise--liquid w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <SectionHeading tone="dark" className="mb-10 sm:mb-14">In good company</SectionHeading>
+      <SectionHeading tone="dark" align="left" className="mb-10 sm:mb-14">In good company</SectionHeading>
       <ul className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-12">
         {items.map((item) => (
           <li key={item.slug}>
@@ -3196,7 +3240,8 @@ function VisualLayout({
     <>
     <main className="page-container relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] flex flex-col">
       <LightCard>
-        <div className="mx-auto w-full max-w-[80rem] flex flex-col">
+        <div className="relative mx-auto w-full max-w-[80rem] flex flex-col">
+          <FrameRails tone="light" />
           <VercelHero accentColor={accentColor} ctaRef={ctaRef} />
 
           {/* Work thumbnail section (WorkScrollGallery) temporarily hidden
@@ -3216,7 +3261,7 @@ function VisualLayout({
 
           <DesignPhilosophy introRef={introRef} />
 
-          <div className="py-16 sm:py-24" />
+          <FrameRule tone="light" />
 
           <AiApproach posts={initialPosts} />
 
@@ -3233,20 +3278,21 @@ function VisualLayout({
       {false && <HeroToIntroLine fromRef={ctaRef} toRef={introRef} />}
 
       <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))", marginTop: -2 }}>
-        <div className="mx-auto w-full max-w-[80rem] flex flex-col">
+        <div className="relative mx-auto w-full max-w-[80rem] flex flex-col">
+          <FrameRails tone="dark" />
           <div className="py-6 sm:py-10" />
 
           <ServicesSection />
 
-          <div className="py-16 sm:py-24" />
+          <FrameRule tone="dark" />
 
           <Questionnaire />
 
-          <div className="py-16 sm:py-24" />
+          <FrameRule tone="dark" />
 
           <ClientGrid items={initialWork} />
 
-          <div className="py-16 sm:py-24" />
+          <FrameRule tone="dark" />
 
           <AskAi />
 

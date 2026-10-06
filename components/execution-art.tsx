@@ -1,23 +1,16 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import { Defs, Framing, INK, PAPER, SEL, useMaterialIds, type Ids } from "@/components/material-art";
 
-// Small abstract illustrations for the homepage's "How we think about
-// execution" principles. Built from the illustrated-card language in
-// docs/design-system.md: skeleton bars (fg 0.12, 0.22 for a heading bar),
-// white panels with a 1px ring and the soft drop shadow, 6px corners, no real
-// text. Each one acts its principle out when `play` turns on, and resets when
-// it turns off so it plays again next time.
+// Illustrations for the homepage's "How we think about execution"
+// principles, in the same material kit as the What we do drawings
+// (components/material-art.tsx): grain, halftone, dither, a pixel grid and
+// the shared construction framing. Each one acts its principle out when
+// `play` turns on, and resets when it turns off so it plays again next time.
 
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const SPRING = "cubic-bezier(0.34, 1.4, 0.64, 1)";
-const BAR = "rgba(26,26,26,0.12)";
-const BAR_STRONG = "rgba(26,26,26,0.22)";
-const PANEL: CSSProperties = {
-  background: "#fff",
-  borderRadius: 6,
-  boxShadow: "0 0 0 1px rgba(26,26,26,0.08), 0 10px 24px -12px rgba(0,0,0,0.25)",
-};
 
 // Flips to true a beat after `play` does, so the starting state is seen first.
 function useDone(play: boolean, delay = 450) {
@@ -33,141 +26,195 @@ function useDone(play: boolean, delay = 450) {
   return done;
 }
 
-const Bar = ({ w, strong, h = 6 }: { w: string; strong?: boolean; h?: number }) => (
-  <span className="block rounded-full" style={{ width: w, height: h, background: strong ? BAR_STRONG : BAR }} />
-);
+// SVG groups animate with CSS transforms around their own centre.
+const own: CSSProperties = { transformBox: "fill-box", transformOrigin: "center" };
 
-// Restraint: a crowded panel loses everything that isn't needed, one piece at
-// a time, until a heading, a line and the one action are left.
-export function RestraintArt({ play }: { play: boolean }) {
-  const done = useDone(play);
-  const rows: { extra?: boolean; node: ReactNode }[] = [
-    { extra: true, node: <span className="block h-4 w-14 rounded-[4px]" style={{ background: "rgba(26,26,26,0.08)" }} /> },
-    { node: <Bar w="58%" strong h={9} /> },
-    { extra: true, node: <span className="flex gap-1.5">{[40, 32, 48].map((w) => <span key={w} className="block h-4 rounded-[4px]" style={{ width: w, background: "rgba(26,26,26,0.08)" }} />)}</span> },
-    { node: <Bar w="92%" /> },
-    { extra: true, node: <Bar w="74%" /> },
-    { extra: true, node: <span className="flex gap-1.5">{[0, 1, 2, 3].map((k) => <span key={k} className="block size-5 rounded-[4px]" style={{ background: "rgba(26,26,26,0.1)" }} />)}</span> },
-    { extra: true, node: <Bar w="64%" /> },
-    { node: <span className="block h-7 w-24 rounded-[6px]" style={{ background: "#1a1a1a" }} /> },
-  ];
-  let k = 0;
+function Board({ ids, children }: { ids: Ids; children: React.ReactNode }) {
   return (
-    <div className="w-[68%] p-5" style={PANEL}>
-      {rows.map((r, i) => {
-        const gone = r.extra && done;
-        const delay = r.extra ? (k++) * 110 : 0;
-        return (
-          <div
-            key={i}
-            className="grid"
-            style={{
-              gridTemplateRows: gone ? "0fr" : "1fr",
-              opacity: gone ? 0 : 1,
-              transition: `grid-template-rows 500ms ${EASE} ${delay}ms, opacity 300ms ease ${delay}ms`,
-            }}
-          >
-            <div className="overflow-hidden">
-              <div className={i === 0 ? "" : "pt-3"}>{r.node}</div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <svg viewBox="0 0 400 300" className="h-full w-full" fill="none" aria-hidden="true">
+      <Defs ids={ids} />
+      <Framing ids={ids} />
+      {children}
+    </svg>
   );
 }
 
-// Agreement: six cards that each made their own call (corners, position,
-// tilt, line lengths) snap into one consistent set.
-const DISAGREE = [
-  { r: 0, x: -5, y: 6, rot: -3, a: "84%", b: "40%" },
-  { r: 14, x: 4, y: -5, rot: 2, a: "62%", b: "70%" },
-  { r: 3, x: 6, y: 5, rot: -1.5, a: "90%", b: "30%" },
-  { r: 10, x: -6, y: -4, rot: 3, a: "50%", b: "58%" },
-  { r: 0, x: 3, y: 7, rot: -2, a: "76%", b: "48%" },
-  { r: 18, x: -4, y: -6, rot: 1.5, a: "66%", b: "36%" },
-];
+// Restraint: a crowded board of pieces, each in a different finish, clears
+// away one at a time until only the pair that matters is left.
+export function RestraintArt({ play }: { play: boolean }) {
+  const ids = useMaterialIds();
+  const done = useDone(play);
+  const extras: { x: number; y: number; s: number; fill: string; dashed?: boolean }[] = [
+    { x: 74, y: 70, s: 44, fill: `url(#${ids.halftone})` },
+    { x: 304, y: 64, s: 32, fill: `url(#${ids.fine})` },
+    { x: 86, y: 196, s: 40, fill: "none", dashed: true },
+    { x: 296, y: 196, s: 38, fill: `url(#${ids.dither})` },
+    { x: 238, y: 222, s: 22, fill: SEL },
+    { x: 120, y: 132, s: 18, fill: INK },
+    { x: 262, y: 44, s: 16, fill: INK },
+  ];
+  return (
+    <Board ids={ids}>
+      {extras.map((e, i) => (
+        <g
+          key={i}
+          style={{
+            ...own,
+            opacity: done ? 0 : 1,
+            transform: done ? "scale(0.6)" : "none",
+            transition: `opacity 360ms ease ${i * 110}ms, transform 500ms ${EASE} ${i * 110}ms`,
+          }}
+        >
+          <rect
+            x={e.x}
+            y={e.y}
+            width={e.s}
+            height={e.s}
+            fill={e.fill}
+            stroke={e.dashed ? INK : undefined}
+            strokeOpacity={0.5}
+            strokeDasharray={e.dashed ? "4 4" : undefined}
+          />
+        </g>
+      ))}
+      <rect x={188} y={86} width={96} height={96} fill={SEL} filter={`url(#${ids.grain})`} />
+      <rect x={150} y={134} width={80} height={80} fill={INK} filter={`url(#${ids.grain})`} />
+    </Board>
+  );
+}
+
+// Agreement: six pieces that each made their own call (finish, size, tilt,
+// position) snap into one consistent set.
+const CELLS = [
+  { fill: "halftone", rot: -9, sc: 0.8, x: -6, y: 8 },
+  { fill: "blue", rot: 6, sc: 1.15, x: 5, y: -6 },
+  { fill: "outline", rot: -3, sc: 0.9, x: 8, y: 4 },
+  { fill: "dither", rot: 10, sc: 1.1, x: -8, y: -5 },
+  { fill: "ink", rot: -5, sc: 0.72, x: 4, y: 9 },
+  { fill: "fine", rot: 4, sc: 1.05, x: -5, y: -7 },
+] as const;
 
 export function AgreementArt({ play }: { play: boolean }) {
+  const ids = useMaterialIds();
   const done = useDone(play);
+  const s = 56;
+  const gap = 16;
+  const x0 = 200 - (s * 3 + gap * 2) / 2;
+  const y0 = 150 - (s * 2 + gap) / 2;
+  const own_fill = (f: (typeof CELLS)[number]["fill"]) =>
+    f === "halftone" ? `url(#${ids.halftone})` : f === "dither" ? `url(#${ids.dither})` : f === "fine" ? `url(#${ids.fine})` : f === "blue" ? SEL : f === "ink" ? INK : "none";
   return (
-    <div className="grid w-[78%] grid-cols-3 gap-3">
-      {DISAGREE.map((c, i) => {
-        const t = `${700}ms ${SPRING} ${i * 60}ms`;
+    <Board ids={ids}>
+      {CELLS.map((c, i) => {
+        const x = x0 + (i % 3) * (s + gap);
+        const y = y0 + Math.floor(i / 3) * (s + gap);
+        const t = `700ms ${SPRING} ${i * 70}ms`;
         return (
-          <div
+          <g
             key={i}
-            className="flex aspect-[4/3] flex-col justify-between p-2.5"
             style={{
-              ...PANEL,
-              borderRadius: done ? 6 : c.r,
-              transform: done ? "none" : `translate(${c.x}px, ${c.y}px) rotate(${c.rot}deg)`,
-              transition: `border-radius ${t}, transform ${t}`,
+              ...own,
+              transform: done ? "none" : `translate(${c.x}px, ${c.y}px) rotate(${c.rot}deg) scale(${c.sc})`,
+              transition: `transform ${t}`,
             }}
           >
-            <span
-              className="block size-4"
-              style={{ background: "rgba(26,26,26,0.1)", borderRadius: done ? 4 : (c.r % 7) + 1, transition: `border-radius ${t}` }}
+            <rect x={x} y={y} width={s} height={s} fill={PAPER} />
+            <rect
+              x={x}
+              y={y}
+              width={s}
+              height={s}
+              fill={own_fill(c.fill)}
+              stroke={c.fill === "outline" ? INK : undefined}
+              strokeOpacity={0.5}
+              strokeDasharray={c.fill === "outline" ? "4 4" : undefined}
+              style={{ opacity: done ? 0 : 1, transition: `opacity 400ms ease ${i * 70}ms` }}
             />
-            <span className="flex flex-col gap-1.5">
-              <span className="block h-[5px] rounded-full" style={{ width: done ? "72%" : c.a, background: BAR_STRONG, transition: `width ${t}` }} />
-              <span className="block h-[5px] rounded-full" style={{ width: done ? "46%" : c.b, background: BAR, transition: `width ${t}` }} />
-            </span>
-          </div>
+            <rect
+              x={x}
+              y={y}
+              width={s}
+              height={s}
+              fill={INK}
+              filter={`url(#${ids.grain})`}
+              style={{ opacity: done ? 1 : 0, transition: `opacity 400ms ease ${i * 70 + 120}ms` }}
+            />
+          </g>
         );
       })}
-    </div>
+    </Board>
   );
 }
 
-// Follow-through: a checklist of details ticks off one by one. The last one
-// takes a beat longer, because the last detail always does.
-const CHECK_WIDTHS = ["78%", "62%", "84%", "56%", "70%"];
+// Follow-through: a square fills in pixel by pixel. The last pixel waits in
+// blue a beat longer, because the last detail always does, then settles.
+const GRID = 6;
+const CELL = 24;
 
 export function FollowThroughArt({ play }: { play: boolean }) {
-  const [ticked, setTicked] = useState(0);
+  const ids = useMaterialIds();
+  const [filled, setFilled] = useState(0);
+  const total = GRID * GRID;
 
   useEffect(() => {
     if (!play) {
-      setTicked(0);
+      setFilled(0);
       return;
     }
-    const timers = CHECK_WIDTHS.map((_, i) =>
-      setTimeout(() => setTicked(i + 1), 500 + i * 420 + (i === CHECK_WIDTHS.length - 1 ? 700 : 0)),
+    const timers = Array.from({ length: total }, (_, i) =>
+      setTimeout(() => setFilled(i + 1), 400 + i * 55 + (i === total - 1 ? 900 : 0)),
     );
     return () => timers.forEach(clearTimeout);
-  }, [play]);
+  }, [play, total]);
 
+  const x0 = 200 - (GRID * CELL) / 2;
+  const y0 = 150 - (GRID * CELL) / 2;
+  // Fill order snakes row by row, like a scan.
+  const order = (i: number) => {
+    const row = Math.floor(i / GRID);
+    const col = row % 2 === 0 ? i % GRID : GRID - 1 - (i % GRID);
+    return { x: x0 + col * CELL, y: y0 + row * CELL };
+  };
+  const last = order(total - 1);
+  const waiting = filled === total - 1;
   return (
-    <div className="w-[68%] p-5" style={PANEL}>
-      <Bar w="44%" strong h={9} />
-      <div className="mt-4 flex flex-col gap-3">
-        {CHECK_WIDTHS.map((w, i) => {
-          const on = ticked > i;
-          return (
-            <div key={i} className="flex items-center gap-3">
-              <span
-                className="flex size-[18px] shrink-0 items-center justify-center rounded-full"
-                style={{
-                  background: on ? "#1a1a1a" : "#fff",
-                  boxShadow: on ? "none" : "inset 0 0 0 1px rgba(26,26,26,0.25)",
-                  transform: on ? "scale(1)" : "scale(0.92)",
-                  transition: `background 200ms ease, transform 400ms ${SPRING}`,
-                }}
-              >
-                <svg viewBox="0 0 12 12" className="size-[10px]" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path
-                    d="M2.5 6.2 L5 8.5 L9.5 3.5"
-                    pathLength={1}
-                    style={{ strokeDasharray: 1, strokeDashoffset: on ? 0 : 1, transition: `stroke-dashoffset 300ms ${EASE} 80ms` }}
-                  />
-                </svg>
-              </span>
-              <span className="block h-[6px] rounded-full" style={{ width: w, background: on ? BAR_STRONG : BAR, transition: "background 300ms ease" }} />
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <Board ids={ids}>
+      <rect x={x0} y={y0} width={GRID * CELL} height={GRID * CELL} fill={PAPER} />
+      <rect x={x0} y={y0} width={GRID * CELL} height={GRID * CELL} fill={`url(#${ids.fine})`} opacity={0.6} />
+      {Array.from({ length: total }, (_, i) => {
+        const { x, y } = order(i);
+        return (
+          <rect
+            key={i}
+            x={x}
+            y={y}
+            width={CELL}
+            height={CELL}
+            fill={INK}
+            style={{ opacity: filled > i ? 1 : 0, transition: "opacity 160ms ease" }}
+          />
+        );
+      })}
+      {/* The last detail, asking for attention until it's done. */}
+      <rect
+        x={last.x}
+        y={last.y}
+        width={CELL}
+        height={CELL}
+        fill={SEL}
+        style={{ opacity: waiting ? 1 : 0, transition: "opacity 200ms ease" }}
+      />
+      {/* Once complete, one solid piece: no seams between the pixels. */}
+      <rect
+        x={x0}
+        y={y0}
+        width={GRID * CELL}
+        height={GRID * CELL}
+        fill={INK}
+        filter={`url(#${ids.grain})`}
+        style={{ opacity: filled === total ? 1 : 0, transition: "opacity 400ms ease 150ms" }}
+      />
+      <rect x={x0} y={y0} width={GRID * CELL} height={GRID * CELL} fill="none" stroke={INK} strokeWidth={1} />
+    </Board>
   );
 }

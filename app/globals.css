@@ -2889,3 +2889,13 @@ h1:hover .redact > span.redact-inner,
     transition: none;
   }
 }
+
+/* What we do, Direction: the outline square's dashes keep marching, like a
+   selection that's still being decided. */
+@keyframes wwd-march {
+  to { stroke-dashoffset: -20; }
+}
+.wwd-march { animation: wwd-march 1.2s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .wwd-march { animation: none; }
+}

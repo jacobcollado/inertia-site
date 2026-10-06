@@ -4,6 +4,7 @@ import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { VisualNotch } from "./visual-notch";
 import { MinimalFooter } from "./site-footer";
+import { FrameColumnRails } from "@/components/page-frame";
 
 const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password", "/accept-invite", "/docs"];
 
@@ -24,6 +25,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // continues through the footer — every other route keeps the normal
   // light footer.
   const isHome = pathname === "/";
+  const isBlogPost = pathname.startsWith("/blog/");
 
   // The footer's dark zone only covers page content, not the <html> element
   // itself — so overscroll/rubber-band past the bottom (Safari, and anywhere
@@ -89,8 +91,19 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <>
       <VisualNotch />
       {children}
+      {/* The page's rails run on through the footer: the homepage's frame,
+          or a blog post's sheet edges. */}
       {noFooter ? null : isHome ? (
-        <div className="homepage-dark-zone" style={{ background: "rgb(var(--bg))" }}>
+        <div className="homepage-dark-zone relative" style={{ background: "rgb(var(--bg))" }}>
+          <FrameColumnRails tone="dark" />
+          <MinimalFooter />
+        </div>
+      ) : isBlogPost ? (
+        <div className="relative">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[56rem] -translate-x-1/2 border-x border-[rgba(26,26,26,0.09)] sm:block"
+          />
           <MinimalFooter />
         </div>
       ) : (

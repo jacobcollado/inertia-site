@@ -6,9 +6,10 @@ import { notFound } from "next/navigation";
 import { TOCInline } from "./toc";
 import { Highlighter } from "./highlighter";
 import { CopyURL } from "./copy-url";
-import { PostGlyph, postTint } from "@/components/post-glyph";
+import { PostGlyph } from "@/components/post-glyph";
 import { PostCover, hasPostCover, postFigure } from "@/components/post-figures";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { MaterialBackdrop } from "@/components/material-art";
 import {
   getAllPosts,
   getPost,
@@ -17,6 +18,14 @@ import {
   extractHeadings,
   readingStats,
 } from "@/lib/posts";
+
+// A grid every 120px for the page beside the title block, and ruler ticks
+// for the strips down both screen edges.
+const GUTTER_GRID = [
+  "repeating-linear-gradient(to bottom, transparent 0 119px, rgba(26,26,26,0.07) 119px 120px)",
+  "repeating-linear-gradient(to right, transparent 0 119px, rgba(26,26,26,0.05) 119px 120px)",
+].join(", ");
+const RULER = "repeating-linear-gradient(to bottom, rgba(26,26,26,0.18) 0 1px, transparent 1px 6px)";
 
 const BODY_CLASSES = `px-0 pt-10 pb-8 rise prose-marker
   text-[15px] sm:text-[19px] leading-[1.75] sm:leading-[1.85] tracking-[0em] text-[rgb(var(--fg))]
@@ -134,49 +143,87 @@ export default async function BlogPost({
   };
 
   return (
-    <main className="relative mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] px-3">
+    // The article is one sheet, a column with
+    // hairline edges that carry on through the footer. Above the cover, the
+    // page either side of the sheet carries construction marks (ruler ticks,
+    // a grid). The cover runs the sheet's full width with
+    // square corners and handles where it meets the edges.
+    <main
+      className="relative w-full"
+      style={{ ["--post-head" as any]: "400px" }}
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
-      {/* Single centred column: the TOC that used to occupy the left gutter
-          now sits inline above the title. */}
-      <div className="mx-auto w-full max-w-[48rem]">
-        <article>
 
-        {/* Collapsed contents tab, above the title */}
-        <div className="px-0 pt-10 pb-6 rise">
-          <TOCInline headings={headings} />
-        </div>
+      {/* Construction marks beside the title block. */}
+      {/* They fade out toward the bottom rather than stopping on a hard edge
+          at the cover. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 hidden h-[var(--post-head)] sm:block"
+        style={{
+          backgroundImage: GUTTER_GRID,
+          maskImage: "linear-gradient(to bottom, black 35%, transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 35%, transparent)",
+        }}
+      >
+        <div className="absolute inset-y-0 left-0 w-[10px]" style={{ backgroundImage: RULER }} />
+        <div className="absolute inset-y-0 right-0 w-[10px]" style={{ backgroundImage: RULER }} />
+      </div>
 
-        {/* Header */}
-        <header className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "40ms" }}>
+      <article className="relative mx-auto w-full max-w-[56rem] bg-white sm:border-x sm:border-[rgba(26,26,26,0.09)]">
+        {/* Title block, centred. */}
+        <header
+          className="flex min-h-[var(--post-head)] flex-col items-center justify-center px-6 py-16 text-center sm:px-16 rise"
+          style={{ ["--rise-delay" as any]: "40ms" }}
+        >
+          <p className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">{formatDate(post.date)}</p>
           {/* clamp in px, not rem: the root is 15px, so rem values here read
               15/16ths of their number and made the scale hard to reason about
               against the index's px sizes. */}
-          <h1 className="text-[clamp(26px,4.4vw,46px)] font-medium tracking-[-0.04em] leading-[1.08] text-[rgb(var(--fg))] mb-4 [text-wrap:balance]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+          <h1
+            className="mt-5 text-[clamp(30px,5vw,54px)] font-medium tracking-[-0.04em] leading-[1.06] text-[rgb(var(--fg))] [text-wrap:balance]"
+            style={{ fontFamily: "'Satoshi', sans-serif" }}
+          >
             {post.title}
           </h1>
-
           {post.subtitle && (
-            <p className="text-[14px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] max-w-xl mb-7 [text-wrap:pretty]" style={{ fontFamily: "'Satoshi', sans-serif" }}>
+            <p
+              className="mt-5 max-w-lg text-[15px] sm:text-[18px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]"
+              style={{ fontFamily: "'Satoshi', sans-serif" }}
+            >
               {post.subtitle}
             </p>
           )}
+        </header>
 
-          {/* Dashed hairline between the subtitle and the byline. Drawn as a
-              background gradient rather than border-top: a 1px dashed border
-              renders as chunky 3px-on-3px segments with no way to tune them,
-              where a repeating gradient lets the dash and gap be set
-              independently and stay fine at this weight. */}
-          <div
-            className="flex items-center justify-between pt-5 bg-no-repeat bg-top"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(to right, rgb(var(--line)) 0 4px, transparent 4px 8px)",
-              backgroundSize: "100% 1px",
-            }}
-          >
+        {/* Cover: the post's own drawing on the material backdrop, falling
+            back to its glyph for a post without one. Full sheet width. */}
+        <div className="relative rise" style={{ ["--rise-delay" as any]: "80ms" }}>
+          <div className="relative flex w-full items-center justify-center overflow-hidden" style={{ aspectRatio: "1200/630", background: "#f4f4f4" }}>
+            <MaterialBackdrop w={800} h={420} />
+            {hasPostCover(slug) ? (
+              <PostCover slug={slug} />
+            ) : (
+              <PostGlyph slug={slug} tag={post.tag} className="relative w-28 h-28 sm:w-36 sm:h-36" />
+            )}
+          </div>
+          {/* Handles where the cover's edges meet the sheet's. */}
+          {["-top-[3.5px] -left-[3.5px]", "-top-[3.5px] -right-[3.5px]", "-bottom-[3.5px] -left-[3.5px]", "-bottom-[3.5px] -right-[3.5px]"].map((pos) => (
+            <span
+              key={pos}
+              aria-hidden="true"
+              className={`absolute z-[1] hidden size-[7px] bg-white sm:block ${pos}`}
+              style={{ boxShadow: "inset 0 0 0 1px rgba(26,26,26,0.28)" }}
+            />
+          ))}
+        </div>
+
+        <div className="px-6 pt-12 sm:px-12">
+          {/* Byline opens the body. */}
+          <div className="flex items-center justify-between rise">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-full border border-[rgb(var(--line))] overflow-hidden shrink-0">
                 {/* Source is a 1000x1000 square, so the portrait fills the
@@ -192,10 +239,8 @@ export default async function BlogPost({
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-[13px] sm:text-[15px] tracking-tight text-[rgb(var(--fg))]">Jacob Collado</span>
-                <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.5 }}>
+                <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-[13px] tracking-tight text-[rgb(var(--muted))]" style={{ opacity: 0.6 }}>
                   <span>Founder, Inertia</span>
-                  <span aria-hidden="true">/</span>
-                  <span>{formatDate(post.date)}</span>
                   <span aria-hidden="true">/</span>
                   <span>{stats.minutes} min read</span>
                 </div>
@@ -203,56 +248,27 @@ export default async function BlogPost({
             </div>
             <CopyURL />
           </div>
-        </header>
 
-        {/* Header cover: the post's own drawing on the shared tint (see
-            PostCover), falling back to its glyph for a post without one. */}
-        <div className="px-0 pb-10 rise" style={{ ["--rise-delay" as any]: "80ms" }}>
-          <div
-            className="relative w-full rounded-2xl overflow-hidden border border-[rgb(var(--line))] flex items-center justify-center"
-            style={{
-              aspectRatio: "1200/630",
-              background: postTint(slug),
-            }}
-          >
-            {hasPostCover(slug) ? (
-              <PostCover slug={slug} />
-            ) : (
-              <PostGlyph slug={slug} tag={post.tag} className="w-28 h-28 sm:w-36 sm:h-36" />
-            )}
+          <div className="pt-8 rise">
+            <TOCInline headings={headings} />
+          </div>
+
+          <ArticleBody html={html} slug={slug} />
+
+          <Highlighter slug={slug} />
+
+          <div className="pt-4 pb-16">
+            {/* Full width of the sheet, with the label centred: the CTA reads
+                as the end of the post rather than a stray chip. */}
+            <Link
+              href="/"
+              className={`flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-3.5 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[#f1f1f1] hover:bg-[#e9e9e9] hover:text-[rgb(var(--fg))] transition-colors`}
+            >
+              Back home
+            </Link>
           </div>
         </div>
-
-        {/* Body */}
-        <ArticleBody html={html} slug={slug} />
-
-        <Highlighter slug={slug} />
-
-        {/* Same dashed hairline as the byline rule above, drawn the same way
-            and with matching dash/gap so the page opens and closes on the
-            same mark. */}
-        <div
-          className="px-0 pt-6 pb-20 bg-no-repeat bg-top"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(to right, rgb(var(--line)) 0 4px, transparent 4px 8px)",
-            backgroundSize: "100% 1px",
-          }}
-        >
-          {/* Full width of the article column, with the label centred: the
-              CTA reads as the end of the post rather than a stray chip. */}
-          <Link
-            href="/"
-            className={`flex w-full items-center justify-center ${ACTION_RADIUS_CLASS} px-3.5 py-3 text-[13px] tracking-tight text-[rgb(var(--muted))] bg-[#f1f1f1] hover:bg-[#e9e9e9] hover:text-[rgb(var(--fg))] transition-colors`}
-          >
-            Back home
-          </Link>
-        </div>
-
       </article>
-        <div className="hidden xl:block" />
-      </div>
-
     </main>
   );
 }
