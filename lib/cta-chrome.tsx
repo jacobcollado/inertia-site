@@ -17,14 +17,14 @@ export const CTA_WELL_SHADOW = "none";
 
 export const CTA_SHELL_HEIGHT_CLASS = "h-10 sm:h-12";
 
-export const CTA_HEADER_SHELL_HEIGHT_CLASS = "h-9 sm:h-12";
+export const CTA_HEADER_SHELL_HEIGHT_CLASS = "h-9 sm:h-10";
 
 export const CTA_PILL_CLASS =
   "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-4 sm:py-1.5 text-[16px] sm:text-[19px] tracking-tight leading-none " +
   CTA_SHELL_HEIGHT_CLASS;
 
 export const CTA_HEADER_PILL_CLASS =
-  "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-4 sm:py-1.5 text-[14px] sm:text-[18px] font-normal tracking-tight leading-none " +
+  "relative inline-flex items-center overflow-hidden rounded-[6px] px-3 py-1 sm:px-3.5 sm:py-1.5 text-[14px] sm:text-[16px] font-normal tracking-tight leading-none " +
   CTA_HEADER_SHELL_HEIGHT_CLASS;
 
 // Icons inside CTA wells scale from shell height (h-9 / sm:h-12) via calc —

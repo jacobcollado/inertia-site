@@ -9,15 +9,17 @@ export const HERO_HEADING_LINES = [
 ];
 
 export const HERO_HEADING_LINES_MOBILE = [
-  ["Websites", "people"],
+  ["A", "design", "and"],
+  ["development", "studio"],
+  ["making", "websites", "people"],
   ["actually", "remember."],
 ];
 
 export const HERO_SUBLINE =
   "We work with local shops, artists and growing startups, taking each project from first idea to launch, all in-house.";
 
-export const HERO_SUBLINE_MOBILE =
-  "We design and build websites for local shops, artists and growing startups, from first idea to launch, all in-house.";
+// The phone heading now carries the full sentence, so the subline matches.
+export const HERO_SUBLINE_MOBILE = HERO_SUBLINE;
 
 export const EXECUTION_INTRO =
   "Ideas and identity are rarely the problem. [[Execution is.]] We take what a company, brand, or person stands for and carry it through every detail, until the result feels effortless to the people moving through it.";

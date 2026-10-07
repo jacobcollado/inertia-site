@@ -2124,13 +2124,33 @@ h1:hover .redact > span.redact-inner,
   align-items: center;
   margin: 0 12px;
   max-width: 80rem;
-  height: 72px;
+  height: 56px;
 }
 
 @media (min-width: 640px) {
   .site-header__inner {
     margin: 0 auto;
   }
+}
+
+/* The minimal header lines its logo and buttons up with the page's content
+   column: 23px in on phones on every page (12px margin + 11px), and from sm
+   up the inset VisualNotch sets per page (the homepage's by default). */
+.site-header__inner--content {
+  margin: 0 12px;
+  padding: 0 11px;
+}
+@media (min-width: 640px) {
+  .site-header__inner--content {
+    margin: 0 auto;
+    padding: 0 var(--hdr-pad-sm, 32px);
+  }
+}
+.site-header__inner--content .site-header__brand {
+  padding: 0;
+}
+.site-header__inner--content .site-header__actions {
+  padding: 0;
 }
 
 .site-header__brand {

@@ -43,13 +43,13 @@ export default async function BuySuccessPage({
   const { session_id } = await searchParams;
   const purchase = await fetchPurchase(session_id);
 
-  // Height budget: the in-flow site header (72px) and minimal footer (~86px)
+  // Height budget: the in-flow site header (56px) and minimal footer (~86px)
   // both sit outside this main, so a full-viewport min-height here would always
   // overflow by their combined height. svh (not vh) so mobile toolbars don't
   // create the same overflow dynamically. No bottom padding: it would sit below
   // the centered content and pull the optical centre up.
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-[calc(100svh-158px)] flex flex-col">
+    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-[calc(100svh-142px)] flex flex-col">
       {/* Optical, not mathematical, centre: the block is visually top-heavy (a
           48px badge and a large headline over one short line and a button row),
           so true centre reads as sitting low. A small upward nudge corrects it.

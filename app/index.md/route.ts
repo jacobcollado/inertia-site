@@ -54,10 +54,6 @@ ${AI_APPROACH.map(plainCopy).join("\n\n")}
 
 ${stages.join("\n")}
 
-## Our thoughts
-
-${postLines.join("\n")}
-
 ## In good company
 
 ${workLines.join("\n")}
@@ -65,6 +61,10 @@ ${workLines.join("\n")}
 ## Working on something?
 
 Tell us a little about it at ${BASE}/#start. It takes about two minutes, and we read every answer. Or email hello@byinertia.com.
+
+## Our thoughts
+
+${postLines.join("\n")}
 
 ## More
 

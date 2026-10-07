@@ -17,6 +17,8 @@ import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
 import { HeroCanvas } from "@/components/hero-canvas";
 import { MaterialCover } from "@/components/post-covers";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
+import { StatementArt } from "@/components/statement-art";
+import { ClientTileArt } from "@/components/client-tile-art";
 import { useMounted } from "@/hooks/use-mounted";
 import {
   AI_APPROACH,
@@ -116,7 +118,8 @@ const STATEMENT_SETTLE_AT = 0.8;
 // a few screens tall and the line sticks in the middle of the view while its
 // words light up in order (scrubbing back if you scroll back). Once it's
 // read, the lead settles to grey and "people fall for" stays bright, so the
-// payoff is what's left standing. Set large and centred.
+// payoff is what's left standing. Set large and centred, with a sketch
+// under it that acts the line out (components/statement-art.tsx).
 function ServicesSection() {
   const ref = useRef<HTMLElement>(null);
   const reduced = useReducedMotion() ?? false;
@@ -179,6 +182,11 @@ function ServicesSection() {
               ))}
             </span>
           </h2>
+          <StatementArt
+            shown={lit > 0}
+            settled={settled}
+            className="mx-auto mt-8 sm:mt-12 block w-full max-w-[22rem] sm:max-w-md"
+          />
         </div>
       </div>
     </section>
@@ -587,9 +595,8 @@ function VercelHero({
 
   // Fixed lines so the break is the same at every width and the lines stay
   // close in length. The words are draggable (see HeroDragHeading).
-  // Two lines from sm up. Phones get the short form on two lines at a
-  // headline size (the full sentence would need four lines, or two at body
-  // size); the phone subline carries the "design and build" instead.
+  // Two lines from sm up. Phones get the full sentence on four lines, sized
+  // so the longest ("making websites people") fits a 360px screen.
   const HEADING_LINES = HERO_HEADING_LINES;
   const HEADING_LINES_MOBILE = HERO_HEADING_LINES_MOBILE;
   const HEADING_WORDS = HEADING_LINES.flat();
@@ -619,7 +626,9 @@ function VercelHero({
         {/* Heading, subline and buttons from the top, left-aligned on the
             same edge as the canvas under them, which runs off the bottom of
             the first screen so there's something to scroll into. */}
-        <div className="relative max-w-[80rem] mx-auto w-full px-6 sm:px-8 pt-[12dvh] sm:pt-[14dvh] flex flex-col items-start text-left gap-10">
+        {/* Top padding matches the FrameRule's below the canvas, so the
+            hero sits evenly between the header line and the next rule. */}
+        <div className="relative max-w-[80rem] mx-auto w-full px-6 sm:px-8 pt-16 sm:pt-24 flex flex-col items-start text-left gap-10">
           {false && (
           <span
             className="inline-flex items-center rounded-full px-3.5 py-1.5 text-[14px] tracking-tight"
@@ -646,7 +655,7 @@ function VercelHero({
           )}
 
           <h1
-            className="tracking-[-0.05em] leading-[0.98] text-[clamp(2.2rem,10.5vw,3rem)] sm:tracking-[-0.045em] sm:text-[clamp(1.8rem,4.2vw,4rem)] flex flex-col items-start"
+            className="tracking-[-0.05em] leading-[0.98] text-[clamp(1.9rem,9vw,2.5rem)] sm:tracking-[-0.045em] sm:text-[clamp(1.8rem,4.2vw,4rem)] flex flex-col items-start"
             style={{ color: "var(--ink)", fontWeight: 450 }}
           >
             <HeroDragHeading lines={HEADING_LINES} mobileLines={HEADING_LINES_MOBILE} align="left" />
@@ -706,7 +715,7 @@ function VercelHero({
                   const el = document.getElementById("start");
                   if (!el) return; // let the browser handle the hash
                   e.preventDefault();
-                  const targetY = window.scrollY + el.getBoundingClientRect().top - 40;
+                  const targetY = window.scrollY + el.getBoundingClientRect().top - 96; // 40px clear of the 56px sticky header
                   const lenis = window.__lenis;
                   if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
                   else window.scrollTo({ top: targetY, behavior: "smooth" });
@@ -1963,7 +1972,7 @@ function WhatWeDo() {
   );
 }
 
-function AiApproach({ posts }: { posts: PostMeta[] }) {
+function AiApproach({ clients }: { clients: ClientCarouselItem[] }) {
   const [first, second] = AI_APPROACH;
   return (
     <>
@@ -1986,7 +1995,8 @@ function AiApproach({ posts }: { posts: PostMeta[] }) {
       <FrameRule tone="light" />
       <WhatWeDo />
       <FrameRule tone="light" />
-      <BlogCarousel posts={posts} />
+      {clients.length > 0 && <FrameRule tone="light" />}
+      <ClientGrid items={clients} />
     </>
   );
 }
@@ -2119,50 +2129,76 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
 // tile with 6px corners holding the mark, name and service underneath. Marks
 // are masked in the zone's ink rather than brand colours, so the grid stays
 // as monochrome as the drawings above it. Each tile links to its case study.
+// Each client drawn as a block in the line style, logo on its front face
+// (components/client-tile-art.tsx), then one faint empty block for whoever's
+// next, which points down to the enquiry flow.
 function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
   if (items.length === 0) return null;
+  const tile = "block aspect-[4/3] overflow-hidden rounded-[6px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]";
   return (
     <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <SectionHeading tone="dark" align="left" className="mb-10 sm:mb-14">In good company</SectionHeading>
-      <ul data-stagger className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-4 sm:gap-x-6 sm:gap-y-12">
-        {items.map((item) => (
+      <SectionHeading align="left" className="mb-10 sm:mb-14">In good company</SectionHeading>
+      <ul data-stagger className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-12">
+        {items.map((item, i) => (
           <li key={item.slug}>
             <Link href={`/work/${item.slug}`} className="group block">
-              <div className="flex aspect-[4/3] items-center justify-center rounded-[6px] bg-[rgb(var(--surface))] transition-colors duration-200 group-hover:bg-[rgb(var(--surface-elevated))]">
-                {item.logo ? (
-                  <span className="flex aspect-square h-[78%] items-center justify-center" role="img" aria-label={item.client}>
-                    <span
-                      className="block opacity-80 transition-opacity duration-200 group-hover:opacity-100"
-                      style={{
-                        width: carouselLogoStyle(item.slug).width,
-                        aspectRatio: "1 / 1",
-                        backgroundColor: "rgb(var(--fg))",
-                        WebkitMaskImage: `url(${item.logo})`,
-                        maskImage: `url(${item.logo})`,
-                        WebkitMaskRepeat: "no-repeat",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskPosition: "center",
-                        maskPosition: "center",
-                        WebkitMaskSize: "contain",
-                        maskSize: "contain",
-                      }}
-                    />
-                  </span>
-                ) : (
-                  <span className="text-[18px] tracking-tight text-[rgb(var(--fg))]">{item.client}</span>
-                )}
+              <div className="overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
+                <div className={tile}>
+                  <ClientTileArt index={i}>
+                    {item.logo ? (
+                      <span
+                        role="img"
+                        aria-label={item.client}
+                        className="block opacity-80 transition-opacity duration-200 group-hover:opacity-100"
+                        style={{
+                          width: carouselLogoStyle(item.slug).width,
+                          aspectRatio: "1 / 1",
+                          maxHeight: "86%",
+                          backgroundColor: "var(--ink)",
+                          WebkitMaskImage: `url(${item.logo})`,
+                          maskImage: `url(${item.logo})`,
+                          WebkitMaskRepeat: "no-repeat",
+                          maskRepeat: "no-repeat",
+                          WebkitMaskPosition: "center",
+                          maskPosition: "center",
+                          WebkitMaskSize: "contain",
+                          maskSize: "contain",
+                        }}
+                      />
+                    ) : (
+                      <span className="text-[15px] tracking-tight" style={{ color: "var(--ink)" }}>{item.client}</span>
+                    )}
+                  </ClientTileArt>
+                </div>
               </div>
-              <p className="mt-4 text-[18px] sm:text-[22px] tracking-[-0.02em] leading-snug text-[rgb(var(--fg))]">
+              <p className="mt-4 text-[18px] sm:text-[22px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)" }}>
                 {item.client}
               </p>
               {item.service && (
-                <p className="mt-1 text-[14px] sm:text-[16px] leading-snug tracking-tight text-[rgb(var(--muted))]">
+                <p className="mt-1 text-[14px] sm:text-[16px] leading-snug tracking-tight" style={{ color: "var(--ink-2)" }}>
                   {item.service}
                 </p>
               )}
             </Link>
           </li>
         ))}
+        <li>
+          <a href="#start" className="group block">
+            <div className="overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
+              <div className={tile}>
+                <ClientTileArt index={items.length} open>
+                  <span className="text-[22px] sm:text-[28px] font-light leading-none transition-opacity duration-200 opacity-40 group-hover:opacity-80" style={{ color: "var(--ink)" }} aria-hidden="true">+</span>
+                </ClientTileArt>
+              </div>
+            </div>
+            <p className="mt-4 text-[18px] sm:text-[22px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)" }}>
+              Your business
+            </p>
+            <p className="mt-1 text-[14px] sm:text-[16px] leading-snug tracking-tight" style={{ color: "var(--ink-2)" }}>
+              Next, if you like
+            </p>
+          </a>
+        </li>
       </ul>
     </section>
   );
@@ -3263,7 +3299,7 @@ function VisualLayout({
 
           <FrameRule tone="light" />
 
-          <AiApproach posts={initialPosts} />
+          <AiApproach clients={initialWork} />
 
           <div className="py-16 sm:py-28" />
         </div>
@@ -3290,11 +3326,20 @@ function VisualLayout({
 
           <FrameRule tone="dark" />
 
-          <ClientGrid items={initialWork} />
-
-          <FrameRule tone="dark" />
-
           <AskAi />
+
+          {/* The blog closes the page. On the lower panel the tile tone would
+              match the panel itself in light mode, so its cards take the
+              panel's surface tones instead. */}
+          <FrameRule tone="dark" />
+          <div
+            style={{
+              ["--tile" as string]: "rgb(var(--surface))",
+              ["--tile-3" as string]: "rgb(var(--surface-elevated))",
+            }}
+          >
+            <BlogCarousel posts={initialPosts} />
+          </div>
 
           <div className="py-24 sm:py-28" />
         </div>

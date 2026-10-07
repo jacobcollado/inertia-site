@@ -3,20 +3,17 @@
 import Link from "next/link";
 import { FrameColumnRails, FrameRule } from "@/components/page-frame";
 import { usePathname } from "next/navigation";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { HeaderAuth } from "./dashboard/header-auth";
 import { TOC_ITEMS } from "./components/shared";
 import { useWebHaptics } from "web-haptics/react";
 import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 import {
+  CTA_FILL,
   CTA_HEADER_PILL_CLASS,
   CTA_HEADER_SHELL_HEIGHT_CLASS,
-  CTA_HEADER_SIGNIN_SHELL_CLASS,
-  CTA_HEADER_WELL_CLASS,
-  CTA_HEADER_WELL_ICON_CLASS,
   CtaGrain,
-  CtaWell,
 } from "@/lib/cta-chrome";
 import { SiShopify } from "react-icons/si";
 import {
@@ -589,118 +586,52 @@ function InertiaLogo() {
   );
 }
 
-/* ── Merged CTA — two separate rounded pills (book-a-call + sign-in)
-   bridged at vertical center. Shares the hero CTA's dark gradient,
-   grain, and inset well so the header control matches the page CTA. ── */
-
-function SignInWellIcon({ variant }: { variant: "arrow" | "avatar" }) {
-  const iconClass = CTA_HEADER_WELL_ICON_CLASS;
-
-  if (variant === "avatar") {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={iconClass}
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="8" r="3.5" />
-        <path d="M5.5 19.5c0-3.3 2.7-6 6.5-6s6.5 2.7 6.5 6" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={iconClass}
-      aria-hidden="true"
-    >
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <line x1="12" y1="5" x2="19" y2="12" />
-      <line x1="12" y1="19" x2="19" y2="12" />
-    </svg>
-  );
-}
+/* ── Header CTAs — the hero's pair at header size: a quiet "Sign in" on
+   the tile tone and the primary "Reach out" in the page's CTA fill, as two
+   separate buttons. ── */
 
 function MergedCTA({
   compact: _compact = false,
   hideContact = false,
-  signInIcon = "arrow",
 }: {
   compact?: boolean;
   hideContact?: boolean;
-  signInIcon?: "arrow" | "avatar";
 }) {
-  const gap = 5;
   return (
-    <div
-      className={`relative inline-flex items-center ${CTA_HEADER_SHELL_HEIGHT_CLASS}`}
-      style={{ gap: 0, transformOrigin: "center" }}
-      {...ctaScaleHoverOnSelf}
-    >
-      {!hideContact ? (
-        <>
-          <a
-            href="https://cal.com/jacob-c-99otvp/15min"
-            target="_blank"
-            rel="noreferrer"
-            className={CTA_HEADER_PILL_CLASS}
-            style={{
-              zIndex: 1,
-              background: "var(--hdr-fill)",
-              color: "var(--hdr-fg)",
-              boxShadow: "none",
-              textDecoration: "none",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <CtaGrain />
-            <span className="relative">Reach out</span>
-          </a>
-          {/* Bridge — thin bar connecting the two pills, sits behind them via
-              negative margins so it overlaps into each rather than floating in
-              an empty gap. */}
-          <span
-            aria-hidden="true"
-            style={{
-              width: gap + 6,
-              marginLeft: -4,
-              marginRight: -4,
-              height: 16,
-              background: "var(--hdr-fill)",
-              zIndex: 0,
-              flexShrink: 0,
-            }}
-          />
-        </>
-      ) : null}
+    <div className={`relative inline-flex items-center gap-2 ${CTA_HEADER_SHELL_HEIGHT_CLASS}`}>
       <Link
         href="/login"
-        aria-label="Sign in"
-        className={CTA_HEADER_SIGNIN_SHELL_CLASS}
+        className={CTA_HEADER_PILL_CLASS}
         style={{
-          zIndex: 1,
-          borderRadius: 6,
-          background: "var(--hdr-fill)",
-          color: "var(--hdr-fg)",
-          boxShadow: "none",
+          background: "var(--tile-2)",
+          color: "var(--ink)",
+          textDecoration: "none",
+          whiteSpace: "nowrap",
+          transformOrigin: "center",
         }}
+        {...ctaScaleHoverOnSelf}
       >
-        <CtaGrain />
-        <CtaWell className={CTA_HEADER_WELL_CLASS}>
-          <SignInWellIcon variant={signInIcon} />
-        </CtaWell>
+        <span className="relative">Sign in</span>
       </Link>
+      {!hideContact ? (
+        <a
+          href="https://cal.com/jacob-c-99otvp/15min"
+          target="_blank"
+          rel="noreferrer"
+          className={CTA_HEADER_PILL_CLASS}
+          style={{
+            background: CTA_FILL,
+            color: "var(--cta-fg)",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+            transformOrigin: "center",
+          }}
+          {...ctaScaleHoverOnSelf}
+        >
+          <CtaGrain />
+          <span className="relative">Reach out</span>
+        </a>
+      ) : null}
     </div>
   );
 }
@@ -807,11 +738,30 @@ export function VisualNotch() {
   const isBlogPost = pathname.startsWith("/blog/");
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
+  // The header lines its logo and buttons up with each page's own content
+  // column. On phones every page's content starts 23px in (its 12px margin
+  // plus 11px), so that's fixed in .site-header__inner--content; from sm up
+  // pages differ, so each sets the column's max width and its inset.
+  const inset = (maxWidth: string, padSm: string) =>
+    ({ maxWidth, "--hdr-pad-sm": padSm }) as CSSProperties;
+  const headerInset = isComponents
+    ? inset("96rem", "12px")
+    : isBlogPost
+      ? inset("56rem", "48px") // the post sheet's body padding
+      : isBlog
+        ? inset("80rem", "12px")
+        : isWork && !pathname.startsWith("/work/")
+          ? inset("64rem", "32px")
+          : isAether || isPolicies
+            ? inset("80rem", "0px")
+            : inset("80rem", "32px"); // the homepage and case studies
+
   if (useMinimalHeader) {
     return (
       <>
         <div
-          className={`site-header${mobileOpen ? " site-header--open" : ""}${isAetherLanding ? " site-header--pinned" : ""}`}
+          // Pinned to the top while scrolling, on every page that uses it.
+          className={`site-header site-header--pinned${mobileOpen ? " site-header--open" : ""}`}
           ref={headerRef}
           // On blog posts a hairline underneath, so the sheet starts below it.
           style={isBlogPost ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
@@ -836,7 +786,7 @@ export function VisualNotch() {
               </div>
             </>
           )}
-          <div className="site-header__inner" style={isComponents ? { maxWidth: "96rem" } : undefined}>
+          <div className="site-header__inner site-header__inner--content" style={headerInset}>
             <Link href="/" className="site-header__brand">
               <InertiaLogo />
             </Link>
