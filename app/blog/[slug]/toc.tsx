@@ -234,8 +234,17 @@ export function TOC({ headings }: { headings: Heading[] }) {
 
 // Collapsed "Contents" tab that sits inline above the post title. Expands in
 // place rather than overlaying, so it never covers the heading it introduces.
-export function TOCInline({ headings, scrollable = false }: { headings: Heading[]; scrollable?: boolean }) {
+export function TOCInline({
+  headings,
+  scrollable = false,
+  onOpenChange,
+}: {
+  headings: Heading[];
+  scrollable?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const [open, setOpen] = useState(false);
+  useEffect(() => onOpenChange?.(open), [open, onOpenChange]);
   const [height, setHeight] = useState(0);
   const bodyRef = useRef<HTMLUListElement>(null);
 
@@ -285,13 +294,14 @@ export function TOCInline({ headings, scrollable = false }: { headings: Heading[
             strokeLinecap="round"
             strokeLinejoin="round"
             className="w-3 h-3"
+            // A plus that turns into a close mark as the list opens.
             style={{
-              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+              transform: open ? "rotate(45deg)" : "rotate(0deg)",
               transition: "transform 260ms cubic-bezier(0.22,1,0.36,1)",
             }}
             aria-hidden="true"
           >
-            <polyline points="4 6 8 10 12 6" />
+            <path d="M8 3v10M3 8h10" />
           </svg>
         </button>
 
@@ -335,6 +345,7 @@ export function TOCInline({ headings, scrollable = false }: { headings: Heading[
 export function TOCSticky({ headings }: { headings: Heading[] }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -354,15 +365,33 @@ export function TOCSticky({ headings }: { headings: Heading[] }) {
           re-render would wipe that mark and hide it. The stuck padding
           change goes through style instead. */}
       <div
-        className="rise max-sm:sticky max-sm:top-0 max-sm:z-30 max-sm:-mx-6 max-sm:px-6 max-sm:bg-[var(--paper)] max-sm:pb-3 pt-[var(--toc-pt)] transition-[box-shadow,padding] duration-200"
+        className="rise relative z-20 max-sm:sticky max-sm:top-0 max-sm:z-30 max-sm:-mx-6 max-sm:px-6 max-sm:bg-[var(--paper)] max-sm:pb-3 pt-[var(--toc-pt)] transition-[box-shadow,padding] duration-200"
         style={
           {
             "--toc-pt": stuck ? "12px" : "32px",
-            boxShadow: stuck ? "0 1px 0 rgb(var(--ink-rgb) / 0.09)" : "0 1px 0 transparent",
+            // The hairline is a 9% tint, so it's laid over a row of paper:
+            // on its own, the text scrolling underneath showed through it.
+            boxShadow: stuck
+              ? "0 1px 0 rgb(var(--ink-rgb) / 0.09), 0 1px 0 var(--paper)"
+              : "0 1px 0 transparent, 0 1px 0 transparent",
           } as React.CSSProperties
         }
       >
-        <TOCInline headings={headings} scrollable={stuck} />
+        <TOCInline headings={headings} scrollable={stuck} onOpenChange={setOpen} />
+        {/* While the list is open, the text below fades back into the paper
+            so the list is what reads. It hangs from the bar's own bottom
+            edge, past its padding and the 1px hairline it shows while
+            stuck, so it never covers the bar or its line. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 h-80"
+          style={{
+            top: "calc(100% + 1px)",
+            background: "linear-gradient(to bottom, var(--paper) 10%, rgb(from var(--paper) r g b / 0.6) 55%, transparent)",
+            opacity: open ? 1 : 0,
+            transition: "opacity 320ms cubic-bezier(0.22,1,0.36,1)",
+          }}
+        />
       </div>
     </>
   );

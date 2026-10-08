@@ -19,7 +19,12 @@ const PLATFORMS: {
   { name: "Google AI", href: (q) => `https://www.google.com/search?udm=50&q=${q}`, Icon: SiGoogle },
 ];
 
-/** `wall` lays the assistants out as a logo wall: even cells split by
+// The studio's own question, for the footer's links.
+export const ASK_AI_STUDIO_PROMPT =
+  "Read https://byinertia.com (if it won't load, use https://byinertia.com/llms.txt) and tell me what Inertia does, the kind of clients they work with, and why someone would hire them.";
+
+/** `icons` is a quiet row of small marks with no names, for the site
+ * footer. `wall` lays the assistants out as a logo wall: even cells split by
  * hairlines, a large mark over each name, like the stores wall on /aether.
  * `tiles` is the same layout as separate raised tiles with no hairlines, for
  * the homepage's dark zone, where they match the grey tiles above. */
@@ -30,10 +35,31 @@ export function AskAiLinks({
 }: {
   prompt: string;
   className?: string;
-  variant?: "buttons" | "wall" | "tiles";
+  variant?: "buttons" | "wall" | "tiles" | "icons";
 }) {
   const q = encodeURIComponent(prompt);
   const mounted = useMounted();
+
+  if (variant === "icons") {
+    return (
+      <ul className={`flex items-center gap-0.5 ${className}`}>
+        {PLATFORMS.map(({ name, href, Icon }) => (
+          <li key={name}>
+            <a
+              href={href(q)}
+              target="_blank"
+              rel="noopener"
+              aria-label={`Ask ${name} about Inertia`}
+              title={name}
+              className="inline-flex size-7 items-center justify-center rounded-[6px] text-[rgb(var(--muted)/0.7)] transition-colors duration-150 hover:bg-[rgb(var(--fg)/0.08)] hover:text-[rgb(var(--fg))] [-webkit-tap-highlight-color:transparent]"
+            >
+              {mounted ? <Icon className="size-[14px]" /> : <span className="size-[14px]" />}
+            </a>
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   if (variant === "tiles") {
     return (

@@ -2,7 +2,7 @@
 
 import type { ReactElement, ReactNode } from "react";
 import { INK, TILE } from "@/components/material-art";
-import { Box, DASH, LINE } from "@/components/line-art";
+import { Box, DASH, Flag, LINE } from "@/components/line-art";
 
 // Essay covers, in the hero staircase's line style (components/line-art.tsx):
 // monoline boxes in perspective, dashed ghosts and guides, on the tile. One
@@ -96,35 +96,28 @@ function FewerComponents() {
   );
 }
 
-// someone-still-has-to-pick: forty options in a grid, drawn light, and one
-// dashed gap where the picked one came out. A dashed line leads from the
-// gap over the grid to it, the only solid piece, standing on its own.
+// someone-still-has-to-pick: forty options laid out as a field of low,
+// faint blocks, and one of them standing up out of it, solid: the one
+// somebody chose. Rows run back to front so nearer blocks cover farther ones.
 function Narrowing() {
   const cols = 8;
   const rows = 5;
-  const cell = { w: 26, h: 22 };
-  const x0 = 36;
-  const y0 = 128;
-  const pick = { c: 5, r: 1 };
-  const gx = x0 + pick.c * cell.w;
-  const gy = y0 + pick.r * cell.h;
-  return (
-    <>
-      {Array.from({ length: cols * rows }, (_, n) => {
-        const c = n % cols;
-        const r = Math.floor(n / cols);
-        const x = x0 + c * cell.w + 3;
-        const y = y0 + r * cell.h + 3;
-        return c === pick.c && r === pick.r ? (
-          <rect key={n} x={x} y={y} width={cell.w - 6} height={cell.h - 6} {...DASH} strokeOpacity={0.9} />
+  const pick = { c: 5, r: 2 };
+  const blocks: ReactElement[] = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = 58 + c * 36;
+      const y = 150 + r * 22;
+      blocks.push(
+        c === pick.c && r === pick.r ? (
+          <Box key={`${c}-${r}`} x={x} y={y - 70} w={26} h={80} d={0.045} />
         ) : (
-          <rect key={n} x={x} y={y} width={cell.w - 6} height={cell.h - 6} {...LINE} strokeOpacity={0.3} />
-        );
-      })}
-      <polyline points={`${gx + cell.w / 2},${gy + 3} ${gx + cell.w / 2},104 ${316},104 ${316},150`} {...DASH} strokeOpacity={0.9} />
-      <Box x={284} y={160} w={68} h={68} d={0.16} />
-    </>
-  );
+          <Box key={`${c}-${r}`} x={x} y={y} w={26} h={8} d={0.045} light />
+        )
+      );
+    }
+  }
+  return <>{blocks}</>;
 }
 
 // speed-is-a-feature: where a page's weight goes. One piece is most of it,
@@ -144,37 +137,43 @@ function Weight() {
   );
 }
 
-// taste-is-trained: the same pair a year apart. Off and unsure, then tidy
-// and settled.
+// taste-is-trained: a staircase of reps. The first steps are only dashed
+// tries, the next ones faint, the last ones solid, with the flag on top:
+// the eye is built one step at a time.
+const REPS = [22, 40, 58, 76, 94, 112];
 function YearApart() {
   return (
     <>
-      <g transform="rotate(-5 90 210)">
-        <Box x={58} y={182} w={60} h={58} d={0.14} light />
-      </g>
-      <g transform="rotate(7 146 222)">
-        <Box x={124} y={204} w={44} h={36} d={0.12} light />
-      </g>
-      <Box x={226} y={182} w={60} h={58} d={0.14} />
-      <Box x={290} y={198} w={44} h={42} d={0.12} />
-      <Label x={112} y={266} size={11}>Then</Label>
-      <Label x={280} y={266} size={11}>Now</Label>
+      {REPS.map((h, i) => {
+        const b = { x: 86 + i * 38, y: 240 - h, w: 38, h, d: 0.05 };
+        return i < 2 ? <Box key={i} {...b} ghost /> : i < 4 ? <Box key={i} {...b} light /> : <Box key={i} {...b} />;
+      })}
+      <Flag x={86 + 5 * 38 + 19} y={128} h={44} />
     </>
   );
 }
 
-// most-projects-fail-before-figma: a brief, drawn light, and one sheet
-// pulled out of the stack, solid: the line that mattered and nobody read.
-// Its place in the stack is dashed.
+// most-projects-fail-before-figma: a tower on a brief that's slightly off.
+// The dashed plumb line is where it should stand; each level above the base
+// drifts a little further from it, so the first mistake is the one that
+// grows. Drawn bottom up, so each level sits over the one below.
+const TOWER = [
+  { dx: 6, w: 112, h: 26 },
+  { dx: 12, w: 96, h: 30 },
+  { dx: 22, w: 84, h: 30 },
+  { dx: 36, w: 72, h: 30 },
+  { dx: 54, w: 60, h: 28 },
+];
 function Brief() {
-  const sheets = [0, 1, 2, 3, 4, 5];
-  const pulled = 3;
-  const sheet = (i: number) => ({ x: 70 + (i % 2) * 5, y: 228 - i * 14, w: 160, h: 12, d: 0.16 });
+  const cx = 186;
+  let top = 240;
   return (
     <>
-      {sheets.map((i) => (i === pulled ? <Box key={i} {...sheet(i)} ghost /> : <Box key={i} {...sheet(i)} light />))}
-      <Box x={214} y={150} w={160} h={12} d={0.16} />
-      <line x1={232} y1={156} x2={330} y2={156} {...LINE} strokeOpacity={0.5} />
+      {TOWER.map((t, i) => {
+        top -= t.h;
+        return <Box key={i} x={cx - t.w / 2 + t.dx} y={top} w={t.w} h={t.h} d={0.05} />;
+      })}
+      <line x1={cx} y1={60} x2={cx} y2={256} {...DASH} />
     </>
   );
 }

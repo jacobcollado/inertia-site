@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { AskAiLinks } from "@/components/ask-ai-links";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -17,8 +16,7 @@ import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
 import { HeroCanvas } from "@/components/hero-canvas";
 import { MaterialCover } from "@/components/post-covers";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
-import { StatementArt } from "@/components/statement-art";
-import { ClientTileArt } from "@/components/client-tile-art";
+import { SurfacingLine } from "@/components/surfacing-line";
 import { useMounted } from "@/hooks/use-mounted";
 import {
   AI_APPROACH,
@@ -32,12 +30,13 @@ import {
 } from "@/lib/home-copy";
 import type { AskUserQuestion, AskUserAnswer } from "@/components/ui/ask-user-questions";
 import { InquirySteps } from "@/components/inquiry-steps";
-import { ctaScaleHoverOnParent } from "@/lib/cta-hover-motion";
+import { ctaScaleHoverOnParent, ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
 import {
   ACTION_RADIUS_CLASS,
   CTA_FILL,
   CTA_INSET_SHADOW,
   CTA_OUTER_SHADOW,
+  CTA_HEADER_PILL_CLASS,
   CTA_PILL_CLASS,
   CtaGrain,
 } from "@/lib/cta-chrome";
@@ -104,93 +103,6 @@ function useLiquidReveal(active: boolean, delayMs = 0) {
   }, [active, delayMs]);
 
   return ref;
-}
-
-const STATEMENT_LEAD = ["We", "build", "the", "version", "of", "your", "business"];
-const STATEMENT_PAYOFF = ["people", "fall", "for."];
-const STATEMENT_WORDS = STATEMENT_LEAD.length + STATEMENT_PAYOFF.length;
-// Share of the pinned scroll spent lighting words; the rest holds the read
-// line, then settles it to two tones.
-const STATEMENT_READ_END = 0.7;
-const STATEMENT_SETTLE_AT = 0.8;
-
-// The page's second statement, pinned and read as you scroll. The section is
-// a few screens tall and the line sticks in the middle of the view while its
-// words light up in order (scrubbing back if you scroll back). Once it's
-// read, the lead settles to grey and "people fall for" stays bright, so the
-// payoff is what's left standing. Set large and centred, with a sketch
-// under it that acts the line out (components/statement-art.tsx).
-function ServicesSection() {
-  const ref = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion() ?? false;
-  const [lit, setLit] = useState(0);
-  const [settled, setSettled] = useState(false);
-
-  // Polled every frame while on screen rather than on scroll events: Lenis
-  // moves the page in its own rAF loop, so scroll events lag what's drawn
-  // (same reason as LightCard below).
-  useEffect(() => {
-    if (reduced) {
-      setLit(STATEMENT_WORDS);
-      setSettled(true);
-      return;
-    }
-    const el = ref.current;
-    if (!el) return;
-    let raf = 0;
-    const tick = () => {
-      const r = el.getBoundingClientRect();
-      const travel = r.height - window.innerHeight;
-      const p = travel > 0 ? Math.min(1, Math.max(0, -r.top / travel)) : 1;
-      const n = Math.min(STATEMENT_WORDS, Math.ceil((p / STATEMENT_READ_END) * STATEMENT_WORDS));
-      setLit((prev) => (prev === n ? prev : n));
-      const s = p >= STATEMENT_SETTLE_AT;
-      setSettled((prev) => (prev === s ? prev : s));
-      raf = requestAnimationFrame(tick);
-    };
-    const io = new IntersectionObserver(([e]) => {
-      cancelAnimationFrame(raf);
-      if (e.isIntersecting) raf = requestAnimationFrame(tick);
-    });
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      cancelAnimationFrame(raf);
-    };
-  }, [reduced]);
-
-  const opacity = (i: number) => {
-    if (i >= lit) return 0.16;
-    if (settled && i < STATEMENT_LEAD.length) return 0.4;
-    return 1;
-  };
-
-  return (
-    <section ref={ref} className={reduced ? "w-full py-16" : "relative h-[220vh] sm:h-[260vh]"}>
-      <div className={reduced ? "" : "sticky top-0 flex h-[100dvh] items-center"}>
-        <div className="mx-auto w-full max-w-[80rem] px-6 sm:px-8">
-          <h2
-            className="mx-auto max-w-5xl text-center text-balance text-[clamp(2.6rem,8.4vw,6rem)] leading-[1.02] tracking-[-0.045em] text-[rgb(var(--fg))]"
-            style={{ fontWeight: 450 }}
-          >
-            <span className="sr-only">We build the version of your business people fall for.</span>
-            <span aria-hidden="true">
-              {[...STATEMENT_LEAD, ...STATEMENT_PAYOFF].map((w, i) => (
-                <Fragment key={w + i}>
-                  <span style={{ opacity: opacity(i), transition: "opacity 320ms ease" }}>{w}</span>{" "}
-                </Fragment>
-              ))}
-            </span>
-          </h2>
-          <StatementArt
-            shown={lit > 0}
-            settled={settled}
-            className="mx-auto mt-8 sm:mt-12 block w-full max-w-[22rem] sm:max-w-md"
-          />
-        </div>
-      </div>
-    </section>
-  );
 }
 
 type Plan = "free" | "service";
@@ -1179,11 +1091,14 @@ function Questionnaire() {
 
   return (
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      {/* Built from the same pieces as the sections on the white card above:
-          a framed heading, a muted paragraph at the body size, and the CTA
-          (inverted for the dark zone). The flow opens below it. */}
+      {/* The dark zone opens on this: one large line that surfaces out of
+          the dark as the white card pulls away above it, then a muted
+          paragraph at the body size and the CTA (inverted for the dark
+          zone). The flow opens below it. */}
+      <div className="pt-24 sm:pt-40 mx-auto max-w-4xl text-center">
+        <SurfacingLine text="Let’s make something people remember." className="mx-auto max-w-[14ch] mb-8 sm:mb-10" />
+      </div>
       <div className="rise rise-stagger mx-auto max-w-2xl sm:max-w-3xl text-center">
-        <SectionHeading tone="dark" className="mb-5 sm:mb-6">Working on something?</SectionHeading>
         <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-balance">
           Tell us a little about it. It takes about two minutes, and we read every answer.
         </p>
@@ -2057,6 +1972,10 @@ function LightCard({ children }: { children: React.ReactNode }) {
       const isMobile = window.innerWidth < 640;
       const radius = isMobile ? 12 + progress * 13 : 32 + progress * 28;
       card.style.transform = progress === 0 ? "" : `scale(${scale})`;
+      // The frame inside the card undoes the horizontal part of that scale
+      // (components/page-frame.tsx reads this), so its rails stay on the
+      // dark zone's rails behind the card instead of drifting inward.
+      card.style.setProperty("--frame-unscale", progress === 0 ? "1" : String(1 / scale));
       card.style.borderBottomLeftRadius = `${radius}px`;
       card.style.borderBottomRightRadius = `${radius}px`;
       rafRef.current = requestAnimationFrame(apply);
@@ -2124,79 +2043,64 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
   "allure-new-york": "#d9c39c",
 };
 
-// "In good company": the clients as a grid of tiles, the dark-zone twin of
-// the What we do and Our thoughts tiles on the white card: a flat surface
-// tile with 6px corners holding the mark, name and service underneath. Marks
-// are masked in the zone's ink rather than brand colours, so the grid stays
-// as monochrome as the drawings above it. Each tile links to its case study.
-// Each client drawn as a block in the line style, logo on its front face
-// (components/client-tile-art.tsx), then one faint empty block for whoever's
-// next, which points down to the enquiry flow.
+// "In good company": a quiet wall of marks. Flat square tiles on the zone's
+// surface, each holding the client's logo masked in ink, so the grid stays
+// monochrome. The name and service stay hidden until hover, when the mark
+// lifts and they rise in at the bottom. Each tile links to its case study,
+// and one last tile with a "+" stands for whoever's next, pointing down to
+// the enquiry flow.
+const WALL_EASE = "duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]";
+const WALL_TILE = "group relative flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-[var(--tile)] transition-colors duration-300 hover:bg-[var(--tile-2)]";
+
+function WallCaption({ title, sub }: { title: string; sub?: string }) {
+  return (
+    <div className={`absolute inset-x-4 bottom-4 translate-y-2 opacity-0 transition-all ${WALL_EASE} group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100`}>
+      <p className="text-[14px] tracking-tight" style={{ color: "var(--ink)" }}>{title}</p>
+      {sub && <p className="text-[13px] tracking-tight" style={{ color: "var(--ink-2)" }}>{sub}</p>}
+    </div>
+  );
+}
+
 function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
   if (items.length === 0) return null;
-  const tile = "block aspect-[4/3] overflow-hidden rounded-[6px] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]";
+  const lift = `transition-transform ${WALL_EASE} group-hover:-translate-y-3 group-focus-visible:-translate-y-3`;
   return (
     <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <SectionHeading align="left" className="mb-10 sm:mb-14">In good company</SectionHeading>
-      <ul data-stagger className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-12">
-        {items.map((item, i) => (
+      <ul data-stagger className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {items.map((item) => (
           <li key={item.slug}>
-            <Link href={`/work/${item.slug}`} className="group block">
-              <div className="overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
-                <div className={tile}>
-                  <ClientTileArt index={i}>
-                    {item.logo ? (
-                      <span
-                        role="img"
-                        aria-label={item.client}
-                        className="block opacity-80 transition-opacity duration-200 group-hover:opacity-100"
-                        style={{
-                          width: carouselLogoStyle(item.slug).width,
-                          aspectRatio: "1 / 1",
-                          maxHeight: "86%",
-                          backgroundColor: "var(--ink)",
-                          WebkitMaskImage: `url(${item.logo})`,
-                          maskImage: `url(${item.logo})`,
-                          WebkitMaskRepeat: "no-repeat",
-                          maskRepeat: "no-repeat",
-                          WebkitMaskPosition: "center",
-                          maskPosition: "center",
-                          WebkitMaskSize: "contain",
-                          maskSize: "contain",
-                        }}
-                      />
-                    ) : (
-                      <span className="text-[15px] tracking-tight" style={{ color: "var(--ink)" }}>{item.client}</span>
-                    )}
-                  </ClientTileArt>
-                </div>
+            <Link href={`/work/${item.slug}`} className={WALL_TILE} aria-label={item.service ? `${item.client}, ${item.service}` : item.client}>
+              <div className={`w-[44%] ${lift}`}>
+                {item.logo ? (
+                  <span
+                    aria-hidden="true"
+                    className="block opacity-[0.85]"
+                    style={{
+                      aspectRatio: "1 / 1",
+                      backgroundColor: "var(--ink)",
+                      WebkitMaskImage: `url(${item.logo})`,
+                      maskImage: `url(${item.logo})`,
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "center",
+                      maskPosition: "center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+                ) : (
+                  <span className="block text-center text-[15px] tracking-tight" style={{ color: "var(--ink)" }}>{item.client}</span>
+                )}
               </div>
-              <p className="mt-4 text-[18px] sm:text-[22px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)" }}>
-                {item.client}
-              </p>
-              {item.service && (
-                <p className="mt-1 text-[14px] sm:text-[16px] leading-snug tracking-tight" style={{ color: "var(--ink-2)" }}>
-                  {item.service}
-                </p>
-              )}
+              <WallCaption title={item.client} sub={item.service} />
             </Link>
           </li>
         ))}
         <li>
-          <a href="#start" className="group block">
-            <div className="overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
-              <div className={tile}>
-                <ClientTileArt index={items.length} open>
-                  <span className="text-[22px] sm:text-[28px] font-light leading-none transition-opacity duration-200 opacity-40 group-hover:opacity-80" style={{ color: "var(--ink)" }} aria-hidden="true">+</span>
-                </ClientTileArt>
-              </div>
-            </div>
-            <p className="mt-4 text-[18px] sm:text-[22px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)" }}>
-              Your business
-            </p>
-            <p className="mt-1 text-[14px] sm:text-[16px] leading-snug tracking-tight" style={{ color: "var(--ink-2)" }}>
-              Next, if you like
-            </p>
+          <a href="#start" className={WALL_TILE} aria-label="Your business, next if you like">
+            <span className={`text-[28px] font-light leading-none opacity-40 transition-opacity duration-200 group-hover:opacity-80 ${lift}`} style={{ color: "var(--ink)" }} aria-hidden="true">+</span>
+            <WallCaption title="Your business" sub="Next, if you like" />
           </a>
         </li>
       </ul>
@@ -2757,210 +2661,64 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
   );
 }
 
-const ASK_AI_PROMPT =
-  "Read https://byinertia.com (if it won't load, use https://byinertia.com/llms.txt) and tell me what Inertia does, the kind of clients they work with, and why someone would hire them.";
-
-// Same layout as Aether's "Still deciding?" (AetherAskAi in app/aether/faq.tsx):
-// the larger heading and subline over the assistants as a logo wall.
-function AskAi() {
-  return (
-    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8 flex flex-col items-center text-center">
-      <SectionHeading tone="dark" className="mb-5 sm:mb-6">Don&rsquo;t take our word for it</SectionHeading>
-      <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
-        Ask your AI of choice about Inertia.
-      </p>
-      <AskAiLinks prompt={ASK_AI_PROMPT} variant="tiles" className="mt-10 sm:mt-14 w-full max-w-3xl" />
-    </section>
-  );
-}
-
-function ArrowGlyph({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.25"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M3 8h10" />
-      <path d="M9 4l4 4-4 4" />
-    </svg>
-  );
-}
-
-// The tag as a small square-cornered chip. No date or read time: every essay
-// runs 500 to 580 words, so read time said "3 min" on every row.
-function BlogMeta({ post }: { post: PostMeta }) {
-  if (!post.tag) return null;
-  return (
-    <span
-      className="inline-flex items-center rounded-[4px] px-1.5 py-1 text-[12px] sm:text-[13px] leading-none tracking-tight"
-      style={{ color: "var(--ink-soft)", background: "rgb(var(--ink-rgb) / 0.06)" }}
-    >
-      {post.tag}
-    </span>
-  );
-}
-
-function BlogArrow() {
-  return (
-    <ArrowGlyph className="size-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
-  );
-}
-
-// "Our thoughts" as a horizontal shelf, so it breaks the page's run of
-// stacked, centred sections: heading on the left, arrows on the right, then
-// the essays as cover cards in a row that swipes or scrolls sideways and runs
-// off the edge, ending on a tile to the full list. Each essay shows the
-// middle of its own cover (the same drawing as its post page; see
-// MaterialCover) with the tag, title and excerpt underneath. No dates or
-// rules.
+// "Our thoughts": the three latest essays as tiles of one size. Each tile is
+// its cover (the same drawing as its post page; see MaterialCover) with the
+// title set inside along the bottom. On hover the drawing lifts and the
+// excerpt opens under the title; on touch screens, where there's no hover,
+// the excerpt simply shows. The full list sits behind the same quiet button
+// as the header's "Sign in".
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
   const mounted = useMounted();
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [revealed, setRevealed] = useState(false);
-  const [edges, setEdges] = useState({ start: true, end: false });
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (!e.isIntersecting) return;
-        obs.disconnect();
-        requestAnimationFrame(() => setRevealed(true));
-      },
-      { threshold: 0.06, rootMargin: "0px 0px -32px 0px" },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  const updateEdges = () => {
-    const t = trackRef.current;
-    if (!t) return;
-    setEdges({ start: t.scrollLeft < 4, end: t.scrollLeft + t.clientWidth >= t.scrollWidth - 4 });
-  };
-
-  useEffect(() => {
-    updateEdges();
-    window.addEventListener("resize", updateEdges);
-    return () => window.removeEventListener("resize", updateEdges);
-  }, []);
-
-  // One card per press, measured so it stays right at every breakpoint.
-  const step = (dir: 1 | -1) => {
-    const t = trackRef.current;
-    const card = t?.firstElementChild as HTMLElement | null;
-    if (!t || !card) return;
-    t.scrollBy({ left: dir * (card.offsetWidth + 16), behavior: "smooth" });
-  };
-
   if (posts.length === 0) return null;
-  const list = posts.slice(0, 8);
-
-  const reveal = (i: number): React.CSSProperties => ({
-    willChange: "opacity, transform, filter",
-    opacity: revealed ? 1 : 0,
-    transform: revealed ? "translateY(0)" : "translateY(6px)",
-    filter: revealed ? "blur(0px)" : "blur(8px)",
-    transition: revealed
-      ? `opacity 680ms cubic-bezier(0.22,0.61,0.36,1) ${i * 70}ms, transform 680ms cubic-bezier(0.22,0.61,0.36,1) ${i * 70}ms, filter 680ms cubic-bezier(0.22,0.61,0.36,1) ${i * 70}ms`
-      : "none",
-  });
-
-  const arrowButton = (dir: 1 | -1, disabled: boolean) => (
-    <button
-      type="button"
-      onClick={() => step(dir)}
-      disabled={disabled}
-      aria-label={dir === 1 ? "Next essays" : "Previous essays"}
-      className="flex size-9 sm:size-10 items-center justify-center rounded-[6px] transition-opacity duration-200 disabled:opacity-30"
-      style={{ background: "rgb(var(--ink-rgb) / 0.06)", color: "var(--ink)" }}
-    >
-      <ArrowGlyph className={cn("size-4", dir === -1 && "rotate-180")} />
-    </button>
-  );
+  const list = posts.slice(0, 3);
+  const ease = "duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
   return (
-    <section ref={sectionRef} className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div className="mb-8 flex items-end justify-between gap-6 sm:mb-10" style={reveal(0)}>
+    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      <div className="mb-10 flex items-center justify-between gap-6 sm:mb-14">
         <SectionHeading align="left">Our thoughts</SectionHeading>
-        <div className="flex shrink-0 items-center gap-2">
-          {arrowButton(-1, edges.start)}
-          {arrowButton(1, edges.end)}
-        </div>
-      </div>
-
-      <div
-        ref={trackRef}
-        onScroll={updateEdges}
-        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:-mx-8 sm:scroll-px-8 sm:px-8"
-      >
-        {list.map((post, i) => (
-          <Link
-            key={post.slug}
-            href={`/blog/${post.slug}`}
-            className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
-            style={reveal(i + 1)}
-          >
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[6px] bg-[var(--tile)]">
-              {mounted && <MaterialCover
-                slug={post.slug}
-                className="transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
-              />}
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              {i === 0 && <NewChip />}
-              <BlogMeta post={post} />
-            </div>
-            <span className="mt-2.5 flex items-start justify-between gap-4">
-              <span className="text-[19px] sm:text-[21px] tracking-[-0.02em] leading-snug text-pretty" style={{ color: "var(--ink)", fontWeight: 500 }}>
-                {post.title}
-              </span>
-              <ArrowGlyph className="mt-1.5 size-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
-            </span>
-            {post.excerpt && (
-              <p className="mt-1.5 text-[15px] leading-snug tracking-tight text-pretty line-clamp-2" style={{ color: "var(--ink-2)" }}>
-                {post.excerpt}
-              </p>
-            )}
-          </Link>
-        ))}
-        {/* The shelf ends on the way to the rest: one more tile, same size
-            and grey as the covers, instead of a separate "All essays" link. */}
         <Link
           href="/blog"
-          className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-[20rem] lg:w-[22rem]"
-          style={reveal(list.length + 1)}
+          className={CTA_HEADER_PILL_CLASS}
+          style={{ background: "var(--tile-2)", color: "var(--ink)", whiteSpace: "nowrap", transformOrigin: "center" }}
+          {...ctaScaleHoverOnSelf}
         >
-          <div className="flex aspect-[4/3] flex-col justify-between rounded-[6px] bg-[var(--tile)] p-5 transition-colors duration-200 group-hover:bg-[var(--tile-3)]">
-            <span className="text-[13px] tracking-tight" style={{ color: "var(--ink-3)" }}>
-              {posts.length} essays
-            </span>
-            <span className="flex items-end justify-between gap-4">
-              <span className="text-[clamp(1.4rem,2.4vw,1.75rem)] tracking-[-0.03em] leading-[1.1]" style={{ color: "var(--ink)", fontWeight: 500 }}>
-                Read the rest
-              </span>
-              <ArrowGlyph className="mb-1 size-5 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:translate-x-1" />
-            </span>
-          </div>
+          <span className="relative">All essays</span>
         </Link>
       </div>
-    </section>
-  );
-}
 
-function NewChip() {
-  return (
-    <span className="inline-flex items-center rounded-[4px] px-1.5 py-1 text-[12px] sm:text-[13px] leading-none tracking-tight" style={{ background: "var(--ink)", color: "var(--paper)" }}>
-      New
-    </span>
+      <ul data-stagger className="grid gap-3 sm:grid-cols-3 sm:gap-4">
+        {list.map((post) => (
+          <li key={post.slug}>
+            <Link
+              href={`/blog/${post.slug}`}
+              className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-square"
+            >
+              <div className={`absolute inset-x-0 top-0 aspect-[4/3] transition-transform ${ease} [@media(hover:hover)]:group-hover:-translate-y-6 group-focus-visible:-translate-y-6`}>
+                {mounted && <MaterialCover slug={post.slug} />}
+              </div>
+              <div className="relative p-5 sm:p-6">
+                <h3
+                  className="text-balance text-[21px] leading-[1.15] tracking-[-0.025em] sm:text-[22px]"
+                  style={{ color: "var(--ink)", fontWeight: 450 }}
+                >
+                  {post.title}
+                </h3>
+                {post.excerpt && (
+                  <div className={`grid grid-rows-[1fr] transition-[grid-template-rows,opacity] ${ease} [@media(hover:hover)]:grid-rows-[0fr] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:grid-rows-[1fr] [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100`}>
+                    <p className="overflow-hidden">
+                      <span className="block pt-2 line-clamp-2 text-pretty text-[14px] leading-snug tracking-tight sm:text-[15px]" style={{ color: "var(--ink-2)" }}>
+                        {post.excerpt}
+                      </span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -3318,15 +3076,7 @@ function VisualLayout({
           <FrameRails tone="dark" />
           <div className="py-6 sm:py-10" />
 
-          <ServicesSection />
-
-          <FrameRule tone="dark" />
-
           <Questionnaire />
-
-          <FrameRule tone="dark" />
-
-          <AskAi />
 
           {/* The blog closes the page. On the lower panel the tile tone would
               match the panel itself in light mode, so its cards take the

@@ -2171,10 +2171,36 @@ h1:hover .redact > span.redact-inner,
   position: absolute;
   inset: 0;
   background: rgb(var(--bg));
-  -webkit-mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.95) 65%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 92%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.95) 65%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0.3) 92%, transparent 100%);
   pointer-events: none;
   z-index: 0;
+}
+
+/* A strip under the header carrying its blur and easing it off, so the
+   header's whole height is blurred without ending on a hard edge. The blur
+   is set from script with the header's own (app/visual-notch.tsx). */
+.site-header__fade {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  height: 24px;
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
+  pointer-events: none;
+}
+
+/* The homepage's header is a cell of the page frame: no colour of its own,
+   just a blur of what's behind it, down to the bottom of its boundary. */
+.site-header__bg--framed {
+  background: transparent;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+/* Over the homepage's lower panel the paper the header's frame corners are
+   cut from takes the panel's colour. */
+.site-header--zone {
+  --bg: var(--zone-bg);
+  --paper: rgb(var(--zone-bg));
 }
 
 /* Solid fill that fades in on open — separate from the masked bg so it isn't

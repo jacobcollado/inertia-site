@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme, type ThemePref } from "./theme-provider";
-import { FrameColumnRails, FrameRule, type FrameTone } from "@/components/page-frame";
+import { ASK_AI_STUDIO_PROMPT, AskAiLinks } from "@/components/ask-ai-links";
+import { FRAME_TONES, FrameColumnRails, FrameRule, type FrameTone } from "@/components/page-frame";
 
 const THEME_OPTIONS: { pref: ThemePref; label: string; Icon: typeof Sun }[] = [
   { pref: "light", label: "Light", Icon: Sun },
@@ -112,7 +113,7 @@ function Wordmark() {
 }
 
 // The site footer, in the page frame: the column's two rails run through it,
-// and a frame rule with square handles separates the bottom row. Above it,
+// and a frame rule separates the bottom row. Above it,
 // the wordmark on the left and three short link columns on the right; below,
 // the year, the policies and (where the route follows the theme) the theme
 // switch. Plain type in the theme's tokens, so it reads on the light pages,
@@ -127,6 +128,12 @@ export function MinimalFooter({ themeSwitch = false, tone = "light", rails = tru
         <div data-stagger className="grid gap-10 sm:grid-cols-[1fr_auto] sm:gap-16">
           <div>
             <Wordmark />
+            {/* A quiet way to hear about us from someone else: each mark
+                opens that assistant with the question already asked. */}
+            <div className="mt-8 flex items-center gap-2.5">
+              <p className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">Ask AI about us</p>
+              <AskAiLinks prompt={ASK_AI_STUDIO_PROMPT} variant="icons" className="-my-1" />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 sm:gap-x-14">
             {FOOTER_COLUMNS.map((col) => (
@@ -140,8 +147,17 @@ export function MinimalFooter({ themeSwitch = false, tone = "light", rails = tru
           </div>
         </div>
 
+        {/* With rails, the frame's split into rounded cells; without them
+            (blog posts) there's nothing for the corners to meet, so a plain
+            hairline. */}
         <div className="-mx-6 sm:-mx-8">
-          <FrameRule tone={tone} className="py-8 sm:py-10" />
+          {rails ? (
+            <FrameRule tone={tone} className="py-8 sm:py-10" />
+          ) : (
+            <div aria-hidden="true" className="py-8 sm:py-10">
+              <div className="h-px" style={{ background: FRAME_TONES[tone].line }} />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col-reverse items-start gap-4 pb-8 sm:flex-row sm:items-center sm:justify-between">

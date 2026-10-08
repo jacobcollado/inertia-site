@@ -11,6 +11,7 @@ import { postFigure } from "@/components/post-figures";
 import { MaterialCover } from "@/components/post-covers";
 import { hasMaterialCover } from "@/components/post-cover-slugs";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
+import { FrameRule } from "@/components/page-frame";
 import {
   getAllPosts,
   getPost,
@@ -201,25 +202,22 @@ export default async function BlogPost({
         </header>
 
         {/* Cover: the post's own drawing in the material kit, falling back
-            to its glyph for a post without one. Full sheet width. */}
+            to its glyph for a post without one. Full sheet width, as a cell
+            of the frame: from sm up (where the sheet has its border rails)
+            the title cell closes above it, the cover's own corners round to
+            match, and the body opens below, the same split as the
+            homepage's section boundaries (FrameRule). */}
+        <FrameRule tone="light" inset="-inset-x-px" className="hidden h-[10px] sm:block" />
         <div className="relative rise" style={{ ["--rise-delay" as any]: "80ms" }}>
-          <div className="relative flex w-full items-center justify-center overflow-hidden" style={{ aspectRatio: "1200/630", background: "var(--tile)" }}>
+          <div className="relative flex w-full items-center justify-center overflow-hidden sm:rounded-[14px]" style={{ aspectRatio: "1200/630", background: "var(--tile)" }}>
             {hasMaterialCover(slug) ? (
               <MaterialCover slug={slug} />
             ) : (
               <PostGlyph slug={slug} tag={post.tag} className="relative w-28 h-28 sm:w-36 sm:h-36" />
             )}
           </div>
-          {/* Handles where the cover's edges meet the sheet's. */}
-          {["-top-[3.5px] -left-[3.5px]", "-top-[3.5px] -right-[3.5px]", "-bottom-[3.5px] -left-[3.5px]", "-bottom-[3.5px] -right-[3.5px]"].map((pos) => (
-            <span
-              key={pos}
-              aria-hidden="true"
-              className={`absolute z-[1] hidden size-[7px] bg-[var(--paper)] sm:block ${pos}`}
-              style={{ boxShadow: "inset 0 0 0 1px rgb(var(--ink-rgb) / 0.28)" }}
-            />
-          ))}
         </div>
+        <FrameRule tone="light" inset="-inset-x-px" className="hidden h-[10px] sm:block" />
 
         <div className="px-6 pt-12 sm:px-12">
           {/* Byline opens the body. */}
@@ -253,16 +251,10 @@ export default async function BlogPost({
 
           <Highlighter slug={slug} />
 
-          {/* Closes the article: a hairline across the full sheet, with the
-              same handles as the cover where it meets the sheet's edges. */}
-          <div aria-hidden="true" className="relative -mx-6 mt-12 h-px bg-[rgb(var(--ink-rgb)/0.09)] sm:-mx-12">
-            {["-left-[3.5px]", "-right-[3.5px]"].map((pos) => (
-              <span
-                key={pos}
-                className={`absolute -top-[3px] hidden size-[7px] bg-[var(--paper)] sm:block ${pos}`}
-                style={{ boxShadow: "inset 0 0 0 1px rgb(var(--ink-rgb) / 0.28)" }}
-              />
-            ))}
+          {/* Closes the article: the body cell ends and the closing one
+              opens, across the full sheet. */}
+          <div className="-mx-6 mt-12 sm:-mx-12">
+            <FrameRule tone="light" inset="-inset-x-px" className="" />
           </div>
 
           <div className="pt-10 pb-16">

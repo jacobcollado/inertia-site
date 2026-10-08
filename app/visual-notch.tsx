@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FrameColumnRails, FrameRule } from "@/components/page-frame";
+import { FRAME_INSET, FRAME_RULE_OVERHANG, FrameColumnRails, FrameRule } from "@/components/page-frame";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -638,6 +638,14 @@ function MergedCTA({
 
 /* ── Root ────────────────────────────────────────────────────────── */
 
+// The homepage header's boundary sits this far below the header's box, so its
+// cell's rounded bottom line clears the buttons by about as much space as
+// they have above them, rather than running right under them.
+const HEADER_RULE_DROP = 7;
+// How far the header's blurred fill reaches below its box: down to the
+// bottom of that boundary, the next cell's rounded top.
+const HEADER_FILL_REACH = HEADER_RULE_DROP + FRAME_RULE_OVERHANG;
+
 export function VisualNotch() {
   const { trigger } = useWebHaptics();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -670,21 +678,26 @@ export function VisualNotch() {
   }, [mobileOpen]);
 
   useEffect(() => {
-    // The homepage scrolls from a white section into a black one (the AI
-    // section onward) — this frosted-glass blur tints toward the global
-    // (light) --bg regardless of what's actually behind it, so past that
-    // point it reads as a stray translucent white bar over black content.
-    // Simplest fix: skip the effect entirely on "/" and leave the header
-    // at its plain static background there.
-    if (pathname === "/") return;
-
     // backdrop-filter is one of the most expensive properties to recompute, so
     // this must not run per scroll event. Coalesce to one write per frame via
     // rAF, and skip the write entirely once `progress` has settled (it clamps
     // at 1 after 120px, so most of a long scroll would otherwise re-apply an
     // identical blur every event).
     const bgEl = headerRef.current?.querySelector<HTMLElement>(".site-header__bg");
+    const fadeEl = headerRef.current?.querySelector<HTMLElement>(".site-header__fade");
     if (!bgEl) return;
+
+    // The homepage's header is a plain blur from its stylesheet
+    // (.site-header__bg--framed), so it skips this. The header stays mounted
+    // across client navigations, so clear what another page wrote inline
+    // first; left in place, it overrode that blur with a solid fill.
+    if (pathname === "/") {
+      bgEl.style.background = "";
+      bgEl.style.backdropFilter = "";
+      (bgEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "";
+      bgEl.style.transition = "";
+      return;
+    }
 
     // Refraction comes from an SVG displacement filter in backdrop-filter,
     // which only Chromium renders. Safari/Firefox drop the whole filter list
@@ -705,13 +718,19 @@ export function VisualNotch() {
       lastProgress = rounded;
 
       // Clear glass: no tint, no saturation boost. The fill fades out fully
-      // so only the blurred, warped content behind shows through.
-      const blur = `blur(${rounded * 6}px)`;
+      // so only the blurred, warped content behind shows through, over the
+      // header's whole height; the strip under it carries the same blur
+      // (without the warp) and eases it off, so there's no hard edge.
+      const blur = `blur(${rounded * 14}px)`;
       const filter = canRefract && rounded > 0 ? `url(#header-glass) ${blur}` : blur;
       bgEl.style.transition = "";
       bgEl.style.backdropFilter = filter;
       (bgEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = filter;
       bgEl.style.background = `rgb(var(--bg) / ${1 - rounded})`;
+      if (fadeEl) {
+        fadeEl.style.backdropFilter = blur;
+        (fadeEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = blur;
+      }
     };
 
     const onScroll = () => {
@@ -726,6 +745,36 @@ export function VisualNotch() {
       if (frame !== null) cancelAnimationFrame(frame);
     };
   }, [mobileOpen, pathname]);
+
+  // On the homepage, whether the header is over the lower panel. Its frame
+  // corners are then cut from that panel's colour (see .site-header--zone).
+  const [overZone, setOverZone] = useState(false);
+  useEffect(() => {
+    if (pathname !== "/") {
+      setOverZone(false);
+      return;
+    }
+    let frame: number | null = null;
+    const check = () => {
+      frame = null;
+      const zone = document.querySelector(".homepage-dark-zone");
+      const header = headerRef.current;
+      if (!zone || !header) return;
+      // The header's fill reaches HEADER_FILL_REACH below its box.
+      setOverZone(zone.getBoundingClientRect().top <= header.offsetHeight + HEADER_FILL_REACH);
+    };
+    const onScroll = () => {
+      if (frame === null) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, [pathname]);
 
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
@@ -760,8 +809,10 @@ export function VisualNotch() {
     return (
       <>
         <div
-          // Pinned to the top while scrolling, on every page that uses it.
-          className={`site-header site-header--pinned${mobileOpen ? " site-header--open" : ""}`}
+          // Pinned to the top while scrolling, on every page that uses it
+          // except blog posts, where it scrolls away with the page so the
+          // reading column has the whole screen.
+          className={`site-header${isBlogPost ? "" : " site-header--pinned"}${mobileOpen ? " site-header--open" : ""}${isHome && overZone ? " site-header--zone" : ""}`}
           ref={headerRef}
           // On blog posts a hairline underneath, so the sheet starts below it.
           style={isBlogPost ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
@@ -772,16 +823,30 @@ export function VisualNotch() {
               <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
             </filter>
           </svg>
-          <div className="site-header__bg" aria-hidden="true" />
+          {/* On the homepage the fill reaches down past the header's boundary,
+              so the next cell's rounded top sits on it and content scrolling
+              underneath is blurred out rather than showing through. */}
+          <div
+            className={`site-header__bg${isHome ? " site-header__bg--framed" : ""}`}
+            style={isHome ? { bottom: -HEADER_FILL_REACH } : undefined}
+            aria-hidden="true"
+          />
+          {!isHome && <div className="site-header__fade" aria-hidden="true" />}
           <div className="site-header__bg-fill" aria-hidden="true" />
           {/* The homepage's frame rails start here, above the hero. */}
           {isHome && (
             <>
               <FrameColumnRails tone="light" className="z-[1]" />
               {/* The header's own boundary, closing the frame above the page. */}
-              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[1]">
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 z-[1]" style={{ bottom: -HEADER_RULE_DROP }}>
                 <div className="relative mx-auto w-full max-w-[80rem]">
                   <FrameRule tone="light" className="" />
+                  {/* Below the cell's rounded top, the blur eases off over
+                      32px instead of stopping at an edge. Kept inside the
+                      rails so they run on sharp. */}
+                  <div className={`absolute h-8 ${FRAME_INSET}`} style={{ top: FRAME_RULE_OVERHANG }}>
+                    <div className="absolute inset-y-0 inset-x-px backdrop-blur-[14px] [mask-image:linear-gradient(black,transparent)] [-webkit-mask-image:linear-gradient(black,transparent)]" />
+                  </div>
                 </div>
               </div>
             </>
@@ -836,6 +901,7 @@ export function VisualNotch() {
     <>
       <div className={`site-header${mobileOpen ? " site-header--open" : ""}`} ref={headerRef}>
         <div className="site-header__bg" aria-hidden="true" />
+        <div className="site-header__fade" aria-hidden="true" />
         <div className="site-header__bg-fill" aria-hidden="true" />
         <div className="site-header__inner">
           {/* Brand */}
