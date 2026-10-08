@@ -690,11 +690,11 @@ export function VisualNotch() {
     const fadeEl = headerRef.current?.querySelector<HTMLElement>(".site-header__fade");
     if (!bgEl) return;
 
-    // The homepage's header is a plain blur from its stylesheet
-    // (.site-header__bg--framed), so it skips this. The header stays mounted
+    // A framed page's header (the homepage, Aether) is a plain blur from its
+    // stylesheet (.site-header__bg--framed), so it skips this. The header stays mounted
     // across client navigations, so clear what another page wrote inline
     // first; left in place, it overrode that blur with a solid fill.
-    if (pathname === "/") {
+    if (pathname === "/" || pathname === "/aether") {
       bgEl.style.background = "";
       bgEl.style.backdropFilter = "";
       (bgEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "";
@@ -789,6 +789,9 @@ export function VisualNotch() {
   // Blog posts and policy documents are laid out as a sheet (see
   // app/blog/[slug]/page.tsx and app/policies/policy-doc.tsx).
   const isSheet = pathname.startsWith("/blog/") || pathname.startsWith("/policies/");
+  // Pages laid out in the frame (rails and rounded cells): the header is a
+  // cell of it too, a plain blur with its boundary below.
+  const isFramed = isHome || isAetherLanding;
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
   // The header lines its logo and buttons up with each page's own content
@@ -805,7 +808,7 @@ export function VisualNotch() {
         ? inset("80rem", "12px")
         : isWork && !pathname.startsWith("/work/")
           ? inset("64rem", "32px")
-          : isAether || isPolicies
+          : (isAether && !isAetherLanding) || isPolicies
             ? inset("80rem", "0px")
             : inset("80rem", "32px"); // the homepage and case studies
 
@@ -830,14 +833,14 @@ export function VisualNotch() {
           {/* On the homepage the blur fills the header cell, down to its
               rounded bottom line just below the header's box. */}
           <div
-            className={`site-header__bg${isHome ? " site-header__bg--framed" : ""}`}
-            style={isHome ? { bottom: -HEADER_CELL_BOTTOM } : undefined}
+            className={`site-header__bg${isFramed ? " site-header__bg--framed" : ""}`}
+            style={isFramed ? { bottom: -HEADER_CELL_BOTTOM } : undefined}
             aria-hidden="true"
           />
-          {!isHome && <div className="site-header__fade" aria-hidden="true" />}
+          {!isFramed && <div className="site-header__fade" aria-hidden="true" />}
           <div className="site-header__bg-fill" aria-hidden="true" />
-          {/* The homepage's frame rails start here, above the hero. */}
-          {isHome && (
+          {/* A framed page's rails start here, above its first cell. */}
+          {isFramed && (
             <>
               <FrameColumnRails tone="light" className="z-[1]" />
               {/* The header's own boundary, closing the frame above the page. */}

@@ -12,6 +12,7 @@ import { SetupSteps } from "./setup-steps";
 import { Testimonials } from "./testimonials";
 import { TrackAetherViewContent } from "./track-view-content";
 import { AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
+import { FrameRails, FrameRule } from "@/components/page-frame";
 
 export const metadata: Metadata = {
   title: { absolute: "Aether, a Shopify theme by Inertia" },
@@ -115,7 +116,12 @@ const THEME_VARIATIONS = [
 
 export default function AetherPage() {
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col pb-16 sm:pb-20">
+    // Laid out in cells, like the homepage: each section is its own rounded
+    // cell, split from the next by a FrameRule, with content inset from the
+    // cell edges (components/page-frame.tsx). Full width with no outer margin,
+    // so on phones the cells run edge to edge in line with the header's.
+    <main className="relative mx-auto w-full max-w-[80rem] min-h-screen flex flex-col px-3 sm:px-8">
+      <FrameRails tone="light" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(AETHER_JSON_LD) }}
@@ -132,43 +138,56 @@ export default function AetherPage() {
           chapter below that proves it. Chapters are set apart by space and
           their chapter mark rather than rules; rules only mark the turns
           from values to chapters to the close. */}
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <Split />
       <Values />
 
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <Split />
       <div id="customer" className="scroll-mt-16">
         <FeaturesScroll features={KEY_FEATURES} demoUrl={DEMO_URL} eyebrow={<ChapterMark value="customer" />} />
         <Testimonials />
       </div>
 
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <Split />
       <div id="speed" className="scroll-mt-16">
         {/* Setup speed, the service half of the value. The demo recording
             is a tap away on every View demo button, so it isn't inline. */}
         <SetupSteps eyebrow={<ChapterMark value="speed" />} />
       </div>
 
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <Split />
       <div id="identity" className="scroll-mt-16">
         <VariationsScroll variations={THEME_VARIATIONS} initial="Relics" eyebrow={<ChapterMark value="identity" />} />
       </div>
 
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <Split />
 
       {/* The closing argument for anyone already on a theme: Aether beside
           a typical premium one, and what stays safe when they switch. */}
       <SwitchToAether />
 
+      <Split />
       <section id={AETHER_PRICING_ID} className="py-16 sm:py-24 scroll-mt-16 w-full">
         <InlinePricing />
       </section>
 
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <Split />
 
       <AetherFaq />
+      <Split />
       <AetherAskAi />
 
+      {/* The page's last cell closes before the footer's. */}
+      <Split className="py-10 sm:py-12" />
     </main>
   );
 }
 
+// A split between cells. The page pads its content in from the cell edges,
+// so the split steps back out across that padding to meet the edges.
+function Split({ className = "" }: { className?: string }) {
+  return (
+    <div className="-mx-3 sm:-mx-8">
+      <FrameRule tone="light" className={className} />
+    </div>
+  );
+}
