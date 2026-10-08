@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FRAME_INSET, FRAME_RULE_OVERHANG, FrameColumnRails, FrameRule } from "@/components/page-frame";
+import { FRAME_CELL_GAP, FRAME_INSET, FRAME_RULE_OVERHANG, FrameColumnRails, FrameRule } from "@/components/page-frame";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -642,9 +642,12 @@ function MergedCTA({
 // cell's rounded bottom line clears the buttons by about as much space as
 // they have above them, rather than running right under them.
 const HEADER_RULE_DROP = 7;
-// How far the header's blurred fill reaches below its box: down to the
-// bottom of that boundary, the next cell's rounded top.
+// How far the header's boundary reaches below its box: down to the bottom of
+// the next cell's rounded top.
 const HEADER_FILL_REACH = HEADER_RULE_DROP + FRAME_RULE_OVERHANG;
+// The header cell's own bottom line, where its blur stops: the gap below it
+// is solid, and the next cell fades instead of blurring.
+const HEADER_CELL_BOTTOM = HEADER_RULE_DROP - FRAME_CELL_GAP / 2;
 
 export function VisualNotch() {
   const { trigger } = useWebHaptics();
@@ -760,7 +763,7 @@ export function VisualNotch() {
       const zone = document.querySelector(".homepage-dark-zone");
       const header = headerRef.current;
       if (!zone || !header) return;
-      // The header's fill reaches HEADER_FILL_REACH below its box.
+      // The header's boundary reaches HEADER_FILL_REACH below its box.
       setOverZone(zone.getBoundingClientRect().top <= header.offsetHeight + HEADER_FILL_REACH);
     };
     const onScroll = () => {
@@ -783,8 +786,9 @@ export function VisualNotch() {
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
   const isBlog = pathname.startsWith("/blog");
-  // Blog posts are laid out as a sheet (see app/blog/[slug]/page.tsx).
-  const isBlogPost = pathname.startsWith("/blog/");
+  // Blog posts and policy documents are laid out as a sheet (see
+  // app/blog/[slug]/page.tsx and app/policies/policy-doc.tsx).
+  const isSheet = pathname.startsWith("/blog/") || pathname.startsWith("/policies/");
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
   // The header lines its logo and buttons up with each page's own content
@@ -795,7 +799,7 @@ export function VisualNotch() {
     ({ maxWidth, "--hdr-pad-sm": padSm }) as CSSProperties;
   const headerInset = isComponents
     ? inset("96rem", "12px")
-    : isBlogPost
+    : isSheet
       ? inset("56rem", "48px") // the post sheet's body padding
       : isBlog
         ? inset("80rem", "12px")
@@ -812,10 +816,10 @@ export function VisualNotch() {
           // Pinned to the top while scrolling, on every page that uses it
           // except blog posts, where it scrolls away with the page so the
           // reading column has the whole screen.
-          className={`site-header${isBlogPost ? "" : " site-header--pinned"}${mobileOpen ? " site-header--open" : ""}${isHome && overZone ? " site-header--zone" : ""}`}
+          className={`site-header${isSheet ? "" : " site-header--pinned"}${mobileOpen ? " site-header--open" : ""}${isHome && overZone ? " site-header--zone" : ""}`}
           ref={headerRef}
           // On blog posts a hairline underneath, so the sheet starts below it.
-          style={isBlogPost ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
+          style={isSheet ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
         >
           <svg width="0" height="0" className="absolute" aria-hidden="true">
             <filter id="header-glass" colorInterpolationFilters="sRGB">
@@ -823,12 +827,11 @@ export function VisualNotch() {
               <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
             </filter>
           </svg>
-          {/* On the homepage the fill reaches down past the header's boundary,
-              so the next cell's rounded top sits on it and content scrolling
-              underneath is blurred out rather than showing through. */}
+          {/* On the homepage the blur fills the header cell, down to its
+              rounded bottom line just below the header's box. */}
           <div
             className={`site-header__bg${isHome ? " site-header__bg--framed" : ""}`}
-            style={isHome ? { bottom: -HEADER_FILL_REACH } : undefined}
+            style={isHome ? { bottom: -HEADER_CELL_BOTTOM } : undefined}
             aria-hidden="true"
           />
           {!isHome && <div className="site-header__fade" aria-hidden="true" />}
@@ -840,13 +843,15 @@ export function VisualNotch() {
               {/* The header's own boundary, closing the frame above the page. */}
               <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 z-[1]" style={{ bottom: -HEADER_RULE_DROP }}>
                 <div className="relative mx-auto w-full max-w-[80rem]">
-                  <FrameRule tone="light" className="" />
-                  {/* Below the cell's rounded top, the blur eases off over
-                      32px instead of stopping at an edge. Kept inside the
-                      rails so they run on sharp. */}
-                  <div className={`absolute h-8 ${FRAME_INSET}`} style={{ top: FRAME_RULE_OVERHANG }}>
-                    <div className="absolute inset-y-0 inset-x-px backdrop-blur-[14px] [mask-image:linear-gradient(black,transparent)] [-webkit-mask-image:linear-gradient(black,transparent)]" />
+                  {/* In the cell below, content fades in from the paper as it
+                      comes out from under the boundary, rather than blurring.
+                      Starts at the cell's top line, kept inside the rails,
+                      and sits under the boundary so its line and corners
+                      draw over it. */}
+                  <div className={`absolute h-10 ${FRAME_INSET}`} style={{ top: FRAME_CELL_GAP / 2 }}>
+                    <div className="absolute inset-y-0 inset-x-px bg-[linear-gradient(var(--paper),transparent)]" />
                   </div>
+                  <FrameRule tone="light" className="" solidGap />
                 </div>
               </div>
             </>

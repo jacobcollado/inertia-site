@@ -38,11 +38,45 @@ const CELL_GAP = 10;
 // How far a boundary reaches below its own line: the gap's lower half and
 // the next cell's rounded top. The pinned header extends its fill this far.
 export const FRAME_RULE_OVERHANG = CELL_RADIUS + CELL_GAP / 2;
+export const FRAME_CELL_GAP = CELL_GAP;
 
 // `inset` places the rails it meets, FRAME_INSET by default; a sheet with
-// its own border passes where that border sits instead.
-export function FrameRule({ tone, className = "py-16 sm:py-24", inset = FRAME_INSET }: { tone: FrameTone; className?: string; inset?: string }) {
+// its own border passes where that border sits instead. `solidGap` fills the
+// gap and the corners outside both cells with paper, for a boundary that
+// content scrolls under (the pinned header's), so nothing shows between the
+// cells.
+export function FrameRule({
+  tone,
+  className = "py-16 sm:py-24",
+  inset = FRAME_INSET,
+  solidGap = false,
+}: {
+  tone: FrameTone;
+  className?: string;
+  inset?: string;
+  solidGap?: boolean;
+}) {
   const t = FRAME_TONES[tone];
+  // A paper square in one corner with the cell's quarter circle cut out of
+  // it, so only the area outside the rounded corner is filled.
+  const corner = (side: "left" | "right", half: "top" | "bottom") => {
+    const at = `${side === "left" ? "100%" : "0%"} ${half === "top" ? "0%" : "100%"}`;
+    const cut = `radial-gradient(circle ${CELL_RADIUS}px at ${at}, transparent ${CELL_RADIUS - 0.5}px, black ${CELL_RADIUS + 0.5}px)`;
+    return (
+      <span
+        className="absolute"
+        style={{
+          [side]: 0,
+          [half === "top" ? "bottom" : "top"]: CELL_GAP / 2,
+          width: CELL_RADIUS,
+          height: CELL_RADIUS,
+          background: t.paper,
+          WebkitMaskImage: cut,
+          maskImage: cut,
+        }}
+      />
+    );
+  };
   const mask = (side: "left" | "right") => (
     <span
       className="absolute w-[5px]"
@@ -54,6 +88,15 @@ export function FrameRule({ tone, className = "py-16 sm:py-24", inset = FRAME_IN
       <div className={cn("absolute top-1/2 h-0", inset)} style={UNSCALE}>
         {mask("left")}
         {mask("right")}
+        {solidGap && (
+          <>
+            <span className="absolute -inset-x-[2px]" style={{ top: -CELL_GAP / 2, height: CELL_GAP, background: t.paper }} />
+            {corner("left", "top")}
+            {corner("right", "top")}
+            {corner("left", "bottom")}
+            {corner("right", "bottom")}
+          </>
+        )}
         <span
           className="absolute inset-x-0 border-x border-b"
           style={{ bottom: CELL_GAP / 2, height: CELL_RADIUS, borderColor: t.line, borderRadius: `0 0 ${CELL_RADIUS}px ${CELL_RADIUS}px` }}

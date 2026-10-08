@@ -175,7 +175,7 @@ export default async function BlogPost({
         <div className="absolute inset-y-0 right-0 w-[10px]" style={{ backgroundImage: RULER }} />
       </div>
 
-      <article className="relative mx-auto w-full max-w-[56rem] bg-[var(--paper)] sm:border-x sm:border-[rgb(var(--ink-rgb)/0.09)]">
+      <article className="relative mx-auto w-full max-w-[56rem] bg-[var(--paper)] sm:rounded-b-[14px] sm:border-x sm:border-b sm:border-[rgb(var(--ink-rgb)/0.09)]">
         {/* Title block, centred. */}
         <header
           className="flex min-h-[var(--post-head)] flex-col items-center justify-center px-6 py-16 text-center sm:px-16 rise"
@@ -254,7 +254,9 @@ export default async function BlogPost({
           {/* Closes the article: the body cell ends and the closing one
               opens, across the full sheet. */}
           <div className="-mx-6 mt-12 sm:-mx-12">
-            <FrameRule tone="light" inset="-inset-x-px" className="" />
+            <FrameRule tone="light" inset="-inset-x-px" className="hidden sm:block" />
+            {/* Phones have no rails for the corners to meet: a hairline. */}
+            <div aria-hidden="true" className="h-px bg-[rgb(var(--ink-rgb)/0.09)] sm:hidden" />
           </div>
 
           <div className="pt-10 pb-16">

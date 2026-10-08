@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { TableOfContents } from "../table-of-contents";
-import { PolicyText } from "../policy-text";
+import { PolicyDoc } from "../policy-doc";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -68,47 +66,13 @@ const SECTIONS = [
 
 export default function PrivacyPage() {
   return (
-    <main className="policy-body mx-auto w-full pt-6 pb-24 px-6 sm:px-8" style={{ maxWidth: "52rem" }}>
-
-      <TableOfContents sections={SECTIONS} />
-
-      {/* Document header */}
-      <div className="mb-10">
-        <h1 className="text-[2.1rem] font-medium tracking-[-0.03em] leading-tight text-[rgb(var(--fg))] mb-4">
-          Inertia Privacy Policy
-        </h1>
-        <div className="flex flex-wrap gap-x-8 gap-y-1">
-          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))]">{COMPANY}</p>
-          <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {EFFECTIVE}</p>
-          <a href={`mailto:${CONTACT}`} className="text-[15px] tracking-tight text-[rgb(var(--muted))] hover:opacity-80 transition-opacity">{CONTACT}</a>
-        </div>
-      </div>
-
-      {/* Sections */}
-      <div className="flex flex-col gap-12">
-        {SECTIONS.map((s) => (
-          <section key={s.id} id={s.id} className="scroll-mt-24">
-            <h2 className="text-[18px] font-medium tracking-tight text-[rgb(var(--fg))] mb-4">{s.title}</h2>
-            <p className="text-[15px] leading-[1.8] tracking-tight text-[rgb(var(--muted))]">
-              <PolicyText text={s.body} self="privacy" />
-            </p>
-          </section>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="mt-20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <p className="text-[15px] tracking-tight text-[rgb(var(--muted))] opacity-50">
-          Questions?{" "}
-          <a href={`mailto:${CONTACT}`} className="underline underline-offset-2 hover:opacity-80 transition-opacity">
-            {CONTACT}
-          </a>
-        </p>
-        <Link href="/policies/terms-of-service" className="text-[14px] tracking-tight text-[rgb(var(--muted))] opacity-40 hover:opacity-70 transition-opacity">
-          Terms of Service →
-        </Link>
-      </div>
-
-    </main>
+    <PolicyDoc
+      title="Inertia Privacy Policy"
+      effective={EFFECTIVE}
+      meta={[COMPANY, CONTACT]}
+      sections={SECTIONS}
+      self="privacy"
+      next={{ href: "/policies/refund-policy", label: "Refund Policy" }}
+    />
   );
 }

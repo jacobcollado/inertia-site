@@ -25,7 +25,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // continues through the footer — every other route keeps the normal
   // light footer.
   const isHome = pathname === "/";
-  const isBlogPost = pathname.startsWith("/blog/");
+  // Blog posts and policy documents are a sheet, closed off above the footer.
+  const isSheet = pathname.startsWith("/blog/") || pathname.startsWith("/policies/");
   // Routes that follow the light / dark switch (see theme-provider.tsx).
   // Bare routes like /docs can be themed too; they place their own switch.
   const themed = isThemedPath(pathname);
@@ -96,20 +97,15 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <>
       <VisualNotch />
       {children}
-      {/* The page's rails run on through the footer: the homepage's frame,
-          or a blog post's sheet edges. */}
+      {/* The homepage's rails run on through the footer. */}
       {noFooter ? null : isHome ? (
         <div className="homepage-dark-zone relative" style={{ background: "rgb(var(--bg))" }}>
           <MinimalFooter themeSwitch tone="dark" />
         </div>
-      ) : isBlogPost ? (
-        <div className="relative">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-full max-w-[56rem] -translate-x-1/2 border-x border-[rgb(var(--ink-rgb)/0.09)] sm:block"
-          />
-          <MinimalFooter themeSwitch={themed} rails={false} />
-        </div>
+      ) : isSheet ? (
+        // The sheet closes above it (its last cell has rounded bottom
+        // corners), so the footer runs without rails.
+        <MinimalFooter themeSwitch={themed} rails={false} />
       ) : (
         <MinimalFooter themeSwitch={themed} />
       )}
