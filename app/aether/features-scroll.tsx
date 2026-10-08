@@ -13,50 +13,72 @@ interface Feature {
   imageMobile?: string;
 }
 
-// Native sizes: the desktop screenshots, and the iPhone device-frame renders
-// used for the phone shots, so Next reserves the right box before load.
-const SHOT_W = 1365;
-const SHOT_H = 858;
-const PHONE_RENDER_W = 1300;
-const PHONE_RENDER_H = 2642;
-
-function isPhoneRender(src: string) {
-  return /^\/aether\/(hero|feature)-mobile-/.test(src);
-}
-
-function Shot({ src, alt, sizes, className }: { src: string; alt: string; sizes: string; className: string }) {
-  const phone = isPhoneRender(src);
+/* One feature as a tile: the number, name and line at the top, the shot
+ * under them, set inside the tile with the same margin all round.
+ * Phones show the phone render, sm and up the desktop screenshot. The shot
+ * lifts a touch on hover. */
+function Tile({ f, i, big }: { f: Feature; i: number; big: boolean }) {
+  const phone = f.imageMobile ?? f.image;
   return (
-    <Image
-      src={src}
-      alt={alt}
-      width={phone ? PHONE_RENDER_W : SHOT_W}
-      height={phone ? PHONE_RENDER_H : SHOT_H}
-      sizes={sizes}
-      quality={90}
-      draggable={false}
-      className={className}
-    />
+    <li className={`group flex flex-col overflow-hidden rounded-[6px] bg-[var(--tile)] ${big ? "sm:row-span-2" : ""}`}>
+      <div className="px-5 pt-5 sm:px-7 sm:pt-6">
+        <p className="flex items-baseline gap-3">
+          <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight text-[rgb(var(--muted))] opacity-70">{i + 1}</span>
+          <span
+            className={`${big ? "text-[20px] sm:text-[26px]" : "text-[19px] sm:text-[21px]"} tracking-[-0.02em] leading-snug text-[rgb(var(--fg))]`}
+            style={{ fontWeight: 500 }}
+          >
+            {f.title}
+          </span>
+        </p>
+        <p className="mt-1 pl-7 max-w-sm text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
+          {f.desc}
+        </p>
+      </div>
+      <div className={`relative mx-6 mb-6 mt-6 h-[22rem] sm:h-auto sm:flex-1 ${big ? "sm:mx-10 sm:mb-10 sm:mt-8" : "sm:mx-8 sm:mb-7 sm:mt-5"}`}>
+        <div className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1.5 motion-reduce:transition-none">
+          {phone ? (
+            <Image src={phone} alt={`${f.title} on a phone`} fill sizes="(max-width: 639px) 80vw, 0px" quality={90} draggable={false} className="object-contain object-center sm:hidden" />
+          ) : null}
+          {f.image ? (
+            <Image
+              src={f.image}
+              alt={`${f.title} example`}
+              fill
+              sizes={big ? "(min-width: 640px) min(42rem, 54vw), 0px" : "(min-width: 640px) min(30rem, 38vw), 0px"}
+              quality={90}
+              draggable={false}
+              className="hidden object-contain object-center sm:block"
+            />
+          ) : null}
+        </div>
+      </div>
+    </li>
   );
 }
 
-/* "Built to sell": the heading and one line, then each feature as its own
- * row, the screenshot on a plain tile on one side and the text on the other
- * (a step number, the name, the description), alternating sides down the
- * section. Phones stack each row, picture first, and show the phone renders.
- * The section closes on the demo: a hairline row with one line and the View
- * demo button, so the demo comes right after the reasons to look. Comes in
- * with the site's staggered reveal. */
+/* "Built to sell" as a bento: the first feature as one large tile on the
+ * left, the other two stacked on the right, each with its name on top and
+ * its shot filling the rest. Phones stack the three. The section closes on the
+ * demo, one line and the View demo button. Comes in with the site's
+ * staggered reveal. */
 export function FeaturesScroll({
   features,
   demoUrl,
+  eyebrow,
 }: {
   features: Feature[];
   demoUrl: string;
+  /** Sits above the heading (the chapter mark on /aether). */
+  eyebrow?: React.ReactNode;
 }) {
   return (
-    <section id="features" className="rise rise-stagger relative scroll-mt-16 mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24">
-      <div className="mb-10 sm:mb-14">
+    <section
+      id="features"
+      className="rise rise-stagger relative scroll-mt-16 mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] pt-20 pb-16 sm:pt-28 sm:pb-24"
+    >
+      <div className="mb-10 sm:mb-12">
+        {eyebrow}
         <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
           Built to sell
         </h2>
@@ -65,42 +87,13 @@ export function FeaturesScroll({
         </p>
       </div>
 
-      <ul data-stagger className="flex flex-col gap-12 sm:gap-20">
-        {features.map((f, i) => {
-          const flip = i % 2 === 1;
-          const phoneSrc = f.imageMobile ?? f.image;
-          return (
-            <li key={f.title} className="grid items-center gap-6 sm:grid-cols-[1.5fr_1fr] sm:gap-14">
-              <div
-                className={`relative flex h-72 items-end justify-center overflow-hidden rounded-[6px] bg-[var(--tile)] px-4 pt-6 sm:h-[24rem] sm:px-10 sm:pt-10 ${flip ? "sm:order-2" : ""}`}
-              >
-                {phoneSrc ? (
-                  <Shot src={phoneSrc} alt={`${f.title} on a phone`} sizes="80vw" className="h-full w-auto max-w-full object-contain object-bottom sm:hidden" />
-                ) : null}
-                {f.image ? (
-                  <Shot
-                    src={f.image}
-                    alt={`${f.title} example`}
-                    sizes="(min-width: 640px) min(46rem, 58vw), 0px"
-                    className="hidden h-full w-auto max-w-full rounded-t-[6px] object-contain object-bottom sm:block"
-                  />
-                ) : null}
-              </div>
-              <div className={flip ? "sm:order-1" : ""}>
-                <p className="text-[14px] tabular-nums tracking-tight text-[rgb(var(--muted))] opacity-70">{i + 1}</p>
-                <h3 className="mt-2 text-[22px] sm:text-[28px] tracking-[-0.025em] leading-tight text-[rgb(var(--fg))]" style={{ fontWeight: 500 }}>
-                  {f.title}
-                </h3>
-                <p className="mt-2 max-w-sm text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
-                  {f.desc}
-                </p>
-              </div>
-            </li>
-          );
-        })}
+      <ul data-stagger className="grid gap-3 sm:grid-cols-[1.4fr_1fr] sm:grid-rows-[20rem_20rem] sm:gap-4 lg:grid-rows-[23rem_23rem]">
+        {features.map((f, i) => (
+          <Tile key={f.title} f={f} i={i} big={i === 0} />
+        ))}
       </ul>
 
-      <div className="mt-14 flex flex-col items-start gap-4 border-t border-[rgb(var(--fg)/0.08)] pt-8 sm:mt-20 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-10 flex flex-col items-start gap-4 sm:mt-12 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-[16px] sm:text-[19px] tracking-tight text-[rgb(var(--fg))]">See all three working in our demo store.</p>
         <div className="w-full shrink-0 sm:w-auto [&>div]:sm:w-auto [&_a]:sm:w-auto">
           <DemoButton href={demoUrl} password="aether" />

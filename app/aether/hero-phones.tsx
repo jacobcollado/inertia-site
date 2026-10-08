@@ -17,9 +17,11 @@ import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS } from "./motion";
  */
 
 const PHONES = [
-  { src: "/aether/hero-mobile-center-v3.png", w: 1349, h: 2691, quality: 100 },
-  { src: "/aether/hero-mobile-center-v2.png", w: 1349, h: 2691, quality: 90 },
-  { src: "/aether/hero-mobile-left.png", w: 1300, h: 2642, quality: 90 },
+  // Three of the four example stores: After Hours in front, Rosso right,
+  // Argent left.
+  { src: "/aether/after-hours-mobile.png", w: 1300, h: 2642, quality: 100 },
+  { src: "/aether/rosso-mobile.png", w: 1280, h: 2642, quality: 90 },
+  { src: "/aether/argent-mobile-v2.png", w: 1300, h: 2642, quality: 90 },
 ];
 
 // Slot 0 is the front, 1 sits right, 2 sits left.

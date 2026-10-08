@@ -63,10 +63,12 @@ const STEPS: { title: string; desc: string; time: string; Art: () => ReactNode }
   { title: "We set it up", desc: "We install Aether and get it ready. Nothing for you to do.", time: "Same day", Art: Live },
 ];
 
-export function SetupSteps() {
+/** `eyebrow` sits above the heading (the chapter mark on /aether). */
+export function SetupSteps({ eyebrow }: { eyebrow?: ReactNode }) {
   return (
-    <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24">
+    <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] pt-20 pb-16 sm:pt-28 sm:pb-24">
       <div className="mb-10 sm:mb-12">
+        {eyebrow}
         <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
           Set up for you, same day
         </h2>

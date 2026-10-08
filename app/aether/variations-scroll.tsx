@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AETHER_LIQUID_EASE, AETHER_LIQUID_MS } from "./motion";
 
 export interface ThemeVariation {
@@ -29,19 +29,21 @@ const segmentClass = (selected: boolean) =>
       : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
   }`;
 
-/* "Make it yours", laid out like "Built to sell" and "See it in action"
- * above it: the heading and its line on the left with the device switch
- * beside them, the selected style's preview on a plain tile, then the four
- * styles as small thumbnail cards under it, the selected one outlined in
- * ink. Switching a style or device crossfades the preview in place, nothing
- * slides. */
+/* "Make it yours", laid out like the sections around it: the heading and
+ * its line on the left with the device switch beside them, the selected
+ * example's preview on a plain tile, then the four examples as small thumbnail
+ * cards under it, the selected one outlined in ink. Switching a style or
+ * device crossfades the preview in place, nothing slides. */
 export function VariationsScroll({
   variations,
   initial,
+  eyebrow,
 }: {
   variations: ThemeVariation[];
   /** Name of the style to open on. Defaults to the first one. */
   initial?: string;
+  /** Sits above the heading (the chapter mark on /aether). */
+  eyebrow?: ReactNode;
 }) {
   const named = initial ? variations.findIndex((v) => v.name === initial) : -1;
   const [active, setActive] = useState(named >= 0 ? named : 0);
@@ -74,14 +76,15 @@ export function VariationsScroll({
   );
 
   return (
-    <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] py-16 sm:py-24">
+    <section className="rise rise-stagger mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] pt-20 pb-16 sm:pt-28 sm:pb-24">
       <div className="mb-10 flex items-end justify-between gap-6 sm:mb-12">
         <div>
+          {eyebrow}
           <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
             Make it yours
           </h2>
           <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
-            Start from one of four styles, then change colors, fonts and layout in the theme editor. No code.
+            Four stores built with Aether&apos;s own settings. They&apos;re examples, not presets. Mix colors, fonts, layouts and imagery into a look that&apos;s only yours, no code.
           </p>
         </div>
         <div className="hidden shrink-0 sm:block">{deviceToggle}</div>
@@ -89,7 +92,7 @@ export function VariationsScroll({
 
       <div className="rounded-[6px] bg-[var(--tile)] px-3 py-5 sm:px-10 sm:py-10">
         <div
-          className={`relative mx-auto w-full max-w-[64rem] overflow-hidden ${
+          className={`relative mx-auto w-full max-w-[72rem] overflow-hidden ${
             mode === "mobile" ? "aspect-[4/5] sm:aspect-[1365/858]" : "aspect-[1365/858]"
           }`}
         >
@@ -102,15 +105,19 @@ export function VariationsScroll({
               <Image
                 key={`${v.name}-${mode}`}
                 src={mobile ? v.imageMobile : v.image}
-                alt={shown ? `${v.name} style, ${mode} view` : ""}
+                alt={shown ? `${v.name}, an example Aether store, ${mode} view` : ""}
                 aria-hidden={!shown}
                 width={mobile ? SHOT_W_MOBILE : SHOT_W}
                 height={mobile ? SHOT_H_MOBILE : SHOT_H}
-                sizes={mobile ? "(min-width: 640px) 20rem, 60vw" : "(min-width: 1024px) 64rem, 94vw"}
+                sizes={mobile ? "(min-width: 640px) 20rem, 60vw" : "(min-width: 1024px) 100rem, 130vw"}
                 quality={90}
                 loading={shown ? "eager" : "lazy"}
                 draggable={false}
-                className={`absolute inset-0 m-auto motion-reduce:transition-none ${mobile ? "h-[96%] w-auto" : "h-full w-full object-contain"}`}
+                // The MacBook renders sit in a wide transparent margin (the
+                // laptop is ~57% of the frame), so the desktop view is scaled
+                // up 1.4x: the laptop fills the tile and still clears its
+                // edges. `sizes` asks for the scaled width.
+                className={`absolute inset-0 m-auto motion-reduce:transition-none ${mobile ? "h-[96%] w-auto" : "h-full w-full object-contain scale-[1.4]"}`}
                 style={{ opacity: shown ? 1 : 0, transition: FADE }}
               />
             );
@@ -120,7 +127,7 @@ export function VariationsScroll({
 
       {/* The styles: a thumbnail of each with its name, the selected one
           outlined in ink. */}
-      <div role="tablist" aria-label="Aether styles" className="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
+      <div role="tablist" aria-label="Example stores" className="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
         {variations.map((v, i) => {
           const selected = i === active;
           return (
@@ -136,7 +143,7 @@ export function VariationsScroll({
                 className="relative block aspect-[16/10] overflow-hidden rounded-[6px] bg-[var(--tile)] transition-shadow duration-200"
                 style={{ boxShadow: selected ? "0 0 0 1px rgb(var(--fg))" : "0 0 0 1px transparent" }}
               >
-                <Image src={v.image} alt="" fill sizes="(min-width: 640px) 18rem, 24vw" className="object-cover object-top transition-opacity duration-200 group-hover:opacity-90" />
+                <Image src={v.image} alt="" fill sizes="(min-width: 640px) 18rem, 24vw" className="object-cover object-top max-sm:scale-[1.55] max-sm:object-contain max-sm:object-center transition-opacity duration-200 group-hover:opacity-90" />
               </span>
               <span
                 className={`mt-2 block text-[13px] sm:text-[15px] tracking-tight transition-colors duration-200 ${

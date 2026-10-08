@@ -54,3 +54,16 @@ export function aetherLiquidTransition(stagger = 0) {
     `filter ${AETHER_LIQUID_MS}ms ${AETHER_LIQUID_EASE} ${stagger}ms`,
   ].join(", ");
 }
+
+/** Smooth-scrolls to the element with `id` using the site's Lenis scroll,
+ * leaving `offset` px above it. For in-page links: call it from the click
+ * handler and keep the real `#id` href, so it still works without JS. */
+export function scrollToId(id: string, e?: { preventDefault: () => void }, offset = 24) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  e?.preventDefault();
+  const y = window.scrollY + el.getBoundingClientRect().top - offset;
+  const lenis = (window as unknown as { __lenis?: { scrollTo: (y: number, o?: object) => void } }).__lenis;
+  if (lenis) lenis.scrollTo(y, { duration: 1.1 });
+  else window.scrollTo({ top: y, behavior: "smooth" });
+}

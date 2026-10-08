@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { AetherHero } from "./aether-hero";
 import { AetherDemoBanner } from "./demo-banner";
-import { HeroRule } from "./hero-rule";
+import { ChapterMark, Values } from "./values";
+import { SwitchToAether } from "./switch";
 import { FeaturesScroll } from "./features-scroll";
 import { StoresOnAether } from "./stores-on-aether";
 import { VariationsScroll } from "./variations-scroll";
 import { InlinePricing } from "./inline-pricing";
 import { AetherAskAi, AetherFaq, QUESTIONS } from "./faq";
 import { SetupSteps } from "./setup-steps";
-import { Bonuses } from "./bonuses";
-import { DemoSection } from "./demo-section";
 import { Testimonials } from "./testimonials";
 import { TrackAetherViewContent } from "./track-view-content";
 import { AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
@@ -39,25 +38,25 @@ const KEY_FEATURES = [
     desc: "Every page points shoppers to the next step.",
     visual: "guided",
     image: "/aether/guided.jpg",
-    imageMobile: "/aether/hero-mobile-center-v3.png",
+    imageMobile: "/aether/feature-mobile-guided.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
   {
     title: "Upsell",
-    desc: "A free shipping bar that gets shoppers to add one more item.",
+    desc: "Picks in the cart and a free shipping bar get shoppers to add one more item.",
     visual: "upsell",
     image: "/aether/upsell.png",
-    imageMobile: "/aether/feature-mobile-cart.png",
+    imageMobile: "/aether/feature-mobile-upsell.png",
     flip: false,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
   {
     title: "Scarcity",
-    desc: "Low stock and sold-out sizes show before anyone taps.",
+    desc: "Sold-out sizes show at a glance, and a back-in-stock alert keeps the sale.",
     visual: "scarcity",
     image: "/aether/scarcity.png",
-    imageMobile: "/aether/feature-mobile-product.png",
+    imageMobile: "/aether/feature-mobile-scarcity.png",
     flip: true,
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
   },
@@ -108,10 +107,10 @@ const AETHER_JSON_LD = [
 ];
 
 const THEME_VARIATIONS = [
-  { name: "Ember", image: "/aether/ember-macbook.png", imageMobile: "/aether/ember-mobile.png" },
-  { name: "Parisian", image: "/aether/parisian-macbook.png", imageMobile: "/aether/parisian-mobile.png" },
-  { name: "Nocturne", image: "/aether/nocturne-macbook.png", imageMobile: "/aether/nocturne-mobile.png" },
-  { name: "Vespers", image: "/aether/vespers-macbook.png", imageMobile: "/aether/vespers-mobile.png" },
+  { name: "Rosso", image: "/aether/rosso-macbook-v2.png", imageMobile: "/aether/rosso-mobile.png" },
+  { name: "Argent", image: "/aether/argent-macbook.png", imageMobile: "/aether/argent-mobile-v2.png" },
+  { name: "After Hours", image: "/aether/after-hours-macbook.png", imageMobile: "/aether/after-hours-mobile.png" },
+  { name: "Relics", image: "/aether/relics-macbook.png", imageMobile: "/aether/relics-mobile.png" },
 ];
 
 export default function AetherPage() {
@@ -126,51 +125,47 @@ export default function AetherPage() {
 
       <AetherHero demoUrl={DEMO_URL} />
 
-      <HeroRule />
-
-      {/* Proof first, and light: real stores before any feature list. */}
+      {/* Proof first, and light: real stores before anything is claimed. */}
       <StoresOnAether />
 
-      {/* Key features — carousel */}
-      <FeaturesScroll features={KEY_FEATURES} demoUrl={DEMO_URL} />
+      {/* The spine: three values, said once and drawn. Each one links to the
+          chapter below that proves it. Chapters are set apart by space and
+          their chapter mark rather than rules; rules only mark the turns
+          from values to chapters to the close. */}
+      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <Values />
+
+      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <div id="customer" className="scroll-mt-16">
+        <FeaturesScroll features={KEY_FEATURES} demoUrl={DEMO_URL} eyebrow={<ChapterMark value="customer" />} />
+        <Testimonials />
+      </div>
+
+      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <div id="speed" className="scroll-mt-16">
+        {/* Setup speed, the service half of the value. The demo recording
+            is a tap away on every View demo button, so it isn't inline. */}
+        <SetupSteps eyebrow={<ChapterMark value="speed" />} />
+      </div>
+
+      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
+      <div id="identity" className="scroll-mt-16">
+        <VariationsScroll variations={THEME_VARIATIONS} initial="Relics" eyebrow={<ChapterMark value="identity" />} />
+      </div>
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
-      {/* The store itself, moving, right after the features it just listed. */}
-      <DemoSection href={DEMO_URL} password="aether" />
+      {/* The closing argument for anyone already on a theme: Aether beside
+          a typical premium one, and what stays safe when they switch. */}
+      <SwitchToAether />
 
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
-
-      <VariationsScroll variations={THEME_VARIATIONS} initial="Vespers" />
-
-      {/* Renders its own leading rule. */}
-      <Testimonials />
-
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
-
-      {/* Setup effort, the last doubt before the bonuses and price. */}
-      <SetupSteps />
-
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
-
-      {/* Bonuses sit immediately before pricing, so the extras are counted
-          at the moment the price is read. */}
-      <Bonuses />
-
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
-
-      {/* Pricing */}
       <section id={AETHER_PRICING_ID} className="py-16 sm:py-24 scroll-mt-16 w-full">
         <InlinePricing />
       </section>
 
       <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
 
-      {/* FAQ */}
       <AetherFaq />
-
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
-
       <AetherAskAi />
 
     </main>

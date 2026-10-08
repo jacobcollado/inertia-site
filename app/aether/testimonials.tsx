@@ -281,7 +281,6 @@ export function Testimonials() {
 
   return (
     <>
-      <div className="grid-rule grid-rule--dashed" aria-hidden="true" />
       {/* Laid out like the sections around it: the heading and one line on
           the left, then the reviews as plain tiles. Comes in with the site's
           staggered reveal. */}
