@@ -95,6 +95,10 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {/* Safari (iOS 26) tints its top bar from a solid fixed element at the
+          top edge. The header is pure blur, so this thin strip in the page's
+          colour sits above it for Safari to pick up (.safari-top-tint). */}
+      <div aria-hidden="true" className="safari-top-tint" />
       <VisualNotch />
       {children}
       {/* The homepage's rails run on through the footer. */}

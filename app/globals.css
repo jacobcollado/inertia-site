@@ -2180,6 +2180,20 @@ h1:hover .redact > span.redact-inner,
   pointer-events: none;
 }
 
+/* A strip in the page's colour pinned to the very top: the notch area on
+   phones, 1px elsewhere. iOS Safari extends a solid fixed element's colour
+   under its top bar, so the bar takes the page's colour while the header
+   below it stays a blur. */
+.safari-top-tint {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  height: max(1px, env(safe-area-inset-top, 0px));
+  background: rgb(var(--bg));
+  z-index: 60;
+  pointer-events: none;
+}
+
 /* The homepage's header is a cell of the page frame: no colour of its own,
    just a blur of what's behind it, down to the bottom of its boundary. */
 .site-header__bg--framed {
