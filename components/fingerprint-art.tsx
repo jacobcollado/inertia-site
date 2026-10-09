@@ -8,8 +8,7 @@ import { useEffect, useRef, useState } from "react";
 // a colour from a palette picked for this visit, and build up into long,
 // silky streams that run across the whole frame. Then it holds, finished.
 // A new visit gets a new seed, so a new palette and a new current: no two
-// people see the same one. It can be saved as an image. With reduced
-// motion it's drawn at once.
+// people see the same one. With reduced motion it's drawn at once.
 
 const PALETTES = [
   ["#ff6b6b", "#ffd166", "#06d6a0", "#118ab2", "#8338ec"],
@@ -158,37 +157,10 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
     };
   }, [seed, play, delay]);
 
-  // Save it on the tile colour, so the image isn't transparent.
-  const save = () => {
-    const src = ref.current;
-    if (!src) return;
-    const out = document.createElement("canvas");
-    out.width = src.width;
-    out.height = src.height;
-    const x = out.getContext("2d")!;
-    x.fillStyle = getComputedStyle(src.parentElement!).backgroundColor;
-    x.fillRect(0, 0, out.width, out.height);
-    x.drawImage(src, 0, 0);
-    out.toBlob((blob) => {
-      if (!blob) return;
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `inertia-${seed}.png`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
-  };
-
   return (
     <div className={className}>
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-[12/5]">
         <canvas ref={ref} aria-label="A pattern drawn for this visit" className="h-full w-full" />
-      </div>
-      <div className="mt-3 flex items-center justify-between gap-4 text-[13px] tracking-tight" style={{ color: "var(--ink-2)" }}>
-        <span>Drawn for this visit. No one else will see this one.</span>
-        <button type="button" onClick={save} className="rounded-[6px] px-3 py-1.5 transition-colors hover:text-[var(--ink)]" style={{ background: "var(--tile-2)" }}>
-          Save it
-        </button>
       </div>
     </div>
   );
