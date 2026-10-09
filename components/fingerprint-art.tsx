@@ -79,7 +79,12 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
     const rand = mulberry32(seed);
     const noise = makeNoise(rand);
     const palette = PALETTES[Math.floor(rand() * PALETTES.length)];
-    const scale = 0.0016 + rand() * 0.0014; // how broad the current's sweeps are
+    // Sized to the panel, not in pixels: a narrow phone panel gets the same
+    // number of sweeps, lines and line length as the wide desktop one, so it
+    // fills with many streams instead of pooling into one. 1200 is the
+    // desktop panel's width.
+    const fit = Math.max(1, 1200 / Math.max(w, 1));
+    const scale = (0.0016 + rand() * 0.0014) * fit; // how broad the current's sweeps are
     const twist = 1.6 + rand() * 1.4; // how hard it turns
     const dark = document.documentElement.dataset.theme === "dark" && document.documentElement.classList.contains("themed");
     ctx.globalCompositeOperation = dark ? "lighter" : "source-over";
@@ -88,16 +93,16 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
     // Each line starts somewhere random and follows the current. Long
     // lives, so neighbouring lines run on together into streams that cross
     // the whole frame.
-    const N = 1500;
+    const N = Math.round(1500 * Math.min(1, Math.max(0.45, (w * h) / (1200 * 500))));
     const WIDTHS = [0.7, 1.2, 1.8];
     const lines = Array.from({ length: N }, () => ({
       x: rand() * w,
       y: rand() * h,
       color: Math.floor(rand() * palette.length),
       width: Math.floor(rand() * WIDTHS.length),
-      life: 260 + rand() * 340,
+      life: (260 + rand() * 340) / fit,
     }));
-    const STEPS = 600;
+    const STEPS = Math.ceil(600 / fit);
     // One step moves every line along the current. Segments are batched into
     // one path per colour and width, so a step is a handful of draw calls
     // rather than one per line (it has to run smoothly on phones).
@@ -138,7 +143,8 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
     let s = 0;
     let raf = 0;
     const frame = () => {
-      for (let k = 0; k < 4 && s < STEPS; k++, s++) stepOnce();
+      // About the same build time on any panel.
+      for (let k = 0; k < Math.max(1, Math.round(4 / fit)) && s < STEPS; k++, s++) stepOnce();
       if (s < STEPS) raf = requestAnimationFrame(frame);
     };
     let io: IntersectionObserver | null = null;
