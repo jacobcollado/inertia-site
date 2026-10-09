@@ -149,5 +149,5 @@ export function releasesSince(license: { downloaded_at: string | null; downloade
 }
 
 export function formatChangelogDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
 }

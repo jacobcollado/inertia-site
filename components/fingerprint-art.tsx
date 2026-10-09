@@ -8,7 +8,8 @@ import { useEffect, useRef, useState } from "react";
 // a colour from a palette picked for this visit, and build up into long,
 // silky streams that run across the whole frame. Then it holds, finished.
 // A new visit gets a new seed, so a new palette and a new current: no two
-// people see the same one. With reduced motion it's drawn at once.
+// people see the same one. Moving the pointer across it paints more lines
+// into the current. With reduced motion it's drawn at once.
 
 // Each palette is a family of neighbouring, saturated hues, so where lines
 // overlap they blend into each other cleanly instead of turning muddy.
@@ -97,9 +98,12 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
     // the whole frame.
     const N = Math.round(1500 * Math.min(1, Math.max(0.7, (w * h) / (1200 * 500))));
     const WIDTHS = [0.7, 1.2, 1.8];
-    const lines = Array.from({ length: N }, () => ({
+    type Line = { x: number; y: number; vx: number; vy: number; color: number; width: number; life: number };
+    let lines: Line[] = Array.from({ length: N }, () => ({
       x: rand() * w,
       y: rand() * h,
+      vx: 0,
+      vy: 0,
       color: Math.floor(rand() * palette.length),
       width: Math.floor(rand() * WIDTHS.length),
       life: (260 + rand() * 340) / fit,
@@ -118,8 +122,12 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
             if (l.life <= 0 || l.color !== c || l.width !== k) continue;
             // Two octaves of noise: broad sweeps, with a little finer drift.
             const a = (noise(l.x * scale, l.y * scale) * 0.8 + noise(l.x * scale * 3, l.y * scale * 3) * 0.2) * Math.PI * 2 * twist;
-            const nx = l.x + Math.cos(a) * 1.6;
-            const ny = l.y + Math.sin(a) * 1.6;
+            // A line thrown by the pointer carries its push for a moment,
+            // then settles into the current.
+            const nx = l.x + Math.cos(a) * 1.6 + l.vx;
+            const ny = l.y + Math.sin(a) * 1.6 + l.vy;
+            l.vx *= 0.9;
+            l.vy *= 0.9;
             ctx.moveTo(l.x, l.y);
             ctx.lineTo(nx, ny);
             l.x = nx;
@@ -135,26 +143,86 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
       }
     };
 
+    // The pointer is a brush: moving across the piece sends new lines out
+    // from under it into the same current, in this visit's palette. Faster
+    // strokes throw them further along the stroke before the current takes
+    // them. Short lives, so a stroke adds a stream rather than a flood.
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let last: { x: number; y: number } | null = null;
+    const paint = (e: PointerEvent) => {
+      const r = canvas.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      const from = last ?? { x, y };
+      last = { x, y };
+      const dx = x - from.x;
+      const dy = y - from.y;
+      const dist = Math.hypot(dx, dy);
+      const count = Math.min(12, Math.max(1, Math.round(dist / 4)));
+      const push = Math.min(2, dist / 16);
+      const ux = dist ? dx / dist : 0;
+      const uy = dist ? dy / dist : 0;
+      for (let i = 0; i < count; i++) {
+        const t = rand();
+        lines.push({
+          x: from.x + dx * t + (rand() - 0.5) * 14,
+          y: from.y + dy * t + (rand() - 0.5) * 14,
+          vx: ux * push,
+          vy: uy * push,
+          color: Math.floor(rand() * palette.length),
+          width: Math.floor(rand() * WIDTHS.length),
+          life: (120 + rand() * 160) / fit,
+        });
+      }
+      if (lines.length > 4000) lines = lines.filter((l) => l.life > 0);
+      if (reduced) {
+        while (lines.some((l) => l.life > 0)) stepOnce();
+        lines = [];
+      } else start();
+    };
+    const leave = () => {
+      last = null;
+    };
+    canvas.addEventListener("pointermove", paint);
+    canvas.addEventListener("pointerdown", paint);
+    canvas.addEventListener("pointerleave", leave);
+    canvas.addEventListener("pointercancel", leave);
+    const unlisten = () => {
+      canvas.removeEventListener("pointermove", paint);
+      canvas.removeEventListener("pointerdown", paint);
+      canvas.removeEventListener("pointerleave", leave);
+      canvas.removeEventListener("pointercancel", leave);
+    };
+
     if (reduced) {
       for (let s = 0; s < STEPS; s++) stepOnce();
-      return;
+      lines = [];
+      return unlisten;
     }
     // Build it up over about four seconds, then hold. It starts once the
-    // delay has passed and the panel is on screen.
-    let s = 0;
+    // delay has passed and the panel is on screen, or as soon as someone
+    // paints on it. The loop runs while any line is still moving, and
+    // sleeps once they've all run out.
     let raf = 0;
+    let running = false;
+    const perFrame = Math.max(1, Math.round(4 / fit)); // about the same build time on any panel
     const frame = () => {
-      // About the same build time on any panel.
-      for (let k = 0; k < Math.max(1, Math.round(4 / fit)) && s < STEPS; k++, s++) stepOnce();
-      if (s < STEPS) raf = requestAnimationFrame(frame);
+      for (let k = 0; k < perFrame; k++) stepOnce();
+      lines = lines.filter((l) => l.life > 0);
+      if (lines.length) raf = requestAnimationFrame(frame);
+      else running = false;
     };
+    function start() {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(frame);
+    }
     let io: IntersectionObserver | null = null;
     const timer = setTimeout(() => {
       io = new IntersectionObserver(([e]) => {
         if (!e.isIntersecting) return;
         io?.disconnect();
-        raf = requestAnimationFrame(frame);
+        start();
       }, { threshold: 0.35 });
       io.observe(canvas);
     }, delay);
@@ -162,13 +230,20 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
       clearTimeout(timer);
       io?.disconnect();
       cancelAnimationFrame(raf);
+      unlisten();
     };
   }, [seed, play, delay]);
 
   return (
     <div className={className}>
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-[12/5]">
-        <canvas ref={ref} aria-label="A pattern drawn for this visit" className="h-full w-full" />
+        {/* pan-y keeps vertical swipes scrolling the page on phones; sideways
+            drags paint. */}
+        <canvas
+          ref={ref}
+          aria-label="A pattern drawn for this visit. Move across it to add to it."
+          className="h-full w-full cursor-crosshair touch-pan-y"
+        />
       </div>
     </div>
   );

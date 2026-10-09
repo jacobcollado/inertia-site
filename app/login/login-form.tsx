@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useId, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -99,18 +99,33 @@ function EmailForm({
   loading,
   onSubmit,
   onBack,
+  autoFocus = false,
 }: {
   mode: "signin" | "signup";
   loading: boolean;
   onSubmit: (email: string, password: string, firstName?: string, lastName?: string) => void;
   onBack: () => void;
+  // Only the live form takes focus; the hidden sizer copies must not.
+  autoFocus?: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [capsLock, setCapsLock] = useState(false);
-  const inputBase = `w-full px-4 py-3 ${LOGIN_INPUT} rounded-xl outline-none transition-colors bg-[rgb(var(--fg)/0.035)] placeholder:text-[rgb(var(--muted))] placeholder:opacity-70`;
+  const [showPassword, setShowPassword] = useState(false);
+  const passwordId = useId();
+  const emailRef = useRef<HTMLInputElement>(null);
+  // Focus the first field once the card has slid in, so typing can start
+  // straight away. preventScroll keeps phones from jumping mid-transition.
+  useEffect(() => {
+    if (!autoFocus) return;
+    const t = setTimeout(() => emailRef.current?.focus({ preventScroll: true }), ENTER_MS);
+    return () => clearTimeout(t);
+  }, [autoFocus]);
+  // Same 6px radius as the buttons, with a visible border on focus.
+  const inputBase = `w-full px-4 py-3 ${LOGIN_INPUT} rounded-[6px] outline-none transition-colors text-[rgb(var(--fg))] bg-[rgb(var(--fg)/0.035)] border border-[rgb(var(--fg)/0.1)] focus:border-[rgb(var(--fg)/0.4)] focus:bg-transparent placeholder:text-[rgb(var(--muted))] placeholder:opacity-70`;
+  const label = `${LOGIN_UI} text-[rgb(var(--muted))]`;
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (typeof e.getModifierState === "function") setCapsLock(e.getModifierState("CapsLock"));
@@ -130,6 +145,9 @@ function EmailForm({
     if (score <= 3) return { label: "Okay", color: "rgb(217 119 6)", score };
     return { label: "Strong", color: "rgb(22 163 74)", score };
   })();
+  // Icons inside the right of the password field: the show/hide toggle, plus
+  // caps lock and strength when they apply.
+  const passwordIcons = 1 + (capsLock ? 1 : 0) + (mode === "signup" && strength ? 1 : 0);
 
   return (
     <>
@@ -156,7 +174,7 @@ function EmailForm({
 
       <form
         onSubmit={(e) => { e.preventDefault(); onSubmit(email, password, firstName, lastName); }}
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-4"
       >
         {mode === "signup" && (
           <div className="flex gap-3">
@@ -165,53 +183,62 @@ function EmailForm({
               required
               autoComplete="given-name"
               placeholder="First name"
+              aria-label="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               className={inputBase}
-              style={{ border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)")}
             />
             <input
               type="text"
               autoComplete="family-name"
               placeholder="Last name (optional)"
+              aria-label="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               className={inputBase}
-              style={{ border: "1.5px solid rgb(var(--fg) / 0.14)", color: "rgb(var(--fg))" }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.4)")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = "rgb(var(--fg) / 0.14)")}
             />
           </div>
         )}
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className={inputBase}
-          style={{ border: "none", color: "rgb(var(--fg))" }}
-        />
+        <label className="flex flex-col gap-1.5">
+          <span className={label}>Email</span>
+          <input
+            ref={emailRef}
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={inputBase}
+          />
+        </label>
+        <div className="flex flex-col gap-1.5">
+          {/* Forgot password sits on the label's line, by the field it's about. */}
+          <div className="flex items-baseline justify-between">
+            <label htmlFor={passwordId} className={label}>Password</label>
+            {mode === "signin" && (
+              <Link
+                href="/reset-password"
+                className={`${LOGIN_UI} text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]`}
+              >
+                Forgot password?
+              </Link>
+            )}
+          </div>
         <div className="relative">
           <input
-            type="password"
+            id={passwordId}
+            type={showPassword ? "text" : "password"}
             required
             minLength={8}
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
-            placeholder="Password"
+            placeholder={mode === "signin" ? "Your password" : "At least 8 characters"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyUp={checkCapsLock}
             onKeyDown={checkCapsLock}
             className={inputBase}
-            style={{
-              border: "none",
-              color: "rgb(var(--fg))",
-              paddingRight: capsLock && mode === "signup" && strength ? 68 : capsLock || (mode === "signup" && strength) ? 44 : undefined,
-            }}
+            style={{ paddingRight: 12 + passwordIcons * 30 }}
             onBlur={() => setCapsLock(false)}
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -249,20 +276,26 @@ function EmailForm({
                 </span>
               </span>
             )}
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              className="flex size-[26px] items-center justify-center rounded-md text-[rgb(var(--muted))] transition-colors hover:bg-[rgb(var(--fg)/0.06)] hover:text-[rgb(var(--fg))]"
+            >
+              <svg viewBox="0 0 16 16" className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" />
+                <circle cx="8" cy="8" r="2" />
+                {showPassword && <line x1="2.5" y1="13.5" x2="13.5" y2="2.5" />}
+              </svg>
+            </button>
           </div>
         </div>
-        {mode === "signin" && (
-          <Link
-            href="/reset-password"
-            className={`self-end ${LOGIN_UI} text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]`}
-          >
-            Forgot password?
-          </Link>
-        )}
+        </div>
         <button
           type="submit"
           disabled={loading}
-          className={`flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed`}
+          className={`mt-2 flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed`}
           style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
         >
           {loading ? <Spinner /> : null}
@@ -329,11 +362,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   const [pillRect, setPillRect] = useState<{ left: number; width: number } | null>(null);
   const checkEmail = searchParams.get("checkEmail") === "1";
   const oauthErrorParam = searchParams.get("error_description") ?? searchParams.get("error");
-  const shouldAutoReveal =
-    !!oauthErrorParam ||
-    checkEmail ||
-    (SIGNUPS_ENABLED && initialTab === "signup");
-  const [revealed, setRevealed] = useState(shouldAutoReveal);
 
   // Measure only the view shown on first paint (signin/auth), so the
   // pre-hydration fallback height matches what's actually displayed instead
@@ -367,7 +395,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     });
     obs.observe(el);
     return () => obs.disconnect();
-  }, [displayedTab, displayedView, revealed]);
+  }, [displayedTab, displayedView]);
 
   // Track the active tab button's position so the pill indicator can glide
   // between "Sign in" and "Create account" instead of just swapping color.
@@ -416,7 +444,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   // Handle OAuth callback errors
   useEffect(() => {
     if (oauthErrorParam) {
-      setRevealed(true);
       setError(oauthErrorParam.replace(/\+/g, " "));
     }
   }, [oauthErrorParam]);
@@ -474,7 +501,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     <>
       {/* Heading */}
       <div className="flex flex-col text-center">
-        <p className={`${LOGIN_SUBTITLE} text-[rgb(var(--muted))] opacity-50 mb-2`}>
+        <p className={`${LOGIN_SUBTITLE} text-[rgb(var(--muted))] mb-2`}>
           {t === "signin" ? "Welcome back to Inertia" : "Welcome to Inertia"}
         </p>
         <h1 className={`${LOGIN_TITLE} text-[rgb(var(--fg))]`}>
@@ -507,9 +534,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     </>
   );
 
-  const renderEmail = (t: "signin" | "signup") => (
+  const renderEmail = (t: "signin" | "signup", live = false) => (
     <>
       <EmailForm
+        autoFocus={live}
         mode={t}
         loading={loading}
         onSubmit={(email, password, firstName, lastName) => onEmailSubmit(t, email, password, firstName, lastName)}
@@ -519,7 +547,9 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     </>
   );
 
-  const renderBody = (t: "signin" | "signup", v: "auth" | "email") => (v === "auth" ? renderAuth(t) : renderEmail(t));
+  // `live` marks the copy actually on screen, as opposed to the hidden sizers.
+  const renderBody = (t: "signin" | "signup", v: "auth" | "email", live = false) =>
+    v === "auth" ? renderAuth(t) : renderEmail(t, live);
 
   const exitX = direction * -14;
   const enterX = direction * 14;
@@ -561,7 +591,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               <CtaGrain />
               <span className="relative">Reach out</span>
             </a>
-            <ThemeSwitch />
           </div>
         </div>
       </div>
@@ -581,7 +610,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
           >
             <span
               className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[var(--paper)]"
-              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.18), inset 0 1px 2px rgba(0,0,0,0.12), inset 0 -1px 1px rgba(255,255,255,0.8)" }}
+              style={{ boxShadow: "var(--login-avatar-shadow)" }}
             >
               <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="8" cy="5.5" r="2.5" />
@@ -624,7 +653,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                 Not rendered AT ALL while sign-ups are closed: with one tab
                 left there's nothing to switch between, and a zero-height
                 child still costs a full gap-6 in this column. */}
-            {SIGNUPS_ENABLED && revealed && (
+            {SIGNUPS_ENABLED && (
             <div
               className="flex justify-center overflow-hidden"
               style={{
@@ -665,39 +694,22 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
                 so switching tabs/views never resizes the card. */}
             <div
               style={{
-                height: revealed ? (cardHeight ?? maxCardHeight) : undefined,
+                height: cardHeight ?? maxCardHeight,
                 transition: "height 280ms cubic-bezier(0.22,1,0.36,1)",
                 overflow: "hidden",
               }}
             >
               <div
                 ref={liveContentRef}
-                style={revealed ? contentStyle : undefined}
+                style={contentStyle}
                 className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}
               >
-                {!revealed ? (
-                  <>
-                    <p className={`${LOGIN_SUBTITLE} text-[rgb(var(--muted))] opacity-50 text-center`}>
-                      Own Aether or working with us?
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => setRevealed(true)}
-                      className={`flex items-center justify-center w-full py-3 ${LOGIN_BTN} rounded-[6px] hover:opacity-90 transition-opacity`}
-                      style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
-                    >
-                      Log in
-                    </button>
-                  </>
-                ) : (
-                  renderBody(displayedTab, displayedView)
-                )}
+                {renderBody(displayedTab, displayedView, true)}
               </div>
             </div>
 
             <p
-              className={`${LOGIN_CAPTION} text-[rgb(var(--muted))] text-center`}
-              style={{ opacity: 0.5 }}
+              className={`${LOGIN_CAPTION} text-[rgb(var(--muted))] text-center [text-wrap:balance]`}
             >
               By continuing, you agree to our{" "}
               <Link href="/policies/terms-of-service" className="underline hover:text-[rgb(var(--fg))] transition-colors">
@@ -736,6 +748,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
           </div>
         </div>
         </div>
+        </div>
+        {/* The theme switch, out of the way at the foot of the page. */}
+        <div className="flex shrink-0 justify-center pb-6 sm:pb-8">
+          <ThemeSwitch />
         </div>
       </div>
 

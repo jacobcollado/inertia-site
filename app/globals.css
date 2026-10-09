@@ -138,6 +138,11 @@ html.themed[data-theme="dark"] .homepage-dark-zone {
   --login-card-edge:
     linear-gradient(90deg, rgba(0,0,0,0.016) 0%, transparent 14%, transparent 86%, rgba(0,0,0,0.016) 100%),
     linear-gradient(0deg, rgba(0,0,0,0.02) 0%, transparent 18%);
+  /* The avatar disc in the login page's "For Aether owners" chip. */
+  --login-avatar-shadow:
+    0 1px 3px rgba(0,0,0,0.18),
+    inset 0 1px 2px rgba(0,0,0,0.12),
+    inset 0 -1px 1px rgba(255,255,255,0.8);
 }
 
 /* Dark mode on the routes that follow the theme switch (data-theme and
@@ -170,6 +175,10 @@ html.themed[data-theme="dark"] {
     inset 0 1px 0 rgba(255,255,255,0.05),
     inset 0 0 0 1px rgba(255,255,255,0.06);
   --login-card-edge: none;
+  /* No white lower rim here: on the dark disc it read as a white border. */
+  --login-avatar-shadow:
+    0 1px 3px rgba(0,0,0,0.5),
+    inset 0 0 0 1px rgba(255,255,255,0.08);
 
   --bg: 10 10 10;
   --surface: 20 20 20;
@@ -2190,8 +2199,9 @@ h1:hover .redact > span.redact-inner,
   inset-inline: 0;
   top: 0;
   height: max(6px, env(safe-area-inset-top, 0px));
-  background-color: rgb(var(--bg));
-  z-index: 60;
+  background-color: var(--header-tint, rgb(var(--bg)));
+  /* Inside the header: over its blur, under its links and buttons. */
+  z-index: 0;
   pointer-events: none;
 }
 .safari-top-tint::after {
@@ -2200,7 +2210,7 @@ h1:hover .redact > span.redact-inner,
   inset-inline: 0;
   top: 100%;
   height: 10px;
-  background: linear-gradient(rgb(var(--bg)), rgb(var(--bg) / 0));
+  background: linear-gradient(var(--header-tint, rgb(var(--bg))), transparent);
 }
 
 /* The homepage's header is a cell of the page frame: no colour of its own,
@@ -2209,6 +2219,15 @@ h1:hover .redact > span.redact-inner,
   background: transparent;
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
+}
+
+/* On the homepage the header's paper (its frame corners, the fade under its
+   boundary) and Safari's top band blend from the page's colour toward the
+   lower panel's as that panel scrolls up into view. --zone-t runs 0 to 1,
+   set from scroll in visual-notch.tsx. */
+.site-header--home {
+  --header-tint: color-mix(in srgb, rgb(var(--zone-bg)) calc(var(--zone-t, 0) * 100%), rgb(var(--bg)));
+  --paper: var(--header-tint);
 }
 
 /* Over the homepage's lower panel the paper the header's frame corners are

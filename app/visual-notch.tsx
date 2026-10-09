@@ -751,10 +751,14 @@ export function VisualNotch() {
 
   // On the homepage, whether the header is over the lower panel. Its frame
   // corners are then cut from that panel's colour (see .site-header--zone).
+  // On the way there the header blends toward that colour (--zone-t, 0 to
+  // 1), starting as soon as the panel comes up into view, so it has arrived
+  // by the time the panel reaches it.
   const [overZone, setOverZone] = useState(false);
   useEffect(() => {
     if (pathname !== "/") {
       setOverZone(false);
+      headerRef.current?.style.removeProperty("--zone-t");
       return;
     }
     let frame: number | null = null;
@@ -764,7 +768,12 @@ export function VisualNotch() {
       const header = headerRef.current;
       if (!zone || !header) return;
       // The header's boundary reaches HEADER_FILL_REACH below its box.
-      setOverZone(zone.getBoundingClientRect().top <= header.offsetHeight + HEADER_FILL_REACH);
+      const top = zone.getBoundingClientRect().top;
+      const end = header.offsetHeight + HEADER_FILL_REACH;
+      const vh = window.innerHeight;
+      const t = Math.min(1, Math.max(0, (vh - top) / Math.max(1, vh - end)));
+      header.style.setProperty("--zone-t", t.toFixed(3));
+      setOverZone(top <= end);
     };
     const onScroll = () => {
       if (frame === null) frame = requestAnimationFrame(check);
@@ -783,6 +792,8 @@ export function VisualNotch() {
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
   const isAetherLanding = pathname === "/aether";
+  // Aether pages laid out in cells like the landing page.
+  const isAetherFramed = isAetherLanding || pathname === "/aether/changelog";
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
   const isBlog = pathname.startsWith("/blog");
@@ -791,7 +802,7 @@ export function VisualNotch() {
   const isSheet = pathname.startsWith("/blog/") || pathname.startsWith("/policies/");
   // Pages laid out in the frame (rails and rounded cells): the header is a
   // cell of it too, a plain blur with its boundary below.
-  const isFramed = isHome || isAetherLanding;
+  const isFramed = isHome || isAetherFramed;
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
   // The header lines its logo and buttons up with each page's own content
@@ -808,7 +819,7 @@ export function VisualNotch() {
         ? inset("80rem", "12px")
         : isWork && !pathname.startsWith("/work/")
           ? inset("64rem", "32px")
-          : (isAether && !isAetherLanding) || isPolicies
+          : (isAether && !isAetherFramed) || isPolicies
             ? inset("80rem", "0px")
             : inset("80rem", "32px"); // the homepage and case studies
 
@@ -819,7 +830,7 @@ export function VisualNotch() {
           // Pinned to the top while scrolling, on every page that uses it
           // except blog posts, where it scrolls away with the page so the
           // reading column has the whole screen.
-          className={`site-header${isSheet ? "" : " site-header--pinned"}${mobileOpen ? " site-header--open" : ""}${isHome && overZone ? " site-header--zone" : ""}`}
+          className={`site-header${isSheet ? "" : " site-header--pinned"}${mobileOpen ? " site-header--open" : ""}${isHome ? " site-header--home" : ""}${isHome && overZone ? " site-header--zone" : ""}`}
           ref={headerRef}
           // On blog posts a hairline underneath, so the sheet starts below it.
           style={isSheet ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
@@ -839,6 +850,11 @@ export function VisualNotch() {
           />
           {!isFramed && <div className="site-header__fade" aria-hidden="true" />}
           <div className="site-header__bg-fill" aria-hidden="true" />
+          {/* Safari (iOS 26) tints its top bar from a solid fixed element at the
+              top edge. The header is pure blur, so this band in the page's
+              colour sits over the blur, under the header's content, for Safari
+              to pick up (.safari-top-tint). */}
+          <div aria-hidden="true" className="safari-top-tint" />
           {/* A framed page's rails start here, above its first cell. */}
           {isFramed && (
             <>

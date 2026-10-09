@@ -1,7 +1,8 @@
 "use client";
 
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
+import { recordPath } from "@/lib/previous-path";
 import { VisualNotch } from "./visual-notch";
 import { MinimalFooter } from "./site-footer";
 import { isThemedPath } from "./theme-provider";
@@ -30,6 +31,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // Routes that follow the light / dark switch (see theme-provider.tsx).
   // Bare routes like /docs can be themed too; they place their own switch.
   const themed = isThemedPath(pathname);
+
+  // For pages that link back only to where the visitor came from.
+  useEffect(() => recordPath(pathname), [pathname]);
 
   // The footer's dark zone only covers page content, not the <html> element
   // itself — so overscroll/rubber-band past the bottom (Safari, and anywhere
@@ -95,10 +99,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* Safari (iOS 26) tints its top bar from a solid fixed element at the
-          top edge. The header is pure blur, so this thin strip in the page's
-          colour sits above it for Safari to pick up (.safari-top-tint). */}
-      <div aria-hidden="true" className="safari-top-tint" />
       <VisualNotch />
       {children}
       {/* The homepage's rails run on through the footer. */}
