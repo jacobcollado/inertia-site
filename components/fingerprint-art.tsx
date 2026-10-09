@@ -10,13 +10,15 @@ import { useEffect, useRef, useState } from "react";
 // A new visit gets a new seed, so a new palette and a new current: no two
 // people see the same one. With reduced motion it's drawn at once.
 
+// Each palette is a family of neighbouring, saturated hues, so where lines
+// overlap they blend into each other cleanly instead of turning muddy.
 const PALETTES = [
-  ["#ff6b6b", "#ffd166", "#06d6a0", "#118ab2", "#8338ec"],
-  ["#f72585", "#b5179e", "#7209b7", "#4361ee", "#4cc9f0"],
-  ["#ff7b00", "#ffb700", "#ff4d6d", "#c9184a", "#590d22"],
-  ["#2ec4b6", "#3a86ff", "#8338ec", "#ff006e", "#fb5607"],
-  ["#e76f51", "#f4a261", "#e9c46a", "#2a9d8f", "#264653"],
-  ["#00bbf9", "#00f5d4", "#fee440", "#f15bb5", "#9b5de5"],
+  ["#0ea5e9", "#22d3ee", "#3b82f6", "#6366f1"], // ocean
+  ["#f43f5e", "#fb7185", "#f97316", "#f59e0b"], // sunset
+  ["#7c3aed", "#a855f7", "#d946ef", "#ec4899"], // violet
+  ["#14b8a6", "#06b6d4", "#38bdf8", "#818cf8"], // lagoon
+  ["#10b981", "#14b8a6", "#3b82f6", "#8b5cf6"], // aurora
+  ["#ef4444", "#f97316", "#f59e0b", "#e11d48"], // ember
 ];
 
 // A small seeded generator, so a seed always draws the same piece.
@@ -79,11 +81,11 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
     const rand = mulberry32(seed);
     const noise = makeNoise(rand);
     const palette = PALETTES[Math.floor(rand() * PALETTES.length)];
-    // Sized to the panel, not in pixels: a narrow phone panel gets the same
-    // number of sweeps, lines and line length as the wide desktop one, so it
-    // fills with many streams instead of pooling into one. 1200 is the
-    // desktop panel's width.
-    const fit = Math.max(1, 1200 / Math.max(w, 1));
+    // Sized partly to the panel: a narrow phone panel gets more, tighter
+    // sweeps and shorter lines than pixel sizing would give it, so it fills
+    // with several streams instead of pooling into one, but not so many that
+    // the swirls turn thin. 1200 is the desktop panel's width.
+    const fit = Math.pow(Math.max(1, 1200 / Math.max(w, 1)), 0.6);
     const scale = (0.0016 + rand() * 0.0014) * fit; // how broad the current's sweeps are
     const twist = 1.6 + rand() * 1.4; // how hard it turns
     const dark = document.documentElement.dataset.theme === "dark" && document.documentElement.classList.contains("themed");
@@ -93,7 +95,7 @@ export function FingerprintArt({ className = "", play = true, delay = 0 }: { cla
     // Each line starts somewhere random and follows the current. Long
     // lives, so neighbouring lines run on together into streams that cross
     // the whole frame.
-    const N = Math.round(1500 * Math.min(1, Math.max(0.45, (w * h) / (1200 * 500))));
+    const N = Math.round(1500 * Math.min(1, Math.max(0.7, (w * h) / (1200 * 500))));
     const WIDTHS = [0.7, 1.2, 1.8];
     const lines = Array.from({ length: N }, () => ({
       x: rand() * w,
