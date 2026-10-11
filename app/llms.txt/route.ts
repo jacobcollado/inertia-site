@@ -40,7 +40,7 @@ export function GET() {
 
   const body = `# Inertia
 
-> Inertia is a design studio for founders and brands moving fast. Direction, design, and development, handled by one focused team. The studio builds Shopify storefronts, custom websites, and web app interfaces, and makes Aether, a premium Shopify theme.
+> Inertia is a Gen Z-led identity studio. It redesigns the identity and website of companies, brands and founders for the next generation of buyers, with audit, design and build handled by one team. The studio builds Shopify storefronts, custom websites, and web app interfaces, and makes Aether, a premium Shopify theme.
 
 ## About
 

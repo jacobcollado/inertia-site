@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Inertia",
     short_name: "Inertia",
     description:
-      "Inertia is a design studio for founders and brands moving fast. Direction, design, and development, one focused team.",
+      "Inertia is a Gen Z-led identity studio. We redesign brands and websites for the next generation of buyers, from audit to launch.",
     start_url: "/",
     display: "standalone",
     background_color: "#0e0e0e",

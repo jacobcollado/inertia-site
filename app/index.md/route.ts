@@ -3,6 +3,7 @@ import { getAllWork } from "@/lib/work";
 import { MARKDOWN_HEADERS } from "@/lib/agent-negotiation";
 import {
   AI_APPROACH,
+  CLIENTS_HEADING,
   EXECUTION_INTRO,
   EXECUTION_PRINCIPLES,
   HERO_HEADING_LINES,
@@ -54,7 +55,7 @@ ${AI_APPROACH.map(plainCopy).join("\n\n")}
 
 ${stages.join("\n")}
 
-## In good company
+## ${CLIENTS_HEADING}
 
 ${workLines.join("\n")}
 

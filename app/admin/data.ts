@@ -39,7 +39,7 @@ export async function getClients(): Promise<Client[]> {
   const profileMap = new Map((profileRows ?? []).map((p: { id: string; role: string; avatar_url: string | null }) => [p.id, p]));
 
   return (authUsers ?? [])
-    .filter(u => profileMap.get(u.id)?.role !== "admin")
+    .filter(u => !["admin", "team"].includes(profileMap.get(u.id)?.role ?? ""))
     .map(u => {
       const row = clientMap.get(u.id) as Record<string, unknown> | undefined;
       const metaName = (u.user_metadata?.name as string | null) ?? null;

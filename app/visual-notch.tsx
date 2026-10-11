@@ -800,9 +800,11 @@ export function VisualNotch() {
   // Blog posts and policy documents are laid out as a sheet (see
   // app/blog/[slug]/page.tsx and app/policies/policy-doc.tsx).
   const isSheet = pathname.startsWith("/blog/") || pathname.startsWith("/policies/");
+  // The work index and case studies, laid out in cells like the homepage.
+  const isWorkCase = pathname === "/work" || pathname.startsWith("/work/");
   // Pages laid out in the frame (rails and rounded cells): the header is a
   // cell of it too, a plain blur with its boundary below.
-  const isFramed = isHome || isAetherFramed;
+  const isFramed = isHome || isAetherFramed || isWorkCase;
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
   // The header lines its logo and buttons up with each page's own content
@@ -817,11 +819,9 @@ export function VisualNotch() {
       ? inset("56rem", "48px") // the post sheet's body padding
       : isBlog
         ? inset("80rem", "12px")
-        : isWork && !pathname.startsWith("/work/")
-          ? inset("64rem", "32px")
-          : (isAether && !isAetherFramed) || isPolicies
+        : (isAether && !isAetherFramed) || isPolicies
             ? inset("80rem", "0px")
-            : inset("80rem", "32px"); // the homepage and case studies
+            : inset("80rem", "32px"); // the homepage and /work
 
   if (useMinimalHeader) {
     return (

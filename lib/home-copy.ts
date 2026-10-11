@@ -4,26 +4,25 @@
 // mark a key phrase, set in full ink on the page.
 
 export const HERO_HEADING_LINES = [
-  ["A", "design", "and", "development", "studio"],
-  ["making", "websites", "people", "actually", "remember."],
+  ["Your", "brand,", "rebuilt", "for", "the"],
+  ["next", "generation", "of", "buyers."],
 ];
 
 export const HERO_HEADING_LINES_MOBILE = [
-  ["A", "design", "and"],
-  ["development", "studio"],
-  ["making", "websites", "people"],
-  ["actually", "remember."],
+  ["Your", "brand,", "rebuilt", "for"],
+  ["the", "next", "generation"],
+  ["of", "buyers."],
 ];
 
 export const HERO_SUBLINE =
-  "We work with local shops, artists and growing startups, taking each project from first idea to launch, all in-house.";
+  "Inertia is a Gen Z-led studio. We redesign the identity and website of companies, brands and founders, so the customers they want most trust them sooner and come back. Audit, design and build, all in-house.";
 
 // A little shorter on phones, so it sits in fewer lines under the heading.
 export const HERO_SUBLINE_MOBILE =
-  "We work with local shops, artists and growing startups, from first idea to launch, all in-house.";
+  "A Gen Z-led studio redesigning identities and websites, so the customers you want most trust you sooner and come back.";
 
 export const EXECUTION_INTRO =
-  "Ideas and identity are rarely the problem. [[Execution is.]] We take what a company, brand, or person stands for and carry it through every detail, until the result feels effortless to the people moving through it.";
+  "Ideas and identity are rarely the problem. [[Execution is.]] We take what a company, brand, or person stands for and carry it through every page, transition and email, until it feels effortless to the customer moving through it.";
 
 // Each principle is one way of finishing "how we think about execution":
 // the label names it, the line argues it, the illustration acts it out.
@@ -47,24 +46,29 @@ export const AI_APPROACH = [
   "None of that works without judgment, and [[judgment comes from reps]]. Years of projects have built our grip on the fundamentals: design systems that hold up as a brand grows, infrastructure that stays out of the way, and details people feel before they notice.",
 ] as const;
 
+// What a client can hire us for, in the order most of them do it. Each label
+// names its drawing in components/what-we-do-sketches.tsx.
 export const WHAT_WE_DO_ITEMS = [
   {
-    label: "Direction",
-    description: "We figure out what the product or brand actually needs to be before anything gets designed.",
+    label: "Audit",
+    description: "We go through your site and brand the way a new customer would, and hand you a ranked list of what's costing you. It's yours to keep whether or not we do the work.",
   },
   {
-    label: "Design",
-    description: "Interfaces, identity, and the small decisions in between, held to one standard of taste.",
+    label: "Identity",
+    description: "A visual system built for who's buying next: mark, type, color and motion, with rules your team can actually follow.",
   },
   {
-    label: "Development",
-    description: "We build what we design ourselves, so nothing is lost translating one team's vision to another's code.",
+    label: "Build",
+    description: "We design and develop the site ourselves, so the version you approved is the version that ships.",
   },
   {
-    label: "Launch",
-    description: "We ship what we build and stay through launch, so what goes live matches what was designed.",
+    label: "Partnership",
+    description: "After launch we stay on for new pages, campaigns and the small fixes that keep it sharp as you grow.",
   },
 ] as const;
+
+// For an identity studio, a client's name is what they hand over.
+export const CLIENTS_HEADING = "They trusted us with their name.";
 
 /** Copy with the [[key phrase]] markers taken out. */
 export function plainCopy(text: string): string {

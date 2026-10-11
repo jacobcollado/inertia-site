@@ -38,6 +38,8 @@ export function RestraintArt({ play }: { play: boolean }) {
   const done = useDone(play);
   return (
     <Board>
+      {/* Lifted so the drawing sits centred on the tile. */}
+      <g transform="translate(0 -20)">
       {EXTRAS.map((b, i) => (
         <g key={i}>
           <g style={fade(done, i * 220)}>
@@ -50,6 +52,7 @@ export function RestraintArt({ play }: { play: boolean }) {
       ))}
       <Box x={150} y={150} w={100} h={100} d={0.2} />
       <Box x={176} y={124} w={48} h={26} d={0.13} />
+      </g>
     </Board>
   );
 }
@@ -80,6 +83,7 @@ export function AgreementArt({ play }: { play: boolean }) {
   const done = useDone(play);
   return (
     <Board>
+      <g transform="translate(0 -14)">
       <g style={fade(!done, 900)}>
         <Box x={U.x} y={U.y} w={U.w * 4} h={U.h * 3} d={0.18} ghost />
       </g>
@@ -98,6 +102,7 @@ export function AgreementArt({ play }: { play: boolean }) {
           </g>
         );
       })}
+      </g>
     </Board>
   );
 }

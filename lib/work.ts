@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
@@ -127,5 +128,17 @@ export async function getWorkGalleryImages(w: WorkMeta): Promise<SizedImage[]> {
     ...(w.preview ? [w.preview] : []),
     ...(w.images ?? []),
   ];
-  return Promise.all(paths.map(sizeImage));
+  // Some pieces reuse one file under two names (a preview that is also the
+  // first shot); show it once.
+  const seen = new Set<string>();
+  const unique = paths.filter((src) => {
+    let key = src;
+    try {
+      key = crypto.createHash("sha1").update(fs.readFileSync(path.join(PUBLIC_DIR, src))).digest("hex");
+    } catch {}
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return Promise.all(unique.map(sizeImage));
 }

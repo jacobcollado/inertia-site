@@ -13,6 +13,7 @@ import { SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 import { HeroDragHeading } from "@/components/hero-drag-heading";
 import { SectionHeading } from "@/components/section-heading";
 import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
+import { TeardownDialog } from "@/components/teardown-dialog";
 import { HeroCanvas } from "@/components/hero-canvas";
 import { MaterialCover } from "@/components/post-covers";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
@@ -20,6 +21,7 @@ import { SurfacingLine } from "@/components/surfacing-line";
 import { useMounted } from "@/hooks/use-mounted";
 import {
   AI_APPROACH,
+  CLIENTS_HEADING,
   EXECUTION_INTRO,
   EXECUTION_PRINCIPLES,
   HERO_HEADING_LINES,
@@ -484,6 +486,7 @@ function VercelHero({
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
+  const [teardownOpen, setTeardownOpen] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -605,13 +608,10 @@ function VercelHero({
 
           {/* Buttons join the same liquid stagger as the heading and subline. */}
           <div className="flex flex-wrap items-center justify-start gap-3" style={{ ...liquid(240), display: "flex" }}>
-            {/* Points at the quiz at the foot of the page rather than straight
-                to Cal: answering a few questions is a lower commitment than
-                putting a meeting on the calendar, and the quiz hands off to
-                booking itself once it knows what the project is. Stays a real
-                href so it still works without JS and offers a normal link
-                context menu; the handler only takes over to match the site's
-                Lenis smooth scrolling. */}
+            {/* The free teardown: the lowest-commitment way in, and value
+                up front. Opens a short form; without JS the link still lands
+                on the questionnaire at the foot of the page. Reach out stays
+                in the header for anyone ready to talk. */}
             <span
               className="relative inline-flex rounded-[6px]"
               style={{
@@ -622,15 +622,9 @@ function VercelHero({
               <a
                 ref={ctaRef}
                 href="#start"
-                aria-label="Reach out"
                 onClick={e => {
-                  const el = document.getElementById("start");
-                  if (!el) return; // let the browser handle the hash
                   e.preventDefault();
-                  const targetY = window.scrollY + el.getBoundingClientRect().top - 96; // 40px clear of the 56px sticky header
-                  const lenis = window.__lenis;
-                  if (lenis) lenis.scrollTo(targetY, { duration: 1.1 });
-                  else window.scrollTo({ top: targetY, behavior: "smooth" });
+                  setTeardownOpen(true);
                 }}
                 className={CTA_PILL_CLASS}
                 style={{
@@ -642,7 +636,7 @@ function VercelHero({
                 {...ctaScaleHoverOnParent}
               >
                 <CtaGrain />
-                <span className="relative whitespace-nowrap">Reach out</span>
+                <span className="relative whitespace-nowrap">Get a free teardown</span>
               </a>
             </span>
             <span
@@ -682,6 +676,7 @@ function VercelHero({
             </a>
             )}
           </div>
+          <TeardownDialog open={teardownOpen} onOpenChange={setTeardownOpen} />
 
           <HeroCanvas
             play={visible}
@@ -1292,7 +1287,7 @@ const WORK_CLIENT_SLUGS: Record<string, string> = {
 };
 
 // Launch month per client, kept in sync with the year/month overrides on
-// /work (see WORK_LINKS in work-index-client.tsx) so the two surfaces agree.
+// /work so the two surfaces agree.
 // Month is 1-12; "Early 2026" (Ellora LA) reads as January. Drives the
 // timeline's month rail; "Inertia" has none (it's the site itself, not a
 // dated engagement) and sits at the end unpinned to a date.
@@ -1909,7 +1904,6 @@ function AiApproach({ clients }: { clients: ClientCarouselItem[] }) {
       </section>
       <FrameRule tone="light" />
       <WhatWeDo />
-      <FrameRule tone="light" />
       {clients.length > 0 && <FrameRule tone="light" />}
       <ClientGrid items={clients} />
     </>
@@ -2050,34 +2044,47 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
 // and one last tile with a "+" stands for whoever's next, pointing down to
 // the enquiry flow.
 const WALL_EASE = "duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]";
-const WALL_TILE = "group relative flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-[var(--tile)] transition-colors duration-300 hover:bg-[var(--tile-2)]";
+// Each logo's box, sized so they all carry the same visual weight: wide
+// wordmarks get more width, square marks less. `w` is the share of the cell's
+// width; `ratio` is the PNG's own aspect, so the mask lines up with it.
+// Started from each file's inked area (width ~ aspect^0.56), then tuned by
+// eye for stroke weight; retune here if a logo file changes.
+const WALL_LOGO: Record<string, { w: string; ratio: string }> = {
+  "trippie-redd": { w: "38%", ratio: "476 / 324" },
+  aether: { w: "64%", ratio: "492 / 145" },
+  "allure-new-york": { w: "47.3%", ratio: "594 / 218" },
+  "ellora-la": { w: "53%", ratio: "400 / 89" },
+  "ft-gioo": { w: "28.5%", ratio: "500 / 453" },
+  inboundly: { w: "32.3%", ratio: "1 / 1" },
+  "mood-swings": { w: "36%", ratio: "498 / 386" },
+  "samuel-norris": { w: "43.7%", ratio: "229 / 97" },
+  "subtle-goods": { w: "44%", ratio: "500 / 647" },
+};
 
-function WallCaption({ title, sub }: { title: string; sub?: string }) {
-  return (
-    <div className={`absolute inset-x-4 bottom-4 translate-y-2 opacity-0 transition-all ${WALL_EASE} group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100`}>
-      <p className="text-[14px] tracking-tight" style={{ color: "var(--ink)" }}>{title}</p>
-      {sub && <p className="text-[13px] tracking-tight" style={{ color: "var(--ink-2)" }}>{sub}</p>}
-    </div>
-  );
-}
-
+// The client wall: one panel, logos only, balanced by weight. The name and
+// what we did surface on hover; the whole cell links to the case study.
 function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
   if (items.length === 0) return null;
-  const lift = `transition-transform ${WALL_EASE} group-hover:-translate-y-3 group-focus-visible:-translate-y-3`;
   return (
     <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <SectionHeading align="left" className="mb-10 sm:mb-14">In good company</SectionHeading>
-      <ul data-stagger className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {items.map((item) => (
-          <li key={item.slug}>
-            <Link href={`/work/${item.slug}`} className={WALL_TILE} aria-label={item.service ? `${item.client}, ${item.service}` : item.client}>
-              <div className={`w-[44%] ${lift}`}>
+      <SectionHeading align="left" className="mb-10 text-balance sm:mb-14">{CLIENTS_HEADING}</SectionHeading>
+      <ul data-stagger className="grid grid-cols-2 overflow-hidden rounded-[12px] sm:grid-cols-4" style={{ background: "var(--tile)" }}>
+        {items.map((item) => {
+          const box = WALL_LOGO[item.slug] ?? { w: "40%", ratio: "1 / 1" };
+          return (
+            <li key={item.slug}>
+              <Link
+                href={`/work/${item.slug}`}
+                className="group relative flex aspect-[3/2] items-center justify-center transition-colors duration-300 hover:bg-[var(--tile-2)] focus-visible:bg-[var(--tile-2)] sm:aspect-[16/11]"
+                aria-label={item.service ? `${item.client}, ${item.service}` : item.client}
+              >
                 {item.logo ? (
                   <span
                     aria-hidden="true"
-                    className="block opacity-[0.85]"
+                    className={`block opacity-[0.82] transition-[opacity,transform] ${WALL_EASE} group-hover:opacity-100 sm:group-hover:-translate-y-2`}
                     style={{
-                      aspectRatio: "1 / 1",
+                      width: box.w,
+                      aspectRatio: box.ratio,
                       backgroundColor: "var(--ink)",
                       WebkitMaskImage: `url(${item.logo})`,
                       maskImage: `url(${item.logo})`,
@@ -2090,19 +2097,19 @@ function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
                     }}
                   />
                 ) : (
-                  <span className="block text-center text-[15px] tracking-tight" style={{ color: "var(--ink)" }}>{item.client}</span>
+                  <span className="text-[15px] tracking-tight" style={{ color: "var(--ink)" }}>{item.client}</span>
                 )}
-              </div>
-              <WallCaption title={item.client} sub={item.service} />
-            </Link>
-          </li>
-        ))}
-        <li>
-          <a href="#start" className={WALL_TILE} aria-label="Your business, next if you like">
-            <span className={`text-[28px] font-light leading-none opacity-40 transition-opacity duration-200 group-hover:opacity-80 ${lift}`} style={{ color: "var(--ink)" }} aria-hidden="true">+</span>
-            <WallCaption title="Your business" sub="Next, if you like" />
-          </a>
-        </li>
+                <span
+                  className={`pointer-events-none absolute inset-x-4 bottom-3 hidden translate-y-1 text-[13px] tracking-tight opacity-0 transition-all ${WALL_EASE} group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 sm:block`}
+                  style={{ color: "var(--ink-2)" }}
+                >
+                  <span style={{ color: "var(--ink)" }}>{item.client}</span>
+                  {item.service && <> · {item.service}</>}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
