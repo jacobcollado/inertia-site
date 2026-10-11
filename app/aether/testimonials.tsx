@@ -26,7 +26,7 @@ const TESTIMONIALS: Testimonial[] = [
   {
     quote:
       "You've been great, super happy with how our website turned out and how quickly you were able to do everything. You make all the changes we have needed and are constantly willing to help. You have been amazing!",
-    name: "vora.archive",
+    name: "Vora",
     logo: "/reviews/voraarchive.png",
     site: "voraarchive.com",
     highlight: "super happy with how our website turned out",

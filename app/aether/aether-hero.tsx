@@ -2,120 +2,93 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { DemoButton } from "./demo-button";
+import { HeroLooks } from "./hero-looks";
 import { HeroPhones } from "./hero-phones";
+import { Mark, STORES } from "./stores-on-aether";
 import { ACTION_RADIUS_CLASS, CTA_SHELL_HEIGHT_CLASS } from "@/lib/cta-chrome";
 import { AETHER_PRICING_ID, navigateToAetherCheckout } from "@/lib/scroll-to-hash";
-import { scrollToId } from "./motion";
 
+/* Built for cold traffic: someone from an ad who has never heard of Aether
+ * should see the stores, the promise and the price on the first screen.
+ *
+ * From lg up the hero splits: the copy on the left, the four example stores
+ * on the right, crossfading on a laptop (hero-looks.tsx). Between sm and lg
+ * the same pieces stack, centred. Phones stack too, with the short subhead
+ * and the phone carousel (hero-phones.tsx), so the stores start on the first
+ * screen there as well.
+ *
+ * Order in the copy: the product's name as a small mark, the promise in
+ * large type, what it is, the two actions, then the price and the refund as
+ * small print. From sm up, real stores on Aether close it as their marks;
+ * phones get those in the strip after the hero (stores-on-aether.tsx). */
 export function AetherHero({ demoUrl }: { demoUrl: string }) {
-
   return (
-    <section className="flex flex-col">
-      <div
-        className="flex flex-col items-center justify-center gap-3 px-4 sm:px-6 text-center pt-14 sm:pt-20 lg:pt-40 sm:min-h-[480px]"
-        style={{ paddingBottom: 32 }}
-      >
-        {/* Logo, then the promise in large type, then two actions and the
-            practical details as small print. The scroll cue goes to the
-            values, the page's spine. */}
-        <h1 className="m-0 font-normal leading-none">
-          <Image
-            src="/work-logos/aether.png"
-            alt="Aether"
-            width={220}
-            height={55}
-            className="theme-invert h-[clamp(1.6rem,3vw,2rem)] w-auto mx-auto opacity-90"
-            priority
-          />
-        </h1>
-        <p className="mt-4 sm:mt-6 max-w-[22rem] sm:max-w-[44rem] text-[clamp(2.4rem,6.2vw,4.75rem)] leading-[1.02] tracking-[-0.045em] text-[rgb(var(--fg))] [text-wrap:balance]">
+    <section className="grid items-center gap-y-6 pt-10 pb-10 sm:gap-y-10 sm:pt-16 sm:pb-16 lg:min-h-[min(46rem,calc(100svh-6rem))] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-x-6 lg:py-12">
+      <div className="flex flex-col items-center px-4 text-center sm:px-6 lg:items-start lg:pl-8 lg:pr-0 lg:text-left xl:pl-12">
+        <Image
+          src="/work-logos/aether.png"
+          alt="Aether"
+          width={220}
+          height={55}
+          // The file pads its ink a little; pull it flush with the headline.
+          className="theme-invert h-[1.15rem] sm:h-[1.35rem] w-auto opacity-80 lg:-ml-[5px]"
+          priority
+        />
+        <h1 className="mt-5 sm:mt-6 max-w-[22rem] sm:max-w-[40rem] lg:max-w-[34rem] text-[clamp(2.4rem,6.2vw,4.25rem)] font-normal leading-[1.02] tracking-[-0.045em] text-[rgb(var(--fg))] [text-wrap:balance]">
           Look like the brand you&apos;re becoming.
+        </h1>
+        <p className="mt-4 max-w-[22rem] sm:max-w-[30rem] text-[16px] sm:text-[18px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:balance] lg:[text-wrap:pretty]">
+          {/* Phones get the short version; the hero has little room there. */}
+          <span className="sm:hidden">A Shopify theme for fashion brands, installed for you today.</span>
+          <span className="hidden sm:inline">A Shopify theme for fashion brands that turns more visits into orders. We install it for you, same day.</span>
         </p>
-        <p className="max-w-[22rem] sm:max-w-[30rem] text-[16px] sm:text-[18px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:balance]">
-          A Shopify theme by Inertia, for brands ready for their next level.
-        </p>
-        <div className="mt-4 flex flex-col items-center justify-center gap-2 w-full max-w-sm px-2 sm:px-0 text-[13px] tracking-tight">
-          <div className="w-full flex gap-2">
-            <Link
-              href={`/aether#${AETHER_PRICING_ID}`}
-              data-aether-cta
-              onClick={navigateToAetherCheckout}
-              // Same raised fill as the checkout's buy button (.cta-buy).
-              className={`cta-buy flex-1 min-w-0 inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none`}
-            >
-              Get Aether
-            </Link>
-            <div className="flex-1 min-w-0">
-              <DemoButton href={demoUrl} password="aether" />
-            </div>
-          </div>
-          <p className="mt-1.5 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
-            $125 once. Installed for you, with lifetime updates and support.
-          </p>
-          {/* A real link, so it works without JS; the handler only smooths
-              it with the site's Lenis scroll. */}
-          <a
-            href="#values"
-            onClick={(e) => scrollToId("values", e)}
-            className="group mt-8 inline-flex flex-col items-center gap-1 text-[15px] sm:text-[16px] tracking-tight text-[rgb(var(--fg)/0.75)] transition-colors hover:text-[rgb(var(--fg))]"
+
+        <div className="mt-7 flex w-full max-w-sm gap-2 px-2 sm:px-0">
+          <Link
+            href={`/aether#${AETHER_PRICING_ID}`}
+            data-aether-cta
+            onClick={navigateToAetherCheckout}
+            // Same raised fill as the checkout's buy button (.cta-buy).
+            className={`cta-buy flex-1 min-w-0 inline-flex items-center justify-center gap-2 ${ACTION_RADIUS_CLASS} ${CTA_SHELL_HEIGHT_CLASS} px-3 sm:px-5 text-[16px] sm:text-[19px] font-medium tracking-tight leading-none`}
           >
-            What we stand for
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="scroll-cue size-5" aria-hidden="true">
-              <polyline points="4 6 8 10 12 6" />
-            </svg>
-          </a>
+            Get Aether
+          </Link>
+          <div className="flex-1 min-w-0">
+            <DemoButton href={demoUrl} password="aether" />
+          </div>
+        </div>
+        <p className="mt-3 text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))]">
+          $125 once. Full refund if we can&apos;t get it working.
+        </p>
+
+        {/* Proof, quiet: the marks of stores running Aether, every one
+            confirmed in stores-on-aether.tsx. */}
+        <div className="mt-10 hidden flex-col items-center gap-3 sm:flex lg:items-start">
+          <p className="text-[12px] tracking-tight text-[rgb(var(--muted))] opacity-80">Stores running Aether</p>
+          <ul
+            className="flex flex-wrap items-center justify-center gap-x-7 gap-y-3 lg:justify-start"
+            style={{ "--mark": "1.9rem" } as CSSProperties}
+          >
+            {STORES.map((s) => (
+              <li key={s.name} className="flex items-center">
+                <Mark s={s} className="opacity-40" />
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-      <div className="mt-12 sm:mt-14 pb-8 sm:pb-12 rise rise--liquid sm:w-screen sm:relative sm:left-1/2 sm:right-1/2 sm:-ml-[50vw] sm:-mr-[50vw]">
-        {/* The mockups move two ways, transform only: a slow float
-            (.hero-bob), and a scroll parallax as the hero leaves
-            (.hero-par, a scroll-driven animation), the side laptops rising at
-            their own rates for depth. See "Aether hero mockups" in
-            globals.css. */}
-        <div className="sm:hidden px-2">
-          <div className="hero-bob">
-            <HeroPhones />
-          </div>
+
+      {/* The stores. The laptop floats slowly (.hero-bob, in HeroLooks);
+          the phones stay still. */}
+      <div className="rise rise--liquid min-w-0">
+        <div className="px-2 sm:hidden">
+          <HeroPhones />
         </div>
-        <div className="hidden sm:block relative">
-          <div className="hero-par hero-par--main">
-            <div className="hero-bob">
-              <Image
-                src="/aether/rosso-macbook-v2.png"
-                alt="An Aether store, Rosso, on MacBook"
-                width={4500}
-                height={3000}
-                sizes="(min-width: 640px) 60vw"
-                quality={90}
-                className="w-[60vw] max-w-none h-auto mx-auto"
-                priority
-              />
-            </div>
-          </div>
-          <div className="hero-par hero-par--left hidden 2xl:block absolute left-0 top-[8%] w-[min(52rem,60vw)] pointer-events-none select-none">
-            <Image
-              src="/aether/argent-macbook.png"
-              alt="An Aether store, Argent, on MacBook"
-              width={4500}
-              height={3000}
-              sizes="(min-width: 1536px) 52rem, 0px"
-              quality={90}
-              className="hero-float hero-float--left w-full h-auto"
-              priority
-            />
-          </div>
-          <div className="hero-par hero-par--right hidden 2xl:block absolute right-0 top-[8%] w-[min(52rem,60vw)] pointer-events-none select-none">
-          <Image
-            src="/aether/relics-macbook.png"
-            alt="An Aether store, Relics, on MacBook"
-            width={4500}
-            height={3000}
-            sizes="(min-width: 1536px) 52rem, 0px"
-            quality={90}
-            className="hero-float hero-float--right w-full h-auto"
-            priority
-          />
+        <div className="hidden px-6 sm:block lg:px-0 lg:pr-4">
+          <div className="mx-auto max-w-[44rem] lg:max-w-none">
+            <HeroLooks />
           </div>
         </div>
       </div>

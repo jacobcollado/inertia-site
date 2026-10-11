@@ -40,7 +40,7 @@ export function DemoVideoModal({
 
   useEffect(() => {
     if (!open) return;
-    // Phones see the phone recording first, like the "Make it yours" section.
+    // Phones see the phone recording first, like the "A store no one mistakes for a template" section.
     setMode(window.matchMedia("(max-width: 639px)").matches ? "mobile" : "desktop");
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {

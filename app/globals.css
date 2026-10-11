@@ -900,15 +900,15 @@ h1:hover .redact > span.redact-inner,
   .stores-marquee__track > ul { padding-right: 0; flex-wrap: wrap; justify-content: center; }
 }
 
-/* /aether values, the customer drawing (app/aether/values-art.tsx): the
-   shopper's dot hops as it moves to the next step. Transform only. */
-.values-hop { animation: values-hop 760ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-@keyframes values-hop {
-  0%, 100% { transform: translateY(0); }
-  42% { transform: translateY(-26px); }
+/* /aether values, the sales drawing (app/aether/values-art.tsx): each new
+   order count rises into place. */
+.values-count { animation: values-count 520ms cubic-bezier(0.22, 1, 0.36, 1) both; transform-box: fill-box; }
+@keyframes values-count {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .values-hop { animation: none; }
+  .values-count { animation: none; }
 }
 
 /* /aether "Other themes stop at the download" (app/aether/switch.tsx): a
@@ -1287,86 +1287,25 @@ h1:hover .redact > span.redact-inner,
   to   { transform: translateY(-3px); }
 }
 
-/* Hero flanking mockups — a perspective tilt plus a slow vertical drift, so
-   the two laptops read as floating beside the centre one rather than sitting
-   flat against it. The tilt lives inside the keyframes rather than as a
-   static transform: an animation on `transform` replaces the property
-   outright, so a separately-declared rotate would be discarded the moment
-   the float starts. The two sides mirror each other on the Y axis and run
-   off-phase (different durations, negative delay on one) so they never bob
-   in lockstep. */
-.hero-float {
-  will-change: transform;
-  transform-origin: center center;
-  backface-visibility: hidden;
-}
-
-.hero-float--left {
-  animation: hero-float-left 9s ease-in-out infinite;
-}
-
-.hero-float--right {
-  animation: hero-float-right 11s ease-in-out infinite -3.5s;
-}
-
-@keyframes hero-float-left {
-  0%, 100% { transform: perspective(1800px) rotateY(9deg) rotateX(2deg) rotateZ(-1.2deg) translateY(0); }
-  50%      { transform: perspective(1800px) rotateY(9deg) rotateX(2deg) rotateZ(-1.2deg) translateY(-14px); }
-}
-
-@keyframes hero-float-right {
-  0%, 100% { transform: perspective(1800px) rotateY(-9deg) rotateX(2deg) rotateZ(1.2deg) translateY(0); }
-  50%      { transform: perspective(1800px) rotateY(-9deg) rotateX(2deg) rotateZ(1.2deg) translateY(-16px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* Keep the tilt, drop the drift — the angle is composition, the bob is motion. */
-  .hero-float--left {
-    animation: none;
-    transform: perspective(1800px) rotateY(9deg) rotateX(2deg) rotateZ(-1.2deg);
-  }
-  .hero-float--right {
-    animation: none;
-    transform: perspective(1800px) rotateY(-9deg) rotateX(2deg) rotateZ(1.2deg);
-  }
-}
-
-/* Aether hero mockups (app/aether/aether-hero.tsx). A slow float on the
-   main laptop and the phones, and a scroll parallax as the hero leaves the
-   screen: the laptop rises a little and grows slightly, the side laptops
-   rise faster, for depth. The parallax is a scroll-driven animation, so it
-   needs no JS; browsers without it keep the float. Transform only. */
+/* Aether hero mockup (app/aether/hero-looks.tsx): a slow float on the
+   laptop. The phones stay still. Transform only. */
 .hero-bob { will-change: transform; animation: hero-bob 10s ease-in-out infinite; }
 @keyframes hero-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
-@supports (animation-timeline: view()) {
-  .hero-par {
-    will-change: transform;
-    animation-timing-function: linear;
-    animation-fill-mode: both;
-    animation-timeline: view();
-    animation-range: cover 45% cover 100%;
-  }
-  .hero-par--main { animation-name: hero-par-main; }
-  .hero-par--left { animation-name: hero-par-left; }
-  .hero-par--right { animation-name: hero-par-right; }
-}
-@keyframes hero-par-main {
-  from { transform: translateY(0) scale(1); }
-  to { transform: translateY(-56px) scale(1.04); }
-}
-@keyframes hero-par-left {
-  from { transform: translateY(0); }
-  to { transform: translateY(-130px); }
-}
-@keyframes hero-par-right {
-  from { transform: translateY(0); }
-  to { transform: translateY(-96px); }
+
+/* Aether hero looks (app/aether/hero-looks.tsx): the bar under the showing
+   look's name fills while it's up; its animationend moves to the next look.
+   Reduced motion: no bar animation, so the looks stay put. */
+.hero-looks-bar { transform-origin: 0 50%; animation: hero-looks-bar 4200ms linear both; }
+@keyframes hero-looks-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-bob, .hero-par { animation: none !important; }
+  .hero-bob { animation: none !important; }
+  .hero-looks-bar { animation: none; transform: scaleX(1); }
 }
 
 /* ── Cookie banner ─────────────────────────────────────────────────────────

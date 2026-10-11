@@ -7,10 +7,10 @@ import type { CSSProperties } from "react";
  * The marks are ink-only PNGs (public/aether/stores), trimmed tight to the
  * ink and drawn as CSS masks, so they all take the page's own text color in
  * light and dark mode. `w`/`h` are each file's pixel size. */
-const STORES: { name: string; src: string; w: number; h: number; optical?: number }[] = [
+export const STORES: { name: string; src: string; w: number; h: number; optical?: number }[] = [
   { name: "Ellora LA", src: "/aether/stores/ellora-la.png", w: 400, h: 89 },
   // Solid, dense ink reads heavier than the rest at the same area.
-  { name: "vora.archive", src: "/aether/stores/vora-archive.png", w: 116, h: 109, optical: 0.84 },
+  { name: "Vora", src: "/aether/stores/vora-archive.png", w: 116, h: 109, optical: 0.84 },
   { name: "Awoken Dreams", src: "/aether/stores/ad.png", w: 324, h: 288 },
   { name: "Defy", src: "/aether/stores/defy.png", w: 400, h: 389 },
   // Widest mark, so it closes the row.
@@ -24,12 +24,12 @@ const STORES: { name: string; src: string; w: number; h: number; optical?: numbe
 const markHeight = (w: number, h: number, optical = 1) =>
   `calc(var(--mark) * ${(optical / Math.sqrt(w / h)).toFixed(3)})`;
 
-function Mark({ s }: { s: (typeof STORES)[number] }) {
+export function Mark({ s, className = "opacity-60" }: { s: (typeof STORES)[number]; className?: string }) {
   return (
     <span
       role="img"
       aria-label={s.name}
-      className="block shrink-0 bg-[rgb(var(--fg))] opacity-60"
+      className={`block shrink-0 bg-[rgb(var(--fg))] ${className}`}
       style={{
         height: markHeight(s.w, s.h, s.optical),
         aspectRatio: `${s.w} / ${s.h}`,
@@ -52,7 +52,9 @@ function Mark({ s }: { s: (typeof STORES)[number] }) {
  * still and the one set sits centred. CSS in globals.css (.stores-marquee). */
 export function StoresOnAether() {
   return (
-    <section className="rise rise--liquid py-14 sm:py-20" aria-label="Stores running Aether">
+    // From sm up the marks sit in the hero, under its buttons, so this
+    // section is for phones only.
+    <section className="rise rise--liquid py-14 sm:hidden" aria-label="Stores running Aether">
       <p className="px-3 text-center text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
         Stores running Aether
       </p>

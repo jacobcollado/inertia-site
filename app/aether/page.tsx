@@ -16,27 +16,28 @@ import { FrameRails, FrameRule } from "@/components/page-frame";
 
 export const metadata: Metadata = {
   title: { absolute: "Aether, a Shopify theme by Inertia" },
-  description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
+  description: "Aether is a Shopify theme that turns more visits into orders and makes a growing brand look established. Installed for you the same day. $125 once.",
   alternates: { canonical: "https://byinertia.com/aether" },
   openGraph: {
     type: "website",
     url: "https://byinertia.com/aether",
     title: { absolute: "Aether, a Shopify theme by Inertia" },
-    description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
+    description: "Aether is a Shopify theme that turns more visits into orders and makes a growing brand look established. Installed for you the same day. $125 once.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Aether Shopify Theme" }],
   },
   twitter: {
     card: "summary_large_image",
     title: { absolute: "Aether, a Shopify theme by Inertia" },
-    description: "Aether is a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once.",
+    description: "Aether is a Shopify theme that turns more visits into orders and makes a growing brand look established. Installed for you the same day. $125 once.",
     images: ["/og.png"],
   },
 };
 
 const KEY_FEATURES = [
   {
-    title: "Guided format",
-    desc: "Every page points shoppers to the next step.",
+    title: "Fewer shoppers get lost",
+    name: "Guided format",
+    desc: "Every page points to the next step, so visitors find their way to checkout instead of the back button.",
     visual: "guided",
     image: "/aether/guided.jpg",
     imageMobile: "/aether/feature-mobile-guided.png",
@@ -44,8 +45,9 @@ const KEY_FEATURES = [
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
   },
   {
-    title: "Upsell",
-    desc: "Picks in the cart and a free shipping bar get shoppers to add one more item.",
+    title: "Bigger orders",
+    name: "Upsell",
+    desc: "Picks in the cart and a free shipping bar get shoppers to add one more item before they pay.",
     visual: "upsell",
     image: "/aether/upsell.png",
     imageMobile: "/aether/feature-mobile-upsell.png",
@@ -53,8 +55,9 @@ const KEY_FEATURES = [
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
   },
   {
-    title: "Scarcity",
-    desc: "Sold-out sizes show at a glance, and a back-in-stock alert keeps the sale.",
+    title: "Sales you'd have missed",
+    name: "Scarcity",
+    desc: "Shoppers see sold-out sizes before they click, and a back-in-stock alert brings them back when it returns.",
     visual: "scarcity",
     image: "/aether/scarcity.png",
     imageMobile: "/aether/feature-mobile-scarcity.png",
@@ -86,7 +89,7 @@ const AETHER_JSON_LD = [
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Shopify",
     "url": "https://byinertia.com/aether",
-    "description": "A Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day.",
+    "description": "A Shopify theme that turns more visits into orders and makes a growing brand look established. Installed for you the same day.",
     "offers": {
       "@type": "Offer",
       "price": "125",

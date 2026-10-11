@@ -4,7 +4,10 @@ import Image from "next/image";
 import { DemoButton } from "./demo-button";
 
 interface Feature {
+  /** What the store owner gets. */
   title: string;
+  /** The feature that gets it, for alt text. */
+  name: string;
   desc: string;
   icon: React.ReactNode;
   /** Screenshot of the feature on desktop. */
@@ -38,12 +41,12 @@ function Tile({ f, i, big }: { f: Feature; i: number; big: boolean }) {
       <div className={`relative mx-6 mb-6 mt-6 h-[22rem] sm:h-auto sm:flex-1 ${big ? "sm:mx-10 sm:mb-10 sm:mt-8" : "sm:mx-8 sm:mb-7 sm:mt-5"}`}>
         <div className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1.5 motion-reduce:transition-none">
           {phone ? (
-            <Image src={phone} alt={`${f.title} on a phone`} fill sizes="(max-width: 639px) 80vw, 0px" quality={90} draggable={false} className="object-contain object-center sm:hidden" />
+            <Image src={phone} alt={`${f.name} on a phone`} fill sizes="(max-width: 639px) 80vw, 0px" quality={90} draggable={false} className="object-contain object-center sm:hidden" />
           ) : null}
           {f.image ? (
             <Image
               src={f.image}
-              alt={`${f.title} example`}
+              alt={`${f.name} example`}
               fill
               sizes={big ? "(min-width: 640px) min(42rem, 54vw), 0px" : "(min-width: 640px) min(30rem, 38vw), 0px"}
               quality={90}
@@ -57,7 +60,7 @@ function Tile({ f, i, big }: { f: Feature; i: number; big: boolean }) {
   );
 }
 
-/* "Built to sell" as a bento: the first feature as one large tile on the
+/* "More of your visitors buy" as a bento: the first feature as one large tile on the
  * left, the other two stacked on the right, each with its name on top and
  * its shot filling the rest. Phones stack the three. The section closes on the
  * demo, one line and the View demo button. Comes in with the site's
@@ -80,10 +83,10 @@ export function FeaturesScroll({
       <div className="mb-10 sm:mb-12">
         {eyebrow}
         <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
-          Built to sell
+          More of your visitors buy
         </h2>
         <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
-          Three things every Aether store does to turn a visit into an order.
+          Most visits end without an order. Here are three ways an Aether store wins more of them back.
         </p>
       </div>
 

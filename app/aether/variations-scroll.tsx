@@ -29,7 +29,7 @@ const segmentClass = (selected: boolean) =>
       : "text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))]"
   }`;
 
-/* "Make it yours", laid out like the sections around it: the heading and
+/* "A store no one mistakes for a template", laid out like the sections around it: the heading and
  * its line on the left with the device switch beside them, the selected
  * example's preview on a plain tile, then the four examples as small thumbnail
  * cards under it, the selected one outlined in ink. Switching a style or
@@ -81,10 +81,10 @@ export function VariationsScroll({
         <div>
           {eyebrow}
           <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] font-normal tracking-[-0.03em] leading-[1.1] text-[rgb(var(--fg))]">
-            Make it yours
+            A store no one mistakes for a template
           </h2>
           <p className="mt-2 max-w-lg text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
-            Four stores built with Aether&apos;s own settings. They&apos;re examples, not presets. Mix colors, fonts, layouts and imagery into a look that&apos;s only yours, no code.
+            Four stores made with Aether&apos;s settings alone. None of them looks like the others, and yours won&apos;t look like any of them. Set the colors, fonts, layouts and imagery without touching code.
           </p>
         </div>
         <div className="hidden shrink-0 sm:block">{deviceToggle}</div>

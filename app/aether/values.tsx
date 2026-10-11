@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
-import { CustomerArt, IdentityArt, SpeedArt } from "./values-art";
+import { IdentityArt, SalesArt, SameDayArt } from "./values-art";
 import { scrollToId } from "./motion";
 
-/* What Aether stands on, said once and shown once. A single sentence names
- * the three values; its key phrases ink in one after another as it's read.
+/* What Aether does for the store owner, said once and shown once. A single
+ * sentence names the three outcomes; its key phrases ink in one after
+ * another as it's read.
  * Under it, each value as a drawing that acts it out (values-art.tsx), its
  * name and one line, and a link down to the chapter that proves it. The
  * rest of the page is those three chapters, each opened by a ChapterMark. */
@@ -14,23 +15,23 @@ import { scrollToId } from "./motion";
 export const VALUES = [
   {
     id: "customer",
-    name: "Customer",
-    title: "Obsessed with your customer",
-    desc: "Every page points the shopper to their next step. You get lifetime updates and real people on support.",
-    Art: CustomerArt,
+    name: "More sales",
+    title: "More visitors become customers",
+    desc: "Every page leads to the next step, and the cart suggests one more item. Shoppers who would have left end up checking out.",
+    Art: SalesArt,
   },
   {
     id: "speed",
-    name: "Speed",
-    title: "Speed, first",
-    desc: "Designed thumb-first, with quick buy and a cart that follows the scroll. Installed for you the same day.",
-    Art: SpeedArt,
+    name: "Selling today",
+    title: "Selling today, not next month",
+    desc: "We install and set up Aether the day you buy. No weekend lost to setup, no developer to hire.",
+    Art: SameDayArt,
   },
   {
     id: "identity",
-    name: "Identity",
-    title: "An identity to grow into",
-    desc: "Every color, font, layout and image is yours to set. No presets, no code, no limit on the look.",
+    name: "Your look",
+    title: "A brand people take seriously",
+    desc: "A store that looks made for you tells shoppers you're here to stay. Set every color, font, layout and image, with no code.",
     Art: IdentityArt,
   },
 ] as const;
@@ -39,17 +40,17 @@ type ValueId = (typeof VALUES)[number]["id"];
 
 // The sentence, as runs of muted text and key phrases.
 const STATEMENT: { t: string; key?: boolean }[] = [
-  { t: "We " },
-  { t: "obsess over your customer", key: true },
-  { t: ", build every page for " },
-  { t: "speed", key: true },
-  { t: ", and give your brand " },
-  { t: "the look of where it's going next", key: true },
+  { t: "Aether gets " },
+  { t: "more of your visitors buying", key: true },
+  { t: ", has you " },
+  { t: "selling today", key: true },
+  { t: ", and makes your brand " },
+  { t: "look established", key: true },
   { t: "." },
 ];
 
 // True while the element is at least `threshold` on screen.
-function useOnScreen<T extends Element>(threshold = 0.5) {
+export function useOnScreen<T extends Element>(threshold = 0.5) {
   const ref = useRef<T>(null);
   const [on, setOn] = useState(false);
   useEffect(() => {
