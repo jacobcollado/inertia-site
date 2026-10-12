@@ -1780,8 +1780,7 @@ const WHAT_WE_DO_STEP_MS = 420;
 
 // "What we do" as the process it is: the four stages of the hero's stair, in
 // order, each a line drawing on its tile, then a small step number beside the
-// stage name and the description under it (the same pattern as How we think
-// about execution). One row of four on wide screens, two by two below that.
+// stage name, its description collapsed under it until opened. One row of four on wide screens, two by two below that.
 // On first view the drawings build one after another. On phones the stages
 // sit in a row that swipes sideways, like Our thoughts, and each drawing
 // builds as it's swiped in.
@@ -1836,6 +1835,10 @@ function WhatWeDo() {
     return () => obs.disconnect();
   }, [phone]);
 
+  // Each step's description starts collapsed and opens on its own.
+  const [open, setOpen] = useState<boolean[]>(() => WHAT_WE_DO_ITEMS.map(() => false));
+  const toggle = (i: number) => setOpen((prev) => prev.map((v, k) => (k === i ? !v : v)));
+
   const lit = on || reduced;
   // Per step: does its drawing build, and when. On phones a drawing builds
   // when its card is swiped in.
@@ -1848,7 +1851,7 @@ function WhatWeDo() {
       <ol
         ref={listRef}
         data-stagger
-        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-12 sm:overflow-visible sm:px-0 lg:grid-cols-4 lg:gap-x-5"
+        className="no-scrollbar -mx-6 flex items-start snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-12 sm:overflow-visible sm:px-0 lg:grid-cols-4 lg:gap-x-5"
       >
         {WHAT_WE_DO_ITEMS.map((item, i) => {
           const delay = stepDelay(i);
@@ -1863,17 +1866,44 @@ function WhatWeDo() {
                   className="h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
                 />}
               </div>
-              <div className="mt-4 flex items-baseline gap-3">
-                <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
-                  {i + 1}
-                </span>
-                <h3 className="text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)", fontWeight: 500 }}>
-                  {item.label}
-                </h3>
+              {/* Collapsed to the step name; the plus opens its description. */}
+              <h3 className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => toggle(i)}
+                  aria-expanded={open[i]}
+                  aria-controls={`wwd-text-${i}`}
+                  className="flex w-full items-baseline gap-3 text-left"
+                >
+                  <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
+                    {i + 1}
+                  </span>
+                  <span className="flex-1 text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)", fontWeight: 500 }}>
+                    {item.label}
+                  </span>
+                  <span aria-hidden="true" className="relative size-3 shrink-0 self-center" style={{ color: "var(--ink-3)" }}>
+                    <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-current" />
+                    <span
+                      className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-current transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                      style={{ transform: open[i] ? "translateX(-50%) scaleY(0)" : "translateX(-50%)" }}
+                    />
+                  </span>
+                </button>
+              </h3>
+              <div
+                id={`wwd-text-${i}`}
+                className="grid"
+                style={{ gridTemplateRows: open[i] ? "1fr" : "0fr", transition: "grid-template-rows 420ms cubic-bezier(0.22,1,0.36,1)" }}
+              >
+                <div className="overflow-hidden" inert={!open[i]}>
+                  <p
+                    className="pt-1.5 pl-7 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-pretty transition-opacity duration-300"
+                    style={{ color: "var(--ink-2)", opacity: open[i] ? 1 : 0 }}
+                  >
+                    {item.description}
+                  </p>
+                </div>
               </div>
-              <p className="mt-1.5 pl-7 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-pretty" style={{ color: "var(--ink-2)" }}>
-                {item.description}
-              </p>
             </li>
           );
         })}
@@ -2052,7 +2082,7 @@ const WALL_EASE = "duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]";
 const WALL_LOGO: Record<string, { w: string; ratio: string }> = {
   "trippie-redd": { w: "38%", ratio: "476 / 324" },
   aether: { w: "64%", ratio: "492 / 145" },
-  "allure-new-york": { w: "47.3%", ratio: "594 / 218" },
+  "allure-new-york": { w: "58%", ratio: "594 / 80" },
   "ellora-la": { w: "53%", ratio: "400 / 89" },
   "ft-gioo": { w: "28.5%", ratio: "500 / 453" },
   inboundly: { w: "32.3%", ratio: "1 / 1" },
@@ -2061,10 +2091,22 @@ const WALL_LOGO: Record<string, { w: string; ratio: string }> = {
   "subtle-goods": { w: "44%", ratio: "500 / 647" },
 };
 
+// The wall's order, four to a row on desktop. Anyone not listed follows in
+// their usual order.
+const WALL_FIRST = [
+  "aether", "trippie-redd", "ellora-la", "mood-swings",
+  "allure-new-york", "samuel-norris", "inboundly", "subtle-goods",
+];
+
 // The client wall: one panel, logos only, balanced by weight. The name and
 // what we did surface on hover; the whole cell links to the case study.
-function ClientGrid({ items }: { items: ClientCarouselItem[] }) {
-  if (items.length === 0) return null;
+function ClientGrid({ items: unordered }: { items: ClientCarouselItem[] }) {
+  if (unordered.length === 0) return null;
+  const rank = (slug: string) => {
+    const i = WALL_FIRST.indexOf(slug);
+    return i < 0 ? WALL_FIRST.length : i;
+  };
+  const items = [...unordered].sort((a, b) => rank(a.slug) - rank(b.slug));
   return (
     <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <SectionHeading align="left" className="mb-10 text-balance sm:mb-14">{CLIENTS_HEADING}</SectionHeading>

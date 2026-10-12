@@ -1,17 +1,17 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { FingerprintArt } from "@/components/fingerprint-art";
+import { FieldArt } from "@/components/field-art";
 
-// The hero's visual: a generative piece drawn fresh for each visit
-// (components/fingerprint-art.tsx), on the page's tile. The homepage fades
+// The hero's visual: a lattice of points bent by an unseen mass that
+// follows the pointer (components/field-art.tsx), on the page's tile. The homepage fades
 // the panel in with the hero;
-// `play` and `delay` hold the drawing until it has, so it builds in view.
+// `play` and `delay` hold the lattice until it has, so it settles in view.
 export function HeroCanvas({ style, play = true, delay = 0 }: { style?: CSSProperties; play?: boolean; delay?: number }) {
   return (
     <div className="relative w-full" style={style}>
       {/* Starts once the panel has mostly faded in (its fade runs 900ms). */}
-      <FingerprintArt className="w-full" play={play} delay={delay + 500} />
+      <FieldArt className="w-full" play={play} delay={delay + 500} />
     </div>
   );
 }

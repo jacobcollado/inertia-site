@@ -3,7 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 // Light / dark theme. The visitor picks in the footer (light, dark or follow
-// the system); the pick is kept in localStorage under "theme". THEME_SCRIPT
+// the system); the pick is kept in localStorage under "theme". With no pick
+// stored, the site is light: following the system is an opt-in. THEME_SCRIPT
 // runs in <head> before first paint and sets data-theme on <html>, so the
 // page never flashes the wrong theme. Every route follows it except those
 // in UNTHEMED_PREFIXES, which keep their own look (the always-dark client
@@ -22,14 +23,14 @@ export const isThemedPath = (path: string) =>
   !UNTHEMED_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
 const ThemeContext = createContext<Ctx | null>(null);
 
-export const THEME_SCRIPT = `(function(){try{var p=localStorage.getItem("${KEY}");var t=p==="light"||p==="dark"?p:matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var d=document.documentElement;d.dataset.theme=t;var p2=location.pathname;if(!${JSON.stringify(UNTHEMED_PREFIXES)}.some(function(x){return p2===x||p2.indexOf(x+"/")===0}))d.classList.add("themed");if(p2==="/")d.classList.add("home-dark-root")}catch(e){}})()`;
+export const THEME_SCRIPT = `(function(){try{var p=localStorage.getItem("${KEY}");var t=p==="dark"?"dark":p==="system"&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var d=document.documentElement;d.dataset.theme=t;var p2=location.pathname;if(!${JSON.stringify(UNTHEMED_PREFIXES)}.some(function(x){return p2===x||p2.indexOf(x+"/")===0}))d.classList.add("themed");if(p2==="/")d.classList.add("home-dark-root")}catch(e){}})()`;
 
 function readPref(): ThemePref {
   try {
     const p = localStorage.getItem(KEY);
-    return p === "light" || p === "dark" ? p : "system";
+    return p === "dark" || p === "system" ? p : "light";
   } catch {
-    return "system";
+    return "light";
   }
 }
 
@@ -63,13 +64,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setPref = useCallback((p: ThemePref) => {
     try {
-      if (p === "system") localStorage.removeItem(KEY);
+      if (p === "light") localStorage.removeItem(KEY);
       else localStorage.setItem(KEY, p);
     } catch {}
     setPrefState(p);
   }, []);
 
-  return <ThemeContext.Provider value={{ pref: pref ?? "system", theme, setPref }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ pref: pref ?? "light", theme, setPref }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

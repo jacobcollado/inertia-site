@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { Box, EASE, Flag, LineBoard as Board, enter, raise } from "@/components/line-art";
+import { Box, DASH, EASE, LineBoard as Board } from "@/components/line-art";
 
 // Illustrations for the homepage's "How we think about execution"
 // principles, in the hero staircase's line style (components/line-art.tsx).
@@ -107,29 +107,51 @@ export function AgreementArt({ play }: { play: boolean }) {
   );
 }
 
-// Follow-through: a staircase carried to the end. Three steps are built and
-// the last is only a dashed outline; on play it fills in solid, then a flag
-// goes up on top. The hero's staircase in miniature, where the top step is
-// Launch.
-const STEP = { x0: 84, w: 58, rise: 34, base: 244 };
+// Follow-through: a finished thing that isn't finished yet. A box with its
+// lid on, nearly right, with three small things still asking for attention,
+// each ringed like a note in review: the two halves of the box don't line
+// up, the lid sits askew, and the knob on top is off centre. They're put
+// right one after another, each ring going as its fix lands, and the last
+// and smallest, the knob, waits a beat longer before it settles. Then
+// nothing is asking.
+// Low and wide, with shallow depth, so it reads as a box and not a house.
+const BASE = { x: 100, y: 176, w: 200, h: 68, d: 0.1 };
+const SEAM = 200; // where the two halves meet
+const LID = { x: 96, y: 166, w: 208, h: 10, d: 0.1 };
+// The knob sits halfway back on the lid's top face.
+const KNOB_BACK = (LID.y + 700) * LID.d * 0.3 * 0.5;
+const KNOB = { x: 189, y: LID.y - KNOB_BACK - 6, w: 22, h: 6, d: 0.03 };
+// When each fix lands after `done`, in ms. The last one waits.
+const FIX = [0, 650, 1600];
+
+function Ring({ x, y, r, on, delay }: { x: number; y: number; r: number; on: boolean; delay: number }) {
+  return <circle cx={x} cy={y} r={r} {...DASH} style={fade(on, delay)} />;
+}
 
 export function FollowThroughArt({ play }: { play: boolean }) {
   const done = useDone(play);
-  const step = (i: number) => ({ x: STEP.x0 + i * STEP.w, y: STEP.base - STEP.rise * (i + 1), w: STEP.w, h: STEP.rise * (i + 1) });
-  const last = step(3);
+  const settle = (from: string, i: number, ms = 700): CSSProperties => ({
+    transform: done ? "none" : from,
+    transition: `transform ${ms}ms ${EASE} ${done ? FIX[i] : 0}ms`,
+    transformBox: "fill-box",
+    transformOrigin: "0% 100%",
+  });
   return (
     <Board>
-      {[0, 1, 2].map((i) => (
-        <Box key={i} {...step(i)} d={0.14} />
-      ))}
-      <g style={fade(!done)}>
-        <Box {...last} d={0.14} ghost />
-      </g>
-      <g style={enter(done, "translateY(24px)", 0, 700)}>
-        <Box {...last} d={0.14} />
-      </g>
-      <g style={raise(done, 650)}>
-        <Flag x={last.x + last.w * 0.55} y={last.y - 6} h={64} />
+      <g transform="translate(0 -26)">
+        <Box x={BASE.x} y={BASE.y} w={SEAM - BASE.x} h={BASE.h} d={BASE.d} />
+        <g style={settle("translateY(8px)", 0)}>
+          <Box x={SEAM} y={BASE.y} w={BASE.x + BASE.w - SEAM} h={BASE.h} d={BASE.d} />
+        </g>
+        <g style={settle("translate(3px, -9px) rotate(-3deg)", 1, 800)}>
+          <Box {...LID} />
+          <g style={settle("translateX(-18px)", 2, 900)}>
+            <Box {...KNOB} />
+          </g>
+        </g>
+        <Ring x={SEAM} y={BASE.y + 6} r={12} on={!done} delay={FIX[0] + 250} />
+        <Ring x={LID.x + LID.w - 4} y={LID.y - 12} r={14} on={!done} delay={FIX[1] + 350} />
+        <Ring x={KNOB.x + KNOB.w / 2 - 18} y={KNOB.y - 9} r={12} on={!done} delay={FIX[2] + 450} />
       </g>
     </Board>
   );
