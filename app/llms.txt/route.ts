@@ -40,20 +40,20 @@ export function GET() {
 
   const body = `# Inertia
 
-> Inertia is a Gen Z-led identity studio. It redesigns the identity and website of companies, brands and founders for the next generation of buyers, with audit, design and build handled by one team. The studio builds Shopify storefronts, custom websites, and web app interfaces, and makes Aether, a premium Shopify theme.
+> Inertia is a minimalist design studio for companies and builders. It designs identities and websites, with audit, design and build handled by one team. The studio builds Shopify storefronts, custom websites, and web app interfaces, and makes Aether, a premium Shopify theme.
 
 ## About
 
 - Name: Inertia
 - Website: ${BASE}
-- What we do: brand and product direction, visual and interface design, and front-end and Shopify development
-- Who we work with: founders, ecommerce brands, artists, and product teams who care about presentation and need to ship quickly
+- What we do: identity and product direction, visual and interface design, and front-end and Shopify development
+- Who we work with: founders, ecommerce companies, artists, and product teams who care about presentation and need to ship quickly
 - How we work: one small team from first conversation to launch, with no handoffs between agencies
 - Start a project: ${BASE}/#start
 
 ## Aether, our Shopify theme
 
-- [Aether](${BASE}/aether): a Shopify theme for brands that care how their store looks. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once for a single store, with lifetime updates.
+- [Aether](${BASE}/aether): a Shopify theme for stores that care how they look. 41 sections, dark mode, sticky cart and mega menu, installed for you the same day. $125 once for a single store, with lifetime updates.
 - [Changelog](${BASE}/aether/changelog): theme updates and release notes
 - [Docs](${BASE}/docs): setup and customization guides
 

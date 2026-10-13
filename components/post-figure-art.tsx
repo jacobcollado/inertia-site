@@ -1,67 +1,67 @@
 "use client";
 
 import type { ReactElement, ReactNode } from "react";
-import { INK, TILE } from "@/components/material-art";
-import { Box, DASH, LINE, type Pt } from "@/components/line-art";
+import { INK, SIGNAL, TILE } from "@/components/material-art";
+import { Box, LINE, type Pt } from "@/components/line-art";
 
 // In-body figure drawings for blog posts, in the same 3D line style as the
 // post covers and the hero staircase (components/line-art.tsx): boxes in
-// perspective seen from above, light for the parts a figure isn't about,
-// dashed for ghosts and guides, solid for the thing it is about. Picked by
-// app/blog/[slug]/page.tsx through postFigure() in post-figures.tsx.
+// perspective seen from above, faint for the parts a figure isn't about,
+// solid for the thing it is about, and the signal colour for the one point
+// it makes. No dashes: they flatten the perspective, so anything secondary
+// is simply lighter. Picked by app/blog/[slug]/page.tsx through
+// postFigure() in post-figures.tsx.
 
 // The figures are 560 wide, so the vanishing point sits over their middle.
 const VP: Pt = [280, -700];
 const LIGHT = { ...LINE, strokeOpacity: 0.32 };
+const ACCENT = { ...LINE, stroke: SIGNAL };
 const FONT = { fontFamily: "var(--font-satoshi), sans-serif", fontWeight: 450 } as const;
 
-function Label({ x, y, children, anchor = "start", opacity = 0.6, size = 13 }: {
-  x: number; y: number; children: ReactNode; anchor?: "start" | "middle" | "end"; opacity?: number; size?: number;
+function Label({ x, y, children, anchor = "start", opacity = 0.6, size = 13, color = INK }: {
+  x: number; y: number; children: ReactNode; anchor?: "start" | "middle" | "end"; opacity?: number; size?: number; color?: string;
 }) {
   return (
-    <text x={x} y={y} textAnchor={anchor} fontSize={size} fill={INK} fillOpacity={opacity} style={FONT}>
+    <text x={x} y={y} textAnchor={anchor} fontSize={size} fill={color} fillOpacity={opacity} style={FONT}>
       {children}
     </text>
   );
 }
 
 // A dimension line with end ticks.
-function Dim({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) {
+function Dim({ x1, y1, x2, y2, stroke = LINE }: { x1: number; y1: number; x2: number; y2: number; stroke?: typeof LINE }) {
   const v = x1 === x2;
   const t = 5;
   return (
     <g>
-      <line x1={x1} y1={y1} x2={x2} y2={y2} {...LINE} />
-      <line x1={v ? x1 - t : x1} y1={v ? y1 : y1 - t} x2={v ? x1 + t : x1} y2={v ? y1 : y1 + t} {...LINE} />
-      <line x1={v ? x2 - t : x2} y1={v ? y2 : y2 - t} x2={v ? x2 + t : x2} y2={v ? y2 : y2 + t} {...LINE} />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} {...stroke} />
+      <line x1={v ? x1 - t : x1} y1={v ? y1 : y1 - t} x2={v ? x1 + t : x1} y2={v ? y1 : y1 + t} {...stroke} />
+      <line x1={v ? x2 - t : x2} y1={v ? y2 : y2 - t} x2={v ? x2 + t : x2} y2={v ? y2 : y2 + t} {...stroke} />
     </g>
   );
 }
-
-// The dashed frame that marks what a figure is about.
-const Mark = ({ x, y, w, h }: { x: number; y: number; w: number; h: number }) => <rect x={x - 6} y={y - 6} width={w + 12} height={h + 12} {...DASH} strokeOpacity={0.9} />;
 
 // Side by side, boxes farther from the vanishing point go first, so the
 // side faces of the nearer ones aren't drawn over their neighbours.
 const outsideIn = (xs: number[], w: number) => [...xs].sort((a, b) => Math.abs(b + w / 2 - VP[0]) - Math.abs(a + w / 2 - VP[0]));
 
-/* someone-still-has-to-pick: a field of forty directions, three gaps in it,
-   and the three kept ones set apart on their own plinth. */
+/* someone-still-has-to-pick: forty directions in rows, all faint, with
+   three empty places in them; the three kept ones stand solid on their own
+   plinth beside the field. */
 function FortyDirections() {
   const kept = new Set(["0-7", "2-2", "3-5"]);
-  const W = 30, H = 24;
-  const col = (c: number) => 24 + c * 38;
+  const W = 26, H = 16;
+  const col = (c: number) => 24 + c * 36;
   const cells: ReactElement[] = [];
-  // Top row first, so each lower row's tops cover the row above's feet.
   for (let r = 0; r < 4; r++) {
-    const y = 52 + r * 40;
+    const y = 70 + r * 38;
     for (const x of outsideIn(Array.from({ length: 10 }, (_, c) => col(c)), W)) {
-      const c = (x - 24) / 38;
+      const c = (x - 24) / 36;
       cells.push(
         kept.has(`${r}-${c}`) ? (
-          <rect key={`${r}-${c}`} x={x} y={y} width={W} height={H} {...DASH} strokeOpacity={0.9} />
+          <rect key={`${r}-${c}`} x={x} y={y} width={W} height={H} {...LIGHT} />
         ) : (
-          <Box key={`${r}-${c}`} x={x} y={y} w={W} h={H} d={0.05} vp={VP} light />
+          <Box key={`${r}-${c}`} x={x} y={y} w={W} h={H} d={0.035} vp={VP} light />
         ),
       );
     }
@@ -69,32 +69,34 @@ function FortyDirections() {
   return (
     <>
       {cells}
-      <Box x={420} y={198} w={134} h={14} d={0.1} vp={VP} />
-      {outsideIn([428, 470, 512], 28).map((x) => (
-        <Box key={x} x={x} y={170} w={28} h={28} d={0.08} vp={VP} />
+      <Box x={404} y={196} w={140} h={14} d={0.08} vp={VP} />
+      {outsideIn([414, 460, 506], 28).map((x) => (
+        <Box key={x} x={x} y={176} w={28} h={20} d={0.05} vp={VP} />
       ))}
+      <Label x={474} y={236} anchor="middle" size={12} opacity={0.85}>kept</Label>
     </>
   );
 }
 
-/* taste-is-trained: the work climbs a year at a time toward a bar that was
-   set on day one. */
+/* taste-is-trained: a bar set on day one (what you can tell is good) and
+   the work climbing toward it a year at a time. Year one's gap is measured;
+   by year five the work reaches the bar. */
 function TasteGap() {
-  const BASE = 206, W = 92, X0 = 46;
-  const heights = [36, 58, 80, 102, 124];
-  const top = BASE - heights[4];
+  const BASE = 206, W = 84, X0 = 50, GAPX = 10;
+  const bar = 70;
+  const heights = [34, 62, 88, 112, BASE - bar];
   return (
     <>
-      <line x1={X0 - 10} y1={top - 30} x2={X0 + W * 5 + 10} y2={top - 30} {...DASH} strokeOpacity={0.9} />
-      <Label x={X0 - 10} y={top - 40} opacity={0.85}>your taste</Label>
+      <line x1={X0 - 14} y1={bar} x2={X0 + (W + GAPX) * 5} y2={bar} {...ACCENT} />
+      <Label x={X0 - 14} y={bar - 12} opacity={0.9} color={SIGNAL}>your taste</Label>
       {heights.map((h, i) => (
-        <Box key={i} x={X0 + i * W} y={BASE - h} w={W} h={h} d={0.06} vp={VP} light={i < 4} />
+        <Box key={i} x={X0 + i * (W + GAPX)} y={BASE - h} w={W} h={h} d={0.05} vp={VP} light={i < 4} />
       ))}
       {heights.map((_, i) => (
-        <Label key={i} x={X0 + i * W + W / 2} y={BASE + 22} anchor="middle" size={12} opacity={0.45}>{`year ${i + 1}`}</Label>
+        <Label key={i} x={X0 + i * (W + GAPX) + W / 2} y={BASE + 22} anchor="middle" size={12} opacity={i === 4 ? 0.85 : 0.45}>{`year ${i + 1}`}</Label>
       ))}
-      <Dim x1={X0 + 22} y1={top - 24} x2={X0 + 22} y2={BASE - heights[0] - 16} />
-      <Label x={X0 + 32} y={(top + BASE - heights[0]) / 2 - 8} opacity={0.85}>the gap</Label>
+      <Dim x1={X0 + W / 2} y1={bar + 6} x2={X0 + W / 2} y2={BASE - heights[0] - 22} />
+      <Label x={X0 + W / 2 + 10} y={(bar + BASE - heights[0]) / 2 - 4} opacity={0.85}>the gap</Label>
     </>
   );
 }
@@ -109,9 +111,9 @@ function Screen({ x, y, state }: { x: number; y: number; state: "blank" | "shape
   const s = state === "page" ? LINE : LIGHT;
   return (
     <g>
-      <Box x={x} y={y} w={W} h={H} d={0.03} vp={VP} light={state !== "page"} />
+      <Box x={x} y={y} w={W} h={H} d={0.03} vp={VP} light={state === "blank"} />
       {state === "blank" ? (
-        <circle cx={x + W / 2} cy={y + H / 2} r={8} {...DASH} />
+        <path d={`M ${x + W / 2} ${y + H / 2 - 8} A 8 8 0 1 1 ${x + W / 2 - 8} ${y + H / 2}`} {...LIGHT} />
       ) : (
         <>
           <line x1={x + 10} y1={y + 13} x2={x + 46} y2={y + 13} {...s} strokeWidth={2.4} />
@@ -130,7 +132,7 @@ function PerceivedSpeed() {
   return (
     <>
       {FRAMES.map((t, i) => (
-        <Label key={t} x={x(i) + 52} y={22} anchor="middle" size={12} opacity={0.45}>{t}</Label>
+        <Label key={t} x={x(i) + 52} y={22} anchor="middle" size={12} opacity={i === 1 ? 0.9 : 0.45} color={i === 1 ? SIGNAL : INK}>{t}</Label>
       ))}
       <Label x={x(0)} y={46}>Blank until ready</Label>
       {FRAMES.map((t, i) => (
@@ -140,7 +142,6 @@ function PerceivedSpeed() {
       {FRAMES.map((t, i) => (
         <Screen key={t} x={x(i)} y={172} state={i === 0 ? "blank" : i === 3 ? "page" : "shape"} />
       ))}
-      <rect x={x(1) - 8} y={158} width={120} height={86} {...DASH} strokeOpacity={0.9} />
     </>
   );
 }
@@ -158,12 +159,12 @@ function RequestVersusProblem() {
     <>
       <Box x={190} y={46} w={180} h={42} d={0.04} vp={VP} />
       <Label x={280} y={72} anchor="middle" opacity={0.9}>Redesign the site</Label>
-      <line x1={0} y1={118} x2={560} y2={118} {...DASH} />
+      <line x1={0} y1={118} x2={560} y2={118} {...LIGHT} />
       <Label x={556} y={110} anchor="end" size={12} opacity={0.45}>what&apos;s asked</Label>
-      <Label x={556} y={134} anchor="end" size={12} opacity={0.45}>what&apos;s underneath</Label>
+      <Label x={556} y={136} anchor="end" size={12} opacity={0.45}>what&apos;s underneath</Label>
       {problems.map((p, i) => (
         <g key={p.label}>
-          <line x1={280} y1={88} x2={p.x + 80} y2={166} {...LIGHT} strokeDasharray="3 4" />
+          <line x1={280} y1={88} x2={p.x + 80} y2={166} {...(i === real ? ACCENT : LIGHT)} />
           <Box x={p.x} y={170} w={160} h={44} d={0.04} vp={VP} light={i !== real} />
           <Label x={p.x + 80} y={197} anchor="middle" size={12} opacity={i === real ? 0.9 : 0.45}>{p.label}</Label>
         </g>
@@ -173,7 +174,8 @@ function RequestVersusProblem() {
 }
 
 /* the-difference-you-feel: two play buttons. The left's icon is centred by
-   its box, the right's nudged until its weight, the dot, sits on the centre. */
+   its box, which leaves its weight (the dot) off to the left; the right's is
+   nudged until the dot sits on the centre. */
 function OpticalCentre() {
   const button = (x: number, nudge: number, label: string, math: boolean) => {
     const cx = x + 85;
@@ -182,12 +184,12 @@ function OpticalCentre() {
     return (
       <g>
         <Box x={x} y={60} w={170} h={120} d={0.05} vp={VP} />
-        <line x1={cx} y1={70} x2={cx} y2={170} {...DASH} />
-        <line x1={x + 10} y1={cy} x2={x + 160} y2={cy} {...DASH} />
+        <line x1={cx} y1={70} x2={cx} y2={170} {...LIGHT} />
+        <line x1={x + 10} y1={cy} x2={x + 160} y2={cy} {...LIGHT} />
+        {math && <rect x={cx - 26} y={cy - 30} width={52} height={60} {...LIGHT} />}
         <polygon points={pts} fill={TILE} {...LINE} />
-        {math && <rect x={cx - 26} y={cy - 30} width={52} height={60} {...DASH} strokeOpacity={0.9} />}
-        <circle cx={cx - 9 + nudge} cy={cy} r={4.5} fill={INK} />
-        <Label x={cx} y={214} anchor="middle">{label}</Label>
+        <circle cx={cx - 9 + nudge} cy={cy} r={4.5} fill={math ? INK : SIGNAL} />
+        <Label x={cx} y={214} anchor="middle" opacity={math ? 0.6 : 0.9}>{label}</Label>
       </g>
     );
   };
@@ -201,7 +203,7 @@ function OpticalCentre() {
 
 /* copy-is-design: the same card with placeholder text, and with the
    headline it shipped with. The real one runs three lines and grows past
-   the height it was designed at, which is dashed. */
+   the height it was designed at, marked and measured. */
 function LengthIsLayout() {
   const card = (x: number, real: boolean) => {
     const heading = real ? [140, 150, 96] : [130];
@@ -226,9 +228,10 @@ function LengthIsLayout() {
     <>
       {card(60, false)}
       {card(320, true)}
-      <line x1={506} y1={200} x2={530} y2={200} {...DASH} strokeOpacity={0.9} />
-      <Dim x1={520} y1={200} x2={520} y2={236} />
-      <Label x={528} y={222} size={12} opacity={0.85}>+3 lines</Label>
+      {/* Where the card was meant to end, carried across, and the overrun. */}
+      <line x1={244} y1={200} x2={530} y2={200} {...LIGHT} />
+      <Dim x1={520} y1={200} x2={520} y2={236} stroke={ACCENT} />
+      <Label x={528} y={222} size={12} opacity={0.9} color={SIGNAL}>+3 lines</Label>
     </>
   );
 }
@@ -254,8 +257,9 @@ function TenthPage() {
         return (
           <>
             <line x1={x + 10} y1={y + 14} x2={x + 46} y2={y + 14} {...LINE} strokeWidth={2.2} />
-            <rect x={x + 10} y={y + 26} width={64} height={34} {...LINE} strokeOpacity={0.5} />
+            <rect x={x + 10} y={y + 26} width={64} height={34} {...LIGHT} />
             <Box x={x + 40} y={y + 70} w={72} h={22} d={0.06} vp={VP} />
+            <line x1={x + 84} y1={y + 66} x2={x + 84} y2={y + 96} {...ACCENT} />
           </>
         );
       })()}
@@ -272,26 +276,26 @@ function DriftAndGreys() {
   const names = ["#e2e2e2", "#e2e2e2", "#dfdfe4"];
   return (
     <>
-      <line x1={80} y1={16} x2={80} y2={214} {...DASH} strokeOpacity={0.9} />
+      <line x1={80} y1={16} x2={80} y2={214} {...LIGHT} />
       {/* Drawn 6 units off rather than a literal 2px so the drift shows at
           figure scale; the label carries the real number. */}
       {[0, 1, 2].map((i) => (
         <Box key={i} x={i === 1 ? 86 : 80} y={36 + i * 60} w={140} h={34} d={0.04} vp={VP} light={i !== 1} />
       ))}
-      <Label x={234} y={118} size={12} opacity={0.85}>2px off</Label>
+      <Dim x1={80} y1={113} x2={86} y2={113} stroke={ACCENT} />
+      <Label x={234} y={118} size={12} opacity={0.9} color={SIGNAL}>2px off</Label>
       {greys.map((g, i) => (
         <g key={i}>
           <Box x={322 + i * 76} y={74} w={60} h={60} d={0.12} vp={VP} fill={g} light={i < 2} />
-          <Label x={352 + i * 76} y={162} anchor="middle" size={12} opacity={i === 2 ? 0.85 : 0.45}>{names[i]}</Label>
+          <Label x={352 + i * 76} y={162} anchor="middle" size={12} opacity={i === 2 ? 0.9 : 0.45} color={i === 2 ? SIGNAL : INK}>{names[i]}</Label>
         </g>
       ))}
-      <Mark x={464} y={38} w={76} h={100} />
     </>
   );
 }
 
 const FIGURES: Record<string, { viewBox: string; caption: string; Art: () => ReactElement }> = {
-  FortyDirections: { viewBox: "0 0 560 220", caption: "Forty directions before lunch. Three are worth keeping, and choosing them is the actual job.", Art: FortyDirections },
+  FortyDirections: { viewBox: "0 0 560 240", caption: "Forty directions before lunch. Three are worth keeping, and choosing them is the actual job.", Art: FortyDirections },
   TasteGap: { viewBox: "0 0 560 240", caption: "Taste shows up years before the ability to meet it. The gap closes through reps, not insight.", Art: TasteGap },
   PerceivedSpeed: { viewBox: "0 0 560 252", caption: "The same 2.4 seconds. One is a blank wait the whole time, the other shows the layout at 0.3s and reads as fast.", Art: PerceivedSpeed },
   RequestVersusProblem: { viewBox: "0 0 560 236", caption: "A redesign is the request. The brief's job is finding out which of these is the real problem.", Art: RequestVersusProblem },

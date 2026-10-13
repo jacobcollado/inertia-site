@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
 import { CTA_FILL, CTA_PILL_CLASS } from "@/lib/cta-chrome";
@@ -14,7 +14,27 @@ const REPLY_BUSINESS_DAYS = 3;
 const field =
   "h-11 w-full rounded-[6px] px-3.5 text-[16px] tracking-tight outline-none transition-shadow duration-200 placeholder:opacity-50 focus:shadow-[0_0_0_1.5px_var(--ink)]";
 
-export function TeardownDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+// Where the button that opened the dialog sits, as its centre's offset from
+// the middle of the screen. On wider screens the dialog grows out of that
+// spot and goes back into it on close, so it never just appears. Phones keep
+// the sheet sliding up from the bottom.
+export type TeardownOrigin = { x: number; y: number };
+
+export function originOf(el: Element): TeardownOrigin | undefined {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2 - window.innerWidth / 2, y: r.top + r.height / 2 - window.innerHeight / 2 };
+}
+
+export function TeardownDialog({
+  open,
+  onOpenChange,
+  from,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  from?: TeardownOrigin;
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
@@ -63,8 +83,16 @@ export function TeardownDialog({ open, onOpenChange }: { open: boolean; onOpenCh
       <DialogPrimitive.Portal>
         <DialogPrimitive.Backdrop className="fixed inset-0 z-50 bg-black/45 backdrop-blur-[6px] transition-opacity duration-300 data-[starting-style]:opacity-0 data-[ending-style]:opacity-0" />
         <DialogPrimitive.Popup
-          className="fixed inset-x-0 bottom-0 z-50 max-h-[92dvh] overflow-y-auto overscroll-contain rounded-t-[14px] p-6 outline-none transition-[transform,opacity] duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] data-[starting-style]:translate-y-6 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-4 data-[ending-style]:opacity-0 data-[ending-style]:duration-200 sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(30rem,calc(100vw-2rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[10px] sm:p-8 sm:data-[starting-style]:-translate-y-[calc(50%-16px)] sm:data-[ending-style]:-translate-y-[calc(50%-10px)]"
-          style={{ background: "var(--paper)", color: "var(--ink)", boxShadow: "0 24px 80px -20px rgb(0 0 0 / 0.35)" }}
+          className="fixed inset-x-0 bottom-0 z-50 max-h-[92dvh] overflow-y-auto overscroll-contain rounded-t-[14px] p-6 outline-none transition-[transform,opacity] duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] data-[starting-style]:translate-y-6 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-4 data-[ending-style]:opacity-0 data-[ending-style]:duration-200 sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(30rem,calc(100vw-2rem))] sm:rounded-[10px] sm:p-8 teardown-popup"
+          style={{
+            background: "var(--paper)",
+            color: "var(--ink)",
+            boxShadow: "0 24px 80px -20px rgb(0 0 0 / 0.35)",
+            // Without an origin it rises a little into place.
+            ["--from-x" as string]: `${from?.x ?? 0}px`,
+            ["--from-y" as string]: `${from?.y ?? 16}px`,
+            ["--from-s" as string]: from ? 0.3 : 0.98,
+          } as CSSProperties}
         >
           <DialogPrimitive.Close
             className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full transition-colors hover:bg-[var(--tile)]"
@@ -200,17 +228,21 @@ function Tick() {
 // The offer as a standalone CTA, for pages without the homepage hero.
 export function TeardownButton({ label = "Get a free teardown", className = "" }: { label?: string; className?: string }) {
   const [open, setOpen] = useState(false);
+  const [from, setFrom] = useState<TeardownOrigin>();
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          setFrom(originOf(e.currentTarget));
+          setOpen(true);
+        }}
         className={`${CTA_PILL_CLASS} transition-transform duration-150 active:scale-[0.97] ${className}`}
         style={{ background: CTA_FILL, color: "var(--cta-fg)", fontWeight: 450 }}
       >
         <span className="relative whitespace-nowrap">{label}</span>
       </button>
-      <TeardownDialog open={open} onOpenChange={setOpen} />
+      <TeardownDialog open={open} onOpenChange={setOpen} from={from} />
     </>
   );
 }

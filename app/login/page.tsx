@@ -17,7 +17,7 @@ export default async function LoginPage({
   const initialTab = tab === "signup" ? "signup" : "signin";
 
   return (
-    <main className="min-h-screen flex items-stretch">
+    <main className="flex items-stretch">
       <LoginForm initialTab={initialTab} />
     </main>
   );

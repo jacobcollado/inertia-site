@@ -6,18 +6,17 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
 import { ThemeSwitch } from "@/app/site-footer";
-import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
-import { CTA_HEADER_PILL_CLASS, CtaGrain } from "@/lib/cta-chrome";
+import { RoomsArt } from "@/components/rooms-art";
+import { useMounted } from "@/hooks/use-mounted";
 
-// Typography aligned with homepage index cards (questionnaire, body copy, inputs).
+// Typography from the homepage: the heading in the hero's display type
+// (light, large, tight), the line under it at body size.
 const LOGIN_TITLE =
-  "text-[clamp(1.35rem,3.2vw,2.05rem)] font-medium tracking-[-0.025em] leading-tight";
+  "text-[clamp(2.3rem,9vw,3rem)] sm:text-[clamp(2.6rem,4.4vw,3.6rem)] tracking-[-0.05em] leading-[0.95]";
 const LOGIN_SUBTITLE =
-  "text-[15px] sm:text-[16.5px] leading-relaxed tracking-tight";
-const LOGIN_SECTION_TITLE =
-  "text-[clamp(1.15rem,2.2vw,1.65rem)] font-medium tracking-[-0.025em] leading-tight";
+  "text-[16px] sm:text-[17px] leading-relaxed tracking-tight text-pretty";
 const LOGIN_INPUT = "text-[16px] tracking-tight";
-const LOGIN_BTN = "text-[15px] sm:text-[16px] font-medium tracking-tight";
+const LOGIN_BTN = "text-[15px] sm:text-[16px] tracking-tight";
 const LOGIN_UI = "text-[14px] sm:text-[14.5px] tracking-tight";
 const LOGIN_CAPTION = "text-[13px] sm:text-[14px] tracking-tight";
 
@@ -31,13 +30,13 @@ function Spinner() {
 }
 
 function Alert({ msg, tone }: { msg: string; tone: "error" | "info" }) {
-  const color = tone === "error" ? "rgb(220 38 38)" : "#0a84ff";
-  const cardBg = tone === "error" ? "rgb(220 38 38 / 0.06)" : "rgb(10 132 255 / 0.06)";
-  const border = tone === "error" ? "rgb(220 38 38 / 0.16)" : "rgb(10 132 255 / 0.16)";
+  // Info sits on the plain tile in ink; only an error takes a colour.
+  const color = tone === "error" ? "rgb(220 38 38)" : "var(--ink)";
+  const cardBg = tone === "error" ? "rgb(220 38 38 / 0.06)" : "var(--tile)";
   return (
     <div
-      className="flex items-start gap-2.5 rounded-xl px-3.5 py-3 text-left"
-      style={{ background: cardBg, border: `1px solid ${border}` }}
+      className="flex items-start gap-2.5 rounded-[6px] px-3.5 py-3 text-left"
+      style={{ background: cardBg }}
     >
       <span
         className="flex h-6 w-6 shrink-0 items-center justify-center"
@@ -56,7 +55,7 @@ function Alert({ msg, tone }: { msg: string; tone: "error" | "info" }) {
           </svg>
         )}
       </span>
-      <p className={`${LOGIN_UI} leading-snug pt-0.5`} style={{ color: "rgb(var(--fg))" }}>
+      <p className={`${LOGIN_UI} leading-snug pt-0.5`} style={{ color: "var(--ink)" }}>
         {msg}
       </p>
     </div>
@@ -71,23 +70,13 @@ function InfoMessage({ msg }: { msg: string }) {
   return <Alert msg={msg} tone="info" />;
 }
 
-function Divider() {
-  return (
-    <div className="flex items-center gap-3" aria-hidden="true">
-      <div className="flex-1 h-px" style={{ background: "rgb(var(--line))" }} />
-      <span className={`${LOGIN_CAPTION} text-[rgb(var(--muted))]`} style={{ opacity: 0.5 }}>or</span>
-      <div className="flex-1 h-px" style={{ background: "rgb(var(--line))" }} />
-    </div>
-  );
-}
-
 function EmailToggle({ onToggle }: { onToggle: () => void }) {
   return (
     <button
       type="button"
       onClick={onToggle}
-      className={`flex items-center justify-center gap-2 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-colors hover:bg-[rgb(var(--fg)/0.1)]`}
-      style={{ background: "rgb(var(--fg) / 0.06)", color: "rgb(var(--fg))" }}
+      className={`flex items-center justify-center gap-2 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-[filter,transform] duration-150 hover:brightness-[0.97] active:scale-[0.99]`}
+      style={{ background: "var(--tile)", color: "var(--ink)", fontWeight: 450 }}
     >
       Continue with email
     </button>
@@ -123,9 +112,9 @@ function EmailForm({
     const t = setTimeout(() => emailRef.current?.focus({ preventScroll: true }), ENTER_MS);
     return () => clearTimeout(t);
   }, [autoFocus]);
-  // Same 6px radius as the buttons, with a visible border on focus.
-  const inputBase = `w-full px-4 py-3 ${LOGIN_INPUT} rounded-[6px] outline-none transition-colors text-[rgb(var(--fg))] bg-[rgb(var(--fg)/0.035)] border border-[rgb(var(--fg)/0.1)] focus:border-[rgb(var(--fg)/0.4)] focus:bg-transparent placeholder:text-[rgb(var(--muted))] placeholder:opacity-70`;
-  const label = `${LOGIN_UI} text-[rgb(var(--muted))]`;
+  // Quiet tiles like the teardown form's fields, ringed in ink on focus.
+  const inputBase = `w-full h-12 px-4 ${LOGIN_INPUT} rounded-[6px] outline-none transition-shadow duration-200 text-[var(--ink)] bg-[var(--tile)] focus:shadow-[0_0_0_1.5px_var(--ink)] placeholder:text-[var(--ink-4)]`;
+  const label = `${LOGIN_UI} text-[var(--ink-3)]`;
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (typeof e.getModifierState === "function") setCapsLock(e.getModifierState("CapsLock"));
@@ -155,22 +144,15 @@ function EmailForm({
       <button
         type="button"
         onClick={onBack}
-        className={`flex items-center gap-1.5 ${LOGIN_UI} text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors self-start`}
+        className={`flex items-center gap-1.5 ${LOGIN_UI} text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors self-start`}
       >
         <svg viewBox="0 0 16 16" className="size-[1em] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <line x1="13" y1="8" x2="5" y2="8" />
           <line x1="8" y1="5" x2="5" y2="8" />
           <line x1="8" y1="11" x2="5" y2="8" />
         </svg>
-        Back
+        All sign-in options
       </button>
-
-      {/* Heading */}
-      <div className="flex items-center justify-center gap-2">
-        <h2 className={`${LOGIN_SECTION_TITLE} text-[rgb(var(--fg))]`}>
-          Continue with email
-        </h2>
-      </div>
 
       <form
         onSubmit={(e) => { e.preventDefault(); onSubmit(email, password, firstName, lastName); }}
@@ -219,7 +201,7 @@ function EmailForm({
             {mode === "signin" && (
               <Link
                 href="/reset-password"
-                className={`${LOGIN_UI} text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]`}
+                className={`${LOGIN_UI} text-[var(--ink-3)] transition-colors hover:text-[var(--ink)]`}
               >
                 Forgot password?
               </Link>
@@ -295,8 +277,8 @@ function EmailForm({
         <button
           type="submit"
           disabled={loading}
-          className={`mt-2 flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed`}
-          style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+          className={`mt-2 flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed`}
+          style={{ background: "var(--ink)", color: "var(--paper)", fontWeight: 450 }}
         >
           {loading ? <Spinner /> : null}
           {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
@@ -312,8 +294,8 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
       type="button"
       disabled={loading}
       onClick={onOAuth}
-      className={`flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed`}
-      style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))" }}
+      className={`flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-30 disabled:cursor-not-allowed`}
+      style={{ background: "var(--ink)", color: "var(--paper)", fontWeight: 450 }}
     >
       {oauthProvider === "google" ? <Spinner /> : (
         <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
@@ -389,8 +371,9 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   useEffect(() => {
     const el = liveContentRef.current;
     if (!el) return;
-    const obs = new ResizeObserver(([entry]) => {
-      const h = entry.contentRect.height;
+    // The full box, padding included (that padding is the focus ring's room).
+    const obs = new ResizeObserver(() => {
+      const h = el.offsetHeight;
       if (h > 0) setCardHeight(h);
     });
     obs.observe(el);
@@ -499,24 +482,13 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
 
   const renderAuth = (t: "signin" | "signup") => (
     <>
-      {/* Heading */}
-      <div className="flex flex-col text-center">
-        <p className={`${LOGIN_SUBTITLE} text-[rgb(var(--muted))] mb-2`}>
-          {t === "signin" ? "Welcome back to Inertia" : "Welcome to Inertia"}
-        </p>
-        <h1 className={`${LOGIN_TITLE} text-[rgb(var(--fg))]`}>
-          {t === "signin" ? "Sign in to your portal" : "Create your account"}
-        </h1>
-      </div>
-
       {t === "signin" && checkEmail && <InfoMessage msg="Check your email to confirm your account." />}
 
-      {/* Google button */}
-      <GoogleButton onOAuth={() => onOAuth("google")} loading={loading} oauthProvider={oauthProvider} />
-
-      <Divider />
-
-      <EmailToggle onToggle={() => switchView(t, "email")} />
+      {/* The two ways in, stacked: Google first, email under it. */}
+      <div className="flex flex-col gap-2.5">
+        <GoogleButton onOAuth={() => onOAuth("google")} loading={loading} oauthProvider={oauthProvider} />
+        <EmailToggle onToggle={() => switchView(t, "email")} />
+      </div>
 
       {error && <ErrorMessage msg={error} />}
 
@@ -526,9 +498,9 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
         <button
           type="button"
           onClick={() => switchTab(t === "signin" ? "signup" : "signin")}
-          className={`${LOGIN_UI} text-[rgb(var(--muted))] hover:text-[rgb(var(--fg))] transition-colors text-center`}
+          className={`${LOGIN_UI} text-[var(--ink-3)] hover:text-[var(--ink)] transition-colors text-left`}
         >
-          {t === "signin" ? "No account? Create one →" : "Already have an account? Sign in →"}
+          {t === "signin" ? "No account? Create one" : "Already have an account? Sign in"}
         </button>
       )}
     </>
@@ -560,201 +532,168 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     ? { opacity: 0, transform: `translateX(${enterX}px) scale(0.98)`, filter: "blur(3px)", transition: "none" }
     : { opacity: 1, transform: "translateX(0) scale(1)", filter: "blur(0px)", transition: `opacity ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1), transform ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1), filter ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1)` };
 
+  // While signing in, the rooms beside the form walk forward, so you step
+  // through the doorways as you enter.
+  const entering = loading;
+  const mounted = useMounted();
+
+  // From lg the form is centred against the drawing. Its height there is
+  // held at what the first view (the two ways in) needs, so the email form
+  // grows downward past it instead of re-centring the column: the heading
+  // never moves.
+  const restRef = useRef<HTMLDivElement>(null);
+  const [restH, setRestH] = useState<number | null>(null);
+  const atRest = displayedView === "auth" && phase === "idle";
+  useEffect(() => {
+    const el = restRef.current;
+    if (!el || !atRest) return;
+    const measure = () => setRestH(el.offsetHeight);
+    measure();
+    const obs = new ResizeObserver(measure);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [atRest]);
+
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full">
 
-      {/* Top bar — fixed so it doesn't affect centering */}
-      <div className="fixed top-0 inset-x-0 z-10 px-6 sm:px-8" style={{ height: 72 }}>
-        <div
-          className="flex items-center justify-between h-full mx-auto w-full max-w-[80rem]"
-        >
-          <Link href="/">
-            <img src="/logo.png" alt="Inertia" className="inertia-logo h-6 w-auto" style={{ display: "block" }} />
-          </Link>
-          <div className="flex items-center gap-3">
-            <a
-              href="https://cal.com/jacob-c-99otvp/15min"
-              target="_blank"
-              rel="noreferrer"
-              className={CTA_HEADER_PILL_CLASS}
-              style={{
-                justifyContent: "center",
-                background: "var(--hdr-fill)",
-                color: "var(--hdr-fg)",
-                boxShadow: "none",
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-                transformOrigin: "center",
-              }}
-              {...ctaScaleHoverOnSelf}
-            >
-              <CtaGrain />
-              <span className="relative">Reach out</span>
-            </a>
+      {/* The site header (app/visual-notch.tsx) sits above, 56px tall. */}
+      <div className="min-h-[calc(100dvh-56px)] flex flex-col w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+        {/* Phones: from the top. From lg: the form and the drawing side by
+            side, the form centred on the drawing's height. */}
+        <div className="grid flex-1 content-start gap-6 pt-4 pb-10 sm:pt-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:content-center lg:items-center lg:gap-20 lg:py-10">
+
+          {/* The rooms from the homepage hero: the portal you're stepping
+              into. On top and short on phones, beside the form from lg. */}
+          <div className="order-1 lg:order-2" aria-hidden="true">
+            {mounted && (
+              <RoomsArt
+                frame="aspect-[16/10] w-full lg:aspect-[5/4]"
+                advance={entering ? 1 : 0}
+                delay={120}
+              />
+            )}
           </div>
-        </div>
-      </div>
 
-      {/* Form — centered in the viewport below the fixed header */}
-      <div className="min-h-dvh flex flex-col w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-        <div className="h-[72px] shrink-0" aria-hidden="true" />
-        <div className="flex flex-1 flex-col items-center justify-center pb-[10vh]">
-          <div className="w-full max-w-3xl mx-auto flex flex-col items-center -translate-y-3 sm:-translate-y-4">
-        {/* Who has an account: Aether owners and studio clients. There's no
-            open sign-up, so this says who it's for rather than how to get in.
-            Sits above the card so it reads as page-level context. */}
-        {!SIGNUPS_ENABLED && (
-          <div
-            className={`flex items-center justify-center gap-2 pl-1 pr-3.5 py-1 rounded-full ${LOGIN_CAPTION} mb-6`}
-            style={{ background: "rgb(var(--fg) / 0.05)", color: "rgb(var(--muted))" }}
-          >
-            <span
-              className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[var(--paper)]"
-              style={{ boxShadow: "var(--login-avatar-shadow)" }}
-            >
-              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="var(--ink)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="8" cy="5.5" r="2.5" />
-                <path d="M3.25 13.5a4.75 4.75 0 0 1 9.5 0" />
-              </svg>
-            </span>
-            <span className="leading-none">
-              For <span style={{ color: "rgb(var(--fg))" }}>Aether owners</span> and <span style={{ color: "rgb(var(--fg))" }}>Inertia clients</span>
-            </span>
-          </div>
-        )}
-        {/* Padding tightens while sign-ups are closed: with the tab notch gone
-            the card holds only a heading and two buttons. */}
-        <div
-          className={`w-full max-w-[420px] rounded-2xl ${SIGNUPS_ENABLED ? "p-8 sm:p-10" : "p-7 sm:p-8"}`}
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            // Keep depth but bias it away from the top — the heading area
-            // should stay clean white, with recession only at the edges.
-            // Surfaces live in globals.css (--login-card-*) so dark mode
-            // can swap them.
-            background: "var(--login-card-bg)",
-            boxShadow: "var(--login-card-shadow)",
-            animation: "rise-in 400ms cubic-bezier(0.22,1,0.36,1) both",
-          }}
-        >
-          {/* Side + bottom edges — top stays flat for the heading */}
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 pointer-events-none rounded-2xl"
-            style={{
-              background: "var(--login-card-edge)",
-            }}
-          />
-          <div className="relative z-[1] flex flex-col gap-6">
+          <div className="order-2 lg:order-1 w-full max-w-[26rem]" style={{ animation: "rise-in 500ms cubic-bezier(0.22,1,0.36,1) both" }}>
+            {/* The heading stays put while the options below it change. */}
+            <h1 className={LOGIN_TITLE} style={{ color: "var(--ink)", fontWeight: 420 }}>
+              {displayedTab === "signin" ? "Welcome back." : "Make an account."}
+            </h1>
+            <p className={`${LOGIN_SUBTITLE} mt-4 sm:mt-5`} style={{ color: "var(--ink-2)" }}>
+              {SIGNUPS_ENABLED
+                ? "Follow your project and manage your Aether licenses in one place."
+                : "For Inertia clients and Aether owners. Follow your project and manage your licenses in one place."}
+            </p>
 
-            {/* Tab notch — collapses to 0 height while on the dedicated email
-                card, since Back already covers navigation there.
-                Not rendered AT ALL while sign-ups are closed: with one tab
-                left there's nothing to switch between, and a zero-height
-                child still costs a full gap-6 in this column. */}
+            {/* Tabs, only while sign-ups are open: collapses on the email
+                view, since its own link already leads back. */}
             {SIGNUPS_ENABLED && (
-            <div
-              className="flex justify-center overflow-hidden"
-              style={{
-                height: displayedView === "auth" ? 40 : 0,
-                opacity: displayedView === "auth" ? 1 : 0,
-                transition: "height 280ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease",
-              }}
-            >
-              <div className="relative flex items-center gap-1 rounded-full p-1" style={{ background: "rgb(var(--fg) / 0.06)" }}>
-                {pillRect && (
-                  <div
-                    aria-hidden="true"
-                    className="absolute top-1 bottom-1 rounded-full"
-                    style={{
-                      left: pillRect.left,
-                      width: pillRect.width,
-                      background: "rgb(var(--fg))",
-                      transition: "left 320ms cubic-bezier(0.65,0,0.35,1), width 320ms cubic-bezier(0.65,0,0.35,1)",
-                    }}
-                  />
-                )}
-                {(SIGNUPS_ENABLED ? (["signin", "signup"] as const) : (["signin"] as const)).map((t) => (
-                  <button
-                    key={t}
-                    ref={(el) => { tabRefs.current[t] = el; }}
-                    onClick={() => switchTab(t)}
-                    className="relative px-5 py-2 text-[14px] sm:text-[15px] tracking-tight rounded-full transition-colors duration-200"
-                    style={{ color: tab === t ? "rgb(var(--bg))" : "rgb(var(--muted))" }}
-                  >
-                    {t === "signin" ? "Sign in" : "Create account"}
-                  </button>
-                ))}
+              <div
+                className="mt-8 flex overflow-hidden"
+                style={{
+                  height: displayedView === "auth" ? 40 : 0,
+                  opacity: displayedView === "auth" ? 1 : 0,
+                  transition: "height 280ms cubic-bezier(0.22,1,0.36,1), opacity 200ms ease",
+                }}
+              >
+                <div className="relative flex items-center gap-1 rounded-[8px] p-1" style={{ background: "var(--tile)" }}>
+                  {pillRect && (
+                    <div
+                      aria-hidden="true"
+                      className="absolute top-1 bottom-1 rounded-[6px]"
+                      style={{
+                        left: pillRect.left,
+                        width: pillRect.width,
+                        background: "var(--paper)",
+                        transition: "left 320ms cubic-bezier(0.65,0,0.35,1), width 320ms cubic-bezier(0.65,0,0.35,1)",
+                      }}
+                    />
+                  )}
+                  {(["signin", "signup"] as const).map((t) => (
+                    <button
+                      key={t}
+                      ref={(el) => { tabRefs.current[t] = el; }}
+                      onClick={() => switchTab(t)}
+                      className="relative px-4 py-1.5 text-[14px] tracking-tight rounded-[6px] transition-colors duration-200"
+                      style={{ color: tab === t ? "var(--ink)" : "var(--ink-3)" }}
+                    >
+                      {t === "signin" ? "Sign in" : "Create account"}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
             )}
 
-            {/* Animated content — height locked while auth options are shown
-                so switching tabs/views never resizes the card. */}
+            {/* Held at the first view's height from lg (see restH); what
+                grows past it hangs below. */}
+            <div className="lg:h-[var(--rest-h)]" style={{ ["--rest-h" as string]: restH ? `${restH}px` : "auto" }}>
+            <div ref={restRef}>
+            {/* The options, which slide between the two ways in and the
+                email form. The height eases with whichever is showing. */}
             <div
+              className="relative mt-8 sm:mt-10"
               style={{
                 height: cardHeight ?? maxCardHeight,
                 transition: "height 280ms cubic-bezier(0.22,1,0.36,1)",
-                overflow: "hidden",
+                // clip, not hidden: a hidden box can still be scrolled, and
+                // the browser scrolls it to keep focus in view when an error
+                // grows the form, hiding its top.
+                overflow: "clip",
+                // Room for the focus ring, which the clip would cut.
+                marginLeft: -3,
+                marginRight: -3,
+                paddingLeft: 3,
+                paddingRight: 3,
               }}
             >
-              <div
-                ref={liveContentRef}
-                style={contentStyle}
-                className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}
-              >
+              <div ref={liveContentRef} style={contentStyle} className="flex flex-col gap-5 py-[3px]">
                 {renderBody(displayedTab, displayedView, true)}
+              </div>
+
+              {/* Hidden sizers: off-screen copies of each view, only to
+                  measure their natural height. */}
+              <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 3, right: 3, visibility: "hidden", pointerEvents: "none", zIndex: -1 }}>
+                <div ref={signinSizerRef} className="flex flex-col gap-5 py-[3px]">
+                  {renderBody("signin", "auth")}
+                </div>
+                <div ref={signinEmailSizerRef} className="flex flex-col gap-5 py-[3px]">
+                  {renderBody("signin", "email")}
+                </div>
+                {SIGNUPS_ENABLED && (
+                  <>
+                    <div ref={signupSizerRef} className="flex flex-col gap-5 py-[3px]">
+                      {renderBody("signup", "auth")}
+                    </div>
+                    <div ref={signupEmailSizerRef} className="flex flex-col gap-5 py-[3px]">
+                      {renderBody("signup", "email")}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            <p
-              className={`${LOGIN_CAPTION} text-[rgb(var(--muted))] text-center [text-wrap:balance]`}
-            >
+            <p className={`${LOGIN_CAPTION} mt-8 text-[var(--ink-3)] [text-wrap:pretty]`}>
               By continuing, you agree to our{" "}
-              <Link href="/policies/terms-of-service" className="underline hover:text-[rgb(var(--fg))] transition-colors">
-                Terms of service
+              <Link href="/policies/terms-of-service" className="underline decoration-[var(--ink-4)] underline-offset-2 transition-colors hover:text-[var(--ink)]">
+                Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="/policies/privacy-policy" className="underline hover:text-[rgb(var(--fg))] transition-colors">
-                Privacy policy
+              <Link href="/policies/privacy-policy" className="underline decoration-[var(--ink-4)] underline-offset-2 transition-colors hover:text-[var(--ink)]">
+                Privacy Policy
               </Link>
               .
             </p>
-
-          </div>
-
-          {/* Hidden sizers — off-screen copies of every tab × view combo used
-              only to measure natural height. Not visible, not interactive. */}
-          <div aria-hidden="true" style={{ position: "absolute", top: 0, left: 0, right: 0, visibility: "hidden", pointerEvents: "none", zIndex: -1 }}>
-            {/* Sizer gap MUST match the live content's gap above, or the card
-                locks to a height the real layout never uses. */}
-            <div ref={signinSizerRef} className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}>
-              {renderBody("signin", "auth")}
             </div>
-            <div ref={signinEmailSizerRef} className={`flex flex-col ${SIGNUPS_ENABLED ? "gap-6" : "gap-5"}`}>
-              {renderBody("signin", "email")}
             </div>
-            {SIGNUPS_ENABLED && (
-              <>
-                <div ref={signupSizerRef} className="flex flex-col gap-6">
-                  {renderBody("signup", "auth")}
-                </div>
-                <div ref={signupEmailSizerRef} className="flex flex-col gap-6">
-                  {renderBody("signup", "email")}
-                </div>
-              </>
-            )}
           </div>
         </div>
-        </div>
-        </div>
+
         {/* The theme switch, out of the way at the foot of the page. */}
-        <div className="flex shrink-0 justify-center pb-6 sm:pb-8">
+        <div className="flex shrink-0 pb-6 sm:pb-8">
           <ThemeSwitch />
         </div>
       </div>
-
     </div>
   );
 }

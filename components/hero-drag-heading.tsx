@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, type CSSProperties, type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 // The homepage hero heading's words, laid out per breakpoint (see `layout`
 // below). Static type: the words don't move.
@@ -33,41 +33,10 @@ function layout(lines: string[][], mobileLines: string[][]): Slot[] {
   return slots;
 }
 
-// A "*" in a heading word is censored with a redaction bar in the signal
-// colour, the reviewer's redline striking the letter out. Screen readers
-// still get the word as written, asterisk and all.
-//
-// The bar is cut to the lowercase "u" it usually stands in for, measured
-// from the heading's typeface (Satoshi): the u's ink is 0.446em wide, starts
-// 0.05em into its slot and stands exactly the x-height, 0.496em, on the
-// baseline. Its right margin is the u's right side-bearing less the
-// heading's negative tracking, so the letters either side sit as close as
-// they would to a real u.
-const REDACT: CSSProperties = {
-  width: "0.446em",
-  height: "0.496em",
-  marginLeft: "0.05em",
-  marginRight: "0.018em",
-  borderRadius: "0.035em",
-};
+// A "*" in a heading word is set as plain type, in the heading's own ink.
+// Kept as a hook so a word can be treated specially again.
 function censor(word: string): ReactNode {
-  if (!word.includes("*")) return word;
-  return (
-    <span aria-label={word} role="img">
-      {word.split(/(\*)/).map((part, k) =>
-        part === "*" ? (
-          <span
-            key={k}
-            aria-hidden="true"
-            className="inline-block align-baseline"
-            style={{ ...REDACT, background: "var(--signal)" }}
-          />
-        ) : (
-          <span key={k} aria-hidden="true">{part}</span>
-        ),
-      )}
-    </span>
-  );
+  return word;
 }
 
 export function HeroDragHeading({

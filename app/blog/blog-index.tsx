@@ -64,9 +64,12 @@ function Cell({ post, lead, className = "" }: { post: BlogCard; lead?: boolean; 
 // hover where there is one.
 function Reveal({ line }: { line: string }) {
   return (
-    <div className={`grid grid-rows-[1fr] transition-[grid-template-rows,opacity] ${EASE} [@media(hover:hover)]:grid-rows-[0fr] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:grid-rows-[1fr] [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100`}>
+    <div className={`grid grid-rows-[1fr] transition-[grid-template-rows] ${EASE} [@media(hover:hover)]:grid-rows-[0fr] [@media(hover:hover)]:group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]`}>
       <p className="overflow-hidden">
-        <span className="block pt-2 line-clamp-2 text-pretty text-[14px] leading-snug tracking-tight sm:text-[15px]" style={{ color: "var(--ink-2)" }}>
+        <span
+          className={`line-clamp-2 pt-2 text-pretty text-[14px] leading-snug tracking-tight transition-[opacity,transform] ${EASE} sm:text-[15px] [@media(hover:hover)]:translate-y-1 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:delay-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100`}
+          style={{ color: "var(--ink-3)" }}
+        >
           {line}
         </span>
       </p>
@@ -81,10 +84,14 @@ function Card({ post }: { post: BlogCard }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-square"
+      className="group relative flex aspect-[4/5] flex-col overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-square"
     >
-      <div className={`absolute inset-x-0 top-0 aspect-[4/3] transition-transform ${EASE} [@media(hover:hover)]:group-hover:-translate-y-6 group-focus-visible:-translate-y-6`}>
-        {mounted && <MaterialCover slug={post.slug} />}
+      {/* Centred in the room the text leaves it, gliding up with its middle
+          as the line opens. */}
+      <div className="relative min-h-0 flex-1">
+        <div className="absolute inset-x-0 top-1/2 aspect-[4/3] -translate-y-1/2">
+          {mounted && <MaterialCover slug={post.slug} />}
+        </div>
       </div>
       <div className="relative p-5 sm:p-6">
         <Tag tag={post.tag} />

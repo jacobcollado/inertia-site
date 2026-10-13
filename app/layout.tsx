@@ -28,10 +28,10 @@ export const metadata: Metadata = {
     default: "Inertia | Identity and Web Studio",
     template: "%s - Inertia",
   },
-  description: "Inertia is a Gen Z-led identity studio. We redesign brands and websites for the next generation of buyers, from audit to launch.",
+  description: "Inertia is a minimalist design studio for companies and builders. We design identities and websites, from audit to launch.",
   // Studio first, product second: this is the default for every page that
   // doesn't set its own, so it describes Inertia rather than Aether.
-  keywords: ["Inertia", "Inertia studio", "design studio", "design studio for founders", "brand direction", "web design", "product design", "Shopify storefront design", "Aether Shopify theme"],
+  keywords: ["Inertia", "Inertia studio", "design studio", "design studio for founders", "identity design", "web design", "product design", "Shopify storefront design", "Aether Shopify theme"],
   authors: [{ name: "Inertia" }],
   creator: "Inertia",
   openGraph: {
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     url: BASE_URL,
     siteName: "Inertia",
     title: "Inertia | Identity and Web Studio",
-    description: "Inertia is a Gen Z-led identity studio. We redesign brands and websites for the next generation of buyers, from audit to launch.",
+    description: "Inertia is a minimalist design studio for companies and builders. We design identities and websites, from audit to launch.",
     images: [{ url: "/og.png", width: 1200, height: 630, alt: "Inertia - Design Studio" }],
   },
   twitter: {
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     site: "@inertia_dev",
     creator: "@inertia_dev",
     title: "Inertia | Identity and Web Studio",
-    description: "Inertia is a Gen Z-led identity studio. We redesign brands and websites for the next generation of buyers, from audit to launch.",
+    description: "Inertia is a minimalist design studio for companies and builders. We design identities and websites, from audit to launch.",
     images: ["/og.png"],
   },
   robots: {
@@ -116,7 +116,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "width": 512,
               "height": 512,
             },
-            "description": "Inertia is a Gen Z-led identity studio. We redesign brands and websites for the next generation of buyers, from audit to launch. Makers of Aether, a Shopify theme.",
+            "description": "Inertia is a minimalist design studio for companies and builders. We design identities and websites, from audit to launch. Makers of Aether, a Shopify theme.",
             "email": "hello@byinertia.com",
             "sameAs": [
               "https://www.instagram.com/by.inertia/",

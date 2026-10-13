@@ -7,11 +7,16 @@ import { VisualNotch } from "./visual-notch";
 import { MinimalFooter } from "./site-footer";
 import { isThemedPath } from "./theme-provider";
 
-const BARE_ROUTES = ["/dashboard", "/login", "/admin", "/reset-password", "/accept-invite", "/docs"];
+const BARE_ROUTES = ["/dashboard", "/admin", "/accept-invite", "/docs"];
+// The site's header without its footer: sign in and reset password, which
+// fill the screen below it themselves.
+const HEADER_ONLY_ROUTES = ["/login", "/reset-password"];
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const bare = BARE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
+  const headerOnly = HEADER_ONLY_ROUTES.includes(pathname);
+  // Bare for the homepage background handling below, too.
+  const bare = headerOnly || BARE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
   // Routes that set their own <html> background (via .dashboard-dark) so iOS
   // Safari tints its toolbars to match the page rather than to white. Keep in
@@ -95,6 +100,14 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     };
   }, [isHome, bare, ownsRootBackground, themed]);
 
+  if (headerOnly) {
+    return (
+      <>
+        <VisualNotch />
+        {children}
+      </>
+    );
+  }
   if (bare) return <>{children}</>;
 
   return (

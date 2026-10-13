@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="min-h-screen flex items-stretch">
+    <main className="flex items-stretch">
       <ResetPasswordForm />
     </main>
   );

@@ -593,12 +593,16 @@ function InertiaLogo() {
 function MergedCTA({
   compact: _compact = false,
   hideContact = false,
+  hideSignIn = false,
 }: {
   compact?: boolean;
   hideContact?: boolean;
+  // On the sign-in page itself, where it would only lead back to itself.
+  hideSignIn?: boolean;
 }) {
   return (
     <div className={`relative inline-flex items-center gap-2 ${CTA_HEADER_SHELL_HEIGHT_CLASS}`}>
+      {!hideSignIn && (
       <Link
         href="/login"
         className={CTA_HEADER_PILL_CLASS}
@@ -613,6 +617,7 @@ function MergedCTA({
       >
         <span className="relative">Sign in</span>
       </Link>
+      )}
       {!hideContact ? (
         <a
           href="https://cal.com/jacob-c-99otvp/15min"
@@ -701,7 +706,7 @@ export function VisualNotch() {
     // stylesheet (.site-header__bg--framed), so they skip this. The header stays mounted
     // across client navigations, so clear what another page wrote inline
     // first; left in place, it overrode that blur with a solid fill.
-    if (pathname === "/" || pathname === "/aether" || pathname === "/aether/changelog" || pathname === "/work" || pathname.startsWith("/work/")) {
+    if (pathname === "/" || pathname === "/aether" || pathname === "/aether/changelog" || pathname === "/work" || pathname.startsWith("/work/") || pathname === "/login" || pathname === "/reset-password") {
       bgEl.style.background = "";
       bgEl.style.backdropFilter = "";
       (bgEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "";
@@ -812,9 +817,11 @@ export function VisualNotch() {
   // Pages laid out in the frame (rails and rounded cells): the header is a
   // cell of it too, a plain blur with its boundary below.
   // These pages take a plain blur for the header, with no refraction.
-  const plainBlur = isHome || isAetherFramed || isWorkCase;
+  // Sign in and reset password take the homepage's header as it is.
+  const isAuth = pathname === "/login" || pathname === "/reset-password";
+  const plainBlur = isHome || isAetherFramed || isWorkCase || isAuth;
   const isFramed = FRAMED && plainBlur;
-  const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
+  const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog || isAuth;
 
   // Every page's header sits on the homepage's column: 80rem wide, its logo
   // and buttons 32px in from sm up (phones are fixed at 23px in
@@ -887,12 +894,14 @@ export function VisualNotch() {
               <div className="hidden sm:flex">
                 <MergedCTA
                   hideContact={isAetherLanding}
+                  hideSignIn={pathname === "/login"}
                 />
               </div>
               <div className={isComponents ? "hidden" : "flex sm:hidden"}>
                 <MergedCTA
                   compact
                   hideContact={isAetherLanding}
+                  hideSignIn={pathname === "/login"}
                 />
               </div>
               {isComponents && (

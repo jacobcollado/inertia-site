@@ -48,7 +48,7 @@ export function FieldArt({ className = "", play = true, delay = 0 }: { className
     let vy = new Float32Array(0);
     let born = new Float32Array(0); // ms after start that each point appears
     let ink = "26 26 26";
-    let signal = "255 90 31";
+    let signal = "42 92 255";
     let soft = SOFT;
     let pullK = PULL;
 

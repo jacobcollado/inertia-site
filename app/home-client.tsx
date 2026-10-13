@@ -5,15 +5,14 @@ import { createPortal } from "react-dom";
 import { useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { FrameColumnRails, FrameRails, FrameRule } from "@/components/page-frame";
+import { FrameRails, FrameRule } from "@/components/page-frame";
 import { SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 import { HeroDragHeading } from "@/components/hero-drag-heading";
 import { SectionHeading } from "@/components/section-heading";
 import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
-import { TeardownDialog } from "@/components/teardown-dialog";
+import { TeardownDialog, originOf, type TeardownOrigin } from "@/components/teardown-dialog";
 import { HeroCanvas } from "@/components/hero-canvas";
 import { DirectionsArt } from "@/components/directions-art";
 import { MaterialCover } from "@/components/post-covers";
@@ -28,7 +27,6 @@ import {
   HERO_HEADING_LINES,
   HERO_HEADING_LINES_MOBILE,
   HERO_SUBLINE,
-  HERO_SUBLINE_MOBILE,
   WHAT_WE_DO_ITEMS,
 } from "@/lib/home-copy";
 import type { AskUserQuestion, AskUserAnswer } from "@/components/ui/ask-user-questions";
@@ -47,7 +45,7 @@ import type { PostMeta as FullPostMeta } from "@/lib/posts";
 
 // The fields of a post the homepage shows. app/page.tsx sends only these, so
 // the rest of each post doesn't ride along in the page's HTML.
-export type PostMeta = Pick<FullPostMeta, "slug" | "title" | "tag" | "excerpt">;
+export type PostMeta = Pick<FullPostMeta, "slug" | "title" | "tag" | "subtitle" | "summary">;
 
 export type ClientCarouselItem = {
   slug: string;
@@ -484,10 +482,11 @@ function VercelHero({
   accentColor: string;
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
 }) {
-  const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [teardownOpen, setTeardownOpen] = useState(false);
+  // Where the button sits, so the dialog grows out of it and returns there.
+  const [teardownFrom, setTeardownFrom] = useState<TeardownOrigin>();
 
   useEffect(() => {
     const el = ref.current;
@@ -524,11 +523,6 @@ function VercelHero({
   // Cloud pill waits until the CTA has actually finished landing —
   // ctaFadeDelay is only when that transition *starts*.
   const cloudDelay = ctaFadeDelay + HERO_LIQUID_MS;
-
-  useEffect(() => {
-    if (!visible) return;
-    router.prefetch("/aether");
-  }, [visible, router]);
 
   return (
     <section
@@ -570,19 +564,21 @@ function VercelHero({
           </p>
           )}
 
+          {/* Display type: large, light and tight, so the line carries the
+              hero on its own. Lighter than the section headings (450), which
+              is what lets it run this big without shouting. */}
           <h1
-            className="tracking-[-0.05em] leading-[0.98] text-[clamp(1.9rem,9vw,2.5rem)] sm:tracking-[-0.045em] sm:text-[clamp(1.8rem,4.2vw,4rem)] flex flex-col items-start"
-            style={{ color: "var(--ink)", fontWeight: 450 }}
+            className="tracking-[-0.05em] leading-[0.95] text-[clamp(2.1rem,10.4vw,2.9rem)] sm:tracking-[-0.052em] sm:leading-[0.94] sm:text-[clamp(2.6rem,6.2vw,5.6rem)] flex flex-col items-start"
+            style={{ color: "var(--ink)", fontWeight: 420 }}
           >
             <HeroDragHeading lines={HEADING_LINES} mobileLines={HEADING_LINES_MOBILE} align="left" />
           </h1>
 
           <p
-            className="max-w-none sm:max-w-xl -mt-4 sm:-mt-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-pretty sm:text-balance"
+            className="max-w-none sm:max-w-xl -mt-3 sm:-mt-2 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-pretty sm:text-balance"
             style={{ ...liquid(120), color: "var(--ink-2)" }}
           >
-            <span className="sm:hidden">{HERO_SUBLINE_MOBILE}</span>
-            <span className="hidden sm:inline">{HERO_SUBLINE}</span>
+            {HERO_SUBLINE}
           </p>
 
           {false && (
@@ -625,6 +621,7 @@ function VercelHero({
                 href="#start"
                 onClick={e => {
                   e.preventDefault();
+                  setTeardownFrom(originOf(e.currentTarget));
                   setTeardownOpen(true);
                 }}
                 className={CTA_PILL_CLASS}
@@ -639,28 +636,6 @@ function VercelHero({
                 <CtaGrain />
                 <span className="relative whitespace-nowrap">Get a free teardown</span>
               </a>
-            </span>
-            <span
-              className="relative inline-flex rounded-[6px]"
-              style={{
-                boxShadow: CTA_OUTER_SHADOW,
-                transformOrigin: "center",
-              }}
-            >
-              <Link
-                href="/aether"
-                aria-label="View Aether"
-                className={CTA_PILL_CLASS}
-                style={{
-                  background: "var(--tile-2)",
-                  color: "var(--ink)",
-                  boxShadow: CTA_INSET_SHADOW,
-                  fontWeight: 450,
-                }}
-                {...ctaScaleHoverOnParent}
-              >
-                <span className="relative whitespace-nowrap">View Aether</span>
-              </Link>
             </span>
             {false && (
             <a
@@ -677,7 +652,7 @@ function VercelHero({
             </a>
             )}
           </div>
-          <TeardownDialog open={teardownOpen} onOpenChange={setTeardownOpen} />
+          <TeardownDialog open={teardownOpen} onOpenChange={setTeardownOpen} from={teardownFrom} />
 
           <HeroCanvas
             play={visible}
@@ -1087,16 +1062,15 @@ function Questionnaire() {
 
   return (
     <section id="start" className="w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      {/* The dark zone opens on this: one large line that surfaces out of
-          the dark as the white card pulls away above it, then a muted
-          paragraph at the body size and the CTA (inverted for the dark
-          zone). The flow opens below it. */}
+      {/* The enquiry opens on one large line that surfaces as it scrolls
+          in, then a muted line at the body size and the CTA. The flow opens
+          below it. */}
       <div className="pt-24 sm:pt-40 mx-auto max-w-4xl text-center">
         <SurfacingLine text="Let’s make something people remember." className="mx-auto max-w-[14ch] mb-8 sm:mb-10" />
       </div>
       <div className="rise rise-stagger mx-auto max-w-2xl sm:max-w-3xl text-center">
         <p className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-[rgb(var(--muted))] text-balance">
-          Tell us a little about it. It takes about two minutes, and we read every answer.
+          Two minutes, and we read every answer.
         </p>
         {!open && (
           <span className="relative mt-8 sm:mt-10 inline-flex rounded-[6px]">
@@ -1836,9 +1810,61 @@ function WhatWeDo() {
   );
 }
 
+// A line of copy folded under a quiet toggle. Its plus turns into a minus as
+// the text opens, and the text eases open rather than appearing.
+function Fold({ label, text }: { label: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  const id = React.useId();
+  return (
+    <div className="mt-4 sm:mt-5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={id}
+        className="inline-flex items-center gap-1.5 text-[15px] tracking-tight transition-colors duration-200 hover:text-[var(--ink)] sm:text-[16px]"
+        style={{ color: open ? "var(--ink)" : "var(--ink-3)" }}
+      >
+        {label}
+        {/* A plus that closes to a minus: its upright turns flat onto the bar. */}
+        <svg viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" aria-hidden="true">
+          <line x1="2" y1="6" x2="10" y2="6" />
+          <line
+            x1="6"
+            y1="2"
+            x2="6"
+            y2="10"
+            className="transition-transform duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+            style={{ transformOrigin: "6px 6px", transform: open ? "rotate(90deg)" : "none" }}
+          />
+        </svg>
+      </button>
+      <div
+        id={id}
+        className="grid"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr", transition: "grid-template-rows 420ms cubic-bezier(0.22,1,0.36,1)" }}
+      >
+        <div className="overflow-hidden" inert={!open}>
+          <p
+            className="pt-3 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-pretty transition-opacity duration-300"
+            style={{ color: "var(--ink-2)", opacity: open ? 1 : 0 }}
+          >
+            {tokenizeCopy(text).map((t, k, all) => (
+              <React.Fragment key={t.key}>
+                {t.node}
+                {k < all.length - 1 ? " " : ""}
+              </React.Fragment>
+            ))}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // "How we think about AI": the Directions board acts the first paragraph
 // out (many directions explored, the wrong ones dropped, one shipped), with
-// the two paragraphs side by side under it on wider screens.
+// its point under it and the reasoning folded away.
 function AiApproach({ clients }: { clients: ClientCarouselItem[] }) {
   const [first, second] = AI_APPROACH;
   const boardRef = useRef<HTMLDivElement>(null);
@@ -1873,18 +1899,15 @@ function AiApproach({ clients }: { clients: ClientCarouselItem[] }) {
           {/* Drawn after hydration only, like the other sketches. */}
           {mounted && <DirectionsArt play={play} still={reduced} />}
         </div>
-        <div data-stagger className="mt-8 grid gap-5 sm:mt-12 sm:grid-cols-2 sm:gap-12">
+        {/* The point up front; the reasoning behind it folds away until
+            someone asks for it. */}
+        <div data-stagger className="mt-8 max-w-3xl sm:mt-12">
           <LiquidText
             text={first}
             className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
             style={{ color: "var(--ink-2)" }}
           />
-          <LiquidText
-            text={second}
-            delayMs={160}
-            className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
-            style={{ color: "var(--ink-2)" }}
-          />
+          <Fold label="Why judgment still matters" text={second} />
         </div>
       </section>
       <FrameRule tone="light" />
@@ -1895,114 +1918,13 @@ function AiApproach({ clients }: { clients: ClientCarouselItem[] }) {
   );
 }
 
-// Wraps everything from the hero through AiApproach in a white "card" that
-// sits on the page's true (black) canvas. As the card's own bottom edge
-// approaches and crosses into the viewport, it eases into a slightly
-// smaller, more tightly rounded shape — like it's settling back and away —
-// instead of just cutting to black the instant its flow position ends.
-// Tracks scroll position directly (same pattern as WorkThumbnails'
-// scrollScale effect) rather than a fixed-duration animation, so the motion
-// stays tied 1:1 to how far the user has scrolled and reverses cleanly.
+// Holds everything from the hero through the client wall on the page's
+// paper. It used to be a white card that shrank away from a grey panel
+// below it; the homepage is one colour now, so it's a plain wrapper.
 function LightCard({ children }: { children: React.ReactNode }) {
-  // Measured on a sentinel at the very end of the card's content, not the
-  // scaling element itself — reading getBoundingClientRect() off an element
-  // whose own transform you're about to update from that same read creates
-  // a feedback loop (the scaled position feeds back into the next scroll
-  // tick's measurement instead of tracking real scroll distance).
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    const card = cardRef.current;
-    if (!sentinel || !card) return;
-
-    // Polled every animation frame rather than driven off scroll events —
-    // Lenis (this site's smooth-scroll library) advances the real scroll
-    // position through its own RAF loop, not in lockstep with native
-    // `scroll` events, so an event-driven listener here was reading a
-    // position that lagged behind what was actually on screen, which is
-    // what read as snapping instead of tracking the wheel/swipe input.
-    // Polling directly every frame keeps this locked to the exact position
-    // Lenis is rendering right now.
-    const apply = () => {
-      const rect = sentinel.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // Ramps across a full viewport height of scrolling, starting the
-      // instant the sentinel (end of the card's content) crosses the
-      // bottom of the viewport, finishing once it's scrolled a full
-      // viewport height past that — a wide, generous window so the motion
-      // reads as continuous rather than resolving over a few px of scroll.
-      let progress = Math.min(1, Math.max(0, (vh - rect.bottom) / vh));
-      // Below this, the visual difference is imperceptible but a non-zero
-      // scale() value still forces the card onto its own GPU-composited
-      // layer — which is what caused a faint line to reappear right at the
-      // resting (should-be-untransformed) state: floating-point noise from
-      // getBoundingClientRect() rarely lands on exactly 0, so the `=== 1`
-      // check below almost never actually held even when nothing should be
-      // visually scaling yet. Snapping the whole low end to 0 first means
-      // the transform is genuinely omitted, not just visually close to it.
-      if (progress < 0.01) progress = 0;
-      const scale = 1 - progress * 0.08;
-      // On mobile the corner radius reads too large against the narrow
-      // viewport, so keep its ramp under 25px; desktop keeps the fuller
-      // 32→60 ramp.
-      const isMobile = window.innerWidth < 640;
-      const radius = isMobile ? 12 + progress * 13 : 32 + progress * 28;
-      card.style.transform = progress === 0 ? "" : `scale(${scale})`;
-      // The frame inside the card undoes the horizontal part of that scale
-      // (components/page-frame.tsx reads this), so its rails stay on the
-      // dark zone's rails behind the card instead of drifting inward.
-      card.style.setProperty("--frame-unscale", progress === 0 ? "1" : String(1 / scale));
-      card.style.borderBottomLeftRadius = `${radius}px`;
-      card.style.borderBottomRightRadius = `${radius}px`;
-      rafRef.current = requestAnimationFrame(apply);
-    };
-    rafRef.current = requestAnimationFrame(apply);
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
   return (
-    // The wrapper is the black backdrop the card scales away from. The card
-    // itself is normal document flow (its natural height determines the
-    // wrapper's height) but visually pinned flush to the wrapper via a
-    // second, absolutely-positioned "top pad" strip that always stays
-    // exactly full-width/full-black-free at the top — see below — so
-    // nothing at the very top edge (where the card never actually needs to
-    // shrink) can ever expose the black wrapper behind it, regardless of
-    // any sub-pixel rounding the scale()'d bottom edge introduces.
-    <div
-      className="relative"
-      style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--zone-bg))" }}
-    >
-      {/* Dark rails on the backdrop, in the same column as the dark zone's,
-          so the frame runs unbroken into it where the card pulls away. */}
-      <FrameColumnRails tone="dark" />
-      <div
-        ref={cardRef}
-        className="relative"
-        style={{
-          background: "var(--paper)",
-          borderBottomLeftRadius: 32,
-          borderBottomRightRadius: 32,
-          overflow: "hidden",
-          transformOrigin: "center top",
-        }}
-      >
-        {children}
-        <div ref={sentinelRef} />
-      </div>
-      {/* Covers exactly the sliver a scale()'d box can expose right at its
-          own top edge from sub-pixel rounding — a fixed-height white strip
-          that never moves or scales, so there's nothing dynamic left to
-          misalign against the wrapper's black background. */}
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 pointer-events-none" style={{ height: 6, background: "var(--paper)", zIndex: 1 }} />
-      {/* ...and the rails carried over that strip, so the frame stays
-          unbroken from the header into the card. */}
-      <FrameColumnRails tone="light" className="bottom-auto z-[2] h-[6px]" />
+    <div className="relative" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "var(--paper)" }}>
+      {children}
     </div>
   );
 }
@@ -2022,12 +1944,7 @@ const CLIENT_LOGO_TINT: Record<string, string> = {
   "allure-new-york": "#d9c39c",
 };
 
-// "In good company": a quiet wall of marks. Flat square tiles on the zone's
-// surface, each holding the client's logo masked in ink, so the grid stays
-// monochrome. The name and service stay hidden until hover, when the mark
-// lifts and they rise in at the bottom. Each tile links to its case study,
-// and one last tile with a "+" stands for whoever's next, pointing down to
-// the enquiry flow.
+// The client wall's motion (see ClientGrid).
 const WALL_EASE = "duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]";
 // Each logo's box, sized so they all carry the same visual weight: wide
 // wordmarks get more width, square marks less. `w` is the share of the cell's
@@ -2053,76 +1970,35 @@ const WALL_FIRST = [
   "trippie-redd", "ellora-la", "mood-swings", "samuel-norris",
 ];
 
-// The wall lights one tile at a time, as if it were being hovered, in a
-// scattered order so it never reads as a scan. A real hover takes over.
-const WALL_CYCLE = [0, 5, 2, 7, 1, 4, 6, 3];
-const WALL_CYCLE_MS = 2400;
-
-// The client wall: logos only, straight on the page, balanced by weight. The
-// name and what we did surface on the lit tile, hovered or cycling; the whole
-// cell links to the case study.
+// The client wall: every mark on its own quiet tile, the same tiles the
+// homepage's boards and cards use, in an even grid. Nothing moves until you
+// reach for it: on hover (or keyboard focus) the mark lifts to full ink and
+// the client's name and what we did rise in at the bottom, like the blog
+// cards' lines. Each tile links to its case study.
 function ClientGrid({ items: unordered }: { items: ClientCarouselItem[] }) {
-  const listRef = useRef<HTMLUListElement>(null);
-  const reduced = useReducedMotion() ?? false;
-  const [inView, setInView] = useState(false);
-  const [step, setStep] = useState(-1);
-  const [hovered, setHovered] = useState<number | null>(null);
-
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.35 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  // Steps through the cycle while the wall is on screen and nobody's
-  // hovering it. The first tile lights a beat after the wall arrives.
-  const cycling = inView && hovered === null && !reduced;
-  useEffect(() => {
-    if (!cycling) return;
-    const t = setTimeout(() => setStep((s) => s + 1), step < 0 ? 900 : WALL_CYCLE_MS);
-    return () => clearTimeout(t);
-  }, [cycling, step]);
-
   if (unordered.length === 0) return null;
   const rank = (slug: string) => {
     const i = WALL_FIRST.indexOf(slug);
     return i < 0 ? WALL_FIRST.length : i;
   };
   const items = [...unordered].sort((a, b) => rank(a.slug) - rank(b.slug));
-  const order = WALL_CYCLE.filter((i) => i < items.length);
-  const lit = hovered ?? (cycling && step >= 0 ? order[step % order.length] : null);
   return (
     <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <SectionHeading align="left" className="mb-10 text-balance sm:mb-14">{CLIENTS_HEADING}</SectionHeading>
-      <ul ref={listRef} data-stagger className="grid grid-cols-2 sm:grid-cols-4" onPointerLeave={() => setHovered(null)}>
-        {items.map((item, i) => {
+      <SectionHeading align="left" className="mb-8 text-balance sm:mb-12">{CLIENTS_HEADING}</SectionHeading>
+      <ul data-stagger className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+        {items.map((item) => {
           const box = WALL_LOGO[item.slug] ?? { w: "40%", ratio: "1 / 1" };
           return (
             <li key={item.slug}>
               <Link
                 href={`/work/${item.slug}`}
-                data-lit={lit === i}
-                // While one tile is lit the rest recede, so it's a spotlight
-                // rather than one bright tile among flat grey ones.
-                data-dim={lit !== null && lit !== i}
-                onPointerEnter={(e) => {
-                  if (e.pointerType === "mouse") setHovered(i);
-                }}
-                className="group relative flex aspect-[3/2] items-center justify-center rounded-[6px] transition-colors duration-500 data-[lit=true]:bg-[var(--tile)] focus-visible:bg-[var(--tile)] sm:aspect-[16/11]"
+                className="group relative flex aspect-[3/2] items-center justify-center overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-[16/11]"
                 aria-label={item.service ? `${item.client}, ${item.service}` : item.client}
               >
-                {/* A small signal dot marks the lit tile. */}
-                <span
-                  aria-hidden="true"
-                  className={`absolute right-3.5 top-3.5 size-1.5 rounded-full opacity-0 transition-opacity ${WALL_EASE} group-data-[lit=true]:opacity-100`}
-                  style={{ background: "var(--signal)" }}
-                />
                 {item.logo ? (
                   <span
                     aria-hidden="true"
-                    className={`block opacity-[0.82] transition-[opacity,transform] ${WALL_EASE} group-data-[lit=true]:opacity-100 sm:group-data-[lit=true]:-translate-y-2 group-data-[dim=true]:scale-[0.94] group-data-[dim=true]:opacity-[0.22]`}
+                    className={`block opacity-[0.72] transition-[opacity,transform] ${WALL_EASE} [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:sm:group-hover:-translate-y-3 group-focus-visible:opacity-100 sm:group-focus-visible:-translate-y-3`}
                     style={{
                       width: box.w,
                       aspectRatio: box.ratio,
@@ -2145,7 +2021,7 @@ function ClientGrid({ items: unordered }: { items: ClientCarouselItem[] }) {
                   <span className="text-[15px] tracking-tight" style={{ color: "var(--ink)" }}>{item.client}</span>
                 )}
                 <span
-                  className={`pointer-events-none absolute inset-x-4 bottom-3.5 hidden translate-y-1 text-[13px] leading-snug tracking-tight opacity-0 transition-all ${WALL_EASE} group-data-[lit=true]:translate-y-0 group-data-[lit=true]:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 sm:block`}
+                  className={`pointer-events-none absolute inset-x-4 bottom-3.5 hidden translate-y-2 text-[13px] leading-snug tracking-tight opacity-0 transition-[opacity,transform] ${WALL_EASE} [@media(hover:hover)]:group-hover:translate-y-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 sm:block`}
                   style={{ color: "var(--ink-3)" }}
                 >
                   {/* Name over service, like a credit: no separator. */}
@@ -2716,12 +2592,39 @@ function ClientCarousel({ initialItems }: { initialItems: ClientCarouselItem[] }
 
 // "Our thoughts": the three latest essays as tiles of one size. Each tile is
 // its cover (the same drawing as its post page; see MaterialCover) with the
-// title set inside along the bottom. On hover the drawing lifts and the
-// excerpt opens under the title; on touch screens, where there's no hover,
-// the excerpt simply shows. The full list sits behind the same quiet button
-// as the header's "Sign in".
+// title set inside along the bottom. Wider screens: three in a row, the
+// subtitle opening on hover (touch screens just show it). Phones: a sideways
+// swipe row, like the execution cards, where only the card in view opens
+// its subtitle, so one thing reads at a time. Either way the drawing stays
+// centred in the room above the text. The full list sits behind the same quiet button as the
+// header's "Sign in".
 function BlogCarousel({ posts }: { posts: PostMeta[] }) {
   const mounted = useMounted();
+  const listRef = useRef<HTMLUListElement>(null);
+  const [phone, setPhone] = useState(false);
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  useEffect(() => {
+    const root = listRef.current;
+    if (!phone || !root) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.index));
+        }
+      },
+      { root, threshold: 0.75 },
+    );
+    Array.from(root.children).forEach((c) => obs.observe(c));
+    return () => obs.disconnect();
+  }, [phone, posts.length]);
+
   if (posts.length === 0) return null;
   const list = posts.slice(0, 3);
   const ease = "duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]";
@@ -2740,15 +2643,25 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
         </Link>
       </div>
 
-      <ul data-stagger className="grid gap-3 sm:grid-cols-3 sm:gap-4">
-        {list.map((post) => (
-          <li key={post.slug}>
+      <ul
+        ref={listRef}
+        data-stagger
+        className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0"
+      >
+        {list.map((post, i) => (
+          <li key={post.slug} data-index={i} className="w-[85%] shrink-0 snap-start sm:w-auto">
             <Link
               href={`/blog/${post.slug}`}
-              className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-square"
+              data-active={phone && i === active}
+              className="group relative flex aspect-[4/5] flex-col overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-square"
             >
-              <div className={`absolute inset-x-0 top-0 aspect-[4/3] transition-transform ${ease} [@media(hover:hover)]:group-hover:-translate-y-6 group-focus-visible:-translate-y-6`}>
-                {mounted && <MaterialCover slug={post.slug} />}
+              {/* The drawing stays centred in whatever room the text leaves
+                  it: as the line opens below, the space shrinks and the
+                  drawing glides up with its middle, at its own size. */}
+              <div className="relative min-h-0 flex-1">
+                <div className="absolute inset-x-0 top-1/2 aspect-[4/3] -translate-y-1/2">
+                  {mounted && <MaterialCover slug={post.slug} />}
+                </div>
               </div>
               <div className="relative p-5 sm:p-6">
                 <h3
@@ -2757,11 +2670,18 @@ function BlogCarousel({ posts }: { posts: PostMeta[] }) {
                 >
                   {post.title}
                 </h3>
-                {post.excerpt && (
-                  <div className={`grid grid-rows-[1fr] transition-[grid-template-rows,opacity] ${ease} [@media(hover:hover)]:grid-rows-[0fr] [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:grid-rows-[1fr] [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:grid-rows-[1fr] group-focus-visible:opacity-100`}>
+                {(post.subtitle || post.summary) && (
+                  // The essay's one-line subtitle. Closed by default: phones
+                  // open it on the card in view, wider touch screens show it,
+                  // and with a pointer it opens on hover. The room opens
+                  // first and the words settle in just after it.
+                  <div className={`grid grid-rows-[0fr] transition-[grid-template-rows] ${ease} group-data-[active=true]:grid-rows-[1fr] sm:[@media(hover:none)]:grid-rows-[1fr] sm:[@media(hover:hover)]:group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]`}>
                     <p className="overflow-hidden">
-                      <span className="block pt-2 line-clamp-2 text-pretty text-[14px] leading-snug tracking-tight sm:text-[15px]" style={{ color: "var(--ink-2)" }}>
-                        {post.excerpt}
+                      <span
+                        className={`line-clamp-2 translate-y-1 pt-2 text-pretty text-[14px] leading-snug tracking-tight opacity-0 transition-[opacity,transform] ${ease} group-data-[active=true]:translate-y-0 group-data-[active=true]:opacity-100 group-data-[active=true]:delay-100 sm:text-[15px] sm:[@media(hover:none)]:translate-y-0 sm:[@media(hover:none)]:opacity-100 sm:[@media(hover:hover)]:group-hover:translate-y-0 sm:[@media(hover:hover)]:group-hover:opacity-100 sm:[@media(hover:hover)]:group-hover:delay-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100`}
+                        style={{ color: "var(--ink-3)" }}
+                      >
+                        {post.subtitle || post.summary}
                       </span>
                     </p>
                   </div>
@@ -3124,25 +3044,16 @@ function VisualLayout({
           Hidden for now — flip back on once the draw-in timing is right. */}
       {false && <HeroToIntroLine fromRef={ctaRef} toRef={introRef} />}
 
-      <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))", marginTop: -2 }}>
+      <div className="homepage-dark-zone" style={{ width: "100vw", marginLeft: "calc(50% - 50vw)", background: "rgb(var(--bg))" }}>
         <div className="relative mx-auto w-full max-w-[80rem] flex flex-col">
           <FrameRails tone="dark" />
           <div className="py-6 sm:py-10" />
 
           <Questionnaire />
 
-          {/* The blog closes the page. On the lower panel the tile tone would
-              match the panel itself in light mode, so its cards take the
-              panel's surface tones instead. */}
+          {/* The blog closes the page. */}
           <FrameRule tone="dark" />
-          <div
-            style={{
-              ["--tile" as string]: "rgb(var(--surface))",
-              ["--tile-3" as string]: "rgb(var(--surface-elevated))",
-            }}
-          >
-            <BlogCarousel posts={initialPosts} />
-          </div>
+          <BlogCarousel posts={initialPosts} />
 
           <div className="py-24 sm:py-28" />
         </div>
