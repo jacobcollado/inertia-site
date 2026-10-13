@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Heading } from "@/lib/posts";
+import { FRAMED } from "@/components/page-frame";
 import { GlassFilterDef, GLASS_FILTER_ID } from "@/components/ui/glass-card";
 
 // Matches the sheet's slide-out transition below, so it stays mounted for
@@ -336,10 +337,10 @@ export function TOCInline({
   );
 }
 
-// The Contents bar as it sits in the post: on phones it sticks to the top of
-// the screen once scrolled past, on a white strip across the sheet with a
-// hairline under it while stuck, so the contents stay one tap away while
-// reading. From sm up it scrolls away with the page as before. The sticky
+// The Contents bar as it sits in the post: at every width it sticks to the
+// top of the screen once scrolled past, on a white strip across the sheet
+// with a hairline under it while stuck, so the contents stay one tap away
+// while reading. (The site header scrolls away on posts, so top-0 is clear.) The sticky
 // element is this wrapper, a direct child of the long body column, so it
 // stays stuck for the whole article.
 export function TOCSticky({ headings }: { headings: Heading[] }) {
@@ -365,13 +366,14 @@ export function TOCSticky({ headings }: { headings: Heading[] }) {
           re-render would wipe that mark and hide it. The stuck padding
           change goes through style instead. */}
       <div
-        className="rise relative z-20 max-sm:sticky max-sm:top-0 max-sm:z-30 max-sm:-mx-6 max-sm:px-6 max-sm:bg-[var(--paper)] max-sm:pb-3 pt-[var(--toc-pt)] transition-[box-shadow,padding] duration-200"
+        className="rise sticky top-0 z-30 -mx-6 bg-[var(--paper)] px-6 pb-3 pt-[var(--toc-pt)] transition-[box-shadow,padding] duration-200 sm:-mx-12 sm:px-12"
         style={
           {
             "--toc-pt": stuck ? "12px" : "32px",
-            // The hairline is a 9% tint, so it's laid over a row of paper:
-            // on its own, the text scrolling underneath showed through it.
-            boxShadow: stuck
+            // With the frame on, a hairline under the stuck bar (a 9% tint
+            // laid over a row of paper, or the text showed through it).
+            // Frameless, the paper strip alone sets it apart.
+            boxShadow: stuck && FRAMED
               ? "0 1px 0 rgb(var(--ink-rgb) / 0.09), 0 1px 0 var(--paper)"
               : "0 1px 0 transparent, 0 1px 0 transparent",
           } as React.CSSProperties

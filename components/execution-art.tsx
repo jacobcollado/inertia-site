@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { Box, DASH, EASE, LineBoard as Board } from "@/components/line-art";
+import { SIGNAL } from "@/components/material-art";
 
 // Illustrations for the homepage's "How we think about execution"
 // principles, in the hero staircase's line style (components/line-art.tsx).
@@ -146,7 +147,8 @@ export function FollowThroughArt({ play }: { play: boolean }) {
         <g style={settle("translate(3px, -9px) rotate(-3deg)", 1, 800)}>
           <Box {...LID} />
           <g style={settle("translateX(-18px)", 2, 900)}>
-            <Box {...KNOB} />
+            {/* The last detail, the one that was still asking: in the signal colour. */}
+            <Box {...KNOB} fill={SIGNAL} />
           </g>
         </g>
         <Ring x={SEAM} y={BASE.y + 6} r={12} on={!done} delay={FIX[0] + 250} />

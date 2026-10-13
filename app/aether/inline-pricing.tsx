@@ -160,9 +160,9 @@ export function InlinePricing() {
                 <RevealDetail label="What's in them">
                   <ul className="flex flex-col gap-1.5 pt-3 pl-7 text-[14px] sm:text-[15px] tracking-tight text-[rgb(var(--muted))]">
                     {BONUSES.map((b) => (
-                      <li key={b.title}>
+                      <li key={b.title} className="flex flex-wrap items-baseline gap-x-3">
                         <span className="text-[rgb(var(--fg))]">{b.title}</span>
-                        <span className="opacity-70"> · {b.kind === "guide" ? "Guide" : "List"}</span>
+                        <span className="opacity-70">{b.kind === "guide" ? "Guide" : "List"}</span>
                       </li>
                     ))}
                   </ul>

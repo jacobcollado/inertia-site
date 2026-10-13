@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme, type ThemePref } from "./theme-provider";
 import { ASK_AI_STUDIO_PROMPT, AskAiLinks } from "@/components/ask-ai-links";
-import { FRAME_TONES, FrameColumnRails, FrameRule, type FrameTone } from "@/components/page-frame";
+import { FRAMED, FRAME_TONES, FrameColumnRails, FrameRule, type FrameTone } from "@/components/page-frame";
 
 const THEME_OPTIONS: { pref: ThemePref; label: string; Icon: typeof Sun }[] = [
   { pref: "light", label: "Light", Icon: Sun },
@@ -72,9 +72,9 @@ const FOOTER_COLUMNS: { title: string; links: FooterLink[] }[] = [
 ];
 
 const LEGAL: FooterLink[] = [
-  { label: "Terms", href: "/policies/terms-of-service" },
-  { label: "Privacy", href: "/policies/privacy-policy" },
-  { label: "Refunds", href: "/policies/refund-policy" },
+  { label: "Terms of Service", href: "/policies/terms-of-service" },
+  { label: "Privacy Policy", href: "/policies/privacy-policy" },
+  { label: "Refund Policy", href: "/policies/refund-policy" },
 ];
 
 const LINK = "text-[15px] tracking-tight text-[rgb(var(--muted))] transition-colors hover:text-[rgb(var(--fg))]";
@@ -121,8 +121,10 @@ function Wordmark() {
 // in dark mode and on the homepage's dark zone (tone="dark") alike. Comes in
 // with the same staggered reveal as the homepage sections. `rails` is off on
 // blog posts, which frame their own narrower sheet.
-// DMCA.com's protection badge. Their helper script only appends the page
-// being viewed as `refurl`, so that's done here instead of loading it.
+// DMCA.com's protection status, set as one more legal link instead of their
+// green badge image. Their helper
+// script only appends the page being viewed as `refurl`, so that's done
+// here instead of loading it.
 const DMCA_ID = "cc802ccb-91b7-4302-8bda-47f24b39beb3";
 const DMCA_STATUS = `https://www.dmca.com/Protection/Status.aspx?ID=${DMCA_ID}`;
 
@@ -132,15 +134,14 @@ function DmcaBadge() {
     setHref(`${DMCA_STATUS}&refurl=${encodeURIComponent(location.href)}`);
   }, []);
   return (
-    <a href={href} title="DMCA.com Protection Status" className="dmca-badge inline-flex opacity-60 transition-opacity hover:opacity-100" target="_blank" rel="noreferrer">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={`https://images.dmca.com/Badges/dmca-badge-w150-2x1-04.png?ID=${DMCA_ID}`}
-        alt="DMCA.com Protection Status"
-        width={48}
-        height={24}
-        loading="lazy"
-      />
+    <a
+      href={href}
+      title="DMCA.com Protection Status"
+      target="_blank"
+      rel="noreferrer"
+      className="dmca-badge text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60 transition-opacity hover:opacity-100"
+    >
+      DMCA Protected
     </a>
   );
 }
@@ -179,8 +180,9 @@ export function MinimalFooter({ themeSwitch = false, tone = "light", rails = tru
           {rails ? (
             <FrameRule tone={tone} className="py-8 sm:py-10" />
           ) : (
+            // With the frame off there's no line here either, only the space.
             <div aria-hidden="true" className="py-8 sm:py-10">
-              <div className="h-px" style={{ background: FRAME_TONES[tone].line }} />
+              {FRAMED && <div className="h-px" style={{ background: FRAME_TONES[tone].line }} />}
             </div>
           )}
         </div>

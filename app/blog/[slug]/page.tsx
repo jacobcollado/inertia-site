@@ -11,7 +11,7 @@ import { postFigure } from "@/components/post-figures";
 import { MaterialCover } from "@/components/post-covers";
 import { hasMaterialCover } from "@/components/post-cover-slugs";
 import { ACTION_RADIUS_CLASS } from "@/lib/cta-chrome";
-import { FrameRule } from "@/components/page-frame";
+import { FRAMED, FrameRule } from "@/components/page-frame";
 import {
   getAllPosts,
   getPost,
@@ -175,7 +175,10 @@ export default async function BlogPost({
         <div className="absolute inset-y-0 right-0 w-[10px]" style={{ backgroundImage: RULER }} />
       </div>
 
-      <article className="relative mx-auto w-full max-w-[56rem] bg-[var(--paper)] sm:rounded-b-[14px] sm:border-x sm:border-b sm:border-[rgb(var(--ink-rgb)/0.09)]">
+      {/* The sheet runs the same column as the header and the homepage
+          (80rem, 32px in); the text inside keeps a reading width. */}
+      <div className="mx-auto w-full max-w-[80rem] sm:px-8">
+      <article className="relative w-full bg-[var(--paper)] sm:rounded-b-[14px] sm:border-x sm:border-b sm:border-[rgb(var(--ink-rgb)/0.09)]">
         {/* Title block, centred. */}
         <header
           className="flex min-h-[var(--post-head)] flex-col items-center justify-center px-6 py-16 text-center sm:px-16 rise"
@@ -204,12 +207,12 @@ export default async function BlogPost({
         {/* Cover: the post's own drawing in the material kit, falling back
             to its glyph for a post without one. Full sheet width, as a cell
             of the frame: from sm up (where the sheet has its border rails)
-            the title cell closes above it, the cover's own corners round to
-            match, and the body opens below, the same split as the
-            homepage's section boundaries (FrameRule). */}
+            the title cell closes above it and the body opens below, the same
+            split as the homepage's section boundaries (FrameRule). The cover
+            itself stays square, flush with the sheet. */}
         <FrameRule tone="light" inset="-inset-x-px" className="hidden h-[10px] sm:block" />
         <div className="relative rise" style={{ ["--rise-delay" as any]: "80ms" }}>
-          <div className="relative flex w-full items-center justify-center overflow-hidden sm:rounded-[14px]" style={{ aspectRatio: "1200/630", background: "var(--tile)" }}>
+          <div className="relative flex w-full items-center justify-center overflow-hidden" style={{ aspectRatio: "1200/630", background: "var(--tile)" }}>
             {hasMaterialCover(slug) ? (
               <MaterialCover slug={slug} />
             ) : (
@@ -219,7 +222,7 @@ export default async function BlogPost({
         </div>
         <FrameRule tone="light" inset="-inset-x-px" className="hidden h-[10px] sm:block" />
 
-        <div className="px-6 pt-12 sm:px-12">
+        <div className="mx-auto w-full max-w-[56rem] px-6 pt-12 sm:px-12">
           {/* Byline opens the body. */}
           <div className="flex items-center justify-between rise">
             <div className="flex items-center gap-3">
@@ -255,8 +258,9 @@ export default async function BlogPost({
               opens, across the full sheet. */}
           <div className="-mx-6 mt-12 sm:-mx-12">
             <FrameRule tone="light" inset="-inset-x-px" className="hidden sm:block" />
-            {/* Phones have no rails for the corners to meet: a hairline. */}
-            <div aria-hidden="true" className="h-px bg-[rgb(var(--ink-rgb)/0.09)] sm:hidden" />
+            {/* Phones have no rails for the corners to meet: a hairline,
+                only while the frame is on. */}
+            {FRAMED && <div aria-hidden="true" className="h-px bg-[rgb(var(--ink-rgb)/0.09)] sm:hidden" />}
           </div>
 
           <div className="pt-10 pb-16">
@@ -271,6 +275,7 @@ export default async function BlogPost({
           </div>
         </div>
       </article>
+      </div>
     </main>
   );
 }

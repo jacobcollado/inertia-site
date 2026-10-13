@@ -174,13 +174,18 @@ function Release({ release: r, open, onToggle }: { release: ChangelogEntry; open
               v{r.version}
             </span>
             {r.version === LATEST && (
-              <span className="rounded-[6px] bg-[var(--tile)] px-2 py-1 text-[12px] sm:text-[13px] tracking-tight leading-none text-[rgb(var(--fg))]">
+              <span className="inline-flex items-center gap-1.5 rounded-[6px] bg-[var(--tile)] px-2 py-1 text-[12px] sm:text-[13px] tracking-tight leading-none text-[rgb(var(--fg))]">
+                {/* The live release, marked with the signal colour. */}
+                <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: "var(--signal)" }} />
                 Latest
               </span>
             )}
           </span>
-          <span className="mt-2 block text-[13px] sm:text-[14px] tracking-tight tabular-nums text-[rgb(var(--muted))]">
-            {RELEASE_LABEL[r.label]} · {formatChangelogDate(r.date)} · {r.notes.length} {r.notes.length === 1 ? "change" : "changes"}
+          {/* Set apart by space alone, no separators. */}
+          <span className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] sm:text-[14px] tracking-tight tabular-nums text-[rgb(var(--muted))]">
+            <span>{RELEASE_LABEL[r.label]}</span>
+            <span>{formatChangelogDate(r.date)}</span>
+            <span>{r.notes.length} {r.notes.length === 1 ? "change" : "changes"}</span>
           </span>
           <span className="mt-3 block max-w-2xl text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--fg))] [text-wrap:pretty]">
             {r.summary}

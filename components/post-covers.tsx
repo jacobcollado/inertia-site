@@ -202,11 +202,13 @@ const COVERS: Record<string, () => ReactElement> = {
 };
 
 // Fills its parent. The parent sets the shape: 1200/630 on the post page,
-// 4:3 on the homepage card (the board is cropped to its middle there).
-export function MaterialCover({ slug, className = "" }: { slug: string; className?: string }) {
+// 4:3 on the homepage card (the board is cropped to its middle there). With
+// `fit`, the whole board is shown inside the parent instead of cropped to
+// fill it, for wide, short boxes like the journal's bento cells.
+export function MaterialCover({ slug, className = "", fit = false }: { slug: string; className?: string; fit?: boolean }) {
   const Cover = COVERS[slug];
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" className={`absolute inset-0 h-full w-full ${className}`} fill="none" aria-hidden="true">
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio={fit ? "xMidYMid meet" : "xMidYMid slice"} className={`absolute inset-0 h-full w-full ${className}`} fill="none" aria-hidden="true">
       <rect width={W} height={H} fill={TILE} />
       {Cover && (
         <g transform="translate(240 -27) scale(1.8)">

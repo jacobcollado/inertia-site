@@ -62,6 +62,69 @@ function Arrow({ out = false, className = "size-3.5" }: { out?: boolean; classNa
   );
 }
 
+type Shot = { src: string; width: number; height: number; label?: string };
+
+// Its name under each shot, numbered through the page: what the screen is
+// (Product page, Tier system cart), not a generic "The work".
+function Caption({ n, label }: { n?: number; label?: string }) {
+  if (!label) return null;
+  return (
+    <figcaption className="mt-3 flex items-baseline gap-3 sm:mt-4">
+      <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
+        {n}
+      </span>
+      <span className="text-[16px] leading-snug tracking-[-0.01em] sm:text-[18px]" style={{ color: "var(--ink)", fontWeight: 450 }}>
+        {label}
+      </span>
+    </figcaption>
+  );
+}
+
+// One gallery block: a landscape shot at full width, or a row of portrait
+// ones. Each figure in a row grows in proportion to its image's
+// width-to-height ratio, so the images share one height and fill the row
+// exactly. On phones the row swipes sideways instead, each image a fixed
+// height. A lone portrait shot is held to a sensible width. Every shot
+// carries its name and number under it.
+function Shots({ block, client, numbers, first = false }: { block: Shot[]; client: string; numbers: Map<string, number>; first?: boolean }) {
+  const img = (s: Shot, className: string, style?: React.CSSProperties) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={s.src}
+      alt={s.label ? `${client}, ${s.label}` : client}
+      width={s.width}
+      height={s.height}
+      loading={first ? undefined : "lazy"}
+      className={className}
+      style={{ background: "var(--tile)", ...style }}
+    />
+  );
+  const portrait = block[0].height > block[0].width;
+  if (!portrait || block.length === 1) {
+    const s = block[0];
+    return (
+      <figure className={portrait ? "mx-auto w-full max-w-[28rem]" : ""}>
+        {img(s, "block h-auto w-full rounded-[12px]")}
+        <Caption n={numbers.get(s.src)} label={s.label} />
+      </figure>
+    );
+  }
+  return (
+    <div className="no-scrollbar -mx-3 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-3 px-3 sm:mx-0 sm:gap-4 sm:overflow-visible sm:px-0">
+      {block.map((s) => (
+        <figure
+          key={s.src}
+          className="shrink-0 snap-start sm:min-w-0 sm:shrink sm:[flex:var(--r)_1_0%]"
+          style={{ ["--r" as string]: String(s.width / s.height) }}
+        >
+          {img(s, "block h-[30rem] w-auto rounded-[12px] object-cover sm:h-auto sm:w-full", { aspectRatio: `${s.width} / ${s.height}` })}
+          <Caption n={numbers.get(s.src)} label={s.label} />
+        </figure>
+      ))}
+    </div>
+  );
+}
+
 export default async function WorkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const piece = getWork(slug);
@@ -80,7 +143,24 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   // with its real size so the page doesn't jump as they load. A piece with
   // none falls back to its homepage card.
   const gallery = await getWorkGalleryImages(piece);
-  const [lead, ...rest] = gallery.length ? gallery : meta?.card ? [{ src: meta.card, width: 4, height: 3 }] : [];
+  const shots = gallery.length ? gallery : meta?.card ? [{ src: meta.card, width: 4, height: 3 }] : [];
+  // Landscape shots run full width, one each. Portrait ones (phone screens,
+  // lookbook photos) would stand far too tall that way, so each run of them
+  // is set in a row of up to three at one shared height. The first block
+  // leads the page; the rest follow it, each shot named for what it shows.
+  const blocks: (typeof shots)[] = [];
+  for (const img of shots) {
+    const last = blocks[blocks.length - 1];
+    const portrait = img.height > img.width;
+    if (portrait && last && last[0].height > last[0].width && last.length < 3) last.push(img);
+    else blocks.push([img]);
+  }
+  const [leadBlock, ...restBlocks] = blocks;
+  const lead = leadBlock?.[0];
+  const rest = restBlocks.flat();
+  // Named shots are numbered in the order they appear.
+  const numbers = new Map<string, number>();
+  for (const img of shots) if (img.label) numbers.set(img.src, numbers.size + 1);
 
   const specs = [
     piece.service && { label: "Service", value: piece.service },
@@ -169,15 +249,9 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         <>
           <Split />
           <div className="px-3 sm:px-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={lead.src}
-              alt={piece.client}
-              width={lead.width}
-              height={lead.height}
-              className="rise rise--liquid block h-auto w-full rounded-[12px]"
-              style={{ ...reveal(320), background: "var(--tile)" }}
-            />
+            <div className="rise rise--liquid" style={reveal(320)}>
+              <Shots block={leadBlock} client={piece.client} numbers={numbers} first />
+            </div>
           </div>
         </>
       )}
@@ -185,10 +259,14 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
       {(html || rest.length > 0) && (
         <>
           <Split />
+          {/* No generic heading over the shots: each one is named for what
+              it shows. Written notes, when a piece has them, get their own. */}
           <section className="w-full px-3 sm:px-0">
-            <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] tracking-[-0.03em] leading-[1.1]" style={{ color: "var(--ink)", fontWeight: 450 }}>
-              The work
-            </h2>
+            {html && (
+              <h2 className="text-[clamp(1.8rem,3vw,2.5rem)] tracking-[-0.03em] leading-[1.1]" style={{ color: "var(--ink)", fontWeight: 450 }}>
+                About the project
+              </h2>
+            )}
             {html && (
               <div
                 className="mt-5 max-w-2xl space-y-5 text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight
@@ -201,19 +279,11 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
               />
             )}
             {rest.length > 0 && (
-              <div className="mt-10 flex flex-col gap-3 sm:mt-14 sm:gap-4">
-                {rest.map((img, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={img.src}
-                    src={img.src}
-                    alt={`${piece.client}, shot ${i + 1}`}
-                    width={img.width}
-                    height={img.height}
-                    loading="lazy"
-                    className="rise block h-auto w-full rounded-[12px]"
-                    style={{ background: "var(--tile)" }}
-                  />
+              <div className={`flex flex-col gap-10 sm:gap-14 ${html ? "mt-10 sm:mt-14" : ""}`}>
+                {restBlocks.map((block) => (
+                  <div key={block[0].src} className="rise">
+                    <Shots block={block} client={piece.client} numbers={numbers} />
+                  </div>
                 ))}
               </div>
             )}

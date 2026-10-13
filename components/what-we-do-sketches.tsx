@@ -1,8 +1,8 @@
 "use client";
 
 import type { CSSProperties, ReactElement } from "react";
-import { Box, DASH, EASE, Flag, LINE, enter, raise } from "@/components/line-art";
-import { INK, TILE } from "@/components/material-art";
+import { Box, DASH, EASE, Flag, LINE, Trace, enter, raise } from "@/components/line-art";
+import { INK, SIGNAL, TILE } from "@/components/material-art";
 
 // The What we do drawings, in the hero staircase's line style
 // (components/line-art.tsx). One per service, each building itself once
@@ -24,12 +24,6 @@ type Anim = { play: boolean; delay: number; still: boolean };
 const fade = (on: boolean, delay: number, ms = 500): CSSProperties => ({
   opacity: on ? 1 : 0,
   transition: `opacity ${ms}ms ${EASE} ${delay}ms`,
-});
-
-// Traces an outline drawn with pathLength={1} strokeDasharray="1 1".
-const trace = (on: boolean, delay: number, ms = 700): CSSProperties => ({
-  strokeDashoffset: on ? 0 : 1,
-  transition: `stroke-dashoffset ${ms}ms ${EASE} ${delay}ms`,
 });
 
 // --- Audit -------------------------------------------------------------------
@@ -57,8 +51,9 @@ const AUDIT = [
 function Marker({ cx, cy, n }: { cx: number; cy: number; n: number }) {
   return (
     <g>
-      <circle cx={cx} cy={cy} r={9} fill={n === 1 ? INK : TILE} {...LINE} />
-      <text x={cx} y={cy + 3.4} textAnchor="middle" fontSize={10} fontWeight={500} fill={n === 1 ? TILE : INK} style={{ fontFamily: "inherit" }}>
+      {/* The fix that matters most carries the signal colour. */}
+      <circle cx={cx} cy={cy} r={9} fill={n === 1 ? SIGNAL : TILE} {...LINE} stroke={n === 1 ? SIGNAL : INK} />
+      <text x={cx} y={cy + 3.4} textAnchor="middle" fontSize={10} fontWeight={500} fill={n === 1 ? "#fff" : INK} style={{ fontFamily: "inherit" }}>
         {n}
       </text>
     </g>
@@ -111,12 +106,13 @@ function Audit({ play, delay, still }: Anim) {
 
 // --- Identity ----------------------------------------------------------------
 
-// The mark: a ring with a stroke through it.
+// The mark: a ring with a stroke through it, in the signal colour wherever
+// it's carried.
 function Mark({ cx, cy, r }: { cx: number; cy: number; r: number }) {
   return (
     <g>
-      <circle cx={cx} cy={cy} r={r} {...LINE} />
-      <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} {...LINE} />
+      <circle cx={cx} cy={cy} r={r} {...LINE} stroke={SIGNAL} />
+      <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} {...LINE} stroke={SIGNAL} />
     </g>
   );
 }
@@ -136,8 +132,9 @@ function Identity({ play, delay, still }: Anim) {
       <Box x={56} y={222} w={288} h={30} d={0.1} />
       <g style={enter(on, "translateY(-40px)", d, 640)}>
         <Box x={150} y={108} w={100} h={114} d={0.16} />
-        <circle cx={200} cy={165} r={28} {...LINE} pathLength={1} strokeDasharray="1 1" style={trace(on, still ? 0 : d + 520, 800)} />
-        <line x1={200} y1={137} x2={200} y2={193} {...LINE} pathLength={1} strokeDasharray="1 1" style={trace(on, still ? 0 : d + 1000, 400)} />
+        {/* The mark itself is the decision here, so it's drawn in the signal colour. */}
+        <Trace on={on} delay={still ? 0 : d + 520} ms={800} shape={{ as: "circle", cx: 200, cy: 165, r: 28 }} stroke={SIGNAL} />
+        <Trace on={on} delay={still ? 0 : d + 1000} ms={400} shape={{ as: "line", x1: 200, y1: 137, x2: 200, y2: 193 }} stroke={SIGNAL} />
       </g>
       {CARRIED.map((p, i) => (
         <g key={i} style={enter(on, "translateY(-30px)", d + 1300 + i * 160, 560)}>
@@ -178,7 +175,7 @@ function Build({ play, delay, still }: Anim) {
             {/* The approved layout. The trace runs exactly over it, so by
                 the end none of it is left showing. */}
             <rect {...r} {...DASH} />
-            <rect {...r} {...LINE} pathLength={1} strokeDasharray="1 1" style={trace(on, t)} />
+            <Trace on={on} delay={t} shape={{ as: "rect", ...r }} />
           </g>
         );
       })}

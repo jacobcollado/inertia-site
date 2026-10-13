@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils";
 // column edge on wide screens, 12px in from the viewport below that, where
 // the column runs edge to edge.
 export const FRAME_INSET = "inset-x-0 sm:inset-x-3 xl:inset-x-0";
+// Off: no rails or cells anywhere. Sections are set apart by space alone,
+// and every boundary keeps only its spacing. On brings the frame back.
+export const FRAMED = false;
 export const FRAME_TONES = {
   light: { line: "rgb(var(--ink-rgb) / 0.09)", paper: "var(--paper)" },
   // The homepage's lower panel, which follows the theme: lines in its own ink.
@@ -19,6 +22,7 @@ export type FrameTone = keyof typeof FRAME_TONES;
 const UNSCALE = { transform: "scaleX(var(--frame-unscale, 1))" } as const;
 
 export function FrameRails({ tone }: { tone: FrameTone }) {
+  if (!FRAMED) return null;
   const t = FRAME_TONES[tone];
   return (
     <div aria-hidden="true" className={cn("pointer-events-none absolute inset-y-0", FRAME_INSET)} style={UNSCALE}>
@@ -56,6 +60,7 @@ export function FrameRule({
   inset?: string;
   solidGap?: boolean;
 }) {
+  if (!FRAMED) return <div aria-hidden="true" className={className} />;
   const t = FRAME_TONES[tone];
   // A paper square in one corner with the cell's quarter circle cut out of
   // it, so only the area outside the rounded corner is filled.
@@ -113,6 +118,7 @@ export function FrameRule({
 // The rails alone, for a full-width band (the header, the card backdrop):
 // centred on the same 80rem column as the page content.
 export function FrameColumnRails({ tone, className }: { tone: FrameTone; className?: string }) {
+  if (!FRAMED) return null;
   return (
     <div aria-hidden="true" className={cn("pointer-events-none absolute inset-0", className)}>
       <div className="relative mx-auto h-full w-full max-w-[80rem]">

@@ -101,6 +101,11 @@ html.themed[data-theme="dark"] .homepage-dark-zone {
    hardcoded hex, so the theme switch in the footer can flip them. Light
    values are the original colours. */
 :root {
+  /* The one accent: a redline, the reviewer's pen. It marks the decision in
+     each moment (a launch flag, the fix that matters most, the last detail)
+     and nothing else: never buttons, backgrounds, headings or copy. */
+  --signal: #ff5a1f;
+  --signal-rgb: 255 90 31;
   --ink: #1a1a1a;
   --ink-rgb: 26 26 26;
   --ink-soft: #3d3d3d;
@@ -150,6 +155,9 @@ html.themed[data-theme="dark"] .homepage-dark-zone {
    to near-black #0a0a0a; the homepage's lower zone lifts to a lighter grey
    (#161616), so there's still a quiet shift into it. */
 html.themed[data-theme="dark"] {
+  /* A touch brighter on black, so it holds the same weight. */
+  --signal: #ff6a33;
+  --signal-rgb: 255 106 51;
   --ink: #ececec;
   --ink-rgb: 236 236 236;
   --ink-soft: #c6c6c6;
@@ -1195,24 +1203,6 @@ h1:hover .redact > span.redact-inner,
   @keyframes chat-dot { 0%, 100% { opacity: 0.6; } }
 }
 
-/* "How we think about execution": time left on the auto-playing principle. */
-@keyframes execution-progress {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-/* Hero heading (hero-drag-heading): the words lift and settle once, one
-   after another, to show they can be picked up. */
-@keyframes hero-wave {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  40% { transform: translateY(-0.12em) rotate(-1.5deg); }
-  70% { transform: translateY(0.02em) rotate(0.3deg); }
-}
-.hero-wave { animation: hero-wave 620ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-@media (prefers-reduced-motion: reduce) {
-  .hero-wave { animation: none; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   @keyframes modal-down {
     to { opacity: 0; transform: none; }
@@ -2158,6 +2148,12 @@ h1:hover .redact > span.redact-inner,
   background: transparent;
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
+}
+
+/* With the frame off: a wash of the page's colour under the blur, so the
+   logo and buttons stay legible over imagery. */
+.site-header__bg--soft {
+  background: rgb(var(--bg) / 0.72);
 }
 
 /* On the homepage the header's paper (its frame corners, the fade under its

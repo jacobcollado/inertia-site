@@ -3,23 +3,25 @@
 // homepage (app/index.md) is built from the same copy. [[Double brackets]]
 // mark a key phrase, set in full ink on the page.
 
+// A "*" is censored on the page with a redaction bar in the signal colour
+// (components/hero-drag-heading.tsx).
 export const HERO_HEADING_LINES = [
-  ["Your", "brand,", "rebuilt", "for", "the"],
-  ["next", "generation", "of", "buyers."],
+  ["Your", "brand", "should", "look"],
+  ["good", "as", "f*ck."],
 ];
 
 export const HERO_HEADING_LINES_MOBILE = [
-  ["Your", "brand,", "rebuilt", "for"],
-  ["the", "next", "generation"],
-  ["of", "buyers."],
+  ["Your", "brand", "should"],
+  ["look", "good", "as"],
+  ["f*ck."],
 ];
 
 export const HERO_SUBLINE =
-  "Inertia is a Gen Z-led studio. We redesign the identity and website of companies, brands and founders, so the customers they want most trust them sooner and come back. Audit, design and build, all in-house.";
+  "Inertia redesigns the identity and website of companies, brands and founders for the way people buy now, so the customers you want most trust you sooner and keep coming back. Audit, design and build, all in-house.";
 
 // A little shorter on phones, so it sits in fewer lines under the heading.
 export const HERO_SUBLINE_MOBILE =
-  "A Gen Z-led studio redesigning identities and websites, so the customers you want most trust you sooner and come back.";
+  "We redesign identities and websites for the way people buy now, so the customers you want most trust you sooner.";
 
 export const EXECUTION_INTRO =
   "Ideas and identity are rarely the problem. [[Execution is.]] We take what a company, brand, or person stands for and carry it through every page, transition and email, until it feels effortless to the customer moving through it.";

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FRAME_CELL_GAP, FRAME_INSET, FRAME_RULE_OVERHANG, FrameColumnRails, FrameRule } from "@/components/page-frame";
+import { FRAME_CELL_GAP, FRAME_INSET, FRAME_RULE_OVERHANG, FRAMED, FrameColumnRails, FrameRule } from "@/components/page-frame";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -648,6 +648,13 @@ const HEADER_FILL_REACH = HEADER_RULE_DROP + FRAME_RULE_OVERHANG;
 // The header cell's own bottom line, where its blur stops: the gap below it
 // is solid, and the next cell fades instead of blurring.
 const HEADER_CELL_BOTTOM = HEADER_RULE_DROP - FRAME_CELL_GAP / 2;
+// The wash under the blur is .site-header__bg--soft in the stylesheet, since
+// the backdrop's inline background is cleared from script.
+const HEADER_SOFT_EDGE: CSSProperties = {
+  bottom: -18,
+  WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent)",
+  maskImage: "linear-gradient(to bottom, black 60%, transparent)",
+};
 
 export function VisualNotch() {
   const { trigger } = useWebHaptics();
@@ -690,11 +697,11 @@ export function VisualNotch() {
     const fadeEl = headerRef.current?.querySelector<HTMLElement>(".site-header__fade");
     if (!bgEl) return;
 
-    // A framed page's header (the homepage, Aether) is a plain blur from its
-    // stylesheet (.site-header__bg--framed), so it skips this. The header stays mounted
+    // The homepage, Aether and the work pages get a plain blur from the
+    // stylesheet (.site-header__bg--framed), so they skip this. The header stays mounted
     // across client navigations, so clear what another page wrote inline
     // first; left in place, it overrode that blur with a solid fill.
-    if (pathname === "/" || pathname === "/aether") {
+    if (pathname === "/" || pathname === "/aether" || pathname === "/aether/changelog" || pathname === "/work" || pathname.startsWith("/work/")) {
       bgEl.style.background = "";
       bgEl.style.backdropFilter = "";
       (bgEl.style as unknown as Record<string, string>)["-webkit-backdrop-filter"] = "";
@@ -804,24 +811,18 @@ export function VisualNotch() {
   const isWorkCase = pathname === "/work" || pathname.startsWith("/work/");
   // Pages laid out in the frame (rails and rounded cells): the header is a
   // cell of it too, a plain blur with its boundary below.
-  const isFramed = isHome || isAetherFramed || isWorkCase;
+  // These pages take a plain blur for the header, with no refraction.
+  const plainBlur = isHome || isAetherFramed || isWorkCase;
+  const isFramed = FRAMED && plainBlur;
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog;
 
-  // The header lines its logo and buttons up with each page's own content
-  // column. On phones every page's content starts 23px in (its 12px margin
-  // plus 11px), so that's fixed in .site-header__inner--content; from sm up
-  // pages differ, so each sets the column's max width and its inset.
+  // Every page's header sits on the homepage's column: 80rem wide, its logo
+  // and buttons 32px in from sm up (phones are fixed at 23px in
+  // .site-header__inner--content), and each page lines its content up with
+  // that column. The components gallery is the exception: a wider dev page.
   const inset = (maxWidth: string, padSm: string) =>
     ({ maxWidth, "--hdr-pad-sm": padSm }) as CSSProperties;
-  const headerInset = isComponents
-    ? inset("96rem", "12px")
-    : isSheet
-      ? inset("56rem", "48px") // the post sheet's body padding
-      : isBlog
-        ? inset("80rem", "12px")
-        : (isAether && !isAetherFramed) || isPolicies
-            ? inset("80rem", "0px")
-            : inset("80rem", "32px"); // the homepage and /work
+  const headerInset = isComponents ? inset("96rem", "12px") : inset("80rem", "32px");
 
   if (useMinimalHeader) {
     return (
@@ -832,8 +833,9 @@ export function VisualNotch() {
           // reading column has the whole screen.
           className={`site-header${isSheet ? "" : " site-header--pinned"}${mobileOpen ? " site-header--open" : ""}${isHome ? " site-header--home" : ""}${isHome && overZone ? " site-header--zone" : ""}`}
           ref={headerRef}
-          // On blog posts a hairline underneath, so the sheet starts below it.
-          style={isSheet ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
+          // On blog posts a hairline underneath, so the sheet starts below it
+          // (with the frame on; frameless, space does that job).
+          style={isSheet && FRAMED ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
         >
           <svg width="0" height="0" className="absolute" aria-hidden="true">
             <filter id="header-glass" colorInterpolationFilters="sRGB">
@@ -843,12 +845,14 @@ export function VisualNotch() {
           </svg>
           {/* On the homepage the blur fills the header cell, down to its
               rounded bottom line just below the header's box. */}
+          {/* With the frame off, the plain blur runs a little past the header
+              and eases off, so it never ends on a hard edge. */}
           <div
-            className={`site-header__bg${isFramed ? " site-header__bg--framed" : ""}`}
-            style={isFramed ? { bottom: -HEADER_CELL_BOTTOM } : undefined}
+            className={`site-header__bg${plainBlur ? " site-header__bg--framed" : ""}${plainBlur && !isFramed ? " site-header__bg--soft" : ""}`}
+            style={isFramed ? { bottom: -HEADER_CELL_BOTTOM } : plainBlur ? HEADER_SOFT_EDGE : undefined}
             aria-hidden="true"
           />
-          {!isFramed && <div className="site-header__fade" aria-hidden="true" />}
+          {!plainBlur && <div className="site-header__fade" aria-hidden="true" />}
           <div className="site-header__bg-fill" aria-hidden="true" />
           {/* Safari (iOS 26) tints its top bar from a solid fixed element at the
               top edge. The header is pure blur, so this band in the page's

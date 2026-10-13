@@ -20,6 +20,9 @@ import { SELECTION_FRAME_COLOR } from "@/components/figma-frame";
 export const INK = "var(--ink)";
 export const PAPER = "var(--paper)";
 export const TILE = "var(--tile)";
+// The site's one accent (the redline in globals.css), for the decision in a
+// drawing and nothing else.
+export const SIGNAL = "var(--signal)";
 export const SEL = SELECTION_FRAME_COLOR;
 
 export type Ids = Record<"grain" | "halftone" | "fade" | "fadeMask" | "dither" | "fine", string>;

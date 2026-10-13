@@ -1,62 +1,16 @@
-import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
+import { BlogIndex } from "./blog-index";
 
 // Rendered on the server so the post links are in the HTML itself. It used to
 // fetch them in the browser, which left crawlers (search and AI alike) an
-// empty page with nothing to follow.
-export default function BlogIndex() {
-  const posts = getAllPosts();
-
-  return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col px-3">
-      <h1 className="sr-only">Inertia journal, essays on design and craft</h1>
-
-      <div className="pt-12 sm:pt-16" />
-
-      {/* Grid */}
-      {posts.length === 0 ? (
-        <p className="px-6 sm:px-8 py-6 text-[13px] tracking-tight text-[rgb(var(--muted))]">Nothing here yet.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
-          {posts.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/blog/${post.slug}`}
-              className="group flex flex-col gap-3"
-            >
-              {/* Meta — no thumbnail; the card is a neutral typographic
-                  block with a hairline edge that warms slightly on hover. */}
-              <div
-                className="flex flex-col gap-1.5 rounded-lg border border-[rgb(var(--line))] group-hover:border-[rgb(var(--fg)/0.2)] transition-colors p-5"
-                style={{ background: "rgb(var(--surface))" }}
-              >
-                <div className="flex items-center gap-2">
-                  {post.tag && (
-                    <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-60">{post.tag}</span>
-                  )}
-                  <span className="text-[13px] tracking-tight text-[rgb(var(--muted))] opacity-40">{formatDate(post.date)}</span>
-                </div>
-                <p className="text-[18px] tracking-tight text-[rgb(var(--fg))] leading-snug font-normal group-hover:opacity-70 transition-opacity">
-                  {post.title}
-                </p>
-                {(post.subtitle || post.summary) && (
-                  <p className="text-[14px] tracking-tight leading-relaxed text-[rgb(var(--muted))] line-clamp-2" style={{ opacity: 0.55 }}>
-                    {post.subtitle || post.summary}
-                  </p>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-    </main>
-  );
-}
-
-function formatDate(iso: string): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+// empty page with nothing to follow. The layout and topic filter live in
+// ./blog-index.tsx.
+export default function BlogPage() {
+  const posts = getAllPosts().map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    tag: p.tag,
+    line: p.subtitle || p.summary || p.excerpt,
+  }));
+  return <BlogIndex posts={posts} />;
 }

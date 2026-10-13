@@ -14,7 +14,8 @@ const reveal = (delay = 0) =>
 // the top of the shot.
 const THUMB_POSITION: Record<string, string> = {
   "trippie-redd": "center 35%",
-  "allure-new-york": "center 50%",
+  // Its cover is a portrait lookbook shot: keep the hood and face in frame.
+  "allure-new-york": "center 22%",
 };
 
 // A split between cells. The page pads its content in from the cell edges,

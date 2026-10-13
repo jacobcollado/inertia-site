@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
-import { INK, TILE } from "@/components/material-art";
+import { useId, type CSSProperties, type SVGProps } from "react";
+import { INK, SIGNAL, TILE } from "@/components/material-art";
 
 // Shared line kit for the homepage drawings in the hero staircase's style
 // (components/hero-canvas.tsx): monoline boxes in one-point perspective seen
@@ -55,12 +55,13 @@ export function Box({ x, y, w, h, d, ghost, light, vp = VP, fill = TILE }: { x: 
   );
 }
 
-// A flag on a pole standing at (x, y), `h` tall.
+// A flag on a pole standing at (x, y), `h` tall. A flag always means
+// launched, so it carries the signal colour wherever it's drawn.
 export function Flag({ x, y, h }: { x: number; y: number; h: number }) {
   return (
     <g>
       <line x1={x} y1={y} x2={x} y2={y - h} {...LINE} />
-      <polygon points={poly([[x, y - h], [x + h * 0.4, y - h * 0.86], [x, y - h * 0.72]])} fill={TILE} {...LINE} />
+      <polygon points={poly([[x, y - h], [x + h * 0.4, y - h * 0.86], [x, y - h * 0.72]])} fill={SIGNAL} {...LINE} stroke={SIGNAL} />
     </g>
   );
 }
@@ -88,3 +89,36 @@ export const raise = (on: boolean, delay = 0): CSSProperties => ({
   transformBox: "fill-box",
   transformOrigin: "50% 100%",
 });
+
+// A line that draws itself on. The visible stroke keeps LINE's fixed screen
+// width (non-scaling-stroke), which breaks pathLength dashes once a drawing
+// is shown larger than its board, so the trace runs in a mask instead: an
+// invisible stroke in the drawing's own units draws along the shape and
+// reveals the real line under it. `shape` is the element's geometry.
+type TraceShape =
+  | ({ as: "path" } & SVGProps<SVGPathElement>)
+  | ({ as: "rect" } & SVGProps<SVGRectElement>)
+  | ({ as: "circle" } & SVGProps<SVGCircleElement>)
+  | ({ as: "line" } & SVGProps<SVGLineElement>);
+
+export function Trace({ on, delay = 0, ms = 700, shape, stroke }: { on: boolean; delay?: number; ms?: number; shape: TraceShape; stroke?: string }) {
+  const id = `trace-${useId().replace(/:/g, "")}`;
+  const { as: Tag, ...geo } = shape;
+  const El = Tag as unknown as React.ElementType;
+  return (
+    <g>
+      <mask id={id} maskUnits="userSpaceOnUse" x={-2000} y={-2000} width={6000} height={6000}>
+        <El
+          {...geo}
+          fill="none"
+          stroke="white"
+          strokeWidth={6}
+          pathLength={1}
+          strokeDasharray="1 1"
+          style={{ strokeDashoffset: on ? 0 : 1, transition: `stroke-dashoffset ${ms}ms ${EASE} ${on ? delay : 0}ms` }}
+        />
+      </mask>
+      <El {...geo} {...LINE} {...(stroke ? { stroke } : {})} fill="none" mask={`url(#${id})`} />
+    </g>
+  );
+}

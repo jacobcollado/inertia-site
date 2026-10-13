@@ -28,20 +28,26 @@ export function PolicyDoc({
 }) {
   return (
     <main className="relative w-full">
-      <article className="relative mx-auto w-full max-w-[56rem] bg-[var(--paper)] sm:rounded-b-[14px] sm:border-x sm:border-b sm:border-[rgb(var(--ink-rgb)/0.09)]">
+      {/* The sheet runs the same column as the header and the homepage
+          (80rem, 32px in); the text inside keeps a reading width. */}
+      <div className="mx-auto w-full max-w-[80rem] sm:px-8">
+      <article className="relative w-full bg-[var(--paper)] sm:rounded-b-[14px] sm:border-x sm:border-b sm:border-[rgb(var(--ink-rgb)/0.09)]">
         <header className="flex min-h-[320px] flex-col items-center justify-center px-6 py-16 text-center sm:px-16 rise">
           <p className="text-[13px] sm:text-[14px] tracking-tight text-[rgb(var(--muted))] tabular-nums">Effective {effective}</p>
           <h1 className="mt-5 text-[clamp(30px,5vw,54px)] font-medium tracking-[-0.04em] leading-[1.06] text-[rgb(var(--fg))] [text-wrap:balance]">
             {title}
           </h1>
+          {/* One line each, no separators. */}
           <p className="mt-5 max-w-lg text-[15px] sm:text-[18px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:pretty]">
-            {meta.join(" · ")}
+            {meta.map((m) => (
+              <span key={m} className="block">{m}</span>
+            ))}
           </p>
         </header>
 
         <Split />
 
-        <div className="px-6 sm:px-12">
+        <div className="mx-auto w-full max-w-[56rem] px-6 sm:px-12">
           <TOCSticky headings={sections.map((s) => ({ id: s.id, text: s.title, level: 2 }))} />
 
           <div className="rise flex flex-col gap-14 pt-12 pb-8">
@@ -79,6 +85,7 @@ export function PolicyDoc({
           </div>
         </div>
       </article>
+      </div>
     </main>
   );
 }

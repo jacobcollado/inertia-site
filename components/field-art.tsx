@@ -10,8 +10,8 @@ import { useEffect, useRef } from "react";
 // touch before they settle. Nothing is drawn but the points. With no pointer
 // the mass drifts slowly on its own, so the field is never quite at rest.
 //
-// On arrival the lattice settles into place from the centre out. Colour is
-// the page's ink, read from the stylesheet, so it follows light and dark.
+// On arrival the lattice settles into place from the centre out. It sits
+// straight on the page, fading out toward its edges. Colour is the page's ink, read from the stylesheet, so it follows light and dark.
 // It pauses off screen and in hidden tabs; with reduced motion it holds
 // still.
 
@@ -24,6 +24,9 @@ const PULL = 150;
 const BASE_R = 1; // px, a point at rest
 const ALPHA = 0.2; // a point at rest
 const BUCKETS = 8; // alpha levels drawn as one path each
+const HOT_FROM = 0.86; // how hard a point must be pulled to take the signal colour
+// The field's edge: solid through the middle, gone by the panel's bounds.
+const FIELD_FADE = "radial-gradient(ellipse 50% 50% at 50% 50%, black 55%, transparent 100%)";
 
 export function FieldArt({ className = "", play = true, delay = 0 }: { className?: string; play?: boolean; delay?: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -45,11 +48,14 @@ export function FieldArt({ className = "", play = true, delay = 0 }: { className
     let vy = new Float32Array(0);
     let born = new Float32Array(0); // ms after start that each point appears
     let ink = "26 26 26";
+    let signal = "255 90 31";
     let soft = SOFT;
     let pullK = PULL;
 
     const readInk = () => {
-      ink = getComputedStyle(canvas).getPropertyValue("--ink-rgb").trim() || ink;
+      const cs = getComputedStyle(canvas);
+      ink = cs.getPropertyValue("--ink-rgb").trim() || ink;
+      signal = cs.getPropertyValue("--signal-rgb").trim() || signal;
     };
 
     // Lays the lattice out to fill the panel with even margins. Each point
@@ -108,6 +114,10 @@ export function FieldArt({ className = "", play = true, delay = 0 }: { className
       const t = now - t0;
       ctx.clearRect(0, 0, w, h);
       const paths: Path2D[] = Array.from({ length: BUCKETS }, () => new Path2D());
+      // The points pulled in hardest, at the crest of the well, take the
+      // signal colour instead of ink, stronger the harder they're pulled.
+      // At rest nothing is pulled that far, so the field stays grey.
+      const hot: Path2D[] = Array.from({ length: BUCKETS }, () => new Path2D());
       for (let i = 0; i < n; i++) {
         const appear = Math.min(1, Math.max(0, (t - born[i]) / 500));
         if (appear <= 0) continue;
@@ -117,16 +127,25 @@ export function FieldArt({ className = "", play = true, delay = 0 }: { className
         // reads without anything being drawn at its centre.
         const pull = Math.min(1, off / 16);
         const r = BASE_R * (1 + pull * 0.9);
-        const a = (ALPHA + pull * 0.5) * ease;
-        const b = Math.min(BUCKETS - 1, Math.floor((a / 0.7) * BUCKETS));
         const x = rx[i] + dx[i];
         const y = ry[i] + dy[i];
+        const heat = (pull - HOT_FROM) / (1 - HOT_FROM);
+        if (heat > 0) {
+          const b = Math.min(BUCKETS - 1, Math.floor(heat * ease * BUCKETS));
+          hot[b].moveTo(x + r, y);
+          hot[b].arc(x, y, r, 0, Math.PI * 2);
+          continue;
+        }
+        const a = (ALPHA + pull * 0.5) * ease;
+        const b = Math.min(BUCKETS - 1, Math.floor((a / 0.7) * BUCKETS));
         paths[b].moveTo(x + r, y);
         paths[b].arc(x, y, r, 0, Math.PI * 2);
       }
       for (let b = 0; b < BUCKETS; b++) {
         ctx.fillStyle = `rgb(${ink} / ${((b + 0.5) / BUCKETS) * 0.7})`;
         ctx.fill(paths[b]);
+        ctx.fillStyle = `rgb(${signal} / ${0.3 + ((b + 0.5) / BUCKETS) * 0.6})`;
+        ctx.fill(hot[b]);
       }
     };
 
@@ -246,13 +265,16 @@ export function FieldArt({ className = "", play = true, delay = 0 }: { className
 
   return (
     <div className={className}>
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[6px] bg-[var(--tile)] sm:aspect-[12/5]">
+      {/* No tile: the field sits on the page itself and fades out toward
+          its edges, so there's no box around it. */}
+      <div className="relative aspect-[4/3] w-full sm:aspect-[12/5]">
         {/* pan-y keeps vertical swipes scrolling the page on phones; a
             sideways drag moves the mass. */}
         <canvas
           ref={ref}
           aria-label="A field of points, bent by an unseen mass that follows the pointer."
           className="h-full w-full touch-pan-y"
+          style={{ WebkitMaskImage: FIELD_FADE, maskImage: FIELD_FADE }}
         />
       </div>
     </div>

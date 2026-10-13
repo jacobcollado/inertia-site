@@ -26,6 +26,10 @@ export type WorkMeta = {
   instagram?: string;
   url?: string;
   images?: string[];
+  // Each write-up image's name, from its alt text with the client's name
+  // taken off the front ("Allure New York tier system cart" becomes "Tier
+  // system cart"). Labels the shot on its case study.
+  labels?: Record<string, string>;
   featured?: boolean;
   logo?: string;
 };
@@ -56,11 +60,25 @@ export function getAllWork(): WorkMeta[] {
       instagram: data.instagram,
       url: data.url,
       images,
+      labels: extractLabels(content, data.client ?? slug),
       featured: data.featured === true,
       logo: data.logo,
     } as WorkMeta;
   });
   return pieces.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+}
+
+function extractLabels(md: string, client: string): Record<string, string> {
+  const re = /!\[(.*?)\]\((.*?)\)/g;
+  const out: Record<string, string> = {};
+  const prefix = client.toLowerCase();
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(md)) !== null) {
+    let alt = m[1].trim();
+    if (alt.toLowerCase().startsWith(prefix)) alt = alt.slice(client.length).replace(/^(?:['’]s\b)?[\s,:-]*/, "").trim();
+    if (alt) out[m[2]] = alt.charAt(0).toUpperCase() + alt.slice(1);
+  }
+  return out;
 }
 
 function extractImages(md: string): string[] {
@@ -92,6 +110,7 @@ export function getWork(slug: string): WorkPiece | null {
         instagram: data.instagram,
         url: data.url,
         images: extractImages(content),
+        labels: extractLabels(content, data.client ?? slug),
         content,
       };
     }
@@ -104,7 +123,7 @@ export async function renderWorkMarkdown(md: string): Promise<string> {
   return processed.toString();
 }
 
-export type SizedImage = { src: string; width: number; height: number };
+export type SizedImage = { src: string; width: number; height: number; label?: string };
 
 // Reading each image's real dimensions server-side lets the gallery reserve
 // the right amount of space before the <img> tag ever loads, instead of
@@ -140,5 +159,6 @@ export async function getWorkGalleryImages(w: WorkMeta): Promise<SizedImage[]> {
     seen.add(key);
     return true;
   });
-  return Promise.all(unique.map(sizeImage));
+  const sized = await Promise.all(unique.map(sizeImage));
+  return sized.map((img) => ({ ...img, label: w.labels?.[img.src] }));
 }

@@ -15,6 +15,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
 import { TeardownDialog } from "@/components/teardown-dialog";
 import { HeroCanvas } from "@/components/hero-canvas";
+import { DirectionsArt } from "@/components/directions-art";
 import { MaterialCover } from "@/components/post-covers";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
 import { SurfacingLine } from "@/components/surfacing-line";
@@ -509,7 +510,7 @@ function VercelHero({
     heroLiquidStyle(visible, delay, opts);
 
   // Fixed lines so the break is the same at every width and the lines stay
-  // close in length. The words are draggable (see HeroDragHeading).
+  // close in length (see HeroDragHeading for the per-breakpoint layout).
   // Two lines from sm up. Phones get the full sentence on four lines, sized
   // so the longest ("making websites people") fits a 360px screen.
   const HEADING_LINES = HERO_HEADING_LINES;
@@ -1575,14 +1576,28 @@ function LiquidText({
   );
 }
 
-// How long each principle stays up while the list plays on its own.
-const EXECUTION_PERIOD_MS = 6500;
+// How far apart the three sketches start playing once the bento is in view.
+const EXECUTION_STEP_MS = 650;
+
+// One cell per principle, sized by weight. Desktop: a 12-column bento,
+// Restraint large on the left (7 columns, both rows), Agreement and
+// Follow-through stacked on the right (5 each). Tablet: Restraint across the
+// top with its line beside the sketch, the other two side by side under it.
+// Phones: a sideways swipe row of three cards. Every cell is the sketch on
+// the tile with its number, name and line under it.
+const EXECUTION_CELL = [
+  {
+    cell: "sm:col-span-2 sm:flex-row-reverse sm:items-stretch lg:col-span-7 lg:row-span-2 lg:flex-col",
+    art: "sm:w-[58%] lg:w-full lg:aspect-auto lg:flex-1",
+    text: "sm:flex sm:w-[42%] sm:flex-col sm:justify-end lg:w-full",
+    line: "lg:text-[19px]",
+  },
+  { cell: "lg:col-span-5", art: "lg:aspect-auto lg:flex-1 lg:min-h-0", text: "", line: "" },
+  { cell: "lg:col-span-5", art: "lg:aspect-auto lg:flex-1 lg:min-h-0", text: "", line: "" },
+];
 
 function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagraphElement | null> }) {
-  const [active, setActive] = useState(0);
-  const [auto, setAuto] = useState(true);
-  const [inView, setInView] = useState(false);
-  const blockRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion() ?? false;
   const mounted = useMounted();
   const intro = EXECUTION_INTRO;
@@ -1593,205 +1608,10 @@ function DesignPhilosophy({ introRef }: { introRef?: React.RefObject<HTMLParagra
     Art: [RestraintArt, AgreementArt, FollowThroughArt][i],
   }));
 
-  // Plays only while on screen, so it's on the first principle when you
-  // arrive and doesn't cycle unseen.
-  useEffect(() => {
-    const el = blockRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.4 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  const playing = auto && inView && !reduced;
-  useEffect(() => {
-    if (!playing) return;
-    const t = setTimeout(() => setActive((a) => (a + 1) % segments.length), EXECUTION_PERIOD_MS);
-    return () => clearTimeout(t);
-  }, [playing, active, segments.length]);
-
-  // Picking one by hand takes over from the autoplay for good.
-  const pick = (i: number) => {
-    setAuto(false);
-    setActive(i);
-  };
-
-  return (
-    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <div data-stagger className="max-w-2xl sm:max-w-3xl">
-        <SectionHeading align="left" className="mb-5 sm:mb-6">How we think about execution</SectionHeading>
-        <LiquidText
-          pRef={introRef}
-          text={intro}
-          className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
-          style={{ color: "var(--ink-2)" }}
-        />
-      </div>
-
-      {/* Desktop: the accordion list beside the illustration. Phones: the
-          illustration on top, three tabs under it, then the line, in a box
-          sized to the longest line so the autoplay never shifts the page. */}
-      <div ref={blockRef} data-stagger className="mt-8 grid gap-5 sm:mt-14 sm:grid-cols-[1fr_1.1fr] sm:items-center sm:gap-12">
-        <ul className="hidden sm:flex flex-col gap-1.5">
-          {segments.map((seg, i) => {
-            const selected = i === active;
-            return (
-              <li
-                key={seg.label}
-                className="relative overflow-hidden rounded-[6px] transition-colors duration-300"
-                style={{ background: selected ? "var(--tile)" : "transparent" }}
-              >
-                <button
-                  type="button"
-                  onClick={() => pick(i)}
-                  aria-expanded={selected}
-                  aria-controls={`execution-text-${i}`}
-                  className="flex w-full items-baseline gap-3 px-4 py-4 text-left sm:px-5 sm:py-5"
-                >
-                  <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
-                    {i + 1}
-                  </span>
-                  <span
-                    className="text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug transition-colors duration-300"
-                    style={{ color: selected ? "var(--ink)" : "var(--ink-4)", fontWeight: 500 }}
-                  >
-                    {seg.label}
-                  </span>
-                </button>
-                <div
-                  id={`execution-text-${i}`}
-                  className="grid px-4 sm:px-5"
-                  style={{ gridTemplateRows: selected ? "1fr" : "0fr", transition: "grid-template-rows 420ms cubic-bezier(0.22,1,0.36,1)" }}
-                >
-                  <div className="overflow-hidden">
-                    <div className="-mt-2 pb-5 pl-7 sm:pb-6">
-                      {selected && (
-                        <LiquidText
-                          key={seg.label}
-                          text={seg.text}
-                          className="text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-left"
-                          style={{ color: "var(--ink-2)" }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {/* Time left on this principle while the list plays itself. */}
-                {selected && playing && (
-                  <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "rgb(var(--ink-rgb) / 0.06)" }}>
-                    <span
-                      key={active}
-                      className="block h-full origin-left"
-                      style={{ background: "var(--ink)", animation: `execution-progress ${EXECUTION_PERIOD_MS}ms linear both` }}
-                    />
-                  </span>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-
-        <div aria-hidden="true" className="relative aspect-[4/3] overflow-hidden rounded-[6px] order-first sm:order-none" style={{ background: "var(--tile)" }}>
-          {segments.map(({ label, Art }, i) => (
-            <div
-              key={label}
-              className="absolute inset-0 flex items-center justify-center"
-              style={{ opacity: i === active ? 1 : 0, transition: "opacity 400ms ease" }}
-            >
-              {/* Drawn after hydration only: decoration, kept out of the
-                  server HTML so the page's text isn't buried in markup. */}
-              {mounted && <Art play={i === active && (inView || reduced)} />}
-            </div>
-          ))}
-        </div>
-
-        <div className="sm:hidden">
-          <div role="tablist" aria-label="How we think about execution" className="grid grid-cols-3 gap-1.5">
-            {segments.map((seg, i) => {
-              const selected = i === active;
-              return (
-                <button
-                  key={seg.label}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  aria-controls="execution-text-mobile"
-                  onClick={() => pick(i)}
-                  className="relative flex flex-col items-start gap-1 overflow-hidden rounded-[6px] px-3 py-2.5 text-left transition-colors duration-300"
-                  style={{ background: selected ? "var(--tile)" : "transparent" }}
-                >
-                  <span className="text-[12.5px] tabular-nums leading-none tracking-tight" style={{ color: "var(--ink-4)" }}>
-                    {i + 1}
-                  </span>
-                  <span
-                    className="whitespace-nowrap text-[15px] leading-snug tracking-[-0.02em] transition-colors duration-300"
-                    style={{ color: selected ? "var(--ink)" : "var(--ink-4)", fontWeight: 500 }}
-                  >
-                    {seg.label}
-                  </span>
-                  {selected && playing && (
-                    <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: "rgb(var(--ink-rgb) / 0.06)" }}>
-                      <span
-                        key={active}
-                        className="block h-full origin-left"
-                        style={{ background: "var(--ink)", animation: `execution-progress ${EXECUTION_PERIOD_MS}ms linear both` }}
-                      />
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          <div id="execution-text-mobile" role="tabpanel" className="mt-4 grid px-1">
-            {/* Every line laid out invisibly in the same cell, so the box
-                holds the tallest one. */}
-            {segments.map((seg) => (
-              <p key={seg.label} aria-hidden="true" className="invisible [grid-area:1/1] text-[16px] leading-relaxed tracking-tight">
-                {tokenizeCopy(seg.text).map((t, i, all) => (
-                  <React.Fragment key={t.key}>
-                    {t.node}
-                    {i < all.length - 1 ? " " : ""}
-                  </React.Fragment>
-                ))}
-              </p>
-            ))}
-            <LiquidText
-              key={segments[active].label}
-              text={segments[active].text}
-              className="[grid-area:1/1] text-[16px] leading-relaxed tracking-tight text-left"
-              style={{ color: "var(--ink-2)" }}
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Ramps up smoothly rather than moving fastest right at t=0, so a release
-// glide starts unhurried instead of snapping off abruptly the instant you
-// let go.
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-
-// How far apart the four drawings start building, once the section scrolls in.
-const WHAT_WE_DO_STEP_MS = 420;
-
-// "What we do" as the process it is: the four stages of the hero's stair, in
-// order, each a line drawing on its tile, then a small step number beside the
-// stage name, its description collapsed under it until opened. One row of four on wide screens, two by two below that.
-// On first view the drawings build one after another. On phones the stages
-// sit in a row that swipes sideways, like Our thoughts, and each drawing
-// builds as it's swiped in.
-function WhatWeDo() {
-  const listRef = useRef<HTMLOListElement>(null);
-  const mounted = useMounted();
+  // The bento plays once, when it scrolls into view.
   const [on, setOn] = useState(false);
-  const reduced = useReducedMotion() ?? false;
-
   useEffect(() => {
-    const el = listRef.current;
+    const el = gridRef.current;
     if (!el) return;
     const obs = new IntersectionObserver(
       ([e]) => {
@@ -1799,18 +1619,16 @@ function WhatWeDo() {
         obs.disconnect();
         setOn(true);
       },
-      { threshold: 0.35 },
+      { threshold: 0.3 },
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  // On phones the stages are a swipe row, so each one plays when it's swiped
-  // into view instead of all four at once while three are off screen. The
-  // row is the observer's root; `on` above still gates it on the section
-  // being in view vertically.
+  // On phones the cells are a swipe row, so each sketch plays as its card is
+  // swiped in rather than all three while two are off screen.
   const [phone, setPhone] = useState(false);
-  const [seen, setSeen] = useState<boolean[]>(() => WHAT_WE_DO_ITEMS.map(() => false));
+  const [seen, setSeen] = useState<boolean[]>(() => EXECUTION_PRINCIPLES.map(() => false));
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 639px)");
     const sync = () => setPhone(mq.matches);
@@ -1819,7 +1637,7 @@ function WhatWeDo() {
     return () => mq.removeEventListener("change", sync);
   }, []);
   useEffect(() => {
-    const root = listRef.current;
+    const root = gridRef.current;
     if (!phone || !root) return;
     const obs = new IntersectionObserver(
       (entries) => {
@@ -1835,101 +1653,238 @@ function WhatWeDo() {
     return () => obs.disconnect();
   }, [phone]);
 
-  // Each step's description starts collapsed and opens on its own.
-  const [open, setOpen] = useState<boolean[]>(() => WHAT_WE_DO_ITEMS.map(() => false));
-  const toggle = (i: number) => setOpen((prev) => prev.map((v, k) => (k === i ? !v : v)));
-
-  const lit = on || reduced;
-  // Per step: does its drawing build, and when. On phones a drawing builds
-  // when its card is swiped in.
-  const stepOn = (i: number) => (phone ? lit && (seen[i] || reduced) : lit);
-  const stepDelay = (i: number) => (reduced ? 0 : phone ? (i > 0 ? WHAT_WE_DO_STEP_MS : 0) : i * WHAT_WE_DO_STEP_MS);
+  // Staggered on wider screens, so the three play one after another.
+  const [played, setPlayed] = useState<boolean[]>(() => EXECUTION_PRINCIPLES.map(() => false));
+  useEffect(() => {
+    if (!on && !reduced) return;
+    const timers = EXECUTION_PRINCIPLES.map((_, i) => {
+      const ready = reduced || (phone ? seen[i] : true);
+      if (!ready) return null;
+      return setTimeout(
+        () => setPlayed((prev) => (prev[i] ? prev : prev.map((v, k) => v || k === i))),
+        reduced || phone ? 0 : i * EXECUTION_STEP_MS,
+      );
+    });
+    return () => timers.forEach((t) => t && clearTimeout(t));
+  }, [on, reduced, phone, seen]);
 
   return (
     <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-      <SectionHeading align="left" className="mb-10 sm:mb-14">What we do</SectionHeading>
-      <ol
-        ref={listRef}
+      <div data-stagger className="max-w-2xl sm:max-w-3xl">
+        <SectionHeading align="left" className="mb-5 sm:mb-6">How we think about execution</SectionHeading>
+        <LiquidText
+          pRef={introRef}
+          text={intro}
+          className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
+          style={{ color: "var(--ink-2)" }}
+        />
+      </div>
+
+      <div
+        ref={gridRef}
         data-stagger
-        className="no-scrollbar -mx-6 flex items-start snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:gap-y-12 sm:overflow-visible sm:px-0 lg:grid-cols-4 lg:gap-x-5"
+        className="no-scrollbar -mx-6 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-6 px-6 sm:mx-0 sm:mt-14 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 lg:grid-cols-12 lg:grid-rows-[repeat(2,22rem)]"
       >
-        {WHAT_WE_DO_ITEMS.map((item, i) => {
-          const delay = stepDelay(i);
+        {segments.map(({ label, text, Art }, i) => {
+          const c = EXECUTION_CELL[i];
           return (
-            <li key={item.label} data-index={i} className="group flex w-[80%] shrink-0 snap-start flex-col sm:w-auto">
-              <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[6px]" style={{ background: "var(--tile)" }}>
-                {mounted && <WhatWeDoSketch
-                  stage={item.label}
-                  play={stepOn(i)}
-                  delay={phone ? Math.max(0, delay - 200) : delay}
-                  still={reduced}
-                  className="h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:group-hover:scale-[1.04]"
-                />}
+            <article
+              key={label}
+              data-index={i}
+              className={`flex w-[85%] shrink-0 snap-start flex-col overflow-hidden rounded-[6px] sm:w-auto ${c.cell}`}
+              style={{ background: "var(--tile)" }}
+            >
+              <div aria-hidden="true" className={`relative flex aspect-[4/3] w-full items-center justify-center ${c.art}`}>
+                {/* Drawn after hydration only: decoration, kept out of the
+                    server HTML so the page's text isn't buried in markup. */}
+                {mounted && <Art play={played[i]} />}
               </div>
-              {/* Collapsed to the step name; the plus opens its description. */}
-              <h3 className="mt-4">
-                <button
-                  type="button"
-                  onClick={() => toggle(i)}
-                  aria-expanded={open[i]}
-                  aria-controls={`wwd-text-${i}`}
-                  className="flex w-full items-baseline gap-3 text-left"
-                >
+              <div className={`px-5 pb-5 sm:px-6 sm:pb-6 lg:px-7 lg:pb-7 ${c.text}`}>
+                <h3 className="flex items-baseline gap-3">
                   <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight" style={{ color: "var(--ink-4)" }}>
                     {i + 1}
                   </span>
-                  <span className="flex-1 text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)", fontWeight: 500 }}>
-                    {item.label}
+                  <span className="text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug" style={{ color: "var(--ink)", fontWeight: 500 }}>
+                    {label}
                   </span>
-                  <span aria-hidden="true" className="relative size-3 shrink-0 self-center" style={{ color: "var(--ink-3)" }}>
-                    <span className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-current" />
-                    <span
-                      className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-current transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                      style={{ transform: open[i] ? "translateX(-50%) scaleY(0)" : "translateX(-50%)" }}
-                    />
-                  </span>
-                </button>
-              </h3>
-              <div
-                id={`wwd-text-${i}`}
-                className="grid"
-                style={{ gridTemplateRows: open[i] ? "1fr" : "0fr", transition: "grid-template-rows 420ms cubic-bezier(0.22,1,0.36,1)" }}
-              >
-                <div className="overflow-hidden" inert={!open[i]}>
-                  <p
-                    className="pt-1.5 pl-7 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-pretty transition-opacity duration-300"
-                    style={{ color: "var(--ink-2)", opacity: open[i] ? 1 : 0 }}
-                  >
-                    {item.description}
-                  </p>
-                </div>
+                </h3>
+                <p className={`mt-2 pl-7 text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-pretty ${c.line}`} style={{ color: "var(--ink-2)" }}>
+                  {tokenizeCopy(text).map((t, k, all) => (
+                    <React.Fragment key={t.key}>
+                      {t.node}
+                      {k < all.length - 1 ? " " : ""}
+                    </React.Fragment>
+                  ))}
+                </p>
               </div>
-            </li>
+            </article>
           );
         })}
-      </ol>
+      </div>
     </section>
   );
 }
 
+// Ramps up smoothly rather than moving fastest right at t=0, so a release
+// glide starts unhurried instead of snapping off abruptly the instant you
+// let go.
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// "What we do" as a feature and an index: the four services listed and
+// numbered on one side, the selected one's sketch large on the other, with
+// its description opened under its name. Hovering a service (or tapping it)
+// selects it and plays its sketch. Wide screens put the list beside the
+// board; below that the board sits on top and the list runs under it.
+function WhatWeDo() {
+  const boardRef = useRef<HTMLDivElement>(null);
+  const mounted = useMounted();
+  const reduced = useReducedMotion() ?? false;
+  const [active, setActive] = useState(0);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = boardRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.4 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
+      <SectionHeading align="left" className="mb-8 sm:mb-12">What we do</SectionHeading>
+      <div data-stagger className="grid gap-6 lg:grid-cols-[1fr_1.25fr] lg:items-center lg:gap-14">
+        <ol className="order-2 flex flex-col gap-1.5 lg:order-1">
+          {WHAT_WE_DO_ITEMS.map((item, i) => {
+            const selected = i === active;
+            return (
+              <li
+                key={item.label}
+                className="rounded-[6px] transition-colors duration-300"
+                style={{ background: selected ? "var(--tile)" : "transparent" }}
+                onPointerEnter={(e) => {
+                  if (e.pointerType === "mouse") setActive(i);
+                }}
+              >
+                <h3>
+                  <button
+                    type="button"
+                    onClick={() => setActive(i)}
+                    aria-expanded={selected}
+                    aria-controls={`wwd-text-${i}`}
+                    className="flex w-full items-baseline gap-3 px-4 py-4 text-left sm:px-5 sm:py-5"
+                  >
+                    {/* The selected service's number is the one mark of colour here. */}
+                    <span className="w-4 shrink-0 text-[14px] tabular-nums tracking-tight transition-colors duration-300" style={{ color: selected ? "var(--signal)" : "var(--ink-4)" }}>
+                      {i + 1}
+                    </span>
+                    <span
+                      className="text-[18px] sm:text-[21px] tracking-[-0.02em] leading-snug transition-colors duration-300"
+                      style={{ color: selected ? "var(--ink)" : "var(--ink-4)", fontWeight: 500 }}
+                    >
+                      {item.label}
+                    </span>
+                  </button>
+                </h3>
+                <div
+                  id={`wwd-text-${i}`}
+                  className="grid px-4 sm:px-5"
+                  style={{ gridTemplateRows: selected ? "1fr" : "0fr", transition: "grid-template-rows 420ms cubic-bezier(0.22,1,0.36,1)" }}
+                >
+                  <div className="overflow-hidden" inert={!selected}>
+                    <p
+                      className="-mt-2 pb-5 pl-7 text-[15.5px] sm:text-[17px] leading-relaxed tracking-tight text-pretty transition-opacity duration-300 sm:pb-6"
+                      style={{ color: "var(--ink-2)", opacity: selected ? 1 : 0 }}
+                    >
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div
+          ref={boardRef}
+          aria-hidden="true"
+          className="relative order-1 aspect-[4/3] overflow-hidden rounded-[6px] lg:order-2"
+          style={{ background: "var(--tile)" }}
+        >
+          {WHAT_WE_DO_ITEMS.map((item, i) => (
+            <div
+              key={item.label}
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ opacity: i === active ? 1 : 0, transition: "opacity 400ms ease" }}
+            >
+              {/* Drawn after hydration only, like the other sketches. */}
+              {mounted && (
+                <WhatWeDoSketch
+                  stage={item.label}
+                  play={i === active && inView}
+                  still={reduced}
+                  className="h-full w-full"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// "How we think about AI": the Directions board acts the first paragraph
+// out (many directions explored, the wrong ones dropped, one shipped), with
+// the two paragraphs side by side under it on wider screens.
 function AiApproach({ clients }: { clients: ClientCarouselItem[] }) {
   const [first, second] = AI_APPROACH;
+  const boardRef = useRef<HTMLDivElement>(null);
+  const mounted = useMounted();
+  const reduced = useReducedMotion() ?? false;
+  const [play, setPlay] = useState(false);
+  useEffect(() => {
+    const el = boardRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        obs.disconnect();
+        setPlay(true);
+      },
+      { threshold: 0.45 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   return (
     <>
       <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-        <div data-stagger className="max-w-2xl sm:max-w-3xl sm:mx-auto">
-            <SectionHeading className="mb-5 sm:mb-6">How we think about AI</SectionHeading>
-            <LiquidText
-              text={first}
-              className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left"
-              style={{ color: "var(--ink-2)" }}
-            />
-            <LiquidText
-              text={second}
-              delayMs={160}
-              className="text-[16.5px] sm:text-[21px] leading-relaxed tracking-tight text-left mt-5"
-              style={{ color: "var(--ink-2)" }}
-            />
+        <SectionHeading align="left" className="mb-8 sm:mb-12">How we think about AI</SectionHeading>
+        <div
+          ref={boardRef}
+          data-stagger
+          aria-hidden="true"
+          className="relative aspect-[4/3] w-full overflow-hidden rounded-[6px] sm:aspect-[1200/420]"
+          style={{ background: "var(--tile)" }}
+        >
+          {/* Drawn after hydration only, like the other sketches. */}
+          {mounted && <DirectionsArt play={play} still={reduced} />}
+        </div>
+        <div data-stagger className="mt-8 grid gap-5 sm:mt-12 sm:grid-cols-2 sm:gap-12">
+          <LiquidText
+            text={first}
+            className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+            style={{ color: "var(--ink-2)" }}
+          />
+          <LiquidText
+            text={second}
+            delayMs={160}
+            className="text-[16.5px] sm:text-[19px] leading-relaxed tracking-tight text-left"
+            style={{ color: "var(--ink-2)" }}
+          />
         </div>
       </section>
       <FrameRule tone="light" />
@@ -2094,39 +2049,87 @@ const WALL_LOGO: Record<string, { w: string; ratio: string }> = {
 // The wall's order, four to a row on desktop. Anyone not listed follows in
 // their usual order.
 const WALL_FIRST = [
-  "aether", "trippie-redd", "ellora-la", "mood-swings",
-  "allure-new-york", "samuel-norris", "inboundly", "subtle-goods",
+  "aether", "allure-new-york", "inboundly", "subtle-goods",
+  "trippie-redd", "ellora-la", "mood-swings", "samuel-norris",
 ];
 
-// The client wall: one panel, logos only, balanced by weight. The name and
-// what we did surface on hover; the whole cell links to the case study.
+// The wall lights one tile at a time, as if it were being hovered, in a
+// scattered order so it never reads as a scan. A real hover takes over.
+const WALL_CYCLE = [0, 5, 2, 7, 1, 4, 6, 3];
+const WALL_CYCLE_MS = 2400;
+
+// The client wall: logos only, straight on the page, balanced by weight. The
+// name and what we did surface on the lit tile, hovered or cycling; the whole
+// cell links to the case study.
 function ClientGrid({ items: unordered }: { items: ClientCarouselItem[] }) {
+  const listRef = useRef<HTMLUListElement>(null);
+  const reduced = useReducedMotion() ?? false;
+  const [inView, setInView] = useState(false);
+  const [step, setStep] = useState(-1);
+  const [hovered, setHovered] = useState<number | null>(null);
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.35 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  // Steps through the cycle while the wall is on screen and nobody's
+  // hovering it. The first tile lights a beat after the wall arrives.
+  const cycling = inView && hovered === null && !reduced;
+  useEffect(() => {
+    if (!cycling) return;
+    const t = setTimeout(() => setStep((s) => s + 1), step < 0 ? 900 : WALL_CYCLE_MS);
+    return () => clearTimeout(t);
+  }, [cycling, step]);
+
   if (unordered.length === 0) return null;
   const rank = (slug: string) => {
     const i = WALL_FIRST.indexOf(slug);
     return i < 0 ? WALL_FIRST.length : i;
   };
   const items = [...unordered].sort((a, b) => rank(a.slug) - rank(b.slug));
+  const order = WALL_CYCLE.filter((i) => i < items.length);
+  const lit = hovered ?? (cycling && step >= 0 ? order[step % order.length] : null);
   return (
     <section className="rise rise-stagger w-full max-w-[80rem] mx-auto px-6 sm:px-8">
       <SectionHeading align="left" className="mb-10 text-balance sm:mb-14">{CLIENTS_HEADING}</SectionHeading>
-      <ul data-stagger className="grid grid-cols-2 overflow-hidden rounded-[12px] sm:grid-cols-4" style={{ background: "var(--tile)" }}>
-        {items.map((item) => {
+      <ul ref={listRef} data-stagger className="grid grid-cols-2 sm:grid-cols-4" onPointerLeave={() => setHovered(null)}>
+        {items.map((item, i) => {
           const box = WALL_LOGO[item.slug] ?? { w: "40%", ratio: "1 / 1" };
           return (
             <li key={item.slug}>
               <Link
                 href={`/work/${item.slug}`}
-                className="group relative flex aspect-[3/2] items-center justify-center transition-colors duration-300 hover:bg-[var(--tile-2)] focus-visible:bg-[var(--tile-2)] sm:aspect-[16/11]"
+                data-lit={lit === i}
+                // While one tile is lit the rest recede, so it's a spotlight
+                // rather than one bright tile among flat grey ones.
+                data-dim={lit !== null && lit !== i}
+                onPointerEnter={(e) => {
+                  if (e.pointerType === "mouse") setHovered(i);
+                }}
+                className="group relative flex aspect-[3/2] items-center justify-center rounded-[6px] transition-colors duration-500 data-[lit=true]:bg-[var(--tile)] focus-visible:bg-[var(--tile)] sm:aspect-[16/11]"
                 aria-label={item.service ? `${item.client}, ${item.service}` : item.client}
               >
+                {/* A small signal dot marks the lit tile. */}
+                <span
+                  aria-hidden="true"
+                  className={`absolute right-3.5 top-3.5 size-1.5 rounded-full opacity-0 transition-opacity ${WALL_EASE} group-data-[lit=true]:opacity-100`}
+                  style={{ background: "var(--signal)" }}
+                />
                 {item.logo ? (
                   <span
                     aria-hidden="true"
-                    className={`block opacity-[0.82] transition-[opacity,transform] ${WALL_EASE} group-hover:opacity-100 sm:group-hover:-translate-y-2`}
+                    className={`block opacity-[0.82] transition-[opacity,transform] ${WALL_EASE} group-data-[lit=true]:opacity-100 sm:group-data-[lit=true]:-translate-y-2 group-data-[dim=true]:scale-[0.94] group-data-[dim=true]:opacity-[0.22]`}
                     style={{
                       width: box.w,
                       aspectRatio: box.ratio,
+                      // Kept on its own layer for good: otherwise the browser
+                      // redraws the mask crisper the moment the lift ends,
+                      // and the logo visibly snaps in weight and size.
+                      willChange: "transform, opacity",
                       backgroundColor: "var(--ink)",
                       WebkitMaskImage: `url(${item.logo})`,
                       maskImage: `url(${item.logo})`,
@@ -2142,11 +2145,12 @@ function ClientGrid({ items: unordered }: { items: ClientCarouselItem[] }) {
                   <span className="text-[15px] tracking-tight" style={{ color: "var(--ink)" }}>{item.client}</span>
                 )}
                 <span
-                  className={`pointer-events-none absolute inset-x-4 bottom-3 hidden translate-y-1 text-[13px] tracking-tight opacity-0 transition-all ${WALL_EASE} group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 sm:block`}
-                  style={{ color: "var(--ink-2)" }}
+                  className={`pointer-events-none absolute inset-x-4 bottom-3.5 hidden translate-y-1 text-[13px] leading-snug tracking-tight opacity-0 transition-all ${WALL_EASE} group-data-[lit=true]:translate-y-0 group-data-[lit=true]:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 sm:block`}
+                  style={{ color: "var(--ink-3)" }}
                 >
-                  <span style={{ color: "var(--ink)" }}>{item.client}</span>
-                  {item.service && <> · {item.service}</>}
+                  {/* Name over service, like a credit: no separator. */}
+                  <span className="block" style={{ color: "var(--ink)" }}>{item.client}</span>
+                  {item.service && <span className="mt-0.5 block">{item.service}</span>}
                 </span>
               </Link>
             </li>
