@@ -1,20 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FRAME_CELL_GAP, FRAME_INSET, FRAME_RULE_OVERHANG, FRAMED, FrameColumnRails, FrameRule } from "@/components/page-frame";
 import { usePathname } from "next/navigation";
-import { useState, useRef, useCallback, useEffect, type CSSProperties } from "react";
+import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { HeaderAuth } from "./dashboard/header-auth";
+import { BuyButton } from "./aether/buy-button";
 import { TOC_ITEMS } from "./components/shared";
 import { useWebHaptics } from "web-haptics/react";
-import { ctaScaleHoverOnSelf } from "@/lib/cta-hover-motion";
-import {
-  CTA_FILL,
-  CTA_HEADER_PILL_CLASS,
-  CTA_HEADER_SHELL_HEIGHT_CLASS,
-  CtaGrain,
-} from "@/lib/cta-chrome";
 import { SiShopify } from "react-icons/si";
 import {
   HiOutlineSparkles,
@@ -573,7 +566,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
   );
 }
 
-/* ── Logo spring ─────────────────────────────────────────────────── */
+/* ── Logo ────────────────────────────────────────────────────────── */
 
 function InertiaLogo() {
   return (
@@ -586,80 +579,90 @@ function InertiaLogo() {
   );
 }
 
-/* ── Header CTAs — the hero's pair at header size: a quiet "Sign in" on
-   the tile tone and the primary "Reach out" in the page's CTA fill, as two
-   separate buttons. ── */
+/* ── Header ──────────────────────────────────────────────────────────
+   A plain bar. From sm up: the wordmark in the far left corner, Sign in and
+   Reach out in the far right. On phones the wordmark is centred and the two
+   actions wait at the bottom of the screen, rising into a sticky dock once
+   the visitor is past the hero (.header-bar and .dock in globals.css). */
 
-function MergedCTA({
-  compact: _compact = false,
-  hideContact = false,
-  hideSignIn = false,
-}: {
-  compact?: boolean;
-  hideContact?: boolean;
-  // On the sign-in page itself, where it would only lead back to itself.
-  hideSignIn?: boolean;
-}) {
+function HeaderBar({ menu }: { menu?: ReactNode }) {
   return (
-    <div className={`relative inline-flex items-center gap-2 ${CTA_HEADER_SHELL_HEIGHT_CLASS}`}>
-      {!hideSignIn && (
-      <Link
-        href="/login"
-        className={CTA_HEADER_PILL_CLASS}
-        style={{
-          background: "var(--tile-2)",
-          color: "var(--ink)",
-          textDecoration: "none",
-          whiteSpace: "nowrap",
-          transformOrigin: "center",
-        }}
-        {...ctaScaleHoverOnSelf}
-      >
-        <span className="relative">Sign in</span>
+    <div className="header-bar">
+      <Link href="/" className="header-bar__brand">
+        <InertiaLogo />
       </Link>
+      <div className="header-bar__end">
+        <HeaderActions />
+      </div>
+      {menu}
+    </div>
+  );
+}
+
+function HeaderActions() {
+  const pathname = usePathname();
+  return (
+    <>
+      {/* Not on the sign-in page itself, where it would only lead back. */}
+      {pathname !== "/login" && (
+        <Link href="/login" className="header-signin">
+          Sign in
+        </Link>
       )}
-      {!hideContact ? (
-        <a
-          href="https://cal.com/jacob-c-99otvp/15min"
-          target="_blank"
-          rel="noreferrer"
-          className={CTA_HEADER_PILL_CLASS}
-          style={{
-            background: CTA_FILL,
-            color: "var(--cta-fg)",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-            transformOrigin: "center",
-          }}
-          {...ctaScaleHoverOnSelf}
-        >
-          <CtaGrain />
-          <span className="relative">Reach out</span>
+      {/* The Aether page has its own call to action. */}
+      {pathname !== "/aether" && (
+        <a href={CAL_LINK} target="_blank" rel="noreferrer" className="header-cta">
+          Reach out
         </a>
-      ) : null}
+      )}
+    </>
+  );
+}
+
+// Phones: the actions rise into a dock at the bottom of the screen once the
+// page's hero ([data-hero], else the first screen) has scrolled away, and
+// drop back while a section with its own (data-dock-hide) is on screen.
+function HeaderDock() {
+  const pathname = usePathname();
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    let frame: number | null = null;
+    const check = () => {
+      frame = null;
+      const hero = document.querySelector("[data-hero]");
+      const passed = hero ? hero.getBoundingClientRect().bottom <= 0 : window.scrollY > window.innerHeight;
+      // It steps aside where the page asks for the same thing itself
+      // ([data-dock-hide], like the homepage's close).
+      const ownInView = Array.from(document.querySelectorAll("[data-dock-hide]")).some((el) => {
+        const r = el.getBoundingClientRect();
+        return r.top < window.innerHeight && r.bottom > 0;
+      });
+      setShown(passed && !ownInView);
+    };
+    const onScroll = () => {
+      if (frame === null) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, [pathname]);
+  if (pathname === "/login" || pathname === "/reset-password") return null;
+  return (
+    <div className="dock" data-shown={shown || undefined} aria-hidden={!shown}>
+      <div className="dock__inner" inert={!shown || undefined}>
+        {/* On Aether the dock is the way to buy it. */}
+        {pathname === "/aether" ? <BuyButton /> : <HeaderActions />}
+      </div>
     </div>
   );
 }
 
 /* ── Root ────────────────────────────────────────────────────────── */
-
-// The homepage header's boundary sits this far below the header's box, so its
-// cell's rounded bottom line clears the buttons by about as much space as
-// they have above them, rather than running right under them.
-const HEADER_RULE_DROP = 7;
-// How far the header's boundary reaches below its box: down to the bottom of
-// the next cell's rounded top.
-const HEADER_FILL_REACH = HEADER_RULE_DROP + FRAME_RULE_OVERHANG;
-// The header cell's own bottom line, where its blur stops: the gap below it
-// is solid, and the next cell fades instead of blurring.
-const HEADER_CELL_BOTTOM = HEADER_RULE_DROP - FRAME_CELL_GAP / 2;
-// The wash under the blur is .site-header__bg--soft in the stylesheet, since
-// the backdrop's inline background is cleared from script.
-const HEADER_SOFT_EDGE: CSSProperties = {
-  bottom: -18,
-  WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent)",
-  maskImage: "linear-gradient(to bottom, black 60%, transparent)",
-};
 
 export function VisualNotch() {
   const { trigger } = useWebHaptics();
@@ -761,152 +764,34 @@ export function VisualNotch() {
     };
   }, [mobileOpen, pathname]);
 
-  // On the homepage, whether the header is over the lower panel. Its frame
-  // corners are then cut from that panel's colour (see .site-header--zone).
-  // On the way there the header blends toward that colour (--zone-t, 0 to
-  // 1), starting as soon as the panel comes up into view, so it has arrived
-  // by the time the panel reaches it.
-  const [overZone, setOverZone] = useState(false);
-  useEffect(() => {
-    if (pathname !== "/") {
-      setOverZone(false);
-      headerRef.current?.style.removeProperty("--zone-t");
-      return;
-    }
-    let frame: number | null = null;
-    const check = () => {
-      frame = null;
-      const zone = document.querySelector(".homepage-dark-zone");
-      const header = headerRef.current;
-      if (!zone || !header) return;
-      // The header's boundary reaches HEADER_FILL_REACH below its box.
-      const top = zone.getBoundingClientRect().top;
-      const end = header.offsetHeight + HEADER_FILL_REACH;
-      const vh = window.innerHeight;
-      const t = Math.min(1, Math.max(0, (vh - top) / Math.max(1, vh - end)));
-      header.style.setProperty("--zone-t", t.toFixed(3));
-      setOverZone(top <= end);
-    };
-    const onScroll = () => {
-      if (frame === null) frame = requestAnimationFrame(check);
-    };
-    check();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (frame !== null) cancelAnimationFrame(frame);
-    };
-  }, [pathname]);
-
   const isHome = pathname === "/";
   const isPolicies = pathname.startsWith("/policies");
   const isAether = pathname.startsWith("/aether");
-  const isAetherLanding = pathname === "/aether";
-  // Aether pages laid out in cells like the landing page.
-  const isAetherFramed = isAetherLanding || pathname === "/aether/changelog";
   const isWork = pathname.startsWith("/work");
   const isComponents = pathname.startsWith("/components");
   const isBlog = pathname.startsWith("/blog");
   // Blog posts and policy documents are laid out as a sheet (see
   // app/blog/[slug]/page.tsx and app/policies/policy-doc.tsx).
   const isSheet = pathname.startsWith("/blog/") || pathname.startsWith("/policies/");
-  // The work index and case studies, laid out in cells like the homepage.
-  const isWorkCase = pathname === "/work" || pathname.startsWith("/work/");
-  // Pages laid out in the frame (rails and rounded cells): the header is a
-  // cell of it too, a plain blur with its boundary below.
-  // These pages take a plain blur for the header, with no refraction.
   // Sign in and reset password take the homepage's header as it is.
   const isAuth = pathname === "/login" || pathname === "/reset-password";
-  const plainBlur = isHome || isAetherFramed || isWorkCase || isAuth;
-  const isFramed = FRAMED && plainBlur;
   const useMinimalHeader = isHome || isPolicies || isAether || isWork || isComponents || isBlog || isAuth;
-
-  // Every page's header sits on the homepage's column: 80rem wide, its logo
-  // and buttons 32px in from sm up (phones are fixed at 23px in
-  // .site-header__inner--content), and each page lines its content up with
-  // that column. The components gallery is the exception: a wider dev page.
-  const inset = (maxWidth: string, padSm: string) =>
-    ({ maxWidth, "--hdr-pad-sm": padSm }) as CSSProperties;
-  const headerInset = isComponents ? inset("96rem", "12px") : inset("80rem", "32px");
 
   if (useMinimalHeader) {
     return (
       <>
-        <div
-          // Pinned to the top while scrolling, on every page that uses it
-          // except blog posts, where it scrolls away with the page so the
-          // reading column has the whole screen.
-          className={`site-header${isSheet ? "" : " site-header--pinned"}${mobileOpen ? " site-header--open" : ""}${isHome ? " site-header--home" : ""}${isHome && overZone ? " site-header--zone" : ""}`}
-          ref={headerRef}
-          // On blog posts a hairline underneath, so the sheet starts below it
-          // (with the frame on; frameless, space does that job).
-          style={isSheet && FRAMED ? { borderBottom: "1px solid rgb(var(--ink-rgb) / 0.09)" } : undefined}
-        >
-          <svg width="0" height="0" className="absolute" aria-hidden="true">
-            <filter id="header-glass" colorInterpolationFilters="sRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="2" seed="4" result="noise" />
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-          </svg>
-          {/* On the homepage the blur fills the header cell, down to its
-              rounded bottom line just below the header's box. */}
-          {/* With the frame off, the plain blur runs a little past the header
-              and eases off, so it never ends on a hard edge. */}
-          <div
-            className={`site-header__bg${plainBlur ? " site-header__bg--framed" : ""}${plainBlur && !isFramed ? " site-header__bg--soft" : ""}`}
-            style={isFramed ? { bottom: -HEADER_CELL_BOTTOM } : plainBlur ? HEADER_SOFT_EDGE : undefined}
-            aria-hidden="true"
-          />
-          {!plainBlur && <div className="site-header__fade" aria-hidden="true" />}
-          <div className="site-header__bg-fill" aria-hidden="true" />
-          {/* Safari (iOS 26) tints its top bar from a solid fixed element at the
-              top edge. The header is pure blur, so this band in the page's
-              colour sits over the blur, under the header's content, for Safari
-              to pick up (.safari-top-tint). */}
+        {/* Pinned on every page that uses it except blog posts, where it
+            scrolls away so the reading column has the whole screen. */}
+        <div className={`site-header site-header--bar${isSheet ? "" : " site-header--pinned"}`} ref={headerRef}>
+          {/* Safari (iOS 26) tints its top bar from a solid fixed element at
+              the top edge; this band in the page's colour is what it picks up
+              (.safari-top-tint), under the bar. */}
           <div aria-hidden="true" className="safari-top-tint" />
-          {/* A framed page's rails start here, above its first cell. */}
-          {isFramed && (
-            <>
-              <FrameColumnRails tone="light" className="z-[1]" />
-              {/* The header's own boundary, closing the frame above the page. */}
-              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 z-[1]" style={{ bottom: -HEADER_RULE_DROP }}>
-                <div className="relative mx-auto w-full max-w-[80rem]">
-                  {/* In the cell below, content fades in from the paper as it
-                      comes out from under the boundary, rather than blurring.
-                      Starts at the cell's top line, kept inside the rails,
-                      and sits under the boundary so its line and corners
-                      draw over it. */}
-                  <div className={`absolute h-10 ${FRAME_INSET}`} style={{ top: FRAME_CELL_GAP / 2 }}>
-                    <div className="absolute inset-y-0 inset-x-px bg-[linear-gradient(var(--paper),transparent)]" />
-                  </div>
-                  <FrameRule tone="light" className="" solidGap />
-                </div>
-              </div>
-            </>
-          )}
-          <div className="site-header__inner site-header__inner--content" style={headerInset}>
-            <Link href="/" className="site-header__brand">
-              <InertiaLogo />
-            </Link>
-            <div className="site-header__actions">
-              <div className="hidden sm:flex">
-                <MergedCTA
-                  hideContact={isAetherLanding}
-                  hideSignIn={pathname === "/login"}
-                />
-              </div>
-              <div className={isComponents ? "hidden" : "flex sm:hidden"}>
-                <MergedCTA
-                  compact
-                  hideContact={isAetherLanding}
-                  hideSignIn={pathname === "/login"}
-                />
-              </div>
-              {isComponents && (
+          <HeaderBar
+            menu={
+              isComponents ? (
                 <button
-                  className="site-header__hamburger sm:hidden"
+                  className="header-bar__menu sm:hidden"
                   onClick={() => {
                     trigger("medium");
                     setMobileOpen((v) => !v);
@@ -917,9 +802,10 @@ export function VisualNotch() {
                   <span className="site-header__hamburger-bar" data-open={mobileOpen} />
                   <span className="site-header__hamburger-bar" data-open={mobileOpen} />
                 </button>
-              )}
-            </div>
-          </div>
+              ) : null
+            }
+          />
+          <HeaderDock />
         </div>
         {isComponents && mobileOpen && (
           <div

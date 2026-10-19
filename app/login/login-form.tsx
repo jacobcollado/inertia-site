@@ -5,16 +5,13 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
-import { ThemeSwitch } from "@/app/site-footer";
-import { RoomsArt } from "@/components/rooms-art";
-import { useMounted } from "@/hooks/use-mounted";
 
-// Typography from the homepage: the heading in the hero's display type
-// (light, large, tight), the line under it at body size.
+// Typography from the homepage: the heading at the size of its closing line
+// (light, large, tight), the line under it at the size of its section lines.
 const LOGIN_TITLE =
-  "text-[clamp(2.3rem,9vw,3rem)] sm:text-[clamp(2.6rem,4.4vw,3.6rem)] tracking-[-0.05em] leading-[0.95]";
+  "text-[clamp(2.5rem,6.4vw,4.5rem)] tracking-[-0.05em] leading-[1.04] text-balance";
 const LOGIN_SUBTITLE =
-  "text-[16px] sm:text-[17px] leading-relaxed tracking-tight text-pretty";
+  "text-[17px] sm:text-[18px] leading-[1.45] tracking-[-0.015em] text-balance";
 const LOGIN_INPUT = "text-[16px] tracking-tight";
 const LOGIN_BTN = "text-[15px] sm:text-[16px] tracking-tight";
 const LOGIN_UI = "text-[14px] sm:text-[14.5px] tracking-tight";
@@ -75,8 +72,8 @@ function EmailToggle({ onToggle }: { onToggle: () => void }) {
     <button
       type="button"
       onClick={onToggle}
-      className={`flex items-center justify-center gap-2 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-[filter,transform] duration-150 hover:brightness-[0.97] active:scale-[0.99]`}
-      style={{ background: "var(--tile)", color: "var(--ink)", fontWeight: 450 }}
+      className={`flex h-12 items-center justify-center gap-2 w-full ${LOGIN_BTN} leading-none rounded-[6px] transition-[box-shadow,transform] duration-150 shadow-[inset_0_0_0_1px_rgb(var(--ink-rgb)/0.12)] hover:shadow-[inset_0_0_0_1px_rgb(var(--ink-rgb)/0.28)] active:scale-[0.99]`}
+      style={{ background: "var(--paper)", color: "var(--ink)", fontWeight: 450 }}
     >
       Continue with email
     </button>
@@ -112,8 +109,9 @@ function EmailForm({
     const t = setTimeout(() => emailRef.current?.focus({ preventScroll: true }), ENTER_MS);
     return () => clearTimeout(t);
   }, [autoFocus]);
-  // Quiet tiles like the teardown form's fields, ringed in ink on focus.
-  const inputBase = `w-full h-12 px-4 ${LOGIN_INPUT} rounded-[6px] outline-none transition-shadow duration-200 text-[var(--ink)] bg-[var(--tile)] focus:shadow-[0_0_0_1.5px_var(--ink)] placeholder:text-[var(--ink-4)]`;
+  // White fields with a thin inset ring, like the site's outlined buttons,
+  // which darkens to ink on focus.
+  const inputBase = `w-full h-11 px-4 ${LOGIN_INPUT} rounded-[6px] outline-none transition-shadow duration-200 text-[var(--ink)] bg-[var(--paper)] shadow-[inset_0_0_0_1px_rgb(var(--ink-rgb)/0.12)] focus:shadow-[inset_0_0_0_1.5px_var(--ink)] placeholder:text-[var(--ink-4)]`;
   const label = `${LOGIN_UI} text-[var(--ink-3)]`;
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -277,8 +275,8 @@ function EmailForm({
         <button
           type="submit"
           disabled={loading}
-          className={`mt-2 flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed`}
-          style={{ background: "var(--ink)", color: "var(--paper)", fontWeight: 450 }}
+          className={`mt-2 flex h-12 items-center justify-center gap-2.5 w-full ${LOGIN_BTN} leading-none rounded-[6px] transition-[opacity,transform] duration-150 hover:opacity-85 active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed`}
+          style={{ background: "#000", color: "#fff", fontWeight: 450 }}
         >
           {loading ? <Spinner /> : null}
           {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
@@ -294,8 +292,8 @@ function GoogleButton({ onOAuth, loading, oauthProvider }: { onOAuth: () => void
       type="button"
       disabled={loading}
       onClick={onOAuth}
-      className={`flex items-center justify-center gap-2.5 w-full py-3 ${LOGIN_BTN} rounded-[6px] transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-30 disabled:cursor-not-allowed`}
-      style={{ background: "var(--ink)", color: "var(--paper)", fontWeight: 450 }}
+      className={`flex h-12 items-center justify-center gap-2.5 w-full ${LOGIN_BTN} leading-none rounded-[6px] transition-[opacity,transform] duration-150 hover:opacity-85 active:scale-[0.99] disabled:opacity-30 disabled:cursor-not-allowed`}
+      style={{ background: "#000", color: "#fff", fontWeight: 450 }}
     >
       {oauthProvider === "google" ? <Spinner /> : (
         <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" aria-hidden="true">
@@ -532,15 +530,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
     ? { opacity: 0, transform: `translateX(${enterX}px) scale(0.98)`, filter: "blur(3px)", transition: "none" }
     : { opacity: 1, transform: "translateX(0) scale(1)", filter: "blur(0px)", transition: `opacity ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1), transform ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1), filter ${ENTER_MS}ms cubic-bezier(0.16,1,0.3,1)` };
 
-  // While signing in, the rooms beside the form walk forward, so you step
-  // through the doorways as you enter.
-  const entering = loading;
-  const mounted = useMounted();
-
-  // From lg the form is centred against the drawing. Its height there is
-  // held at what the first view (the two ways in) needs, so the email form
-  // grows downward past it instead of re-centring the column: the heading
-  // never moves.
+  // The column sits on the screen's optical centre. Its height is held at
+  // what the first view (the two ways in) needs, so the email form grows
+  // downward past it instead of re-centring the column: the heading never
+  // moves.
   const restRef = useRef<HTMLDivElement>(null);
   const [restH, setRestH] = useState<number | null>(null);
   const atRest = displayedView === "auth" && phase === "idle";
@@ -557,33 +550,19 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   return (
     <div className="w-full">
 
-      {/* The site header (app/visual-notch.tsx) sits above, 56px tall. */}
-      <div className="min-h-[calc(100dvh-56px)] flex flex-col w-full max-w-[80rem] mx-auto px-6 sm:px-8">
-        {/* Phones: from the top. From lg: the form and the drawing side by
-            side, the form centred on the drawing's height. */}
-        <div className="grid flex-1 content-start gap-6 pt-4 pb-10 sm:pt-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:content-center lg:items-center lg:gap-20 lg:py-10">
-
-          {/* The rooms from the homepage hero: the portal you're stepping
-              into. On top and short on phones, beside the form from lg. */}
-          <div className="order-1 lg:order-2" aria-hidden="true">
-            {mounted && (
-              <RoomsArt
-                frame="aspect-[16/10] w-full lg:aspect-[5/4]"
-                advance={entering ? 1 : 0}
-                delay={120}
-              />
-            )}
-          </div>
-
-          <div className="order-2 lg:order-1 w-full max-w-[26rem]" style={{ animation: "rise-in 500ms cubic-bezier(0.22,1,0.36,1) both" }}>
+      {/* The site header sits above (--header-h). The free space splits 4:5
+          above and below the column, as on the homepage's opening, so it sits
+          a little above the geometric centre. */}
+      <div className="grid min-h-[calc(100dvh-var(--header-h))] w-full grid-rows-[4fr_auto_5fr] px-6 py-10 sm:px-8">
+        <div className="row-start-2 mx-auto w-full max-w-[40rem]" style={{ animation: "rise-in 500ms cubic-bezier(0.22,1,0.36,1) both" }}>
             {/* The heading stays put while the options below it change. */}
-            <h1 className={LOGIN_TITLE} style={{ color: "var(--ink)", fontWeight: 420 }}>
+            <h1 className={`${LOGIN_TITLE} text-center`} style={{ color: "var(--ink)", fontWeight: 420 }}>
               {displayedTab === "signin" ? "Welcome back." : "Make an account."}
             </h1>
-            <p className={`${LOGIN_SUBTITLE} mt-4 sm:mt-5`} style={{ color: "var(--ink-2)" }}>
+            <p className={`${LOGIN_SUBTITLE} mt-4 text-center`} style={{ color: "var(--ink-3)" }}>
               {SIGNUPS_ENABLED
-                ? "Follow your project and manage your Aether licenses in one place."
-                : "For Inertia clients and Aether owners. Follow your project and manage your licenses in one place."}
+                ? "Follow your project and your Aether licenses."
+                : "For Inertia clients and Aether owners."}
             </p>
 
             {/* Tabs, only while sign-ups are open: collapses on the email
@@ -625,9 +604,10 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               </div>
             )}
 
-            {/* Held at the first view's height from lg (see restH); what
-                grows past it hangs below. */}
-            <div className="lg:h-[var(--rest-h)]" style={{ ["--rest-h" as string]: restH ? `${restH}px` : "auto" }}>
+            {/* The form, narrower than the heading above it. Held at the
+                first view's height (see restH); what grows past it hangs
+                below. */}
+            <div className="mx-auto h-[var(--rest-h)] w-full max-w-[24rem]" style={{ ["--rest-h" as string]: restH ? `${restH}px` : "auto" }}>
             <div ref={restRef}>
             {/* The options, which slide between the two ways in and the
                 email form. The height eases with whichever is showing. */}
@@ -673,7 +653,7 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
               </div>
             </div>
 
-            <p className={`${LOGIN_CAPTION} mt-8 text-[var(--ink-3)] [text-wrap:pretty]`}>
+            <p className={`${LOGIN_CAPTION} mt-8 text-center text-[var(--ink-3)] [text-wrap:balance]`}>
               By continuing, you agree to our{" "}
               <Link href="/policies/terms-of-service" className="underline decoration-[var(--ink-4)] underline-offset-2 transition-colors hover:text-[var(--ink)]">
                 Terms of Service
@@ -686,12 +666,6 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             </p>
             </div>
             </div>
-          </div>
-        </div>
-
-        {/* The theme switch, out of the way at the foot of the page. */}
-        <div className="flex shrink-0 pb-6 sm:pb-8">
-          <ThemeSwitch />
         </div>
       </div>
     </div>

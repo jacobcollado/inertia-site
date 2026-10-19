@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { AetherHero } from "./aether-hero";
-import { AetherDemoBanner } from "./demo-banner";
-import { ChapterMark, Values } from "./values";
-import { SwitchToAether } from "./switch";
-import { FeaturesScroll } from "./features-scroll";
-import { StoresOnAether } from "./stores-on-aether";
-import { VariationsScroll } from "./variations-scroll";
-import { InlinePricing } from "./inline-pricing";
-import { AetherAskAi, AetherFaq, QUESTIONS } from "./faq";
-import { SetupSteps } from "./setup-steps";
-import { Testimonials } from "./testimonials";
+import type { CSSProperties } from "react";
+import Image from "next/image";
+import { DemoButton } from "./demo-button";
+import { HeroLooks } from "./hero-looks";
+import { HeroPhones } from "./hero-phones";
+import { Mark, STORES } from "./stores-on-aether";
+import { QUESTIONS } from "./faq";
+import { BuyButton } from "./buy-button";
+import { Questions } from "./questions";
+import { Walkthrough, type WalkStep } from "./walkthrough";
+import { TESTIMONIALS, type Testimonial } from "./reviews";
+import { PolicyDisclaimer } from "./policy-disclaimer";
 import { TrackAetherViewContent } from "./track-view-content";
-import { AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
-import { FrameRails, FrameRule } from "@/components/page-frame";
+import { PaymentMethodIcons } from "@/components/payment-method-icons";
+import { AETHER_CHECKOUT_ID, AETHER_PRICING_ID } from "@/lib/scroll-to-hash";
 
 export const metadata: Metadata = {
   title: { absolute: "Aether, a Shopify theme by Inertia" },
@@ -33,52 +34,29 @@ export const metadata: Metadata = {
   },
 };
 
-const KEY_FEATURES = [
-  {
-    title: "Fewer shoppers get lost",
-    name: "Guided format",
-    desc: "Every page points to the next step, so visitors find their way to checkout instead of the back button.",
-    visual: "guided",
-    image: "/aether/guided.jpg",
-    imageMobile: "/aether/feature-mobile-guided.png",
-    flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><path key="a" d="M3 3h18v4H3z"/><path key="b" d="M3 10h11v4H3z"/><path key="c" d="M3 17h7v4H3z"/></svg>,
-  },
-  {
-    title: "Bigger orders",
-    name: "Upsell",
-    desc: "Picks in the cart and a free shipping bar get shoppers to add one more item before they pay.",
-    visual: "upsell",
-    image: "/aether/upsell.png",
-    imageMobile: "/aether/feature-mobile-upsell.png",
-    flip: false,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><polyline key="a" points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline key="b" points="16 7 22 7 22 13"/></svg>,
-  },
-  {
-    title: "Sales you'd have missed",
-    name: "Scarcity",
-    desc: "Shoppers see sold-out sizes before they click, and a back-in-stock alert brings them back when it returns.",
-    visual: "scarcity",
-    image: "/aether/scarcity.png",
-    imageMobile: "/aether/feature-mobile-scarcity.png",
-    flip: true,
-    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"><circle key="a" cx="12" cy="12" r="10"/><polyline key="b" points="12 6 12 12 16 14"/></svg>,
-  },
-];
-
-const SECONDARY_FEATURES = [
-  { name: "Sticky cart", desc: "Add to cart follows the scroll, so the decision never goes cold", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M1.5 6h8.5l-.8 8H2.3Z"/><path key="b" d="M3.8 6V4.8a2 2 0 0 1 4 0V6"/><circle key="c" cx="13" cy="3.3" r="1.8"/><path key="d" d="M13 5.1V8.5"/></svg> },
-  { name: "Quick buy", desc: "Straight from the collection grid, no detour", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><circle key="a" cx="8" cy="8" r="7"/><polyline key="b" points="5 8 7 10 11 6"/></svg> },
-  { name: "Mobile optimised", desc: "Designed thumb-first, then scaled up to desktop", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><rect key="a" x="4" y="1" width="8" height="14" rx="1.5"/><line key="b" x1="8" y1="12" x2="8" y2="12.5" strokeWidth="1.8"/></svg> },
-  { name: "Mega menu", desc: "Deep catalogues, organised at a glance", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M1.5 2.5h3M6.5 2.5h3M11.5 2.5h3"/><rect key="b" x="1" y="5" width="14" height="9.5" rx="1.5"/><path key="c" d="M4 8.5h3M4 11.5h2M9 8.5h3M9 11.5h2"/></svg> },
-  { name: "SMS + email capture", desc: "Corner widget and popup, styled to match, built in", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M6.5 9.5H2.5A1.5 1.5 0 0 1 1 8V4a1.5 1.5 0 0 1 1.5-1.5h7A1.5 1.5 0 0 1 11 4v1.5"/><polyline key="b" points="1.4 3.1 6 6.3 10.6 3.1"/><path key="c" d="M9 7h5a1 1 0 0 1 1 1v3.5a1 1 0 0 1-1 1h-1.5L11 14v-1.5H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/></svg> },
-  { name: "41 sections", desc: "Every layout a store actually uses, none it doesn't", icon: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0"><path key="a" d="M8 1.5 14.5 5 8 8.5 1.5 5Z"/><path key="b" d="M1.5 8 8 11.5 14.5 8"/><path key="c" d="M1.5 11 8 14.5 14.5 11"/></svg> },
-];
-
 const DEMO_URL = "https://aether-starter.myshopify.com";
 
-// Structured data for this page only: the product, and the FAQ as questions
-// and answers. Lived in the root layout before, which put a product offer on
+// The questions asked before buying, in the order they come up. Their
+// answers live with the rest in faq.tsx.
+const ASKED = [
+  "Will my store look like the demo?",
+  "What do I get when I buy?",
+  "How does the install work?",
+  "Will I lose my products or reviews?",
+  "Can I pay in installments?",
+  "What if it doesn't work on my store?",
+];
+// Asked here first, so its answer lives here.
+const DEMO_QUESTION = {
+  q: "Will my store look like the demo?",
+  a: "It will look as good as your photos and products. Aether makes strong imagery look its best, and we set it up with yours. If your photos need work, the guides that come with it show how to shoot products and choose images that sell.",
+};
+const ASKED_QUESTIONS = ASKED.map((q) => (q === DEMO_QUESTION.q ? DEMO_QUESTION : QUESTIONS.find((x) => x.q === q))).filter(
+  (x): x is { q: string; a: string } => Boolean(x),
+);
+
+// Structured data for this page only: the product, and the questions it
+// answers. Lived in the root layout before, which put a product offer on
 // every page of the studio site.
 const AETHER_JSON_LD = [
   {
@@ -102,7 +80,7 @@ const AETHER_JSON_LD = [
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": QUESTIONS.map(({ q, a }) => ({
+    "mainEntity": ASKED_QUESTIONS.map(({ q, a }) => ({
       "@type": "Question",
       "name": q,
       "acceptedAnswer": { "@type": "Answer", "text": a },
@@ -110,87 +88,195 @@ const AETHER_JSON_LD = [
   },
 ];
 
-const THEME_VARIATIONS = [
-  { name: "Rosso", image: "/aether/rosso-macbook-v2.png", imageMobile: "/aether/rosso-mobile.png" },
-  { name: "Argent", image: "/aether/argent-macbook.png", imageMobile: "/aether/argent-mobile-v2.png" },
-  { name: "After Hours", image: "/aether/after-hours-macbook.png", imageMobile: "/aether/after-hours-mobile.png" },
-  { name: "Relics", image: "/aether/relics-macbook.png", imageMobile: "/aether/relics-mobile.png" },
+const INCLUDES = ["The full theme, all 41 sections", "Updates for life, no renewals", "Full refund if we can\u2019t get it working"];
+
+// A walk through a store on Aether: the home page, a product, the cart.
+const STEPS: WalkStep[] = [
+  {
+    name: "Home",
+    title: "Taken seriously on arrival.",
+    line: "Editorial imagery and quiet type, so a new visitor reads you as established before they scroll.",
+    desktop: { src: "/aether/demo/desktop-poster.jpg", w: 1440, h: 902 },
+    mobile: { src: "/aether/feature-mobile-guided.png", w: 1300, h: 2642 },
+  },
+  {
+    name: "Product",
+    title: "Sold-out sizes, shown up front.",
+    line: "Nobody clicks a size that isn\u2019t there, and a back-in-stock alert brings them back when it returns.",
+    desktop: { src: "/aether/scarcity.png", w: 1024, h: 597 },
+    mobile: { src: "/aether/feature-mobile-scarcity.png", w: 1300, h: 2642 },
+  },
+  {
+    name: "Cart",
+    title: "One more thing in the bag.",
+    line: "Picks in the cart and a free shipping bar, right where shoppers decide.",
+    desktop: { src: "/aether/checkout-cart-drawer.png", w: 1024, h: 687 },
+    mobile: { src: "/aether/feature-mobile-upsell.png", w: 1300, h: 2642 },
+  },
 ];
 
-export default function AetherPage() {
+// The extras every license comes with (the guides and lists in bonuses.ts,
+// which the license email sends), described short enough for a phone.
+const icon = (d: string) => (
+  <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+  </svg>
+);
+const EXTRAS = [
+  {
+    title: "Getting the most from Aether",
+    desc: "The sections and settings worth knowing.",
+    icon: icon("M2.5 3.5h13v4h-13zM2.5 10.5h6v4h-6zM11.5 10.5h4v4h-4z"),
+  },
+  {
+    title: "Shooting your products",
+    desc: "Clean shots on a phone or a camera.",
+    icon: icon("M2.5 6a1.5 1.5 0 0 1 1.5-1.5h1.8l1.2-2h4l1.2 2H14A1.5 1.5 0 0 1 15.5 6v7a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 13zM9 12.25a2.75 2.75 0 1 0 0-5.5 2.75 2.75 0 0 0 0 5.5z"),
+  },
+  {
+    title: "Imagery that converts",
+    desc: "The photos that sell, and why.",
+    icon: icon("M3.5 2.5h11a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-11a1 1 0 0 1 1-1zM2.5 12l3.5-3.5 3 3 2-2 4.5 4.5M11.75 6.75a1.25 1.25 0 1 0 0-2.5 1.25 1.25 0 0 0 0 2.5z"),
+  },
+  {
+    title: "Manufacturers we trust",
+    desc: "Two we\u2019ve worked with and recommend.",
+    icon: icon("M2.5 5.5 9 2.5l6.5 3v7L9 15.5l-6.5-3zM2.5 5.5 9 8.5l6.5-3M9 8.5v7"),
+  },
+  {
+    title: "Designers we trust",
+    desc: "For your logo, graphics and artwork.",
+    icon: icon("M11.5 2.5l4 4-8.5 8.5H3v-4zM9.5 4.5l4 4"),
+  },
+];
+
+// A review as its standout line, quoted exactly from what the store sent
+// (the full text lives in reviews.ts), with the store under it.
+function Quote({ t }: { t: Testimonial }) {
+  const line = t.highlight ?? t.quote;
   return (
-    // Laid out in cells, like the homepage: each section is its own rounded
-    // cell, split from the next by a FrameRule, with content inset from the
-    // cell edges (components/page-frame.tsx). Full width with no outer margin,
-    // so on phones the cells run edge to edge in line with the header's.
-    <main className="relative mx-auto w-full max-w-[80rem] min-h-screen flex flex-col px-3 sm:px-8">
-      <FrameRails tone="light" />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(AETHER_JSON_LD) }}
-      />
-      <TrackAetherViewContent />
-      <AetherDemoBanner />
-
-      <AetherHero demoUrl={DEMO_URL} />
-
-      {/* Proof first, and light: real stores before anything is claimed. */}
-      <StoresOnAether />
-
-      {/* The spine: three values, said once and drawn. Each one links to the
-          chapter below that proves it. Chapters are set apart by space and
-          their chapter mark rather than rules; rules only mark the turns
-          from values to chapters to the close. */}
-      <Split />
-      <Values />
-
-      <Split />
-      <div id="customer" className="scroll-mt-16">
-        <FeaturesScroll features={KEY_FEATURES} demoUrl={DEMO_URL} eyebrow={<ChapterMark value="customer" />} />
-        <Testimonials />
-      </div>
-
-      <Split />
-      <div id="speed" className="scroll-mt-16">
-        {/* Setup speed, the service half of the value. The demo recording
-            is a tap away on every View demo button, so it isn't inline. */}
-        <SetupSteps eyebrow={<ChapterMark value="speed" />} />
-      </div>
-
-      <Split />
-      <div id="identity" className="scroll-mt-16">
-        <VariationsScroll variations={THEME_VARIATIONS} initial="Relics" eyebrow={<ChapterMark value="identity" />} />
-      </div>
-
-      <Split />
-
-      {/* The closing argument for anyone already on a theme: Aether beside
-          a typical premium one, and what stays safe when they switch. */}
-      <SwitchToAether />
-
-      <Split />
-      <section id={AETHER_PRICING_ID} className="py-16 sm:py-24 scroll-mt-16 w-full">
-        <InlinePricing />
-      </section>
-
-      <Split />
-
-      <AetherFaq />
-      <Split />
-      <AetherAskAi />
-
-      {/* The page's last cell closes before the footer's. */}
-      <Split className="py-10 sm:py-12" />
-    </main>
+    <figure className="ae-quote">
+      <blockquote className="ae-quote__text">
+        &ldquo;{line.charAt(0).toUpperCase() + line.slice(1).replace(/[.!]$/, "")}&rdquo;
+      </blockquote>
+      <figcaption className="ae-quote__by">
+        {t.logo && <Image src={t.logo} alt="" width={28} height={28} className="ae-quote__logo" />}
+        {t.site ?? t.name}
+      </figcaption>
+    </figure>
   );
 }
 
-// A split between cells. The page pads its content in from the cell edges,
-// so the split steps back out across that padding to meet the edges.
-function Split({ className = "" }: { className?: string }) {
+function Check() {
   return (
-    <div className="-mx-3 sm:-mx-8">
-      <FrameRule tone="light" className={className} />
-    </div>
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="ae-check" aria-hidden="true">
+      <polyline points="3.5 8.5 6.5 11.5 12.5 4.5" />
+    </svg>
+  );
+}
+
+// Aether, as simple as a page that sells can be: the pain and the offer,
+// the theme itself and the stores running it, a walk through a store doing
+// its job, what owners say, the honest part about photos, the price once,
+// and the questions asked before paying. Everything in the site's one
+// system (the homepage's type and buttons).
+export default function AetherPage() {
+  return (
+    <main className="index-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(AETHER_JSON_LD) }} />
+      <TrackAetherViewContent />
+
+      <section className="index-col ae-open" data-hero>
+        <Image src="/work-logos/aether.png" alt="Aether" width={220} height={55} className="ae-open__mark" priority />
+        <h1 className="ae-open__line">Your clothes look better than your store.</h1>
+        <p className="ae-open__sub">
+          Aether is a Shopify theme for fashion brands, built to turn visits into orders. We install it for you today.
+        </p>
+        <div className="ae-open__actions">
+          <BuyButton />
+          <div className="ae-open__demo">
+            <DemoButton href={DEMO_URL} password="aether" />
+          </div>
+        </div>
+        <p className="ae-open__note">One payment. Full refund if we can&apos;t get it working.</p>
+      </section>
+
+      <section className="index-col ae-looks" aria-label="Example stores">
+        <div className="sm:hidden">
+          <HeroPhones />
+        </div>
+        <div className="mx-auto hidden max-w-[56rem] sm:block">
+          <HeroLooks />
+        </div>
+      </section>
+
+      <section className="index-col ae-stores" aria-label="Stores running Aether">
+        <p className="ae-stores__label">Running Aether today</p>
+        <ul className="ae-stores__marks" style={{ "--mark": "2rem" } as CSSProperties}>
+          {STORES.map((s) => (
+            <li key={s.name} className="flex items-center">
+              <Mark s={s} className="opacity-40" />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <Walkthrough steps={STEPS} />
+
+      <section className="index-col ae-said" aria-label="What owners say">
+        <h2 className="index-spot__label">From stores on Aether</h2>
+        <div className="ae-said__grid">
+          {TESTIMONIALS.map((t) => (
+            <Quote key={t.name} t={t} />
+          ))}
+        </div>
+      </section>
+
+      <section className="index-col ae-photos">
+        <h2 className="ae-photos__line">It looks as good as your photos.</h2>
+        <p className="ae-photos__sub">So we help you get them there.</p>
+        <div className="ae-extras">
+          <p className="ae-extras__label">With every license</p>
+          <ul className="ae-extras__list">
+            {EXTRAS.map((x) => (
+              <li key={x.title} className="ae-extras__item">
+                <span className="ae-extras__icon">{x.icon}</span>
+                <span className="ae-extras__text">
+                  <span className="ae-extras__title">{x.title}</span>
+                  <span className="ae-extras__desc">{x.desc}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section id={AETHER_PRICING_ID} className="index-col ae-price" data-dock-hide>
+        <h2 className="ae-price__lead">Installed by us today.</h2>
+        <p className="ae-price__sub">Your current theme stays live until you say go.</p>
+        <p className="ae-price__amount">
+          $125 <span>once</span>
+        </p>
+        <p className="ae-price__klarna">or 4 interest-free payments of $31.25 with Klarna</p>
+        <ul className="ae-price__includes">
+          {INCLUDES.map((line) => (
+            <li key={line}>
+              <Check />
+              {line}
+            </li>
+          ))}
+        </ul>
+        <BuyButton id={AETHER_CHECKOUT_ID} />
+        <div className="ae-price__small">
+          <PaymentMethodIcons />
+          <PolicyDisclaimer />
+        </div>
+      </section>
+
+      <section className="index-col ae-faq">
+        <h2 className="index-spot__label">Before you buy</h2>
+        <Questions items={ASKED_QUESTIONS} />
+      </section>
+    </main>
   );
 }

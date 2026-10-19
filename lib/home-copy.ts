@@ -19,7 +19,7 @@ export const HERO_HEADING_LINES_MOBILE = [
 
 // One short line at every width. How we do it is the rest of the page's job.
 export const HERO_SUBLINE =
-  "Identity and websites for startups, designed as one.";
+  "Identity and websites for founders, designed as one.";
 
 export const EXECUTION_INTRO =
   "Ideas are rarely the problem. [[Execution is.]] We carry what you stand for through every page, transition and email, until it feels effortless.";

@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { ThemeSwitch } from "@/app/site-footer";
 import { RoomsArt } from "@/components/rooms-art";
 import { useMounted } from "@/hooks/use-mounted";
 
@@ -251,9 +250,6 @@ export function ResetPasswordForm() {
           </div>
         </div>
 
-        <div className="flex shrink-0 pb-6 sm:pb-8">
-          <ThemeSwitch />
-        </div>
       </div>
     </div>
   );

@@ -912,7 +912,7 @@ function useTypewriter(text: string, active: boolean, speed = 18) {
 type Stage = "quiz" | "typing" | "intake" | "done";
 
 
-function Questionnaire() {
+export function Questionnaire() {
   const [open, setOpen] = useState(false);
   const reducedMotion = useReducedMotion() ?? false;
   const [stage, setStage] = useState<Stage>("quiz");

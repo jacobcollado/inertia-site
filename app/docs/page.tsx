@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { ThemeSwitch } from "@/app/site-footer";
 
 // â"€â"€â"€ Types â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
@@ -1506,14 +1505,13 @@ function DocsPageInner() {
             ))}
           </nav>
 
-          <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-[rgb(var(--line))]">
-            <ThemeSwitch />
-            {product.id === "aether" && (
+          {product.id === "aether" && (
+            <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-[rgb(var(--line))]">
               <Link href="/aether#pricing" className="text-[12.5px] tracking-tight transition-colors hover:text-[rgb(var(--fg))]" style={{ color: "rgb(var(--muted))" }}>
                 Get Aether
               </Link>
-            )}
-          </div>
+            </div>
+          )}
         </aside>
 
         {/* Content: one reading column centred beside the sidebar, and on
@@ -1869,14 +1867,9 @@ function DocsPageInner() {
             <Link href="/" onClick={() => setSheetOpen(false)}>
               <img src="/logo.png" alt="Inertia" className="inertia-logo h-6 w-auto" />
             </Link>
-            {/* Theme switch lives here on phones: the header's right edge is
-                under the fixed menu button. */}
-            <div className="ml-auto mr-2">
-              <ThemeSwitch />
-            </div>
             <button
               onClick={() => setSheetOpen(false)}
-              className="h-8 w-8 flex items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent]"
+              className="ml-auto h-8 w-8 flex items-center justify-center rounded-full [-webkit-tap-highlight-color:transparent]"
               style={{ background: "rgb(var(--fg) / 0.06)" }}
               aria-label="Close"
             >

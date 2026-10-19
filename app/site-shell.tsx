@@ -30,11 +30,11 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // The homepage's AI section transitions the page to a black theme that
   // continues through the footer — every other route keeps the normal
   // light footer.
-  const isHome = pathname === "/";
-  // Blog posts and policy documents are a sheet, closed off above the footer.
-  const isSheet = pathname.startsWith("/blog/") || pathname.startsWith("/policies/");
+  // Off while the homepage is white top to bottom (app/home-index.tsx); the
+  // dark-footer handling below is kept for when a dark close comes back.
+  const isHome = false;
   // Routes that follow the light / dark switch (see theme-provider.tsx).
-  // Bare routes like /docs can be themed too; they place their own switch.
+  // Bare routes like /docs are themed too.
   const themed = isThemedPath(pathname);
 
   // For pages that link back only to where the visitor came from.
@@ -114,18 +114,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <>
       <VisualNotch />
       {children}
-      {/* The homepage's rails run on through the footer. */}
-      {noFooter ? null : isHome ? (
-        <div className="homepage-dark-zone relative" style={{ background: "rgb(var(--bg))" }}>
-          <MinimalFooter themeSwitch tone="dark" />
-        </div>
-      ) : isSheet ? (
-        // The sheet closes above it (its last cell has rounded bottom
-        // corners), so the footer runs without rails.
-        <MinimalFooter themeSwitch={themed} rails={false} />
-      ) : (
-        <MinimalFooter themeSwitch={themed} />
-      )}
+      {noFooter ? null : <MinimalFooter />}
     </>
   );
 }
