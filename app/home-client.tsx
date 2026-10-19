@@ -13,7 +13,7 @@ import { HeroDragHeading } from "@/components/hero-drag-heading";
 import { SectionHeading } from "@/components/section-heading";
 import { WhatWeDoSketch } from "@/components/what-we-do-sketches";
 import { TeardownDialog, originOf, type TeardownOrigin } from "@/components/teardown-dialog";
-import { HeroCanvas } from "@/components/hero-canvas";
+import { HeroFilm } from "@/components/hero-film";
 import { DirectionsArt } from "@/components/directions-art";
 import { MaterialCover } from "@/components/post-covers";
 import { AgreementArt, FollowThroughArt, RestraintArt } from "@/components/execution-art";
@@ -510,19 +510,12 @@ function VercelHero({
 
   // Fixed lines so the break is the same at every width and the lines stay
   // close in length (see HeroDragHeading for the per-breakpoint layout).
-  // Two lines from sm up. Phones get the full sentence on four lines, sized
-  // so the longest ("making websites people") fits a 360px screen.
+  // Two lines from sm up; phones get three.
   const HEADING_LINES = HERO_HEADING_LINES;
   const HEADING_LINES_MOBILE = HERO_HEADING_LINES_MOBILE;
-  const HEADING_WORDS = HEADING_LINES.flat();
-  const headingEnd = HERO_START + HEADING_WORDS.length * HERO_WORD_STEP;
-  const ctaFadeDelay = headingEnd + 644;
   // The canvas comes in while the heading is still landing, about four words
   // in, so the hero reads as one fluid stagger rather than heading-then-art.
   const canvasDelay = HERO_START + HERO_WORD_STEP * 4;
-  // Cloud pill waits until the CTA has actually finished landing —
-  // ctaFadeDelay is only when that transition *starts*.
-  const cloudDelay = ctaFadeDelay + HERO_LIQUID_MS;
 
   return (
     <section
@@ -654,9 +647,13 @@ function VercelHero({
           </div>
           <TeardownDialog open={teardownOpen} onOpenChange={setTeardownOpen} from={teardownFrom} />
 
-          <HeroCanvas
+          {/* The canvas: one quiet shot of daylight on a wall
+              (components/hero-film.tsx). Kept for elsewhere: the review of a
+              dated site, with an address bar for the visitor's own, in
+              components/site-markup.tsx, and the Rooms drawing in
+              components/hero-canvas.tsx. */}
+          <HeroFilm
             play={visible}
-            delay={canvasDelay + 120}
             style={{
               marginTop: 8,
               opacity: visible ? 1 : 0,

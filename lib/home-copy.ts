@@ -3,22 +3,23 @@
 // homepage (app/index.md) is built from the same copy. [[Double brackets]]
 // mark a key phrase, set in full ink on the page.
 
-// Written for builders and companies, not "brands". The "*" is set as plain
-// type (components/hero-drag-heading.tsx).
+// Written for founders: the company they're building toward, not the one
+// their brand still shows. The earlier line was "What you build should look
+// good as f*ck."
 export const HERO_HEADING_LINES = [
-  ["What", "you", "build", "should"],
-  ["look", "good", "as", "f*ck."],
+  ["Look", "like", "the", "company"],
+  ["you're", "becoming."],
 ];
 
 export const HERO_HEADING_LINES_MOBILE = [
-  ["What", "you", "build"],
-  ["should", "look", "good"],
-  ["as", "f*ck."],
+  ["Look", "like", "the"],
+  ["company", "you're"],
+  ["becoming."],
 ];
 
 // One short line at every width. How we do it is the rest of the page's job.
 export const HERO_SUBLINE =
-  "Identities and websites for companies and builders who know the details matter.";
+  "Identity and websites for startups, designed as one.";
 
 export const EXECUTION_INTRO =
   "Ideas are rarely the problem. [[Execution is.]] We carry what you stand for through every page, transition and email, until it feels effortless.";

@@ -20,6 +20,15 @@ export const spring = {
     bounce: 0.12,
     exit: { duration: 0.16 },
   },
+  // A whole scene changing over, or something travelling across one. Long
+  // enough to follow by eye; lands with no overshoot so nothing wobbles once
+  // it settles.
+  scene: {
+    type: "spring" as const,
+    duration: 0.9,
+    bounce: 0,
+    exit: { duration: 0.2 },
+  },
 } as const;
 
 // Fallback delay (ms) for deferred-unmount timers that guard an exit tween:

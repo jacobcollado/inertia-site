@@ -13,6 +13,7 @@ import { ScrollReveal } from "./scroll-reveal";
 import { cn } from "@/lib/utils";
 import { PostHogProvider } from "./posthog-provider";
 import { MetaPixel } from "./meta-pixel";
+import { Agentation } from "agentation";
 
 const satoshi = localFont({
   src: "../public/fonts/Satoshi-Variable.woff2",
@@ -146,6 +147,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CookieBanner />
         </ThemeProvider>
         <Analytics />
+        {process.env.NODE_ENV === "development" && <Agentation />}
         </PostHogProvider>
       </body>
     </html>

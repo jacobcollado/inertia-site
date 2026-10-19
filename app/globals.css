@@ -3205,3 +3205,22 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
     transition: transform 300ms cubic-bezier(0.4, 0, 0.6, 1), opacity 240ms ease 60ms;
   }
 }
+
+/* The hero stage's autoplay timer (components/one-brand-stage.tsx): a line
+   along the foot of the active tab. Its animationend advances to the next
+   surface, so pausing the line pauses the sequence. Reduced motion: no line,
+   and the component skips autoplay. */
+@keyframes stage-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.stage-progress {
+  background: currentColor;
+  opacity: 0.5;
+  transform-origin: left center;
+  animation: stage-progress var(--stage-hold) linear both;
+}
+.stage-progress[data-paused="true"] { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .stage-progress { display: none; }
+}

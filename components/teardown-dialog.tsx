@@ -30,10 +30,13 @@ export function TeardownDialog({
   open,
   onOpenChange,
   from,
+  website: givenWebsite,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   from?: TeardownOrigin;
+  // A site the visitor already typed (the hero canvas's address bar).
+  website?: string;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,6 +45,10 @@ export function TeardownDialog({
   const [trap, setTrap] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open && givenWebsite) setWebsite(givenWebsite);
+  }, [open, givenWebsite]);
 
   // Clear a finished request once the dialog has closed, so reopening starts fresh.
   useEffect(() => {
