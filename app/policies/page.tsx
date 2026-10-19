@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CTA_HEADER_PILL_CLASS } from "@/lib/cta-chrome";
+import { PlaneIcon, ReachOut } from "@/components/reach-out";
 
 export const metadata: Metadata = {
   title: "Policies",
@@ -26,51 +26,42 @@ const DOCS = [
   },
 ];
 
-// The three documents as tiles of one size, the same flat tile, 6px corners
-// and type as the homepage's cards: the title set like a card heading, the
-// summary under it. No dates or separators; each document carries its own
-// effective date.
+// The three documents as three cards of one size, on the paper with a
+// hairline ring, like the Reach out pop-up's ways in: the title set like a
+// section heading, the summary under it, and an arrow that leans the way it
+// points on hover. Then where to ask about any of it.
 export default function PoliciesPage() {
   return (
-    <main className="mx-3 sm:mx-auto w-auto sm:w-full max-w-[80rem] min-h-screen flex flex-col px-3 sm:px-8 pb-16 sm:pb-24">
-      <header className="flex flex-col items-center text-center pt-16 sm:pt-24 pb-12 sm:pb-16 rise">
-        <h1 className="text-[clamp(30px,5vw,54px)] font-medium tracking-[-0.04em] leading-[1.06] text-[rgb(var(--fg))]">
-          Policies
-        </h1>
-        <p className="mt-5 max-w-md text-[15px] sm:text-[18px] leading-relaxed tracking-tight text-[rgb(var(--muted))] [text-wrap:balance]">
-          The fine print, written plainly so it&rsquo;s actually worth reading.
-        </p>
+    <main className="mx-auto flex min-h-screen w-full max-w-[80rem] flex-col px-6 pb-16 sm:px-8 sm:pb-24">
+      <header className="policy-head rise">
+        <h1 className="policy-title">Policies</h1>
+        <p className="policy-meta">The fine print, written plainly so it&rsquo;s actually worth reading.</p>
       </header>
 
       <ul className="rise rise-stagger grid gap-3 sm:grid-cols-3 sm:gap-4" data-stagger>
         {DOCS.map((doc) => (
           <li key={doc.href}>
-            <Link
-              href={doc.href}
-              className="flex h-full min-h-[200px] flex-col justify-between gap-8 rounded-[6px] bg-[var(--tile)] p-6 transition-colors duration-300 hover:bg-[var(--tile-2)] sm:min-h-[240px] sm:p-7"
-            >
-              <h2 className="text-[22px] leading-[1.15] tracking-[-0.025em] text-[var(--ink)]" style={{ fontWeight: 450 }}>
-                {doc.title}
-              </h2>
-              <p className="text-[15px] leading-snug tracking-tight text-[var(--ink-2)] [text-wrap:pretty]">{doc.description}</p>
+            <Link href={doc.href} className="policy-card">
+              <span className="flex items-start justify-between gap-4">
+                <span className="policy-card__title">{doc.title}</span>
+                <svg className="policy-card__arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                  <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span className="policy-card__line">{doc.description}</span>
             </Link>
           </li>
         ))}
       </ul>
 
-      <section className="flex flex-col items-center text-center pt-16 sm:pt-24 gap-6 rise">
-        <p className="max-w-sm text-[15px] sm:text-[16px] leading-relaxed tracking-tight text-[rgb(var(--muted))]">
+      <section className="rise flex flex-col items-center gap-6 pt-20 text-center sm:pt-28">
+        <p className="max-w-sm text-[16px] leading-relaxed tracking-tight text-[var(--ink-3)] [text-wrap:balance]">
           Questions about any of these? We&rsquo;re happy to explain anything in plain language.
         </p>
-        <a
-          href="https://cal.com/jacob-c-99otvp/15min"
-          target="_blank"
-          rel="noreferrer"
-          className={CTA_HEADER_PILL_CLASS}
-          style={{ background: "var(--tile-2)", color: "var(--ink)", whiteSpace: "nowrap" }}
-        >
-          <span className="relative">Reach out</span>
-        </a>
+        <ReachOut className="header-cta">
+          <PlaneIcon className="header-cta__icon" />
+          Reach out
+        </ReachOut>
       </section>
     </main>
   );

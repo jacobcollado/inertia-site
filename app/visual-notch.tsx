@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PlaneIcon, ReachOut } from "@/components/reach-out";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -446,15 +447,12 @@ function ComponentsMobileMenu({ onClose }: { onClose: () => void }) {
           );
         })}
       </div>
-      <a
-        href="https://cal.com/jacob-c-99otvp/15min"
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex items-center justify-center w-full rounded-full py-3 text-[15px] font-medium tracking-tight transition-opacity"
+      <ReachOut
+        className="inline-flex items-center justify-center w-full rounded-[6px] py-3 text-[15px] font-medium tracking-tight transition-opacity"
         style={{ background: "rgb(var(--fg))", color: "rgb(var(--bg))", letterSpacing: "-0.01em" }}
       >
         Reach out
-      </a>
+      </ReachOut>
     </nav>
   );
 }
@@ -611,9 +609,10 @@ function HeaderActions() {
       )}
       {/* The Aether page has its own call to action. */}
       {pathname !== "/aether" && (
-        <a href={CAL_LINK} target="_blank" rel="noreferrer" className="header-cta">
+        <ReachOut className="header-cta">
+          <PlaneIcon className="header-cta__icon" />
           Reach out
-        </a>
+        </ReachOut>
       )}
     </>
   );

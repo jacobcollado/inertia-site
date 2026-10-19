@@ -3228,6 +3228,11 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 /* ── Homepage index (app/home-index.tsx) ─────────────────────────────
    White, one column, type first. Motion comes from the shared tokens. */
 :root {
+  /* Vertical rhythm, scaled to the screen's height so a short laptop and a
+     tall desktop both breathe right: the space between sections, and
+     between a section's label and its content. Every page uses these. */
+  --section-y: clamp(72px, 13svh, 168px);
+  --section-gap: clamp(28px, 4.5svh, 56px);
   --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --motion-dur: 650ms;
   --motion-dur-short: 300ms;
@@ -3243,55 +3248,76 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 }
 @media (min-width: 640px) { .index-col { padding-inline: 32px; } }
 
-/* Fills the screen below the sticky header (--header-h, set with the header). The free space splits 4:5 above
-   and below the line, so it sits on the optical centre, a little above the
-   geometric one. */
-.index-opening {
-  min-height: calc(100svh - var(--header-h));
-  display: grid;
-  grid-template-rows: 4fr auto 5fr;
-  padding-block: 48px;
+/* The opening plate fills the screen below the sticky header (--header-h,
+   set with the header). The drawing is a canvas filling the column. */
+.index-plate {
+  position: relative;
+  height: calc(100svh - var(--header-h));
+  min-height: 420px;
+  max-height: 1100px;
 }
-.index-opening > * { grid-row: 2; }
+.movement-plate { position: absolute; inset: 0 24px; }
+@media (min-width: 640px) { .movement-plate { inset: 0 32px; } }
+.movement-plate canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
 
-.index-sentence {
-  max-width: 15.5em;
-  font-size: clamp(2.25rem, 5.4vw, 4.75rem);
-  font-weight: 420;
-  line-height: 1.06;
-  letter-spacing: -0.045em;
+/* What we do: a sheet of three drawn figures, each with its phrase and line
+   under it (components/what-we-do.tsx). Side by side from tablets up,
+   stacked on phones; the text starts at each figure's left edge. */
+.index-figs { padding-block: var(--section-y); }
+.index-figs__list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 56px;
+}
+@media (min-width: 900px) {
+  .index-figs__list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+}
+.index-figs__item { display: flex; flex-direction: column; }
+.index-figs__art { position: relative; aspect-ratio: 4 / 3; margin-bottom: 20px; }
+.index-figs__art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.index-figs__word {
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 450;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+}
+.index-figs__line {
+  max-width: 26em;
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--ink-3);
   text-wrap: pretty;
 }
 
-/* A frame of the work set in the line: cap height tall, sitting on the
-   baseline like a letter. Once it has flown, an outline keeps its place. */
-.index-chip {
-  position: relative;
-  display: inline-block;
-  height: 0.72em;
-  aspect-ratio: 4 / 5;
-  vertical-align: baseline;
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--tile);
-}
-.index-chip[data-flying="true"] { background: transparent; }
-.index-chip[data-flying="true"] img { visibility: hidden; }
-.index-chip[data-left="true"] { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.14); }
+/* The sentence follows the plate, in display type. */
+.index-opening { padding-block: var(--section-y); }
 
-.index-flyer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--tile);
-  will-change: transform, width, height;
+.index-sentence {
+  max-width: 14.5em;
+  font-size: clamp(2.5rem, 6.4vw, 6rem);
+  font-weight: 420;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-wrap: pretty;
+}
+/* The company you're becoming isn't built yet, so it's drawn: the words in
+   outline, a hairline in the ink of the plates. The stroke sits under a
+   paper fill, so only its outer half shows and the letters' own overlaps
+   stay hidden. */
+.index-sentence__drawn {
+  color: var(--paper);
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
 }
 
-.index-work { padding-bottom: 64px; }
+.index-work { padding-bottom: var(--section-y); }
 
 /* /work: every card, three across (two on phones), starting just under the
    header. */
@@ -3324,6 +3350,126 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .index-tile:hover .index-tile__frame img { transform: scale(1.03); }
 .index-tile[data-landed="false"] .index-tile__frame { background: transparent; }
 .index-tile[data-landed="false"] .index-tile__frame img { visibility: hidden; }
+
+/* With a logo: the client's logo in ink, centred on the tile and sized by
+   presence (--k, from markScale) so wide wordmarks and square marks carry
+   the same weight. On hover, and only there, an arrow comes in at the
+   corner along the way it points. */
+.index-tile[data-logo] .index-tile__frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.index-tile__logo {
+  display: block;
+  height: calc(24cqw * var(--k));
+  max-width: 62cqw;
+  background: var(--ink);
+  mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+}
+.index-tile__go {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--paper);
+  opacity: 0;
+  transform: translate(-6px, 6px) scale(0.9);
+  transition:
+    opacity var(--motion-dur-short) var(--motion-ease),
+    transform var(--motion-dur) var(--motion-ease);
+}
+.index-tile[data-logo]:is(:hover, :focus-visible) .index-tile__go { opacity: 1; transform: none; }
+@media (hover: none) { .index-tile__go { display: none; } }
+
+/* The homepage's work: a row of logo plates drawn on a canvas, full width
+   and fading into the page at both sides, with a link laid over each plate
+   (components/work-plates.tsx). */
+.index-page { overflow-x: clip; }
+.work-plates {
+  position: relative;
+  height: clamp(300px, 28vw, 440px);
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.work-plates canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.work-plates__link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.work-plates__link:focus-visible { outline: none; box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4); }
+
+/* Each piece's tag: the client's name, on a 28 tag with a hairline ring.
+   While the piece is pointed at or focused, it fills with ink and the name
+   flips up to "View case study". */
+.work-plates__caption {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding-inline: 10px;
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16);
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-dur-short) var(--motion-ease),
+    color var(--motion-dur-short) var(--motion-ease),
+    box-shadow var(--motion-dur-short) var(--motion-ease);
+}
+.work-plates__flip { display: grid; overflow: hidden; }
+.work-plates__flip > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  transition:
+    transform var(--motion-dur) var(--motion-ease),
+    opacity var(--motion-dur-short) var(--motion-ease);
+}
+.work-plates__flip > span:last-child { opacity: 0; transform: translateY(100%); }
+@media (hover: hover) {
+  .work-plates__link:is(:hover, :focus-visible) .work-plates__caption {
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--ink);
+  }
+  .work-plates__link:is(:hover, :focus-visible) .work-plates__flip > span:first-child { opacity: 0; transform: translateY(-100%); }
+  .work-plates__link:is(:hover, :focus-visible) .work-plates__flip > span:last-child { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-plates__caption,
+  .work-plates__flip > span { transition: none; }
+}
+/* "All work" sits under the middle of the row, where the eye already is. */
+.index-work .index-more-row { display: flex; justify-content: center; }
 
 /* The cards' glass: a clear sheet over the card's foot. It is the photo
    again (.index-tile__sheet), exactly over the first and following its
@@ -3423,20 +3569,36 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .index-tile__name { clip-path: inset(0); }
 .index-tile[data-landed="true"] .index-tile__name { transition-delay: 120ms; }
 
+/* "All work": a 36 button in the family of the work's tags, a hairline ring
+   at rest, filled with ink on hover, its arrow easing on along the way it
+   points. */
 .index-more {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   height: 36px;
-  margin-top: 32px;
-  font-size: 15px;
+  margin-top: 24px;
+  padding-inline: 14px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16);
+  font-size: 14px;
+  font-weight: 450;
   line-height: 1;
   color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: rgb(var(--ink-rgb) / 0.25);
-  text-underline-offset: 4px;
-  transition: text-decoration-color var(--motion-dur-short) var(--motion-ease);
+  text-decoration: none;
+  transition:
+    background-color var(--motion-dur-short) var(--motion-ease),
+    color var(--motion-dur-short) var(--motion-ease),
+    box-shadow var(--motion-dur-short) var(--motion-ease);
 }
-.index-more:hover { text-decoration-color: rgb(var(--ink-rgb) / 1); }
+.index-more svg { transition: transform var(--motion-dur) var(--motion-ease); }
+.index-more:is(:hover, :focus-visible) {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  outline: none;
+}
+.index-more:is(:hover, :focus-visible) svg { transform: translateX(3px); }
 
 
 /* The close: one line, centred, and two ways to answer it (Close in
@@ -3446,10 +3608,9 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   flex-direction: column;
   align-items: center;
   gap: 40px;
-  padding-block: 96px 64px;
+  padding-block: var(--section-y) calc(var(--section-y) * 0.6);
   text-align: center;
 }
-@media (min-width: 768px) { .index-close { padding-block: 160px 96px; } }
 .index-close__line {
   max-width: 12em;
   font-size: clamp(2.5rem, 6.4vw, 5.5rem);
@@ -3459,6 +3620,270 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   text-wrap: balance;
 }
 .index-close__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+/* The assembling movement over the line (components/movement-plate.tsx). */
+/* Taller than the movement, which stands in its lower part; the top fades
+   in from the paper, so the parts coming down arrive out of the page rather
+   than out of an edge. */
+.index-close__art {
+  position: relative;
+  width: 100%;
+  height: clamp(320px, 38vw, 500px);
+  mask-image: linear-gradient(to bottom, transparent, #000 42%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 42%);
+}
+.index-close__art .movement-plate { inset: 0; }
+
+/* Policies (app/policies): the title block centred, its date on a 28 tag,
+   the title in the homepage's display type; sections in its section type;
+   links in ink, lightly underlined. The index's cards wear a hairline ring
+   like the Reach out pop-up's ways in. */
+.policy-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 72px 24px 56px;
+  text-align: center;
+}
+@media (min-width: 640px) { .policy-head { padding: 112px 32px 72px; } }
+.policy-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding-inline: 10px;
+  margin-bottom: 24px;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.14);
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.policy-title {
+  max-width: 12em;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 420;
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.policy-meta {
+  max-width: 32rem;
+  margin-top: 20px;
+  font-size: clamp(16px, 1.4vw, 18px);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--ink-3);
+  text-wrap: pretty;
+}
+.policy-section {
+  margin-bottom: 12px;
+  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  font-weight: 450;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.policy-body {
+  font-size: clamp(16px, 1.3vw, 17px);
+  line-height: 1.75;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.policy-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--ink-rgb) / 0.25);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--motion-dur-short) var(--motion-ease);
+}
+.policy-link:hover { text-decoration-color: rgb(var(--ink-rgb) / 1); }
+.policy-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  height: 100%;
+  min-height: 200px;
+  padding: 24px;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12);
+  transition: box-shadow var(--motion-dur-short) var(--motion-ease);
+}
+@media (min-width: 640px) { .policy-card { min-height: 240px; padding: 28px; } }
+.policy-card:is(:hover, :focus-visible) { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4); outline: none; }
+.policy-card__title { font-size: 22px; font-weight: 450; line-height: 1.15; letter-spacing: -0.025em; color: var(--ink); }
+.policy-card__line { font-size: 15px; line-height: 1.45; letter-spacing: -0.01em; color: var(--ink-3); text-wrap: pretty; }
+.policy-card__arrow {
+  flex: none;
+  margin-top: 4px;
+  color: var(--ink-3);
+  transition: transform var(--motion-dur) var(--motion-ease), color var(--motion-dur-short) var(--motion-ease);
+}
+.policy-card:is(:hover, :focus-visible) .policy-card__arrow { color: var(--ink); transform: translate(2px, -2px); }
+
+/* The footer's policies (app/policies-menu.tsx): a 32 button in the family
+   of the work's tags, and a small raised menu that rises out of it, upward,
+   since the footer is the foot of the page. */
+.policies { position: relative; display: inline-flex; }
+.policies__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px 0 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink-3);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12);
+  transition: color var(--motion-dur-short) var(--motion-ease), box-shadow var(--motion-dur-short) var(--motion-ease);
+}
+.policies__button:is(:hover, :focus-visible),
+.policies[data-open] .policies__button { color: var(--ink); box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.32); outline: none; }
+.policies__button svg { transition: transform var(--motion-dur) var(--motion-ease); }
+.policies[data-open] .policies__button svg { transform: rotate(180deg); }
+.policies__menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: 4px;
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16),
+    0 16px 32px -12px rgb(0 0 0 / 0.24),
+    0 2px 6px rgb(0 0 0 / 0.05);
+  transform-origin: bottom left;
+  opacity: 0;
+  transform: translateY(6px) scale(0.97);
+  pointer-events: none;
+  transition:
+    opacity var(--motion-dur-short) var(--motion-ease),
+    transform var(--motion-dur) var(--motion-ease);
+}
+.policies[data-open] .policies__menu { opacity: 1; transform: none; pointer-events: auto; }
+.policies__item {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding-inline: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color var(--motion-dur-short) var(--motion-ease);
+}
+.policies__item:is(:hover, :focus-visible) { background: var(--tile); outline: none; }
+@media (prefers-reduced-motion: reduce) {
+  .policies__menu,
+  .policies__button svg { transition: none; }
+}
+
+/* Reach out (components/reach-out.tsx): a pop-up over a soft wash of the
+   page, raised on a firm ring and a shadow. It rises in from a little below
+   and settles; it leaves the way it came. On phones it sits at the foot of
+   the screen. */
+.reach {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+@media (min-width: 640px) { .reach { align-items: center; padding: 24px; } }
+.reach__wash {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: opacity var(--motion-dur-short) var(--motion-ease);
+}
+.reach__panel {
+  position: relative;
+  width: min(440px, 100%);
+  padding: 20px;
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16),
+    0 24px 48px -16px rgb(0 0 0 / 0.28),
+    0 2px 6px rgb(0 0 0 / 0.06);
+  transition:
+    transform var(--motion-dur) var(--motion-ease),
+    opacity var(--motion-dur-short) var(--motion-ease);
+}
+.reach[data-state="out"] .reach__wash { opacity: 0; }
+.reach[data-state="out"] .reach__panel { opacity: 0; transform: translateY(16px) scale(0.98); }
+@media (prefers-reduced-motion: reduce) {
+  .reach__wash,
+  .reach__panel { transition: none; }
+}
+.reach__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.reach__title { font-size: 20px; font-weight: 450; line-height: 1.2; letter-spacing: -0.02em; }
+.reach__line { margin-top: 4px; font-size: 15px; line-height: 1.4; color: var(--ink-3); }
+.reach__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: -4px -4px 0 0;
+  border-radius: 6px;
+  color: var(--ink-3);
+  transition: color var(--motion-dur-short) var(--motion-ease), box-shadow var(--motion-dur-short) var(--motion-ease);
+}
+.reach__close:is(:hover, :focus-visible) { color: var(--ink); box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16); outline: none; }
+.reach__ways { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+.reach__way {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 72px;
+  padding: 0 16px 0 12px;
+  border-radius: 6px;
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12);
+  transition: box-shadow var(--motion-dur-short) var(--motion-ease);
+}
+.reach__way:is(:hover, :focus-visible) { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4); outline: none; }
+.reach__art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: var(--tile);
+}
+.reach__art svg { width: 40px; height: 40px; }
+.reach__hand {
+  transform-box: view-box;
+  transform-origin: 24px 24px;
+  transition: transform var(--motion-dur) var(--motion-ease);
+}
+.reach__way:is(:hover, :focus-visible) .reach__hand { transform: rotate(90deg); }
+.reach__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.reach__way-title { font-size: 15px; font-weight: 450; line-height: 1.3; }
+.reach__way-sub { font-size: 13px; line-height: 1.3; color: var(--ink-3); }
+.reach__arrow { flex: none; color: var(--ink-3); transition: transform var(--motion-dur) var(--motion-ease), color var(--motion-dur-short) var(--motion-ease); }
+.reach__way:is(:hover, :focus-visible) .reach__arrow { color: var(--ink); transform: translate(2px, -2px); }
 .index-close__call,
 .index-close__email {
   display: inline-flex;
@@ -3512,14 +3937,12 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 48px;
-  padding-block: 96px;
+  gap: var(--section-gap);
+  padding-block: var(--section-y);
   text-align: center;
 }
-@media (min-width: 768px) { .index-spot { gap: 64px; padding-block: 128px; } }
 .index-spot__label { font-size: 15px; font-weight: 450; color: var(--ink-3); }
-.index-spot__list { display: flex; flex-direction: column; gap: 56px; }
-@media (min-width: 768px) { .index-spot__list { gap: 80px; } }
+.index-spot__list { display: flex; flex-direction: column; gap: clamp(48px, 9svh, 96px); }
 .index-spot__item { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .index-spot__word {
   font-size: clamp(2.75rem, 8vw, 6.5rem);
@@ -3651,6 +4074,10 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   transition: background-color var(--motion-dur-short) var(--motion-ease);
 }
 .header-cta:hover { background: rgb(0 0 0 / 0.82); }
+/* Its paper plane: 14 in the 36 button, as far from the left edge as from
+   the top, (36 - 14) / 2 = 11. */
+.header-cta:has(.header-cta__icon) { gap: 6px; padding-left: 11px; }
+.header-cta__icon { width: 14px; height: 14px; flex: none; }
 
 /* Phones: the dock. The page fades out under it; the buttons are thumb
    sized (48) and Reach out takes the remaining width. It rises in from below
@@ -3706,86 +4133,52 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .dock, .dock .header-cta, .dock .header-signin { transform: none; transition: opacity var(--motion-dur-short) linear; }
 }
 
-/* Why us: one sentence, pinned while its ending flips upward through the
-   reasons (Reasons in app/home-index.tsx). The section's height sets how
-   long each reason holds; the stacks keep the tallest reason's room so
-   nothing below moves. */
-.index-why { position: relative; }
-.index-why__pin {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  padding-inline: 24px;
-  text-align: center;
+/* Why us (components/why-us.tsx): the reasons, beside a drawing of a
+   wheel with one tooth called out in a detail. From tablets up the reasons
+   sit left and the drawing right; on phones the drawing follows them. The
+   part fills the left of the drawing, the detail is a circle on the right,
+   and an SVG over both draws the callout's circles and the two lines that
+   join them. */
+.why {
+  display: grid;
+  gap: 48px;
+  padding-block: var(--section-y);
 }
-.index-why__label { margin-bottom: 24px; font-size: 15px; font-weight: 450; color: var(--ink-3); }
-.index-why__sentence {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 14em;
-  font-size: clamp(2.5rem, 6.4vw, 5.5rem);
-  font-weight: 420;
-  line-height: 1.04;
-  letter-spacing: -0.05em;
-  color: var(--ink);
+@media (min-width: 900px) {
+  .why { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: 32px; }
 }
-.index-why__lead { color: var(--ink-3); }
-/* The phrases stack in one cell, so the room stays the tallest one's and
-   nothing below moves. No clip: a phrase dissolves where it stands, rising
-   a little as it goes, while the next rises in from a little below a beat
-   later, so the two never overlap half-blurred and no soft edge is cut. */
-.index-why__stack { display: grid; }
-.index-why__stack > * { grid-area: 1 / 1; }
-.index-why__clause,
-.index-why__line {
-  text-wrap: balance;
-  transition:
-    transform var(--motion-dur) var(--motion-ease) 140ms,
-    opacity var(--motion-dur) var(--motion-ease) 140ms,
-    filter var(--motion-dur) var(--motion-ease) 140ms;
+.why__list { display: flex; flex-direction: column; gap: 32px; }
+.why__title {
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 450;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
 }
-.index-why__clause:not([data-pos="on"]),
-.index-why__line:not([data-pos="on"]) {
-  opacity: 0;
-  filter: blur(10px);
-  pointer-events: none;
-  /* Leaving is quicker than arriving, and starts at once. */
-  transition:
-    transform var(--motion-dur) var(--motion-ease),
-    opacity var(--motion-dur-short) var(--motion-ease),
-    filter var(--motion-dur-short) var(--motion-ease);
-}
-.index-why__clause[data-pos="before"],
-.index-why__line[data-pos="before"] { transform: translateY(-0.35em); }
-.index-why__clause[data-pos="after"],
-.index-why__line[data-pos="after"] { transform: translateY(0.35em); }
-.index-why__stack--line { max-width: 26em; }
-.index-why__line {
-  font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
-  line-height: 1.45;
-  letter-spacing: -0.015em;
+.why__line {
+  max-width: 26em;
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   color: var(--ink-3);
+  text-wrap: pretty;
 }
-
-/* Without motion: the reasons, listed. */
-.index-why--list {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 56px;
-  padding-block: 96px;
-  text-align: center;
+.why__fig { position: relative; aspect-ratio: 16 / 10; }
+.why__part { position: absolute; top: 0; left: 0; width: 58%; height: 100%; }
+.why__detail {
+  position: absolute;
+  top: 50%;
+  right: 1px;
+  width: 38%;
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  clip-path: circle(50%);
 }
-.index-why__list { display: flex; flex-direction: column; gap: 48px; }
-.index-why__item { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.index-why--list .index-why__sentence { display: block; font-size: clamp(2rem, 4.8vw, 3.5rem); }
-.index-why--list .index-why__line { max-width: 26em; }
+.why__part canvas,
+.why__detail canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.why__callout { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.why__callout circle,
+.why__callout line { fill: none; stroke: rgb(var(--ink-rgb) / 0.4); stroke-width: 1; }
 
 .index-close__icon { width: 16px; height: 16px; flex: none; }
 .index-close__done { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
@@ -3813,10 +4206,9 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  padding-block: 72px 64px;
+  padding-block: var(--section-y) calc(var(--section-y) * 0.7);
   text-align: center;
 }
-@media (min-width: 768px) { .case-open { padding-block: 120px 96px; } }
 .case-open__name {
   font-size: clamp(2.75rem, 8vw, 6.5rem);
   font-weight: 420;
@@ -3866,10 +4258,9 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding-top: 120px;
+  gap: var(--section-gap);
+  padding-top: var(--section-y);
 }
-@media (min-width: 768px) { .case-next { padding-top: 160px; } }
 .case-next__card { width: min(100%, 360px); }
 
 /* Aether (app/aether/page.tsx): what it is and the way to buy, the theme,
@@ -3879,10 +4270,9 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-block: 56px 32px;
+  padding-block: calc(var(--section-y) * 0.7) 32px;
   text-align: center;
 }
-@media (min-width: 768px) { .ae-open { padding-block: 96px 40px; } }
 .ae-open__mark { width: auto; height: 22px; opacity: 0.8; }
 .ae-open__line {
   max-width: 12em;
@@ -3947,7 +4337,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding-block: 48px 32px;
+  padding-block: 48px 0;
 }
 .ae-stores__label { font-size: 14px; letter-spacing: -0.01em; color: var(--ink-3); }
 .ae-stores__marks { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 32px; }
@@ -3956,11 +4346,10 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-block: 96px;
+  padding-block: var(--section-y);
   text-align: center;
   scroll-margin-top: var(--header-h);
 }
-@media (min-width: 768px) { .ae-price { padding-block: 128px; } }
 .ae-price__amount {
   font-size: clamp(3.5rem, 9vw, 7rem);
   font-weight: 420;
@@ -3974,7 +4363,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .ae-check { width: 18px; height: 18px; flex: none; color: var(--ink-3); }
 .ae-price__small { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 32px; }
 
-.ae-faq { display: flex; flex-direction: column; align-items: center; gap: 32px; padding-block: 32px 96px; }
+.ae-faq { display: flex; flex-direction: column; align-items: center; gap: var(--section-gap); padding-block: 0 var(--section-y); }
 .ae-q { width: 100%; max-width: 40rem; display: flex; flex-direction: column; }
 .ae-q__ask {
   display: flex;
@@ -4112,14 +4501,14 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 }
 
 /* Without motion: the steps, stacked. */
-.ae-walk--list { display: flex; flex-direction: column; gap: 96px; padding-block: 96px; }
+.ae-walk--list { display: flex; flex-direction: column; gap: var(--section-y); padding-block: var(--section-y); }
 .ae-walk__step { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
 .ae-walk__name { font-size: 14px; color: var(--ink-3); }
 .ae-walk--list .ae-walk__frame { width: min(100%, 64rem); }
 @media (max-width: 639px) { .ae-walk--list .ae-walk__frame { width: min(70vw, 300px); height: auto; } }
 
 /* What owners say: the three reviews, each with its standout line in ink. */
-.ae-said { display: flex; flex-direction: column; align-items: center; gap: 40px; padding-block: 96px; }
+.ae-said { display: flex; flex-direction: column; align-items: center; gap: var(--section-gap); padding-block: var(--section-y); }
 .ae-said__grid { display: grid; gap: 48px; width: 100%; }
 @media (min-width: 900px) { .ae-said__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; } }
 /* Each review as its standout line, set as a pull quote, store beneath. */
@@ -4138,7 +4527,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .ae-quote__logo { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.08); }
 
 /* The honest part: it looks as good as your photos, and what comes with it. */
-.ae-photos { display: flex; flex-direction: column; align-items: center; padding-block: 64px 96px; text-align: center; }
+.ae-photos { display: flex; flex-direction: column; align-items: center; padding-block: 0 var(--section-y); text-align: center; }
 /* The heading runs to one line on desktop; the line under it is short. */
 .ae-photos__line {
   max-width: 18em;
@@ -4189,3 +4578,21 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   text-wrap: balance;
 }
 .ae-price__sub { margin: 12px 0 48px; font-size: clamp(1.0625rem, 1.6vw, 1.25rem); letter-spacing: -0.015em; color: var(--ink-3); }
+
+/* No visible section labels, anywhere ("What we do", "Why us", "Next" and
+   the like): sections speak for themselves. The labels stay for screen
+   readers only. Absolutely positioned, they take no space or gap. */
+.index-spot__label,
+.ae-stores__label,
+.ae-extras__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.ae-extras__list { margin-top: 0; }

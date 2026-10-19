@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SIGNUPS_ENABLED } from "@/lib/auth-flags";
+import { MovementPlate } from "@/components/movement-plate";
 
 // Typography from the homepage: the heading at the size of its closing line
 // (light, large, tight), the line under it at the size of its section lines.
@@ -548,11 +549,12 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
   }, [atRest]);
 
   return (
-    <div className="w-full">
+    <div className="w-full lg:grid lg:grid-cols-2">
 
       {/* The site header sits above (--header-h). The free space splits 4:5
           above and below the column, as on the homepage's opening, so it sits
-          a little above the geometric centre. */}
+          a little above the geometric centre. From laptops up the form takes
+          the left half and the homepage's movement the right. */}
       <div className="grid min-h-[calc(100dvh-var(--header-h))] w-full grid-rows-[4fr_auto_5fr] px-6 py-10 sm:px-8">
         <div className="row-start-2 mx-auto w-full max-w-[40rem]" style={{ animation: "rise-in 500ms cubic-bezier(0.22,1,0.36,1) both" }}>
             {/* The heading stays put while the options below it change. */}
@@ -667,6 +669,13 @@ export function LoginForm({ initialTab }: { initialTab: "signin" | "signup" }) {
             </div>
             </div>
         </div>
+      </div>
+
+      {/* The movement from the homepage, closed. Signing in is what opens
+          it: while the account is checked, it comes apart into its drawing,
+          so the wait is the opening. */}
+      <div className="relative hidden h-[calc(100dvh-var(--header-h))] lg:block" aria-hidden>
+        <MovementPlate opened={loading} />
       </div>
     </div>
   );

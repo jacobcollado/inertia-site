@@ -1,15 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MovementPlate } from "@/components/movement-plate";
+import { PlaneIcon, ReachOut } from "@/components/reach-out";
 
 // The close every page ends on (styles are .index-close in globals.css).
 
-const CAL_LINK = "https://cal.com/jacob-c-99otvp/15min";
 const EMAIL = "hello@byinertia.com";
 
-// One line, and two ways to answer it. Reach out (books a call),
-// or take the email: clicking it copies the address, and its label flips up
-// to say so, the check drawing itself in.
+// The page ends where it began: the opening plate's movement, its parts
+// coming down and set into one another as the close comes into view. Then
+// one line, its last word drawn like the company you're becoming, and two
+// ways to answer it. Reach out (a message or a call, see reach-out.tsx), or
+// take the email: clicking it copies the address, and its label flips up to
+// say so, the check drawing itself in.
 export function Close() {
   const [copied, setCopied] = useState(false);
   useEffect(() => {
@@ -29,12 +33,17 @@ export function Close() {
 
   return (
     <section className="index-col index-close" data-dock-hide>
-      <h2 className="index-close__line">Tell us what you&apos;re building.</h2>
+      <div className="index-close__art">
+        <MovementPlate assemble />
+      </div>
+      <h2 className="index-close__line">
+        Tell us what you&apos;re <span className="index-sentence__drawn">building.</span>
+      </h2>
       <div className="index-close__actions">
-        <a href={CAL_LINK} target="_blank" rel="noreferrer" className="index-close__call">
-          <MessageIcon />
+        <ReachOut className="index-close__call">
+          <PlaneIcon className="index-close__icon" />
           Reach out
-        </a>
+        </ReachOut>
         <button type="button" onClick={copy} className="index-close__email" aria-label={`Copy ${EMAIL}`}>
           <span className="index-close__flip" data-copied={copied || undefined}>
             <span>{EMAIL}</span>
@@ -49,14 +58,6 @@ export function Close() {
         </span>
       </div>
     </section>
-  );
-}
-
-function MessageIcon() {
-  return (
-    <svg className="index-close__icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M3.25 2.75h9.5a2 2 0 0 1 2 2v5.5a2 2 0 0 1-2 2H8.5l-3.25 2.5v-2.5h-2a2 2 0 0 1-2-2v-5.5a2 2 0 0 1 2-2z" />
-    </svg>
   );
 }
 

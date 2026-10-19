@@ -1220,8 +1220,6 @@ const WORK_ITEMS = [
   { src: "/work/ftgioo-1.png", title: "FT.GIOO", category: "Shopify storefront", accent: "#b8433a", logo: "/work-logos/ft-gioo.png" },
   { src: "/work/ftgioo-2.png", title: "FT.GIOO", category: "Shop page", accent: "#b8433a", logo: "/work-logos/ft-gioo.png" },
   { src: "/work/ftgioo-3.png", title: "FT.GIOO", category: "Collection page", accent: "#b8433a", logo: "/work-logos/ft-gioo.png" },
-  { src: "/work/subtle-goods/1.png", title: "Subtle Goods", category: "Shopify storefront", accent: "#3a627c", logo: "/work-logos/subtle-goods.png" },
-  { src: "/work/subtle-goods/2.png", title: "Subtle Goods", category: "Coming soon page", accent: "#4a5a2c", logo: "/work-logos/subtle-goods.png" },
   { src: "/work/trippie-1.png", title: "Trippie Redd", category: "Merch store", accent: "#9c0000", logo: "/work-logos/1400.png" },
   { src: "/work/trippie-2.png", title: "Trippie Redd", category: "Music page", accent: "#0d1b3e", logo: "/work-logos/1400.png" },
   { src: "/work/trippie-3.png", title: "Trippie Redd", category: "Product page", accent: "#a50000", logo: "/work-logos/1400.png" },
@@ -1236,8 +1234,6 @@ const CAROUSEL_LOGO_WIDTH: Record<string, string> = {
   "trippie-redd": "48%",
   "ellora-la": "56%",
   "allure-new-york": "58%",
-  "mood-swings": "62%",
-  "subtle-goods": "46%",
   "ft-gioo": "44%",
   "samuel-norris": "68%",
 };
@@ -1254,7 +1250,6 @@ const WORK_CLIENT_SLUGS: Record<string, string> = {
   "Aether Theme": "aether",
   "Ellora LA": "ellora-la",
   "FT.GIOO": "ft-gioo",
-  "Subtle Goods": "subtle-goods",
   "Trippie Redd": "trippie-redd",
 };
 
@@ -1269,7 +1264,6 @@ const WORK_CLIENT_DATES: Record<string, { year: number; month: number }> = {
   "Trippie Redd": { year: 2025, month: 6 },
   "Ellora LA": { year: 2026, month: 1 },
   "Inboundly": { year: 2026, month: 5 },
-  "Subtle Goods": { year: 2026, month: 6 },
 };
 
 function dateKey(year: number, month: number) {
@@ -1955,16 +1949,14 @@ const WALL_LOGO: Record<string, { w: string; ratio: string }> = {
   "ellora-la": { w: "53%", ratio: "400 / 89" },
   "ft-gioo": { w: "28.5%", ratio: "500 / 453" },
   inboundly: { w: "32.3%", ratio: "1 / 1" },
-  "mood-swings": { w: "36%", ratio: "498 / 386" },
   "samuel-norris": { w: "43.7%", ratio: "229 / 97" },
-  "subtle-goods": { w: "44%", ratio: "500 / 647" },
 };
 
 // The wall's order, four to a row on desktop. Anyone not listed follows in
 // their usual order.
 const WALL_FIRST = [
-  "aether", "allure-new-york", "inboundly", "subtle-goods",
-  "trippie-redd", "ellora-la", "mood-swings", "samuel-norris",
+  "aether", "allure-new-york", "inboundly",
+  "trippie-redd", "ellora-la", "samuel-norris",
 ];
 
 // The client wall: every mark on its own quiet tile, the same tiles the

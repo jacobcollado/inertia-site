@@ -42,7 +42,6 @@ export const KNOWN_SEGMENTS = new Set([
   "docs",
   "emoji",
   "fonts",
-  "hero-lab",
   "ingest",
   "login",
   "og-lab",

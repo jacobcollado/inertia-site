@@ -14,8 +14,9 @@ const LINKS: { pattern: string; href: string; page?: PolicyPage }[] = [
   { pattern: "Intellectual Property & Ownership", href: "/policies/terms-of-service#ip" },
 ];
 
-const LINK_CLASS =
-  "text-blue-500 underline underline-offset-2 decoration-blue-500/40 hover:text-blue-400 hover:decoration-blue-400 transition-colors";
+// In ink, underlined lightly, the line darkening on hover (.policy-link in
+// globals.css): the signal blue is kept for the drawings.
+const LINK_CLASS = "policy-link";
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 

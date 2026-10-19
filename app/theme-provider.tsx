@@ -13,7 +13,7 @@ export type ThemePref = "light" | "dark" | "system";
 type Theme = "light" | "dark";
 type Ctx = { pref: ThemePref; theme: Theme; setPref: (p: ThemePref) => void };
 
-export const UNTHEMED_PREFIXES = ["/dashboard", "/admin", "/portal", "/accept-invite", "/components", "/canvas-lab", "/hero-lab", "/og-lab"];
+export const UNTHEMED_PREFIXES = ["/dashboard", "/admin", "/portal", "/accept-invite", "/components", "/canvas-lab", "/og-lab"];
 export const isThemedPath = (path: string) =>
   !UNTHEMED_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
 

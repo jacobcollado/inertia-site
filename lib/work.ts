@@ -32,6 +32,10 @@ export type WorkMeta = {
   labels?: Record<string, string>;
   featured?: boolean;
   logo?: string;
+  // The logo in one colour, trimmed to its edges (public/work/marks), and
+  // its width over its height.
+  mark?: string;
+  markRatio?: number;
 };
 
 export type WorkPiece = WorkMeta & { content: string };
@@ -63,9 +67,24 @@ export function getAllWork(): WorkMeta[] {
       labels: extractLabels(content, data.client ?? slug),
       featured: data.featured === true,
       logo: data.logo,
+      mark: data.mark,
+      markRatio: data.mark ? pngRatio(data.mark) : undefined,
     } as WorkMeta;
   });
   return pieces.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+}
+
+// A PNG's width over its height, read from its header.
+function pngRatio(src: string): number | undefined {
+  try {
+    const fd = fs.openSync(path.join(PUBLIC_DIR, src), "r");
+    const head = Buffer.alloc(24);
+    fs.readSync(fd, head, 0, 24, 0);
+    fs.closeSync(fd);
+    return head.readUInt32BE(16) / head.readUInt32BE(20);
+  } catch {
+    return undefined;
+  }
 }
 
 function extractLabels(md: string, client: string): Record<string, string> {

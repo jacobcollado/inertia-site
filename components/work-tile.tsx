@@ -1,20 +1,31 @@
-import type { Ref } from "react";
+import type { CSSProperties, Ref } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { WorkMeta } from "@/lib/work";
 
 // A piece of work as a card, shared by the homepage and /work so the two
-// never drift apart: the photo, and the client's name on a sheet of clear
-// glass across its foot, with the line about the work opening under it on
-// hover. Styles are .index-tile in globals.css; the glass needs <TileGlass />
-// once on the page.
+// never drift apart. With a logo, the card is the client's logo in the ink
+// of the page, set on a quiet tile; on hover, an arrow says it opens the
+// case study. Without one, it's the photo, and the client's name on a
+// sheet of clear glass across its foot. Styles are .index-tile in
+// globals.css; the glass needs <TileGlass /> once on the page.
 
 export type TileWork = {
   slug: string;
   client: string;
   blurb?: string;
   image: string;
+  service?: string;
+  mark?: { src: string; ratio: number };
 };
+
+// Logos are sized by presence, not by height: a wide wordmark sits shorter
+// than a square mark, so each carries about the same weight. Rounded, since
+// the server and the browser can differ in the last digit of a power, and
+// the markup has to match.
+function markScale(ratio: number) {
+  return Math.round(ratio ** -0.4 * 1e4) / 1e4;
+}
 
 // The card's photo: the project's card art, else its first shot.
 export function tileImage(w: WorkMeta): string | undefined {
@@ -23,7 +34,9 @@ export function tileImage(w: WorkMeta): string | undefined {
 
 export function toTileWork(w: WorkMeta): TileWork | null {
   const image = tileImage(w);
-  return image ? { slug: w.slug, client: w.client, blurb: w.blurb ?? w.summary, image } : null;
+  if (!image) return null;
+  const mark = w.mark && w.markRatio ? { src: w.mark, ratio: w.markRatio } : undefined;
+  return { slug: w.slug, client: w.client, blurb: w.blurb ?? w.summary, service: w.service, image, mark };
 }
 
 export function WorkTile({
@@ -46,6 +59,27 @@ export function WorkTile({
   pane?: boolean;
   ref?: Ref<HTMLAnchorElement>;
 }) {
+  if (w.mark) {
+    const url = `url(${w.mark.src})`;
+    return (
+      <Link ref={ref} href={`/work/${w.slug}`} className="index-tile" data-landed={landed ? "true" : "false"} data-logo="">
+        <span data-frame className="index-tile__frame">
+          <span
+            role="img"
+            aria-label={w.client}
+            className="index-tile__logo"
+            style={{ "--k": markScale(w.mark.ratio), aspectRatio: Math.round(w.mark.ratio * 1e4) / 1e4, maskImage: url, WebkitMaskImage: url } as CSSProperties}
+          />
+          <span className="index-tile__go" aria-hidden>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M5 11 11 5M6 5h5v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </span>
+      </Link>
+    );
+  }
+
   return (
     <Link ref={ref} href={`/work/${w.slug}`} className="index-tile" data-landed={landed ? "true" : "false"}>
       <span data-frame className="index-tile__frame">
