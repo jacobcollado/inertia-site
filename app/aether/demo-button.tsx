@@ -7,11 +7,11 @@ import { DemoVideoModal } from "./demo-video-modal";
  * demo recording in a dialog. The live store, and the password
  * copy that goes with it, moved into the dialog's footer. The href stays on
  * the anchor so a middle click or a no-JS visit still reaches the store. */
-export function DemoButton({ href, password }: { href: string; password: string }) {
+export function DemoButton({ href, password, className = "ae-demo", children = "View demo" }: { href: string; password: string; className?: string; children?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative w-full">
+    <div className="relative">
       <a
         href={href}
         onClick={(e) => {
@@ -19,9 +19,9 @@ export function DemoButton({ href, password }: { href: string; password: string 
           e.preventDefault();
           setOpen(true);
         }}
-        className="ae-demo"
+        className={className}
       >
-        View demo
+        {children}
       </a>
       <DemoVideoModal open={open} onClose={() => setOpen(false)} href={href} password={password} />
     </div>

@@ -266,22 +266,10 @@ function FigureCanvas({ build }: { build: Build }) {
   return <div ref={hostRef} className="index-figs__art" aria-hidden />;
 }
 
-const FIGURES: { build: Build; word: string; line: string }[] = [
-  {
-    build: dial,
-    word: "Up to date.",
-    line: "Design dates within a year. We bring how you look back in line with the company you are now.",
-  },
-  {
-    build: mesh,
-    word: "In one piece.",
-    line: "Your identity and your site are made together, so everywhere people meet you, it feels like the same company.",
-  },
-  {
-    build: escapement,
-    word: "What’s next.",
-    line: "We try new ideas on our own work first, so you get what’s coming, not what everyone already has.",
-  },
+const FIGURES: { build: Build; line: string }[] = [
+  { build: dial, line: "We bring how you look up to date with the company you are now." },
+  { build: mesh, line: "Your identity and your site, made together so they read as one." },
+  { build: escapement, line: "We try new ideas on our own work first, so you get what’s next." },
 ];
 
 export function WhatWeDo() {
@@ -292,10 +280,9 @@ export function WhatWeDo() {
       </h2>
       <ol className="index-figs__list">
         {FIGURES.map((f) => (
-          <li key={f.word} className="index-figs__item">
+          <li key={f.line} className="index-figs__item">
             <FigureCanvas build={f.build} />
-            <h3 className="index-figs__word">{f.word}</h3>
-            <p className="index-figs__line">{f.line}</p>
+            <h3 className="index-figs__line">{f.line}</h3>
           </li>
         ))}
       </ol>

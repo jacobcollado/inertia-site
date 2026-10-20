@@ -33,18 +33,9 @@ const PLATE_H = 1.1;
 const LIFT = PLATE_H + 0.7;
 
 const REASONS = [
-  {
-    title: "We see what’s off.",
-    line: "Something can feel wrong before anyone can say why. We find it, and we fix it.",
-  },
-  {
-    title: "Close enough isn’t done.",
-    line: "If it doesn’t look right, it isn’t finished. Every detail gets the care of the whole.",
-  },
-  {
-    title: "No hand-offs.",
-    line: "The people you talk to are the people who make it, from the first sketch to the last pixel.",
-  },
+  "We find what feels off before anyone can say why.",
+  "Nothing is finished until every detail looks right.",
+  "The people you talk to are the people who make it.",
 ];
 
 // The wheel, with its called-out tooth on a group of its own; returns the
@@ -220,9 +211,8 @@ export function WhyUs() {
       </h2>
       <ul className="why__list">
         {REASONS.map((r) => (
-          <li key={r.title} className="why__item">
-            <h3 className="why__title">{r.title}</h3>
-            <p className="why__line">{r.line}</p>
+          <li key={r} className="why__item">
+            <h3 className="why__line">{r}</h3>
           </li>
         ))}
       </ul>

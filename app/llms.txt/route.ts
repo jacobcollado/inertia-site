@@ -2,6 +2,7 @@ import { getAllPosts } from "@/lib/posts";
 import { getAllWork } from "@/lib/work";
 import { getAllBonuses } from "@/lib/bonuses";
 import { QUESTIONS } from "@/app/aether/faq";
+import { AETHER_PRICE, SMS_PRICE } from "@/lib/aether-price";
 
 // llms.txt (https://llmstxt.org): a plain markdown summary of the site for AI
 // assistants and crawlers. Built from content/ so new work and posts show up
@@ -10,11 +11,9 @@ export const dynamic = "force-static";
 
 const BASE = "https://byinertia.com";
 
-// Mirrors the pricing block on /aether (app/aether/inline-pricing.tsx, a
-// client component this route can't import from). Update both together.
-const AETHER_PRICE = 125;
+// The install's value, for the total below; the prices come from
+// lib/aether-price.ts like the page's.
 const INSTALL_VALUE = 50;
-const SMS_SETUP_PRICE = 10;
 
 export function GET() {
   const work = getAllWork();
@@ -59,7 +58,7 @@ export function GET() {
 
 ### What comes with an Aether license
 
-- Price: $${AETHER_PRICE} once, no subscription or renewals. Optional SMS setup for +$${SMS_SETUP_PRICE}.
+- Price: $${AETHER_PRICE} once, no subscription or renewals. Optional SMS setup for +$${SMS_PRICE}.
 - License key by email within a minute of purchase
 - The full theme, all 41 sections, for one Shopify store
 - Lifetime updates and priority support from the people who built it

@@ -631,7 +631,7 @@ function HeaderDock() {
       const hero = document.querySelector("[data-hero]");
       const passed = hero ? hero.getBoundingClientRect().bottom <= 0 : window.scrollY > window.innerHeight;
       // It steps aside where the page asks for the same thing itself
-      // ([data-dock-hide], like the homepage's close).
+      // ([data-dock-hide], like the homepage's close), and over the footer.
       const ownInView = Array.from(document.querySelectorAll("[data-dock-hide]")).some((el) => {
         const r = el.getBoundingClientRect();
         return r.top < window.innerHeight && r.bottom > 0;

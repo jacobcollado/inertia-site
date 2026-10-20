@@ -9,9 +9,8 @@ export interface Testimonial {
   logo?: string;
   /** The brand's store, shown as a bare domain under the name. */
   site?: string;
-  /** An exact substring of the quote, set in full ink against the rest of
-   * the quote in muted grey, so each card has one line that scans. Keep it
-   * inside the first four lines, which is all the card shows. */
+  /** An exact substring of the quote, inked in against the rest of the
+   * quote in grey once it lands, so each review has one line that scans. */
   highlight?: string;
 }
 

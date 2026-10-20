@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { trackMeta } from "../meta-pixel";
+import { AETHER_PRICE as PRICE } from "@/lib/aether-price";
 
 // The one way to buy Aether, used at the top of the page and at the price:
 // straight to Stripe checkout, the price in the label so the click holds no
 // surprise. Styles are .ae-buy in globals.css.
 
-const PRICE = 125;
 const LICENSE_ID = "lifetime" as const;
 
 function Spinner() {
@@ -64,7 +64,12 @@ export function BuyButton({ id }: { id?: string }) {
             Opening checkout
           </>
         ) : (
-          <span>Get Aether for ${PRICE}</span>
+          <>
+            <span>Get Aether for ${PRICE}</span>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="ae-buy__arrow" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" />
+            </svg>
+          </>
         )}
       </button>
       {error && (
