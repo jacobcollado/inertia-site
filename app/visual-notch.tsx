@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PlaneIcon, ReachOut } from "@/components/reach-out";
+import { InertiaMark } from "@/components/inertia-mark";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -566,14 +567,19 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 
 /* ── Logo ────────────────────────────────────────────────────────── */
 
+// The mark, a step under the wordmark's 24px, centred on it; then the
+// wordmark.
 function InertiaLogo() {
   return (
-    <img
-      src="/logo.png"
-      alt="Inertia"
-      className="inertia-logo h-6 w-auto"
-      style={{ display: "block" }}
-    />
+    <span className="flex items-center gap-2">
+      <InertiaMark className="inertia-logo block h-5 w-auto" />
+      <img
+        src="/logo.png"
+        alt="Inertia"
+        className="inertia-logo h-6 w-auto"
+        style={{ display: "block" }}
+      />
+    </span>
   );
 }
 

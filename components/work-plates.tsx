@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import Link from "next/link";
 import type * as Three from "three";
 import type { TileWork } from "@/components/work-tile";
@@ -17,9 +17,10 @@ import { AZIMUTH, ELEVATION, ease, lineDrawing } from "@/components/line-drawing
 // grows to full size, its neighbours a little less, and the bloom follows
 // the pointer along the row; that plate also rises off its base on a faint
 // axis, and its tag fills with ink and turns to "View case study", which is
-// what a click does. Leaving the row lets it settle back to even. On a phone the row is
-// wider than the screen, always blooms on the middle piece, and swiping
-// moves it through. Each piece is a real link laid over the drawing, so
+// what a click does. Leaving the row lets it settle back to even. On a phone the pieces
+// stand in a grid instead, two across, each standing over its name. The row
+// ends on the archive, All work: blank plates filed on a stand like cards in
+// an index, the rest of the work waiting. Each piece is a real link laid over the drawing, so
 // keyboard focus and opening in a new tab work as they should. As the row
 // first comes into view, the plates are set down onto their bases one after
 // another.
@@ -41,6 +42,11 @@ const REST = 0.78;
 const SPREAD = 1.3;
 // How far a hovered plate rises, as a share of its height.
 const RISE = 0.22;
+// On a phone: the grid's columns, the gap between its cells and its side
+// margins, in px (the page's gutter).
+const COLS = 2;
+const CELL_GAP = 12;
+const INSET = 24;
 
 type Outline = { ratio: number; shapes: { o: [number, number][]; h: [number, number][][] }[] };
 
@@ -63,7 +69,8 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
 
   useEffect(() => {
     const host = hostRef.current;
-    const n = items.length;
+    // The pieces: the clients, then the archive.
+    let n = items.length;
     if (!host || !n) return;
     let disposed = false;
     let cleanup = () => {};
@@ -87,22 +94,14 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
       // little from the side.
       const across = new THREE.Vector3(Math.cos(AZIMUTH), 0, -Math.sin(AZIMUTH));
 
-      const plates = outlines.map((outline, i) => {
-        const h = BASE * presence(outline.ratio);
-        const w = h * outline.ratio;
-        const shapes = outline.shapes.map((s) => {
-          const shape = new THREE.Shape(s.o.map(([x, y]) => new THREE.Vector2(x * h - w / 2, y * h)));
-          for (const hole of s.h) shape.holes.push(new THREE.Path(hole.map(([x, y]) => new THREE.Vector2(x * h - w / 2, y * h))));
-          return shape;
-        });
-        const g = art.keep(new THREE.ExtrudeGeometry(shapes, { depth: THICK, bevelEnabled: false, curveSegments: 1 }));
-        g.translate(0, 0, -THICK / 2);
-        // The piece: its base, and the plate on a riser that lifts it.
+      // A piece: its base, and on a riser that lifts it, what stands on it
+      // (`w` wide and `h` tall).
+      const piece = (i: number, h: number, w: number, standing: Three.Mesh[]) => {
         const unit = new THREE.Group();
         const sw = w + PAD * 2;
         const slab = new THREE.Mesh(art.keep(new THREE.BoxGeometry(sw, SLAB, DEPTH).translate(0, SLAB / 2, 0)), art.surface(i + 1));
         const riser = new THREE.Group();
-        riser.add(new THREE.Mesh(g, art.surface(i + 101)));
+        riser.add(...standing);
         // The axis it rises on, from its base to its foot.
         const axis = new THREE.Line(art.keep(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0)])), axisMat);
         axis.position.y = SLAB;
@@ -113,7 +112,35 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
         // How wide it stands on screen, base and all.
         const foot = sw * Math.cos(AZIMUTH) + DEPTH * Math.abs(Math.sin(AZIMUTH));
         return { unit, riser, axis, h, w, foot, lift: 0, settle: reduce ? 1 : 0 };
+      };
+
+      // Each client's logo, cut from a plate.
+      const plates = outlines.map((outline, i) => {
+        const h = BASE * presence(outline.ratio);
+        const w = h * outline.ratio;
+        const shapes = outline.shapes.map((s) => {
+          const shape = new THREE.Shape(s.o.map(([x, y]) => new THREE.Vector2(x * h - w / 2, y * h)));
+          for (const hole of s.h) shape.holes.push(new THREE.Path(hole.map(([x, y]) => new THREE.Vector2(x * h - w / 2, y * h))));
+          return shape;
+        });
+        const g = art.keep(new THREE.ExtrudeGeometry(shapes, { depth: THICK, bevelEnabled: false, curveSegments: 1 }));
+        g.translate(0, 0, -THICK / 2);
+        return piece(i, h, w, [new THREE.Mesh(g, art.surface(i + 101))]);
       });
+      // Last, the archive (All work): blank plates filed one behind another
+      // like cards in an index, each a little taller than the one in front
+      // so every top shows. The rest of the work, waiting on its stand.
+      {
+        const h = BASE * 0.78;
+        const w = h * 0.8;
+        const cards = [0, 1, 2, 3].map((k) => {
+          const ch = h * (0.7 + 0.1 * k);
+          const z = DEPTH * (0.26 - 0.17 * k);
+          return new THREE.Mesh(art.keep(new THREE.BoxGeometry(w, ch, THICK).translate(0, ch / 2, z)), art.surface(160 + k));
+        });
+        plates.push(piece(plates.length, h, w, cards));
+      }
+      n = plates.length;
 
       // The bloom's centre, as a place in the row (fractional while it
       // moves), where it's heading, and which plate is raised.
@@ -127,9 +154,16 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
       let width = 0;
       let height = 0;
       let scale = 1;
-      // Wider than the screen (phones): the bloom stays in the middle and the
-      // row moves under it.
-      let overflow = false;
+      // On a phone the pieces stand in a grid: its cells' size in px, and the
+      // screen's right and up as directions in the scene, to place each
+      // piece in its cell.
+      let stacked = false;
+      let cellW = 0;
+      let cellH = 0;
+      // How much each piece is grown to fill its cell.
+      let grow = plates.map(() => 1);
+      const screenRight = new THREE.Vector3();
+      const screenUp = new THREE.Vector3();
       // The narrowest each piece may stand, in mm, so its caption never
       // runs into the next one's.
       let least = plates.map(() => 0);
@@ -145,7 +179,7 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
           if (i > 0) at += slot(i - 1, s[i - 1]) / 2 + (GAP * (s[i - 1] + s[i])) / 2 + slot(i, s[i]) / 2;
           x.push(at);
         });
-        const shift = overflow ? -(x[Math.floor(f)] + (x[Math.min(n - 1, Math.floor(f) + 1)] - x[Math.floor(f)]) * (f - Math.floor(f))) : -(x[0] + x[n - 1]) / 2;
+        const shift = -(x[0] + x[n - 1]) / 2;
         return { s, x: x.map((v) => v + shift), span: x[n - 1] - x[0] + slot(0, s[0]) / 2 + slot(n - 1, s[n - 1]) / 2 };
       };
 
@@ -159,15 +193,33 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
       // Each piece's box on screen: left, top, right, bottom.
       const bounds = plates.map(() => [0, 0, 0, 0]);
 
+      // A grid cell's box in px: left, top, and the height of its drawing
+      // above the name.
+      const cell = (i: number) => ({
+        left: INSET + (i % COLS) * (cellW + CELL_GAP),
+        top: Math.floor(i / COLS) * cellH,
+        room: cellH - CELL_GAP - CAPTION,
+      });
+
       // Places the plates and their links, and draws.
       function paint() {
         if (!width || !height) return;
-        const { s, x } = layout(focus, overflow ? 1 : open);
+        const { s, x } = layout(focus, open);
         plates.forEach((p, i) => {
           const set = ease(p.settle);
           const lift = (p.lift * RISE + (1 - set) * 0.5) * p.h;
-          p.unit.position.copy(across).multiplyScalar(x[i]);
-          p.unit.scale.setScalar(s[i]);
+          if (stacked) {
+            // Centred across its cell, its base standing just over its name
+            // (set once the piece's box on screen is known, below).
+            const c = cell(i);
+            const dx = (c.left + cellW / 2 - width / 2) / scale;
+            const dy = (height / 2 - (c.top + c.room / 2)) / scale;
+            p.unit.position.copy(screenRight).multiplyScalar(dx).addScaledVector(screenUp, dy);
+            p.unit.scale.setScalar(grow[i]);
+          } else {
+            p.unit.position.copy(across).multiplyScalar(x[i]);
+            p.unit.scale.setScalar(s[i]);
+          }
           p.riser.position.y = SLAB + lift;
           p.axis.scale.y = Math.max(0.001, lift);
           p.axis.visible = lift > 0.05 && p.settle >= 1;
@@ -186,16 +238,36 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
                 r[2] = Math.max(r[2], sx);
                 r[3] = Math.max(r[3], sy);
               }
+          if (stacked) {
+            // Down so the front of its base meets the foot of the room.
+            const c = cell(i);
+            const down = c.top + c.room - r[3];
+            p.unit.position.addScaledVector(screenUp, -down / scale);
+            p.unit.updateMatrixWorld();
+            r[1] += down;
+            r[3] += down;
+          }
         });
         // Each link covers its piece, down to the captions, which all sit on
         // one line under the lowest base.
         const floor = Math.max(...bounds.map((r) => r[3]));
+        // In the grid, each link is its whole cell.
+        const place = (el: HTMLElement, left: number, top: number, w: number, h: number) => {
+          el.style.transform = `translate(${left}px, ${top}px)`;
+          el.style.width = `${w}px`;
+          el.style.height = `${h}px`;
+        };
         bounds.forEach(([x0, y0, x1], i) => {
           const link = linkRefs.current[i];
           if (!link) return;
-          link.style.transform = `translate(${x0 - 6}px, ${y0 - 6}px)`;
-          link.style.width = `${x1 - x0 + 12}px`;
-          link.style.height = `${floor - y0 + 12 + CAPTION}px`;
+          if (stacked) {
+            const c = cell(i);
+            place(link, c.left, c.top, cellW, cellH - CELL_GAP);
+          } else {
+            place(link, x0 - 6, y0 - 6, x1 - x0 + 12, floor - y0 + 12 + CAPTION);
+          }
+          // Its tag comes up as the plate comes down.
+          link.toggleAttribute("data-set", plates[i].settle > 0.2);
         });
         art.render();
       }
@@ -218,18 +290,44 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
         const up = SLAB + BASE * (1 + RISE);
         const tall = up * Math.cos(ELEVATION) + DEPTH * Math.sin(ELEVATION);
         const room = height - CAPTION;
-        // On a narrow screen the pieces keep a readable size, the widest
-        // fitting at full bloom, and the row runs off the edges.
-        overflow = width < 768;
         const widest = Math.max(...plates.map((p) => p.foot));
+        // On a phone, a grid two across. Each piece grows to fill its cell,
+        // as wide as the cell allows or as tall as its room (a little over
+        // half the cell's width), whichever it meets first; so a compact mark
+        // stands as large as a long wordmark. Each row is that room over a
+        // name, and the drawing as tall as its rows.
+        stacked = width < 768;
+        if (stacked) {
+          cellW = (width - INSET * 2 - CELL_GAP * (COLS - 1)) / COLS;
+          scale = (cellW * 0.92) / widest;
+          const roomPx = Math.round(cellW * 0.62);
+          grow = plates.map((p) => {
+            const raised = (SLAB + p.h * (1 + RISE)) * Math.cos(ELEVATION) + DEPTH * Math.sin(ELEVATION);
+            return Math.min((cellW * 0.84) / (p.foot * scale), roomPx / (raised * scale));
+          });
+          cellH = roomPx + CAPTION + CELL_GAP;
+          const fits = Math.ceil(n / COLS) * cellH;
+          if (Math.abs(fits - height) > 1) {
+            // The resize this makes calls fit again.
+            host.style.height = `${fits}px`;
+            return;
+          }
+          art.aim(new THREE.Vector3(), width, height, scale);
+          screenRight.set(1, 0, 0).applyQuaternion(art.camera.quaternion);
+          screenUp.set(0, 1, 0).applyQuaternion(art.camera.quaternion);
+          paint();
+          return;
+        }
+        if (host.style.height) {
+          host.style.height = "";
+          return;
+        }
         // The captions' widths depend on nothing, but the room they take in
         // mm depends on the scale, so it's settled in a few rounds.
         const captions = linkRefs.current.map((l) => (l?.querySelector(".work-plates__caption") as HTMLElement | null)?.offsetWidth ?? 0);
         least = plates.map(() => 0);
         for (let round = 0; round < 4; round++) {
-          scale = overflow
-            ? Math.min((width * 0.8) / widest, (room * 0.86) / tall)
-            : Math.min((width * 0.86) / widestRow(), (room * 0.86) / tall);
+          scale = Math.min((width * 0.86) / widestRow(), (room * 0.86) / tall);
           least = captions.map((c) => (c + 12) / scale);
         }
         // Centred in the room above the captions.
@@ -285,7 +383,7 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
 
       // The bloom follows the pointer along the row.
       const onMove = (e: PointerEvent) => {
-        if (e.pointerType !== "mouse" || overflow) return;
+        if (e.pointerType !== "mouse" || stacked) return;
         const r = host.getBoundingClientRect();
         // Read against the even row, which doesn't move under the pointer.
         const { x, s } = layout(middle, 0);
@@ -301,32 +399,9 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
         wake();
       };
       const onLeave = () => {
-        if (overflow) return;
+        if (stacked) return;
         openAim = 0;
         raised = -1;
-        wake();
-      };
-
-      // On a phone, swiping moves the row under the bloom, and it settles
-      // with a plate in the middle.
-      let drag: { x: number; focus: number } | null = null;
-      let swiped = false;
-      const onDown = (e: PointerEvent) => {
-        if (!overflow) return;
-        drag = { x: e.clientX, focus };
-        swiped = false;
-      };
-      const onDrag = (e: PointerEvent) => {
-        if (!drag) return;
-        if (Math.abs(e.clientX - drag.x) > 6) swiped = true;
-        const step = (BASE + GAP) * scale;
-        aim = focus = Math.max(-0.3, Math.min(n - 0.7, drag.focus - (e.clientX - drag.x) / step));
-        paint();
-      };
-      const onUp = () => {
-        if (!drag) return;
-        drag = null;
-        aim = Math.max(0, Math.min(n - 1, Math.round(focus)));
         wake();
       };
 
@@ -334,7 +409,7 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
       // from the keyboard also blooms the row on it.
       const raise = (i: number) => (e: Event) => {
         raised = i;
-        if (e.type === "focus" && !overflow) {
+        if (e.type === "focus" && !stacked) {
           aim = i;
           openAim = 1;
         }
@@ -342,7 +417,7 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
       };
       const lower = (i: number) => (e: Event) => {
         if (raised === i) raised = -1;
-        if (e.type === "blur" && !overflow && !host.contains((e as FocusEvent).relatedTarget as Node)) openAim = 0;
+        if (e.type === "blur" && !stacked && !host.contains((e as FocusEvent).relatedTarget as Node)) openAim = 0;
         wake();
       };
       const unbind: (() => void)[] = [];
@@ -363,18 +438,6 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
       });
       host.addEventListener("pointermove", onMove);
       host.addEventListener("pointerleave", onLeave);
-      host.addEventListener("pointerdown", onDown);
-      // A swipe that ends on a plate doesn't open it.
-      const onClick = (e: MouseEvent) => {
-        if (!swiped) return;
-        e.preventDefault();
-        e.stopPropagation();
-        swiped = false;
-      };
-      host.addEventListener("click", onClick, true);
-      window.addEventListener("pointermove", onDrag);
-      window.addEventListener("pointerup", onUp);
-      window.addEventListener("pointercancel", onUp);
       const ro = new ResizeObserver(fit);
       ro.observe(host);
       fit();
@@ -386,11 +449,6 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
         for (const u of unbind) u();
         host.removeEventListener("pointermove", onMove);
         host.removeEventListener("pointerleave", onLeave);
-        host.removeEventListener("pointerdown", onDown);
-        host.removeEventListener("click", onClick, true);
-        window.removeEventListener("pointermove", onDrag);
-        window.removeEventListener("pointerup", onUp);
-        window.removeEventListener("pointercancel", onUp);
         art.dispose();
       };
     })();
@@ -404,7 +462,7 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
   }, []);
 
   return (
-    <div ref={hostRef} className="work-plates">
+    <div ref={hostRef} className="work-plates" style={{ "--rows": Math.ceil((items.length + 1) / COLS) } as CSSProperties}>
       {items.map((w, i) => (
         <Link
           key={w.slug}
@@ -428,6 +486,27 @@ export function WorkPlates({ work }: { work: TileWork[] }) {
           </span>
         </Link>
       ))}
+      {/* The archive: the rest of the work. */}
+      <Link
+        href="/work"
+        ref={(el) => {
+          linkRefs.current[items.length] = el;
+        }}
+        className="work-plates__link"
+        draggable={false}
+      >
+        <span className="work-plates__caption">
+          <span className="work-plates__flip">
+            <span>All work</span>
+            <span aria-hidden>
+              View all work
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </span>
+        </span>
+      </Link>
     </div>
   );
 }

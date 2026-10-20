@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { MovementPlate } from "@/components/movement-plate";
+import { useReveal, Words } from "@/components/reveal";
 import { PlaneIcon, ReachOut } from "@/components/reach-out";
 
 // The close every page ends on (styles are .index-close in globals.css).
@@ -16,6 +17,8 @@ const EMAIL = "hello@byinertia.com";
 // say so, the check drawing itself in.
 export function Close() {
   const [copied, setCopied] = useState(false);
+  const line = useReveal<HTMLHeadingElement>();
+  const actions = useReveal<HTMLDivElement>();
   useEffect(() => {
     if (!copied) return;
     const t = setTimeout(() => setCopied(false), 1800);
@@ -36,23 +39,30 @@ export function Close() {
       <div className="index-close__art">
         <MovementPlate assemble />
       </div>
-      <h2 className="index-close__line">
-        Tell us what you&apos;re <span className="index-sentence__drawn">building.</span>
+      <h2 ref={line} className="index-close__line">
+        <Words text="Tell us what you’re" />{" "}
+        <span className="index-sentence__drawn">
+          <Words text="building." from={4} />
+        </span>
       </h2>
-      <div className="index-close__actions">
-        <ReachOut className="index-close__call">
-          <PlaneIcon className="index-close__icon" />
-          Reach out
-        </ReachOut>
-        <button type="button" onClick={copy} className="index-close__email" aria-label={`Copy ${EMAIL}`}>
-          <span className="index-close__flip" data-copied={copied || undefined}>
-            <span>{EMAIL}</span>
-            <span aria-hidden className="index-close__done">
-              <CheckIcon />
-              Copied
+      <div ref={actions} className="index-close__actions" style={{ "--i": 1 } as CSSProperties}>
+        <span className="reveal-word">
+          <ReachOut className="index-close__call">
+            <PlaneIcon className="index-close__icon" />
+            Reach out
+          </ReachOut>
+        </span>
+        <span className="reveal-word" style={{ "--w": 1 } as CSSProperties}>
+          <button type="button" onClick={copy} className="index-close__email" aria-label={`Copy ${EMAIL}`}>
+            <span className="index-close__flip" data-copied={copied || undefined}>
+              <span>{EMAIL}</span>
+              <span aria-hidden className="index-close__done">
+                <CheckIcon />
+                Copied
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+        </span>
         <span className="sr-only" aria-live="polite">
           {copied ? "Email address copied" : ""}
         </span>
