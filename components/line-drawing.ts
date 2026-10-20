@@ -36,7 +36,20 @@ export function ease(x: number) {
   return 3 * t * (1 - t) ** 2 + 3 * t * t * (1 - t) + t ** 3;
 }
 
-export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () => void) {
+// For things lifted or lowered from rest: they gather speed, then settle,
+// instead of leaving at full speed.
+export function easeInOut(x: number) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  return x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2;
+}
+
+// With `smooth`, the geometry is drawn at twice the density and each pixel
+// of the drawing averages the four under it, so lines are antialiased and
+// slow motion glides between pixels instead of stepping a whole pixel at a
+// time. Four times the work: for small drawings that move slowly.
+export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () => void, { smooth = false } = {}) {
+  const density = smooth ? 2 : 1;
   const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, premultipliedAlpha: true });
   renderer.setPixelRatio(2);
   renderer.setClearColor(0x000000, 0);
@@ -55,7 +68,9 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
     magFilter: THREE.NearestFilter,
     depthTexture: new THREE.DepthTexture(1, 1),
   });
+  // One texel of the geometry buffer, and one pixel of the canvas, in uv.
   const texel = new THREE.Vector2();
+  const screen = new THREE.Vector2();
   const ink = new THREE.Vector3();
   const signal = new THREE.Vector3();
 
@@ -97,7 +112,7 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
     const m = new THREE.ShaderMaterial({
       uniforms: {
         tDepth: { value: target.depthTexture },
-        uTexel: { value: texel },
+        uScreen: { value: screen },
         uColor: { value: accent ? signal : ink },
         uAlpha: { value: alpha },
       },
@@ -106,11 +121,11 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
       `,
       fragmentShader: /* glsl */ `
         uniform sampler2D tDepth;
-        uniform vec2 uTexel;
+        uniform vec2 uScreen;
         uniform vec3 uColor;
         uniform float uAlpha;
         void main() {
-          float d = texture2D(tDepth, gl_FragCoord.xy * uTexel).r;
+          float d = texture2D(tDepth, gl_FragCoord.xy * uScreen).r;
           if (gl_FragCoord.z > d + 0.0004) discard;
           gl_FragColor = vec4(uColor * uAlpha, uAlpha);
         }
@@ -148,31 +163,34 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
       uniform vec3 uSignal;
       varying vec2 vUv;
 
-      float depthAt(vec2 o) { return texture2D(tDepth, vUv + o * uTexel).r; }
-      vec4 surfAt(vec2 o) { return texture2D(tNormal, vUv + o * uTexel); }
+      // Neighbours are a canvas pixel away, however dense the buffer, so a
+      // line is as wide smooth or not.
+      float depthAt(vec2 uv, vec2 o) { return texture2D(tDepth, uv + o * uTexel * ${density.toFixed(1)}).r; }
+      vec4 surfAt(vec2 uv, vec2 o) { return texture2D(tNormal, uv + o * uTexel * ${density.toFixed(1)}); }
 
-      void main() {
-        float d0 = depthAt(vec2(0.0));
-        float dl = depthAt(vec2(-1.0, 0.0));
-        float dr = depthAt(vec2(1.0, 0.0));
-        float dd = depthAt(vec2(0.0, -1.0));
-        float du = depthAt(vec2(0.0, 1.0));
-        float da = depthAt(vec2(-1.0, -1.0));
-        float db = depthAt(vec2(1.0, 1.0));
-        float dc = depthAt(vec2(-1.0, 1.0));
-        float de = depthAt(vec2(1.0, -1.0));
+      // The line at one place in the buffer, premultiplied.
+      vec4 shade(vec2 uv) {
+        float d0 = depthAt(uv, vec2(0.0));
+        float dl = depthAt(uv, vec2(-1.0, 0.0));
+        float dr = depthAt(uv, vec2(1.0, 0.0));
+        float dd = depthAt(uv, vec2(0.0, -1.0));
+        float du = depthAt(uv, vec2(0.0, 1.0));
+        float da = depthAt(uv, vec2(-1.0, -1.0));
+        float db = depthAt(uv, vec2(1.0, 1.0));
+        float dc = depthAt(uv, vec2(-1.0, 1.0));
+        float de = depthAt(uv, vec2(1.0, -1.0));
         // Planar faces are linear in depth under an orthographic camera, so
         // their second difference is zero; edges and folds are not.
         float lap = max(max(abs(dl + dr - 2.0 * d0), abs(dd + du - 2.0 * d0)),
                         max(abs(da + db - 2.0 * d0), abs(dc + de - 2.0 * d0)));
         float edge = smoothstep(0.00035, 0.0011, lap);
 
-        vec4 s0 = surfAt(vec2(0.0));
+        vec4 s0 = surfAt(uv, vec2(0.0));
         vec4 sn[4];
-        sn[0] = surfAt(vec2(-1.0, 0.0));
-        sn[1] = surfAt(vec2(1.0, 0.0));
-        sn[2] = surfAt(vec2(0.0, -1.0));
-        sn[3] = surfAt(vec2(0.0, 1.0));
+        sn[0] = surfAt(uv, vec2(-1.0, 0.0));
+        sn[1] = surfAt(uv, vec2(1.0, 0.0));
+        sn[2] = surfAt(uv, vec2(0.0, -1.0));
+        sn[3] = surfAt(uv, vec2(0.0, 1.0));
         float dn[4];
         dn[0] = dl; dn[1] = dr; dn[2] = dd; dn[3] = du;
 
@@ -190,7 +208,17 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
 
         vec3 col = nearId * 255.0 > ${ACCENT_ID - 0.5} ? uSignal : uInk;
         float a = edge * 0.92;
-        gl_FragColor = vec4(col * a, a);
+        return vec4(col * a, a);
+      }
+
+      void main() {
+        ${
+          smooth
+            ? `// The four buffer texels under this pixel, averaged.
+        gl_FragColor = 0.25 * (shade(vUv + vec2(-0.5, -0.5) * uTexel) + shade(vUv + vec2(0.5, -0.5) * uTexel) +
+                               shade(vUv + vec2(-0.5, 0.5) * uTexel) + shade(vUv + vec2(0.5, 0.5) * uTexel));`
+            : "gl_FragColor = shade(vUv);"
+        }
       }
     `,
     depthTest: false,
@@ -238,8 +266,9 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
     // Sizes the drawing to its box, in CSS pixels.
     setSize(width: number, height: number) {
       renderer.setSize(width, height, false);
-      target.setSize(width * 2, height * 2);
-      texel.set(1 / (width * 2), 1 / (height * 2));
+      target.setSize(width * 2 * density, height * 2 * density);
+      texel.set(1 / (width * 2 * density), 1 / (height * 2 * density));
+      screen.set(1 / (width * 2), 1 / (height * 2));
     },
     // Looks at a point from the shared angle, `scale` CSS pixels to the
     // unit, in a box of the given size.

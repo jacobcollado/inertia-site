@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { ACCENT_ID, AZIMUTH, ELEVATION, ease, lineDrawing, type LineDrawing } from "@/components/line-drawing";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { ACCENT_ID, AZIMUTH, ELEVATION, ease, easeInOut, lineDrawing, type LineDrawing } from "@/components/line-drawing";
+import { useReveal, Words } from "@/components/reveal";
 import { TAU, circle, hull, partsKit, toothDepth, type V2 } from "@/components/watch-parts";
 
 // What we do, as a drawing sheet: three figures side by side (stacked on
@@ -19,8 +20,12 @@ import { TAU, circle, hull, partsKit, toothDepth, type V2 } from "@/components/w
 // - What's next: an escapement, the lever rocking and the escape wheel
 //   stepping on a tooth at a time, once a second.
 //
-// Each figure draws only while it's on screen; with reduced motion they hold
-// still (the dial still shows the time it was drawn at).
+// Each mechanism is put together on its base as it comes up the screen,
+// following the scroll (and taken apart again going back): its pieces come
+// down from the lowest level up in one motion, the figures on the left a
+// little ahead, while its line rises in (reveal.tsx). Each figure
+// draws only while it's on screen; with reduced motion they hold still,
+// already set down (the dial still shows the time it was drawn at).
 
 type Kit = ReturnType<typeof partsKit>;
 type Figure = {
@@ -190,6 +195,18 @@ const escapement: Build = (THREE, art, { extrude, solid, ring, wheel }) => {
   };
 };
 
+// Taken apart, a mechanism stands above its base the way the opening plate
+// shows its movement: each piece lifted LIFT, and STEP more for every level
+// it stands above the lowest, in mm.
+const LIFT = 2.4;
+const STEP = 0.8;
+// How far up the screen a figure's top has come when it's put together, as
+// a share of the screen's height; how quickly it follows the scroll; and how
+// far behind its neighbour on the left it runs, side by side.
+const ASSEMBLED_AT = 0.5;
+const FOLLOW = 7;
+const LAG = 0.08;
+
 function FigureCanvas({ build }: { build: Build }) {
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -203,18 +220,42 @@ function FigureCanvas({ build }: { build: Build }) {
       const THREE = await import("three");
       if (disposed) return;
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const art = lineDrawing(THREE, host, () => draw(performance.now()));
+      const art = lineDrawing(THREE, host, () => draw(performance.now()), { smooth: true });
       const figure = build(THREE, art, partsKit(THREE, art));
       // Mounted on its base: the mechanism stands on the slab's top.
-      for (const child of [...art.scene.children]) child.position.y += BASE_H;
+      for (const child of art.scene.children) child.position.y += BASE_H;
+      // Its pieces, each on a level by the height it stands at.
+      const pieces = art.scene.children.flatMap((root) => root.children.map((o) => ({ o, y: o.position.y })));
+      const levels = [...new Set(pieces.map((p) => p.y))].sort((a, b) => a - b);
+      const level = pieces.map((p) => levels.indexOf(p.y));
       const base = new THREE.Mesh(art.keep(new THREE.BoxGeometry(BASE_W, BASE_H, BASE_D).translate(0, BASE_H / 2, 0)), art.surface(50));
       art.scene.add(base);
       const start = performance.now();
+      const item: HTMLElement = host;
+      // Its place in the row (--i, side by side only), and how put together
+      // it is, easing after where the scroll says it should be.
+      let order = 0;
+      let together = reduce ? 1 : 0;
+      let last = 0;
       let width = 0;
       let height = 0;
 
       function draw(now: number) {
         if (!width || !height) return;
+        if (!reduce) {
+          const top = item.getBoundingClientRect().top;
+          const want = Math.min(1, Math.max(0, (innerHeight - top) / (innerHeight * (1 - ASSEMBLED_AT)) - order * LAG));
+          const dt = last ? Math.min(0.05, (now - last) / 1000) : 1;
+          together += (want - together) * (1 - Math.exp(-dt * FOLLOW));
+          last = now;
+        }
+        // Put together from the lowest level up: each level leads the one
+        // above it, all in one motion.
+        const highest = Math.max(1, levels.length - 1);
+        pieces.forEach((p, j) => {
+          const k = easeInOut((together - (level[j] / highest) * 0.3) / 0.7);
+          p.o.position.y = p.y + (1 - k) * (LIFT + level[j] * STEP);
+        });
         figure.tick(reduce ? 0 : (now - start) / 1000);
         art.render();
       }
@@ -222,8 +263,9 @@ function FigureCanvas({ build }: { build: Build }) {
         width = host.clientWidth;
         height = host.clientHeight;
         if (!width || !height) return;
+        order = parseFloat(getComputedStyle(item).getPropertyValue("--i")) || 0;
         art.setSize(width, height);
-        const scale = Math.min((width * 0.9) / FRAME_W, (height * 0.9) / FRAME_H);
+        const scale = Math.min((width * 0.82) / FRAME_W, (height * 0.82) / FRAME_H);
         art.aim(new THREE.Vector3(0, FRAME_LOOK, 0), width, height, scale);
         draw(performance.now());
       };
@@ -272,6 +314,21 @@ const FIGURES: { build: Build; line: string }[] = [
   { build: escapement, line: "We try new ideas on our own work first, so you get what’s next." },
 ];
 
+// A figure and its line, revealed on its own: side by side, the three come
+// in together, a beat apart; stacked on a phone, each as it's reached.
+function FigureItem({ build, line, index }: { build: Build; line: string; index: number }) {
+  const item = useReveal<HTMLLIElement>();
+
+  return (
+    <li ref={item} className="index-figs__item" style={{ "--n": index } as CSSProperties}>
+      <FigureCanvas build={build} />
+      <h3 className="index-figs__line">
+        <Words text={line} />
+      </h3>
+    </li>
+  );
+}
+
 export function WhatWeDo() {
   return (
     <section className="index-col index-figs" aria-labelledby="what-we-do">
@@ -279,11 +336,8 @@ export function WhatWeDo() {
         What we do
       </h2>
       <ol className="index-figs__list">
-        {FIGURES.map((f) => (
-          <li key={f.line} className="index-figs__item">
-            <FigureCanvas build={f.build} />
-            <h3 className="index-figs__line">{f.line}</h3>
-          </li>
+        {FIGURES.map((f, i) => (
+          <FigureItem key={f.line} build={f.build} line={f.line} index={i} />
         ))}
       </ol>
     </section>
