@@ -3267,7 +3267,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 
 /* What we do: a sheet of three drawn figures, each with its phrase and line
    under it (components/what-we-do.tsx). Side by side from tablets up,
-   stacked on phones; the text starts at each figure's left edge. */
+   stacked on phones; each figure's text is centred under its base. */
 .index-figs { padding-block: var(--section-y); }
 .index-figs__list {
   display: grid;
@@ -3277,8 +3277,8 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 @media (min-width: 900px) {
   .index-figs__list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
 }
-.index-figs__item { display: flex; flex-direction: column; }
-.index-figs__art { position: relative; aspect-ratio: 4 / 3; margin-bottom: 20px; }
+.index-figs__item { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.index-figs__art { position: relative; width: 100%; aspect-ratio: 4 / 3; margin-bottom: 20px; }
 .index-figs__art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .index-figs__word {
   font-size: clamp(1.5rem, 2.4vw, 2rem);
@@ -3287,7 +3287,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   letter-spacing: -0.035em;
 }
 .index-figs__line {
-  max-width: 26em;
+  max-width: 24em;
   margin-top: 8px;
   font-size: 16px;
   line-height: 1.5;
@@ -3569,9 +3569,9 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .index-tile__name { clip-path: inset(0); }
 .index-tile[data-landed="true"] .index-tile__name { transition-delay: 120ms; }
 
-/* "All work": a 36 button in the family of the work's tags, a hairline ring
-   at rest, filled with ink on hover, its arrow easing on along the way it
-   points. */
+/* "All work": a 36 outlined button, like every secondary button: a hairline
+   ring at rest that darkens on hover, its arrow easing on along the way it
+   points. Filled ink is kept for the page's main action, Reach out. */
 .index-more {
   display: inline-flex;
   align-items: center;
@@ -3586,16 +3586,11 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   line-height: 1;
   color: var(--ink);
   text-decoration: none;
-  transition:
-    background-color var(--motion-dur-short) var(--motion-ease),
-    color var(--motion-dur-short) var(--motion-ease),
-    box-shadow var(--motion-dur-short) var(--motion-ease);
+  transition: box-shadow var(--motion-dur-short) var(--motion-ease);
 }
 .index-more svg { transition: transform var(--motion-dur) var(--motion-ease); }
 .index-more:is(:hover, :focus-visible) {
-  background: var(--ink);
-  color: var(--paper);
-  box-shadow: inset 0 0 0 1px var(--ink);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4);
   outline: none;
 }
 .index-more:is(:hover, :focus-visible) svg { transform: translateX(3px); }
@@ -3741,11 +3736,11 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   line-height: 1;
   letter-spacing: -0.01em;
   color: var(--ink-3);
-  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16);
   transition: color var(--motion-dur-short) var(--motion-ease), box-shadow var(--motion-dur-short) var(--motion-ease);
 }
 .policies__button:is(:hover, :focus-visible),
-.policies[data-open] .policies__button { color: var(--ink); box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.32); outline: none; }
+.policies[data-open] .policies__button { color: var(--ink); box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4); outline: none; }
 .policies__button svg { transition: transform var(--motion-dur) var(--motion-ease); }
 .policies[data-open] .policies__button svg { transform: rotate(180deg); }
 .policies__menu {
@@ -3903,17 +3898,17 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .index-close__call {
   gap: 8px;
   padding-left: 14px;
-  background: #000;
-  color: #fff;
+  background: var(--ink);
+  color: var(--paper);
   transition: background-color var(--motion-dur-short) var(--motion-ease);
 }
-.index-close__call:hover { background: rgb(0 0 0 / 0.82); }
+.index-close__call:hover { background: rgb(var(--ink-rgb) / 0.82); }
 .index-close__email {
   color: var(--ink);
-  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16);
   transition: box-shadow var(--motion-dur-short) var(--motion-ease);
 }
-.index-close__email:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.28); }
+.index-close__email:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4); }
 
 /* The email's label and "Copied" share one cell, the wider one setting the
    button's width; on copy the address flips up and out, "Copied" up and in. */
@@ -4064,16 +4059,16 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .header-signin {
   background: var(--paper);
   color: var(--ink);
-  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16);
   transition: box-shadow var(--motion-dur-short) var(--motion-ease);
 }
-.header-signin:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.28); }
+.header-signin:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4); }
 .header-cta {
-  background: #000;
-  color: #fff;
+  background: var(--ink);
+  color: var(--paper);
   transition: background-color var(--motion-dur-short) var(--motion-ease);
 }
-.header-cta:hover { background: rgb(0 0 0 / 0.82); }
+.header-cta:hover { background: rgb(var(--ink-rgb) / 0.82); }
 /* Its paper plane: 14 in the 36 button, as far from the left edge as from
    the top, (36 - 14) / 2 = 11. */
 .header-cta:has(.header-cta__icon) { gap: 6px; padding-left: 11px; }
@@ -4128,6 +4123,30 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .dock .header-signin { transform: translateY(12px) scale(0.96); transition: transform var(--motion-dur) var(--motion-ease), box-shadow var(--motion-dur-short) var(--motion-ease); }
 .dock[data-shown] .header-cta,
 .dock[data-shown] .header-signin { transform: none; }
+
+/* Aligned with the rest of the system. Floating over the page, both buttons
+   are raised alike (one shadow) and Sign in's ring is firmer than it is in
+   the header. The plane is 18 in the 48 button, the text's 16 plus a step.
+   Touch screens keep no hover: a tap left the button greyed as if disabled,
+   so they answer the press instead, a small give that springs back. */
+.dock {
+  --dock-raise: 0 10px 24px -10px rgb(0 0 0 / 0.28), 0 2px 6px rgb(0 0 0 / 0.06);
+}
+.dock .header-cta,
+.dock .ae-buy { box-shadow: var(--dock-raise); }
+.dock .header-signin { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.24), var(--dock-raise); }
+.dock .header-cta:has(.header-cta__icon) { gap: 8px; }
+.dock .header-cta__icon { width: 18px; height: 18px; }
+@media (hover: none) {
+  .header-cta:hover,
+  .index-close__call:hover,
+  .ae-buy:hover { background: var(--ink); }
+  .header-signin:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16); }
+  .dock .header-signin:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.24), var(--dock-raise); }
+  .dock[data-shown] .header-cta:active,
+  .dock[data-shown] .header-signin:active,
+  .index-close__call:active { transform: scale(0.97); transition-duration: var(--motion-dur-short); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .dock, .dock .header-cta, .dock .header-signin { transform: none; transition: opacity var(--motion-dur-short) linear; }
@@ -4239,10 +4258,10 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   line-height: 1;
   letter-spacing: -0.01em;
   color: var(--ink);
-  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.12);
+  box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16);
   transition: box-shadow var(--motion-dur-short) var(--motion-ease);
 }
-.case-open__visit:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.28); }
+.case-open__visit:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.4); }
 
 .case-shots { display: flex; flex-direction: column; gap: 40px; }
 @media (min-width: 768px) { .case-shots { gap: 64px; } }
@@ -4313,11 +4332,11 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   white-space: nowrap;
 }
 .ae-buy {
-  background: #000;
-  color: #fff;
+  background: var(--ink);
+  color: var(--paper);
   transition: background-color var(--motion-dur-short) var(--motion-ease);
 }
-.ae-buy:hover { background: rgb(0 0 0 / 0.82); }
+.ae-buy:hover { background: rgb(var(--ink-rgb) / 0.82); }
 .ae-buy:disabled { opacity: 0.7; cursor: progress; }
 .ae-buy__error { margin-top: 8px; font-size: 13px; color: rgb(220 38 38); }
 .ae-demo {

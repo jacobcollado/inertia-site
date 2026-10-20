@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ACCENT_ID, ease, lineDrawing, type LineDrawing } from "@/components/line-drawing";
+import { ACCENT_ID, AZIMUTH, ELEVATION, ease, lineDrawing, type LineDrawing } from "@/components/line-drawing";
 import { TAU, circle, hull, partsKit, toothDepth, type V2 } from "@/components/watch-parts";
 
 // What we do, as a drawing sheet: three figures side by side (stacked on
 // phones), each a small mechanism from the same watch as the opening plate,
 // drawn the same way (line-drawing.ts, watch-parts.ts), with what it stands
-// for under it. Each says its line without a caption:
+// for centred under it. Each mechanism is mounted on a base, the same slab
+// under all three and framed the same, so the bases line up across the row
+// like the work's: the figures stand on something, and read as one set
+// while staying three. Each says its line without a caption:
 //
 // - Up to date: a dial showing the visitor's own time, its seconds hand
 //   sweeping, in the signal blue: the section's one blue part.
@@ -30,6 +33,17 @@ type Figure = {
   tick: (t: number) => void;
 };
 type Build = (THREE: typeof import("three"), art: LineDrawing, kit: Kit) => Figure;
+
+// The base every figure is mounted on, in mm: width, depth and height. Every
+// figure is framed on it alike, so the three bases match across the row.
+const BASE_W = 40;
+const BASE_D = 30;
+const BASE_H = 1.6;
+// How much of the paper each figure's frame takes in, in mm, and the height
+// it looks at.
+const FRAME_W = BASE_W * Math.cos(AZIMUTH) + BASE_D * Math.abs(Math.sin(AZIMUTH));
+const FRAME_H = BASE_D * Math.sin(ELEVATION) + 8 * Math.cos(ELEVATION);
+const FRAME_LOOK = 2.4;
 
 // A straight bar in plate coordinates, from one point to another, `w` wide.
 function bar(a: V2, b: V2, w: number): V2[] {
@@ -134,6 +148,8 @@ const mesh: Build = (THREE, art, { extrude, solid, ring, wheel }) => {
 // What's next: an escapement, ticking once a second.
 const escapement: Build = (THREE, art, { extrude, solid, ring, wheel }) => {
   const root = new THREE.Group();
+  // Drawn larger than life, so it fills its base like the other two.
+  root.scale.setScalar(1.4);
   art.scene.add(root);
   const w: V2 = [0, -2.6];
   const p: V2 = [0, 6.4];
@@ -189,6 +205,10 @@ function FigureCanvas({ build }: { build: Build }) {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const art = lineDrawing(THREE, host, () => draw(performance.now()));
       const figure = build(THREE, art, partsKit(THREE, art));
+      // Mounted on its base: the mechanism stands on the slab's top.
+      for (const child of [...art.scene.children]) child.position.y += BASE_H;
+      const base = new THREE.Mesh(art.keep(new THREE.BoxGeometry(BASE_W, BASE_H, BASE_D).translate(0, BASE_H / 2, 0)), art.surface(50));
+      art.scene.add(base);
       const start = performance.now();
       let width = 0;
       let height = 0;
@@ -203,8 +223,8 @@ function FigureCanvas({ build }: { build: Build }) {
         height = host.clientHeight;
         if (!width || !height) return;
         art.setSize(width, height);
-        const scale = Math.min((width * 0.84) / figure.extent, (height * 0.84) / figure.tall);
-        art.aim(new THREE.Vector3(0, figure.look, 0), width, height, scale);
+        const scale = Math.min((width * 0.9) / FRAME_W, (height * 0.9) / FRAME_H);
+        art.aim(new THREE.Vector3(0, FRAME_LOOK, 0), width, height, scale);
         draw(performance.now());
       };
 

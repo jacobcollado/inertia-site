@@ -24,6 +24,13 @@ const N = 40;
 const CALLED = 33;
 // How much of the part the detail shows across, in mm.
 const DETAIL = 7.5;
+// The base the wheel stands over, like the figures of what we do: round and
+// only just wider than the wheel, so it grounds it without taking more of the
+// width. The wheel stands just above it on its arbor, as it would in a
+// movement.
+const PLATE_R = R + 1.5;
+const PLATE_H = 1.1;
+const LIFT = PLATE_H + 0.7;
 
 const REASONS = [
   {
@@ -47,7 +54,9 @@ function model(THREE: typeof import("three"), kit: ReturnType<typeof partsKit>, 
   const depth = toothDepth(R, N) * 1.6;
   const t = 0.6;
   const rim = R - depth - 1.4;
+  solid(scene, extrude(circle(0, 0, PLATE_R, 128), [], PLATE_H), 0, 3);
   const root = new THREE.Group();
+  root.position.y = LIFT;
   scene.add(root);
   solid(root, extrude(teeth(R, N, depth, false, CALLED), [...windows(2.4, rim, 5, 1.1, 0.3), circle(0, 0, 0.45, 32)], t), 0, 1);
   solid(root, extrude(teeth(1.8, 8, 0.6), [], 1.8), -1.8, 1);
@@ -61,7 +70,7 @@ function model(THREE: typeof import("three"), kit: ReturnType<typeof partsKit>, 
   const g = extrude(tooth(R, N, depth, CALLED, 0), [], t);
   g.translate(-pivot[0], 0, pivot[1]);
   const piece = solid(fix, g, 0, 2);
-  const tip = new THREE.Vector3(Math.cos(mid) * (R - depth * 0.5), t, -Math.sin(mid) * (R - depth * 0.5));
+  const tip = new THREE.Vector3(Math.cos(mid) * (R - depth * 0.5), LIFT + t, -Math.sin(mid) * (R - depth * 0.5));
   return { fix, piece, tip };
 }
 
@@ -126,7 +135,7 @@ export function WhyUs() {
         part.setSize(pw, ph);
         detail.setSize(dw, dh);
         partScale = Math.min((pw * 0.86) / (R * 2 + 2), (ph * 0.86) / (R + 6));
-        part.aim(new THREE.Vector3(0, -0.6, 0), pw, ph, partScale);
+        part.aim(new THREE.Vector3(0, (LIFT + 0.6) / 2, 0), pw, ph, partScale);
         detail.aim(a.tip.clone(), dw, dh, dw / DETAIL);
 
         // The callout: where the tooth is on the part, the detail's circle,
