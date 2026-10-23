@@ -1259,11 +1259,11 @@ const WORK_CLIENT_SLUGS: Record<string, string> = {
 // timeline's month rail; "Inertia" has none (it's the site itself, not a
 // dated engagement) and sits at the end unpinned to a date.
 const WORK_CLIENT_DATES: Record<string, { year: number; month: number }> = {
-  "Aether Theme": { year: 2023, month: 1 },
+  "Aether Theme": { year: 2026, month: 1 },
   "FT.GIOO": { year: 2025, month: 6 },
   "Trippie Redd": { year: 2025, month: 6 },
   "Ellora LA": { year: 2026, month: 1 },
-  "Inboundly": { year: 2026, month: 5 },
+  "Inboundly": { year: 2026, month: 3 },
 };
 
 function dateKey(year: number, month: number) {

@@ -1,17 +1,18 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { MovementPlate } from "@/components/movement-plate";
+import { ChipPlate } from "@/components/chip-plate";
 import { useReveal, Words } from "@/components/reveal";
+import { Scramble } from "@/components/scramble";
 import { PlaneIcon, ReachOut } from "@/components/reach-out";
 
 // The close every page ends on (styles are .index-close in globals.css).
 
 const EMAIL = "hello@byinertia.com";
 
-// The page ends where it began: the opening plate's movement, its parts
-// coming down and set into one another as the close comes into view. Then
-// one line, its last word drawn like the company you're becoming, and two
+// The page ends where it began: the opening plate's chip, its layers coming
+// down onto one another and closed as the close comes into view. Then
+// one line, its last word never quite done decoding (scramble.tsx), and two
 // ways to answer it. Reach out (a message or a call, see reach-out.tsx), or
 // take the email: clicking it copies the address, and its label flips up to
 // say so, the check drawing itself in.
@@ -37,12 +38,14 @@ export function Close() {
   return (
     <section className="index-col index-close" data-dock-hide>
       <div className="index-close__art">
-        <MovementPlate assemble />
+        <ChipPlate assemble />
       </div>
       <h2 ref={line} className="index-close__line">
         <Words text="Tell us what you’re" />{" "}
-        <span className="index-sentence__drawn">
-          <Words text="building." from={4} />
+        <span className="reveal-word" style={{ "--w": 4 } as CSSProperties}>
+          <span>
+            <Scramble text="building." />
+          </span>
         </span>
       </h2>
       <div ref={actions} className="index-close__actions" style={{ "--i": 1 } as CSSProperties}>

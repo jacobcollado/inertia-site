@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
+import { JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { THEME_SCRIPT, ThemeProvider } from "./theme-provider";
@@ -18,6 +19,14 @@ import { Agentation } from "agentation";
 const satoshi = localFont({
   src: "../public/fonts/Satoshi-Variable.woff2",
   variable: "--font-satoshi",
+  display: "swap",
+});
+
+// The mono the about sentence is scrambled in before it resolves.
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -84,7 +93,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn(satoshi.variable, "font-sans", "dark")} suppressHydrationWarning>
+    <html lang="en" className={cn(satoshi.variable, mono.variable, "font-sans", "dark")} suppressHydrationWarning>
       <head>
         {/* Sets the theme before first paint (see theme-provider.tsx).
             next/script with beforeInteractive, since React won't run a
