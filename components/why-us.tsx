@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { PointField, along, arc, type Form, type V } from "@/components/point-field";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
+import { PointField } from "@/components/point-field";
+import { along, arc, type Form, type V } from "@/components/point-forms";
 import { useReveal, Words } from "@/components/reveal";
 
 // Why us (styles are .why in globals.css): the reasons, beside one field of
@@ -75,16 +76,24 @@ const REASONS: { line: string; forms: Form[] }[] = [
 // How long each reason is lit before the next, in ms.
 const TURN = 5200;
 
+// Whether motion is reduced, read before first paint (and kept up to date).
+const REDUCE = "(prefers-reduced-motion: reduce)";
+const subscribeReduce = (change: () => void) => {
+  const q = window.matchMedia(REDUCE);
+  q.addEventListener("change", change);
+  return () => q.removeEventListener("change", change);
+};
+
 export function WhyUs() {
   const list = useReveal<HTMLUListElement>();
   const ref = useRef<HTMLElement>(null);
   const [lit, setLit] = useState(0);
   const [held, setHeld] = useState(false);
-  const [reduce, setReduce] = useState(false);
-
-  useEffect(() => {
-    setReduce(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
+  const reduce = useSyncExternalStore(
+    subscribeReduce,
+    () => window.matchMedia(REDUCE).matches,
+    () => false,
+  );
 
   // Taking turns while on screen, unless a reason is being pointed at.
   useEffect(() => {

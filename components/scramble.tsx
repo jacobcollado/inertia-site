@@ -20,6 +20,7 @@ export function Scramble({ text }: { text: string }) {
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const letters = [...text];
     const pick = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
     const id = window.setInterval(() => {
       setOut((prev) => {
@@ -35,7 +36,7 @@ export function Scramble({ text }: { text: string }) {
       });
     }, TICK);
     return () => clearInterval(id);
-  }, [letters.length]);
+  }, [text]);
 
   return (
     <span className="scramble" aria-label={text}>

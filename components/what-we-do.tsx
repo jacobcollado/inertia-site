@@ -1,7 +1,8 @@
 "use client";
 
 import { type CSSProperties } from "react";
-import { PointField, across, along, arc, roundedRect, roundedTriangle, type Form, type V } from "@/components/point-field";
+import { PointField } from "@/components/point-field";
+import { across, along, arc, roundedRect, roundedTriangle, type Form, type V } from "@/components/point-forms";
 import { useReveal, Words } from "@/components/reveal";
 
 // What we do (styles are .index-figs in globals.css): the three things we

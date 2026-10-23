@@ -60,7 +60,26 @@ export function ChipPlate({ assemble = false }: { assemble?: boolean }) {
     const host = hostRef.current;
     if (!host) return;
     let disposed = false;
-    let cleanup = () => {};
+    // Owned here, so they're always torn down; wired to the drawing once
+    // three.js is in (the latest sighting is kept until then).
+    let raf = 0;
+    let seen: IntersectionObserverEntry | null = null;
+    let onSeen = (_entry: IntersectionObserverEntry) => {};
+    let onResize = () => {};
+    let onVisibility = () => {};
+    let dispose = () => {};
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        seen = entry;
+        onSeen(entry);
+      },
+      { threshold: [0, 0.5] },
+    );
+    io.observe(host);
+    const ro = new ResizeObserver(() => onResize());
+    ro.observe(host);
+    const visibility = () => onVisibility();
+    document.addEventListener("visibilitychange", visibility);
 
     (async () => {
       const THREE = await import("three");
@@ -274,7 +293,6 @@ export function ChipPlate({ assemble = false }: { assemble?: boolean }) {
         art.render();
       }
 
-      let raf = 0;
       let visible = true;
       const loop = (now: number) => {
         raf = 0;
@@ -284,33 +302,26 @@ export function ChipPlate({ assemble = false }: { assemble?: boolean }) {
       const resume = () => {
         if (!raf && !reduce && visible && !document.hidden) raf = requestAnimationFrame(loop);
       };
-      const io = new IntersectionObserver(
-        ([entry]) => {
-          visible = entry.isIntersecting;
-          if (assemble && !begun && entry.intersectionRatio >= 0.5) begun = performance.now();
-          resume();
-        },
-        { threshold: [0, 0.5] },
-      );
-      io.observe(host);
-      document.addEventListener("visibilitychange", resume);
-      const ro = new ResizeObserver(fit);
-      ro.observe(host);
-      fit();
-      resume();
-
-      cleanup = () => {
-        cancelAnimationFrame(raf);
-        io.disconnect();
-        ro.disconnect();
-        document.removeEventListener("visibilitychange", resume);
-        art.dispose();
+      onSeen = (entry) => {
+        visible = entry.isIntersecting;
+        if (assemble && !begun && entry.intersectionRatio >= 0.5) begun = performance.now();
+        resume();
       };
+      onResize = fit;
+      onVisibility = resume;
+      dispose = () => art.dispose();
+      fit();
+      if (seen) onSeen(seen);
+      resume();
     })();
 
     return () => {
       disposed = true;
-      cleanup();
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      ro.disconnect();
+      document.removeEventListener("visibilitychange", visibility);
+      dispose();
     };
   }, [assemble]);
 
