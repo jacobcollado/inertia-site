@@ -94,7 +94,9 @@ export function PointField({ forms, drift: drifts = true, className }: { forms: 
   const ref = useRef<HTMLCanvasElement>(null);
   // Read each frame, so new forms are glided to without a reset.
   const formsRef = useRef(forms);
-  formsRef.current = forms;
+  useEffect(() => {
+    formsRef.current = forms;
+  }, [forms]);
 
   useEffect(() => {
     const canvas = ref.current;
