@@ -117,7 +117,7 @@ export function ChipPlate({ assemble = false }: { assemble?: boolean }) {
       // few parts around it.
       layer(1.6, (g) => {
         const id = nextId++;
-        box(g, 40, 34, 1.6, -1.6, id, 0, 0, 0.6);
+        box(g, 40, 34, 1.6, 0, id, 0, 0, 0.6);
         for (const [x, z, w, d] of [
           [-17, 13, 2.4, 1.4],
           [-17, 10.6, 2.4, 1.4],
@@ -125,7 +125,7 @@ export function ChipPlate({ assemble = false }: { assemble?: boolean }) {
           [16.6, 12.4, 3.2, 2],
           [-16.6, -12.8, 1.6, 3.2],
         ] as const)
-          box(g, w, d, 0.9, 0, id, x, z, 0.1);
+          box(g, w, d, 0.9, 1.6, id, x, z, 0.1);
       });
 
       // The solder balls, a full grid under the substrate.

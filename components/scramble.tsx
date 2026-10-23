@@ -39,7 +39,8 @@ export function Scramble({ text }: { text: string }) {
   }, [text]);
 
   return (
-    <span className="scramble" aria-label={text}>
+    <span className="scramble">
+      <span className="sr-only">{text}</span>
       {letters.map((ch, i) => (
         <span key={i} className="scramble__ch" data-out={out[i] ? "" : undefined} aria-hidden>
           {ch}

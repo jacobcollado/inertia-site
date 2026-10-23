@@ -33,7 +33,8 @@ export function PointField({ forms, drift: drifts = true, className }: { forms: 
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let reduce = motion.matches;
     let shown = formsRef.current;
     let targets = shown.map((f) => f(COUNT));
     // Each point's place, and a seed for its own wander in the drift.
@@ -60,11 +61,13 @@ export function PointField({ forms, drift: drifts = true, className }: { forms: 
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ink = getComputedStyle(canvas).color;
-      if (reduce) {
-        targets = formsRef.current.map((f) => f(COUNT));
-        targets[targets.length - 1].forEach(([x, y], i) => Object.assign(pts[i], { x, y }));
-      }
+      if (reduce) settle();
       draw();
+    };
+    // Reduced motion: the points simply at the last form.
+    const settle = () => {
+      targets = formsRef.current.map((f) => f(COUNT));
+      targets[targets.length - 1].forEach(([x, y], i) => Object.assign(pts[i], { x, y }));
     };
 
     let raf = 0;
@@ -123,6 +126,17 @@ export function PointField({ forms, drift: drifts = true, className }: { forms: 
     document.addEventListener("visibilitychange", resume);
     const ro = new ResizeObserver(fit);
     ro.observe(canvas);
+    // The preference changing while the page is open: settle, or start up.
+    const onMotion = () => {
+      reduce = motion.matches;
+      if (reduce) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        settle();
+        draw();
+      } else resume();
+    };
+    motion.addEventListener("change", onMotion);
     fit();
 
     return () => {
@@ -130,6 +144,7 @@ export function PointField({ forms, drift: drifts = true, className }: { forms: 
       io.disconnect();
       ro.disconnect();
       document.removeEventListener("visibilitychange", resume);
+      motion.removeEventListener("change", onMotion);
     };
   }, [drifts]);
 
