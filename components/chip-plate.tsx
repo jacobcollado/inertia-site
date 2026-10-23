@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type * as Three from "three";
 import { ELEVATION, easeInOut, lineDrawing } from "@/components/line-drawing";
-import { partsKit, type V2 } from "@/components/watch-parts";
+import { partsKit, rounded } from "@/components/watch-parts";
 
 // The homepage's opening plate: an AI accelerator package drawn as an
 // exploded axonometric, the way hardware teardowns show one. Real geometry
@@ -31,25 +31,6 @@ import { partsKit, type V2 } from "@/components/watch-parts";
 
 // The air under every layer when opened, in mm.
 const GAP = 6.5;
-
-// A rounded rectangle centred on (cx, cy), w by h, corner radius r. Its
-// corners are fine enough (16 facets) that the drawing reads them as one
-// curve, not a row of small edges.
-function rounded(w: number, h: number, r: number, cx = 0, cy = 0, n = 16): V2[] {
-  const pts: V2[] = [];
-  const corners: [number, number, number][] = [
-    [w / 2 - r, h / 2 - r, 0],
-    [-w / 2 + r, h / 2 - r, Math.PI / 2],
-    [-w / 2 + r, -h / 2 + r, Math.PI],
-    [w / 2 - r, -h / 2 + r, (3 * Math.PI) / 2],
-  ];
-  for (const [x, y, a0] of corners)
-    for (let i = 0; i <= n; i++) {
-      const a = a0 + (Math.PI / 2) * (i / n);
-      pts.push([cx + x + Math.cos(a) * r, cy + y + Math.sin(a) * r]);
-    }
-  return pts;
-}
 
 type Layer = { group: Three.Group; seat: number; lift: number; order: number };
 

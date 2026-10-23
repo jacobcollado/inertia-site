@@ -112,11 +112,19 @@ export function PointField({ forms, drift: drifts = true, className }: { forms: 
       }
     };
 
-    // Before it plays the points lie scattered, so the first form is found.
+    // Before it plays the points lie scattered in a loose cloud, so the
+    // first form is found. Hashed from the seed, so they fall at random
+    // rather than into a lattice.
+    const hash = (k: number) => {
+      const v = Math.sin(k) * 43758.5453;
+      return v - Math.floor(v);
+    };
     if (!reduce)
       for (const p of pts) {
-        p.x = Math.cos(p.seed) * 0.9;
-        p.y = Math.sin(p.seed * 1.3) * 0.9;
+        const a = hash(p.seed) * Math.PI * 2;
+        const r = Math.sqrt(hash(p.seed + 78.233)) * 0.85;
+        p.x = Math.cos(a) * r;
+        p.y = Math.sin(a) * r;
       }
     const io = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;

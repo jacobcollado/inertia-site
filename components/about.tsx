@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { fitNoise, noise } from "@/components/decrypt";
 
 // About, straight after the opening plate (styles are .about in
 // globals.css): what we do, in one sentence, decrypted. It waits as
@@ -13,33 +14,11 @@ import { useEffect, useRef, useState } from "react";
 
 const SENTENCE = "We design identities and websites for founders, as one system, so you look like the company you\u2019re becoming.";
 const WORDS = SENTENCE.split(" ");
-const GLYPHS = "abcdefghijklmnopqrstuvwxyz0123456789#%&$@!?";
-
 // When the first word resolves, how far apart the rest follow, and how often
 // the noise changes, in ms.
 const LEAD = 260;
 const STEP = 55;
 const TICK = 45;
-
-// The noise for a word, `count` glyphs long (as many as fit the resolved
-// word's width; its own length until that's measured), keeping a closing
-// comma or full stop so it still reads as the sentence being decoded.
-// Seeded, so the server and the first client render agree.
-function noise(word: string, count: number, seed: number) {
-  const end = /[,.]$/.test(word) ? word.slice(-1) : "";
-  let n = seed;
-  let out = "";
-  for (let i = 0; i < Math.max(1, count - end.length); i++) {
-    n = (n * 1103515245 + 12345) % 2147483648;
-    out += GLYPHS[n % GLYPHS.length];
-  }
-  return out + end;
-}
-
-// A mono glyph's advance, in its own em (JetBrains Mono, with the noise's
-// tracking), and the noise's size against the sentence's.
-const ADVANCE = 0.58;
-const NOISE_SIZE = 0.78;
 
 export function About() {
   const ref = useRef<HTMLHeadingElement>(null);
@@ -52,10 +31,7 @@ export function About() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const measure = () => {
-      const size = parseFloat(getComputedStyle(el).fontSize) * NOISE_SIZE * ADVANCE;
-      setFit([...el.querySelectorAll<HTMLElement>(".decrypt__word")].map((w) => Math.max(1, Math.floor(w.offsetWidth / size))));
-    };
+    const measure = () => setFit(fitNoise(el));
     document.fonts.ready.then(measure);
     const ro = new ResizeObserver(measure);
     ro.observe(el);

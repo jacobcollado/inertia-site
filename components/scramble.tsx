@@ -1,22 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // A word that never quite finishes decoding (styles are .scramble in
 // globals.css): it reads plainly, in our type, but every moment one or two
 // of its letters flicker into the grey mono of the about sentence's noise
 // and back. Each letter keeps its own width, the glyph laid over it, so the
-// line never moves. With reduced motion it's simply the word.
+// line never moves. With `active` off no new letters go out, and those out
+// come back in their own time, so a word can glitch in turns with others.
+// With reduced motion it's simply the word.
 
 const GLYPHS = "abcdefghijklmnopqrstuvwxyz0123456789#%&$@!?";
 // How often the flicker moves on, and how many letters are out at once.
 const TICK = 130;
 const OUT = 2;
 
-export function Scramble({ text }: { text: string }) {
+export function Scramble({ text, active = true }: { text: string; active?: boolean }) {
   const letters = [...text];
   // The letters currently out, each with its glyph and how many ticks left.
   const [out, setOut] = useState<Record<number, { glyph: string; left: number }>>({});
+  const on = useRef(active);
+  useEffect(() => {
+    on.current = active;
+  }, [active]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -24,11 +30,12 @@ export function Scramble({ text }: { text: string }) {
     const pick = () => GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
     const id = window.setInterval(() => {
       setOut((prev) => {
+        if (!on.current && !Object.keys(prev).length) return prev;
         const next: Record<number, { glyph: string; left: number }> = {};
         for (const [i, o] of Object.entries(prev)) if (o.left > 1) next[+i] = { glyph: pick(), left: o.left - 1 };
         // Now and then another letter goes out: never punctuation, and never
         // a narrow letter, which a mono glyph would spill out of.
-        if (Object.keys(next).length < OUT && Math.random() < 0.55) {
+        if (on.current && Object.keys(next).length < OUT && Math.random() < 0.55) {
           const i = Math.floor(Math.random() * letters.length);
           if (/[\p{L}\p{N}]/u.test(letters[i]) && !/[iljtfr]/i.test(letters[i]) && !next[i]) next[i] = { glyph: pick(), left: 1 + Math.floor(Math.random() * 3) };
         }
@@ -41,12 +48,19 @@ export function Scramble({ text }: { text: string }) {
   return (
     <span className="scramble">
       <span className="sr-only">{text}</span>
-      {letters.map((ch, i) => (
-        <span key={i} className="scramble__ch" data-out={out[i] ? "" : undefined} aria-hidden>
-          {ch}
-          {out[i] ? <span className="scramble__glyph">{out[i].glyph}</span> : null}
-        </span>
-      ))}
+      {letters.map((ch, i) =>
+        // Spaces stay plain text: a space alone in a box collapses.
+        ch === " " ? (
+          <span key={i} aria-hidden>
+            {" "}
+          </span>
+        ) : (
+          <span key={i} className="scramble__ch" data-out={out[i] ? "" : undefined} aria-hidden>
+            {ch}
+            {out[i] ? <span className="scramble__glyph">{out[i].glyph}</span> : null}
+          </span>
+        ),
+      )}
     </span>
   );
 }

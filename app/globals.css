@@ -3293,24 +3293,25 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   height: 100%;
 }
 
-/* What we do (components/what-we-do.tsx): three tiles side by side from
-   tablets up (stacked on phones), each a field of ink points on a quiet
-   ground, with the name and one line under it, left-aligned to the tile. */
+/* What we do (components/what-we-do.tsx): three fields of ink points side
+   by side from tablets up (stacked on phones), straight on the paper, a
+   little wider than tall so the forms sit close over their names, each with its name and one line centred under it. */
 .index-figs { padding-block: var(--section-y); }
-.index-figs__list { display: grid; gap: 48px; }
+.index-figs__list { display: grid; gap: 32px; }
 @media (min-width: 900px) {
   .index-figs__list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 }
-.index-figs__item { display: flex; flex-direction: column; }
+.index-figs__item { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .index-figs__tile {
   position: relative;
-  aspect-ratio: 1;
-  margin-bottom: 24px;
-  border-radius: 6px;
-  background: rgb(var(--ink-rgb) / 0.035);
+  align-self: stretch;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 16px;
 }
+@media (min-width: 900px) { .index-figs__tile { aspect-ratio: 5 / 4; } }
 .index-figs__field { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--ink); }
 .index-figs__title {
+  --decrypt-lh: 1.2;
   font-size: 1.5rem;
   font-weight: 450;
   line-height: 1.2;
@@ -3322,6 +3323,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   font-size: 1rem;
   line-height: 1.45;
   color: var(--ink-3);
+  text-wrap: pretty;
 }
 
 /* The sentence follows the plate, in display type. */
@@ -3357,7 +3359,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   top: 0;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.78em;
-  line-height: calc(1.18em / 0.78);
+  line-height: calc(var(--decrypt-lh, 1.18) * 1em / 0.78);
   letter-spacing: -0.02em;
   white-space: nowrap;
   color: var(--ink-3);
@@ -3365,16 +3367,15 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 
 /* The work (components/client-links.tsx): the clients' names in one row,
    centred under the sentence, each with its year under it in the mono; on
-   phones, one to a line. Pointing at one sets the name back a step, the
+   phones, two to a row. Pointing at one sets the name back a step, the
    year staying put. */
 .client-links {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 16px;
 }
 @media (min-width: 900px) {
-  .client-links { flex-direction: row; justify-content: center; align-items: flex-start; gap: 56px; }
+  .client-links { display: flex; justify-content: center; align-items: flex-start; gap: 56px; }
 }
 .client-links__item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: inherit; }
 .client-links__name {
@@ -3719,15 +3720,15 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .index-close__line {
   max-width: 12em;
   /* On phones the line scales with the screen so it stays on one line
-     (it's about 10.6em long; 8vw leaves room for the page's side padding). */
-  font-size: clamp(1.5rem, 8vw, 2.5rem);
+     (it's about 11em long; 7.4vw leaves room for the page's side padding). */
+  font-size: clamp(1.5rem, 7.4vw, 2.5rem);
   font-weight: 420;
-  line-height: 1.04;
-  letter-spacing: -0.05em;
+  line-height: 1.18;
+  letter-spacing: -0.035em;
   text-wrap: balance;
 }
 @media (min-width: 640px) {
-  .index-close__line { font-size: clamp(2.5rem, 6.4vw, 5.5rem); }
+  .index-close__line { font-size: clamp(1.875rem, 3.2vw, 2.75rem); }
 }
 .index-close__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 @media (min-width: 900px) { .index-close { gap: 32px; } }
@@ -4264,42 +4265,51 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .dock, .dock .header-cta, .dock .header-signin { transform: none; transition: opacity var(--motion-dur-short) linear; }
 }
 
-/* Why us (components/why-us.tsx): the reasons beside one field of points
-   that acts out whichever is lit, on the same quiet ground as what we do's
-   tiles. From tablets up the reasons sit left and the field right; on
-   phones the field follows them. */
-.why {
+/* Why us (components/why-us.tsx): a tall section whose stage pins under
+   the header while it's scrolled through, the reasons beside the chip the
+   camera pushes into. From tablets up the reasons sit left and the drawing
+   right; on phones the drawing follows them. With reduced motion it's an
+   ordinary section. */
+.why { height: 300svh; }
+.why__stage {
+  position: sticky;
+  top: var(--header-h);
   display: grid;
-  gap: 48px;
-  padding-block: var(--section-y);
+  align-content: center;
+  gap: 32px;
+  height: calc(100svh - var(--header-h));
 }
-/* Side by side, the reasons stand well clear of the field. */
+.why[data-still] { height: auto; padding-block: var(--section-y); }
+.why[data-still] .why__stage { position: static; height: auto; }
 @media (min-width: 900px) {
-  .why { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: 48px; }
+  .why__stage { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: 48px; }
 }
 @media (min-width: 1200px) {
-  .why { gap: 80px; }
+  .why__stage { gap: 80px; }
 }
-.why__list { display: flex; flex-direction: column; gap: 40px; }
-/* The reason the field is acting out is in ink and the others rest, so the
-   eye moves down the list with it. */
-.why__item { cursor: default; transition: color var(--motion-dur) var(--motion-ease); }
-.why__list[data-beats] .why__item:not([data-lit]) { color: rgb(var(--ink-rgb) / 0.28); }
+.why__list { display: flex; flex-direction: column; gap: 24px; }
+@media (min-width: 900px) { .why__list { gap: 40px; } }
 .why__line {
+  --decrypt-lh: 1.1;
   max-width: 13em;
   font-size: clamp(1.5rem, 2.8vw, 2.5rem);
   font-weight: 450;
   line-height: 1.1;
   letter-spacing: -0.035em;
-  text-wrap: balance;
 }
-.why__fig {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  border-radius: 6px;
-  background: rgb(var(--ink-rgb) / 0.035);
+.why__art { position: relative; height: min(40svh, 360px); }
+@media (min-width: 900px) { .why__art { height: min(72svh, 640px); } }
+.die-zoom {
+  position: absolute;
+  inset: 0;
+  /* Close in, the drawing runs past its box; it fades into the paper at
+     every edge rather than being cut. */
+  mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  mask-composite: intersect;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  -webkit-mask-composite: source-in;
 }
-.why__field { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--ink); }
+.die-zoom canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 .index-close__icon { width: 16px; height: 16px; flex: none; }
 .index-close__done { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }

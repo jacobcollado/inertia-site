@@ -120,6 +120,25 @@ export function toothDepth(r: number, n: number) {
 }
 
 // The kit: outlines into solids, in a drawing.
+// A rounded rectangle centred on (cx, cy), w by h, corner radius r. Its
+// corners are fine enough (16 facets by default) that the drawing reads each
+// as one curve, not a row of small edges.
+export function rounded(w: number, h: number, r: number, cx = 0, cy = 0, n = 16): V2[] {
+  const pts: V2[] = [];
+  const corners: [number, number, number][] = [
+    [w / 2 - r, h / 2 - r, 0],
+    [-w / 2 + r, h / 2 - r, Math.PI / 2],
+    [-w / 2 + r, -h / 2 + r, Math.PI],
+    [w / 2 - r, -h / 2 + r, (3 * Math.PI) / 2],
+  ];
+  for (const [x, y, a0] of corners)
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + (Math.PI / 2) * (i / n);
+      pts.push([cx + x + Math.cos(a) * r, cy + y + Math.sin(a) * r]);
+    }
+  return pts;
+}
+
 export function partsKit(THREE: typeof import("three"), art: LineDrawing) {
   const extrude = (outline: V2[], holes: V2[][], h: number) => {
     const shape = new THREE.Shape(outline.map(([x, y]) => new THREE.Vector2(x, y)));
