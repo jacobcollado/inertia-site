@@ -3293,67 +3293,130 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   height: 100%;
 }
 
-/* What we do: a sheet of three drawn figures, each with one sentence in
-   display type under it (components/what-we-do.tsx). Side by side from tablets up,
-   stacked on phones; each figure's text is centred under its base. */
+/* What we do (components/what-we-do.tsx): three tiles side by side from
+   tablets up (stacked on phones), each a field of ink points on a quiet
+   ground, with the name and one line under it, left-aligned to the tile. */
 .index-figs { padding-block: var(--section-y); }
-.index-figs__list {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 56px;
-}
-/* Side by side, the three stand well apart (--figs-gap), so each reads as
-   its own figure; their lines' type is sized from the same gap below. */
+.index-figs__list { display: grid; gap: 48px; }
 @media (min-width: 900px) {
-  .index-figs { --figs-gap: 48px; }
-  .index-figs__list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--figs-gap); }
-  /* Side by side, the figures are revealed together, a beat apart in the
-     row (--n); stacked, each comes in as it's reached. */
-  .index-figs__item { --i: var(--n); }
+  .index-figs__list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 }
-.index-figs__item { display: flex; flex-direction: column; align-items: center; text-align: center; }
-.index-figs__art { position: relative; width: 100%; aspect-ratio: 4 / 3; margin-bottom: 20px; }
-.index-figs__art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* Each line sits on two lines: 14em of measure, with the type shrinking to
-   fit when the column is narrower than that (a phone's 24px gutters, or a
-   third of the row less its padding and gaps). */
-.index-figs__line {
-  max-width: 14em;
-  font-size: min(clamp(1.5rem, 2.4vw, 2rem), (100vw - 48px) / 14);
+.index-figs__item { display: flex; flex-direction: column; }
+.index-figs__tile {
+  position: relative;
+  aspect-ratio: 1;
+  margin-bottom: 24px;
+  border-radius: 6px;
+  background: rgb(var(--ink-rgb) / 0.035);
+}
+.index-figs__field { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--ink); }
+.index-figs__title {
+  font-size: 1.5rem;
   font-weight: 450;
-  line-height: 1.1;
-  letter-spacing: -0.035em;
-  text-wrap: balance;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
-@media (min-width: 900px) {
-  .index-figs__line { font-size: min(2rem, (min(100vw, 1280px) - 64px - 2 * var(--figs-gap)) / 42); }
-}
-@media (min-width: 1200px) {
-  .index-figs { --figs-gap: 80px; }
+.index-figs__line {
+  margin-top: 8px;
+  max-width: 22em;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--ink-3);
 }
 
 /* The sentence follows the plate, in display type. */
 .index-opening { padding-block: var(--section-y); }
 
-.index-sentence {
-  max-width: 14.5em;
-  font-size: clamp(2.5rem, 6.4vw, 6rem);
+/* About (components/about.tsx): one centred sentence, decrypted. Each word
+   is sized by its resolved text; until it resolves that text is hidden and
+   the noise, in a grey mono set smaller so it runs about as wide, lies over
+   it from its left edge, clipped at the word's sides so no word runs into
+   the next (never top or bottom). */
+.about { padding-block: var(--section-y); }
+.about__statement {
+  max-width: 16em;
+  margin-inline: auto;
+  font-size: clamp(1.875rem, 3.2vw, 2.75rem);
   font-weight: 420;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  text-wrap: pretty;
+  line-height: 1.18;
+  letter-spacing: -0.035em;
+  text-align: center;
+  text-wrap: balance;
 }
-/* The company you're becoming isn't built yet, so it's drawn: the words in
-   outline, a hairline in the ink of the plates. The stroke sits under a
-   paper fill, so only its outer half shows and the letters' own overlaps
-   stay hidden. */
-.index-sentence__drawn {
-  color: var(--paper);
-  -webkit-text-stroke: 2px var(--ink);
-  paint-order: stroke fill;
+/* On phones it sits on three lines: the sentence runs about 43em, so the
+   type is the column's width over a little more than a third of that. */
+@media (max-width: 639px) {
+  .about__statement { font-size: calc((100vw - 48px) / 15.4); }
+}
+.decrypt { position: relative; display: inline-block; }
+.decrypt:not([data-resolved]) { clip-path: inset(-0.4em 0); }
+.decrypt:not([data-resolved]) .decrypt__word { visibility: hidden; }
+.decrypt__noise {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.78em;
+  line-height: calc(1.18em / 0.78);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  color: var(--ink-3);
 }
 
-.index-work { padding-bottom: var(--section-y); }
+/* The work (components/client-links.tsx): the clients' names in one row,
+   centred under the sentence, each with its year under it in the mono; on
+   phones, one to a line. Pointing at one sets the name back a step, the
+   year staying put. */
+.client-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+@media (min-width: 900px) {
+  .client-links { flex-direction: row; justify-content: center; align-items: flex-start; gap: 56px; }
+}
+.client-links__item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: inherit; }
+.client-links__name {
+  font-size: 1.375rem;
+  font-weight: 450;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  transition: color var(--motion-dur-short) var(--motion-ease);
+}
+.client-links__year {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+@media (hover: hover) {
+  .client-links__item:hover .client-links__name { color: var(--ink-3); }
+}
+
+/* A word that never quite finishes decoding (components/scramble.tsx): a
+   letter that's out is hidden, keeping its width, and its glyph, in the
+   about noise's grey mono, sits centred over it. */
+.scramble__ch { position: relative; display: inline-block; }
+.scramble__ch[data-out] { color: transparent; }
+.scramble__glyph {
+  position: absolute;
+  left: 50%;
+  bottom: 0.08em;
+  transform: translateX(-50%);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.78em;
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+
+/* The work stands in its own air: a --section-y of its own above and below,
+   on top of the sentence's section's and What we do's, so it sits evenly
+   between them, two section gaps clear of each. */
+.index-work { padding-block: var(--section-y); }
 
 /* /work: every card, three across (two on phones), starting just under the
    header. */
@@ -3647,7 +3710,9 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  /* The chip stands close over the line (it's seated at its box's foot,
+     chip-plate.tsx), the line and the actions a step further apart. */
+  gap: 24px;
   padding-block: var(--section-y) calc(var(--section-y) * 0.6);
   text-align: center;
 }
@@ -3665,14 +3730,14 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .index-close__line { font-size: clamp(2.5rem, 6.4vw, 5.5rem); }
 }
 .index-close__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-/* The assembling movement over the line (components/movement-plate.tsx). */
-/* Taller than the movement, which stands in its lower part; the top fades
-   in from the paper, so the parts coming down arrive out of the page rather
-   than out of an edge. */
+@media (min-width: 900px) { .index-close { gap: 32px; } }
+/* The assembling chip over the line (components/chip-plate.tsx), seated at
+   the box's foot; the top fades in from the paper, so the layers coming
+   down arrive out of the page rather than out of an edge. */
 .index-close__art {
   position: relative;
   width: 100%;
-  height: clamp(320px, 38vw, 500px);
+  height: clamp(240px, 28vw, 380px);
   mask-image: linear-gradient(to bottom, transparent, #000 42%);
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 42%);
 }
@@ -4125,7 +4190,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .header-cta__icon { width: 14px; height: 14px; flex: none; }
 
 /* Phones: the dock. The page fades out under it; the buttons are thumb
-   sized (48) and Reach out takes the remaining width. It rises in from below
+   sized (48), each as wide as its label, centred together. It rises in from below
    the screen edge, settling as it lands, and drops back the same way. */
 .dock {
   position: fixed;
@@ -4158,10 +4223,9 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 }
 .dock::after { background: linear-gradient(to top, var(--scrim)); }
 @media (min-width: 640px) { .dock { display: none; } }
-.dock__inner { position: relative; display: flex; gap: 8px; }
+.dock__inner { position: relative; display: flex; justify-content: center; gap: 8px; }
 .dock .header-signin,
 .dock .header-cta { height: 48px; padding-inline: 20px; font-size: 16px; }
-.dock .header-cta { flex: 1; }
 /* On Aether the dock holds the buy button, full width. */
 .dock .ae-buy-wrap { flex: 1; }
 .dock .ae-buy { width: 100%; box-shadow: 0 8px 16px -6px rgb(0 0 0 / 0.3); }
@@ -4183,7 +4247,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .dock .header-cta { box-shadow: var(--dock-raise); }
 .dock .ae-buy { box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 0 0 1px rgb(0 0 0 / 0.6), var(--dock-raise); }
 .dock .header-signin { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.24), var(--dock-raise); }
-.dock .header-cta:has(.header-cta__icon) { gap: 8px; }
+.dock .header-cta:has(.header-cta__icon) { gap: 8px; padding-left: 15px; }
 .dock .header-cta__icon { width: 18px; height: 18px; }
 @media (hover: none) {
   .header-cta:hover,
@@ -4200,19 +4264,16 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .dock, .dock .header-cta, .dock .header-signin { transform: none; transition: opacity var(--motion-dur-short) linear; }
 }
 
-/* Why us (components/why-us.tsx): the reasons, beside a drawing of a
-   wheel with one tooth called out in a detail. From tablets up the reasons
-   sit left and the drawing right; on phones the drawing follows them. The
-   part fills the left of the drawing, the detail is a circle on the right,
-   and an SVG over both draws the callout's circles and the two lines that
-   join them. */
+/* Why us (components/why-us.tsx): the reasons beside one field of points
+   that acts out whichever is lit, on the same quiet ground as what we do's
+   tiles. From tablets up the reasons sit left and the field right; on
+   phones the field follows them. */
 .why {
   display: grid;
   gap: 48px;
   padding-block: var(--section-y);
 }
-/* Side by side, the reasons stand as far from the drawing as the figures
-   of what we do stand from each other. */
+/* Side by side, the reasons stand well clear of the field. */
 @media (min-width: 900px) {
   .why { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; gap: 48px; }
 }
@@ -4220,43 +4281,25 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .why { gap: 80px; }
 }
 .why__list { display: flex; flex-direction: column; gap: 40px; }
-/* While the drawing plays its beats (why-us.tsx), the reason being played
-   is in ink and the others rest, so the eye moves down the list with it. */
-.why__item { transition: color var(--motion-dur) var(--motion-ease); }
+/* The reason the field is acting out is in ink and the others rest, so the
+   eye moves down the list with it. */
+.why__item { cursor: default; transition: color var(--motion-dur) var(--motion-ease); }
 .why__list[data-beats] .why__item:not([data-lit]) { color: rgb(var(--ink-rgb) / 0.28); }
 .why__line {
   max-width: 13em;
-  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-size: clamp(1.5rem, 2.8vw, 2.5rem);
   font-weight: 450;
   line-height: 1.1;
   letter-spacing: -0.035em;
   text-wrap: balance;
 }
-/* The part and its detail, with clear paper between them for the
-   callout's lines to cross. On a phone they run on a diagonal, the part
-   large at the top left and the detail below it to the right, so both
-   read at that width; side by side, the part on the left and the detail
-   on the right. */
-.why__fig { position: relative; aspect-ratio: 1; }
-.why__part { position: absolute; top: 0; left: 0; width: 72%; height: 60%; }
-.why__detail {
-  position: absolute;
-  right: 1px;
-  bottom: 1px;
-  width: 48%;
-  aspect-ratio: 1;
-  clip-path: circle(50%);
+.why__fig {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  background: rgb(var(--ink-rgb) / 0.035);
 }
-@media (min-width: 900px) {
-  .why__fig { aspect-ratio: 16 / 10; }
-  .why__part { width: 50%; height: 100%; }
-  .why__detail { top: 50%; bottom: auto; width: 40%; transform: translateY(-50%); }
-}
-.why__part canvas,
-.why__detail canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.why__callout { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-.why__callout circle,
-.why__callout line { fill: none; stroke: rgb(var(--ink-rgb) / 0.4); stroke-width: 1; }
+.why__field { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--ink); }
 
 .index-close__icon { width: 16px; height: 16px; flex: none; }
 .index-close__done { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
