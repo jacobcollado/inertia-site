@@ -21,7 +21,7 @@ export function MinimalFooter() {
   return (
     // The phone dock steps aside here, so it never covers the footer and the
     // page needs no room reserved under it.
-    <footer className="w-full" data-dock-hide>
+    <footer className="w-full">
       <div className="mx-auto flex w-full max-w-[80rem] flex-col gap-2 px-6 pt-16 pb-8 sm:flex-row sm:items-center sm:justify-between sm:px-8 sm:pt-24">
         <div className="flex flex-wrap items-center gap-x-5">
           <span className="inline-flex h-9 items-center text-[14px] leading-none tracking-tight text-[var(--ink-3)]">

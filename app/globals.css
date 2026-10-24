@@ -104,6 +104,13 @@ html.themed[data-theme="dark"] .homepage-dark-zone {
      detail) and nothing else: never buttons, backgrounds, headings or copy. */
   --signal: #2a5cff;
   --signal-rgb: 42 92 255;
+  /* The homepage's two quiet colours, out of a garden: heather and sage.
+     Small moments only, never fills: the finest detail in a drawing, the
+     noise text decrypts from, a frame's marks. */
+  --heather: #7b68a6;
+  --heather-rgb: 123 104 166;
+  --sage: #7c9672;
+  --sage-rgb: 124 150 114;
   --ink: #1a1a1a;
   --ink-rgb: 26 26 26;
   --ink-soft: #3d3d3d;
@@ -134,6 +141,10 @@ html.themed[data-theme="dark"] .homepage-dark-zone {
 html.themed[data-theme="dark"] {
   /* A touch brighter on black, so it holds the same weight. */
   --signal: #5582ff;
+  --heather: #a796d4;
+  --heather-rgb: 167 150 212;
+  --sage: #a2ba97;
+  --sage-rgb: 162 186 151;
   --signal-rgb: 85 130 255;
   --ink: #ececec;
   --ink-rgb: 236 236 236;
@@ -3265,6 +3276,32 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .reveal-word { clip-path: none; }
   .reveal-word > * { transform: none; transition: none; }
 }
+/* Drawings and the blocks around them arrive the way the opening plate
+   does: drawn in from the bottom up under a soft edge rising through them,
+   on the same beat and curve as the words. The mask is three times the
+   block's height: its top third clear, its bottom third solid, so sliding
+   it from top to bottom carries the edge up through the block. */
+.reveal-draw {
+  --reveal-delay: calc(var(--i, 0) * 5 * var(--motion-stagger));
+  -webkit-mask-image: linear-gradient(to top, #000 33.4%, transparent 50%);
+  mask-image: linear-gradient(to top, #000 33.4%, transparent 50%);
+  -webkit-mask-size: 100% 300%;
+  mask-size: 100% 300%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  transition:
+    -webkit-mask-position var(--motion-dur-long) var(--motion-ease) var(--reveal-delay),
+    mask-position var(--motion-dur-long) var(--motion-ease) var(--reveal-delay);
+}
+.reveal-draw[data-shown],
+[data-shown] .reveal-draw { -webkit-mask-position: 0 100%; mask-position: 0 100%; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal-draw { -webkit-mask-image: none; mask-image: none; }
+}
+/* Phones: room at the foot of the page for the dock over it. */
+@media (max-width: 639px) {
+  body:has(.dock) { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
+}
 
 .index-page { background: var(--paper); color: var(--ink); }
 
@@ -3293,23 +3330,50 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   height: 100%;
 }
 
-/* What we do (components/what-we-do.tsx): three fields of ink points side
-   by side from tablets up (stacked on phones), straight on the paper, a
-   little wider than tall so the forms sit close over their names, each with its name and one line centred under it. */
+/* What we do (components/what-we-do.tsx): three drawn figures, each with
+   its name and one line in a quiet panel under it. Side by side from
+   tablets up; on phones a carousel swiped sideways, each item snapping to
+   the column's edge with the next peeking in. */
 .index-figs { padding-block: var(--section-y); }
-.index-figs__list { display: grid; gap: 32px; }
-@media (min-width: 900px) {
-  .index-figs__list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.index-figs__list {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
 }
-.index-figs__item { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.index-figs__list::-webkit-scrollbar { display: none; }
+.index-figs__item { display: flex; flex: 0 0 80%; flex-direction: column; scroll-snap-align: start; }
+@media (min-width: 900px) {
+  .index-figs__list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; overflow: visible; }
+}
 .index-figs__tile {
   position: relative;
-  align-self: stretch;
   aspect-ratio: 4 / 3;
   margin-bottom: 16px;
 }
 @media (min-width: 900px) { .index-figs__tile { aspect-ratio: 5 / 4; } }
-.index-figs__field { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--ink); }
+.index-figs__field { position: absolute; inset: 0; }
+.index-figs__field canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* Each item, figure and info together, is framed like a selection in a
+   terminal: four thin corner marks and no fill, the decrypt's cursor after
+   the name. */
+.index-figs__item {
+  --mark: rgb(var(--ink-rgb) / 0.35);
+  --arm: 12px;
+  background:
+    linear-gradient(var(--mark), var(--mark)) left top / var(--arm) 1px,
+    linear-gradient(var(--mark), var(--mark)) left top / 1px var(--arm),
+    linear-gradient(var(--mark), var(--mark)) right top / var(--arm) 1px,
+    linear-gradient(var(--mark), var(--mark)) right top / 1px var(--arm),
+    linear-gradient(var(--mark), var(--mark)) left bottom / var(--arm) 1px,
+    linear-gradient(var(--mark), var(--mark)) left bottom / 1px var(--arm),
+    linear-gradient(var(--mark), var(--mark)) right bottom / var(--arm) 1px,
+    linear-gradient(var(--mark), var(--mark)) right bottom / 1px var(--arm);
+  background-repeat: no-repeat;
+}
+.index-figs__info { flex: 1; padding: 0 20px 20px; }
 .index-figs__title {
   --decrypt-lh: 1.2;
   font-size: 1.5rem;
@@ -3362,7 +3426,27 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   line-height: calc(var(--decrypt-lh, 1.18) * 1em / 0.78);
   letter-spacing: -0.02em;
   white-space: nowrap;
-  color: var(--ink-3);
+  color: var(--sage);
+}
+/* The cursor a decrypting line can carry (decrypt-text.tsx): a block in the
+   noise's grey after the last word while it resolves, which blinks twice
+   once the line is done and goes. */
+.decrypt__cursor {
+  display: inline-block;
+  width: 0.45em;
+  height: 0.9em;
+  margin-left: 0.12em;
+  vertical-align: -0.08em;
+  background: var(--ink-3);
+}
+.decrypt__cursor[data-done] { animation: decrypt-cursor 1.2s steps(1, end) forwards; }
+@keyframes decrypt-cursor {
+  0%, 50% { opacity: 0; }
+  25%, 75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .decrypt__cursor { display: none; }
 }
 
 /* The work (components/client-links.tsx): the clients' names in one row,
@@ -3377,6 +3461,8 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 @media (min-width: 900px) {
   .client-links { display: flex; justify-content: center; align-items: flex-start; gap: 56px; }
 }
+/* Each name sits centred in its cell, its year centred under it. */
+.client-links > li { display: flex; justify-content: center; }
 .client-links__item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: inherit; }
 .client-links__name {
   font-size: 1.375rem;
@@ -3411,7 +3497,7 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.78em;
   letter-spacing: 0;
-  color: var(--ink-3);
+  color: var(--heather);
 }
 
 /* The work stands in its own air: a --section-y of its own above and below,
@@ -4191,21 +4277,14 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .header-cta__icon { width: 14px; height: 14px; flex: none; }
 
 /* Phones: the dock. The page fades out under it; the buttons are thumb
-   sized (48), each as wide as its label, centred together. It rises in from below
-   the screen edge, settling as it lands, and drops back the same way. */
+   sized (48), each as wide as its label, centred together. Like the header
+   it's always there and never moves. */
 .dock {
   position: fixed;
   inset: auto 0 0 0;
   z-index: 50;
   padding: 40px 24px calc(16px + env(safe-area-inset-bottom, 0px));
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(100%);
-  transition:
-    opacity var(--motion-dur-short) var(--motion-ease),
-    transform var(--motion-dur) var(--motion-ease);
 }
-.dock[data-shown] { opacity: 1; transform: none; pointer-events: auto; }
 /* The header's fade, mirrored: a blur easing off upward under the eased
    white, behind the buttons. */
 .dock::before,
@@ -4232,10 +4311,6 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
 .dock .ae-buy { width: 100%; box-shadow: 0 8px 16px -6px rgb(0 0 0 / 0.3); }
 .dock .header-signin { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16), 0 8px 16px -8px rgb(0 0 0 / 0.16); }
 .dock .header-cta { box-shadow: 0 8px 16px -6px rgb(0 0 0 / 0.3); }
-.dock .header-cta { transform: translateY(12px) scale(0.96); transition: transform var(--motion-dur) var(--motion-ease) 60ms, background-color var(--motion-dur-short) var(--motion-ease); }
-.dock .header-signin { transform: translateY(12px) scale(0.96); transition: transform var(--motion-dur) var(--motion-ease), box-shadow var(--motion-dur-short) var(--motion-ease); }
-.dock[data-shown] .header-cta,
-.dock[data-shown] .header-signin { transform: none; }
 
 /* Aligned with the rest of the system. Floating over the page, both buttons
    are raised alike (one shadow) and Sign in's ring is firmer than it is in
@@ -4256,8 +4331,8 @@ html.themed[data-theme="dark"] .prose-marker > p > strong:first-child {
   .ae-buy:hover { background-color: var(--ink); }
   .header-signin:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.16); }
   .dock .header-signin:hover { box-shadow: inset 0 0 0 1px rgb(var(--ink-rgb) / 0.24), var(--dock-raise); }
-  .dock[data-shown] .header-cta:active,
-  .dock[data-shown] .header-signin:active,
+  .dock .header-cta:active,
+  .dock .header-signin:active,
   .index-close__call:active { transform: scale(0.97); transition-duration: var(--motion-dur-short); }
 }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
 import type * as Three from "three";
-import { easeInOut, lineDrawing } from "@/components/line-drawing";
+import { ACCENT_ID, easeInOut, lineDrawing } from "@/components/line-drawing";
 import { rounded } from "@/components/watch-parts";
 
 // Why us's drawing: an AI accelerator package, open, drawn the way the
@@ -87,33 +87,44 @@ export function DieZoom({ ref }: { ref?: Ref<DieZoomHandle> }) {
     ro.observe(host);
 
     (async () => {
-      const THREE = await import("three");
+      const [THREE, { mergeGeometries }] = await Promise.all([import("three"), import("three/examples/jsm/utils/BufferGeometryUtils.js")]);
       if (disposed) return;
 
-      const art = lineDrawing(THREE, host, () => frame(), { smooth: true });
+      // Antialiased where there's power to spare; on phones the plain
+      // drawing, a quarter of the work, so the scroll stays smooth.
+      const small = window.matchMedia("(max-width: 899px)").matches;
+      const art = lineDrawing(THREE, host, () => frame(), { smooth: !small, accent: "--heather" });
       const root = new THREE.Group();
       art.scene.add(root);
 
-      // One geometry per size and one material per part, shared.
+      // One geometry per size, placed copies of it gathered by group and
+      // part, and merged into one mesh each once everything is in: a few
+      // draws a frame instead of hundreds.
       const geos = new Map<string, Three.BufferGeometry>();
-      const mats = new Map<number, Three.Material>();
+      const parts = new Map<Three.Object3D, Map<number, Three.BufferGeometry[]>>();
       const box = (parent: Three.Object3D, w: number, d: number, h: number, x: number, y: number, z: number, id: number, r = 0.1, n = 16) => {
         const key = `${w} ${d} ${h} ${r} ${n}`;
         let g = geos.get(key);
         if (!g) {
           const shape = new THREE.Shape(rounded(w, d, Math.min(r, w / 2 - 0.001, d / 2 - 0.001), 0, 0, n).map(([a, b]) => new THREE.Vector2(a, b)));
-          g = art.keep(new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false }));
+          g = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false });
           g.rotateX(-Math.PI / 2);
           geos.set(key, g);
         }
-        let m = mats.get(id);
-        if (!m) {
-          m = art.surface(id);
-          mats.set(id, m);
-        }
-        const mesh = new THREE.Mesh(g, m);
-        mesh.position.set(x, y, z);
-        parent.add(mesh);
+        const byId = parts.get(parent) ?? new Map<number, Three.BufferGeometry[]>();
+        parts.set(parent, byId);
+        const list = byId.get(id) ?? [];
+        byId.set(id, list);
+        list.push(g.clone().translate(x, y, z));
+      };
+      const merge = () => {
+        for (const [parent, byId] of parts)
+          for (const [id, list] of byId) {
+            const merged = mergeGeometries(list);
+            for (const g of list) g.dispose();
+            if (merged) parent.add(new THREE.Mesh(art.keep(merged), art.surface(id)));
+          }
+        for (const g of geos.values()) g.dispose();
       };
 
       // The package substrate, with its capacitors in rows along two edges.
@@ -144,13 +155,15 @@ export function DieZoom({ ref }: { ref?: Ref<DieZoomHandle> }) {
               box(cells, 0.4, 0.45, CELL, x, DIE_TOP + TILE, z, 6, 0.02, 3);
             }
         }
-      // In the tile the camera goes into, the rows inside every cell.
+      // In the tile the camera goes into, the rows inside every cell, in
+      // heather: the finest detail, where the zoom ends.
       const rows = new THREE.Group();
       for (let a = 0; a < 4; a++)
         for (let b = 0; b < 4; b++) {
           const [x, z] = cellAt(FOCUS_X, FOCUS_Z, a, b);
-          for (let k = 0; k < 5; k++) box(rows, 0.32, 0.05, 0.01, x, DIE_TOP + TILE + CELL, z + (k - 2) * 0.085, 7, 0.01, 2);
+          for (let k = 0; k < 5; k++) box(rows, 0.32, 0.05, 0.01, x, DIE_TOP + TILE + CELL, z + (k - 2) * 0.085, ACCENT_ID, 0.01, 2);
         }
+      merge();
 
       let width = 0;
       let height = 0;

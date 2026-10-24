@@ -19,8 +19,16 @@ type ThreeModule = typeof import("three");
 export const ELEVATION = (30 * Math.PI) / 180;
 export const AZIMUTH = (-18 * Math.PI) / 180;
 
-// Part ids at or above this are drawn in the signal blue.
+// Part ids at or above this are drawn in the drawing's accent (the signal
+// blue unless it names another), and at or above the second in sage.
 export const ACCENT_ID = 200;
+export const ACCENT2_ID = 230;
+// With `fill`, parts from here are filled solid in ink (hair, eyes), and
+// accent parts are tinted, lightly on faces toward the viewer and deeper on
+// the walls, so a filled drawing still reads its depth.
+export const INK_FILL_ID = 240;
+// And parts from here to the second accent are filled with the paper.
+export const PAPER_FILL_ID = 210;
 
 // --motion-ease, cubic-bezier(0.22, 1, 0.36, 1), solved for x.
 export function ease(x: number) {
@@ -48,7 +56,12 @@ export function easeInOut(x: number) {
 // of the drawing averages the four under it, so lines are antialiased and
 // slow motion glides between pixels instead of stepping a whole pixel at a
 // time. Four times the work: for small drawings that move slowly.
-export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () => void, { smooth = false } = {}) {
+export function lineDrawing(
+  THREE: ThreeModule,
+  host: HTMLElement,
+  onTheme: () => void,
+  { smooth = false, accent = "--signal", fill = false }: { smooth?: boolean; accent?: string; fill?: boolean } = {},
+) {
   const density = smooth ? 2 : 1;
   const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, premultipliedAlpha: true });
   renderer.setPixelRatio(2);
@@ -73,6 +86,8 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
   const screen = new THREE.Vector2();
   const ink = new THREE.Vector3();
   const signal = new THREE.Vector3();
+  const sage = new THREE.Vector3();
+  const paper = new THREE.Vector3();
 
   const materials: Three.Material[] = [];
   const geometries: Three.BufferGeometry[] = [];
@@ -150,6 +165,8 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
       uTexel: { value: texel },
       uInk: { value: ink },
       uSignal: { value: signal },
+      uSage: { value: sage },
+      uPaper: { value: paper },
     },
     vertexShader: /* glsl */ `
       varying vec2 vUv;
@@ -161,6 +178,8 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
       uniform vec2 uTexel;
       uniform vec3 uInk;
       uniform vec3 uSignal;
+      uniform vec3 uSage;
+      uniform vec3 uPaper;
       varying vec2 vUv;
 
       // Neighbours are a canvas pixel away, however dense the buffer, so a
@@ -206,19 +225,37 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
           if (dn[i] < nearest) { nearest = dn[i]; nearId = sn[i].a; }
         }
 
-        vec3 col = nearId * 255.0 > ${ACCENT_ID - 0.5} ? uSignal : uInk;
+        float nid = nearId * 255.0;
+        vec3 col = nid > ${INK_FILL_ID - 0.5} ? uInk : nid > ${ACCENT2_ID - 0.5} ? uSage : nid > ${PAPER_FILL_ID - 0.5} ? uInk : nid > ${ACCENT_ID - 0.5} ? uSignal : uInk;
         float a = edge * 0.92;
         return vec4(col * a, a);
+      }
+
+      // The fill under the lines, premultiplied: ink parts solid, accent
+      // parts tinted by how squarely they face the viewer.
+      vec4 fillAt(vec2 uv) {
+        if (texture2D(tDepth, uv).r >= 1.0) return vec4(0.0);
+        vec4 s = texture2D(tNormal, uv);
+        float id = s.a * 255.0;
+        float front = smoothstep(0.7, 0.95, abs(s.b * 2.0 - 1.0));
+        if (id > ${INK_FILL_ID - 0.5}) return vec4(uInk, 1.0);
+        if (id > ${PAPER_FILL_ID - 0.5} && id < ${ACCENT2_ID - 0.5}) return vec4(uPaper, 1.0);
+        if (id > ${ACCENT_ID - 0.5} && id < ${PAPER_FILL_ID - 0.5}) {
+          float a = mix(0.42, 0.14, front);
+          return vec4(uSignal * a, a);
+        }
+        return vec4(0.0);
       }
 
       void main() {
         ${
           smooth
             ? `// The four buffer texels under this pixel, averaged.
-        gl_FragColor = 0.25 * (shade(vUv + vec2(-0.5, -0.5) * uTexel) + shade(vUv + vec2(0.5, -0.5) * uTexel) +
+        vec4 lines = 0.25 * (shade(vUv + vec2(-0.5, -0.5) * uTexel) + shade(vUv + vec2(0.5, -0.5) * uTexel) +
                                shade(vUv + vec2(-0.5, 0.5) * uTexel) + shade(vUv + vec2(0.5, 0.5) * uTexel));`
-            : "gl_FragColor = shade(vUv);"
+            : "vec4 lines = shade(vUv);"
         }
+        ${fill ? "gl_FragColor = lines + fillAt(vUv) * (1.0 - lines.a);" : "gl_FragColor = lines;"}
       }
     `,
     depthTest: false,
@@ -243,7 +280,9 @@ export function lineDrawing(THREE: ThreeModule, host: HTMLElement, onTheme: () =
   };
   const applyTheme = () => {
     ink.set(...cssRgb("--ink", "#1a1a1a"));
-    signal.set(...cssRgb("--signal", "#2a5cff"));
+    signal.set(...cssRgb(accent, "#2a5cff"));
+    sage.set(...cssRgb("--sage", "#7c9672"));
+    paper.set(...cssRgb("--paper", "#ffffff"));
   };
   applyTheme();
   const themeObs = new MutationObserver(() => {

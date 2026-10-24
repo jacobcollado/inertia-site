@@ -6,13 +6,26 @@ import { fitNoise, noise } from "@/components/decrypt";
 // A line of decrypting type (decrypt.ts): while it's off, it waits as noise
 // in the grey mono, each word's noise as wide as the word; when it comes on
 // it resolves word by word, and when it goes off again it returns to noise,
-// last word first. Nothing reflows either way.
+// last word first. Nothing reflows either way. With `cursor` a block sits
+// after the last word while it resolves, and blinks out once it's done.
 
 // How far apart the words resolve, and how often the noise changes, in ms.
 const STEP = 55;
 const TICK = 45;
 
-export function DecryptText({ text, on, as: Tag = "span", className }: { text: string; on: boolean; as?: ElementType; className?: string }) {
+export function DecryptText({
+  text,
+  on,
+  as: Tag = "span",
+  className,
+  cursor = false,
+}: {
+  text: string;
+  on: boolean;
+  as?: ElementType;
+  className?: string;
+  cursor?: boolean;
+}) {
   const ref = useRef<HTMLElement>(null);
   const words = text.split(" ");
   const [done, setDone] = useState(0);
@@ -62,6 +75,7 @@ export function DecryptText({ text, on, as: Tag = "span", className }: { text: s
           {i < words.length - 1 ? " " : null}
         </span>
       ))}
+      {cursor && on ? <span className="decrypt__cursor" data-done={done === words.length ? "" : undefined} aria-hidden /> : null}
     </Tag>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DieZoom, type DieZoomHandle } from "@/components/die-zoom";
 import { DecryptText } from "@/components/decrypt-text";
+import { useReveal } from "@/components/reveal";
 
 // Why us (styles are .why in globals.css): the section is tall and its
 // stage pins under the header while it's scrolled through. The reasons sit
@@ -37,6 +38,7 @@ const useReduce = () =>
 export function WhyUs() {
   const ref = useRef<HTMLElement>(null);
   const zoom = useRef<DieZoomHandle>(null);
+  const art = useReveal<HTMLDivElement>();
   const reduce = useReduce();
   // How many reasons have decrypted.
   const [reached, setReached] = useState(0);
@@ -83,7 +85,7 @@ export function WhyUs() {
             <DecryptText key={r} as="h3" className="why__line" text={r} on={reduce || i < reached} />
           ))}
         </div>
-        <div className="why__art">
+        <div ref={art} className="why__art reveal-draw">
           <DieZoom ref={zoom} />
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type * as Three from "three";
-import { ELEVATION, easeInOut, lineDrawing } from "@/components/line-drawing";
+import { ACCENT_ID, ELEVATION, easeInOut, lineDrawing } from "@/components/line-drawing";
 import { partsKit, rounded } from "@/components/watch-parts";
 
 // The homepage's opening plate: an AI accelerator package drawn as an
@@ -68,7 +68,7 @@ export function ChipPlate({ assemble = false }: { assemble?: boolean }) {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       // Drawn smooth: antialiased, at twice the density.
-      const art = lineDrawing(THREE, host, () => frame(), { smooth: true });
+      const art = lineDrawing(THREE, host, () => frame(), { smooth: true, accent: "--heather" });
       const root = new THREE.Group();
       art.scene.add(root);
       const axisMat = art.lineMat(0.2);
@@ -137,7 +137,8 @@ export function ChipPlate({ assemble = false }: { assemble?: boolean }) {
       // stacks, each four thin dies on a base die.
       layer(1.4, (g) => {
         box(g, 10, 13, 0.7, 0, nextId++, 0, 0, 0.1);
-        const cores = nextId++;
+        // The core tiles, the finest detail, in heather.
+        const cores = ACCENT_ID;
         for (let i = 0; i < 4; i++)
           for (let j = 0; j < 5; j++) box(g, 2, 2.2, 0.08, 0.7, cores, (i - 1.5) * 2.3, (j - 2) * 2.5, 0.05);
         const id = nextId++;

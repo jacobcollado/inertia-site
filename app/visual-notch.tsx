@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { PlaneIcon, ReachOut } from "@/components/reach-out";
-import { InertiaMark } from "@/components/inertia-mark";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { ThemeToggle } from "./theme-toggle";
@@ -567,12 +566,10 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 
 /* ── Logo ────────────────────────────────────────────────────────── */
 
-// The mark, a step under the wordmark's 24px, centred on it; then the
-// wordmark.
+// The wordmark alone.
 function InertiaLogo() {
   return (
-    <span className="flex items-center gap-2">
-      <InertiaMark className="inertia-logo block h-5 w-auto" />
+    <span className="flex items-center">
       <img
         src="/logo.png"
         alt="Inertia"
@@ -624,42 +621,14 @@ function HeaderActions() {
   );
 }
 
-// Phones: the actions rise into a dock at the bottom of the screen once the
-// page's hero ([data-hero], else the first screen) has scrolled away, and
-// drop back while a section with its own (data-dock-hide) is on screen.
+// Phones: the actions sit in a dock at the bottom of the screen, always
+// there and still, like the header itself.
 function HeaderDock() {
   const pathname = usePathname();
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    let frame: number | null = null;
-    const check = () => {
-      frame = null;
-      const hero = document.querySelector("[data-hero]");
-      const passed = hero ? hero.getBoundingClientRect().bottom <= 0 : window.scrollY > window.innerHeight;
-      // It steps aside where the page asks for the same thing itself
-      // ([data-dock-hide], like the homepage's close), and over the footer.
-      const ownInView = Array.from(document.querySelectorAll("[data-dock-hide]")).some((el) => {
-        const r = el.getBoundingClientRect();
-        return r.top < window.innerHeight && r.bottom > 0;
-      });
-      setShown(passed && !ownInView);
-    };
-    const onScroll = () => {
-      if (frame === null) frame = requestAnimationFrame(check);
-    };
-    check();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (frame !== null) cancelAnimationFrame(frame);
-    };
-  }, [pathname]);
   if (pathname === "/login" || pathname === "/reset-password") return null;
   return (
-    <div className="dock" data-shown={shown || undefined} aria-hidden={!shown}>
-      <div className="dock__inner" inert={!shown || undefined}>
+    <div className="dock">
+      <div className="dock__inner">
         {/* On Aether the dock is the way to buy it. */}
         {pathname === "/aether" ? <BuyButton /> : <HeaderActions />}
       </div>

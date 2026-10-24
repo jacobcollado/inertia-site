@@ -36,7 +36,7 @@ export function Close() {
   };
 
   return (
-    <section className="index-col index-close" data-dock-hide>
+    <section className="index-col index-close">
       <div className="index-close__art">
         <ChipPlate assemble />
       </div>
